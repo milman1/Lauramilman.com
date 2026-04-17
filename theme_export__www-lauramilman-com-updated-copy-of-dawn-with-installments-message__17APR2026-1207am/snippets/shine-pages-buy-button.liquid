@@ -1,0 +1,167 @@
+{% assign product_form_id = 'product-form-' | append: section.id %}
+<div id="sp-{{ section.id }}-buy-button" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }}-buy-button .sp-product-form-submit,
+        #sp-{{ section.id }}-buy-button .shopify-payment-button__button {
+            --sp-button-radius: {{ setting.button_radius }}px;
+            --sp-button-border-width: {{ setting.input_border_width }}px;
+        }
+
+        #sp-{{ section.id }}-buy-button .sp-product-form-submit {
+            --sp-font-size-scale: {{ setting.add_to_cart_button_scale | divided_by: 100.0 }};
+            --sp-button-background-color: {{ setting.add_to_cart_button_background_color | default: "transparent" }};
+            --sp-button-background-gradient-color: {{ setting.add_to_cart_button_background_gradient_color | default: null }};
+            --sp-section-text-color: {{ setting.add_to_cart_button_text_color | default:"transparent" }};
+            --sp-button-border-color: {{ setting.add_to_cart_button_border_color | default :"transparent" }};
+        }
+
+        #sp-{{ section.id }}-buy-button .shopify-payment-button__button {
+            --sp-font-size-scale: {{ setting.buy_now_button_scale | divided_by: 100.0 }};
+            --sp-button-background-color: {{ setting.buy_now_button_background_color | default: "transparent" }};
+            --sp-button-background-gradient-color: {{ setting.buy_now_button_background_gradient_color | default: null }};
+            --sp-section-text-color: {{ setting.buy_now_button_text_color | default:"transparent" }};
+            --sp-button-border-color: {{ setting.buy_now_button_border_color | default :"transparent" }};
+        }
+
+        #sp-{{ section.id }}-buy-button .sp-form .sp-field .sp-form-label {
+            --sp-input-form-text-color: {{ setting.input_text_color | default: "transparent" }};
+            --sp-input-form-text-active-color: {{ setting.input_text_hover_color | default: "transparent" }};
+        }
+
+        #sp-{{ section.id }}-buy-button .sp-form .sp-field input,
+        #sp-{{ section.id }}-buy-button .sp-form .sp-field textarea {
+            --sp-input-form-border-radius: {{ setting.input_radius }}px;
+            --sp-input-form-border-size: {{ setting.input_border_width }}px;
+
+            --sp-background-form-text-color: {{ setting.input_background_color | default: "transparent" }};
+            --sp-input-form-text-color: {{ setting.input_text_color | default: "transparent" }};
+            --sp-input-border-color: {{ setting.input_border_color | default: "transparent" }};
+
+            --sp-background-form-text-active-color: {{ setting.input_background_hover_color | default: "transparent" }};
+            --sp-input-border-active-color: {{ setting.input_border_hover_color | default: "transparent" }};
+            --sp-input-form-text-active-color: {{ setting.input_text_hover_color | default: "transparent" }};
+        }
+
+    </style>
+    {% liquid
+        assign gift_card_recipient_feature_active = false
+        if setting.show_recipient_form and product.gift_card?
+            assign gift_card_recipient_feature_active = true
+        endif
+        assign show_dynamic_checkout = false
+        if setting.show_dynamic_button and gift_card_recipient_feature_active == false
+            assign show_dynamic_checkout = true
+        endif
+    %}
+    <script>
+        window.spVariantStrings = {
+            addToCart: `{{ 'shinepages.product.add_to_cart' | t }}`,
+            soldOut: `{{ 'shinepages.product.sold_out' | t }}`,
+            unavailable: `{{ 'shinepages.product.unavailable' | t }}`,
+            unavailable_with_option: `{{ 'shinepages.product.value_unavailable' | t: option_value: '[value]' }}`,
+        };
+    </script>
+
+    {%- if product != blank -%}
+        <sp-product-form
+                class="sp-product-form sp-form"
+                data-hide-errors="{{ gift_card_recipient_feature_active }}"
+                data-section-id="{{ section.id }}"
+        >
+            <div class="sp-product-form-error-message-wrapper" role="alert" hidden>
+                <svg class="sp-form-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"
+                     fill="none">
+                    <g clip-path="url(#clip0_3892_13454)">
+                        <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                              fill="currentColor"/>
+                    </g>
+                    <defs>
+                        <clipPath id="clip0_3892_13454">
+                            <rect width="16" height="16" fill="white"/>
+                        </clipPath>
+                    </defs>
+                </svg>
+                <span class="sp-product-form-error-message"></span>
+            </div>
+
+            {%- form 'product',
+                    product,
+                    id: product_form_id,
+                    class: 'form sp-product-form',
+                    novalidate: 'novalidate',
+                    data-type: 'add-to-cart-form'
+            -%}
+                <input
+                        type="hidden"
+                        name="id"
+                        value="{{ product.selected_or_first_available_variant.id }}"
+                        {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+                            disabled
+                        {% endif %}
+                        class="product-variant-id"
+                >
+                {%- if gift_card_recipient_feature_active -%}
+                    {% render 'shine-pages-gift-card-recipient-form', section: section, setting: setting %}
+                {%- endif -%}
+
+                <div class="sp-product-form-buttons">
+                    {%- liquid
+                        assign check_against_inventory = true
+                        if product.selected_or_first_available_variant.inventory_management != 'shopify' or product.selected_or_first_available_variant.inventory_policy == 'continue'
+                            assign check_against_inventory = false
+                        endif
+                        if product.selected_or_first_available_variant.quantity_rule.min > product.selected_or_first_available_variant.inventory_quantity and check_against_inventory
+                            assign quantity_rule_soldout = true
+                        endif
+                    -%}
+                    <button
+                        id="sp-product-submit-button-{{ section.id }}"
+                        type="submit"
+                        name="add"
+                        class="sp-product-form-submit sp-loading-swaper"
+                        {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+                            disabled
+                        {% endif %}
+                    >
+                        <span>
+                          {%- if product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+                              {{ 'shinepages.product.sold_out' | t }}
+                          {%- else -%}
+                              {{ 'shinepages.product.add_to_cart' | t }}
+                          {%- endif -%}
+                        </span>
+                        <div class="sp-loading-spinner hidden">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                    </button>
+                    {%- if show_dynamic_checkout -%}
+                        {{ form | payment_button }}
+                    {%- endif -%}
+                </div>
+            {%- endform -%}
+        </sp-product-form>
+    {%- else -%}
+        <sp-product-form
+                class="sp-product-form sp-form"
+                data-hide-errors="{{ gift_card_recipient_feature_active }}"
+                data-section-id="{{ section.id }}"
+        >
+            <div class="sp-product-form">
+                <div class="sp-product-form-buttons form">
+                    <button
+                            type="submit"
+                            name="add"
+                            class="sp-product-form-submit"
+                            disabled
+                    >
+                        {{ 'shinepages.product.sold_out' | t }}
+                    </button>
+                </div>
+            </div>
+        </sp-product-form>
+    {%- endif -%}
+
+</div>

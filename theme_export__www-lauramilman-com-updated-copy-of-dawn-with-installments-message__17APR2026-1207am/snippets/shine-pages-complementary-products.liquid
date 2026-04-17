@@ -1,0 +1,239 @@
+<div id="sp-{{ block.id }}-complementary-products" class="sp-complementary-products body-font" {{ block.shopify_attributes }} data-show-navigation-mobile="false">
+    <style>
+        #sp-{{ block.id }}-complementary-products [data-plugin="sp-carousel"] .flickity-button {
+            --sp-slideshow-navigation-icon-color: {{ setting.navigation_highlight_color }};
+            background: transparent;
+        }
+
+        #sp-{{ block.id }}-complementary-products [data-plugin="sp-carousel"] .flickity-page-dots .dot {
+            --sp-slideshow-navigation-icon-color: {{ setting.navigation_color }};
+            --sp-slideshow-navigation-icon-color-active: {{ setting.navigation_highlight_color }};
+        }
+
+        #sp-{{ block.id }}-complementary-products .sp-heading-outer .sp-heading{
+            margin: 0 auto 20px auto;
+            font-size: 24px;
+        }
+        
+        #sp-{{ block.id }}-complementary-products .sp-heading-wrapper{
+            max-width: 100%;
+        }
+    </style>
+    <sp-product-recommendations data-style="{{ styleSection }}" data-plugin="sp-carousel" data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ setting.max_product }}&intent=complementary" >
+
+        <div class="sp-heading-outer sp-heading-alignment-{{ setting.complementary_heading_alignment }}">
+            <div class="sp-heading-wrapper body-font" style="--sp-section-heading-width: 65.0rem">
+                {% if setting.heading != blank %}
+                    <h2 class="sp-heading">{{ setting.heading }}</h2>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if recommendations.performed and recommendations.products_count > 0 %}
+            {% assign number_of_slides = recommendations.products_count | plus: 0.0 | divided_by: setting.item_per_page | ceil %}
+
+            {%  if styleSection == "style-2"  %} 
+                
+                <div class="sp-carousel sp-carousel-column sp-column-wrapperr" 
+                    data-number-slides="{{ number_of_slides }}"  
+                    data-column="{{ setting.item_per_page }}"
+                    data-column-tablet="{{ setting.item_per_page_tablet }}"
+                    data-column-mobile="{{ setting.item_per_page_mobile }}" 
+                    data-style="{{ styleSection }}"
+                >
+                    {%- for product in recommendations.products -%}
+                        <div class="sp-carousel-item sp-column">
+                            <div class="sp-product-item" data-cascade>
+                                {% if product.selected_or_first_available_variant.featured_media != null %}
+                                    {% assign media = product.selected_or_first_available_variant.featured_media %}
+                                {% else %}
+                                    {% assign media = product.featured_media %}
+                                {% endif %}
+                                
+                                {% if media != null %}
+                                    <div class="sp-product-thumbnail">
+                                        {{ media | image_url: width: 520 | image_tag }}
+                                    </div>
+                                    <div class="sp-product-content">
+                                        <h4 class="sp-product-title">
+                                            {%- if product.title != blank -%}
+                                                {{ product.title | escape }}
+                                            {%- else -%}
+                                                {{ 'shinepages.product.product_title_default' | t }}
+                                            {%- endif -%}
+                                        </h4>
+                                        <div class="sp-product-price
+                                            {%- if product.available == false %} price-sold-out{% endif -%}
+                                            {%- if product.compare_at_price > product.price and product.quantity_price_breaks_configured? != true %} price-on-sale{% endif -%}
+                                            {%- if product.compare_at_price > product.price and product.quantity_price_breaks_configured? %} volume-pricing-sale-badge{% endif -%}
+                                            {%- if product.price_varies == false and product.compare_at_price_varies %} price-no-compare{% endif -%}
+                                        ">
+                                            <span class="price-item price-item--sale price-item--last">
+                                                {% if product_card_show_currency_code %}
+                                                    {{ product.price | money_with_currency }}
+                                                {% else %}
+                                                    {{ product.price | money }}
+                                                {% endif %}
+                                            </span>
+                                            {%- if product.compare_at_price > 0 %}
+                                                <span class="price-item price-item--regular">
+                                                    {{ product.compare_at_price | money }}
+                                                </span>
+                                            {%- endif -%}
+                                        </div>
+                                        {% if setting.button_text != blank %}
+                                            <div class="sp-product-button body-font">
+                                                {% if product.url != blank %}
+                                                    <a class="sp-text " href="{{ product.url }}">
+                                                        <span>
+                                                            {{ setting.button_text }}
+                                                        </span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div> 
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% elsif styleSection == "style-1" %}
+
+                <div class="sp-carousel" 
+                    data-number-slides="{{ number_of_slides }}"  
+                    data-style="{{ styleSection }}"
+                >
+                    {% for i in (1..number_of_slides) %}
+                        <div id="sp-{{ block.id }}-{{ forloop.index }}" class="sp-carousel-item sp-complementary-slide">
+                            <ul class="sp-product-list" role="list">
+                                {%- for product in recommendations.products limit: setting.item_per_page offset: continue -%}
+                                    <li class="sp-product-item">
+                                        {% if product.selected_or_first_available_variant.featured_media != null %}
+                                            {% assign media = product.selected_or_first_available_variant.featured_media %}
+                                        {% else %}
+                                            {% assign media = product.featured_media %}
+                                        {% endif %}
+                                        {% if media != null %}
+                                            <div class="sp-product-thumbnail">
+                                                {{ media | image_url: width: 520 | image_tag }}
+                                            </div>
+                                            <div class="sp-product-content">
+                                                <h4 class="sp-product-title">
+                                                    {%- if product.title != blank -%}
+                                                        {{ product.title | escape }}
+                                                    {%- else -%}
+                                                        {{ 'shinepages.product.product_title_default' | t }}
+                                                    {%- endif -%}
+                                                </h4>
+                                                <div class="sp-product-price
+                                                    {%- if product.available == false %} price-sold-out{% endif -%}
+                                                    {%- if product.compare_at_price > product.price and product.quantity_price_breaks_configured? != true %} price-on-sale{% endif -%}
+                                                    {%- if product.compare_at_price > product.price and product.quantity_price_breaks_configured? %} volume-pricing-sale-badge{% endif -%}
+                                                    {%- if product.price_varies == false and product.compare_at_price_varies %} price-no-compare{% endif -%}
+                                                ">
+                                                    <span class="price-item price-item--sale price-item--last">
+                                                        {% if product_card_show_currency_code %}
+                                                            {{ product.price | money_with_currency }}
+                                                        {% else %}
+                                                            {{ product.price | money }}
+                                                        {% endif %}
+                                                    </span>
+                                                    {%- if product.compare_at_price > 0 %}
+                                                        <span class="price-item price-item--regular">
+                                                            {{ product.compare_at_price | money }}
+                                                        </span>
+                                                    {%- endif -%}
+                                                </div>
+                                                {% if setting.button_text != blank %}
+                                                    <div class="sp-product-button body-font">
+                                                    {% if product.url != blank %}
+                                                            <a class="sp-text " href="{{ product.url }}">
+                                                                <span>
+                                                                    {{ setting.button_text }}
+                                                                </span>
+                                                            </a>
+                                                    {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% endif %}
+            
+        {% endif %}
+    </sp-product-recommendations>
+    <script>
+        (function (document) {
+            window.addEventListener('DOMContentLoaded', function () {
+                const element = document.querySelector("#sp-{{ block.id }}-complementary-products sp-product-recommendations")
+                if (element) {
+                    function _init() {
+                        if (typeof Flickity === 'function') {
+                            const carouselEl = element.querySelector('.sp-carousel')
+                            const style_carouselEl = element.dataset.style
+                            if (!carouselEl) {
+                                return;
+                            }
+                            if (carouselEl) {
+                                
+                                const {numberSlides = 1} = carouselEl.dataset
+
+                                const flickity = new Flickity(carouselEl, {
+                                    draggable: '>1',
+                                    freeScroll: false,
+                                    pageDots: style_carouselEl == "style-1" ? numberSlides >= 2 : false,
+                                    prevNextButtons: numberSlides >= 2,
+                                    wrapAround: true,//loop
+                                    autoPlay: false,//1500,
+                                    pauseAutoPlayOnHover: false,
+                                    adaptiveHeight: false,
+                                    watchCSS: false,// if true, can init carousel by css :after https://flickity.metafizzy.co/options
+                                    initialIndex: 0,
+                                    cellAlign: 'left',
+                                    contain: false,
+                                    groupCells: false,
+                                    fade: false,
+                                    on: {
+                                        ready: function () {
+                                            if(style_carouselEl == "style-1"){
+                                                const button_left = carouselEl.querySelector('.flickity-prev-next-button.previous')
+                                                const button_right = carouselEl.querySelector('.flickity-prev-next-button.next')
+                                                const dots = carouselEl.querySelector('.flickity-page-dots')
+                                                if (button_left || button_right || dots) {
+                                                    const wrapper = document.createElement('div')
+                                                    wrapper.classList.add('sp-navigation-wrapper')
+                                                    if (button_left) {
+                                                        wrapper.appendChild(button_left)
+                                                    }
+                                                    if (dots) {
+                                                        wrapper.appendChild(dots)
+                                                    }
+                                                    if (button_right) {
+                                                        wrapper.appendChild(button_right)
+                                                    }
+
+                                                    carouselEl.appendChild(wrapper)
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+        
+                    _init()
+                    element.addEventListener('SP_RELATED_PRODUCTS_LOAD', _init)
+                }
+            })
+        })(window.document)
+    </script>
+</div>

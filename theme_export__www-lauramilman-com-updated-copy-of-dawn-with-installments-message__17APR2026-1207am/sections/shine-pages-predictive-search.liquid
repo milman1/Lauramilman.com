@@ -1,0 +1,142 @@
+{%- if predictive_search.performed -%}
+    {% assign has_result = predictive_search.resources.queries.size
+            | plus: predictive_search.resources.products.size
+            | plus: predictive_search.resources.collections.size
+            | plus: predictive_search.resources.articles.size
+    %}
+    <div id="sp-predictive-search-results" role="listbox">
+        {% if has_result > 0 %}
+            <div class="sp-search-has-result">
+                {% if predictive_search.resources.queries.size > 0 %}
+                    <div class="sp-suggestion sp-search-result-group">
+                        <h2 class="sp-search-result-heading body-font">{{ 'shinepages.templates.search.suggestions' | t }}</h2>
+                        <div class="search-result-wrapper">
+                            <ul class="sp-search-result-list">
+                                {%- for query in predictive_search.resources.queries -%}
+                                    <li id="sp-predictive-search-option-query-{{ forloop.index }}"
+                                        class="sp-search-result-list-item">
+                                        <a href="{{ query.url }}" class="sp-predictive-search-item-link body-font"
+                                        tabindex="-1">
+                                            {{- query.styled_text -}}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if predictive_search.resources.products.size > 0 or predictive_search.resources.collections.size > 0 or predictive_search.resources.articles.size > 0 %}
+                    <div class="sp-result-types sp-search-result-group">
+                        <ul class="sp-result-type-tabs">
+                            {% if predictive_search.resources.products.size > 0 %}
+                                <li class="sp-result-type-tab-item" data-active="true">
+                                    <a class="body-font"
+                                       href="#sp-predictive-product-tab"
+                                       data-tab="#sp-predictive-product-tab">{{- 'shinepages.templates.search.products' | t -}}</a>
+                                </li>
+                            {% endif %}
+                            {% if predictive_search.resources.collections.size > 0 %}
+                                <li class="sp-result-type-tab-item"
+                                    data-active="{% if predictive_search.resources.products.size == 0 %}true{% endif %}">
+                                    <a class="body-font"
+                                       href="#sp-predictive-collection-tab"
+                                       data-tab="#sp-predictive-collection-tab">{{- 'shinepages.templates.search.collections' | t -}}</a>
+                                </li>
+                            {% endif %}
+                            {% if predictive_search.resources.articles.size > 0 %}
+                                <li class="sp-result-type-tab-item"
+                                    data-active="{% if predictive_search.resources.products.size == 0 and predictive_search.resources.collections.size == 0 %}true{% endif %}">
+                                    <a class="body-font"
+                                       href="#sp-predictive-blog-tab"
+                                       data-tab="#sp-predictive-blog-tab">{{- 'shinepages.templates.search.blogs' | t -}}</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                        {% if predictive_search.resources.products.size > 0 %}
+                            <div id="sp-predictive-product-tab" class="sp-result-type-tab-content" data-active="true">
+                                <div class="sp-predictive-search-objects">
+                                    {%- for product in predictive_search.resources.products -%}
+                                        <div class="sp-predictive-search-object-item">
+                                            <a href="{{ product.url }}" tabindex="-1"><span
+                                                        class="visually-hidden">{{- product.title -}}</span></a>
+                                            {%- if product.featured_media != blank -%}
+                                                <div class="sp-predictive-search-object-item-image">
+                                                    <img
+                                                            src="{{ product.featured_media | image_url: width: 150 }}"
+                                                            alt="{{ product.featured_media.alt }}"
+                                                            width="50"
+                                                            height="{{ 50 | divided_by: product.featured_media.preview_image.aspect_ratio }}"
+                                                    >
+                                                </div>
+                                            {%- endif -%}
+                                            <div class="sp-predictive-search-object-item-content">
+                                                <h4 class="sp-predictive-search-object-item-heading body-font">{{ product.title }}</h4>
+                                                <div class="sp-product-card-price sp-predictive-search-object-item-price body-font
+                                                {%- if product.available == false %} price-sold-out{% endif -%}
+                                                {%- if product.compare_at_price > price and product.quantity_price_breaks_configured? != true %} price-on-sale{% endif -%}
+                                                {%- if product.compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing-sale-badge{% endif -%}
+                                                {%- if product.price_varies == false and product.compare_at_price_varies %} price-no-compare{% endif -%}
+                                              ">
+                                                <span class="price-item price-item--sale price-item--last">
+                                                    {{ product.price | money }}
+                                                </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if predictive_search.resources.collections.size > 0 %}
+                            <div id="sp-predictive-collection-tab" class="sp-result-type-tab-content"
+                                 data-active="{% if predictive_search.resources.products.size == 0 %}true{% endif %}">
+                                <div class="sp-predictive-search-objects" data-style="vertical">
+                                    {%- for collection in predictive_search.resources.collections -%}
+                                        <div class="sp-predictive-search-object-item">
+                                            <a href="{{ collection.url }}" tabindex="-1"><span
+                                                        class="visually-hidden">{{- collection.title -}}</span></a>
+                                            {%- if collection.featured_image != blank -%}
+                                                <div class="sp-predictive-search-object-item-image">
+                                                    <img src="{{ collection.featured_image | image_url: width: 1024 }}"
+                                                         alt="{{ collection.featured_image.alt }}"
+                                                         width="1024">
+                                                </div>
+                                            {%- endif -%}
+                                            <div class="sp-predictive-search-object-item-content">
+                                                <h4 class="sp-predictive-search-object-item-heading body-font">{{ collection.title }}</h4>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if predictive_search.resources.articles.size > 0 %}
+                            <div id="sp-predictive-blog-tab" class="sp-result-type-tab-content"
+                                 data-active="{% if predictive_search.resources.products.size == 0 and predictive_search.resources.collections.size == 0 %}true{% endif %}">
+                                <ul class="sp-search-result-list">
+                                    {%- for blog in predictive_search.resources.articles -%}
+                                        <li id="sp-predictive-search-option-query-{{ forloop.index }}"
+                                            class="sp-search-result-list-item">
+                                            <a href="{{ blog.url }}" class="sp-predictive-search-item-link body-font"
+                                               tabindex="-1">
+                                                {{- blog.title -}}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <button class="sp-predictive-search__search-for-button body-font">
+            <span>{{- 'shinepages.templates.search.search_for' | t: terms: predictive_search.terms -}}</span>
+            <svg class="sp-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.7838 12.5617C19.7205 12.5617 19.6538 12.5617 19.5905 12.5617C14.0254 12.5617 8.46027 12.5617 2.89515 12.5617C2.49526 12.5617 2.242 12.3351 2.24866 11.9885C2.252 11.7019 2.48193 11.4587 2.77185 11.442C2.82184 11.4387 2.87182 11.442 2.92181 11.442C8.48693 11.442 14.0521 11.442 19.6172 11.442C19.6772 11.442 19.7338 11.442 19.7938 11.442C19.8038 11.4287 19.8105 11.4153 19.8204 11.402C19.7738 11.3654 19.7238 11.332 19.6838 11.292C17.881 9.48921 16.0782 7.68638 14.2753 5.88355C14.0021 5.61029 13.9887 5.27039 14.242 5.03378C14.4519 4.83384 14.7652 4.82717 14.9851 5.01379C15.0184 5.04378 15.0484 5.07711 15.0818 5.1071C17.2245 7.24984 19.3706 9.39591 21.5133 11.5386C21.8299 11.8552 21.8299 12.1451 21.52 12.4584C19.3639 14.6145 17.2078 16.7705 15.0518 18.9266C14.8785 19.0999 14.6785 19.1665 14.4486 19.0899C14.2287 19.0166 14.102 18.8566 14.072 18.6267C14.0454 18.4301 14.122 18.2734 14.262 18.1335C14.7885 17.6103 15.315 17.0804 15.8416 16.5573C17.1179 15.2809 18.3942 14.0046 19.6705 12.7283C19.7138 12.685 19.7605 12.6483 19.8071 12.6083C19.7938 12.5917 19.7905 12.575 19.7838 12.5617Z"
+                      fill="currentColor"/>
+            </svg>
+        </button>
+    </div>
+{% endif %}

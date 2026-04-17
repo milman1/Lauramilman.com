@@ -1,0 +1,41 @@
+{% if setting.trust_badge_text != empty or setting.image_picker != null %}
+<div id="sp-{{ block.id }}-trust-badge"
+     class="sp-trust-badge sp-content-alignment-middle-{{ setting.badge_alignment }}" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} #sp-{{ block.id }}-trust-badge .sp-trust-badge-wrap {
+            --sp-content-max-width: {{ setting.badge_max_width }}px;
+            --sp-item-gap: {{ setting.item_gap }}px;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-trust-badge .sp-trust-badge-title {
+            --sp-font-size: {{ setting.text_size_desktop }}px;
+            --sp-letter-spacing: {{ setting.text_spacing }}px;
+            --sp-text-color: {{ setting.text_color }};
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} #sp-{{ block.id }}-trust-badge {
+                --sp-item-gap: {{ setting.item_gap_mobile }}px;
+            }
+
+            #sp-{{ section.id }} #sp-{{ block.id }}-trust-badge .sp-trust-badge-title {
+                --sp-font-size: {{ setting.text_size_mobile }}px;
+            }
+
+            #sp-{{ section.id }} #sp-{{ block.id }}-trust-badge .sp-trust-badge-icon {
+                --sp-content-max-width: {{ setting.badge_max_width_mobile }}px;
+            }
+        }
+    </style>
+    <div class="sp-trust-badge-wrap">
+        {% if setting.trust_badge_text != empty %}
+            <h4 class="sp-trust-badge-title sp-text body-font sp-text-{{ setting.text_style }} sp-content-text-{{ setting.text_alignment }}">{{ setting.trust_badge_text }}</h4>
+        {% endif %}
+        {% if setting.badge_icon != null %}
+            <div class="sp-trust-badge-icon">
+                {{ setting.badge_icon | image_url: width: 1900 | image_tag }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

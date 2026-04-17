@@ -1,0 +1,90 @@
+{% assign product_form_id = 'product-form-' | append: section.id %}
+<div id="sp-{{ section.id }}-quantity" {{ block.shopify_attributes }}>
+    <div class="sp-product-form-quantity-input">
+
+        <style>
+            #sp-{{ section.id }} .sp-product-information-wrapper{
+                --sp-item-border-radius: {{ setting.border_radius_quantity }}px;
+                --sp-section-description-size: {{ setting.input_size_desktop }}px;
+                --sp-quantity-icon-size: {{ setting.icon_size_desktop }}px;
+                --sp-quantity-label-size: {{ setting.label_size_desktop }}px;
+            }
+
+            #sp-{{ section.id }} .sp-product-information-wrapper .sp-form-label{
+                font-size: var(--sp-quantity-label-size);
+            }
+
+            #sp-{{ section.id }} .sp-product-information-wrapper sp-quantity-input .sp-quantity-button .sp-icon{
+                width: var(--sp-quantity-icon-size);
+                height: var(--sp-quantity-icon-size);
+            }
+
+            @media (max-width: 767px) {
+                #sp-{{ section.id }} .sp-product-information-wrapper{
+                    --sp-section-description-size: {{ setting.input_size_mobile }}px;
+                    --sp-quantity-icon-size: {{ setting.icon_size_mobile }}px;
+                    --sp-quantity-label-size: {{ setting.label_size_mobile }}px;
+                }
+            }
+            #sp-{{ section.id }}  .sp-product-information-wrapper .sp-product-form-quantity-input{
+                --sp-section-text-color: {{ setting.label_text_color }};
+                --sp-input-text-color: {{ setting.input_text_color }};
+                --sp-section-text-color-rgb: {{ setting.input_text_color.red }}, {{ setting.input_text_color.green }},{{ setting.input_text_color.blue }};
+            }
+            
+            #sp-{{ section.id }}  .sp-product-information-wrapper sp-quantity-input .sp-quantity-input{
+                color: var(--sp-input-text-color);
+            }
+        </style>
+
+        <div class="body-font sp-form-label">{{ 'shinepages.product.quantity.label' | t }}</div>
+        {% assign variant = product.selected_or_first_available_variant %}
+        {% assign variant_id = variant.id %}
+        {% # theme-check-disable %}
+        
+        <sp-quantity-input class="body-font sp-quantity cart-quantity">
+            <button class="sp-quantity-button" name="minus" type="button">
+                <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                        class="sp-icon sp-icon-minus"
+                        fill="none"
+                        viewBox="0 0 10 2"
+                >
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M.5 1C.5.7.7.5 1 .5h8a.5.5 0 110 1H1A.5.5 0 01.5 1z" fill="currentColor"/>
+                </svg>
+            </button>
+            <input
+                    class="sp-quantity-input"
+                    type="number"
+                    name="quantity"
+                    id="sp-quantity-{{ section.id }}"
+                    data-cart-quantity="{{ cart_qty }}"
+                    data-min="{{ variant.quantity_rule.min }}"
+                    min="{{ variant.quantity_rule.min }}"
+                    {% if variant.quantity_rule.max != null %}
+                        data-max="{{ variant.quantity_rule.max }}"
+                        max="{{ variant.quantity_rule.max }}"
+                    {% endif %}
+                    step="{{ variant.quantity_rule.increment }}"
+                    value="{{ variant.quantity_rule.min | default: 0 }}"
+                    form="{{ product_form_id }}"
+                    aria-label="{{ 'shinepages.product.quantity.label' | t }}"
+            />
+            <button class="sp-quantity-button" name="plus" type="button">
+                <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                        class="sp-icon sp-icon-plus"
+                        fill="none"
+                        viewBox="0 0 10 10"
+                >
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M1 4.51a.5.5 0 000 1h3.5l.01 3.5a.5.5 0 001-.01V5.5l3.5-.01a.5.5 0 00-.01-1H5.5L5.49.99a.5.5 0 00-1 .01v3.5l-3.5.01H1z" fill="currentColor"/>
+                </svg>
+            </button>
+        </sp-quantity-input>
+        {% # theme-check-enable %}
+    </div>
+</div>

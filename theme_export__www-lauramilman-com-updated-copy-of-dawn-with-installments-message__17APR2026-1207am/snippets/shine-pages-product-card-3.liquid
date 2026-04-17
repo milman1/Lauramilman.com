@@ -1,0 +1,651 @@
+{% assign appId = shop.metaobjects['app--126621908993--shine_pages_settings']['shine_pages_settings'] %}
+
+{% if product and product != empty %}
+    {% capture productData %}
+        {% assign onSale = false %}
+        {% assign inventory = 0 %}
+        {
+        "id":{{- product.id -}},
+        "available":{{- product.available | default: false -}},
+        "title":{{- product.title | json -}},
+        "handle":{{- product.handle | json -}},
+        "url":"{{- product.url -}}",
+        "type":{{- product.type | json -}},
+        "price":{{- product.price | default: 0 -}},
+        "price_max":{{- product.price_max | default: 0 -}},
+        "price_min":{{- product.price_min | default: 0 -}},
+        "compare_at_price":{{- product.compare_at_price | default: 0 -}},
+        "compare_at_price_max": {{- product.compare_at_price_max | default: 0 -}},
+        "compare_at_price_min": {{- product.compare_at_price_min | default: 0 -}},
+        "price_varies": {{- product.price_varies | default: false -}},
+        "compare_at_price_varies": {{- product.compare_at_price_varies | default: false -}},
+        "created_at":"{{- product.created_at | date: "%s%L" -}}",
+        "published_at":"{{- product.published_at | date: "%s%L" -}}",
+        "tags": [{% for tag in product.tags %}{%- unless forloop.first -%},{%- endunless -%}{{- tag | json -}}{% endfor %}],
+        "vendor": {{- product.vendor | json -}},
+        "featured_image":"{{- product.featured_image -}}",
+        "featured_media":"{% if product.featured_media %}{{- product.featured_media | image_url: width: 450 -}}{% endif %}",
+        "images":[
+        {%- for image in product.images -%}{%- unless forloop.first -%},
+        {%- endunless -%}{"id":{{- image.id -}},
+            "src":{{- image.src | json -}}}
+        {%- endfor -%}],
+        "collections":{{- product.collections | map: 'id' | json -}},
+        {%- assign selectedVariant = product.selected_or_first_available_variant -%}
+        {% assign sale_amount = 0 %}
+        {% assign sale_percent = 0 %}
+        {% if selectedVariant.price and selectedVariant.compare_at_price %}
+            {% assign sale_amount = selectedVariant.compare_at_price | minus: selectedVariant.price %}
+            {% if sale_amount > 0 %}
+                {% assign divisor = selectedVariant.compare_at_price | times: 1.0 %}
+                {% assign sale_percent = selectedVariant.compare_at_price | minus: selectedVariant.price | divided_by: divisor | times: 100.0 | round %}
+            {% endif %}
+        {% endif %}
+        "variant": {
+        "id": "{{ selectedVariant.id }}",
+        "title": {{- selectedVariant.title | json -}},
+        "available": {{- selectedVariant.available | default: false -}},
+        "inventory_management": "{{- selectedVariant.inventory_management -}}",
+        "inventory_policy": "{{- selectedVariant.inventory_policy -}}",
+        "inventory_quantity": {{- selectedVariant.inventory_quantity | default: 0 -}},
+        "price": {{- selectedVariant.price | default: 0 -}},
+        "compare_at_price": {{- selectedVariant.compare_at_price | default: 0 -}},
+        "unit_price": "{{- selectedVariant.unit_price -}}",
+        "weight": "{{- selectedVariant.weight -}}",
+        "weight_in_unit": "{{- selectedVariant.weight_in_unit -}}",
+        "weight_unit": "{{- selectedVariant.weight_unit -}}",
+        "sale_amount": {{- sale_amount | money | json -}},
+        "sale_percent": {{- sale_percent | json -}}
+        },
+        "variants":{
+        {%- for variant in product.variants -%}
+            {%- unless forloop.first -%},{%- endunless -%}
+            {% if variant.compare_at_price > variant.price %}
+                {% assign onSale = true %}
+            {% endif %}
+            {% if variant.available and variant.inventory_management != null and variant.inventory_management != '' %}
+                {% if variant.inventory_policy == 'deny' and variant.inventory_quantity > 0 %}
+                    {% assign inventory = inventory | plus: variant.inventory_quantity %}
+                {% elsif variant.inventory_policy == 'continue' %}
+                    {% assign inventory = -1 %}
+                {% endif %}
+            {% elsif variant.available and variant.inventory_management == null %}
+                {% assign inventory = -1 %}
+            {% endif %}
+            {% assign sale_amount = 0 %}
+            {% assign sale_percent = 0 %}
+            {% if variant.price and variant.compare_at_price %}
+                {% assign sale_amount = variant.compare_at_price | minus: variant.price %}
+                {% if sale_amount > 0 %}
+                    {% assign divisor = variant.compare_at_price | times: 1.0 %}
+                    {% assign sale_percent = variant.compare_at_price | minus: variant.price | divided_by: divisor | times: 100.0 | round %}
+                {% endif %}
+            {% endif %}
+            "{{- variant.id -}}": {
+            "id":{{- variant.id -}},
+            "title":{{- variant.title | json }},
+            "name":{{- variant.name | json }},
+            "price":{{- variant.price | default: 0 -}},
+            "compare_at_price":{{- variant.compare_at_price | default: 0 -}},
+            "available":{{- variant.available | default: false -}},
+            "sku":{{- variant.sku | json -}},
+            "weight":"{{- variant.weight -}}",
+            "weight_unit": "{{- variant.weight_unit -}}",
+            "inventory_management": "{{- variant.inventory_management -}}",
+            "inventory_policy": "{{- variant.inventory_policy -}}",
+            "inventory_quantity": {{- variant.inventory_quantity | default: 0 -}},
+            "selected": {%- if variant.selected -%}  {{- variant.selected -}} {%- elsif product.selected_or_first_available_variant.id == variant.id -%} true  {%- else -%} false {%- endif -%},
+            "sale_amount": {{- sale_amount | money | json -}},
+            "sale_percent": {{- sale_percent | json -}}
+            }
+        {%- endfor -%}
+        },
+        "on_sale":{{- onSale -}},
+        "inventory":{{- inventory -}},
+        "options":{{- product.options_with_values | json -}},
+        "has_only_default_variant": {{ product.has_only_default_variant | default: false }}
+        }
+    {% endcapture %}
+
+    <div class="sp-card sp-product-card sp-product-card-style-3"
+        data-style="{{ settings.product_card_style | default: "style-1" }}"
+        data-content-alignment="left"
+        data-box-shadow="{{ settings.product_card_box_shadow }}"
+        data-product-card-style="{{ settings.section_product_card_style }}"
+    >
+        <div data-app="shine-trust-app" data-product="{{- productData | base64_encode -}}"></div>
+        <div class="sp-card-inner">
+            {% comment %} MEDIA CARD START {% endcomment %}
+            <div class="sp-card-media sp-product-card-media {% if product.media[1] != null and settings.product_card_show_second_image %}has-second-image{% endif %}">
+                <style>
+                    .sp-product-list[data-card-style-vertical="false"] .sp-column .sp-card-inner .sp-card-media {
+                        --sp-card-media-ratio: {{ settings.product_card_image_ratio }};
+                        --sp-image-aspect-ratio: {{ settings.product_card_image_ratio }};
+                        overflow: visible;
+                    }
+
+                    .sp-product-list[data-card-style-vertical="true"] .sp-column .sp-card-inner .sp-card-media {
+                        overflow: visible;
+                        --sp-card-media-ratio: {{ settings.product_card_image_ratio_vertical }};
+                        --sp-image-aspect-ratio: {{ settings.product_card_image_ratio_vertical }};
+                    }
+
+                    .sp-product-list .sp-product-card-style-3 {
+                        --sp-border-flickity-button: {{ settings.product_card_navigation_border_radius }}px;
+                        --sp-border-radius-choose-option: {{ settings.product_card_button_border_radius }}px;
+                    }
+
+                    .sp-product-list .sp-product-card-style-3.sp-card{
+                        --sp-card-content-gap: {{ settings.product_card_padding_content }}px;
+                    }
+
+                    .sp-product-list .sp-product-card-style-3 sp-media-gallery {
+                        --sp-thumbnail-item-selected-color: {{ settings.product_card_border_thumbnail_color }};
+                        --sp-thumbnail-active-border-size: {{ settings.product_card_border_thumbnail_size }}px;
+                    }
+                </style>
+                <div class="sp-product-card-badge" data-alignment="vertical">
+                    {% if settings.product_card_show_discount_badge and product.compare_at_price > product.price %}
+                        {% assign save = product.compare_at_price | minus: product.price | money %}
+                        {% if settings.product_card_show_currency_code %}
+                            {% assign save = product.compare_at_price | minus: product.price | money_with_currency %}
+                        {% endif %}
+                        {% if settings.product_card_discount_badge_type == 'percent' %}
+                            {% assign save = product.compare_at_price | minus: product.price | times: 1.0 | divided_by: product.compare_at_price | times: 100 | round: 0 | append: "%" %}
+                        {% endif %}
+                        <span class="sp-badge sp-badge--on-sale">{{ 'shinepages.product.sale_html' | t: price: save }}</span>
+                    {% endif %}
+                    {% if settings.product_card_show_sold_out_badge and product.available == false %}
+                        <span class="sp-badge sp-badge--sold-out">{{ 'shinepages.product.sold_out' | t }}</span>
+                    {% endif %}
+                </div>
+
+                <sp-media-gallery data-media-fit="fill"
+                                  data-image-zoom="lightbox">
+                    <div class="main-gallary">
+                        <sp-main-media-gallery data-plugin="sp-carousel"
+                                               data-media-alignment="{{ media_alignment }}"
+                                               data-pagination-style="{{ settings.pagination_style | default: "circle" }}"
+                                               data-show-navigation-desktop="{{ settings.show_navigation_desktop }}"
+                                               data-show-navigation-mobile="{{ settings.show_navigation_mobile }}"
+                                               data-navigation-box-shadow="{{ settings.navigation_box_shadow }}"
+                                               data-navigation-style="{{ settings.navigation_style | default: "fill" }}">
+                            <div class="sp-carousel">
+                                {% if product.media == empty %}
+                                    <div class="sp-carousel-item">
+                                        <div class="sp-product-media-item">
+                                            <div class="sp-product-media">
+                                                {{ 'product-1' | placeholder_svg_tag: 'sp-placeholder-product-1-light' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% assign index = 0 %}
+                                {% for media in product.media %}
+                                    {% assign index = index | plus: 1 %}
+                                    {% if media.id != product.selected_or_first_available_variant.featured_media.id %}
+                                        <div class="sp-carousel-item">
+                                            <div class="sp-product-media-item {{ classes }} {% if active %}is-selected{% endif %}"
+                                                 data-media-id="{{ section.id }}-{{ media.id }}"
+                                                 data-index="{{ index }}"
+                                                 data-media-type="{{ media.media_type }}">
+                                                {% if media.media_type == 'image' %}
+                                                    <div class="sp-product-media"
+                                                         data-img-url="{{ media.preview_image | img_url: "original" }}">
+                                                        {{ media.preview_image | image_url: width: 1920 | image_tag: class: 'sp-image', sizes: sizes, widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1920' }}
+                                                    </div>
+                                                {% endif %}
+                                                {% if media.media_type == 'external_video' %}
+                                                    <div class="sp-product-media">
+                                                        {% if in_thumbnail %}
+                                                            {{ media.preview_image | image_url: width: 1920 | image_tag: class: 'sp-image', sizes: sizes, widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1920' }}
+                                                            <div class="sp-button-play">
+                                                                <svg width="16" height="16" viewBox="0 0 16 16"
+                                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <g>
+                                                                        <path d="M12.7554 7.13423C13.422 7.51913 13.422 8.48138 12.7554 8.86628L6.24219 12.6267C5.57552 13.0116 4.74219 12.5304 4.74219 11.7606L4.74219 4.23986C4.74219 3.47006 5.57552 2.98894 6.24219 3.37384L12.7554 7.13423Z"
+                                                                              fill="currentColor"/>
+                                                                    </g>
+                                                                </svg>
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="sp-video-outer">
+                                                                <div class="sp-video-inner">
+                                                                    <div class="sp-video-background"
+                                                                         style="--sp-video-background-overlay-color: null;">
+                                                                        {% assign video_loop_iframe = '0' %}
+                                                                        {% if video_loop %}{% assign video_loop_iframe = '1' %}{% endif %}
+                                                                        {% if media.host == 'youtube' %}
+                                                                            {{ media | external_video_url: color: 'white', loop: video_loop_iframe, muted: '1' | external_video_tag: data-type: "youtube" }}
+                                                                        {% elsif media.host == 'vimeo' %}
+                                                                            {{ media | external_video_url: loop: video_loop_iframe, muted: '1' | external_video_tag: data-type: "vimeo" }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                                {% if media.media_type == 'video' %}
+                                                    <div class="sp-product-media">
+                                                        {% if in_thumbnail %}
+                                                            {{ media.preview_image | image_url: width: 1920 | image_tag: class: 'sp-image', sizes: sizes, widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1920' }}
+                                                            <div class="sp-button-play">
+                                                                <svg width="16" height="16" viewBox="0 0 16 16"
+                                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <g>
+                                                                        <path d="M12.7554 7.13423C13.422 7.51913 13.422 8.48138 12.7554 8.86628L6.24219 12.6267C5.57552 13.0116 4.74219 12.5304 4.74219 11.7606L4.74219 4.23986C4.74219 3.47006 5.57552 2.98894 6.24219 3.37384L12.7554 7.13423Z"
+                                                                              fill="currentColor"/>
+                                                                    </g>
+                                                                </svg>
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="sp-video-outer">
+                                                                <div class="sp-video-inner">
+                                                                    <div class="sp-video-background"
+                                                                         style="--sp-video-background-overlay-color: null;">
+                                                                        {{ media | video_tag: autoplay: false, loop: video_loop, muted: true, controls: true }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </sp-main-media-gallery>
+
+                        {% comment %} CHOOSE OPTION OR ADD TO CARD BUTTON {% endcomment %}
+                        
+                        <div class="sp-list-choose-option">
+                            <div class="sp-product-choose-option" data-alignment="vertical">
+                                {% if product.selected_or_first_available_variant.available == true or quantity_rule_soldout == true %}
+                                    {% if product.has_only_default_variant == true %}
+                                        <sp-add-to-cart
+                                                type="submit"
+                                                name="add"
+                                                class="sp-button sp-relative body-font"
+                                                data-loading="false"
+                                                data-type="add-to-cart"
+                                                data-quantity="1"
+                                                data-product-id="{{- product.id -}}"
+                                                data-variant-id="{{- product.selected_or_first_available_variant.id -}}"
+                                        >
+                                            <span>{{ "shinepages.product.add_to_cart" | t }}</span>
+                                            <span class="sp-loading-spinner">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </span>
+                                        </sp-add-to-cart>
+                                    {% else %}
+                                        <button
+                                                type="submit"
+                                                name="add"
+                                                class="sp-button sp-relative body-font"
+                                                data-loading="false"
+                                        >
+                                            <span><a class="sp-link" href="{{ product.url }}">{{ "shinepages.product.choose_options" | t }}</a></span>
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            {% if product.has_only_default_variant == false %}
+                                <div class="sp-variant-option">
+                                    {% comment %} PRODUCT COLORS SWATCH START {% endcomment %}
+                                    {% assign variants = product.variants %}
+                                    {% assign count_variant  = product.has_only_default_variant %}
+                                    {% if settings.product_card_show_color_swatches and variants %}
+                                        {% assign colorSwatcheKey = appId.colorSwatchKey.value | downcase %}
+                                        {% assign colorSwatches = appId.colorSwatches.value %}
+                                        {% assign hasVariants = "" %}
+
+                                        <div class="sp-product-color-swatches" 
+                                            data-alignment="{{ settings.product_card_content_alignment }}"
+                                            data-style="{{ settings.product_card_color_swatch_style }}" 
+                                            data-has-change-image="1"
+                                        >
+                                            {% assign setFirstVariant = false %}
+                                            {% assign numItem = 0 %}
+                                            {%- for option in product.options_with_values -%}
+                                                {%- assign downcased_option = option.name | downcase -%}
+                                                {%- if downcased_option == 'color' or downcased_option == 'colour' or downcased_option == 'couleur' or downcased_option == colorSwatcheKey -%}
+                                                    {%- assign variant_option = 'option' | append: forloop.index -%}
+                                                    {%- for value in option.values -%}
+                                                        {%- assign downcased_value = value | downcase -%}
+                                                        {%- capture color_id -%}{{ section.id }}-{{ product.id }}-{% increment color_index %}{%- endcapture -%}
+                                                        {%- for variant in product.variants -%}
+                                                            {%- if variant[variant_option] == value -%}
+                                                                {% for color in colorSwatches %}
+                                                                    {% if value == color[0] %}
+                                                                        {% assign color_check = color[0] | append: ',' %}
+                                                                        {% unless hasVariants contains color_check %}
+                                                                            {% assign numItem = numItem | plus: 1 %}
+                                                                            {% assign hasVariants = hasVariants | append: color[0] | append: ',' %}
+                                                                            {% if numItem <= max_color_swatches %}
+                                                                                <div class="sp-product-color-swatch-item {% if setFirstVariant == false %}active{% endif %}"
+                                                                                    data-plugin="sp-tooltip"
+                                                                                    onclick="spProductCardColorSwatches(this)"
+                                                                                        {% if variant.featured_image %}
+                                                                                            data-featured-image="{{ variant.featured_image | image_url: width: 550 | default: '' }}"
+                                                                                            data-featured-image-srcset="
+                                                                                                {%- if variant.featured_image.width >= 165 -%}{{ variant.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                                                {%- if variant.featured_image.width >= 360 -%}{{ variant.featured_image | image_url: width: 360 }} 360w,{%- endif -%}
+                                                                                                {%- if variant.featured_image.width >= 533 -%}{{ variant.featured_image | image_url: width: 533 }} 533w,{%- endif -%}
+                                                                                                {%- if variant.featured_image.width >= 720 -%}{{ variant.featured_image | image_url: width: 720 }} 720w,{%- endif -%}
+                                                                                                {%- if variant.featured_image.width >= 940 -%}{{ variant.featured_image | image_url: width: 940 }} 940w,{%- endif -%}
+                                                                                                {%- if variant.featured_image.width >= 1066 -%}{{ variant.featured_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                                                                                                {{ variant.featured_image | image_url }} {{ variant.featured_image.width }}w"
+                                                                                        {% endif %}
+                                                                                >
+                                                                                    <div class="sp-product-color"
+                                                                                        style="--sp-product-card-color-swatches-color: {{ color[1] }};">
+                                                                                    </div>
+                                                                                    {% if show_tooltip_color_swatch %}
+                                                                                        <span class="sp-tooltip">{{ color[0] | strip }}</span>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                            {% endif %}
+                                                                            {% assign setFirstVariant = true %}
+                                                                        {% endunless %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {%- endif -%}
+                                                        {%- endfor -%}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {%- endfor -%}
+                                            {% if numItem > max_color_swatches %}
+                                                <span class="sp-count-color">{{ numItem | minus: max_color_swatches | prepend: '+' }}</span>
+                                            {%  else %}
+                                                <span class="sp-count-color">{{ numItem }} Colors</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    {% comment %} PRODUCT COLORS SWATCH END {% endcomment %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </sp-media-gallery>
+            </div>
+            {% comment %} MEDIA CARD END {% endcomment %}
+
+
+            {% comment %} CARD INFOMATION START {% endcomment %}
+            <div class="sp-card-information sp-product-card-information">
+                <div class="sp-title-product">
+
+                    {% if settings.product_card_show_vendor %}
+                        <div class="sp-product-card-vendor">shinepages</div>
+                    {% endif %}
+
+                    <h3 class="sp-product-card-heading">
+                        <a class="sp-link" href="{{ product.url }}">{{ product.title | escape }}</a>
+                    </h3>
+
+                    {% comment %} PRODUCT PRICE START {% endcomment %}
+                    {% assign use_variant = true %}
+                    {% assign show_compare_at_price = true %}
+                    {% assign currency_code_enabled = true %}
+                    {% if settings.product_card_show_price %}
+                        {%- liquid
+                            if use_first_variant_product
+                                assign target = product.selected_or_first_available_variant
+                            else
+                                assign target = product
+                            endif
+
+                            assign compare_at_price = target.compare_at_price
+                            assign price = target.price | default: 1999
+                            assign available = target.available | default: false
+                            assign money_price = price | money
+                            if product_card_show_currency_code
+                                assign money_price = price | money_with_currency
+                            endif
+                        -%}
+
+                        <div class="sp-product-card-price
+                        {%- if available == false %} price-sold-out{% endif -%}
+                        {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price-on-sale{% endif -%}
+                        {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing-sale-badge{% endif -%}
+                        {%- if product.price_varies == false and product.compare_at_price_varies %} price-no-compare{% endif -%}">
+                            <span class="price-item price-item--sale price-item--last">
+                                {% if product_card_show_currency_code %}
+                                    {{ price | money_with_currency }}
+                                {% else %}
+                                    {{ price | money }}
+                                {% endif %}
+                            </span>
+                            {%- if show_compare_at_price and compare_at_price > 0 %}
+                                <span class="price-item price-item--regular">
+                                {% if product_card_show_currency_code %}
+                                    {{ compare_at_price | money_with_currency }}
+                                {% else %}
+                                    {{ compare_at_price | money }}
+                                {% endif %}
+                            </span>
+                            {%- endif -%}
+                        </div>
+                    {% endif %}
+                    {% comment %} PRODUCT PRICE END {% endcomment %}
+
+                    
+                </div>
+
+                {% comment %} PRODUCT RATING START {% endcomment %}
+                {% if product.metafields.reviews.rating.value != blank %}
+                    <div class="sp-product-card-rating">
+                        <div class="sp-rating-box sp-rating">
+                            <span class="sp-icon">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.56544 0.808352C7.70835 0.397217 8.28979 0.397216 8.4327 0.808351L10.0529 5.4695C10.116 5.65087 10.2852 5.77384 10.4772 5.77775L15.4109 5.87829C15.8461 5.88716 16.0257 6.44015 15.6789 6.70311L11.7465 9.6844C11.5935 9.8004 11.5289 9.99938 11.5845 10.1832L13.0135 14.9064C13.1395 15.3231 12.6691 15.6648 12.3118 15.4162L8.26129 12.5976C8.10368 12.4879 7.89446 12.4879 7.73685 12.5976L3.68632 15.4162C3.32905 15.6648 2.85865 15.3231 2.98469 14.9065L4.41366 10.1832C4.46927 9.99938 4.40461 9.8004 4.2516 9.6844L0.319264 6.70311C-0.027587 6.44015 0.152088 5.88716 0.587263 5.87829L5.52095 5.77775C5.71292 5.77384 5.88218 5.65087 5.94523 5.4695L7.56544 0.808352Z" fill="#1A1A1A"/>
+                                </svg>
+                            </span>
+                            <span class="sp-rating-number sp-rating-text">{{ product.metafields.reviews.rating.value.rating }}</span>
+                        </div>
+                    </div>
+                {%- endif -%}
+                {% comment %} PRODUCT RATING END {% endcomment %}
+            </div>
+            {% comment %} CARD INFOMATION END {% endcomment %}
+
+        </div>
+    </div>
+{% else %}
+    {% if placeholder_product %}
+        <div class="sp-card sp-product-card"
+            data-style="{{ settings.product_card_style | default: "style-1" }}"
+            data-content-alignment="{{ settings.product_card_content_alignment }}"
+            data-box-shadow="{{ settings.product_card_box_shadow }}"
+        >
+            <div class="sp-card-inner">
+                <div class="sp-card-media sp-product-card-media {% if settings.product_card_show_second_image %}has-second-image{% endif %}">
+                    <div class="sp-product-card-badge" data-alignment="vertical">
+                        {% if settings.product_card_show_sold_out_badge %}
+                            <span class="sp-badge sp-badge--sold-out">{{ 'shinepages.product.sold_out' | t }}</span>
+                        {% endif %}
+                        {% if settings.product_card_show_discount_badge %}
+                            {% assign save = 100.00 | money %}
+                            {% if currency_code_enabled %}
+                                {% assign save = 100.00 | money_with_currency %}
+                            {% endif %}
+                            {% if product_card_discount_badge_type == 'percent' %}
+                                {% assign save = "10%" %}
+                            {% endif %}
+                            <span class="sp-badge sp-badge--on-sale">{{ 'shinepages.product.sale_html' | t: price: save }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="#.">
+                        {{ 'product-1' | placeholder_svg_tag: 'sp-placeholder-product-1-light' }}
+                        {% if settings.product_card_show_second_image %}
+                            {{ 'product-2' | placeholder_svg_tag: 'sp-placeholder-product-1-light' }}
+                        {% endif %}
+                    </a>
+                </div>
+                
+                <div class="sp-card-information sp-product-card-information">
+
+                    {% if settings.product_card_show_vendor %}
+                        <div class="sp-product-card-vendor">shinepages</div>
+                    {% endif %}
+
+                    <h3 class="sp-product-card-heading">
+                        <a href="#.">Example Product Title</a>
+                    </h3>
+
+                    {% comment %} PRODUCT RATING START {% endcomment %}
+                    {% if settings.product_card_show_rating %}
+                        {% if settings.product_card_show_rating and product.metafields.reviews.rating.value != blank %}
+                            <div class="sp-product-card-rating">
+                                {% liquid
+                                    assign rating_decimal = 0
+                                    assign decimal = product.metafields.reviews.rating.value.rating | modulo: 1
+                                    if decimal >= 0.3 and decimal <= 0.7
+                                        assign rating_decimal = 0.5
+                                    elsif decimal > 0.7
+                                        assign rating_decimal = 1
+                                    endif
+                                %}
+                                <div class="sp-rating" role="img" data-alignment="{{ settings.product_card_content_alignment }}">
+                                    <span aria-hidden="true" class="sp-rating-star"
+                                        style="--sp-rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --sp-rating-max: {{ product.metafields.reviews.rating.value.scale_max }}; --sp-rating-decimal: {{ rating_decimal }};"></span>
+                                    {% if product_card_show_rating_number %}
+                                        <span class="sp-rating-number">({{ product.metafields.reviews.rating.value.rating | floor }})</span>
+                                        {% endif %}
+                                </div>
+                            </div>
+                        {%- endif -%}
+                    {% endif %}
+                    {% comment %} PRODUCT RATING END {% endcomment %}
+
+                    {% comment %} PRODUCT PRICE START {% endcomment %}
+                    {% assign use_variant = true %}
+                    {% assign show_compare_at_price = true %}
+                    {% assign currency_code_enabled = true %}
+                    {% if settings.product_card_show_price %}
+                        {%- liquid
+                            if use_first_variant_product
+                                assign target = product.selected_or_first_available_variant
+                            else
+                                assign target = product
+                            endif
+                    
+                            assign compare_at_price = target.compare_at_price
+                            assign price = target.price | default: 1999
+                            assign available = target.available | default: false
+                            assign money_price = price | money
+                            if product_card_show_currency_code
+                                assign money_price = price | money_with_currency
+                            endif
+                        -%}
+                    
+                        <div class="sp-product-card-price
+                        {%- if available == false %} price-sold-out{% endif -%}
+                        {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price-on-sale{% endif -%}
+                        {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing-sale-badge{% endif -%}
+                        {%- if product.price_varies == false and product.compare_at_price_varies %} price-no-compare{% endif -%}
+                    ">
+                            <span class="price-item price-item--sale price-item--last">
+                                {% if product_card_show_currency_code %}
+                                    {{ price | money_with_currency }}
+                                {% else %}
+                                    {{ price | money }}
+                                {% endif %}
+                            </span>
+                            {%- if show_compare_at_price and compare_at_price > 0 %}
+                                <span class="price-item price-item--regular">
+                                {% if product_card_show_currency_code %}
+                                    {{ compare_at_price | money_with_currency }}
+                                {% else %}
+                                    {{ compare_at_price | money }}
+                                {% endif %}
+                            </span>
+                            {%- endif -%}
+                        </div>
+                    {% endif %}
+                    {% comment %} PRODUCT PRICE END {% endcomment %}
+
+                    {% comment %} PRODUCT COLORS SWATCH START {% endcomment %}
+                    {% if settings.product_card_show_color_swatches %}
+                        {% assign variants = product.variants %}
+                        {% if variants %}
+                            {% assign colorSwatcheKey = shop.metaobjects['app--126621908993--shine_pages_settings']['shine_pages_settings'].colorSwatchKey.value | downcase %}
+                            {% assign colorSwatches = shop.metaobjects['app--126621908993--shine_pages_settings']['shine_pages_settings'].colorSwatches.value %}
+                            {% assign hasVariants = "" %}
+
+                            <div class="sp-product-color-swatches" 
+                                data-alignment="{{ settings.product_card_content_alignment }}"
+                                data-style="{{ settings.product_card_color_swatch_style }}" 
+                                data-has-change-image="1"
+                            >
+                                {% assign setFirstVariant = false %}
+                                {% assign numItem = 0 %}
+                                {%- for option in product.options_with_values -%}
+                                    {%- assign downcased_option = option.name | downcase -%}
+                                    {%- if downcased_option == 'color' or downcased_option == 'colour' or downcased_option == 'couleur' or downcased_option == colorSwatcheKey -%}
+                                        {%- assign variant_option = 'option' | append: forloop.index -%}
+
+                                        {%- for value in option.values -%}
+                                            {%- assign downcased_value = value | downcase -%}
+                                            {%- capture color_id -%}{{ section.id }}-{{ product.id }}-{% increment color_index %}{%- endcapture -%}
+
+                                            {%- for variant in product.variants -%}
+                                                {%- if variant[variant_option] == value -%}
+                                                    {% for color in colorSwatches %}
+                                                        {% if value == color[0] %}
+                                                            {% assign color_check = color[0] | append: ',' %}
+                                                            {% unless hasVariants contains color_check %}
+                                                                {% assign numItem = numItem | plus: 1 %}
+                                                                {% assign hasVariants = hasVariants | append: color[0] | append: ',' %}
+                                                                {% if numItem <= max_color_swatches %}
+                                                                    <div class="sp-product-color-swatch-item {% if setFirstVariant == false %}active{% endif %}"
+                                                                        data-plugin="sp-tooltip"
+                                                                        onclick="spProductCardColorSwatches(this)"
+                                                                            {% if variant.featured_image %}
+                                                                                data-featured-image="{{ variant.featured_image | image_url: width: 550 | default: '' }}"
+                                                                                data-featured-image-srcset="
+                                                                                    {%- if variant.featured_image.width >= 165 -%}{{ variant.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                                    {%- if variant.featured_image.width >= 360 -%}{{ variant.featured_image | image_url: width: 360 }} 360w,{%- endif -%}
+                                                                                    {%- if variant.featured_image.width >= 533 -%}{{ variant.featured_image | image_url: width: 533 }} 533w,{%- endif -%}
+                                                                                    {%- if variant.featured_image.width >= 720 -%}{{ variant.featured_image | image_url: width: 720 }} 720w,{%- endif -%}
+                                                                                    {%- if variant.featured_image.width >= 940 -%}{{ variant.featured_image | image_url: width: 940 }} 940w,{%- endif -%}
+                                                                                    {%- if variant.featured_image.width >= 1066 -%}{{ variant.featured_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                                                                                    {{ variant.featured_image | image_url }} {{ variant.featured_image.width }}w"
+                                                                            {% endif %}
+                                                                    >
+                                                                        <div class="sp-product-color"
+                                                                            style="--sp-product-card-color-swatches-color: {{ color[1] }};">
+                                                                        </div>
+                                                                        {% if show_tooltip_color_swatch %}
+                                                                            <span class="sp-tooltip">{{ color[0] | strip }}</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% assign setFirstVariant = true %}
+                                                            {% endunless %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {%- endif -%}
+                                            {%- endfor -%}
+                                        {% endfor %}
+                                    {% endif %}
+                                {%- endfor -%}
+                                {% if numItem > max_color_swatches %}
+                                    <div class="sp-product-color-swatch-item color-none">
+                                        <div class="sp-text">{{ numItem | minus: max_color_swatches | prepend: '+' }}</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    {% comment %} PRODUCT COLORS SWATCH END {% endcomment %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

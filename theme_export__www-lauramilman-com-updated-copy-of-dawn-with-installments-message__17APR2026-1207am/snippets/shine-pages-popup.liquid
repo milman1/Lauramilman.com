@@ -1,0 +1,80 @@
+<div id="sp-{{ block.id }}-popup-link"
+     class="sp-popup-link-wrapper" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} .sp-popup-link {
+            --sp-text-color: {{ setting.link_text_color }};
+            --sp-font-size: {{ setting.link_font_size }}px;
+            --sp-letter-spacing: {{ setting.link_text_spacing }}px;
+        }
+
+        #sp-{{ section.id }} .sp-popup-link[data-type="button"] {
+            --sp-button-padding: 4px 8px;
+            --sp-border-radius: {{ setting.link_border_radius }}px;
+            --sp-background-color: {{ setting.link_background_color }};
+            --sp-background-gradient-color: {{ setting.link_background_color_gradient }};
+            background: var(--sp-background-color) var(--sp-background-gradient-color);
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} .sp-popup-link {
+                --sp-font-size: {{ setting.link_font_size_mobile }}px;
+            }
+        }
+    </style>
+    <a href="#." data-type="{{ setting.link_type }}" data-popup-link
+       data-modal-target="popup-{{ block.id }}"
+       class="sp-popup-link body-font sp-text-{{ setting.link_text_style }}">
+        {% if setting.link_icon %}
+            {{ setting.link_icon | image_url: width: 150 | image_tag }}
+        {% endif %}
+        {{ setting.link_text }}
+    </a>
+</div>
+{% assign id = block.id %}
+{% assign popup_label = setting.popup_label %}
+{% assign popup_content = setting.page.content | default: "" %}
+{% assign popup_setting = setting %}
+<sp-popup id="popup-{{ id }}" class="sp-popup" data-init="false" data-open="false">
+    <div class="sp-popup-dialog">
+        <button class="sp-popup-close-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M5.63546 5.63624C5.86978 5.40193 6.24969 5.40193 6.48401 5.63624L18.3637 17.5153C18.598 17.7496 18.598 18.1295 18.3637 18.3638C18.1294 18.5981 17.7495 18.5981 17.5152 18.3638L5.63546 6.48474C5.40114 6.25043 5.40114 5.87054 5.63546 5.63624Z"
+                      fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M18.3645 5.6366C18.5988 5.87091 18.5988 6.2508 18.3645 6.48511L6.48474 18.3642C6.25042 18.5985 5.87051 18.5985 5.63619 18.3642C5.40187 18.1299 5.40187 17.75 5.63619 17.5157L17.5159 5.6366C17.7502 5.40229 18.1301 5.40229 18.3645 5.6366Z"
+                      fill="currentColor"/>
+            </svg>
+        </button>
+        {% if popup_label != empty %}
+            <div class="sp-modal-heading">
+                <h4 class="sp-modal-title">{{ popup_label }}</h4>
+            </div>
+        {% endif %}
+        <div class="sp-modal-content">
+            {{ popup_content }}
+        </div>
+    </div>
+</sp-popup>
+<style>
+    sp-popup#popup-{{ id }} {
+        --sp-popup-overlay-color: {{ popup_setting.popup_overlay_color.red }}, {{ popup_setting.popup_overlay_color.green }},{{ popup_setting.popup_overlay_color.blue }};
+    }
+
+    sp-popup#popup-{{ id }} .sp-popup-dialog {
+        --sp-popup-max-width: {{ popup_setting.popup_max_width }}%;
+        --sp-popup-max-height: {{ popup_setting.popup_max_height }}%;
+        --sp-popup-margin-top: {{ popup_setting.popup_margin_top }}px;
+        --sp-popup-title-color: {{ setting.popup_label_color }};
+        --sp-popup-title-size: {{ setting.popup_label_size }}px;
+    }
+
+    @media (max-width: 767px) {
+        sp-popup#popup-{{ id }} .sp-popup-dialog {
+            --sp-popup-max-width: {{ popup_setting.popup_max_width_mobile }}%;
+            --sp-popup-max-height: {{ popup_setting.popup_max_height_mobile }}%;
+            --sp-popup-margin-top: {{ popup_setting.popup_margin_top_mobile }}px;
+            --sp-popup-title-size: {{ setting.popup_label_size_mobile }}px;
+        }
+    }
+</style>

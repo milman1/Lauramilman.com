@@ -1,0 +1,34 @@
+<sp-dropdown class="sp-dropdown" data-style="{{ style | default: "dropdown" }}">
+    <div class="sp-dropdown-link body-font" aria-expanded="false">
+        <img src="https://cdn.shopify.com/static/images/flags/{{ localization.country.iso_code | downcase }}.svg?format=jpg&width=60"
+             alt="{{ localization.currency.iso_code }}">
+        <span>
+            {{- localization.country.currency.iso_code }}{{ localization.country.currency.symbol }}
+        </span>
+        <svg class="sp-icon icon-caret" width="11" height="11" viewBox="0 0 11 11" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_140_3417)">
+                <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5" stroke="currentColor" stroke-linecap="square"/>
+            </g>
+            <defs>
+                <clipPath id="clip0_140_3417">
+                    <rect width="10" height="10" fill="white" transform="translate(0.667969 0.5)"/>
+                </clipPath>
+            </defs>
+        </svg>
+
+    </div>
+    <div class="sp-dropdown-list" aria-expanded="false">
+        {%- for country in localization.available_countries -%}
+            <div class="sp-dropdown-list-item" tabindex="-1">
+                <a class="sp-dropdown-list-item-link body-font"
+                   href="#" {% if country.iso_code == localization.country.iso_code %} aria-current="true" {% endif %}
+                   data-value="{{ country.iso_code }}">
+                    <img src="https://cdn.shopify.com/static/images/flags/{{ country.iso_code | downcase }}.svg?format=jpg&width=60"
+                         alt="{{ country.iso_code }}">
+                    <span> {{- country.currency.iso_code }} {{ country.currency.symbol }}</span>
+                </a>
+            </div>
+        {%- endfor -%}
+    </div>
+</sp-dropdown>
