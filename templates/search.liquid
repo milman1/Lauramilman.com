@@ -1,0 +1,35 @@
+<section class="section">
+  <div class="page-width">
+    <header class="section-heading">
+      <span class="eyebrow">Search</span>
+      <h1>{% if search.performed %}Results for &ldquo;{{ search.terms }}&rdquo;{% else %}Search the collection{% endif %}</h1>
+      <hr class="divider">
+    </header>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" style="max-width:520px;margin:0 auto 2.5rem;display:flex;gap:0.5rem;">
+      <label for="SearchInput" class="visually-hidden">{{ 'general.search.placeholder' | t }}</label>
+      <input
+        id="SearchInput"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="{{ 'general.search.placeholder' | t }}"
+        style="flex:1;padding:0.9rem 1rem;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);font-family:inherit;">
+      <button type="submit" class="btn">{{ 'general.search.submit' | t }}</button>
+    </form>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <div class="product-grid">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', product: item %}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <p class="text-center">{{ 'collections.general.no_matches' | t }}</p>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>

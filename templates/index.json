@@ -1,0 +1,78 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "Spring Collection",
+        "heading": "Quietly made, carried for generations.",
+        "subheading": "Heirloom pieces finished by hand in small batches. Drawn from nature, shaped for the everyday.",
+        "cta_primary_label": "Shop the collection",
+        "cta_secondary_label": "Our story"
+      }
+    },
+    "featured": {
+      "type": "featured-collection",
+      "settings": {
+        "eyebrow": "Selected",
+        "heading": "New arrivals",
+        "subheading": "Signature pieces released this season, each finished by hand in limited numbers.",
+        "products_to_show": 4,
+        "show_view_all": true
+      }
+    },
+    "image-with-text": {
+      "type": "image-with-text",
+      "settings": {
+        "eyebrow": "Our craft",
+        "heading": "Shaped by hand, finished with patience.",
+        "text": "<p>Every piece is drawn by hand and finished in our studio. We work in small batches so that each object can be held, turned, and considered before it finds its keeper.</p>",
+        "cta_label": "Meet the studio",
+        "reverse": false
+      }
+    },
+    "rich-text": {
+      "type": "rich-text",
+      "blocks": {
+        "eyebrow": { "type": "eyebrow", "settings": { "text": "Manifesto" } },
+        "heading": { "type": "heading", "settings": { "text": "A quieter kind of luxury." } },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>We believe an object earns its place by being used. Our collection is designed to live with you, patinate, and carry the story of how it was worn.</p>"
+          }
+        }
+      },
+      "block_order": ["eyebrow", "heading", "text"],
+      "settings": { "style": "dark" }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": { "type": "testimonial", "settings": { "quote": "The finish is extraordinary. It feels less like a piece of jewelry and more like something handed down.", "author": "Sophia R." } },
+        "t2": { "type": "testimonial", "settings": { "quote": "Wearing this feels like slowing down. Every detail is considered, quiet, and alive.", "author": "Mira L." } },
+        "t3": { "type": "testimonial", "settings": { "quote": "The packaging alone made me cry. The piece inside was even more beautiful.", "author": "Anika P." } }
+      },
+      "block_order": ["t1", "t2", "t3"],
+      "settings": {
+        "eyebrow": "In their words",
+        "heading": "Worn and told"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "eyebrow": "Letters from the studio",
+        "heading": "Join our list",
+        "subheading": "Quiet dispatches on new pieces, studio visits, and behind-the-scenes work."
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "featured",
+    "image-with-text",
+    "rich-text",
+    "testimonials",
+    "newsletter"
+  ]
+}

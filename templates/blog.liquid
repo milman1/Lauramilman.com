@@ -1,0 +1,23 @@
+<section class="section">
+  <div class="page-width">
+    <header class="section-heading">
+      <span class="eyebrow">Journal</span>
+      <h1>{{ blog.title }}</h1>
+      <hr class="divider">
+    </header>
+
+    <div class="product-grid">
+      {%- for article in blog.articles -%}
+        <a class="product-card" href="{{ article.url }}">
+          <div class="product-card__media">
+            {%- if article.image != blank -%}
+              <img src="{{ article.image | image_url: width: 800 }}" alt="{{ article.title | escape }}" loading="lazy" width="800" height="1000">
+            {%- endif -%}
+          </div>
+          <h3 class="product-card__title">{{ article.title }}</h3>
+          <div class="product-card__price">{{ article.published_at | date: '%B %d, %Y' }}</div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

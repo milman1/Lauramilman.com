@@ -1,0 +1,26 @@
+{
+  "current": {
+    "color_primary": "#2B4033",
+    "color_secondary": "#5C4332",
+    "color_accent": "#C9A961",
+    "color_background": "#EDE4D0",
+    "color_surface": "#F7F1E3",
+    "color_text": "#1C2A22",
+    "color_muted": "#7A6A55",
+    "font_heading": "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+    "font_body": "'Inter', 'Helvetica Neue', Arial, sans-serif",
+    "page_width": 1400,
+    "logo_width": 140
+  },
+  "presets": {
+    "Default": {
+      "color_primary": "#2B4033",
+      "color_secondary": "#5C4332",
+      "color_accent": "#C9A961",
+      "color_background": "#EDE4D0",
+      "color_surface": "#F7F1E3",
+      "color_text": "#1C2A22",
+      "color_muted": "#7A6A55"
+    }
+  }
+}

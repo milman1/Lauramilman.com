@@ -1,0 +1,113 @@
+<section class="section">
+  <div class="page-width">
+    <div class="product" data-product-gallery>
+      <div class="product__media">
+        <div class="product__media-main" data-gallery-main>
+          {%- if product.featured_media != blank -%}
+            <img
+              src="{{ product.featured_media | image_url: width: 1200 }}"
+              alt="{{ product.featured_media.alt | default: product.title | escape }}"
+              loading="eager"
+              fetchpriority="high"
+              width="1200"
+              height="{{ 1200 | divided_by: product.featured_media.aspect_ratio | round }}">
+          {%- endif -%}
+        </div>
+        {%- if product.media.size > 1 -%}
+          <div class="product__media-thumbs">
+            {%- for media in product.media limit: 8 -%}
+              <button
+                type="button"
+                data-gallery-thumb
+                data-src="{{ media | image_url: width: 1200 }}"
+                data-alt="{{ media.alt | default: product.title | escape }}"
+                {% if forloop.first %}class="is-active"{% endif %}
+                aria-label="View image {{ forloop.index }}">
+                <img
+                  src="{{ media | image_url: width: 200 }}"
+                  alt="{{ media.alt | default: product.title | escape }}"
+                  width="200"
+                  height="200"
+                  loading="lazy">
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="product__info">
+        {%- if product.vendor != blank -%}
+          <span class="eyebrow">{{ product.vendor }}</span>
+        {%- endif -%}
+        <h1 class="product__title">{{ product.title }}</h1>
+        <div class="product__price">{% render 'price', product: product %}</div>
+
+        {%- if product.description != blank -%}
+          <div class="product__description rte">{{ product.description }}</div>
+        {%- endif -%}
+
+        {%- form 'product', product, class: 'product-form' -%}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+
+          {%- unless product.has_only_default_variant -%}
+            {%- for option in product.options_with_values -%}
+              <fieldset class="product-form__input">
+                <legend>{{ option.name }}</legend>
+                <div class="product-form__options">
+                  {%- for value in option.values -%}
+                    {%- assign option_id = 'Option-' | append: option.position | append: '-' | append: forloop.index -%}
+                    <input
+                      type="radio"
+                      id="{{ option_id }}"
+                      name="options[{{ option.name | escape }}]"
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="{{ option_id }}">{{ value }}</label>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endfor -%}
+          {%- endunless -%}
+
+          <div class="product-form__input">
+            <label for="Quantity">{{ 'products.product.quantity' | t }}</label>
+            <div class="quantity" data-quantity>
+              <button type="button" data-step="down" aria-label="Decrease quantity">&minus;</button>
+              <input id="Quantity" type="number" name="quantity" value="1" min="1">
+              <button type="button" data-step="up" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <div class="product__actions">
+            <button
+              type="submit"
+              name="add"
+              class="btn"
+              {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}>
+              {%- if product.selected_or_first_available_variant.available -%}
+                {{ 'products.product.add_to_cart' | t }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- endif -%}
+            </button>
+          </div>
+        {%- endform -%}
+
+        <div class="product__meta">
+          <ul>
+            {%- if product.type != blank -%}<li><strong>Type:</strong> {{ product.type }}</li>{%- endif -%}
+            {%- if product.vendor != blank -%}<li><strong>Maker:</strong> {{ product.vendor }}</li>{%- endif -%}
+            {%- if product.tags.size > 0 -%}<li><strong>Tags:</strong> {{ product.tags | join: ', ' }}</li>{%- endif -%}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,69 @@
+<header class="site-header" role="banner">
+  <div class="page-width">
+    <div class="site-header__inner">
+      <button type="button" class="mobile-menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="MobileMenu">
+        {% render 'icon-menu' %}
+        <span class="visually-hidden">{{ 'accessibility.menu' | t }}</span>
+      </button>
+
+      <nav class="site-header__nav" aria-label="Primary">
+        {%- for link in section.settings.menu.links -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+
+      <div class="site-header__logo">
+        <a href="{{ routes.root_url }}">
+          {%- if settings.logo != blank -%}
+            <img
+              src="{{ settings.logo | image_url: width: 400 }}"
+              alt="{{ shop.name }}"
+              width="{{ settings.logo_width }}"
+              height="auto"
+              style="width: {{ settings.logo_width }}px;"
+              loading="eager">
+          {%- else -%}
+            {{ shop.name }}
+          {%- endif -%}
+        </a>
+      </div>
+
+      <div class="site-header__actions">
+        <a href="{{ routes.search_url }}" aria-label="Search">
+          {% render 'icon-search' %}
+        </a>
+        <a href="{{ routes.account_url }}" aria-label="Account">
+          {% render 'icon-account' %}
+        </a>
+        <a href="{{ routes.cart_url }}" aria-label="Cart">
+          {% render 'icon-cart' %}
+          {%- if cart.item_count > 0 -%}
+            <span class="cart-count">{{ cart.item_count }}</span>
+          {%- endif -%}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-menu" id="MobileMenu" data-mobile-menu>
+    <ul>
+      {%- for link in section.settings.menu.links -%}
+        <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation menu",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}

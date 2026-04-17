@@ -1,0 +1,52 @@
+<section class="hero" role="region" aria-label="{{ section.settings.heading | escape }}">
+  <div class="hero__media">
+    {%- if section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 2400 }}"
+        alt="{{ section.settings.image.alt | default: section.settings.heading | escape }}"
+        loading="eager"
+        fetchpriority="high"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}">
+    {%- endif -%}
+  </div>
+
+  <div class="page-width">
+    <div class="hero__content" data-animate>
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h1>{{ section.settings.heading }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p>{{ section.settings.subheading }}</p>
+      {%- endif -%}
+      <div class="hero__actions">
+        {%- if section.settings.cta_primary_label != blank -%}
+          <a class="btn" href="{{ section.settings.cta_primary_link }}">{{ section.settings.cta_primary_label }}</a>
+        {%- endif -%}
+        {%- if section.settings.cta_secondary_label != blank -%}
+          <a class="btn btn--outline" href="{{ section.settings.cta_secondary_link }}">{{ section.settings.cta_secondary_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Spring Collection" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Quietly made, carried for generations." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Heirloom pieces finished by hand in small batches. Drawn from nature, shaped for the everyday." },
+    { "type": "text", "id": "cta_primary_label", "label": "Primary CTA label", "default": "Shop the collection" },
+    { "type": "url", "id": "cta_primary_link", "label": "Primary CTA link" },
+    { "type": "text", "id": "cta_secondary_label", "label": "Secondary CTA label", "default": "Our story" },
+    { "type": "url", "id": "cta_secondary_link", "label": "Secondary CTA link" }
+  ],
+  "presets": [
+    { "name": "Hero" }
+  ]
+}
+{% endschema %}

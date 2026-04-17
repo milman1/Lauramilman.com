@@ -1,0 +1,16 @@
+<article class="section">
+  <div class="page-width" style="max-width:760px;">
+    <header class="section-heading">
+      <span class="eyebrow">{{ article.published_at | date: '%B %d, %Y' }}</span>
+      <h1>{{ article.title }}</h1>
+      {%- if article.author != blank -%}
+        <p>By {{ article.author }}</p>
+      {%- endif -%}
+      <hr class="divider">
+    </header>
+    {%- if article.image != blank -%}
+      <img src="{{ article.image | image_url: width: 1400 }}" alt="{{ article.title | escape }}" style="margin-bottom:2.5rem;" loading="eager">
+    {%- endif -%}
+    <div class="rte">{{ article.content }}</div>
+  </div>
+</article>

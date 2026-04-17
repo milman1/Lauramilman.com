@@ -1,0 +1,51 @@
+<section class="section testimonials">
+  <div class="page-width">
+    <header class="section-heading" data-animate>
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading }}</h2>
+      <hr class="divider">
+    </header>
+
+    <div class="testimonials__grid">
+      {%- for block in section.blocks -%}
+        <figure class="testimonial" {{ block.shopify_attributes }} data-animate>
+          <blockquote class="testimonial__quote">&ldquo;{{ block.settings.quote }}&rdquo;</blockquote>
+          <figcaption class="testimonial__author">{{ block.settings.author }}</figcaption>
+        </figure>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "In their words" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Worn and told" }
+  ],
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        { "type": "textarea", "id": "quote", "label": "Quote", "default": "The finish is extraordinary. It feels less like a piece of jewelry and more like something handed down." },
+        { "type": "text", "id": "author", "label": "Author", "default": "Sophia R." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}

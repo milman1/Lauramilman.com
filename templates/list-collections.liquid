@@ -1,0 +1,30 @@
+<section class="section">
+  <div class="page-width">
+    <header class="section-heading">
+      <span class="eyebrow">Shop</span>
+      <h1>Collections</h1>
+      <hr class="divider">
+    </header>
+
+    <div class="product-grid">
+      {%- for collection in collections -%}
+        <a class="product-card" href="{{ collection.url }}">
+          <div class="product-card__media">
+            {%- if collection.featured_image != blank -%}
+              <img
+                src="{{ collection.featured_image | image_url: width: 800 }}"
+                alt="{{ collection.title | escape }}"
+                loading="lazy"
+                width="800"
+                height="1000">
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag }}
+            {%- endif -%}
+          </div>
+          <h3 class="product-card__title">{{ collection.title }}</h3>
+          <div class="product-card__price">{{ collection.products_count }} pieces</div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

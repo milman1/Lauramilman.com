@@ -1,0 +1,70 @@
+<header class="collection-header" data-animate>
+  <span class="eyebrow">Collection</span>
+  <h1>{{ collection.title }}</h1>
+  {%- if collection.description != blank -%}
+    <p>{{ collection.description }}</p>
+  {%- endif -%}
+</header>
+
+<section class="section section--tight">
+  <div class="page-width">
+    <div class="collection-toolbar">
+      <div>{{ collection.products_count }} pieces</div>
+      <form>
+        <label for="SortBy" class="visually-hidden">Sort</label>
+        <select id="SortBy" name="sort_by" onchange="this.form.submit()">
+          {%- assign sort_options = 'manual,best-selling,title-ascending,price-ascending,price-descending,created-descending' | split: ',' -%}
+          {%- for option in sort_options -%}
+            <option value="{{ option }}" {% if collection.sort_by == option %}selected{% endif %}>
+              {%- case option -%}
+                {%- when 'manual' -%}Featured
+                {%- when 'best-selling' -%}Best selling
+                {%- when 'title-ascending' -%}Alphabetical: A–Z
+                {%- when 'price-ascending' -%}Price: low to high
+                {%- when 'price-descending' -%}Price: high to low
+                {%- when 'created-descending' -%}Newest
+              {%- endcase -%}
+            </option>
+          {%- endfor -%}
+        </select>
+      </form>
+    </div>
+
+    {%- paginate collection.products by 24 -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="product-grid">
+          {%- for product in collection.products -%}
+            {% render 'product-card', product: product %}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav class="pagination" aria-label="Pagination">
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}">{{ 'general.pagination.previous' | t }}</a>
+            {%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}
+                <a href="{{ part.url }}">{{ part.title }}</a>
+              {%- else -%}
+                <span class="{% if part.title == paginate.current_page %}current{% endif %}">{{ part.title }}</span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}">{{ 'general.pagination.next' | t }}</a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- else -%}
+        <p class="text-center">{{ 'collections.general.no_matches' | t }}</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection",
+  "settings": []
+}
+{% endschema %}

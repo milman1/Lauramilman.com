@@ -1,0 +1,47 @@
+{
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "close": "Close",
+    "menu": "Menu",
+    "cart": "Cart"
+  },
+  "general": {
+    "search": {
+      "placeholder": "Search the collection",
+      "submit": "Search"
+    },
+    "newsletter": {
+      "placeholder": "Your email",
+      "submit": "Subscribe",
+      "success": "Thank you for subscribing."
+    },
+    "cart": {
+      "title": "Your cart",
+      "empty": "Your cart is empty.",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "continue": "Continue shopping",
+      "remove": "Remove"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "from": "from",
+      "sale": "Sale"
+    }
+  },
+  "collections": {
+    "general": {
+      "view_all": "View all",
+      "no_matches": "No products found."
+    }
+  }
+}
