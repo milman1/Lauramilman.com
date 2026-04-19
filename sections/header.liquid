@@ -4,83 +4,113 @@
 
 <header class="site-header" role="banner">
   <div class="site-header__inner">
+
     <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name }}">
       {{ shop.name }}
     </a>
 
     <nav class="site-header__nav" role="navigation" aria-label="Main navigation">
-      {%- for link in section.settings.menu.links -%}
-        <a href="{{ link.url }}" class="site-header__nav-link"
-          {% if link.active %}aria-current="page"{% endif %}>
-          {{ link.title }}
-        </a>
-      {%- endfor -%}
 
-      {%- comment -%} Estate & Antique Jewelry dropdown {%- endcomment -%}
+      {%- comment -%} ── Jewelry dropdown ── {%- endcomment -%}
       <div class="nav-dropdown" data-nav-dropdown>
-        <button
-          class="site-header__nav-link nav-dropdown__trigger"
-          aria-expanded="false"
-          aria-haspopup="true"
-          data-dropdown-trigger
-        >
+        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
+          Jewelry
+          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown__panel nav-dropdown__panel--compact" role="menu" aria-label="Jewelry categories">
+          <div class="nav-dropdown__inner">
+            <a href="/collections/all"        class="nav-dropdown__item" role="menuitem">All Jewelry</a>
+            <a href="/collections/rings"       class="nav-dropdown__item" role="menuitem">Rings</a>
+            <a href="/collections/necklaces"   class="nav-dropdown__item" role="menuitem">Necklaces</a>
+            <a href="/collections/pendants"    class="nav-dropdown__item" role="menuitem">Pendants</a>
+            <a href="/collections/bracelets"   class="nav-dropdown__item" role="menuitem">Bracelets</a>
+            <a href="/collections/earrings"    class="nav-dropdown__item" role="menuitem">Earrings</a>
+            <a href="/collections/brooches"    class="nav-dropdown__item" role="menuitem">Brooches &amp; Pins</a>
+            <a href="/collections/charms"      class="nav-dropdown__item" role="menuitem">Charms</a>
+            <a href="/collections/new-arrivals" class="nav-dropdown__item nav-dropdown__item--accent" role="menuitem">New Arrivals</a>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} ── Wedding dropdown ── {%- endcomment -%}
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
+          Wedding
+          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown__panel nav-dropdown__panel--compact" role="menu" aria-label="Wedding jewelry">
+          <div class="nav-dropdown__inner">
+            <a href="/collections/engagement-rings" class="nav-dropdown__item" role="menuitem">Engagement Rings</a>
+            <a href="/collections/wedding-bands"    class="nav-dropdown__item" role="menuitem">Wedding Bands</a>
+            <a href="/collections/bridal-sets"      class="nav-dropdown__item" role="menuitem">Bridal Sets</a>
+            <a href="/collections/bridal-gifts"     class="nav-dropdown__item" role="menuitem">Bridal Gifts</a>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} ── Antique & Estate dropdown ── {%- endcomment -%}
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
           {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
           <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
             <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-
         <div class="nav-dropdown__panel" role="menu" aria-label="Estate Jewelry Designers">
           <div class="nav-dropdown__inner">
             <p class="nav-dropdown__group-label">A – B</p>
-            <a href="/collections/adler" class="nav-dropdown__item" role="menuitem">Adler</a>
-            <a href="/collections/aldo-cipullo" class="nav-dropdown__item" role="menuitem">Aldo Cipullo</a>
-            <a href="/collections/aletto-brothers" class="nav-dropdown__item" role="menuitem">Aletto Brothers</a>
-            <a href="/collections/angela-cummings" class="nav-dropdown__item" role="menuitem">Angela Cummings</a>
-            <a href="/collections/asch-grossbardt" class="nav-dropdown__item" role="menuitem">Asch Grossbardt</a>
-            <a href="/collections/asprey" class="nav-dropdown__item" role="menuitem">Asprey</a>
-            <a href="/collections/audemars-piguet" class="nav-dropdown__item" role="menuitem">Audemars Piguet</a>
+            <a href="/collections/adler"              class="nav-dropdown__item" role="menuitem">Adler</a>
+            <a href="/collections/aldo-cipullo"        class="nav-dropdown__item" role="menuitem">Aldo Cipullo</a>
+            <a href="/collections/aletto-brothers"     class="nav-dropdown__item" role="menuitem">Aletto Brothers</a>
+            <a href="/collections/angela-cummings"     class="nav-dropdown__item" role="menuitem">Angela Cummings</a>
+            <a href="/collections/asch-grossbardt"     class="nav-dropdown__item" role="menuitem">Asch Grossbardt</a>
+            <a href="/collections/asprey"              class="nav-dropdown__item" role="menuitem">Asprey</a>
+            <a href="/collections/audemars-piguet"     class="nav-dropdown__item" role="menuitem">Audemars Piguet</a>
             <a href="/collections/bailey-banks-biddle" class="nav-dropdown__item" role="menuitem">Bailey Banks &amp; Biddle</a>
-            <a href="/collections/bert-h-satz" class="nav-dropdown__item" role="menuitem">Bert H. Satz</a>
-            <a href="/collections/boucheron" class="nav-dropdown__item" role="menuitem">Boucheron</a>
-            <a href="/collections/buccellati" class="nav-dropdown__item" role="menuitem">Buccellati</a>
-            <a href="/collections/bvlgari" class="nav-dropdown__item" role="menuitem">Bvlgari</a>
+            <a href="/collections/bert-h-satz"         class="nav-dropdown__item" role="menuitem">Bert H. Satz</a>
+            <a href="/collections/boucheron"           class="nav-dropdown__item" role="menuitem">Boucheron</a>
+            <a href="/collections/buccellati"          class="nav-dropdown__item" role="menuitem">Buccellati</a>
+            <a href="/collections/bvlgari"             class="nav-dropdown__item" role="menuitem">Bvlgari</a>
 
             <p class="nav-dropdown__group-label">C</p>
-            <a href="/collections/carrera-y-carrera" class="nav-dropdown__item" role="menuitem">Carrera Y Carrera</a>
-            <a href="/collections/cartier" class="nav-dropdown__item" role="menuitem">Cartier</a>
-            <a href="/collections/carvin-french" class="nav-dropdown__item" role="menuitem">Carvin French</a>
-            <a href="/collections/chanel" class="nav-dropdown__item" role="menuitem">Chanel</a>
-            <a href="/collections/charles-krypell" class="nav-dropdown__item" role="menuitem">Charles Krypell</a>
-            <a href="/collections/chaumet" class="nav-dropdown__item" role="menuitem">Chaumet</a>
-            <a href="/collections/chopard" class="nav-dropdown__item" role="menuitem">Chopard</a>
-            <a href="/collections/christian-dior" class="nav-dropdown__item" role="menuitem">Christian Dior</a>
-            <a href="/collections/craiger-drake" class="nav-dropdown__item" role="menuitem">Craiger Drake</a>
+            <a href="/collections/carrera-y-carrera"   class="nav-dropdown__item" role="menuitem">Carrera Y Carrera</a>
+            <a href="/collections/cartier"             class="nav-dropdown__item" role="menuitem">Cartier</a>
+            <a href="/collections/carvin-french"       class="nav-dropdown__item" role="menuitem">Carvin French</a>
+            <a href="/collections/chanel"              class="nav-dropdown__item" role="menuitem">Chanel</a>
+            <a href="/collections/charles-krypell"     class="nav-dropdown__item" role="menuitem">Charles Krypell</a>
+            <a href="/collections/chaumet"             class="nav-dropdown__item" role="menuitem">Chaumet</a>
+            <a href="/collections/chopard"             class="nav-dropdown__item" role="menuitem">Chopard</a>
+            <a href="/collections/christian-dior"      class="nav-dropdown__item" role="menuitem">Christian Dior</a>
+            <a href="/collections/craiger-drake"       class="nav-dropdown__item" role="menuitem">Craiger Drake</a>
 
             <p class="nav-dropdown__group-label">D – F</p>
-            <a href="/collections/david-webb" class="nav-dropdown__item" role="menuitem">David Webb</a>
-            <a href="/collections/de-grisogono" class="nav-dropdown__item" role="menuitem">De Grisogono</a>
-            <a href="/collections/demner" class="nav-dropdown__item" role="menuitem">Demner</a>
-            <a href="/collections/di-modolo" class="nav-dropdown__item" role="menuitem">Di Modolo</a>
-            <a href="/collections/dinh-van" class="nav-dropdown__item" role="menuitem">Dinh Van</a>
-            <a href="/collections/dominique-paris" class="nav-dropdown__item" role="menuitem">Dominique Paris</a>
-            <a href="/collections/faberge" class="nav-dropdown__item" role="menuitem">Fabergé</a>
-            <a href="/collections/franck-muller" class="nav-dropdown__item" role="menuitem">Franck Muller</a>
-            <a href="/collections/fred" class="nav-dropdown__item" role="menuitem">Fred</a>
+            <a href="/collections/david-webb"          class="nav-dropdown__item" role="menuitem">David Webb</a>
+            <a href="/collections/de-grisogono"        class="nav-dropdown__item" role="menuitem">De Grisogono</a>
+            <a href="/collections/demner"              class="nav-dropdown__item" role="menuitem">Demner</a>
+            <a href="/collections/di-modolo"           class="nav-dropdown__item" role="menuitem">Di Modolo</a>
+            <a href="/collections/dinh-van"            class="nav-dropdown__item" role="menuitem">Dinh Van</a>
+            <a href="/collections/dominique-paris"     class="nav-dropdown__item" role="menuitem">Dominique Paris</a>
+            <a href="/collections/faberge"             class="nav-dropdown__item" role="menuitem">Fabergé</a>
+            <a href="/collections/franck-muller"       class="nav-dropdown__item" role="menuitem">Franck Muller</a>
+            <a href="/collections/fred"                class="nav-dropdown__item" role="menuitem">Fred</a>
 
             <p class="nav-dropdown__group-label">G – M</p>
-            <a href="/collections/graff" class="nav-dropdown__item" role="menuitem">Graff</a>
-            <a href="/collections/harry-winston" class="nav-dropdown__item" role="menuitem">Harry Winston</a>
-            <a href="/collections/hermes" class="nav-dropdown__item" role="menuitem">Hermès</a>
-            <a href="/collections/ilias-lalaounis" class="nav-dropdown__item" role="menuitem">Ilias Lalaounis</a>
-            <a href="/collections/jean-schlumberger" class="nav-dropdown__item" role="menuitem">Jean Schlumberger</a>
-            <a href="/collections/marina-b" class="nav-dropdown__item" role="menuitem">Marina B</a>
-            <a href="/collections/mikimoto" class="nav-dropdown__item" role="menuitem">Mikimoto</a>
+            <a href="/collections/graff"               class="nav-dropdown__item" role="menuitem">Graff</a>
+            <a href="/collections/harry-winston"       class="nav-dropdown__item" role="menuitem">Harry Winston</a>
+            <a href="/collections/hermes"              class="nav-dropdown__item" role="menuitem">Hermès</a>
+            <a href="/collections/ilias-lalaounis"     class="nav-dropdown__item" role="menuitem">Ilias Lalaounis</a>
+            <a href="/collections/jean-schlumberger"   class="nav-dropdown__item" role="menuitem">Jean Schlumberger</a>
+            <a href="/collections/marina-b"            class="nav-dropdown__item" role="menuitem">Marina B</a>
+            <a href="/collections/mikimoto"            class="nav-dropdown__item" role="menuitem">Mikimoto</a>
 
             <p class="nav-dropdown__group-label">P – V</p>
-            <a href="/collections/patek-philippe" class="nav-dropdown__item" role="menuitem">Patek Philippe</a>
-            <a href="/collections/tiffany-co" class="nav-dropdown__item" role="menuitem">Tiffany &amp; Co.</a>
-            <a href="/collections/van-cleef-arpels" class="nav-dropdown__item" role="menuitem">Van Cleef &amp; Arpels</a>
+            <a href="/collections/patek-philippe"      class="nav-dropdown__item" role="menuitem">Patek Philippe</a>
+            <a href="/collections/tiffany-co"          class="nav-dropdown__item" role="menuitem">Tiffany &amp; Co.</a>
+            <a href="/collections/van-cleef-arpels"    class="nav-dropdown__item" role="menuitem">Van Cleef &amp; Arpels</a>
           </div>
         </div>
       </div>
@@ -100,32 +130,55 @@
             <path d="M16 10a4 4 0 01-8 0"/>
           </svg>
           {%- if cart.item_count > 0 -%}
-            <span class="cart-count" data-count="{{ cart.item_count }}" aria-hidden="true">
-              {{ cart.item_count }}
-            </span>
+            <span class="cart-count" data-count="{{ cart.item_count }}" aria-hidden="true">{{ cart.item_count }}</span>
           {%- else -%}
             <span class="cart-count" data-count="0" aria-hidden="true"></span>
           {%- endif -%}
         </a>
       </div>
+
     </nav>
 
     <button class="mobile-menu-toggle" aria-label="{{ 'general.menu' | t }}" aria-expanded="false" aria-controls="mobile-nav">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </button>
   </div>
 </header>
 
+{%- comment -%} ── Mobile nav ── {%- endcomment -%}
 <nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
-  {%- for link in section.settings.menu.links -%}
-    <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>
-      {{ link.title }}
-    </a>
-  {%- endfor -%}
 
-  {%- comment -%} Mobile: Estate dropdown as accordion {%- endcomment -%}
+  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
+    Jewelry
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
+    <a href="/collections/all">All Jewelry</a>
+    <a href="/collections/rings">Rings</a>
+    <a href="/collections/necklaces">Necklaces</a>
+    <a href="/collections/pendants">Pendants</a>
+    <a href="/collections/bracelets">Bracelets</a>
+    <a href="/collections/earrings">Earrings</a>
+    <a href="/collections/brooches">Brooches &amp; Pins</a>
+    <a href="/collections/charms">Charms</a>
+    <a href="/collections/new-arrivals">New Arrivals</a>
+  </div>
+
+  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
+    Wedding
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
+    <a href="/collections/engagement-rings">Engagement Rings</a>
+    <a href="/collections/wedding-bands">Wedding Bands</a>
+    <a href="/collections/bridal-sets">Bridal Sets</a>
+    <a href="/collections/bridal-gifts">Bridal Gifts</a>
+  </div>
+
   <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
     {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
     <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
@@ -179,7 +232,7 @@
 </nav>
 
 <script>
-  /* Desktop dropdown */
+  /* Desktop dropdowns */
   document.querySelectorAll('[data-nav-dropdown]').forEach(function(dropdown) {
     var trigger = dropdown.querySelector('[data-dropdown-trigger]');
     var panel   = dropdown.querySelector('.nav-dropdown__panel');
@@ -206,11 +259,11 @@
     });
   });
 
-  /* Mobile accordion */
+  /* Mobile accordions */
   document.querySelectorAll('[data-mobile-accordion]').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var panel     = btn.nextElementSibling;
-      var expanded  = btn.getAttribute('aria-expanded') === 'true';
+      var panel    = btn.nextElementSibling;
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
       btn.setAttribute('aria-expanded', String(!expanded));
       expanded ? panel.setAttribute('hidden', '') : panel.removeAttribute('hidden');
     });
@@ -222,12 +275,6 @@
   "name": "Header",
   "class": "section-header",
   "settings": [
-    {
-      "type": "link_list",
-      "id": "menu",
-      "default": "main-menu",
-      "label": "Menu"
-    },
     {
       "type": "text",
       "id": "estate_label",

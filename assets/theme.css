@@ -354,6 +354,13 @@ img {
 }
 .nav-dropdown__panel--open { display: block; }
 
+/* Compact variant — for Jewelry & Wedding (no scroll needed) */
+.nav-dropdown__panel--compact {
+  width: 220px;
+  max-height: none;
+  overflow-y: visible;
+}
+
 .nav-dropdown__inner {
   padding: 16px 0;
 }
@@ -386,6 +393,17 @@ img {
   color: var(--accent);
   background: rgba(193, 167, 132, 0.06);
   padding-left: 26px;
+}
+
+/* Accent item (e.g. New Arrivals) */
+.nav-dropdown__item--accent {
+  color: var(--accent);
+  border-top: 1px solid rgba(193, 167, 132, 0.12);
+  margin-top: 6px;
+  padding-top: 14px;
+}
+.nav-dropdown__item--accent:hover {
+  color: var(--accent-hover);
 }
 
 /* ============================================================
