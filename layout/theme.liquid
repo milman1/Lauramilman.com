@@ -43,13 +43,13 @@
 
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
 
-  {%- sections 'header' -%}
+  {%- section 'header' -%}
 
   <main id="main-content" role="main">
     {{ content_for_layout }}
   </main>
 
-  {%- sections 'footer' -%}
+  {%- section 'footer' -%}
 
   {%- render 'chat-widget' -%}
 
