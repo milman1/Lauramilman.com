@@ -25,63 +25,63 @@
           <select
             id="designer-select-{{ section.id }}"
             class="estate-designers__select"
-            onchange="estateDesignerChanged(this, '{{ section.id }}')"
+            onchange="estateDesignerNav(this)"
           >
             <option value="">— Select a Designer —</option>
 
             <optgroup label="A – B">
-              <option value="adler">Adler</option>
-              <option value="aldo-cipullo">Aldo Cipullo</option>
-              <option value="aletto-brothers">Aletto Brothers</option>
-              <option value="angela-cummings">Angela Cummings</option>
-              <option value="asch-grossbardt">Asch Grossbardt</option>
-              <option value="asprey">Asprey</option>
-              <option value="audemars-piguet">Audemars Piguet</option>
-              <option value="bailey-banks-biddle">Bailey Banks &amp; Biddle</option>
-              <option value="bert-h-satz-art-deco-jewelry">Bert H. Satz</option>
-              <option value="boucheron">Boucheron</option>
-              <option value="buccellati">Buccellati</option>
-              <option value="bvlgari">Bvlgari</option>
+              <option value="/collections/adler">Adler</option>
+              <option value="/collections/aldo-cipullo">Aldo Cipullo</option>
+              <option value="/collections/aletto-brothers">Aletto Brothers</option>
+              <option value="/collections/angela-cummings">Angela Cummings</option>
+              <option value="/collections/asch-grossbardt">Asch Grossbardt</option>
+              <option value="/collections/asprey">Asprey</option>
+              <option value="/collections/audemars-piguet">Audemars Piguet</option>
+              <option value="/collections/bailey-banks-biddle">Bailey Banks &amp; Biddle</option>
+              <option value="/collections/bert-h-satz">Bert H. Satz</option>
+              <option value="/collections/boucheron">Boucheron</option>
+              <option value="/collections/buccellati">Buccellati</option>
+              <option value="/collections/bvlgari">Bvlgari</option>
             </optgroup>
 
             <optgroup label="C">
-              <option value="carrera-y-carrera">Carrera Y Carrera</option>
-              <option value="cartier">Cartier</option>
-              <option value="carvin-french">Carvin French</option>
-              <option value="chanel">Chanel</option>
-              <option value="charles-krypell">Charles Krypell</option>
-              <option value="chaumet">Chaumet</option>
-              <option value="chopard">Chopard</option>
-              <option value="christian-dior">Christian Dior</option>
-              <option value="craiger-drake">Craiger Drake</option>
+              <option value="/collections/carrera-y-carrera">Carrera Y Carrera</option>
+              <option value="/collections/cartier">Cartier</option>
+              <option value="/collections/carvin-french">Carvin French</option>
+              <option value="/collections/chanel">Chanel</option>
+              <option value="/collections/charles-krypell">Charles Krypell</option>
+              <option value="/collections/chaumet">Chaumet</option>
+              <option value="/collections/chopard">Chopard</option>
+              <option value="/collections/christian-dior">Christian Dior</option>
+              <option value="/collections/craiger-drake">Craiger Drake</option>
             </optgroup>
 
             <optgroup label="D – F">
-              <option value="david-webb">David Webb</option>
-              <option value="de-grisogono">De Grisogono</option>
-              <option value="demner">Demner</option>
-              <option value="di-modolo">Di Modolo</option>
-              <option value="dinh-van">Dinh Van</option>
-              <option value="dominique-paris">Dominique Paris</option>
-              <option value="faberge">Fabergé</option>
-              <option value="franck-muller">Franck Muller</option>
-              <option value="fred">Fred</option>
+              <option value="/collections/david-webb">David Webb</option>
+              <option value="/collections/de-grisogono">De Grisogono</option>
+              <option value="/collections/demner">Demner</option>
+              <option value="/collections/di-modolo">Di Modolo</option>
+              <option value="/collections/dinh-van">Dinh Van</option>
+              <option value="/collections/dominique-paris">Dominique Paris</option>
+              <option value="/collections/faberge">Fabergé</option>
+              <option value="/collections/franck-muller">Franck Muller</option>
+              <option value="/collections/fred">Fred</option>
             </optgroup>
 
             <optgroup label="G – M">
-              <option value="graff">Graff</option>
-              <option value="harry-winston">Harry Winston</option>
-              <option value="hermes">Hermès</option>
-              <option value="ilias-lalaounis">Ilias Lalaounis</option>
-              <option value="jean-schlumberger">Jean Schlumberger</option>
-              <option value="marina-b">Marina B</option>
-              <option value="mikimoto">Mikimoto</option>
+              <option value="/collections/graff">Graff</option>
+              <option value="/collections/harry-winston">Harry Winston</option>
+              <option value="/collections/hermes">Hermès</option>
+              <option value="/collections/ilias-lalaounis">Ilias Lalaounis</option>
+              <option value="/collections/jean-schlumberger">Jean Schlumberger</option>
+              <option value="/collections/marina-b">Marina B</option>
+              <option value="/collections/mikimoto">Mikimoto</option>
             </optgroup>
 
             <optgroup label="P – V">
-              <option value="patek-philippe">Patek Philippe</option>
-              <option value="tiffany-co">Tiffany &amp; Co.</option>
-              <option value="van-cleef-arpels">Van Cleef &amp; Arpels</option>
+              <option value="/collections/patek-philippe">Patek Philippe</option>
+              <option value="/collections/tiffany-co">Tiffany &amp; Co.</option>
+              <option value="/collections/van-cleef-arpels">Van Cleef &amp; Arpels</option>
             </optgroup>
           </select>
           <span class="estate-designers__chevron" aria-hidden="true">
@@ -95,8 +95,6 @@
           id="estate-designer-cta-{{ section.id }}"
           class="estate-designers__browse-btn"
           href="#"
-          target="_blank"
-          rel="noopener noreferrer"
           aria-disabled="true"
           tabindex="-1"
         >
@@ -108,35 +106,25 @@
       </div>
     </div>
 
-    <div class="estate-designers__footer">
-      {%- if section.settings.partner_note != blank -%}
+    {%- if section.settings.partner_note != blank -%}
+      <div class="estate-designers__footer">
         <p class="estate-designers__partner-note">{{ section.settings.partner_note }}</p>
-      {%- endif -%}
-      <a
-        href="{{ section.settings.shop_all_url | default: 'https://thebackvault.com' }}"
-        class="estate-designers__shop-all"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {{ section.settings.shop_all_label | default: 'Shop All at The Back Vault' }}
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-    </div>
+      </div>
+    {%- endif -%}
 
   </div>
 </section>
 
 <script>
-  function estateDesignerChanged(select, sectionId) {
-    var cta   = document.getElementById('estate-designer-cta-' + sectionId);
-    var label = cta.querySelector('.estate-designers__browse-label');
-    var slug  = select.value;
+  function estateDesignerNav(select) {
+    var path  = select.value;
     var name  = select.options[select.selectedIndex].text;
+    var sectionEl = select.closest('.estate-designers');
+    var cta   = sectionEl.querySelector('.estate-designers__browse-btn');
+    var label = cta.querySelector('.estate-designers__browse-label');
 
-    if (slug) {
-      cta.href = 'https://thebackvault.com/collections/' + slug;
+    if (path) {
+      cta.href = path;
       cta.removeAttribute('aria-disabled');
       cta.removeAttribute('tabindex');
       cta.classList.add('estate-designers__browse-btn--active');
@@ -183,19 +171,8 @@
     {
       "type": "textarea",
       "id": "partner_note",
-      "label": "Partner note",
-      "default": "Sourced exclusively from The Back Vault — authenticated antique & estate jewelry since 1972."
-    },
-    {
-      "type": "text",
-      "id": "shop_all_label",
-      "label": "\"Shop All\" button label",
-      "default": "Shop All at The Back Vault"
-    },
-    {
-      "type": "url",
-      "id": "shop_all_url",
-      "label": "\"Shop All\" button URL"
+      "label": "Note (optional)",
+      "default": "All estate pieces are pre-owned and individually authenticated."
     }
   ],
   "presets": [

@@ -16,6 +16,75 @@
         </a>
       {%- endfor -%}
 
+      {%- comment -%} Estate & Antique Jewelry dropdown {%- endcomment -%}
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button
+          class="site-header__nav-link nav-dropdown__trigger"
+          aria-expanded="false"
+          aria-haspopup="true"
+          data-dropdown-trigger
+        >
+          {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
+          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="nav-dropdown__panel" role="menu" aria-label="Estate Jewelry Designers">
+          <div class="nav-dropdown__inner">
+            <p class="nav-dropdown__group-label">A – B</p>
+            <a href="/collections/adler" class="nav-dropdown__item" role="menuitem">Adler</a>
+            <a href="/collections/aldo-cipullo" class="nav-dropdown__item" role="menuitem">Aldo Cipullo</a>
+            <a href="/collections/aletto-brothers" class="nav-dropdown__item" role="menuitem">Aletto Brothers</a>
+            <a href="/collections/angela-cummings" class="nav-dropdown__item" role="menuitem">Angela Cummings</a>
+            <a href="/collections/asch-grossbardt" class="nav-dropdown__item" role="menuitem">Asch Grossbardt</a>
+            <a href="/collections/asprey" class="nav-dropdown__item" role="menuitem">Asprey</a>
+            <a href="/collections/audemars-piguet" class="nav-dropdown__item" role="menuitem">Audemars Piguet</a>
+            <a href="/collections/bailey-banks-biddle" class="nav-dropdown__item" role="menuitem">Bailey Banks &amp; Biddle</a>
+            <a href="/collections/bert-h-satz" class="nav-dropdown__item" role="menuitem">Bert H. Satz</a>
+            <a href="/collections/boucheron" class="nav-dropdown__item" role="menuitem">Boucheron</a>
+            <a href="/collections/buccellati" class="nav-dropdown__item" role="menuitem">Buccellati</a>
+            <a href="/collections/bvlgari" class="nav-dropdown__item" role="menuitem">Bvlgari</a>
+
+            <p class="nav-dropdown__group-label">C</p>
+            <a href="/collections/carrera-y-carrera" class="nav-dropdown__item" role="menuitem">Carrera Y Carrera</a>
+            <a href="/collections/cartier" class="nav-dropdown__item" role="menuitem">Cartier</a>
+            <a href="/collections/carvin-french" class="nav-dropdown__item" role="menuitem">Carvin French</a>
+            <a href="/collections/chanel" class="nav-dropdown__item" role="menuitem">Chanel</a>
+            <a href="/collections/charles-krypell" class="nav-dropdown__item" role="menuitem">Charles Krypell</a>
+            <a href="/collections/chaumet" class="nav-dropdown__item" role="menuitem">Chaumet</a>
+            <a href="/collections/chopard" class="nav-dropdown__item" role="menuitem">Chopard</a>
+            <a href="/collections/christian-dior" class="nav-dropdown__item" role="menuitem">Christian Dior</a>
+            <a href="/collections/craiger-drake" class="nav-dropdown__item" role="menuitem">Craiger Drake</a>
+
+            <p class="nav-dropdown__group-label">D – F</p>
+            <a href="/collections/david-webb" class="nav-dropdown__item" role="menuitem">David Webb</a>
+            <a href="/collections/de-grisogono" class="nav-dropdown__item" role="menuitem">De Grisogono</a>
+            <a href="/collections/demner" class="nav-dropdown__item" role="menuitem">Demner</a>
+            <a href="/collections/di-modolo" class="nav-dropdown__item" role="menuitem">Di Modolo</a>
+            <a href="/collections/dinh-van" class="nav-dropdown__item" role="menuitem">Dinh Van</a>
+            <a href="/collections/dominique-paris" class="nav-dropdown__item" role="menuitem">Dominique Paris</a>
+            <a href="/collections/faberge" class="nav-dropdown__item" role="menuitem">Fabergé</a>
+            <a href="/collections/franck-muller" class="nav-dropdown__item" role="menuitem">Franck Muller</a>
+            <a href="/collections/fred" class="nav-dropdown__item" role="menuitem">Fred</a>
+
+            <p class="nav-dropdown__group-label">G – M</p>
+            <a href="/collections/graff" class="nav-dropdown__item" role="menuitem">Graff</a>
+            <a href="/collections/harry-winston" class="nav-dropdown__item" role="menuitem">Harry Winston</a>
+            <a href="/collections/hermes" class="nav-dropdown__item" role="menuitem">Hermès</a>
+            <a href="/collections/ilias-lalaounis" class="nav-dropdown__item" role="menuitem">Ilias Lalaounis</a>
+            <a href="/collections/jean-schlumberger" class="nav-dropdown__item" role="menuitem">Jean Schlumberger</a>
+            <a href="/collections/marina-b" class="nav-dropdown__item" role="menuitem">Marina B</a>
+            <a href="/collections/mikimoto" class="nav-dropdown__item" role="menuitem">Mikimoto</a>
+
+            <p class="nav-dropdown__group-label">P – V</p>
+            <a href="/collections/patek-philippe" class="nav-dropdown__item" role="menuitem">Patek Philippe</a>
+            <a href="/collections/tiffany-co" class="nav-dropdown__item" role="menuitem">Tiffany &amp; Co.</a>
+            <a href="/collections/van-cleef-arpels" class="nav-dropdown__item" role="menuitem">Van Cleef &amp; Arpels</a>
+          </div>
+        </div>
+      </div>
+
       <div class="site-header__icons">
         <button class="site-header__icon-btn" aria-label="{{ 'general.search' | t }}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -55,8 +124,98 @@
       {{ link.title }}
     </a>
   {%- endfor -%}
+
+  {%- comment -%} Mobile: Estate dropdown as accordion {%- endcomment -%}
+  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
+    {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
+    <a href="/collections/adler">Adler</a>
+    <a href="/collections/aldo-cipullo">Aldo Cipullo</a>
+    <a href="/collections/aletto-brothers">Aletto Brothers</a>
+    <a href="/collections/angela-cummings">Angela Cummings</a>
+    <a href="/collections/asch-grossbardt">Asch Grossbardt</a>
+    <a href="/collections/asprey">Asprey</a>
+    <a href="/collections/audemars-piguet">Audemars Piguet</a>
+    <a href="/collections/bailey-banks-biddle">Bailey Banks &amp; Biddle</a>
+    <a href="/collections/bert-h-satz">Bert H. Satz</a>
+    <a href="/collections/boucheron">Boucheron</a>
+    <a href="/collections/buccellati">Buccellati</a>
+    <a href="/collections/bvlgari">Bvlgari</a>
+    <a href="/collections/carrera-y-carrera">Carrera Y Carrera</a>
+    <a href="/collections/cartier">Cartier</a>
+    <a href="/collections/carvin-french">Carvin French</a>
+    <a href="/collections/chanel">Chanel</a>
+    <a href="/collections/charles-krypell">Charles Krypell</a>
+    <a href="/collections/chaumet">Chaumet</a>
+    <a href="/collections/chopard">Chopard</a>
+    <a href="/collections/christian-dior">Christian Dior</a>
+    <a href="/collections/craiger-drake">Craiger Drake</a>
+    <a href="/collections/david-webb">David Webb</a>
+    <a href="/collections/de-grisogono">De Grisogono</a>
+    <a href="/collections/demner">Demner</a>
+    <a href="/collections/di-modolo">Di Modolo</a>
+    <a href="/collections/dinh-van">Dinh Van</a>
+    <a href="/collections/dominique-paris">Dominique Paris</a>
+    <a href="/collections/faberge">Fabergé</a>
+    <a href="/collections/franck-muller">Franck Muller</a>
+    <a href="/collections/fred">Fred</a>
+    <a href="/collections/graff">Graff</a>
+    <a href="/collections/harry-winston">Harry Winston</a>
+    <a href="/collections/hermes">Hermès</a>
+    <a href="/collections/ilias-lalaounis">Ilias Lalaounis</a>
+    <a href="/collections/jean-schlumberger">Jean Schlumberger</a>
+    <a href="/collections/marina-b">Marina B</a>
+    <a href="/collections/mikimoto">Mikimoto</a>
+    <a href="/collections/patek-philippe">Patek Philippe</a>
+    <a href="/collections/tiffany-co">Tiffany &amp; Co.</a>
+    <a href="/collections/van-cleef-arpels">Van Cleef &amp; Arpels</a>
+  </div>
+
   <a href="{{ routes.cart_url }}">Cart ({{ cart.item_count }})</a>
 </nav>
+
+<script>
+  /* Desktop dropdown */
+  document.querySelectorAll('[data-nav-dropdown]').forEach(function(dropdown) {
+    var trigger = dropdown.querySelector('[data-dropdown-trigger]');
+    var panel   = dropdown.querySelector('.nav-dropdown__panel');
+
+    function open() {
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.classList.add('nav-dropdown__panel--open');
+    }
+    function close() {
+      trigger.setAttribute('aria-expanded', 'false');
+      panel.classList.remove('nav-dropdown__panel--open');
+    }
+
+    dropdown.addEventListener('mouseenter', open);
+    dropdown.addEventListener('mouseleave', close);
+    trigger.addEventListener('click', function() {
+      trigger.getAttribute('aria-expanded') === 'true' ? close() : open();
+    });
+    trigger.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') close();
+    });
+    document.addEventListener('click', function(e) {
+      if (!dropdown.contains(e.target)) close();
+    });
+  });
+
+  /* Mobile accordion */
+  document.querySelectorAll('[data-mobile-accordion]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var panel     = btn.nextElementSibling;
+      var expanded  = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      expanded ? panel.setAttribute('hidden', '') : panel.removeAttribute('hidden');
+    });
+  });
+</script>
 
 {% schema %}
 {
@@ -68,6 +227,12 @@
       "id": "menu",
       "default": "main-menu",
       "label": "Menu"
+    },
+    {
+      "type": "text",
+      "id": "estate_label",
+      "label": "Estate dropdown label",
+      "default": "Antique & Estate"
     }
   ]
 }
