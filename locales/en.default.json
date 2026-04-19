@@ -1,0 +1,47 @@
+{
+  "general": {
+    "search": "Search",
+    "close": "Close",
+    "menu": "Menu"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "added_to_cart": "Added to Cart",
+      "sold_out": "Sold Out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "size_guide": "Size Guide",
+      "wishlist": "Save to Wishlist",
+      "share": "Share"
+    },
+    "general": {
+      "view_all": "View All",
+      "quick_view": "Quick View",
+      "from_price_html": "From {{ price }}"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your Cart",
+      "empty": "Your cart is currently empty.",
+      "checkout": "Checkout"
+    }
+  },
+  "collections": {
+    "general": {
+      "title": "Collections"
+    }
+  },
+  "newsletter": {
+    "label": "Email address",
+    "placeholder": "Your email for updates",
+    "submit": "Subscribe",
+    "success": "Thank you for subscribing."
+  },
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "cart_count": "{{ count }} items"
+  }
+}

@@ -1,0 +1,105 @@
+<footer class="site-footer" role="contentinfo">
+  <div class="site-footer__grid">
+    <!-- Brand column -->
+    <div>
+      <div class="site-footer__logo">{{ shop.name }}</div>
+      <p class="site-footer__desc">
+        {{ section.settings.description | default: 'Fine jewelry crafted in New York. Each piece is a testament to timeless design and exceptional artistry.' }}
+      </p>
+
+      <div class="site-footer__newsletter">
+        {%- form 'customer', id: 'newsletter-form', data-newsletter-form: '' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="site-footer__newsletter-form">
+            <label for="newsletter-email" class="visually-hidden">
+              {{- 'newsletter.label' | t -}}
+            </label>
+            <input
+              id="newsletter-email"
+              type="email"
+              name="contact[email]"
+              class="site-footer__email-input"
+              placeholder="{{ 'newsletter.placeholder' | t }}"
+              required
+              autocomplete="email"
+            >
+            <button type="submit" class="site-footer__newsletter-btn">
+              →
+            </button>
+          </div>
+          <p data-success hidden style="font-family:'Jost',sans-serif;font-size:12px;color:var(--accent);margin-top:8px;letter-spacing:1px;">
+            {{ 'newsletter.success' | t }}
+          </p>
+        {%- endform -%}
+      </div>
+    </div>
+
+    <!-- Shop links -->
+    <div>
+      <div class="site-footer__col-title">Shop</div>
+      <ul class="site-footer__links">
+        {%- for link in section.settings.shop_menu.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    <!-- About links -->
+    <div>
+      <div class="site-footer__col-title">About</div>
+      <ul class="site-footer__links">
+        {%- for link in section.settings.about_menu.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    <!-- Help links -->
+    <div>
+      <div class="site-footer__col-title">Help</div>
+      <ul class="site-footer__links">
+        {%- for link in section.settings.help_menu.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</span>
+    <span>Powered by Shopify</span>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "class": "section-footer",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Brand description",
+      "default": "Fine jewelry crafted in New York. Each piece is a testament to timeless design and exceptional artistry."
+    },
+    {
+      "type": "link_list",
+      "id": "shop_menu",
+      "label": "Shop menu",
+      "default": "footer-shop"
+    },
+    {
+      "type": "link_list",
+      "id": "about_menu",
+      "label": "About menu",
+      "default": "footer-about"
+    },
+    {
+      "type": "link_list",
+      "id": "help_menu",
+      "label": "Help menu",
+      "default": "footer-help"
+    }
+  ]
+}
+{% endschema %}

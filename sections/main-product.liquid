@@ -1,0 +1,389 @@
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
+
+<div class="product-page">
+
+  <!-- Breadcrumb -->
+  <nav class="product-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ routes.root_url }}">Home</a>
+    <span class="sep" aria-hidden="true">/</span>
+    {%- if collection -%}
+      <a href="{{ collection.url }}">{{ collection.title }}</a>
+      <span class="sep" aria-hidden="true">/</span>
+    {%- endif -%}
+    <span class="current" aria-current="page">{{ product.title }}</span>
+  </nav>
+
+  <!-- Product Layout -->
+  <div class="product-layout">
+
+    <!-- Gallery -->
+    <div class="product-gallery">
+      <div class="product-gallery__main">
+        {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}
+          <div class="product-gallery__badge">New Arrival</div>
+        {%- endif -%}
+
+        {%- if product.featured_image -%}
+          <img
+            id="product-main-image"
+            src="{{ product.featured_image | image_url: width: 1200 }}"
+            alt="{{ product.featured_image.alt | default: product.title | escape }}"
+            width="{{ product.featured_image.width }}"
+            height="{{ product.featured_image.height }}"
+            loading="eager"
+          >
+        {%- endif -%}
+
+        <div class="product-gallery__zoom-hint" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(193,167,132,0.4)" stroke-width="1.5">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.35-4.35"/>
+            <path d="M11 8v6M8 11h6"/>
+          </svg>
+          Hover to zoom
+        </div>
+      </div>
+
+      {%- if product.images.size > 1 -%}
+        <div class="product-gallery__thumbs" role="list">
+          {%- for image in product.images limit: 5 -%}
+            <button
+              class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
+              data-src="{{ image | image_url: width: 1200 }}"
+              aria-label="View image {{ forloop.index }}"
+              role="listitem"
+            >
+              <img
+                src="{{ image | image_url: width: 120 }}"
+                alt="{{ image.alt | default: product.title | escape }}"
+                width="120"
+                height="120"
+                loading="lazy"
+              >
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+
+      <!-- Rating (placeholder) -->
+      <div class="product-rating">
+        <div class="product-rating__stars stars" aria-label="4.8 out of 5 stars">
+          {%- for i in (1..5) -%}
+            <svg width="14" height="14" viewBox="0 0 24 24"
+              fill="{{ i | at_most: 4 | floor | times: 1 | at_least: 1 | minus: i | abs | at_most: 1 | times: -1 | plus: 1 | times: 193 | minus: 193 | at_most: 0 | abs | at_least: 0 | times: 0 }}{% if i <= 4 %}#C1A784{% else %}none{% endif %}"
+              stroke="#C1A784"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          {%- endfor -%}
+        </div>
+        {%- if product.metafields.reviews.rating_count -%}
+          <span class="product-rating__text">
+            {{ product.metafields.reviews.rating.value }} ({{ product.metafields.reviews.rating_count.value }} reviews)
+          </span>
+        {%- endif -%}
+      </div>
+
+      <h1 class="product-title">{{ product.title }}</h1>
+
+      <!-- Price -->
+      <div class="product-price-row">
+        <span class="product-price">
+          {%- if current_variant.price -%}
+            {{ current_variant.price | money }}
+          {%- else -%}
+            {{ product.price_min | money }}
+          {%- endif -%}
+        </span>
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <s class="product-price--compare">{{ current_variant.compare_at_price | money }}</s>
+          <span class="product-price--save">
+            Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}
+          </span>
+        {%- endif -%}
+      </div>
+
+      {%- if product.description != blank -%}
+        <div class="product-description">{{ product.description | strip_html | truncate: 300 }}</div>
+      {%- endif -%}
+
+      <div class="gold-divider"></div>
+
+      <!-- Product Form -->
+      {%- form 'product', product, id: product_form_id, data-product-form: '' -%}
+
+        <!-- Variant select (hidden, controlled by option buttons) -->
+        <select name="id" style="display:none;" aria-label="Variant">
+          {%- for variant in product.variants -%}
+            <option
+              value="{{ variant.id }}"
+              data-options="{{ variant.options | json | escape }}"
+              data-available="{{ variant.available }}"
+              data-price="{{ variant.price }}"
+              data-compare-price="{{ variant.compare_at_price }}"
+              {% if variant == current_variant %}selected{% endif %}
+            >
+              {{ variant.title }}
+            </option>
+          {%- endfor -%}
+        </select>
+
+        <!-- Options -->
+        {%- for option in product.options_with_values -%}
+          <div class="product-option-label" style="margin-top:{{ forloop.first | if: '0', '28px' }}">
+            {{ option.name }} — <span>{{ current_variant.options[forloop.index0] }}</span>
+          </div>
+
+          <div class="product-option-row" data-option-group data-option-index="{{ forloop.index0 }}">
+            {%- for value in option.values -%}
+              {%- assign is_active = false -%}
+              {%- if current_variant.options[forloop.parentloop.index0] == value -%}
+                {%- assign is_active = true -%}
+              {%- endif -%}
+
+              <button
+                type="button"
+                class="product-option-btn{% if option.name == 'Size' %} size-btn{% endif %}{% if is_active %} active{% endif %}"
+                data-value="{{ value | escape }}"
+                aria-pressed="{{ is_active }}"
+              >
+                {{ value }}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endfor -%}
+
+        <!-- Quantity + Add to Cart -->
+        <div class="atc-row">
+          <div class="quantity-selector">
+            <button type="button" class="qty-btn" data-action="minus" aria-label="Decrease quantity">−</button>
+            <div class="qty-display" aria-live="polite">1</div>
+            <button type="button" class="qty-btn" data-action="plus" aria-label="Increase quantity">+</button>
+          </div>
+          <input type="hidden" name="quantity" value="1">
+
+          <button
+            type="submit"
+            class="atc-btn"
+            {% unless current_variant.available %}disabled{% endunless %}
+            aria-label="Add {{ product.title }} to cart"
+          >
+            {%- if current_variant.available -%}
+              {{ 'products.product.add_to_cart' | t }}
+            {%- else -%}
+              {{ 'products.product.sold_out' | t }}
+            {%- endif -%}
+          </button>
+
+          <button type="button" class="wishlist-btn" aria-label="{{ 'products.product.wishlist' | t }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C1A784" stroke-width="1.5" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
+          </button>
+        </div>
+
+      {%- endform -%}
+
+      <!-- Trust badges -->
+      <div class="trust-badges">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'trust_badge' -%}
+            <div class="trust-badge" {{ block.shopify_attributes }}>
+              <span class="trust-badge__icon" aria-hidden="true">{{ block.settings.icon }}</span>
+              <span class="trust-badge__label">{{ block.settings.label }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <!-- Accordion -->
+      <div class="accordion-item" data-open>
+        <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-materials">
+          Materials &amp; Craftsmanship
+          <span class="accordion-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="accordion-body" id="acc-materials">
+          <div class="accordion-content">
+            {%- if product.metafields.custom.materials != blank -%}
+              {{ product.metafields.custom.materials }}
+            {%- else -%}
+              {{ product.description }}
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-shipping">
+          Shipping &amp; Returns
+          <span class="accordion-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="accordion-body" id="acc-shipping">
+          <div class="accordion-content">
+            {%- if section.settings.shipping_text != blank -%}
+              {{ section.settings.shipping_text }}
+            {%- else -%}
+              Complimentary insured shipping on all orders via FedEx. Estimated delivery: 3–5 business days. International shipping available.<br><br>Full refund within 30 days of delivery. Items must be unworn and in original packaging.
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-care">
+          Care Guide
+          <span class="accordion-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="accordion-body" id="acc-care">
+          <div class="accordion-content">
+            {%- if section.settings.care_text != blank -%}
+              {{ section.settings.care_text }}
+            {%- else -%}
+              Store in the provided jewelry box when not wearing. Clean gently with a soft cloth and warm water. Avoid contact with harsh chemicals, perfumes, and chlorine.
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      <!-- Share -->
+      <div class="product-share">
+        <span class="product-share__label">{{ 'products.product.share' | t }}</span>
+        <a href="https://pinterest.com/pin/create/button/?url={{ shop.url }}{{ product.url }}&media={{ product.featured_image | image_url: width: 1200 }}&description={{ product.title | url_encode }}"
+          target="_blank" rel="noopener" class="product-share__link">Pinterest</a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="product-share__link">Instagram</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ product.url }}"
+          target="_blank" rel="noopener" class="product-share__link">Facebook</a>
+      </div>
+
+    </div><!-- /product-info -->
+  </div><!-- /product-layout -->
+
+  <!-- Promise Banner -->
+  <div class="promise-banner">
+    <div class="eyebrow">The {{ shop.name }} Promise</div>
+    <h2 class="promise-banner__title">Crafted to Last a Lifetime</h2>
+    <p class="promise-banner__body">Every piece is handcrafted in our New York atelier using ethically sourced materials and time-honored techniques passed down through generations.</p>
+    <div class="promise-stats">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'stat' -%}
+          <div {{ block.shopify_attributes }}>
+            <div class="promise-stat__num">{{ block.settings.number }}</div>
+            <div class="promise-stat__label">{{ block.settings.label }}</div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {%- assign related = product.metafields.custom.related_products.value | default: collections[product.collections.first.handle].products -%}
+  {%- if related.size > 1 -%}
+    <div class="related-products">
+      <div class="related-products__divider"></div>
+      <div class="related-products__header">
+        <div class="eyebrow">You May Also Love</div>
+        <h2 class="related-products__title">Complete the Look</h2>
+      </div>
+      <div class="products-grid">
+        {%- for related_product in related limit: 4 -%}
+          {%- unless related_product.handle == product.handle -%}
+            {%- render 'product-card', product: related_product -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+</div><!-- /product-page -->
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "section-main-product",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "shipping_text",
+      "label": "Shipping & Returns text"
+    },
+    {
+      "type": "textarea",
+      "id": "care_text",
+      "label": "Care Guide text"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_badge",
+      "name": "Trust Badge",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (symbol or emoji)",
+          "default": "◇"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Authenticity Guaranteed"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "name": "Promise Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number / figure",
+          "default": "18k"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Solid Gold"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product",
+      "blocks": [
+        {
+          "type": "trust_badge",
+          "settings": { "icon": "◇", "label": "Authenticity Guaranteed" }
+        },
+        {
+          "type": "trust_badge",
+          "settings": { "icon": "⟡", "label": "Free Insured Shipping" }
+        },
+        {
+          "type": "trust_badge",
+          "settings": { "icon": "↻", "label": "30-Day Returns" }
+        },
+        {
+          "type": "stat",
+          "settings": { "number": "18k", "label": "Solid Gold" }
+        },
+        {
+          "type": "stat",
+          "settings": { "number": "30", "label": "Day Returns" }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,30 @@
+<div class="chat-panel" id="chat-panel" aria-label="Live chat" role="dialog" aria-hidden="true">
+  <div class="chat-panel__header">
+    <span>{{ shop.name }}</span>
+    <button class="chat-panel__close" aria-label="Close chat">×</button>
+  </div>
+  <div class="chat-panel__body" id="chat-body">
+    <div class="chat-msg chat-msg--bot">Welcome to {{ shop.name }}. How can I assist you today?</div>
+  </div>
+  <div class="chat-panel__input-row">
+    <label for="chat-input" class="visually-hidden">Message</label>
+    <input
+      id="chat-input"
+      class="chat-input"
+      type="text"
+      placeholder="Type a message..."
+      autocomplete="off"
+    >
+    <button class="chat-send-btn" aria-label="Send message">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#0F1A12" aria-hidden="true">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<button class="chat-trigger" aria-label="Open chat" aria-controls="chat-panel" aria-expanded="false">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="#0F1A12" aria-hidden="true">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+</button>

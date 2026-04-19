@@ -1,0 +1,88 @@
+<section class="instagram-section">
+  <div class="instagram-section__header">
+    {%- if section.settings.handle != blank -%}
+      <div class="eyebrow">@{{ section.settings.handle }}</div>
+    {%- endif -%}
+    <h2 class="section-title" style="font-size:32px;">{{ section.settings.title }}</h2>
+  </div>
+
+  <div class="instagram-grid">
+    {%- for block in section.blocks -%}
+      {%- if block.settings.image != blank -%}
+        <a
+          href="{{ block.settings.link | default: settings.social_instagram }}"
+          class="instagram-cell"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram post {{ forloop.index }}"
+          {{ block.shopify_attributes }}
+        >
+          <img
+            src="{{ block.settings.image | image_url: width: 400 }}"
+            alt="{{ block.settings.image.alt | default: shop.name | escape }}"
+            loading="lazy"
+            width="400"
+            height="400"
+          >
+        </a>
+      {%- else -%}
+        <div class="instagram-placeholder" {{ block.shopify_attributes }}>
+          IG Post
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Instagram Feed",
+  "tag": "section",
+  "class": "section-instagram",
+  "settings": [
+    {
+      "type": "text",
+      "id": "handle",
+      "label": "Instagram handle (without @)",
+      "default": "lauramilman"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section title",
+      "default": "Follow the Journey"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "post",
+      "name": "Post",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Post image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Post URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Instagram Feed",
+      "blocks": [
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" }
+      ]
+    }
+  ]
+}
+{% endschema %}

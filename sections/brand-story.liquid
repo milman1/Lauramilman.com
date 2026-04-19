@@ -1,0 +1,85 @@
+<section class="brand-story">
+  <div class="brand-story__inner">
+    <div class="brand-story__image-wrap">
+      {%- if section.settings.image != blank -%}
+        <img
+          src="{{ section.settings.image | image_url: width: 900 }}"
+          alt="{{ section.settings.image.alt | default: shop.name | escape }}"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
+          loading="lazy"
+        >
+      {%- else -%}
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(193,167,132,0.25);background:repeating-linear-gradient(135deg,transparent,transparent 10px,rgba(193,167,132,0.03) 10px,rgba(193,167,132,0.03) 11px);">
+          {{ section.settings.image_label | default: 'Laura Milman Portrait' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="brand-story__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+
+      <h2 class="brand-story__title">{{ section.settings.title | newline_to_br }}</h2>
+
+      {%- if section.settings.body != blank -%}
+        <p class="brand-story__body">{{ section.settings.body }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.signature != blank -%}
+        <div class="brand-story__sig">{{ section.settings.signature }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand Story",
+  "tag": "section",
+  "class": "section-brand-story",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Portrait / brand image"
+    },
+    {
+      "type": "text",
+      "id": "image_label",
+      "label": "Image placeholder label",
+      "default": "Laura Milman Portrait"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Story"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Crafted with Intention,\nWorn with Confidence"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body copy",
+      "default": "Every Laura Milman piece begins with a vision — jewelry that transcends trends and becomes an extension of the wearer. Based in New York, our studio blends timeless design principles with contemporary sensibility."
+    },
+    {
+      "type": "text",
+      "id": "signature",
+      "label": "Signature",
+      "default": "— Laura"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story"
+    }
+  ]
+}
+{% endschema %}

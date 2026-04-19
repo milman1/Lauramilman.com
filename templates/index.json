@@ -1,0 +1,102 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "hero_variant": "dramatic",
+        "eyebrow": "New York · Fine Jewelry",
+        "heading": "Timeless\nElegance",
+        "subheading": "Meticulously crafted fine jewelry designed to become part of your story.",
+        "cta_label": "Shop Collection",
+        "cta_link": "/collections/all"
+      }
+    },
+    "collections-grid": {
+      "type": "collections-grid",
+      "blocks": {
+        "rings": { "type": "collection", "settings": { "title": "Rings" } },
+        "necklaces": { "type": "collection", "settings": { "title": "Necklaces" } },
+        "bracelets": { "type": "collection", "settings": { "title": "Bracelets" } },
+        "earrings": { "type": "collection", "settings": { "title": "Earrings" } }
+      },
+      "blocks_order": ["rings", "necklaces", "bracelets", "earrings"],
+      "settings": {
+        "eyebrow": "Shop by Category",
+        "title": "Collections",
+        "view_all_link": "/collections/all"
+      }
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "Curated Selection",
+        "title": "Featured Pieces",
+        "products_to_show": 4
+      }
+    },
+    "brand-story": {
+      "type": "brand-story",
+      "settings": {
+        "eyebrow": "Our Story",
+        "title": "Crafted with Intention,\nWorn with Confidence",
+        "body": "Every Laura Milman piece begins with a vision — jewelry that transcends trends and becomes an extension of the wearer. Based in New York, our studio blends timeless design principles with contemporary sensibility.",
+        "signature": "— Laura"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me.",
+            "author": "Alexandra K.",
+            "product": "Aura Ring"
+          }
+        },
+        "t2": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I've never received so many compliments. The Lumière necklace is a true statement piece.",
+            "author": "Catherine M.",
+            "product": "Lumière Necklace"
+          }
+        },
+        "t3": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Laura's designs have this rare quality — they're bold yet timeless. I wear mine every single day.",
+            "author": "Victoria S.",
+            "product": "Soleil Bracelet"
+          }
+        }
+      },
+      "blocks_order": ["t1", "t2", "t3"],
+      "settings": {}
+    },
+    "instagram-feed": {
+      "type": "instagram-feed",
+      "blocks": {
+        "p1": { "type": "post", "settings": {} },
+        "p2": { "type": "post", "settings": {} },
+        "p3": { "type": "post", "settings": {} },
+        "p4": { "type": "post", "settings": {} },
+        "p5": { "type": "post", "settings": {} },
+        "p6": { "type": "post", "settings": {} }
+      },
+      "blocks_order": ["p1", "p2", "p3", "p4", "p5", "p6"],
+      "settings": {
+        "handle": "lauramilman",
+        "title": "Follow the Journey"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "collections-grid",
+    "featured-products",
+    "brand-story",
+    "testimonials",
+    "instagram-feed"
+  ]
+}

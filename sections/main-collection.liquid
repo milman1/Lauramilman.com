@@ -1,0 +1,89 @@
+<div class="collection-page">
+  <div class="collection-hero">
+    {%- if collection.image -%}
+      <div style="margin-bottom:32px;max-height:300px;overflow:hidden;">
+        <img
+          src="{{ collection.image | image_url: width: 1400 }}"
+          alt="{{ collection.image.alt | default: collection.title | escape }}"
+          style="width:100%;object-fit:cover;max-height:300px;"
+          loading="eager"
+        >
+      </div>
+    {%- endif -%}
+
+    <div class="eyebrow">{{ section.settings.eyebrow | default: 'Collection' }}</div>
+    <h1 class="collection-title">{{ collection.title }}</h1>
+
+    {%- if collection.description != blank -%}
+      <div class="collection-description">{{ collection.description }}</div>
+    {%- endif -%}
+  </div>
+
+  <div class="collection-grid-section">
+    <div class="collection-toolbar">
+      <span class="collection-count">{{ collection.products_count }} Pieces</span>
+    </div>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      <div class="collection-products-grid">
+        {%- for product in collection.products -%}
+          {%- render 'product-card', product: product -%}
+        {%- else -%}
+          <p style="grid-column:1/-1;text-align:center;font-family:'Jost',sans-serif;color:rgba(235,225,210,0.4);padding:60px 0;">
+            No products found in this collection.
+          </p>
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <div style="text-align:center;margin-top:60px;display:flex;justify-content:center;gap:8px;">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="view-all-link">← Previous</a>
+          {%- endif -%}
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="view-all-link">{{ part.title }}</a>
+            {%- else -%}
+              <span style="font-family:'Jost',sans-serif;font-size:12px;letter-spacing:2px;color:var(--accent);padding-bottom:4px;">
+                {{ part.title }}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="view-all-link">Next →</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection",
+  "tag": "section",
+  "class": "section-main-collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 6,
+      "max": 48,
+      "step": 3,
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection"
+    }
+  ]
+}
+{% endschema %}

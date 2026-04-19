@@ -1,0 +1,100 @@
+<section class="testimonials">
+  <div class="testimonials__inner">
+    <div class="testimonials__quotemark" aria-hidden="true">"</div>
+
+    {%- for block in section.blocks -%}
+      <p class="testimonials__quote" data-quote="{{ forloop.index0 }}" {{ block.shopify_attributes }}
+        style="{% unless forloop.first %}display:none;{% endunless %}">
+        {{ block.settings.quote }}
+      </p>
+    {%- endfor -%}
+
+    {%- for block in section.blocks -%}
+      <div class="testimonials__author" data-author="{{ forloop.index0 }}"
+        style="{% unless forloop.first %}display:none;{% endunless %}">
+        {{ block.settings.author }}
+        {%- if block.settings.product != blank -%}
+          — {{ block.settings.product }}
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+
+    {%- if section.blocks.size > 1 -%}
+      <div class="testimonials__dots" role="tablist" aria-label="Testimonials">
+        {%- for block in section.blocks -%}
+          <button
+            class="testimonials__dot{% if forloop.first %} active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="Testimonial {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "section-testimonials",
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Customer name",
+          "default": "Alexandra K."
+        },
+        {
+          "type": "text",
+          "id": "product",
+          "label": "Product purchased",
+          "default": "Aura Ring"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me.",
+            "author": "Alexandra K.",
+            "product": "Aura Ring"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I've never received so many compliments. The Lumière necklace is a true statement piece.",
+            "author": "Catherine M.",
+            "product": "Lumière Necklace"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Laura's designs have this rare quality — they're bold yet timeless. I wear mine every single day.",
+            "author": "Victoria S.",
+            "product": "Soleil Bracelet"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

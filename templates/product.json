@@ -1,0 +1,32 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "badge1": {
+          "type": "trust_badge",
+          "settings": { "icon": "◇", "label": "Authenticity Guaranteed" }
+        },
+        "badge2": {
+          "type": "trust_badge",
+          "settings": { "icon": "⟡", "label": "Free Insured Shipping" }
+        },
+        "badge3": {
+          "type": "trust_badge",
+          "settings": { "icon": "↻", "label": "30-Day Returns" }
+        },
+        "stat1": {
+          "type": "stat",
+          "settings": { "number": "18k", "label": "Solid Gold" }
+        },
+        "stat2": {
+          "type": "stat",
+          "settings": { "number": "30", "label": "Day Returns" }
+        }
+      },
+      "blocks_order": ["badge1", "badge2", "badge3", "stat1", "stat2"],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,117 @@
+{%- assign variant = settings.hero_variant -%}
+
+<div class="collections-section{% if variant == 'editorial' %} collections-section--editorial{% endif %}">
+  <div class="collections-header">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h2 class="section-title">{{ section.settings.title }}</h2>
+    </div>
+    {%- if section.settings.view_all_link != blank -%}
+      <a href="{{ section.settings.view_all_link }}" class="view-all-link">
+        {{ 'products.general.view_all' | t }}
+      </a>
+    {%- endif -%}
+  </div>
+
+  <div class="collections-grid{% if variant == 'minimal' %} collections-grid--minimal{% endif %}">
+    {%- for block in section.blocks -%}
+      {%- assign collection = collections[block.settings.collection] -%}
+      {%- if collection != blank -%}
+        <a href="{{ collection.url }}" class="collection-card" {{ block.shopify_attributes }}>
+          <div class="collection-card__image-box">
+            {%- if collection.image -%}
+              <img
+                src="{{ collection.image | image_url: width: 600 }}"
+                alt="{{ collection.image.alt | default: collection.title | escape }}"
+                width="{{ collection.image.width }}"
+                height="{{ collection.image.height }}"
+                loading="lazy"
+              >
+            {%- elsif collection.products.first and collection.products.first.featured_image -%}
+              <img
+                src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+                alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                loading="lazy"
+              >
+            {%- endif -%}
+            <div class="collection-card__overlay" aria-hidden="true"></div>
+          </div>
+          <div class="collection-card__info">
+            <h3 class="collection-card__name">{{ collection.title }}</h3>
+            <div class="collection-card__count">{{ collection.products_count }} Pieces</div>
+          </div>
+        </a>
+      {%- else -%}
+        <!-- Placeholder when no collection is selected in the editor -->
+        <div class="collection-card" {{ block.shopify_attributes }}>
+          <div class="collection-card__image-box" style="background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(193,167,132,0.03) 10px,rgba(193,167,132,0.03) 11px);">
+            <div class="collection-card__overlay" aria-hidden="true"></div>
+          </div>
+          <div class="collection-card__info">
+            <h3 class="collection-card__name">{{ block.settings.title | default: 'Collection' }}</h3>
+            <div class="collection-card__count">— Pieces</div>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collections Grid",
+  "tag": "section",
+  "class": "section-collections-grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "url",
+      "id": "view_all_link",
+      "label": "\"View All\" link",
+      "default": "/collections/all"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Override title (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collections Grid",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

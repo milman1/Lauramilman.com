@@ -1,0 +1,159 @@
+{%- assign variant = section.settings.hero_variant | default: settings.hero_variant -%}
+
+{%- if variant == 'editorial' -%}
+
+  <section class="hero hero--editorial" aria-label="Hero">
+    <div class="hero__editorial-left">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h1 class="hero__editorial-title">
+        {{ section.settings.heading | newline_to_br }}
+      </h1>
+      {%- if section.settings.subheading != blank -%}
+        <p class="hero__subtitle" style="text-align:left; margin-top:36px; max-width:400px;">
+          {{ section.settings.subheading }}
+        </p>
+      {%- endif -%}
+      <a href="{{ section.settings.cta_link }}" class="hero__arrow-cta">
+        {{ section.settings.cta_label | default: 'Discover' }}
+        <span class="hero__arrow-line"></span>
+      </a>
+    </div>
+
+    <div class="hero__editorial-right">
+      {%- if section.settings.hero_image != blank -%}
+        <img
+          src="{{ section.settings.hero_image | image_url: width: 1200 }}"
+          alt="{{ section.settings.hero_image.alt | escape }}"
+          width="{{ section.settings.hero_image.width }}"
+          height="{{ section.settings.hero_image.height }}"
+          loading="eager"
+        >
+      {%- endif -%}
+    </div>
+  </section>
+
+{%- elsif variant == 'minimal' -%}
+
+  <section class="hero hero--minimal" aria-label="Hero">
+    <h1 class="hero__big-type" aria-hidden="true">
+      {{- section.settings.minimal_monogram | default: 'LM' -}}
+    </h1>
+
+    <div class="hero__center-box">
+      {%- if section.settings.hero_image != blank -%}
+        <img
+          src="{{ section.settings.hero_image | image_url: width: 600 }}"
+          alt="{{ section.settings.hero_image.alt | escape }}"
+          loading="eager"
+        >
+      {%- endif -%}
+    </div>
+
+    <a href="{{ section.settings.cta_link }}" class="hero__minimal-cta">
+      {{ section.settings.cta_label | default: 'Enter the Collection' }} ↓
+    </a>
+  </section>
+
+{%- else -%}
+
+  <section class="hero hero--dramatic" aria-label="Hero">
+    <div class="hero__overlay" aria-hidden="true"></div>
+    <div class="hero__decor-line" aria-hidden="true"></div>
+
+    <div class="hero__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="hero__eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+
+      <h1 class="hero__title">{{ section.settings.heading | newline_to_br }}</h1>
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="hero__subtitle">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+
+      <a href="{{ section.settings.cta_link }}" class="hero__cta">
+        {{ section.settings.cta_label | default: 'Shop Collection' }}
+      </a>
+    </div>
+
+    {%- if section.settings.hero_image != blank -%}
+      <div class="hero__image-wrap">
+        <img
+          src="{{ section.settings.hero_image | image_url: width: 760 }}"
+          alt="{{ section.settings.hero_image.alt | escape }}"
+          loading="eager"
+        >
+      </div>
+    {%- endif -%}
+  </section>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "class": "section-hero",
+  "settings": [
+    {
+      "type": "select",
+      "id": "hero_variant",
+      "label": "Layout",
+      "options": [
+        { "value": "dramatic", "label": "Dramatic (centered hero)" },
+        { "value": "editorial", "label": "Editorial (split layout)" },
+        { "value": "minimal", "label": "Minimal (type-forward)" }
+      ],
+      "default": "dramatic"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "New York · Fine Jewelry"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Timeless\nElegance"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Meticulously crafted fine jewelry designed to become part of your story."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Shop Collection"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "text",
+      "id": "minimal_monogram",
+      "label": "Monogram (Minimal variant only)",
+      "default": "LM"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}

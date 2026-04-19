@@ -1,0 +1,73 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Laura Milman",
+    "theme_version": "1.0.0",
+    "theme_author": "Laura Milman Studio",
+    "theme_documentation_url": "https://lauramilman.com",
+    "theme_support_url": "https://lauramilman.com"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "accent_color",
+        "label": "Accent Color",
+        "default": "#C1A784"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background (deep)",
+        "default": "#1A0F08"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "select",
+        "id": "hero_variant",
+        "label": "Hero Layout",
+        "options": [
+          { "value": "dramatic", "label": "Dramatic (centered)" },
+          { "value": "editorial", "label": "Editorial (split)" },
+          { "value": "minimal", "label": "Minimal (type-forward)" }
+        ],
+        "default": "dramatic"
+      }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon"
+      }
+    ]
+  },
+  {
+    "name": "Social Media",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "url",
+        "id": "social_pinterest",
+        "label": "Pinterest URL"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook",
+        "label": "Facebook URL"
+      }
+    ]
+  }
+]
