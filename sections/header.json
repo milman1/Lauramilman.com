@@ -1,0 +1,14 @@
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "header": {
+      "type": "header",
+      "settings": {
+        "menu": "main-menu",
+        "estate_label": "Antique & Estate"
+      }
+    }
+  },
+  "order": ["header"]
+}
