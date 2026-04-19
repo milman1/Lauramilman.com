@@ -34,6 +34,17 @@
         "products_to_show": 4
       }
     },
+    "estate-designers": {
+      "type": "estate-designers",
+      "settings": {
+        "eyebrow": "Pre-Owned · Antique · Estate",
+        "title": "Antique & Estate Jewelry",
+        "description": "Discover one-of-a-kind pre-owned pieces from the world's most coveted jewelry houses. Each piece is 100% authenticated and curated for lasting elegance.",
+        "partner_note": "Sourced exclusively from The Back Vault — authenticated antique & estate jewelry since 1972.",
+        "shop_all_label": "Shop All at The Back Vault",
+        "shop_all_url": "https://thebackvault.com"
+      }
+    },
     "brand-story": {
       "type": "brand-story",
       "settings": {
@@ -95,6 +106,7 @@
     "hero",
     "collections-grid",
     "featured-products",
+    "estate-designers",
     "brand-story",
     "testimonials",
     "instagram-feed"

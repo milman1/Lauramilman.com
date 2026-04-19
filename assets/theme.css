@@ -1825,6 +1825,211 @@ img {
 .chat-send-btn:hover { background: var(--accent-hover); }
 
 /* ============================================================
+   ESTATE DESIGNERS
+   ============================================================ */
+.estate-designers {
+  position: relative;
+  padding: 100px var(--pad-x, 40px);
+  background-color: var(--bg-mid);
+  overflow: hidden;
+}
+
+.estate-designers::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--estate-bg-img, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.estate-designers__inner {
+  position: relative;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+/* Header */
+.estate-designers__header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.estate-designers__desc {
+  font-family: 'Jost', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(235, 225, 210, 0.7);
+  line-height: 1.75;
+  max-width: 580px;
+  text-align: center;
+}
+
+/* Selector */
+.estate-designers__selector-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.estate-designers__label {
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.estate-designers__select-row {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+  max-width: 640px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.estate-designers__select-box {
+  position: relative;
+  flex: 1 1 300px;
+}
+
+.estate-designers__select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(193, 167, 132, 0.25);
+  color: var(--text-primary, #EBE1D2);
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  padding: 14px 44px 14px 18px;
+  cursor: pointer;
+  transition: border-color 0.25s, background 0.25s;
+  outline: none;
+}
+
+.estate-designers__select:hover,
+.estate-designers__select:focus {
+  border-color: rgba(193, 167, 132, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.estate-designers__select option,
+.estate-designers__select optgroup {
+  background: #2A1A10;
+  color: #EBE1D2;
+}
+
+.estate-designers__chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+}
+
+/* Browse button */
+.estate-designers__browse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border: 1px solid rgba(193, 167, 132, 0.2);
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(193, 167, 132, 0.4);
+  background: transparent;
+  transition: all 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.estate-designers__browse-btn--active {
+  color: var(--accent);
+  border-color: rgba(193, 167, 132, 0.5);
+  pointer-events: auto;
+}
+
+.estate-designers__browse-btn--active:hover {
+  background: var(--accent);
+  color: var(--bg-deep);
+  border-color: var(--accent);
+}
+
+/* Footer row */
+.estate-designers__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(193, 167, 132, 0.1);
+}
+
+.estate-designers__partner-note {
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(235, 225, 210, 0.45);
+  letter-spacing: 0.04em;
+  text-align: center;
+  font-style: italic;
+}
+
+.estate-designers__shop-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  border: 1px solid rgba(193, 167, 132, 0.4);
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  transition: all 0.3s;
+}
+
+.estate-designers__shop-all:hover {
+  background: var(--accent);
+  color: var(--bg-deep);
+  border-color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .estate-designers__select-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .estate-designers__browse-btn {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1024px) {

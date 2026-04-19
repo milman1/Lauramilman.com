@@ -1,0 +1,207 @@
+<section class="estate-designers" id="estate-designers"
+  {%- if section.settings.bg_image != blank -%}
+  style="--estate-bg-img: url('{{ section.settings.bg_image | image_url: width: 1800 }}')"
+  {%- endif -%}
+>
+  <div class="estate-designers__inner">
+
+    <div class="estate-designers__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- if section.settings.description != blank -%}
+        <p class="estate-designers__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="estate-designers__selector-wrap">
+      <label class="estate-designers__label" for="designer-select-{{ section.id }}">
+        Browse by Designer
+      </label>
+
+      <div class="estate-designers__select-row">
+        <div class="estate-designers__select-box">
+          <select
+            id="designer-select-{{ section.id }}"
+            class="estate-designers__select"
+            onchange="estateDesignerChanged(this, '{{ section.id }}')"
+          >
+            <option value="">— Select a Designer —</option>
+
+            <optgroup label="A – B">
+              <option value="adler">Adler</option>
+              <option value="aldo-cipullo">Aldo Cipullo</option>
+              <option value="aletto-brothers">Aletto Brothers</option>
+              <option value="angela-cummings">Angela Cummings</option>
+              <option value="asch-grossbardt">Asch Grossbardt</option>
+              <option value="asprey">Asprey</option>
+              <option value="audemars-piguet">Audemars Piguet</option>
+              <option value="bailey-banks-biddle">Bailey Banks &amp; Biddle</option>
+              <option value="bert-h-satz-art-deco-jewelry">Bert H. Satz</option>
+              <option value="boucheron">Boucheron</option>
+              <option value="buccellati">Buccellati</option>
+              <option value="bvlgari">Bvlgari</option>
+            </optgroup>
+
+            <optgroup label="C">
+              <option value="carrera-y-carrera">Carrera Y Carrera</option>
+              <option value="cartier">Cartier</option>
+              <option value="carvin-french">Carvin French</option>
+              <option value="chanel">Chanel</option>
+              <option value="charles-krypell">Charles Krypell</option>
+              <option value="chaumet">Chaumet</option>
+              <option value="chopard">Chopard</option>
+              <option value="christian-dior">Christian Dior</option>
+              <option value="craiger-drake">Craiger Drake</option>
+            </optgroup>
+
+            <optgroup label="D – F">
+              <option value="david-webb">David Webb</option>
+              <option value="de-grisogono">De Grisogono</option>
+              <option value="demner">Demner</option>
+              <option value="di-modolo">Di Modolo</option>
+              <option value="dinh-van">Dinh Van</option>
+              <option value="dominique-paris">Dominique Paris</option>
+              <option value="faberge">Fabergé</option>
+              <option value="franck-muller">Franck Muller</option>
+              <option value="fred">Fred</option>
+            </optgroup>
+
+            <optgroup label="G – M">
+              <option value="graff">Graff</option>
+              <option value="harry-winston">Harry Winston</option>
+              <option value="hermes">Hermès</option>
+              <option value="ilias-lalaounis">Ilias Lalaounis</option>
+              <option value="jean-schlumberger">Jean Schlumberger</option>
+              <option value="marina-b">Marina B</option>
+              <option value="mikimoto">Mikimoto</option>
+            </optgroup>
+
+            <optgroup label="P – V">
+              <option value="patek-philippe">Patek Philippe</option>
+              <option value="tiffany-co">Tiffany &amp; Co.</option>
+              <option value="van-cleef-arpels">Van Cleef &amp; Arpels</option>
+            </optgroup>
+          </select>
+          <span class="estate-designers__chevron" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+
+        <a
+          id="estate-designer-cta-{{ section.id }}"
+          class="estate-designers__browse-btn"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-disabled="true"
+          tabindex="-1"
+        >
+          <span class="estate-designers__browse-label">Browse this Designer</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="estate-designers__footer">
+      {%- if section.settings.partner_note != blank -%}
+        <p class="estate-designers__partner-note">{{ section.settings.partner_note }}</p>
+      {%- endif -%}
+      <a
+        href="{{ section.settings.shop_all_url | default: 'https://thebackvault.com' }}"
+        class="estate-designers__shop-all"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ section.settings.shop_all_label | default: 'Shop All at The Back Vault' }}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function estateDesignerChanged(select, sectionId) {
+    var cta   = document.getElementById('estate-designer-cta-' + sectionId);
+    var label = cta.querySelector('.estate-designers__browse-label');
+    var slug  = select.value;
+    var name  = select.options[select.selectedIndex].text;
+
+    if (slug) {
+      cta.href = 'https://thebackvault.com/collections/' + slug;
+      cta.removeAttribute('aria-disabled');
+      cta.removeAttribute('tabindex');
+      cta.classList.add('estate-designers__browse-btn--active');
+      label.textContent = 'Browse ' + name;
+    } else {
+      cta.href = '#';
+      cta.setAttribute('aria-disabled', 'true');
+      cta.setAttribute('tabindex', '-1');
+      cta.classList.remove('estate-designers__browse-btn--active');
+      label.textContent = 'Browse this Designer';
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Estate Designers",
+  "tag": "section",
+  "class": "section-estate-designers",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Pre-Owned · Antique · Estate"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Antique & Estate Jewelry"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Discover one-of-a-kind pre-owned pieces from the world's most coveted jewelry houses. Each piece is 100% authenticated and curated for lasting elegance."
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background image (optional)"
+    },
+    {
+      "type": "textarea",
+      "id": "partner_note",
+      "label": "Partner note",
+      "default": "Sourced exclusively from The Back Vault — authenticated antique & estate jewelry since 1972."
+    },
+    {
+      "type": "text",
+      "id": "shop_all_label",
+      "label": "\"Shop All\" button label",
+      "default": "Shop All at The Back Vault"
+    },
+    {
+      "type": "url",
+      "id": "shop_all_url",
+      "label": "\"Shop All\" button URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Estate Designers"
+    }
+  ]
+}
+{% endschema %}
