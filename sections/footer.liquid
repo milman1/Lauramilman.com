@@ -1,10 +1,10 @@
 <footer class="site-footer" role="contentinfo">
   <div class="site-footer__grid">
-    <!-- Brand column -->
+    {%- comment -%} Brand column {%- endcomment -%}
     <div>
       <div class="site-footer__logo">{{ shop.name }}</div>
       <p class="site-footer__desc">
-        {{ section.settings.description | default: 'Fine jewelry crafted in New York. Each piece is a testament to timeless design and exceptional artistry.' }}
+        {{ section.settings.description | default: 'Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique &amp; estate pieces.' }}
       </p>
 
       <div class="site-footer__newsletter">
@@ -23,7 +23,7 @@
               required
               autocomplete="email"
             >
-            <button type="submit" class="site-footer__newsletter-btn">
+            <button type="submit" class="site-footer__newsletter-btn" aria-label="Subscribe">
               →
             </button>
           </div>
@@ -34,40 +34,66 @@
       </div>
     </div>
 
-    <!-- Shop links -->
+    {%- comment -%} Shop column {%- endcomment -%}
     <div>
       <div class="site-footer__col-title">Shop</div>
       <ul class="site-footer__links">
-        {%- for link in section.settings.shop_menu.links -%}
-          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-        {%- endfor -%}
+        {%- if section.settings.shop_menu != blank and section.settings.shop_menu.links.size > 0 -%}
+          {%- for link in section.settings.shop_menu.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        {%- else -%}
+          <li><a href="/collections/all">All Jewelry</a></li>
+          <li><a href="/collections/new-arrivals">New Arrivals</a></li>
+          <li><a href="/collections/rings">Rings</a></li>
+          <li><a href="/collections/necklaces">Necklaces</a></li>
+          <li><a href="/collections/bracelets">Bracelets</a></li>
+          <li><a href="/collections/earrings">Earrings</a></li>
+          <li><a href="/collections/engagement-rings">Engagement Rings</a></li>
+        {%- endif -%}
       </ul>
     </div>
 
-    <!-- About links -->
+    {%- comment -%} About column {%- endcomment -%}
     <div>
       <div class="site-footer__col-title">About</div>
       <ul class="site-footer__links">
-        {%- for link in section.settings.about_menu.links -%}
-          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-        {%- endfor -%}
+        {%- if section.settings.about_menu != blank and section.settings.about_menu.links.size > 0 -%}
+          {%- for link in section.settings.about_menu.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        {%- else -%}
+          <li><a href="/pages/about">Our Story</a></li>
+          <li><a href="/collections/antique-estate">Estate Jewelry</a></li>
+          <li><a href="/pages/sourcing">Diamond Sourcing</a></li>
+          <li><a href="/pages/authentication">Authentication</a></li>
+          <li><a href="/blogs/news">Journal</a></li>
+        {%- endif -%}
       </ul>
     </div>
 
-    <!-- Help links -->
+    {%- comment -%} Help column {%- endcomment -%}
     <div>
       <div class="site-footer__col-title">Help</div>
       <ul class="site-footer__links">
-        {%- for link in section.settings.help_menu.links -%}
-          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-        {%- endfor -%}
+        {%- if section.settings.help_menu != blank and section.settings.help_menu.links.size > 0 -%}
+          {%- for link in section.settings.help_menu.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        {%- else -%}
+          <li><a href="/pages/contact">Contact Us</a></li>
+          <li><a href="/pages/shipping-returns">Shipping &amp; Returns</a></li>
+          <li><a href="/pages/care-guide">Care Guide</a></li>
+          <li><a href="/pages/faq">FAQ</a></li>
+          <li><a href="/pages/privacy">Privacy Policy</a></li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
 
   <div class="site-footer__bottom">
     <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</span>
-    <span>Powered by Shopify</span>
+    <span>Crafted in New York · Powered by Shopify</span>
   </div>
 </footer>
 
@@ -80,25 +106,25 @@
       "type": "textarea",
       "id": "description",
       "label": "Brand description",
-      "default": "Fine jewelry crafted in New York. Each piece is a testament to timeless design and exceptional artistry."
+      "default": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces."
     },
     {
       "type": "link_list",
       "id": "shop_menu",
-      "label": "Shop menu",
-      "default": "footer-shop"
+      "label": "Shop menu (optional)",
+      "info": "Falls back to a curated list if no menu is selected."
     },
     {
       "type": "link_list",
       "id": "about_menu",
-      "label": "About menu",
-      "default": "footer-about"
+      "label": "About menu (optional)",
+      "info": "Falls back to a curated list if no menu is selected."
     },
     {
       "type": "link_list",
       "id": "help_menu",
-      "label": "Help menu",
-      "default": "footer-help"
+      "label": "Help menu (optional)",
+      "info": "Falls back to a curated list if no menu is selected."
     }
   ]
 }

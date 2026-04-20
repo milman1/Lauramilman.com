@@ -1,0 +1,284 @@
+<section class="about-hero">
+  <div class="about-hero__inner">
+    <div class="eyebrow">{{ section.settings.eyebrow | default: 'Our Story' }}</div>
+    <h1 class="about-hero__title">{{ section.settings.title | newline_to_br }}</h1>
+    {%- if section.settings.subtitle != blank -%}
+      <p class="about-hero__subtitle">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<section class="about-story">
+  <div class="about-story__inner">
+
+    <div class="about-story__image-wrap">
+      {%- if section.settings.portrait != blank -%}
+        <img
+          src="{{ section.settings.portrait | image_url: width: 900 }}"
+          alt="{{ section.settings.portrait.alt | default: 'Laura Milman' | escape }}"
+          loading="lazy"
+        >
+      {%- else -%}
+        <div class="about-story__img-placeholder">
+          <span>Portrait</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="about-story__content">
+      <div class="eyebrow">{{ section.settings.story_eyebrow | default: 'Who We Are' }}</div>
+      <h2 class="about-story__heading">{{ section.settings.story_heading | default: 'Fine Jewelry, Authentically Sourced' }}</h2>
+      <div class="about-story__body">
+        <p>{{ section.settings.story_p1 | default: 'Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. We began with a single conviction: every woman deserves pieces that feel authentically, undeniably hers.' }}</p>
+        <p>{{ section.settings.story_p2 | default: 'From original fine jewelry crafted with traceable diamonds to hand-selected antique and estate pieces from the world\'s great houses — every item in our collection is chosen with purpose. We meticulously trace every diamond we carry to its source, and every estate piece is individually authenticated before it reaches you.' }}</p>
+        <p>{{ section.settings.story_p3 | default: 'Based in New York, we offer a wide selection spanning classic and timeless designs to rare vintage finds — ensuring there is something extraordinary for every chapter of your life.' }}</p>
+      </div>
+      {%- if section.settings.signature != blank -%}
+        <div class="about-story__sig">{{ section.settings.signature }}</div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+<section class="about-values">
+  <div class="about-values__inner">
+    <div class="eyebrow" style="text-align:center;">{{ section.settings.values_eyebrow | default: 'What We Stand For' }}</div>
+    <h2 class="about-values__title">{{ section.settings.values_title | default: 'Our Commitments to You' }}</h2>
+    <div class="about-values__grid">
+
+      <div class="about-value-card">
+        <div class="about-value-card__icon">◇</div>
+        <h3 class="about-value-card__heading">Authenticity Guaranteed</h3>
+        <p class="about-value-card__body">Every estate and antique piece is individually authenticated by our in-house specialists before it is offered for sale. We stand behind every item with a full certificate of authenticity.</p>
+      </div>
+
+      <div class="about-value-card">
+        <div class="about-value-card__icon">⟡</div>
+        <h3 class="about-value-card__heading">Traceable Diamonds</h3>
+        <p class="about-value-card__body">We meticulously trace every rough diamond we use to its source, ensuring complete transparency in our supply chain. Conflict-free and ethically sourced — always.</p>
+      </div>
+
+      <div class="about-value-card">
+        <div class="about-value-card__icon">↻</div>
+        <h3 class="about-value-card__heading">Curated with Purpose</h3>
+        <p class="about-value-card__body">We offer a wide selection spanning classic and timeless designs to rare vintage finds. Our buyers spend thousands of hours sourcing only the pieces that meet our exacting standards.</p>
+      </div>
+
+      <div class="about-value-card">
+        <div class="about-value-card__icon">✦</div>
+        <h3 class="about-value-card__heading">New York Expertise</h3>
+        <p class="about-value-card__body">From our New York studio, we bring decades of expertise across fine jewelry, estate pieces, and bridal. Our team is always available to help you find the perfect piece for your story.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="about-sourcing">
+  <div class="about-sourcing__inner">
+
+    <div class="about-sourcing__content">
+      <div class="eyebrow">{{ section.settings.sourcing_eyebrow | default: 'Our Source Materials' }}</div>
+      <h2 class="about-sourcing__heading">{{ section.settings.sourcing_heading | default: 'From Mine to Setting' }}</h2>
+      <p class="about-sourcing__body">{{ section.settings.sourcing_body | default: 'We meticulously trace every rough diamond we use to its source — from the mine to our workshop — ensuring complete transparency in our process. We believe you should know where your jewelry comes from, and we make that possible with every purchase.' }}</p>
+      <a href="{{ section.settings.sourcing_cta_link | default: '/collections/all' }}" class="hero__cta" style="display:inline-block;margin-top:40px;">
+        {{ section.settings.sourcing_cta_label | default: 'Explore the Collection' }}
+      </a>
+    </div>
+
+    <div class="about-sourcing__image-wrap">
+      {%- if section.settings.sourcing_image != blank -%}
+        <img
+          src="{{ section.settings.sourcing_image | image_url: width: 900 }}"
+          alt="{{ section.settings.sourcing_image.alt | default: 'Diamond sourcing' | escape }}"
+          loading="lazy"
+        >
+      {%- else -%}
+        <div class="about-story__img-placeholder">
+          <span>Sourcing Image</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+<section class="about-cta">
+  <div class="about-cta__inner">
+    <div class="eyebrow">{{ section.settings.cta_eyebrow | default: 'Ready to Begin?' }}</div>
+    <h2 class="about-cta__title">{{ section.settings.cta_title | default: 'Find Your Piece' }}</h2>
+    <p class="about-cta__body">{{ section.settings.cta_body | default: 'From everyday elegance to once-in-a-lifetime occasions — explore our full collection or reach out to our team for personal styling.' }}</p>
+    <div class="about-cta__buttons">
+      <a href="{{ section.settings.cta_shop_link | default: '/collections/all' }}" class="hero__cta">
+        {{ section.settings.cta_shop_label | default: 'Shop All Jewelry' }}
+      </a>
+      <a href="{{ section.settings.cta_contact_link | default: '/pages/contact' }}" class="about-cta__secondary-btn">
+        {{ section.settings.cta_contact_label | default: 'Contact Us' }}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About Page",
+  "tag": "article",
+  "class": "section-page-about",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Hero eyebrow",
+      "default": "Our Story"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Hero title",
+      "default": "Fine Jewelry,\nAuthentically Sourced"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Hero subtitle",
+      "default": "Founded in New York. Built on transparency, curation, and a deep love for extraordinary jewelry."
+    },
+    {
+      "type": "image_picker",
+      "id": "portrait",
+      "label": "Portrait image"
+    },
+    {
+      "type": "text",
+      "id": "story_eyebrow",
+      "label": "Story eyebrow",
+      "default": "Who We Are"
+    },
+    {
+      "type": "textarea",
+      "id": "story_heading",
+      "label": "Story heading",
+      "default": "Fine Jewelry, Authentically Sourced"
+    },
+    {
+      "type": "textarea",
+      "id": "story_p1",
+      "label": "Story paragraph 1",
+      "default": "Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. We began with a single conviction: every woman deserves pieces that feel authentically, undeniably hers."
+    },
+    {
+      "type": "textarea",
+      "id": "story_p2",
+      "label": "Story paragraph 2",
+      "default": "From original fine jewelry crafted with traceable diamonds to hand-selected antique and estate pieces from the world's great houses — every item in our collection is chosen with purpose. We meticulously trace every diamond we carry to its source, and every estate piece is individually authenticated before it reaches you."
+    },
+    {
+      "type": "textarea",
+      "id": "story_p3",
+      "label": "Story paragraph 3",
+      "default": "Based in New York, we offer a wide selection spanning classic and timeless designs to rare vintage finds — ensuring there is something extraordinary for every chapter of your life."
+    },
+    {
+      "type": "text",
+      "id": "signature",
+      "label": "Signature",
+      "default": "— Laura Milman"
+    },
+    {
+      "type": "text",
+      "id": "values_eyebrow",
+      "label": "Values eyebrow",
+      "default": "What We Stand For"
+    },
+    {
+      "type": "text",
+      "id": "values_title",
+      "label": "Values title",
+      "default": "Our Commitments to You"
+    },
+    {
+      "type": "text",
+      "id": "sourcing_eyebrow",
+      "label": "Sourcing eyebrow",
+      "default": "Our Source Materials"
+    },
+    {
+      "type": "textarea",
+      "id": "sourcing_heading",
+      "label": "Sourcing heading",
+      "default": "From Mine to Setting"
+    },
+    {
+      "type": "textarea",
+      "id": "sourcing_body",
+      "label": "Sourcing body",
+      "default": "We meticulously trace every rough diamond we use to its source — from the mine to our workshop — ensuring complete transparency in our process. We believe you should know where your jewelry comes from, and we make that possible with every purchase."
+    },
+    {
+      "type": "image_picker",
+      "id": "sourcing_image",
+      "label": "Sourcing image"
+    },
+    {
+      "type": "text",
+      "id": "sourcing_cta_label",
+      "label": "Sourcing CTA label",
+      "default": "Explore the Collection"
+    },
+    {
+      "type": "url",
+      "id": "sourcing_cta_link",
+      "label": "Sourcing CTA link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Bottom CTA eyebrow",
+      "default": "Ready to Begin?"
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Bottom CTA title",
+      "default": "Find Your Piece"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_body",
+      "label": "Bottom CTA body",
+      "default": "From everyday elegance to once-in-a-lifetime occasions — explore our full collection or reach out to our team for personal styling."
+    },
+    {
+      "type": "text",
+      "id": "cta_shop_label",
+      "label": "Shop button label",
+      "default": "Shop All Jewelry"
+    },
+    {
+      "type": "url",
+      "id": "cta_shop_link",
+      "label": "Shop button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "cta_contact_label",
+      "label": "Contact button label",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "cta_contact_link",
+      "label": "Contact button link",
+      "default": "/pages/contact"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Page"
+    }
+  ]
+}
+{% endschema %}

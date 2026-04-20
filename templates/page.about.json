@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-about",
+      "settings": {
+        "eyebrow": "Our Story",
+        "title": "Fine Jewelry,\nAuthentically Sourced",
+        "subtitle": "Founded in New York. Built on transparency, curation, and a deep love for extraordinary jewelry.",
+        "story_eyebrow": "Who We Are",
+        "story_heading": "A Different Kind of Jewelry Store",
+        "story_p1": "Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. We began with a single conviction: every woman deserves pieces that feel authentically, undeniably hers.",
+        "story_p2": "From original fine jewelry crafted with traceable diamonds to hand-selected antique and estate pieces from the world's great houses — Cartier, Van Cleef & Arpels, Tiffany & Co., and beyond — every item in our collection is chosen with purpose and passion.",
+        "story_p3": "We meticulously trace every diamond we carry to its source, and every estate piece is individually authenticated by our specialists. Based in New York, we believe you should know exactly where your jewelry comes from — and love it all the more for it.",
+        "signature": "— Laura Milman",
+        "values_eyebrow": "What We Stand For",
+        "values_title": "Our Commitments to You",
+        "sourcing_eyebrow": "Our Source Materials",
+        "sourcing_heading": "From Mine to Setting",
+        "sourcing_body": "We meticulously trace every rough diamond we use to its source — from the mine to our New York workshop — ensuring complete transparency. We believe you should know where your jewelry comes from, and we make that possible with every purchase.",
+        "sourcing_cta_label": "Explore the Collection",
+        "sourcing_cta_link": "/collections/all",
+        "cta_eyebrow": "Ready to Begin?",
+        "cta_title": "Find Your Perfect Piece",
+        "cta_body": "From everyday elegance to once-in-a-lifetime occasions — explore our full collection or speak with our team for personal styling guidance.",
+        "cta_shop_label": "Shop All Jewelry",
+        "cta_shop_link": "/collections/all",
+        "cta_contact_label": "Contact Us",
+        "cta_contact_link": "/pages/contact"
+      }
+    }
+  },
+  "order": ["main"]
+}

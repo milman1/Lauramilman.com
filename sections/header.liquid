@@ -115,6 +115,9 @@
         </div>
       </div>
 
+      {%- comment -%} ── About (plain link) ── {%- endcomment -%}
+      <a href="/pages/about" class="site-header__nav-link">About</a>
+
       <div class="site-header__icons">
         <button class="site-header__icon-btn" aria-label="{{ 'general.search' | t }}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -227,6 +230,8 @@
     <a href="/collections/tiffany-co">Tiffany &amp; Co.</a>
     <a href="/collections/van-cleef-arpels">Van Cleef &amp; Arpels</a>
   </div>
+
+  <a href="/pages/about" class="mobile-nav__plain-link">About</a>
 
   <a href="{{ routes.cart_url }}">Cart ({{ cart.item_count }})</a>
 </nav>

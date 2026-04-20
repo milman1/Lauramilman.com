@@ -1,60 +1,116 @@
 <div class="collection-page">
-  <div class="collection-hero">
+
+  <!-- Collection Hero Banner -->
+  <div class="collection-banner">
     {%- if collection.image -%}
-      <div style="margin-bottom:32px;max-height:300px;overflow:hidden;">
+      <div class="collection-banner__img-wrap">
         <img
-          src="{{ collection.image | image_url: width: 1400 }}"
+          src="{{ collection.image | image_url: width: 1800 }}"
           alt="{{ collection.image.alt | default: collection.title | escape }}"
-          style="width:100%;object-fit:cover;max-height:300px;"
           loading="eager"
+          class="collection-banner__img"
         >
+        <div class="collection-banner__overlay" aria-hidden="true"></div>
       </div>
     {%- endif -%}
 
-    <div class="eyebrow">{{ section.settings.eyebrow | default: 'Collection' }}</div>
-    <h1 class="collection-title">{{ collection.title }}</h1>
-
-    {%- if collection.description != blank -%}
-      <div class="collection-description">{{ collection.description }}</div>
-    {%- endif -%}
+    <div class="collection-banner__content{% unless collection.image %} collection-banner__content--no-img{% endunless %}">
+      <nav class="collection-breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ collection.title }}</span>
+      </nav>
+      <div class="eyebrow">{{ section.settings.eyebrow | default: 'Collection' }}</div>
+      <h1 class="collection-banner__title">{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <p class="collection-banner__desc">{{ collection.description | strip_html | truncate: 200 }}</p>
+      {%- endif -%}
+    </div>
   </div>
 
+  <!-- Grid + Toolbar -->
   <div class="collection-grid-section">
+
     <div class="collection-toolbar">
-      <span class="collection-count">{{ collection.products_count }} Pieces</span>
+      <span class="collection-count">
+        <strong>{{ collection.products_count }}</strong> {{ collection.products_count == 1 ? 'Piece' : 'Pieces' }}
+      </span>
+
+      <div class="collection-sort">
+        <label for="sort-by-{{ section.id }}" class="collection-sort__label">Sort by</label>
+        <select id="sort-by-{{ section.id }}" class="collection-sort__select" data-sort-select
+          onchange="window.location = '{{ collection.url }}?sort_by=' + this.value;">
+          {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+          <option value="manual"{% if current_sort == 'manual' %} selected{% endif %}>Featured</option>
+          <option value="price-ascending"{% if current_sort == 'price-ascending' %} selected{% endif %}>Price: Low to High</option>
+          <option value="price-descending"{% if current_sort == 'price-descending' %} selected{% endif %}>Price: High to Low</option>
+          <option value="title-ascending"{% if current_sort == 'title-ascending' %} selected{% endif %}>A – Z</option>
+          <option value="title-descending"{% if current_sort == 'title-descending' %} selected{% endif %}>Z – A</option>
+          <option value="created-descending"{% if current_sort == 'created-descending' %} selected{% endif %}>Newest</option>
+        </select>
+      </div>
     </div>
 
     {%- paginate collection.products by section.settings.products_per_page -%}
-      <div class="collection-products-grid">
-        {%- for product in collection.products -%}
-          {%- render 'product-card', product: product -%}
-        {%- else -%}
-          <p style="grid-column:1/-1;text-align:center;font-family:'Jost',sans-serif;color:rgba(235,225,210,0.4);padding:60px 0;">
-            No products found in this collection.
-          </p>
-        {%- endfor -%}
-      </div>
-
-      {%- if paginate.pages > 1 -%}
-        <div style="text-align:center;margin-top:60px;display:flex;justify-content:center;gap:8px;">
-          {%- if paginate.previous -%}
-            <a href="{{ paginate.previous.url }}" class="view-all-link">← Previous</a>
-          {%- endif -%}
-          {%- for part in paginate.parts -%}
-            {%- if part.is_link -%}
-              <a href="{{ part.url }}" class="view-all-link">{{ part.title }}</a>
-            {%- else -%}
-              <span style="font-family:'Jost',sans-serif;font-size:12px;letter-spacing:2px;color:var(--accent);padding-bottom:4px;">
-                {{ part.title }}
-              </span>
-            {%- endif -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="collection-products-grid">
+          {%- for product in collection.products -%}
+            <a href="{{ product.url }}" class="product-card" aria-label="{{ product.title | escape }}">
+              <div class="product-card__image-box">
+                {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}
+                  <span class="product-card__tag">New</span>
+                {%- endif -%}
+                {%- if product.featured_image -%}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                    loading="lazy"
+                    width="600"
+                  >
+                {%- else -%}
+                  <div class="product-card__no-image">{{ product.title | truncate: 30 }}</div>
+                {%- endif -%}
+                <div class="product-card__quick-view">View Piece</div>
+              </div>
+              <div class="product-card__info">
+                <p class="product-card__name">{{ product.title }}</p>
+                <p class="product-card__price">
+                  {%- if product.compare_at_price > product.price -%}
+                    <s>{{ product.compare_at_price | money }}</s>
+                  {%- endif -%}
+                  {{ product.price | money }}
+                </p>
+              </div>
+            </a>
           {%- endfor -%}
-          {%- if paginate.next -%}
-            <a href="{{ paginate.next.url }}" class="view-all-link">Next →</a>
-          {%- endif -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <div class="collection-pagination">
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}" class="view-all-link">← Previous</a>
+            {%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}
+                <a href="{{ part.url }}" class="view-all-link">{{ part.title }}</a>
+              {%- else -%}
+                <span class="collection-pagination__current">{{ part.title }}</span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}" class="view-all-link">Next →</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+      {%- else -%}
+        <div class="collection-empty">
+          <p>No pieces found in this collection yet.</p>
+          <a href="/collections/all" class="hero__cta" style="display:inline-block;margin-top:32px;">Browse All Jewelry</a>
         </div>
       {%- endif -%}
     {%- endpaginate -%}
+
   </div>
 </div>
 

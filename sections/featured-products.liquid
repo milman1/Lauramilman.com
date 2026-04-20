@@ -4,23 +4,71 @@
       <div class="eyebrow">{{ section.settings.eyebrow }}</div>
     {%- endif -%}
     <h2 class="section-title">{{ section.settings.title }}</h2>
+    {%- if section.settings.description != blank -%}
+      <p class="featured-products__description">{{ section.settings.description }}</p>
+    {%- endif -%}
   </div>
 
+  {%- liquid
+    assign limit = section.settings.products_to_show | default: 4
+    assign products_to_render = empty
+    assign view_all_url = '/collections/all'
+  -%}
+
+  {%- if section.settings.collection != blank -%}
+    {%- assign featured_collection = collections[section.settings.collection] -%}
+    {%- if featured_collection.products.size > 0 -%}
+      {%- assign products_to_render = featured_collection.products -%}
+      {%- assign view_all_url = featured_collection.url -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%} If still empty, fall back to manual blocks {%- endcomment -%}
+  {%- if products_to_render == empty and section.blocks.size > 0 -%}
+    {%- assign has_block_product = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.settings.product != blank -%}
+        {%- assign has_block_product = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if has_block_product -%}
+      {%- assign products_to_render = 'blocks' -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%} Final fallback: pull from collections.all (every product in the store) {%- endcomment -%}
+  {%- if products_to_render == empty and collections.all.products.size > 0 -%}
+    {%- assign products_to_render = collections.all.products -%}
+    {%- assign view_all_url = '/collections/all' -%}
+  {%- endif -%}
+
   <div class="products-grid">
-    {%- if section.settings.collection != blank -%}
-      {%- assign featured_collection = collections[section.settings.collection] -%}
-      {%- for product in featured_collection.products limit: section.settings.products_to_show -%}
-        {%- render 'product-card', product: product -%}
-      {%- endfor -%}
-    {%- else -%}
+    {%- if products_to_render == 'blocks' -%}
       {%- for block in section.blocks -%}
         {%- assign product = all_products[block.settings.product] -%}
         {%- if product != blank -%}
           {%- render 'product-card', product: product -%}
         {%- endif -%}
       {%- endfor -%}
+    {%- elsif products_to_render != empty -%}
+      {%- for product in products_to_render limit: limit -%}
+        {%- render 'product-card', product: product -%}
+      {%- endfor -%}
+    {%- else -%}
+      <p class="featured-products__empty">
+        Add products to your store to see them featured here.
+      </p>
     {%- endif -%}
   </div>
+
+  {%- if section.settings.show_view_all and products_to_render != empty and products_to_render != 'blocks' -%}
+    <div class="featured-products__footer">
+      <a href="{{ view_all_url }}" class="view-all-link">
+        {{ section.settings.view_all_label | default: 'View All' }} →
+      </a>
+    </div>
+  {%- endif -%}
 </div>
 
 {% schema %}
@@ -42,9 +90,15 @@
       "default": "Featured Pieces"
     },
     {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description (optional)"
+    },
+    {
       "type": "collection",
       "id": "collection",
-      "label": "Collection (auto-fills products)"
+      "label": "Collection (auto-fills products)",
+      "info": "If empty, falls back to your store's All products."
     },
     {
       "type": "range",
@@ -54,6 +108,18 @@
       "max": 12,
       "step": 1,
       "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show 'View All' link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View All label",
+      "default": "View All"
     }
   ],
   "blocks": [
