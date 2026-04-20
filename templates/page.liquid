@@ -1,8 +1,135 @@
-<div style="padding-top:120px;min-height:60vh;max-width:800px;margin:0 auto;padding-left:40px;padding-right:40px;padding-bottom:80px;">
-  <h1 style="font-family:'DM Serif Display',serif;font-size:42px;color:#EBE1D2;font-weight:400;margin-bottom:32px;">
-    {{ page.title }}
-  </h1>
-  <div style="font-family:'Jost',sans-serif;font-size:15px;line-height:1.9;color:rgba(235,225,210,0.6);font-weight:300;">
-    {{ page.content }}
+{%- comment -%}
+  If the page handle is "about", render the rich About layout.
+  Otherwise, render the simple default page layout.
+{%- endcomment -%}
+
+{%- if page.handle == 'about' or page.handle == 'about-us' or page.handle == 'our-story' -%}
+
+  {%- comment -%} Rich About page layout (matches sections/page-about.liquid) {%- endcomment -%}
+
+  <section class="about-hero">
+    <div class="about-hero__inner">
+      <div class="eyebrow">Our Story</div>
+      <h1 class="about-hero__title">Fine Jewelry,<br>Authentically Sourced</h1>
+      <p class="about-hero__subtitle">
+        Founded in New York. Built on transparency, curation, and a deep love for extraordinary jewelry.
+      </p>
+    </div>
+  </section>
+
+  <section class="about-story">
+    <div class="about-story__inner">
+
+      <div class="about-story__image-wrap">
+        {%- if page.metafields.about.portrait != blank -%}
+          <img src="{{ page.metafields.about.portrait | image_url: width: 900 }}" alt="Laura Milman" loading="lazy">
+        {%- else -%}
+          <div class="about-story__img-placeholder"><span>Portrait</span></div>
+        {%- endif -%}
+      </div>
+
+      <div class="about-story__content">
+        <div class="eyebrow">Who We Are</div>
+        <h2 class="about-story__heading">A Different Kind of Jewelry Store</h2>
+        <div class="about-story__body">
+          {%- if page.content != blank -%}
+            {{ page.content }}
+          {%- else -%}
+            <p>Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. We began with a single conviction: every woman deserves pieces that feel authentically, undeniably hers.</p>
+            <p>From original fine jewelry crafted with traceable diamonds to hand-selected antique and estate pieces from the world's great houses — Cartier, Van Cleef &amp; Arpels, Tiffany &amp; Co., and beyond — every item in our collection is chosen with purpose and passion.</p>
+            <p>We meticulously trace every diamond we carry to its source, and every estate piece is individually authenticated by our specialists. Based in New York, we believe you should know exactly where your jewelry comes from — and love it all the more for it.</p>
+          {%- endif -%}
+        </div>
+        <div class="about-story__sig">— Laura Milman</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="about-values">
+    <div class="about-values__inner">
+      <div class="eyebrow" style="text-align:center;">What We Stand For</div>
+      <h2 class="about-values__title">Our Commitments to You</h2>
+      <div class="about-values__grid">
+
+        <div class="about-value-card">
+          <div class="about-value-card__icon">◇</div>
+          <h3 class="about-value-card__heading">Authenticity Guaranteed</h3>
+          <p class="about-value-card__body">Every estate and antique piece is individually authenticated by our in-house specialists before it is offered for sale. We stand behind every item with a full certificate of authenticity.</p>
+        </div>
+
+        <div class="about-value-card">
+          <div class="about-value-card__icon">⟡</div>
+          <h3 class="about-value-card__heading">Traceable Diamonds</h3>
+          <p class="about-value-card__body">We meticulously trace every rough diamond we use to its source, ensuring complete transparency in our supply chain. Conflict-free and ethically sourced — always.</p>
+        </div>
+
+        <div class="about-value-card">
+          <div class="about-value-card__icon">↻</div>
+          <h3 class="about-value-card__heading">Curated with Purpose</h3>
+          <p class="about-value-card__body">We offer a wide selection spanning classic and timeless designs to rare vintage finds. Our buyers spend thousands of hours sourcing only the pieces that meet our exacting standards.</p>
+        </div>
+
+        <div class="about-value-card">
+          <div class="about-value-card__icon">✦</div>
+          <h3 class="about-value-card__heading">New York Expertise</h3>
+          <p class="about-value-card__body">From our New York studio, we bring decades of expertise across fine jewelry, estate pieces, and bridal. Our team is always available to help you find the perfect piece for your story.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="about-sourcing">
+    <div class="about-sourcing__inner">
+
+      <div class="about-sourcing__content">
+        <div class="eyebrow">Our Source Materials</div>
+        <h2 class="about-sourcing__heading">From Mine to Setting</h2>
+        <p class="about-sourcing__body">
+          We meticulously trace every rough diamond we use to its source — from the mine to our New York workshop — ensuring complete transparency in our process. We believe you should know where your jewelry comes from, and we make that possible with every purchase.
+        </p>
+        <a href="/collections/all" class="hero__cta" style="display:inline-block;margin-top:40px;">
+          Explore the Collection
+        </a>
+      </div>
+
+      <div class="about-sourcing__image-wrap">
+        {%- if page.metafields.about.sourcing_image != blank -%}
+          <img src="{{ page.metafields.about.sourcing_image | image_url: width: 900 }}" alt="Diamond sourcing" loading="lazy">
+        {%- else -%}
+          <div class="about-story__img-placeholder"><span>Sourcing Image</span></div>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </section>
+
+  <section class="about-cta">
+    <div class="about-cta__inner">
+      <div class="eyebrow">Ready to Begin?</div>
+      <h2 class="about-cta__title">Find Your Perfect Piece</h2>
+      <p class="about-cta__body">
+        From everyday elegance to once-in-a-lifetime occasions — explore our full collection or speak with our team for personal styling guidance.
+      </p>
+      <div class="about-cta__buttons">
+        <a href="/collections/all" class="hero__cta">Shop All Jewelry</a>
+        <a href="/pages/contact" class="about-cta__secondary-btn">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+{%- else -%}
+
+  {%- comment -%} Default plain page layout {%- endcomment -%}
+
+  <div style="padding-top:120px;min-height:60vh;max-width:800px;margin:0 auto;padding-left:40px;padding-right:40px;padding-bottom:80px;">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:42px;color:#EBE1D2;font-weight:400;margin-bottom:32px;">
+      {{ page.title }}
+    </h1>
+    <div style="font-family:'Jost',sans-serif;font-size:15px;line-height:1.9;color:rgba(235,225,210,0.6);font-weight:300;">
+      {{ page.content }}
+    </div>
   </div>
-</div>
+
+{%- endif -%}
