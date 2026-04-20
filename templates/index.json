@@ -5,32 +5,32 @@
       "settings": {
         "hero_variant": "dramatic",
         "eyebrow": "New York · Fine Jewelry",
-        "heading": "Timeless\nElegance",
-        "subheading": "Meticulously crafted fine jewelry designed to become part of your story.",
-        "cta_label": "Shop Collection",
+        "heading": "Where Every\nPiece Tells\na Story",
+        "subheading": "Rare diamonds, vintage icons, and original designs — each piece selected for women who know exactly what they want.",
+        "cta_label": "Explore the Collection",
         "cta_link": "/collections/all"
       }
     },
     "collections-grid": {
       "type": "collections-grid",
       "blocks": {
-        "rings": { "type": "collection", "settings": { "title": "Rings" } },
-        "necklaces": { "type": "collection", "settings": { "title": "Necklaces" } },
-        "bracelets": { "type": "collection", "settings": { "title": "Bracelets" } },
-        "earrings": { "type": "collection", "settings": { "title": "Earrings" } }
+        "new-arrivals": { "type": "collection", "settings": { "title": "New Arrivals" } },
+        "rings":        { "type": "collection", "settings": { "title": "Rings & Pendants" } },
+        "wedding":      { "type": "collection", "settings": { "title": "Wedding & Bridal" } },
+        "estate":       { "type": "collection", "settings": { "title": "Antique & Estate" } }
       },
-      "blocks_order": ["rings", "necklaces", "bracelets", "earrings"],
+      "blocks_order": ["new-arrivals", "rings", "wedding", "estate"],
       "settings": {
-        "eyebrow": "Shop by Category",
-        "title": "Collections",
+        "eyebrow": "Explore Our World",
+        "title": "Shop the Collections",
         "view_all_link": "/collections/all"
       }
     },
     "featured-products": {
       "type": "featured-products",
       "settings": {
-        "eyebrow": "Curated Selection",
-        "title": "Featured Pieces",
+        "eyebrow": "Editor's Picks",
+        "title": "Pieces We Love Right Now",
         "products_to_show": 4
       }
     },
@@ -38,18 +38,18 @@
       "type": "estate-designers",
       "settings": {
         "eyebrow": "Pre-Owned · Antique · Estate",
-        "title": "Antique & Estate Jewelry",
-        "description": "Discover one-of-a-kind pre-owned pieces from the world's most coveted jewelry houses. Each piece is 100% authenticated and curated for lasting elegance.",
-        "partner_note": "All estate pieces are pre-owned and individually authenticated."
+        "title": "Shop by Designer",
+        "description": "From Cartier to Van Cleef & Arpels — explore pre-owned and estate pieces from the most coveted names in jewelry. Each piece is individually authenticated and curated for lasting beauty.",
+        "partner_note": "All estate and antique pieces are pre-owned, hand-selected, and individually authenticated."
       }
     },
     "brand-story": {
       "type": "brand-story",
       "settings": {
         "eyebrow": "Our Story",
-        "title": "Crafted with Intention,\nWorn with Confidence",
-        "body": "Every Laura Milman piece begins with a vision — jewelry that transcends trends and becomes an extension of the wearer. Based in New York, our studio blends timeless design principles with contemporary sensibility.",
-        "signature": "— Laura"
+        "title": "Fine Jewelry,\nAuthentically Sourced",
+        "body": "Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. From original fine jewelry crafted with traceable diamonds to hand-selected antique pieces from the world's great houses — every item in our collection is chosen with purpose. We offer a wide selection spanning classic and timeless designs to rare vintage finds, ensuring there is something extraordinary for every chapter of your life. Based in New York, we believe in complete transparency: we trace every diamond we carry to its source, and every estate piece is individually authenticated before it reaches you.",
+        "signature": "— Laura Milman"
       }
     },
     "testimonials": {
@@ -58,25 +58,25 @@
         "t1": {
           "type": "testimonial",
           "settings": {
-            "quote": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me.",
-            "author": "Alexandra K.",
-            "product": "Aura Ring"
+            "quote": "I am absolutely in love with my necklace from Laura Milman. The quality is exceptional — it looks even more beautiful in person than in the photos. It's become my signature piece and I get compliments every time I wear it.",
+            "author": "Sarah L.",
+            "product": "Diamond Pendant"
           }
         },
         "t2": {
           "type": "testimonial",
           "settings": {
-            "quote": "I've never received so many compliments. The Lumière necklace is a true statement piece.",
-            "author": "Catherine M.",
-            "product": "Lumière Necklace"
+            "quote": "I searched for months for the perfect engagement ring and found it here. The selection is extraordinary and the team was so helpful. My fiancée cried the moment she saw it — exactly what I was hoping for.",
+            "author": "Michael P.",
+            "product": "Engagement Ring"
           }
         },
         "t3": {
           "type": "testimonial",
           "settings": {
-            "quote": "Laura's designs have this rare quality — they're bold yet timeless. I wear mine every single day.",
-            "author": "Victoria S.",
-            "product": "Soleil Bracelet"
+            "quote": "I was hesitant to buy estate jewelry online, but Laura Milman made it completely effortless. The piece arrived beautifully packaged, exactly as described, and their authenticity guarantee gave me total confidence.",
+            "author": "Alex T.",
+            "product": "Vintage Cartier Bracelet"
           }
         }
       },
@@ -95,7 +95,7 @@
       },
       "blocks_order": ["p1", "p2", "p3", "p4", "p5", "p6"],
       "settings": {
-        "handle": "lauramilman",
+        "handle": "lauramilmannewyork",
         "title": "Follow the Journey"
       }
     }

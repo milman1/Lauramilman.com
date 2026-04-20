@@ -56,10 +56,10 @@ img {
 :root {
   --accent: #C1A784;
   --accent-hover: #D4BA96;
-  --bg-deep: #1A0F08;
-  --bg-mid: #2A1A10;
-  --bg-warm: #3D2518;
-  --bg-footer: #0A1A0F;
+  --bg-deep: #100901;
+  --bg-mid: #1A0F08;
+  --bg-warm: #231408;
+  --bg-footer: #100901;
   --text-primary: #EBE1D2;
   --text-muted: rgba(235, 225, 210, 0.5);
   --text-faint: rgba(235, 225, 210, 0.3);
@@ -139,7 +139,7 @@ img {
 }
 
 .site-header.scrolled {
-  background: rgba(26, 15, 8, 0.95);
+  background: rgba(16, 9, 1, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom-color: rgba(193, 167, 132, 0.15);
@@ -250,7 +250,7 @@ img {
   top: 64px;
   left: 0;
   right: 0;
-  background: rgba(26, 15, 8, 0.98);
+  background: rgba(16, 9, 1, 0.99);
   backdrop-filter: blur(12px);
   padding: 32px var(--pad-x);
   z-index: 999;
@@ -341,7 +341,7 @@ img {
   left: 50%;
   transform: translateX(-50%);
   width: 260px;
-  background: rgba(26, 15, 8, 0.97);
+  background: rgba(16, 9, 1, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(193, 167, 132, 0.18);
@@ -420,7 +420,7 @@ img {
 }
 
 .hero--dramatic {
-  background: linear-gradient(160deg, #1A0F08 0%, #3D2518 40%, #2A1A10 100%);
+  background: linear-gradient(160deg, #100901 0%, #1A0F08 50%, #100901 100%);
 }
 
 .hero--editorial {
@@ -669,7 +669,7 @@ img {
   background: var(--bg-deep);
 }
 
-.collections-section--editorial { background: var(--bg-mid); }
+.collections-section--editorial { background: var(--bg-deep); }
 
 .collections-header {
   display: flex;
@@ -747,7 +747,7 @@ img {
   padding: 120px var(--pad-x);
   max-width: var(--max-w);
   margin: 0 auto;
-  background: var(--bg-mid);
+  background: var(--bg-deep);
 }
 
 .featured-products__header {
@@ -849,7 +849,7 @@ img {
    ============================================================ */
 .brand-story {
   padding: 140px var(--pad-x);
-  background: var(--bg-warm);
+  background: var(--bg-deep);
   position: relative;
   overflow: hidden;
 }
@@ -907,7 +907,7 @@ img {
 .testimonials {
   padding: 120px var(--pad-x);
   text-align: center;
-  background: #1E120B;
+  background: var(--bg-deep);
 }
 
 .testimonials__inner {
@@ -1967,7 +1967,7 @@ img {
 .estate-designers {
   position: relative;
   padding: 100px var(--pad-x, 40px);
-  background-color: var(--bg-mid);
+  background-color: var(--bg-deep);
   overflow: hidden;
 }
 
