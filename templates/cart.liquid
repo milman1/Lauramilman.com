@@ -1,1 +1,162 @@
-{{ content_for_layout }}
+<div class="cart-page">
+  <div class="cart-page__inner">
+
+    <h1 class="cart-page__title">Your Cart</h1>
+
+    {%- if cart.item_count == 0 -%}
+
+      <div class="cart-empty">
+        <p class="cart-empty__message">Your cart is currently empty.</p>
+        <a href="/collections/all" class="hero__cta" style="margin-top:32px;">Continue Shopping</a>
+      </div>
+
+    {%- else -%}
+
+      <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-form">
+
+        <div class="cart-layout">
+
+          {%- comment -%} ── Line items ── {%- endcomment -%}
+          <div class="cart-items">
+
+            <div class="cart-items__header">
+              <span>Product</span>
+              <span>Price</span>
+              <span>Quantity</span>
+              <span>Total</span>
+            </div>
+
+            {%- for item in cart.items -%}
+              <div class="cart-item" data-key="{{ item.key }}">
+
+                <div class="cart-item__image-wrap">
+                  {%- if item.image -%}
+                    <a href="{{ item.url }}">
+                      <img src="{{ item.image | image_url: width: 200 }}"
+                           alt="{{ item.image.alt | escape }}"
+                           width="100" height="100"
+                           loading="lazy">
+                    </a>
+                  {%- endif -%}
+                  <div class="cart-item__meta">
+                    <a href="{{ item.url }}" class="cart-item__title">{{ item.product.title }}</a>
+                    {%- unless item.product.has_only_default_variant -%}
+                      <p class="cart-item__variant">{{ item.variant.title }}</p>
+                    {%- endunless -%}
+                    <button type="button"
+                            class="cart-item__remove"
+                            data-remove-key="{{ item.key }}"
+                            aria-label="Remove {{ item.product.title }}">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cart-item__price">
+                  {%- if item.original_price != item.final_price -%}
+                    <s class="cart-item__compare-price">{{ item.original_price | money }}</s>
+                  {%- endif -%}
+                  <span>{{ item.final_price | money }}</span>
+                </div>
+
+                <div class="cart-item__qty">
+                  <button type="button" class="cart-qty__btn" data-qty-change="{{ item.key }}" data-delta="-1" aria-label="Decrease quantity">−</button>
+                  <input type="number"
+                         name="updates[]"
+                         value="{{ item.quantity }}"
+                         min="0"
+                         class="cart-qty__input"
+                         data-qty-input="{{ item.key }}"
+                         aria-label="Quantity for {{ item.product.title }}">
+                  <button type="button" class="cart-qty__btn" data-qty-change="{{ item.key }}" data-delta="1" aria-label="Increase quantity">+</button>
+                </div>
+
+                <div class="cart-item__line-total">
+                  {{ item.final_line_price | money }}
+                </div>
+
+              </div>
+            {%- endfor -%}
+
+          </div>
+
+          {%- comment -%} ── Order summary ── {%- endcomment -%}
+          <aside class="cart-summary">
+
+            <h2 class="cart-summary__title">Order Summary</h2>
+
+            {%- if cart.cart_level_discount_applications.size > 0 -%}
+              <div class="cart-summary__row">
+                <span>Subtotal</span>
+                <span>{{ cart.original_total_price | money }}</span>
+              </div>
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <div class="cart-summary__row cart-summary__row--discount">
+                  <span>{{ discount.title }}</span>
+                  <span>−{{ discount.total_allocated_amount | money }}</span>
+                </div>
+              {%- endfor -%}
+            {%- endif -%}
+
+            <div class="cart-summary__row cart-summary__row--total">
+              <span>Total</span>
+              <span>{{ cart.total_price | money }} {{ cart.currency }}</span>
+            </div>
+
+            <p class="cart-summary__tax-note">
+              {%- if shop.taxes_included -%}
+                Tax included. Shipping calculated at checkout.
+              {%- else -%}
+                Shipping and taxes calculated at checkout.
+              {%- endif -%}
+            </p>
+
+            <button type="submit" name="checkout" class="cart-summary__checkout-btn">
+              Proceed to Checkout
+            </button>
+
+            <a href="/collections/all" class="cart-summary__continue-link">Continue Shopping</a>
+
+          </aside>
+
+        </div>
+
+      </form>
+
+    {%- endif -%}
+
+  </div>
+</div>
+
+<script>
+  (function() {
+    /* Quantity +/- buttons — update input then submit */
+    document.querySelectorAll('[data-qty-change]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var key   = btn.dataset.qtyChange;
+        var delta = parseInt(btn.dataset.delta, 10);
+        var input = document.querySelector('[data-qty-input="' + key + '"]');
+        if (!input) return;
+        var next = Math.max(0, parseInt(input.value, 10) + delta);
+        input.value = next;
+        updateCart(key, next);
+      });
+    });
+
+    /* Remove links */
+    document.querySelectorAll('[data-remove-key]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        updateCart(btn.dataset.removeKey, 0);
+      });
+    });
+
+    function updateCart(key, qty) {
+      fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: key, quantity: qty })
+      })
+      .then(function() { window.location.reload(); });
+    }
+  })();
+</script>
