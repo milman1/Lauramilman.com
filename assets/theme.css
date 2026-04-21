@@ -54,18 +54,21 @@ img {
 
 /* === Design Tokens === */
 :root {
-  --accent: #C1A784;
+  --accent: #C4A882;          /* warm sand gold — primary accent */
   --accent-hover: #D4BA96;
-  --bg-deep: #100901;
-  --bg-mid: #1A0F08;
-  --bg-warm: #231408;
-  --bg-forest: #263228;
-  --bg-footer: #100901;
-  --text-primary: #EBE1D2;
-  --text-muted: rgba(235, 225, 210, 0.5);
-  --text-faint: rgba(235, 225, 210, 0.3);
-  --border: rgba(193, 167, 132, 0.1);
-  --border-hover: rgba(193, 167, 132, 0.3);
+  --wine: #6B1A2A;            /* deep burgundy from image */
+  --wine-mid: #8B2237;        /* lighter burgundy for hover states */
+  --wine-soft: rgba(107, 26, 42, 0.15); /* tinted overlay */
+  --bg-deep: #0E0805;         /* near-black espresso */
+  --bg-mid: #1A0D09;          /* deep warm brown */
+  --bg-warm: #231208;         /* rich dark brown */
+  --bg-forest: #6B1A2A;       /* burgundy replaces forest green */
+  --bg-footer: #0E0805;
+  --text-primary: #EDE3D4;    /* warm ivory — slightly warmer than before */
+  --text-muted: rgba(237, 227, 212, 0.55);
+  --text-faint: rgba(237, 227, 212, 0.3);
+  --border: rgba(196, 168, 130, 0.12);
+  --border-hover: rgba(196, 168, 130, 0.35);
   --font-serif: 'DM Serif Display', serif;
   --font-sans: 'Jost', sans-serif;
   --max-w: 1400px;
@@ -508,13 +511,25 @@ img {
   font-size: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #1A0F08;
+  color: #0E0805;
   text-decoration: none;
-  transition: background 0.4s;
+  transition: background 0.4s, color 0.4s;
   border: none;
   cursor: pointer;
 }
-.hero__cta:hover { background: var(--accent-hover); }
+.hero__cta:hover { background: var(--accent-hover); color: #0E0805; }
+
+/* Wine-tinted CTA — used on dark burgundy backgrounds */
+.hero__cta--wine {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(196, 168, 130, 0.5);
+}
+.hero__cta--wine:hover {
+  background: var(--wine);
+  border-color: var(--wine);
+  color: var(--text-primary);
+}
 
 .hero__image-wrap {
   position: absolute;
@@ -2453,7 +2468,8 @@ img {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(193,167,132,0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(196,168,130,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 50% 100%, rgba(139,34,55,0.2) 0%, transparent 70%);
   pointer-events: none;
 }
 .about-hero__inner { max-width: 760px; margin: 0 auto; position: relative; }
@@ -2558,13 +2574,13 @@ img {
 }
 .about-value-card {
   padding: 40px 28px;
-  border: 1px solid rgba(193,167,132,0.12);
-  background: rgba(16,9,1,0.4);
+  border: 1px solid rgba(107,26,42,0.25);
+  background: rgba(107,26,42,0.12);
   transition: border-color 0.3s, background 0.3s;
 }
 .about-value-card:hover {
-  border-color: rgba(193,167,132,0.3);
-  background: rgba(16,9,1,0.6);
+  border-color: rgba(107,26,42,0.45);
+  background: rgba(107,26,42,0.22);
 }
 .about-value-card__icon {
   font-size: 22px;
