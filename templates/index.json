@@ -77,6 +77,64 @@
         "view_all_label": "Browse All Estate Pieces"
       }
     },
+    "antique-estate-spotlight": {
+      "type": "antique-estate-spotlight",
+      "blocks": {
+        "cartier": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Art Deco geometry, panther codes, and signed diamond classics chosen for provenance.",
+            "link": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        "van-cleef": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French high jewelry",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra icons, sculptural gold, and elegant estate pieces from a collectible house.",
+            "link": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        "tiffany": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed estate jewels selected for everyday polish.",
+            "link": "/collections/tiffany-co",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        "david-webb": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Bold estate design",
+            "title": "David Webb",
+            "copy": "Enamel, carved stones, animal forms, and architectural gold with unmistakable presence.",
+            "link": "/collections/david-webb",
+            "cta_label": "Shop David Webb"
+          }
+        }
+      },
+      "block_order": [
+        "cartier",
+        "van-cleef",
+        "tiffany",
+        "david-webb"
+      ],
+      "settings": {
+        "eyebrow": "High jewelry houses",
+        "title": "Antique & estate designer spotlight",
+        "description": "A focused edit of authenticated, one-of-a-kind pieces from the world's most collected jewelry houses.",
+        "cta_link": "/collections/antique-estate",
+        "cta_label": "Browse all antique & estate"
+      }
+    },
     "brand-story": {
       "type": "brand-story",
       "settings": {
@@ -102,6 +160,7 @@
     "best-sellers",
     "engagement-rings",
     "estate-products",
+    "antique-estate-spotlight",
     "brand-story",
     "instagram-feed"
   ]

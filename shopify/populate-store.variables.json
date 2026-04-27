@@ -1,0 +1,962 @@
+{
+  "catalog": {
+    "store": "laura-milman.myshopify.com",
+    "templateSuffix": "antique-estate",
+    "collections": [
+      {
+        "title": "Antique & Estate",
+        "handle": "antique-estate",
+        "type": "manual",
+        "descriptionHtml": "<p>Authenticated antique and estate jewelry from the world's most collected houses, curated by Laura Milman New York.</p>"
+      },
+      {
+        "title": "New Arrivals",
+        "handle": "new-arrivals",
+        "type": "smart",
+        "descriptionHtml": "<p>The latest authenticated additions to the Laura Milman collection.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "new-arrival"
+          }
+        ]
+      },
+      {
+        "title": "Best Sellers",
+        "handle": "best-sellers",
+        "type": "smart",
+        "descriptionHtml": "<p>Customer favorites and standout Laura Milman edits.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "bestseller"
+          }
+        ]
+      },
+      {
+        "title": "Rings",
+        "handle": "rings",
+        "type": "smart",
+        "descriptionHtml": "<p>Diamond, gemstone, antique, and estate rings selected for everyday wear and collecting.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "rings"
+          }
+        ]
+      },
+      {
+        "title": "Necklaces",
+        "handle": "necklaces",
+        "type": "smart",
+        "descriptionHtml": "<p>Signed estate necklaces, pendants, and chains with refined presence.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "necklaces"
+          }
+        ]
+      },
+      {
+        "title": "Pendants",
+        "handle": "pendants",
+        "type": "smart",
+        "descriptionHtml": "<p>One-of-a-kind pendants and charms from fine and estate jewelry houses.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "pendants"
+          }
+        ]
+      },
+      {
+        "title": "Bracelets",
+        "handle": "bracelets",
+        "type": "smart",
+        "descriptionHtml": "<p>Estate cuffs, link bracelets, tennis bracelets, and signed gold silhouettes.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "bracelets"
+          }
+        ]
+      },
+      {
+        "title": "Earrings",
+        "handle": "earrings",
+        "type": "smart",
+        "descriptionHtml": "<p>Studs, clips, drops, and statement earrings from classic jewelry houses.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "earrings"
+          }
+        ]
+      },
+      {
+        "title": "Brooches & Pins",
+        "handle": "brooches",
+        "type": "smart",
+        "descriptionHtml": "<p>Estate brooches and pins with signed details, gemstones, and period charm.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "brooches"
+          }
+        ]
+      },
+      {
+        "title": "Charms",
+        "handle": "charms",
+        "type": "smart",
+        "descriptionHtml": "<p>Collectible charms and small signed treasures for personal styling.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "charms"
+          }
+        ]
+      },
+      {
+        "title": "Engagement Rings",
+        "handle": "engagement-rings",
+        "type": "smart",
+        "descriptionHtml": "<p>Engagement rings and bridal-era estate pieces selected for beauty and provenance.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "engagement-rings"
+          }
+        ]
+      },
+      {
+        "title": "Wedding Bands",
+        "handle": "wedding-bands",
+        "type": "smart",
+        "descriptionHtml": "<p>Wedding bands and estate bands with enduring silhouettes.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "wedding-bands"
+          }
+        ]
+      },
+      {
+        "title": "Bridal Sets",
+        "handle": "bridal-sets",
+        "type": "smart",
+        "descriptionHtml": "<p>Engagement and band pairings, including estate bridal styles.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "bridal-sets"
+          }
+        ]
+      },
+      {
+        "title": "Bridal Gifts",
+        "handle": "bridal-gifts",
+        "type": "smart",
+        "descriptionHtml": "<p>Fine jewelry gifts for wedding weekends, anniversaries, and heirloom moments.</p>",
+        "rules": [
+          {
+            "column": "TAG",
+            "relation": "EQUALS",
+            "condition": "bridal-gifts"
+          }
+        ]
+      },
+      {
+        "title": "Buccellati",
+        "handle": "buccellati",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Buccellati, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Buccellati"
+          }
+        ]
+      },
+      {
+        "title": "Bvlgari",
+        "handle": "bvlgari",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Bvlgari, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Bvlgari"
+          }
+        ]
+      },
+      {
+        "title": "Cartier",
+        "handle": "cartier",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Cartier, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Cartier"
+          }
+        ]
+      },
+      {
+        "title": "Chopard",
+        "handle": "chopard",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Chopard, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Chopard"
+          }
+        ]
+      },
+      {
+        "title": "David Webb",
+        "handle": "david-webb",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by David Webb, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "David Webb"
+          }
+        ]
+      },
+      {
+        "title": "Graff",
+        "handle": "graff",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Graff, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Graff"
+          }
+        ]
+      },
+      {
+        "title": "Harry Winston",
+        "handle": "harry-winston",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Harry Winston, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Harry Winston"
+          }
+        ]
+      },
+      {
+        "title": "Hermès",
+        "handle": "hermes",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Hermès, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Hermès"
+          }
+        ]
+      },
+      {
+        "title": "Marina B",
+        "handle": "marina-b",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Marina B, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Marina B"
+          }
+        ]
+      },
+      {
+        "title": "Tiffany & Co.",
+        "handle": "tiffany-co",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Tiffany & Co., curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Tiffany & Co."
+          }
+        ]
+      },
+      {
+        "title": "Van Cleef & Arpels",
+        "handle": "van-cleef-arpels",
+        "type": "smart",
+        "descriptionHtml": "<p>Authenticated estate jewelry by Van Cleef & Arpels, curated by Laura Milman New York.</p>",
+        "rules": [
+          {
+            "column": "VENDOR",
+            "relation": "EQUALS",
+            "condition": "Van Cleef & Arpels"
+          }
+        ]
+      }
+    ],
+    "products": [
+      {
+        "title": "Cartier Art Deco Diamond Platinum Ring",
+        "handle": "cartier-art-deco-diamond-platinum-ring",
+        "vendor": "Cartier",
+        "productType": "Rings",
+        "price": "28500.00",
+        "tags": [
+          "antique-estate",
+          "new-arrival",
+          "rings",
+          "designer-jewelry",
+          "cartier",
+          "art-deco"
+        ],
+        "bodyHtml": "<p>An authenticated Cartier estate ring with crisp Art Deco geometry, bright old European cut diamonds, and a platinum mounting selected for its collectible signature and refined condition.</p>",
+        "seoTitle": "Cartier Art Deco Diamond Platinum Ring | Laura Milman",
+        "seoDescription": "Authenticated Cartier Art Deco diamond platinum estate ring curated by Laura Milman New York.",
+        "metafields": {
+          "metal_type": "Platinum",
+          "metal_weight": "7.8 g",
+          "diamond_weight": "Approx. 1.85 CTW",
+          "measurements": "Size 6.25; face 14 mm",
+          "gemstones": "Old European cut diamonds",
+          "era": "Art Deco, c. 1930",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Van Cleef & Arpels Vintage Alhambra Mother-of-Pearl Necklace",
+        "handle": "van-cleef-arpels-vintage-alhambra-mother-of-pearl-necklace",
+        "vendor": "Van Cleef & Arpels",
+        "productType": "Necklaces",
+        "price": "16200.00",
+        "tags": [
+          "antique-estate",
+          "bestseller",
+          "necklaces",
+          "designer-jewelry",
+          "van-cleef-arpels",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>A signed Van Cleef & Arpels Vintage Alhambra necklace with luminous mother-of-pearl stations and 18K yellow gold beading, chosen for its graceful estate presence.</p>",
+        "seoTitle": "Van Cleef & Arpels Alhambra Mother-of-Pearl Necklace",
+        "seoDescription": "Signed estate Van Cleef & Arpels Vintage Alhambra necklace in 18K yellow gold and mother-of-pearl.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "18.4 g",
+          "diamond_weight": "None",
+          "measurements": "16 in length",
+          "gemstones": "Mother-of-pearl",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Tiffany & Co. Schlumberger Diamond X Earrings",
+        "handle": "tiffany-co-schlumberger-diamond-x-earrings",
+        "vendor": "Tiffany & Co.",
+        "productType": "Earrings",
+        "price": "11800.00",
+        "tags": [
+          "antique-estate",
+          "earrings",
+          "designer-jewelry",
+          "tiffany-co",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>Estate Tiffany & Co. earrings from the Schlumberger design language, set with bright round diamonds in an elegant X motif for polished evening wear.</p>",
+        "seoTitle": "Tiffany & Co. Schlumberger Diamond X Earrings",
+        "seoDescription": "Authenticated estate Tiffany & Co. Schlumberger diamond earrings curated by Laura Milman.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold and Platinum",
+          "metal_weight": "10.2 g",
+          "diamond_weight": "Approx. 1.20 CTW",
+          "measurements": "18 mm",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Late 20th century",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "David Webb Black Enamel Diamond Cuff Bracelet",
+        "handle": "david-webb-black-enamel-diamond-cuff-bracelet",
+        "vendor": "David Webb",
+        "productType": "Bracelets",
+        "price": "42500.00",
+        "tags": [
+          "antique-estate",
+          "new-arrival",
+          "bracelets",
+          "designer-jewelry",
+          "david-webb",
+          "statement"
+        ],
+        "bodyHtml": "<p>A bold David Webb estate cuff with glossy black enamel, sculptural 18K gold, and diamond accents, curated for collectors who appreciate unmistakable design.</p>",
+        "seoTitle": "David Webb Black Enamel Diamond Cuff Bracelet",
+        "seoDescription": "Signed David Webb estate cuff bracelet with black enamel, diamonds, and 18K gold.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold and Platinum",
+          "metal_weight": "86.5 g",
+          "diamond_weight": "Approx. 2.35 CTW",
+          "measurements": "6.25 in inner circumference",
+          "gemstones": "Diamonds and black enamel",
+          "era": "Vintage, c. 1970s",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Bvlgari Serpenti Diamond Coil Ring",
+        "handle": "bvlgari-serpenti-diamond-coil-ring",
+        "vendor": "Bvlgari",
+        "productType": "Rings",
+        "price": "23800.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "designer-jewelry",
+          "bvlgari",
+          "statement"
+        ],
+        "bodyHtml": "<p>A signed Bvlgari Serpenti estate ring with coiled 18K gold curves and diamond accents, bringing Roman glamour to a collectible everyday silhouette.</p>",
+        "seoTitle": "Bvlgari Serpenti Diamond Coil Ring",
+        "seoDescription": "Authenticated Bvlgari Serpenti diamond estate ring in 18K gold.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "13.6 g",
+          "diamond_weight": "Approx. 0.68 CTW",
+          "measurements": "Size 6.5",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Buccellati Diamond Rigato Gold Cuff",
+        "handle": "buccellati-diamond-rigato-gold-cuff",
+        "vendor": "Buccellati",
+        "productType": "Bracelets",
+        "price": "36500.00",
+        "tags": [
+          "antique-estate",
+          "bracelets",
+          "designer-jewelry",
+          "buccellati",
+          "bestseller"
+        ],
+        "bodyHtml": "<p>A Buccellati estate cuff with hand-engraved Rigato texture and diamond details, selected for its soft gold finish and heirloom Italian craft.</p>",
+        "seoTitle": "Buccellati Diamond Rigato Gold Cuff",
+        "seoDescription": "Authenticated Buccellati diamond Rigato gold estate cuff curated by Laura Milman.",
+        "metafields": {
+          "metal_type": "18K Yellow and White Gold",
+          "metal_weight": "54.1 g",
+          "diamond_weight": "Approx. 1.10 CTW",
+          "measurements": "6.5 in inner circumference",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Vintage estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Harry Winston Diamond Cluster Stud Earrings",
+        "handle": "harry-winston-diamond-cluster-stud-earrings",
+        "vendor": "Harry Winston",
+        "productType": "Earrings",
+        "price": "52000.00",
+        "tags": [
+          "antique-estate",
+          "new-arrival",
+          "earrings",
+          "designer-jewelry",
+          "harry-winston",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>Harry Winston estate cluster earrings with crisp white diamonds arranged for maximum light, offering a refined high-jewelry staple.</p>",
+        "seoTitle": "Harry Winston Diamond Cluster Stud Earrings",
+        "seoDescription": "Authenticated estate Harry Winston diamond cluster stud earrings.",
+        "metafields": {
+          "metal_type": "Platinum",
+          "metal_weight": "8.9 g",
+          "diamond_weight": "Approx. 4.20 CTW",
+          "measurements": "13 mm",
+          "gemstones": "Round and pear shape diamonds",
+          "era": "Late 20th century",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Graff Sapphire and Diamond Three-Stone Ring",
+        "handle": "graff-sapphire-diamond-three-stone-ring",
+        "vendor": "Graff",
+        "productType": "Rings",
+        "price": "68500.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "designer-jewelry",
+          "graff",
+          "engagement-rings"
+        ],
+        "bodyHtml": "<p>A Graff estate three-stone ring centering a vivid blue sapphire with diamond sides, chosen for color, proportion, and impeccable finish.</p>",
+        "seoTitle": "Graff Sapphire and Diamond Three-Stone Ring",
+        "seoDescription": "Authenticated Graff sapphire and diamond three-stone estate ring.",
+        "metafields": {
+          "metal_type": "Platinum",
+          "metal_weight": "6.7 g",
+          "diamond_weight": "Approx. 1.35 CTW",
+          "measurements": "Size 6",
+          "gemstones": "Blue sapphire and diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Chopard Happy Diamonds Heart Pendant",
+        "handle": "chopard-happy-diamonds-heart-pendant",
+        "vendor": "Chopard",
+        "productType": "Pendants",
+        "price": "7200.00",
+        "tags": [
+          "antique-estate",
+          "pendants",
+          "necklaces",
+          "designer-jewelry",
+          "chopard",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>A playful Chopard Happy Diamonds estate heart pendant with floating diamonds and polished gold, selected as a refined giftable icon.</p>",
+        "seoTitle": "Chopard Happy Diamonds Heart Pendant",
+        "seoDescription": "Signed Chopard Happy Diamonds estate heart pendant in 18K gold.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "11.8 g",
+          "diamond_weight": "Approx. 0.45 CTW",
+          "measurements": "Pendant 22 mm; chain 16 in",
+          "gemstones": "Floating round diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Hermes Diamond Kelly Bracelet",
+        "handle": "hermes-diamond-kelly-bracelet",
+        "vendor": "Hermes",
+        "productType": "Bracelets",
+        "price": "19800.00",
+        "tags": [
+          "antique-estate",
+          "bracelets",
+          "designer-jewelry",
+          "hermes",
+          "bestseller"
+        ],
+        "bodyHtml": "<p>A signed Hermes Kelly bracelet in 18K rose gold with diamond detail, balancing house codes with refined estate wearability.</p>",
+        "seoTitle": "Hermes Diamond Kelly Bracelet",
+        "seoDescription": "Authenticated Hermes diamond Kelly estate bracelet in 18K rose gold.",
+        "metafields": {
+          "metal_type": "18K Rose Gold",
+          "metal_weight": "23.5 g",
+          "diamond_weight": "Approx. 0.30 CTW",
+          "measurements": "6.75 in",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Marina B Diamond Gold Choker Necklace",
+        "handle": "marina-b-diamond-gold-choker-necklace",
+        "vendor": "Marina B",
+        "productType": "Necklaces",
+        "price": "24500.00",
+        "tags": [
+          "antique-estate",
+          "necklaces",
+          "designer-jewelry",
+          "marina-b",
+          "statement"
+        ],
+        "bodyHtml": "<p>A Marina B estate choker necklace with sculptural gold links and diamond accents, selected for the confident 1980s Italian design signature.</p>",
+        "seoTitle": "Marina B Diamond Gold Choker Necklace",
+        "seoDescription": "Signed Marina B estate diamond gold choker necklace curated by Laura Milman.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "62.3 g",
+          "diamond_weight": "Approx. 1.55 CTW",
+          "measurements": "15 in length",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Vintage, c. 1980s",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Cartier Trinity Rolling Wedding Band",
+        "handle": "cartier-trinity-rolling-wedding-band",
+        "vendor": "Cartier",
+        "productType": "Rings",
+        "price": "3950.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "wedding-bands",
+          "bridal-sets",
+          "designer-jewelry",
+          "cartier"
+        ],
+        "bodyHtml": "<p>A Cartier Trinity rolling band in three tones of 18K gold, an enduring estate wedding band and stacking ring with signed provenance.</p>",
+        "seoTitle": "Cartier Trinity Rolling Wedding Band",
+        "seoDescription": "Signed estate Cartier Trinity rolling wedding band in three-tone 18K gold.",
+        "metafields": {
+          "metal_type": "18K Yellow, White, and Rose Gold",
+          "metal_weight": "9.4 g",
+          "diamond_weight": "None",
+          "measurements": "Size 6.75; 4 mm each band",
+          "gemstones": "None",
+          "era": "Contemporary estate",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Van Cleef & Arpels Diamond Fleurette Ring",
+        "handle": "van-cleef-arpels-diamond-fleurette-ring",
+        "vendor": "Van Cleef & Arpels",
+        "productType": "Rings",
+        "price": "14800.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "engagement-rings",
+          "designer-jewelry",
+          "van-cleef-arpels"
+        ],
+        "bodyHtml": "<p>A Van Cleef & Arpels Fleurette estate ring with petal-like diamond clusters in white gold, offering floral brilliance with signed French elegance.</p>",
+        "seoTitle": "Van Cleef & Arpels Diamond Fleurette Ring",
+        "seoDescription": "Signed Van Cleef & Arpels diamond Fleurette estate ring.",
+        "metafields": {
+          "metal_type": "18K White Gold",
+          "metal_weight": "5.6 g",
+          "diamond_weight": "Approx. 1.30 CTW",
+          "measurements": "Size 6.25",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Tiffany & Co. Diamond Tennis Bracelet",
+        "handle": "tiffany-co-diamond-tennis-bracelet",
+        "vendor": "Tiffany & Co.",
+        "productType": "Bracelets",
+        "price": "21500.00",
+        "tags": [
+          "antique-estate",
+          "bracelets",
+          "designer-jewelry",
+          "tiffany-co",
+          "bestseller",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>A Tiffany & Co. estate tennis bracelet with a clean line of round brilliant diamonds, curated for classic daily brilliance.</p>",
+        "seoTitle": "Tiffany & Co. Diamond Tennis Bracelet",
+        "seoDescription": "Authenticated Tiffany & Co. diamond estate tennis bracelet.",
+        "metafields": {
+          "metal_type": "Platinum",
+          "metal_weight": "17.2 g",
+          "diamond_weight": "Approx. 5.00 CTW",
+          "measurements": "7 in length",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "David Webb Coral Diamond Clip Earrings",
+        "handle": "david-webb-coral-diamond-clip-earrings",
+        "vendor": "David Webb",
+        "productType": "Earrings",
+        "price": "27500.00",
+        "tags": [
+          "antique-estate",
+          "earrings",
+          "designer-jewelry",
+          "david-webb",
+          "statement"
+        ],
+        "bodyHtml": "<p>David Webb clip earrings with rich coral cabochons, sculptural gold, and diamond accents, selected for vivid estate glamour.</p>",
+        "seoTitle": "David Webb Coral Diamond Clip Earrings",
+        "seoDescription": "Signed David Webb coral and diamond estate clip earrings.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold and Platinum",
+          "metal_weight": "24.7 g",
+          "diamond_weight": "Approx. 0.95 CTW",
+          "measurements": "26 mm",
+          "gemstones": "Coral cabochons and diamonds",
+          "era": "Vintage, c. 1970s",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Bvlgari Monete Ancient Coin Pendant",
+        "handle": "bvlgari-monete-ancient-coin-pendant",
+        "vendor": "Bvlgari",
+        "productType": "Pendants",
+        "price": "18800.00",
+        "tags": [
+          "antique-estate",
+          "pendants",
+          "necklaces",
+          "designer-jewelry",
+          "bvlgari",
+          "charms"
+        ],
+        "bodyHtml": "<p>A Bvlgari Monete estate pendant featuring an ancient coin in a polished gold frame, selected for its historical texture and Roman house signature.</p>",
+        "seoTitle": "Bvlgari Monete Ancient Coin Pendant",
+        "seoDescription": "Authenticated Bvlgari Monete ancient coin estate pendant.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "21.6 g",
+          "diamond_weight": "None",
+          "measurements": "Pendant 31 mm",
+          "gemstones": "Ancient coin",
+          "era": "Contemporary estate with ancient coin",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Buccellati Pearl Diamond Brooch",
+        "handle": "buccellati-pearl-diamond-brooch",
+        "vendor": "Buccellati",
+        "productType": "Brooches",
+        "price": "22800.00",
+        "tags": [
+          "antique-estate",
+          "brooches",
+          "designer-jewelry",
+          "buccellati"
+        ],
+        "bodyHtml": "<p>A Buccellati estate brooch with a lustrous pearl, diamond accents, and hand-engraved gold, offering delicate texture and heirloom charm.</p>",
+        "seoTitle": "Buccellati Pearl Diamond Brooch",
+        "seoDescription": "Signed Buccellati pearl and diamond estate brooch.",
+        "metafields": {
+          "metal_type": "18K Yellow and White Gold",
+          "metal_weight": "18.9 g",
+          "diamond_weight": "Approx. 0.80 CTW",
+          "measurements": "42 mm",
+          "gemstones": "Pearl and diamonds",
+          "era": "Vintage estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Harry Winston Emerald Cut Diamond Engagement Ring",
+        "handle": "harry-winston-emerald-cut-diamond-engagement-ring",
+        "vendor": "Harry Winston",
+        "productType": "Rings",
+        "price": "96500.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "engagement-rings",
+          "bridal-sets",
+          "designer-jewelry",
+          "harry-winston",
+          "new-arrival"
+        ],
+        "bodyHtml": "<p>An estate Harry Winston emerald cut diamond engagement ring with tapered baguette side stones, chosen for balanced proportions and exceptional presence.</p>",
+        "seoTitle": "Harry Winston Emerald Cut Diamond Engagement Ring",
+        "seoDescription": "Authenticated Harry Winston emerald cut diamond estate engagement ring.",
+        "metafields": {
+          "metal_type": "Platinum",
+          "metal_weight": "5.9 g",
+          "diamond_weight": "Approx. 4.10 CTW center; 0.55 CTW side stones",
+          "measurements": "Size 6",
+          "gemstones": "Emerald cut and baguette diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Graff Fancy Yellow Diamond Drop Earrings",
+        "handle": "graff-fancy-yellow-diamond-drop-earrings",
+        "vendor": "Graff",
+        "productType": "Earrings",
+        "price": "74500.00",
+        "tags": [
+          "antique-estate",
+          "earrings",
+          "designer-jewelry",
+          "graff",
+          "statement",
+          "new-arrival"
+        ],
+        "bodyHtml": "<p>Graff estate drop earrings with fancy yellow diamonds and white diamond accents, selected for color saturation and refined movement.</p>",
+        "seoTitle": "Graff Fancy Yellow Diamond Drop Earrings",
+        "seoDescription": "Authenticated Graff fancy yellow diamond estate drop earrings.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold and Platinum",
+          "metal_weight": "12.1 g",
+          "diamond_weight": "Approx. 5.85 CTW",
+          "measurements": "31 mm drop",
+          "gemstones": "Fancy yellow and white diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Chopard Imperiale Amethyst Diamond Ring",
+        "handle": "chopard-imperiale-amethyst-diamond-ring",
+        "vendor": "Chopard",
+        "productType": "Rings",
+        "price": "8900.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "designer-jewelry",
+          "chopard",
+          "colored-stone"
+        ],
+        "bodyHtml": "<p>A Chopard Imperiale estate ring with a rich amethyst center and diamond accents, offering regal color in an elegant signed setting.</p>",
+        "seoTitle": "Chopard Imperiale Amethyst Diamond Ring",
+        "seoDescription": "Signed Chopard Imperiale amethyst and diamond estate ring.",
+        "metafields": {
+          "metal_type": "18K Rose Gold",
+          "metal_weight": "11.4 g",
+          "diamond_weight": "Approx. 0.35 CTW",
+          "measurements": "Size 6.5",
+          "gemstones": "Amethyst and diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Hermes Chaîne d'Ancre Diamond Necklace",
+        "handle": "hermes-chaine-dancre-diamond-necklace",
+        "vendor": "Hermes",
+        "productType": "Necklaces",
+        "price": "26500.00",
+        "tags": [
+          "antique-estate",
+          "necklaces",
+          "designer-jewelry",
+          "hermes"
+        ],
+        "bodyHtml": "<p>An estate Hermes Chaîne d'Ancre necklace in 18K gold with diamond-set links, balancing crisp house geometry with polished wearability.</p>",
+        "seoTitle": "Hermes Chaine d'Ancre Diamond Necklace",
+        "seoDescription": "Authenticated Hermes Chaine d'Ancre diamond estate necklace in 18K gold.",
+        "metafields": {
+          "metal_type": "18K White Gold",
+          "metal_weight": "38.2 g",
+          "diamond_weight": "Approx. 1.75 CTW",
+          "measurements": "16.5 in length",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Marina B Onyx Diamond Earclips",
+        "handle": "marina-b-onyx-diamond-earclips",
+        "vendor": "Marina B",
+        "productType": "Earrings",
+        "price": "13500.00",
+        "tags": [
+          "antique-estate",
+          "earrings",
+          "designer-jewelry",
+          "marina-b",
+          "statement"
+        ],
+        "bodyHtml": "<p>Marina B estate earclips with black onyx, diamonds, and sculptural gold, selected for a striking graphic profile.</p>",
+        "seoTitle": "Marina B Onyx Diamond Earclips",
+        "seoDescription": "Signed Marina B onyx and diamond estate earclips.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "19.6 g",
+          "diamond_weight": "Approx. 0.72 CTW",
+          "measurements": "24 mm",
+          "gemstones": "Black onyx and diamonds",
+          "era": "Vintage, c. 1980s",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Cartier Diamond Love Bracelet",
+        "handle": "cartier-diamond-love-bracelet",
+        "vendor": "Cartier",
+        "productType": "Bracelets",
+        "price": "12600.00",
+        "tags": [
+          "antique-estate",
+          "bracelets",
+          "designer-jewelry",
+          "cartier",
+          "bestseller",
+          "bridal-gifts"
+        ],
+        "bodyHtml": "<p>A Cartier diamond Love bracelet in 18K yellow gold, authenticated and selected as a timeless estate icon for stacking or solo wear.</p>",
+        "seoTitle": "Cartier Diamond Love Bracelet",
+        "seoDescription": "Authenticated Cartier diamond Love estate bracelet in 18K yellow gold.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold",
+          "metal_weight": "31.8 g",
+          "diamond_weight": "Approx. 0.42 CTW",
+          "measurements": "Size 17",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Contemporary estate",
+          "condition": "Very good pre-owned condition; signed and authenticated"
+        }
+      },
+      {
+        "title": "Tiffany & Co. Schlumberger Sixteen Stone Ring",
+        "handle": "tiffany-co-schlumberger-sixteen-stone-ring",
+        "vendor": "Tiffany & Co.",
+        "productType": "Rings",
+        "price": "11200.00",
+        "tags": [
+          "antique-estate",
+          "rings",
+          "designer-jewelry",
+          "tiffany-co",
+          "wedding-bands"
+        ],
+        "bodyHtml": "<p>A Tiffany & Co. Schlumberger Sixteen Stone estate ring with alternating diamonds and sculptural gold cross-stitches, ideal as a collectible band.</p>",
+        "seoTitle": "Tiffany & Co. Schlumberger Sixteen Stone Ring",
+        "seoDescription": "Signed Tiffany & Co. Schlumberger Sixteen Stone estate ring.",
+        "metafields": {
+          "metal_type": "18K Yellow Gold and Platinum",
+          "metal_weight": "10.7 g",
+          "diamond_weight": "Approx. 1.05 CTW",
+          "measurements": "Size 6",
+          "gemstones": "Round brilliant diamonds",
+          "era": "Late 20th century",
+          "condition": "Excellent pre-owned condition; signed and authenticated"
+        }
+      }
+    ]
+  }
+}

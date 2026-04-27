@@ -177,3 +177,76 @@ Confirmed clean as of this commit — no references in any `.liquid`, `.json`,
 5. Run the post-import audit (§3c).
 6. Spot-check 3–5 products to confirm metafields populated and the
    product appears in the correct brand collection.
+
+---
+
+## 5. Laura Milman Seed Catalog
+
+This repository includes a curated Antique & Estate seed catalog for
+`laura-milman.myshopify.com`:
+
+- Source catalog: `data/antique-estate-catalog.json`
+- Shopify import CSV: `data/shopify-products-antique-estate.csv`
+- CSV generator: `scripts/generate-shopify-csv.mjs`
+- Live-store population script: `scripts/populate-shopify-store.mjs`
+
+### 5a. Included collections
+
+The seed catalog creates or reuses broader store collections first, then adds
+the Antique & Estate designer layer:
+
+- Category / store collections: Antique & Estate, New Arrivals, Best Sellers,
+  Rings, Necklaces, Pendants, Bracelets, Earrings, Brooches & Pins, Charms,
+  Engagement Rings, Wedding Bands, Bridal Sets, Bridal Gifts.
+- Designer collections: Buccellati, Bvlgari, Cartier, Chopard, David Webb,
+  Graff, Harry Winston, Hermès, Marina B, Tiffany & Co., Van Cleef & Arpels.
+
+Category and designer collections are smart collections keyed by product tags
+or exact product vendor values wherever possible. The Antique & Estate
+collection is kept manual so the landing page can be controlled and assigned
+the `collection.antique-estate` theme template.
+
+### 5b. Regenerate the CSV
+
+Run this after editing `data/antique-estate-catalog.json`:
+
+```bash
+node scripts/generate-shopify-csv.mjs
+```
+
+### 5c. Populate the live store with Shopify CLI
+
+Authenticate once with the minimum product/collection scopes:
+
+```bash
+shopify store auth --store laura-milman.myshopify.com --scopes read_products,write_products
+```
+
+Preview the operations:
+
+```bash
+node scripts/populate-shopify-store.mjs --store laura-milman.myshopify.com --dry-run
+```
+
+Create or update the collections and 24 products:
+
+```bash
+node scripts/populate-shopify-store.mjs --store laura-milman.myshopify.com
+```
+
+The script is idempotent by handle. It queries existing collections first,
+updates matching collection handles, creates missing handles, and upserts
+products through `productSet` using each product handle as the identifier.
+
+### 5d. Theme assignment
+
+After the live store is populated, assign the Antique & Estate collection to
+the theme template:
+
+1. Shopify Admin → Products → Collections → Antique & Estate.
+2. Theme template → select `antique-estate`.
+3. Save.
+
+The homepage now includes an Antique & Estate designer spotlight section, and
+the `collection.antique-estate.json` template combines the product grid,
+designer spotlight, and designer dropdown.
