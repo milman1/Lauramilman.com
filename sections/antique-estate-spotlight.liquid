@@ -1,0 +1,153 @@
+<section class="antique-estate-spotlight">
+  <div class="antique-estate-spotlight__header">
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+    {%- endif -%}
+    <h2 class="section-title">{{ section.settings.title }}</h2>
+    {%- if section.settings.description != blank -%}
+      <p class="antique-estate-spotlight__description">{{ section.settings.description }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="antique-estate-spotlight__grid">
+    {%- for block in section.blocks -%}
+      <a class="antique-estate-spotlight__card" href="{{ block.settings.link }}" {{ block.shopify_attributes }}>
+        <span class="antique-estate-spotlight__card-kicker">{{ block.settings.kicker }}</span>
+        <span class="antique-estate-spotlight__card-title">{{ block.settings.title }}</span>
+        <span class="antique-estate-spotlight__card-copy">{{ block.settings.copy }}</span>
+        <span class="antique-estate-spotlight__card-cta">{{ block.settings.cta_label }}</span>
+      </a>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.cta_link != blank and section.settings.cta_label != blank -%}
+    <div class="antique-estate-spotlight__footer">
+      <a class="view-all-link" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Antique estate spotlight",
+  "tag": "section",
+  "class": "section-antique-estate-spotlight",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "High jewelry houses"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Antique & estate designer spotlight"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Shop authenticated, one-of-a-kind estate jewelry from the world's most collected houses."
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Footer link",
+      "default": "/collections/antique-estate"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Footer label",
+      "default": "Browse all antique & estate"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "designer",
+      "name": "Designer",
+      "settings": [
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kicker",
+          "default": "Estate icon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Designer",
+          "default": "Cartier"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy",
+          "default": "Signed pieces chosen for provenance, condition, and enduring design."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Collection link",
+          "default": "/collections/cartier"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Shop the house"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Antique estate spotlight",
+      "blocks": [
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Art Deco geometry, panther codes, and diamond classics with collectible signatures.",
+            "link": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "Van Cleef & Arpels",
+            "title": "Alhambra and beyond",
+            "copy": "Estate necklaces, bracelets, and sculptural pieces with graceful French provenance.",
+            "link": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed estate pieces selected for daily elegance.",
+            "link": "/collections/tiffany-co",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "Bold estate design",
+            "title": "David Webb",
+            "copy": "Enamel, animal forms, carved stones, and strong gold silhouettes with presence.",
+            "link": "/collections/david-webb",
+            "cta_label": "Shop David Webb"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

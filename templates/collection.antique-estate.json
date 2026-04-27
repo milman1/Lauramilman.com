@@ -1,0 +1,83 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "eyebrow": "Antique & Estate",
+        "products_per_page": 24
+      }
+    },
+    "designer-spotlight": {
+      "type": "antique-estate-spotlight",
+      "blocks": {
+        "cartier": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Signed Art Deco, panther, and diamond estate pieces curated for lasting collectability.",
+            "link": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        "bvlgari": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Roman icon",
+            "title": "Bvlgari",
+            "copy": "Bold gold, serpentine silhouettes, and colored stone jewels with unmistakable presence.",
+            "link": "/collections/bvlgari",
+            "cta_label": "Shop Bvlgari"
+          }
+        },
+        "harry-winston": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Diamond house",
+            "title": "Harry Winston",
+            "copy": "Exceptional diamond jewels and refined estate classics selected for brilliance and pedigree.",
+            "link": "/collections/harry-winston",
+            "cta_label": "Shop Harry Winston"
+          }
+        },
+        "graff": {
+          "type": "designer",
+          "settings": {
+            "kicker": "High jewelry color",
+            "title": "Graff",
+            "copy": "Rare diamonds and important colored stones with the polish of a modern collecting house.",
+            "link": "/collections/graff",
+            "cta_label": "Shop Graff"
+          }
+        }
+      },
+      "block_order": [
+        "cartier",
+        "bvlgari",
+        "harry-winston",
+        "graff"
+      ],
+      "settings": {
+        "eyebrow": "Designer estate jewelry",
+        "title": "Shop the great jewelry houses",
+        "description": "Explore authenticated antique and estate pieces by maison, category, and era.",
+        "cta_link": "/collections/antique-estate",
+        "cta_label": "Return to all estate pieces"
+      }
+    },
+    "estate-designers": {
+      "type": "estate-designers",
+      "settings": {
+        "eyebrow": "Browse by designer",
+        "title": "Find your house",
+        "description": "Use the designer list to shop signed estate jewelry by vendor collection.",
+        "partner_note": "All estate pieces are pre-owned and individually authenticated."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "designer-spotlight",
+    "estate-designers"
+  ]
+}
