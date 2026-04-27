@@ -207,7 +207,6 @@ function productInput(product, manualCollectionIds) {
     productType: product.productType,
     tags: product.tags,
     status: 'ACTIVE',
-    templateSuffix: '',
     collections: manualCollectionIds,
     seo: {
       title: product.seoTitle,

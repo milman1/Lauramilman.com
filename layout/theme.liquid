@@ -57,6 +57,6 @@
     <p class="cart-notification__text">Added to cart</p>
   </div>
 
-  {{ 'theme.js' | asset_url | script_tag }}
+  <script src="{{ 'theme.js' | asset_url }}" defer></script>
 </body>
 </html>
