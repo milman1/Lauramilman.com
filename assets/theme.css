@@ -932,34 +932,72 @@ img {
   letter-spacing: 0.5px;
 }
 
+.antique-estate-spotlight__inner { width: 100%; }
+
 .antique-estate-spotlight__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
+.antique-estate-spotlight__grid--6,
+.antique-estate-spotlight__grid--7,
+.antique-estate-spotlight__grid--8 { grid-template-columns: repeat(4, 1fr); }
+.antique-estate-spotlight__grid--3 { grid-template-columns: repeat(3, 1fr); }
+.antique-estate-spotlight__grid--2 { grid-template-columns: repeat(2, 1fr); }
 
 .antique-estate-spotlight__card {
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 32px;
+  position: relative;
+  display: block;
+  aspect-ratio: 4/5;
+  overflow: hidden;
   border: 1px solid var(--border);
-  background:
-    radial-gradient(circle at 20% 10%, rgba(196, 168, 130, 0.14), transparent 34%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.3s, transform 0.3s, background 0.3s;
+  isolation: isolate;
+  background: linear-gradient(160deg, rgba(196,168,130,0.08), rgba(255,255,255,0.02));
+  transition: border-color 0.3s, transform 0.3s;
 }
-
 .antique-estate-spotlight__card:hover {
   border-color: var(--border-hover);
   transform: translateY(-4px);
+}
+
+.antique-estate-spotlight__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.antique-estate-spotlight__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.antique-estate-spotlight__card:hover .antique-estate-spotlight__media img { transform: scale(1.05); }
+
+.antique-estate-spotlight__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14,8,5,0) 30%, rgba(14,8,5,0.85) 100%);
+}
+
+.antique-estate-spotlight__card--placeholder .antique-estate-spotlight__overlay {
   background:
-    radial-gradient(circle at 20% 10%, rgba(196, 168, 130, 0.2), transparent 38%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+    radial-gradient(circle at 25% 15%, rgba(196,168,130,0.18), transparent 38%),
+    linear-gradient(180deg, rgba(14,8,5,0.2), rgba(14,8,5,0.85));
+}
+
+.antique-estate-spotlight__content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 24px 26px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .antique-estate-spotlight__card-kicker {
@@ -972,29 +1010,49 @@ img {
 
 .antique-estate-spotlight__card-title {
   font-family: var(--font-serif);
-  font-size: clamp(24px, 2.4vw, 36px);
+  font-size: clamp(22px, 2vw, 30px);
   line-height: 1.05;
   color: var(--text-primary);
 }
 
 .antique-estate-spotlight__card-copy {
   font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(237, 227, 212, 0.78);
+  margin-top: 2px;
 }
 
 .antique-estate-spotlight__card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--accent);
+  margin-top: 10px;
 }
 
 .antique-estate-spotlight__footer {
   text-align: center;
   margin-top: 56px;
+}
+
+@media (max-width: 1024px) {
+  .antique-estate-spotlight__grid,
+  .antique-estate-spotlight__grid--6,
+  .antique-estate-spotlight__grid--7,
+  .antique-estate-spotlight__grid--8 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .antique-estate-spotlight__grid,
+  .antique-estate-spotlight__grid--6,
+  .antique-estate-spotlight__grid--7,
+  .antique-estate-spotlight__grid--8,
+  .antique-estate-spotlight__grid--3 { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .antique-estate-spotlight__content { padding: 16px 16px 18px; }
 }
 
 /* ============================================================

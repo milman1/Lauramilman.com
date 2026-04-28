@@ -21,36 +21,183 @@
         "minimal_monogram": "LM"
       }
     },
+    "antique-estate-spotlight": {
+      "type": "antique-estate-spotlight",
+      "blocks": {
+        "cartier": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Art Deco geometry, panther codes, and signed diamond classics.",
+            "link": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        "van-cleef": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French high jewelry",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra icons, sculptural gold, and signed estate pieces.",
+            "link": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        "tiffany": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed estate jewels.",
+            "link": "/collections/tiffany",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        "bvlgari": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Roman icon",
+            "title": "Bvlgari",
+            "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
+            "link": "/collections/bvlgari",
+            "cta_label": "Shop Bvlgari"
+          }
+        },
+        "hermes": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French house",
+            "title": "Hermès",
+            "copy": "Chaîne d'Ancre, Kelly, and signed Hermès estate jewelry.",
+            "link": "/collections/hermes",
+            "cta_label": "Shop Hermès"
+          }
+        },
+        "chopard": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Geneva maison",
+            "title": "Chopard",
+            "copy": "Happy Diamonds, Imperiale, and signed Chopard estate pieces.",
+            "link": "/collections/chopard",
+            "cta_label": "Shop Chopard"
+          }
+        },
+        "verdura": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Bold gold",
+            "title": "Verdura",
+            "copy": "Maltese cuffs, gold rope, and signed Verdura icons.",
+            "link": "/collections/verdura",
+            "cta_label": "Shop Verdura"
+          }
+        },
+        "seaman-schepps": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York classic",
+            "title": "Seaman Schepps",
+            "copy": "Shells, turbo earrings, and signed Seaman Schepps estate jewelry.",
+            "link": "/collections/seaman-schepps",
+            "cta_label": "Shop Seaman Schepps"
+          }
+        }
+      },
+      "block_order": [
+        "cartier",
+        "van-cleef",
+        "tiffany",
+        "bvlgari",
+        "hermes",
+        "chopard",
+        "verdura",
+        "seaman-schepps"
+      ],
+      "settings": {
+        "eyebrow": "Designer estate jewelry",
+        "title": "Shop by designer",
+        "description": "Authenticated antique and estate jewelry from the world's most collected houses.",
+        "layout": "tiles",
+        "cta_link": "/collections/vintage-jewelry",
+        "cta_label": "Browse all antique & estate"
+      }
+    },
     "collections-grid": {
       "type": "collections-grid",
+      "blocks": {
+        "cat-rings": {
+          "type": "collection",
+          "settings": { "collection": "rings" }
+        },
+        "cat-necklaces": {
+          "type": "collection",
+          "settings": { "collection": "necklaces" }
+        },
+        "cat-earrings": {
+          "type": "collection",
+          "settings": { "collection": "earrings" }
+        },
+        "cat-bracelets": {
+          "type": "collection",
+          "settings": { "collection": "bangles" }
+        },
+        "cat-engagement": {
+          "type": "collection",
+          "settings": { "collection": "engagement-rings" }
+        },
+        "cat-vintage": {
+          "type": "collection",
+          "settings": { "collection": "vintage-jewelry" }
+        },
+        "cat-watches": {
+          "type": "collection",
+          "settings": { "collection": "watches" }
+        },
+        "cat-luxury": {
+          "type": "collection",
+          "settings": { "collection": "high-quality-jewelry" }
+        }
+      },
+      "block_order": [
+        "cat-rings",
+        "cat-necklaces",
+        "cat-earrings",
+        "cat-bracelets",
+        "cat-engagement",
+        "cat-vintage",
+        "cat-watches",
+        "cat-luxury"
+      ],
       "settings": {
-        "eyebrow": "Explore Our World",
-        "title": "Shop the Collections",
-        "view_all_link": "/collections/all"
+        "eyebrow": "Shop by category",
+        "title": "Explore the collections",
+        "view_all_link": "/collections"
       }
     },
-    "featured-products": {
+    "estate-products": {
       "type": "featured-products",
       "settings": {
-        "eyebrow": "Editor's Picks",
-        "title": "Pieces We Love Right Now",
-        "description": "A curated selection from our latest arrivals, hand-picked by our team.",
-        "collection": "",
+        "eyebrow": "Antique & Estate",
+        "title": "Recently Acquired",
+        "description": "Newly authenticated pieces from the world's great houses. Each one-of-a-kind.",
+        "collection": "vintage-jewelry",
         "products_to_show": 8,
         "show_view_all": true,
-        "view_all_label": "Shop All Pieces"
+        "view_all_label": "Browse all estate pieces"
       }
     },
-    "best-sellers": {
+    "cartier-shelf": {
       "type": "featured-products",
       "settings": {
-        "eyebrow": "Customer Favorites",
-        "title": "Best Sellers",
-        "description": "The pieces our customers reach for most — timeless silhouettes that have earned their place.",
-        "collection": "best-sellers",
+        "eyebrow": "Maison spotlight",
+        "title": "Estate Cartier",
+        "description": "Signed Cartier estate pieces — Love, Trinity, panther, and Art Deco classics.",
+        "collection": "cartier",
         "products_to_show": 8,
         "show_view_all": true,
-        "view_all_label": "Shop Best Sellers"
+        "view_all_label": "Shop all Cartier"
       }
     },
     "engagement-rings": {
@@ -63,76 +210,6 @@
         "products_to_show": 4,
         "show_view_all": true,
         "view_all_label": "Shop Engagement Rings"
-      }
-    },
-    "estate-products": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Antique & Estate",
-        "title": "Recently Acquired",
-        "description": "Newly authenticated pieces from the world's great houses. Each one-of-a-kind.",
-        "collection": "antique-estate",
-        "products_to_show": 4,
-        "show_view_all": true,
-        "view_all_label": "Browse All Estate Pieces"
-      }
-    },
-    "antique-estate-spotlight": {
-      "type": "antique-estate-spotlight",
-      "blocks": {
-        "cartier": {
-          "type": "designer",
-          "settings": {
-            "kicker": "Paris maison",
-            "title": "Cartier",
-            "copy": "Art Deco geometry, panther codes, and signed diamond classics chosen for provenance.",
-            "link": "/collections/cartier",
-            "cta_label": "Shop Cartier"
-          }
-        },
-        "van-cleef": {
-          "type": "designer",
-          "settings": {
-            "kicker": "French high jewelry",
-            "title": "Van Cleef & Arpels",
-            "copy": "Alhambra icons, sculptural gold, and elegant estate pieces from a collectible house.",
-            "link": "/collections/van-cleef-arpels",
-            "cta_label": "Shop Van Cleef"
-          }
-        },
-        "tiffany": {
-          "type": "designer",
-          "settings": {
-            "kicker": "New York icon",
-            "title": "Tiffany & Co.",
-            "copy": "Schlumberger, diamond essentials, and signed estate jewels selected for everyday polish.",
-            "link": "/collections/tiffany-co",
-            "cta_label": "Shop Tiffany"
-          }
-        },
-        "david-webb": {
-          "type": "designer",
-          "settings": {
-            "kicker": "Bold estate design",
-            "title": "David Webb",
-            "copy": "Enamel, carved stones, animal forms, and architectural gold with unmistakable presence.",
-            "link": "/collections/david-webb",
-            "cta_label": "Shop David Webb"
-          }
-        }
-      },
-      "block_order": [
-        "cartier",
-        "van-cleef",
-        "tiffany",
-        "david-webb"
-      ],
-      "settings": {
-        "eyebrow": "High jewelry houses",
-        "title": "Antique & estate designer spotlight",
-        "description": "A focused edit of authenticated, one-of-a-kind pieces from the world's most collected jewelry houses.",
-        "cta_link": "/collections/antique-estate",
-        "cta_label": "Browse all antique & estate"
       }
     },
     "brand-story": {
@@ -155,12 +232,11 @@
   },
   "order": [
     "hero",
-    "collections-grid",
-    "featured-products",
-    "best-sellers",
-    "engagement-rings",
-    "estate-products",
     "antique-estate-spotlight",
+    "collections-grid",
+    "estate-products",
+    "cartier-shelf",
+    "engagement-rings",
     "brand-story",
     "instagram-feed"
   ]

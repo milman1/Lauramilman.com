@@ -15,9 +15,29 @@
           "settings": {
             "kicker": "Paris maison",
             "title": "Cartier",
-            "copy": "Signed Art Deco, panther, and diamond estate pieces curated for lasting collectability.",
+            "copy": "Signed Art Deco, panther, and diamond estate pieces.",
             "link": "/collections/cartier",
             "cta_label": "Shop Cartier"
+          }
+        },
+        "van-cleef": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French house",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra, sculptural gold, and signed estate pieces.",
+            "link": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        "tiffany": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed Tiffany estate jewels.",
+            "link": "/collections/tiffany",
+            "cta_label": "Shop Tiffany"
           }
         },
         "bvlgari": {
@@ -25,43 +45,24 @@
           "settings": {
             "kicker": "Roman icon",
             "title": "Bvlgari",
-            "copy": "Bold gold, serpentine silhouettes, and colored stone jewels with unmistakable presence.",
+            "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
             "link": "/collections/bvlgari",
             "cta_label": "Shop Bvlgari"
-          }
-        },
-        "harry-winston": {
-          "type": "designer",
-          "settings": {
-            "kicker": "Diamond house",
-            "title": "Harry Winston",
-            "copy": "Exceptional diamond jewels and refined estate classics selected for brilliance and pedigree.",
-            "link": "/collections/harry-winston",
-            "cta_label": "Shop Harry Winston"
-          }
-        },
-        "graff": {
-          "type": "designer",
-          "settings": {
-            "kicker": "High jewelry color",
-            "title": "Graff",
-            "copy": "Rare diamonds and important colored stones with the polish of a modern collecting house.",
-            "link": "/collections/graff",
-            "cta_label": "Shop Graff"
           }
         }
       },
       "block_order": [
         "cartier",
-        "bvlgari",
-        "harry-winston",
-        "graff"
+        "van-cleef",
+        "tiffany",
+        "bvlgari"
       ],
       "settings": {
         "eyebrow": "Designer estate jewelry",
         "title": "Shop the great jewelry houses",
-        "description": "Explore authenticated antique and estate pieces by maison, category, and era.",
-        "cta_link": "/collections/antique-estate",
+        "description": "Authenticated antique and estate pieces by maison, category, and era.",
+        "layout": "tiles",
+        "cta_link": "/collections/vintage-jewelry",
         "cta_label": "Return to all estate pieces"
       }
     },
