@@ -23,6 +23,9 @@
           {%- assign card_image = card_collection.products.first.featured_image -%}
         {%- endif -%}
         {%- assign card_url = block.settings.link -%}
+        {%- if card_url == blank and block.settings.link_text != blank -%}
+          {%- assign card_url = block.settings.link_text -%}
+        {%- endif -%}
         {%- if card_url == blank and card_collection != blank -%}
           {%- assign card_url = card_collection.url -%}
         {%- endif -%}
@@ -65,9 +68,13 @@
       {%- endfor -%}
     </div>
 
-    {%- if section.settings.cta_link != blank and section.settings.cta_label != blank -%}
+    {%- assign footer_url = section.settings.cta_link -%}
+    {%- if footer_url == blank -%}
+      {%- assign footer_url = section.settings.cta_link_text -%}
+    {%- endif -%}
+    {%- if footer_url != blank and section.settings.cta_label != blank -%}
       <div class="antique-estate-spotlight__footer">
-        <a class="view-all-link" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }} →</a>
+        <a class="view-all-link" href="{{ footer_url }}">{{ section.settings.cta_label }} →</a>
       </div>
     {%- endif -%}
   </div>
@@ -110,8 +117,13 @@
     {
       "type": "url",
       "id": "cta_link",
-      "label": "Footer link",
-      "default": "/collections/antique-estate"
+      "label": "Footer link"
+    },
+    {
+      "type": "text",
+      "id": "cta_link_text",
+      "label": "Footer link path (text, e.g. /collections/vintage-jewelry)",
+      "default": "/collections/vintage-jewelry"
     },
     {
       "type": "text",
@@ -161,6 +173,11 @@
         },
         {
           "type": "text",
+          "id": "link_text",
+          "label": "Manual link override (text path, e.g. /collections/cartier)"
+        },
+        {
+          "type": "text",
           "id": "cta_label",
           "label": "CTA label",
           "default": "Shop the house"
@@ -178,7 +195,7 @@
             "kicker": "Paris maison",
             "title": "Cartier",
             "copy": "Art Deco geometry, panther codes, and signed diamond classics.",
-            "link": "/collections/cartier",
+            "link_text": "/collections/cartier",
             "cta_label": "Shop Cartier"
           }
         },
@@ -188,7 +205,7 @@
             "kicker": "French high jewelry",
             "title": "Van Cleef & Arpels",
             "copy": "Alhambra icons and sculptural estate pieces.",
-            "link": "/collections/van-cleef-arpels",
+            "link_text": "/collections/van-cleef-arpels",
             "cta_label": "Shop Van Cleef"
           }
         },
@@ -198,7 +215,7 @@
             "kicker": "New York icon",
             "title": "Tiffany & Co.",
             "copy": "Schlumberger, diamond essentials, and signed estate jewels.",
-            "link": "/collections/tiffany-co",
+            "link_text": "/collections/tiffany",
             "cta_label": "Shop Tiffany"
           }
         },
@@ -208,7 +225,7 @@
             "kicker": "Bold estate design",
             "title": "David Webb",
             "copy": "Enamel, carved stones, and architectural gold.",
-            "link": "/collections/david-webb",
+            "link_text": "/collections/david-webb",
             "cta_label": "Shop David Webb"
           }
         }
