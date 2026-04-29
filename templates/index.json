@@ -30,6 +30,7 @@
             "kicker": "Paris maison",
             "title": "Cartier",
             "copy": "Art Deco geometry, panther codes, and signed diamond classics.",
+            "collection_handle": "cartier",
             "link_text": "/collections/cartier",
             "cta_label": "Shop Cartier"
           }
@@ -40,6 +41,7 @@
             "kicker": "French high jewelry",
             "title": "Van Cleef & Arpels",
             "copy": "Alhambra icons, sculptural gold, and signed estate pieces.",
+            "collection_handle": "van-cleef-arpels",
             "link_text": "/collections/van-cleef-arpels",
             "cta_label": "Shop Van Cleef"
           }
@@ -50,6 +52,7 @@
             "kicker": "New York icon",
             "title": "Tiffany & Co.",
             "copy": "Schlumberger, diamond essentials, and signed estate jewels.",
+            "collection_handle": "tiffany",
             "link_text": "/collections/tiffany",
             "cta_label": "Shop Tiffany"
           }
@@ -60,6 +63,7 @@
             "kicker": "Roman icon",
             "title": "Bvlgari",
             "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
+            "collection_handle": "bvlgari",
             "link_text": "/collections/bvlgari",
             "cta_label": "Shop Bvlgari"
           }
@@ -70,6 +74,7 @@
             "kicker": "French house",
             "title": "Hermès",
             "copy": "Chaîne d'Ancre, Kelly, and signed Hermès estate jewelry.",
+            "collection_handle": "hermes",
             "link_text": "/collections/hermes",
             "cta_label": "Shop Hermès"
           }
@@ -80,6 +85,7 @@
             "kicker": "Geneva maison",
             "title": "Chopard",
             "copy": "Happy Diamonds, Imperiale, and signed Chopard estate pieces.",
+            "collection_handle": "chopard",
             "link_text": "/collections/chopard",
             "cta_label": "Shop Chopard"
           }
@@ -90,6 +96,7 @@
             "kicker": "Bold gold",
             "title": "Verdura",
             "copy": "Maltese cuffs, gold rope, and signed Verdura icons.",
+            "collection_handle": "verdura",
             "link_text": "/collections/verdura",
             "cta_label": "Shop Verdura"
           }
@@ -100,6 +107,7 @@
             "kicker": "New York classic",
             "title": "Seaman Schepps",
             "copy": "Shells, turbo earrings, and signed Seaman Schepps estate jewelry.",
+            "collection_handle": "seaman-schepps",
             "link_text": "/collections/seaman-schepps",
             "cta_label": "Shop Seaman Schepps"
           }

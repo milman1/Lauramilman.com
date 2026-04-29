@@ -16,6 +16,7 @@
             "kicker": "Paris maison",
             "title": "Cartier",
             "copy": "Signed Art Deco, panther, and diamond estate pieces.",
+            "collection_handle": "cartier",
             "link_text": "/collections/cartier",
             "cta_label": "Shop Cartier"
           }
@@ -26,6 +27,7 @@
             "kicker": "French house",
             "title": "Van Cleef & Arpels",
             "copy": "Alhambra, sculptural gold, and signed estate pieces.",
+            "collection_handle": "van-cleef-arpels",
             "link_text": "/collections/van-cleef-arpels",
             "cta_label": "Shop Van Cleef"
           }
@@ -36,6 +38,7 @@
             "kicker": "New York icon",
             "title": "Tiffany & Co.",
             "copy": "Schlumberger, diamond essentials, and signed Tiffany estate jewels.",
+            "collection_handle": "tiffany",
             "link_text": "/collections/tiffany",
             "cta_label": "Shop Tiffany"
           }
@@ -46,6 +49,7 @@
             "kicker": "Roman icon",
             "title": "Bvlgari",
             "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
+            "collection_handle": "bvlgari",
             "link_text": "/collections/bvlgari",
             "cta_label": "Shop Bvlgari"
           }

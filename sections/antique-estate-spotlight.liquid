@@ -14,7 +14,10 @@
 
     <div class="antique-estate-spotlight__grid antique-estate-spotlight__grid--{{ section.blocks.size }}">
       {%- for block in section.blocks -%}
-        {%- assign card_collection = collections[block.settings.collection] -%}
+        {%- assign card_collection = block.settings.collection -%}
+        {%- if card_collection == blank and block.settings.collection_handle != blank -%}
+          {%- assign card_collection = collections[block.settings.collection_handle] -%}
+        {%- endif -%}
         {%- assign card_image = block.settings.image -%}
         {%- if card_image == blank and card_collection.image -%}
           {%- assign card_image = card_collection.image -%}
@@ -165,6 +168,11 @@
           "type": "collection",
           "id": "collection",
           "label": "Collection (auto-fills link and image)"
+        },
+        {
+          "type": "text",
+          "id": "collection_handle",
+          "label": "Collection handle (text fallback, e.g. cartier)"
         },
         {
           "type": "url",
