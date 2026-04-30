@@ -13,14 +13,14 @@
       {
         "type": "color",
         "id": "accent_color",
-        "label": "Accent Color",
-        "default": "#C1A784"
+        "label": "Accent (gold)",
+        "default": "#836630"
       },
       {
         "type": "color",
         "id": "bg_color",
-        "label": "Background (deep)",
-        "default": "#1A0F08"
+        "label": "Page background (cream)",
+        "default": "#F5EFE6"
       }
     ]
   },

@@ -36,7 +36,7 @@
         {%- endif -%}
 
         <div class="product-gallery__zoom-hint" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(193,167,132,0.4)" stroke-width="1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(184,148,90,0.6)" stroke-width="1.5">
             <circle cx="11" cy="11" r="7"/>
             <path d="m21 21-4.35-4.35"/>
             <path d="M11 8v6M8 11h6"/>
@@ -75,8 +75,8 @@
         <div class="product-rating__stars stars" aria-label="4.8 out of 5 stars">
           {%- for i in (1..5) -%}
             <svg width="14" height="14" viewBox="0 0 24 24"
-              fill="{{ i | at_most: 4 | floor | times: 1 | at_least: 1 | minus: i | abs | at_most: 1 | times: -1 | plus: 1 | times: 193 | minus: 193 | at_most: 0 | abs | at_least: 0 | times: 0 }}{% if i <= 4 %}#C1A784{% else %}none{% endif %}"
-              stroke="#C1A784"
+              fill="{{ i | at_most: 4 | floor | times: 1 | at_least: 1 | minus: i | abs | at_most: 1 | times: -1 | plus: 1 | times: 193 | minus: 193 | at_most: 0 | abs | at_least: 0 | times: 0 }}{% if i <= 4 %}#836630{% else %}none{% endif %}"
+              stroke="#836630"
               stroke-width="1.5"
               aria-hidden="true"
             >
@@ -183,7 +183,7 @@
           </button>
 
           <button type="button" class="wishlist-btn" aria-label="{{ 'products.product.wishlist' | t }}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C1A784" stroke-width="1.5" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#836630" stroke-width="1.5" aria-hidden="true">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
             </svg>
           </button>
