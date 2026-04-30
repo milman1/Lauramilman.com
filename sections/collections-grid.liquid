@@ -33,6 +33,8 @@
               <img
                 src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
                 alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                width="{{ collection.products.first.featured_image.width }}"
+                height="{{ collection.products.first.featured_image.height }}"
                 loading="lazy"
               >
             {%- endif -%}

@@ -1,0 +1,88 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "eyebrow": "Antique & Estate",
+        "products_per_page": 24
+      }
+    },
+    "designer-spotlight": {
+      "type": "antique-estate-spotlight",
+      "blocks": {
+        "cartier": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Signed Art Deco, panther, and diamond estate pieces.",
+            "collection_handle": "cartier",
+            "link_text": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        "van-cleef": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French house",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra, sculptural gold, and signed estate pieces.",
+            "collection_handle": "van-cleef-arpels",
+            "link_text": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        "tiffany": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed Tiffany estate jewels.",
+            "collection_handle": "tiffany",
+            "link_text": "/collections/tiffany",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        "bvlgari": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Roman icon",
+            "title": "Bvlgari",
+            "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
+            "collection_handle": "bvlgari",
+            "link_text": "/collections/bvlgari",
+            "cta_label": "Shop Bvlgari"
+          }
+        }
+      },
+      "block_order": [
+        "cartier",
+        "van-cleef",
+        "tiffany",
+        "bvlgari"
+      ],
+      "settings": {
+        "eyebrow": "Designer estate jewelry",
+        "title": "Shop the great jewelry houses",
+        "description": "Authenticated antique and estate pieces by maison, category, and era.",
+        "layout": "tiles",
+        "cta_link_text": "/collections/vintage-jewelry",
+        "cta_label": "Return to all estate pieces"
+      }
+    },
+    "estate-designers": {
+      "type": "estate-designers",
+      "settings": {
+        "eyebrow": "Browse by designer",
+        "title": "Find your house",
+        "description": "Use the designer list to shop signed estate jewelry by vendor collection.",
+        "partner_note": "All estate pieces are pre-owned and individually authenticated."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "designer-spotlight",
+    "estate-designers"
+  ]
+}

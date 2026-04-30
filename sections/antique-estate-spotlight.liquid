@@ -1,0 +1,247 @@
+<section
+  class="antique-estate-spotlight antique-estate-spotlight--{{ section.settings.layout | default: 'tiles' }}"
+>
+  <div class="antique-estate-spotlight__inner">
+    <div class="antique-estate-spotlight__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- if section.settings.description != blank -%}
+        <p class="antique-estate-spotlight__description">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="antique-estate-spotlight__grid antique-estate-spotlight__grid--{{ section.blocks.size }}">
+      {%- for block in section.blocks -%}
+        {%- assign card_collection = block.settings.collection -%}
+        {%- if card_collection == blank and block.settings.collection_handle != blank -%}
+          {%- assign card_collection = collections[block.settings.collection_handle] -%}
+        {%- endif -%}
+        {%- assign card_image = block.settings.image -%}
+        {%- if card_image == blank and card_collection.image -%}
+          {%- assign card_image = card_collection.image -%}
+        {%- endif -%}
+        {%- if card_image == blank and card_collection.products.first.featured_image -%}
+          {%- assign card_image = card_collection.products.first.featured_image -%}
+        {%- endif -%}
+        {%- assign card_url = block.settings.link -%}
+        {%- if card_url == blank and block.settings.link_text != blank -%}
+          {%- assign card_url = block.settings.link_text -%}
+        {%- endif -%}
+        {%- if card_url == blank and block.settings.collection_handle != blank -%}
+          {%- capture card_url %}/collections/{{ block.settings.collection_handle }}{%- endcapture -%}
+        {%- endif -%}
+        {%- if card_url == blank and card_collection != blank -%}
+          {%- assign card_url = card_collection.url -%}
+        {%- endif -%}
+        <a
+          class="antique-estate-spotlight__card{% if card_image == blank %} antique-estate-spotlight__card--placeholder{% endif %}"
+          href="{{ card_url | default: '#' }}"
+          aria-label="{{ block.settings.title | default: card_collection.title | escape }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="antique-estate-spotlight__media">
+            {%- if card_image -%}
+              <img
+                src="{{ card_image | image_url: width: 900 }}"
+                alt="{{ card_image.alt | default: block.settings.title | default: card_collection.title | escape }}"
+                width="900"
+                height="1125"
+                loading="lazy"
+              >
+            {%- endif -%}
+            <span class="antique-estate-spotlight__overlay" aria-hidden="true"></span>
+          </div>
+          <div class="antique-estate-spotlight__content">
+            {%- if block.settings.kicker != blank -%}
+              <span class="antique-estate-spotlight__card-kicker">{{ block.settings.kicker }}</span>
+            {%- endif -%}
+            <span class="antique-estate-spotlight__card-title">
+              {{ block.settings.title | default: card_collection.title }}
+            </span>
+            {%- if block.settings.copy != blank -%}
+              <span class="antique-estate-spotlight__card-copy">{{ block.settings.copy }}</span>
+            {%- endif -%}
+            <span class="antique-estate-spotlight__card-cta">
+              {{ block.settings.cta_label | default: 'Shop the house' }}
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+                <path d="M1 5h12M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- assign footer_url = section.settings.cta_link -%}
+    {%- if footer_url == blank -%}
+      {%- assign footer_url = section.settings.cta_link_text -%}
+    {%- endif -%}
+    {%- if footer_url != blank and section.settings.cta_label != blank -%}
+      <div class="antique-estate-spotlight__footer">
+        <a class="view-all-link" href="{{ footer_url }}">{{ section.settings.cta_label }} →</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Antique estate spotlight",
+  "tag": "section",
+  "class": "section-antique-estate-spotlight",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "High jewelry houses"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Shop by designer"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Authenticated, one-of-a-kind antique and estate jewelry from the world's most collected houses."
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "tiles",
+      "options": [
+        { "value": "tiles", "label": "Image tiles" },
+        { "value": "minimal", "label": "Minimal text cards" }
+      ]
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Footer link"
+    },
+    {
+      "type": "text",
+      "id": "cta_link_text",
+      "label": "Footer link path (text, e.g. /collections/vintage-jewelry)",
+      "default": "/collections/vintage-jewelry"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Footer label",
+      "default": "Browse all antique & estate"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "designer",
+      "name": "Designer",
+      "settings": [
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kicker",
+          "default": "Estate icon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Designer",
+          "default": "Cartier"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy",
+          "default": "Signed pieces chosen for provenance, condition, and enduring design."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Tile image (optional)",
+          "info": "Falls back to collection image, then first product image."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection (auto-fills link and image)"
+        },
+        {
+          "type": "text",
+          "id": "collection_handle",
+          "label": "Collection handle (text fallback, e.g. cartier)"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Manual link override (optional)"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Manual link override (text path, e.g. /collections/cartier)"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Shop the house"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Antique estate spotlight",
+      "blocks": [
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Art Deco geometry, panther codes, and signed diamond classics.",
+            "link_text": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "French high jewelry",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra icons and sculptural estate pieces.",
+            "link_text": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed estate jewels.",
+            "link_text": "/collections/tiffany",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        {
+          "type": "designer",
+          "settings": {
+            "kicker": "Bold estate design",
+            "title": "David Webb",
+            "copy": "Enamel, carved stones, and architectural gold.",
+            "link_text": "/collections/david-webb",
+            "cta_label": "Shop David Webb"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
