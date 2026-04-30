@@ -29,6 +29,9 @@
         {%- if card_url == blank and block.settings.link_text != blank -%}
           {%- assign card_url = block.settings.link_text -%}
         {%- endif -%}
+        {%- if card_url == blank and block.settings.collection_handle != blank -%}
+          {%- capture card_url %}/collections/{{ block.settings.collection_handle }}{%- endcapture -%}
+        {%- endif -%}
         {%- if card_url == blank and card_collection != blank -%}
           {%- assign card_url = card_collection.url -%}
         {%- endif -%}
