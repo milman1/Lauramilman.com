@@ -31,7 +31,6 @@
 
     {% render 'meta-tags' %}
 
-    <!-- Google Fonts - optimized loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">
@@ -70,6 +69,7 @@
 
     <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
 
+    {%- comment -%} TODO: Add LM customer-service phone + email to contactPoint below once confirmed. {%- endcomment -%}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -88,7 +88,6 @@
       "contactPoint": {
         "@type": "ContactPoint",
         "contactType": "customer service"
-        "_TODO": "Replace with LM phone + email below"
       },
       "sameAs": [
         "https://instagram.com/laurasgemsnyc",
