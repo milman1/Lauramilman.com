@@ -1,0 +1,87 @@
+{%- comment -%}
+  Laura Milman — Search results section.
+  Heritage-dark layout cloned from PD; copy refined.
+{%- endcomment -%}
+
+<style>
+.search-page-wrap { background: #1c1a1a; min-height: 100vh; }
+.search-page { max-width: 1200px; margin: 0 auto; padding: 8rem 2rem 4rem; min-height: 60vh; }
+.search-page__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.5rem; font-weight: 400; color: #fff; margin-bottom: 0.5rem; font-style: italic; }
+.search-page__count { color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; margin-bottom: 2.5rem; letter-spacing: 0.05em; }
+.search-page__form { display: flex; align-items: center; gap: 0.75rem; max-width: 500px; margin-bottom: 3rem; border-bottom: 1px solid rgba(255, 255, 255, 0.22); padding-bottom: 0.5rem; }
+.search-page__input { flex: 1; background: none; border: none; outline: none; font-size: 1.1rem; color: #fff; font-family: inherit; }
+.search-page__input::placeholder { color: rgba(255, 255, 255, 0.32); }
+.search-page__btn { background: none; border: none; color: rgba(255, 255, 255, 0.6); cursor: pointer; padding: 0; }
+.search-page__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2rem; }
+.search-page__item { text-decoration: none; color: #fff; transition: opacity 0.2s ease; }
+.search-page__item:hover { opacity: 0.85; }
+.search-page__item-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: rgba(255, 255, 255, 0.04); margin-bottom: 0.75rem; }
+.search-page__item-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.search-page__item-price { color: var(--accent-gold, #dea882); font-size: 0.9rem; }
+.search-page__empty { text-align: center; padding: 3rem 0; color: rgba(255, 255, 255, 0.5); }
+.search-page__empty h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.75rem; font-weight: 400; color: #fff; margin-bottom: 0.75rem; font-style: italic; }
+@media (max-width: 768px) { .search-page { padding: 6rem 1.25rem 3rem; } .search-page__title { font-size: 1.75rem; } .search-page__grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; } }
+</style>
+
+<div class="search-page-wrap">
+<div class="search-page">
+  {%- if search.performed -%}
+    <h1 class="search-page__title">
+      {%- if search.results_count > 0 -%}
+        Results for “{{ search.terms }}”
+      {%- else -%}
+        No matches for “{{ search.terms }}”
+      {%- endif -%}
+    </h1>
+    <p class="search-page__count">{{ search.results_count }} piece{{ search.results_count | pluralize: '', 's' }}</p>
+  {%- else -%}
+    <h1 class="search-page__title">Search the collection</h1>
+  {%- endif -%}
+
+  <form action="{{ routes.search_url }}" method="get" class="search-page__form" role="search">
+    <input type="hidden" name="type" value="product">
+    <input type="search" name="q" class="search-page__input" value="{{ search.terms | escape }}" placeholder="Search the collection…">
+    <button type="submit" class="search-page__btn" aria-label="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+    </button>
+  </form>
+
+  {%- if search.performed -%}
+    {%- if search.results_count > 0 -%}
+      <div class="search-page__grid">
+        {%- for item in search.results -%}
+          <a href="{{ item.url }}" class="search-page__item">
+            {%- if item.featured_image -%}
+              <img class="search-page__item-img" src="{{ item.featured_image | image_url: width: 480 }}" alt="{{ item.featured_image.alt | default: item.title | escape }}" loading="lazy">
+            {%- else -%}
+              <div class="search-page__item-img"></div>
+            {%- endif -%}
+            <div class="search-page__item-title">{{ item.title }}</div>
+            {%- if item.price -%}
+              <div class="search-page__item-price">{{ item.price | money }}</div>
+            {%- endif -%}
+          </a>
+        {%- endfor -%}
+      </div>
+
+      {%- if search.results_count > search.results.size -%}
+        <div style="text-align: center; margin-top: 2rem;">
+          <p style="color: rgba(255,255,255,0.4); font-size: 0.85rem;">Showing {{ search.results.size }} of {{ search.results_count }}</p>
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <div class="search-page__empty">
+        <h2>Nothing here yet</h2>
+        <p>Refine the term, or browse the collection.</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+</div>
+
+{% schema %}
+{ "name": "Search Results", "settings": [] }
+{% endschema %}
