@@ -1,0 +1,181 @@
+{%- comment -%}
+  Laura Milman — Provenance & Practice (replaces PD's Sustainability).
+  Reframed from sustainability advocacy to the Milman house standard
+  for sourcing and making. Template: page.sustainability.json
+{%- endcomment -%}
+
+<style>
+.sus-page { padding-top: 120px; padding-bottom: 5rem; background: #1c1a1a; color: #fff; min-height: 100vh; }
+.sus-wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+.sus-hero { text-align: center; margin-bottom: 3.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.sus-hero__eyebrow { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.32em; color: var(--accent-gold, #dea882); margin: 0 0 1rem; }
+.sus-hero__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 400; line-height: 1.2; margin: 0 0 1.25rem; color: #fff; font-style: italic; }
+.sus-hero__lead { font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.68); max-width: 620px; margin: 0 auto; }
+
+.sus-section { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.sus-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.sus-section__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 400; margin: 0 0 1rem; color: #fff; line-height: 1.3; font-style: italic; }
+.sus-section__body { font-size: 1rem; line-height: 1.85; color: rgba(255,255,255,.72); }
+.sus-section__body p { margin: 0 0 1.15rem; }
+.sus-section__body strong { color: rgba(255,255,255,.92); font-weight: 600; }
+.sus-section__body a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; transition: opacity .3s ease; }
+.sus-section__body a:hover { opacity: .78; }
+.sus-section__body ul { list-style: none; margin: .75rem 0 1.25rem; padding: 0; }
+.sus-section__body li { position: relative; padding-left: 1.35rem; margin-bottom: .6rem; line-height: 1.65; }
+.sus-section__body li::before { content: ''; position: absolute; left: 0; top: .55rem; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-gold, #dea882); opacity: .6; }
+
+.sus-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0 1.5rem; }
+.sus-stat { padding: 1.5rem 1.25rem; border: 1px solid rgba(222,168,130,.18); border-radius: 4px; background: rgba(222,168,130,.04); text-align: center; }
+.sus-stat__number { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.55rem; font-weight: 400; color: var(--accent-gold, #dea882); line-height: 1.2; margin-bottom: .65rem; font-style: italic; }
+.sus-stat__desc { font-size: .82rem; line-height: 1.6; color: rgba(255,255,255,.62); }
+
+.sus-tip { margin: 1.25rem 0; padding: .9rem 1.15rem; border-left: 2px solid var(--accent-gold, #dea882); background: rgba(222,168,130,.04); border-radius: 0 4px 4px 0; font-size: .92rem; color: rgba(255,255,255,.82); line-height: 1.7; }
+
+.sus-faq { margin: 3rem 0 2.5rem; padding: 2rem 1.75rem; border: 1px solid rgba(255,255,255,.08); border-radius: 4px; background: rgba(255,255,255,.02); }
+.sus-faq__heading { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: #fff; margin: 0 0 1.5rem; text-align: center; font-style: italic; }
+.sus-faq__item { padding: .85rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.sus-faq__item:last-child { border-bottom: none; padding-bottom: 0; }
+.sus-faq__q { font-weight: 600; color: rgba(255,255,255,.92); margin: 0 0 .35rem; font-size: .95rem; }
+.sus-faq__a { color: rgba(255,255,255,.68); margin: 0; line-height: 1.7; font-size: .92rem; }
+
+.sus-cta { text-align: center; margin-top: 3rem; padding: 2.5rem 1.75rem; border: 1px solid rgba(222,168,130,.2); border-radius: 4px; background: rgba(222,168,130,.03); }
+.sus-cta__heading { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: #fff; margin: 0 0 .75rem; font-style: italic; }
+.sus-cta__text { color: rgba(255,255,255,.68); font-size: .95rem; margin: 0 0 1.5rem; line-height: 1.7; }
+.sus-cta__links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.sus-cta__btn { display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 2rem; background: var(--accent-gold, #dea882); color: #1c1a1a; font-size: .78rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; text-decoration: none; border-radius: 2px; transition: background .3s ease, transform .3s ease; }
+.sus-cta__btn:hover { background: var(--accent-gold-light, #e8bf9e); transform: translateY(-1px); }
+.sus-cta__btn--outline { background: transparent; color: var(--accent-gold, #dea882); border: 1px solid var(--accent-gold, #dea882); }
+.sus-cta__btn--outline:hover { background: rgba(222,168,130,.08); transform: translateY(-1px); }
+
+@media (max-width: 600px) {
+  .sus-page { padding-top: 100px; }
+  .sus-stats { grid-template-columns: 1fr; gap: .75rem; }
+  .sus-stat { padding: 1.25rem 1rem; }
+  .sus-cta__links { flex-direction: column; align-items: center; }
+}
+</style>
+
+<section class="sus-page">
+  <div class="sus-wrap">
+
+    <div class="sus-hero">
+      <p class="sus-hero__eyebrow">From the House</p>
+      <h1 class="sus-hero__title">Provenance &amp; practice</h1>
+      <p class="sus-hero__lead">A piece of fine jewellery should carry its history honestly. Where the stone came from, who set it, what hands shaped the metal — these are not abstractions but answerable questions. This page sets out our standards.</p>
+    </div>
+
+    <div class="sus-section">
+      <h2 class="sus-section__title">On choosing lab-grown</h2>
+      <div class="sus-section__body">
+        <p>The diamonds we set are lab-grown by choice, not as a compromise. The case is straightforward:</p>
+        <ul>
+          <li>No mining — no land disruption, no displaced communities, no open-pit scarring.</li>
+          <li>A markedly lower carbon footprint than the equivalent mined stone.</li>
+          <li>A traceable supply chain — from seed crystal through finished gem, documented on paper.</li>
+          <li>A fraction of the water that mining requires.</li>
+          <li>Production methods that are growing more energy-efficient each year.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sus-stats">
+      <div class="sus-stat">
+        <div class="sus-stat__number">No mines</div>
+        <p class="sus-stat__desc">Every Laura Milman stone is grown in a controlled facility — traceable from seed to setting.</p>
+      </div>
+      <div class="sus-stat">
+        <div class="sus-stat__number">Fully traced</div>
+        <p class="sus-stat__desc">A documented supply chain. The provenance of each centre stone arrives with the piece.</p>
+      </div>
+      <div class="sus-stat">
+        <div class="sus-stat__number">Smaller footprint</div>
+        <p class="sus-stat__desc">Substantially less land, water, and energy than the equivalent mined stone.</p>
+      </div>
+    </div>
+
+    <div class="sus-section">
+      <h2 class="sus-section__title">Atelier standards</h2>
+      <div class="sus-section__body">
+        <ul>
+          <li>We work with a small, vetted set of growers and cutters — the same houses our family has used for years.</li>
+          <li>Every centre stone is independently graded by IGI or GIA before it enters the atelier.</li>
+          <li>Our gold is sourced from refiners who use recycled metal where it is available, and certified responsible mining where it is not.</li>
+          <li>Each piece is hand-finished by master setters in our New York atelier — not contracted out, not assembled abroad.</li>
+          <li>Packaging is restrained: cotton-lined boxes, recycled paper, no plastic in the gift presentation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sus-section">
+      <h2 class="sus-section__title">Why heritage and provenance go together</h2>
+      <div class="sus-section__body">
+        <p>The Milman family has cut, set, and sold stones for three generations. The values we apply to a stone today are the values that built the house: cut over carat, integrity over ornament, and a standard of finish you can pass on. Lab-grown diamonds are simply a more honest way to deliver on that standard — the same beauty, the same hardness, the same grading authorities, with a clearer line of provenance behind every piece.</p>
+      </div>
+    </div>
+
+    <div class="sus-section">
+      <h2 class="sus-section__title">What we are working toward</h2>
+      <div class="sus-section__body">
+        <ul>
+          <li>Carbon-neutral atelier operations.</li>
+          <li>An entirely recycled-metal collection within the next two years.</li>
+          <li>Fully recyclable and FSC-certified packaging across every shipment.</li>
+          <li>Annual disclosure of our supply chain and footprint.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sus-tip">
+      <strong>Worth knowing:</strong> choosing a lab-grown diamond is not a compromise. The same brilliance, the same Mohs 10 hardness, the same IGI / GIA certification — with a clean origin documented on paper.
+    </div>
+
+    <div class="sus-faq">
+      <h2 class="sus-faq__heading">Frequently asked</h2>
+
+      <div class="sus-faq__item">
+        <p class="sus-faq__q">Are lab-grown diamonds meaningfully more sustainable?</p>
+        <p class="sus-faq__a">Yes. They require no mining, produce a substantially lower carbon footprint, and cause no land disruption. Energy is still used in growing — it is not zero impact — but the environmental case for lab-grown is robust by every credible measure.</p>
+      </div>
+
+      <div class="sus-faq__item">
+        <p class="sus-faq__q">Are your diamonds conflict-free?</p>
+        <p class="sus-faq__a">Without exception. Lab-grown diamonds have no connection to conflict mining. Every Laura Milman stone is created in a controlled facility with full traceability — you know exactly where it came from.</p>
+      </div>
+
+      <div class="sus-faq__item">
+        <p class="sus-faq__q">Is a lab-grown piece as durable as a mined one?</p>
+        <p class="sus-faq__a">Yes. Lab-grown diamonds have identical physical, chemical, and optical properties to mined diamonds. They score a 10 on the Mohs hardness scale — the highest possible — and will not cloud, fade, or lose their brilliance over time.</p>
+      </div>
+    </div>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Are lab-grown diamonds meaningfully more sustainable?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. They require no mining, produce a substantially lower carbon footprint, and cause no land disruption. Energy is still used in growing, but the environmental case for lab-grown is robust by every credible measure." } },
+        { "@type": "Question", "name": "Are your diamonds conflict-free?", "acceptedAnswer": { "@type": "Answer", "text": "Without exception. Lab-grown diamonds have no connection to conflict mining. Every Laura Milman stone is created in a controlled facility with full traceability." } },
+        { "@type": "Question", "name": "Is a lab-grown piece as durable as a mined one?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Lab-grown diamonds have identical physical, chemical, and optical properties to mined diamonds. They score a 10 on the Mohs hardness scale." } }
+      ]
+    }
+    </script>
+
+    <div class="sus-cta">
+      <h2 class="sus-cta__heading">Heirlooms with provenance</h2>
+      <p class="sus-cta__text">Each Laura Milman piece arrives with the documents to prove it. Read more on diamond origin, or explore the collection.</p>
+      <div class="sus-cta__links">
+        <a href="/pages/why-lab-grown" class="sus-cta__btn sus-cta__btn--outline">On diamond origin &rarr;</a>
+        <a href="/collections/engagement-rings" class="sus-cta__btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>
+          Explore the collection &rarr;
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Sustainability", "settings": [], "presets": [ { "name": "Sustainability" } ] }
+{% endschema %}
