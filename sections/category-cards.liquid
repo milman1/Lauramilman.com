@@ -1,0 +1,81 @@
+{%- comment -%}
+  Laura Milman — Category cards section.
+  Same grid + overlay structure as PD; palette + voice swapped.
+{%- endcomment -%}
+
+<section class="categories section">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2>{{ section.settings.heading | default: 'Shop by category' }}</h2>
+      <p class="text-muted">{{ section.settings.subheading | default: 'From the atelier collection' }}</p>
+    </div>
+    <div class="categories__grid">
+      {%- for block in section.blocks -%}
+        <div class="category-card" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            <img
+              class="category-card__image"
+              src="{{ block.settings.image | image_url: width: 600 }}"
+              srcset="{{ block.settings.image | image_url: width: 300 }} 300w,
+                      {{ block.settings.image | image_url: width: 400 }} 400w,
+                      {{ block.settings.image | image_url: width: 600 }} 600w,
+                      {{ block.settings.image | image_url: width: 800 }} 800w"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              alt="{{ block.settings.title }}"
+              loading="lazy"
+              decoding="async"
+            >
+          {%- else -%}
+            <div class="category-card__image" style="background: linear-gradient(135deg, #efecec 0%, #c1bcae 100%); display: flex; align-items: center; justify-content: center; height: 100%;">
+              <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="30" stroke="#1c1a1a" stroke-width="2"/>
+                <path d="M50 20 L60 50 L50 80 L40 50 Z" fill="#dea882" opacity="0.5"/>
+              </svg>
+            </div>
+          {%- endif -%}
+          <div class="category-card__overlay">
+            <h3 class="category-card__title">{{ block.settings.title }}</h3>
+            <a href="{{ block.settings.link }}" class="category-card__link">
+              View
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Category Cards",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "From the atelier collection" }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Engagement rings" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Cards",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Engagement rings" }},
+        { "type": "category", "settings": { "title": "Necklaces" }},
+        { "type": "category", "settings": { "title": "Earrings" }},
+        { "type": "category", "settings": { "title": "Bracelets" }}
+      ]
+    }
+  ]
+}
+{% endschema %}
