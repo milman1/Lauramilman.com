@@ -1,0 +1,191 @@
+{%- comment -%} Laura Milman — product page styles (extracted from main-product). {%- endcomment -%}
+<style>
+  .product-section-jc { background: #efecec; min-height: 100vh; min-height: 100dvh; }
+  .product-container-jc { display: grid; grid-template-columns: 1.2fr 1fr; max-width: 1600px; margin: 0 auto; }
+
+  .product-gallery-jc { padding: 100px 40px 60px 60px; }
+  .gallery-image-jc { margin-bottom: 20px; }
+  .gallery-image-jc img { width: 100%; height: auto; display: block; }
+  .gallery-video-jc { aspect-ratio: 1; overflow: hidden; }
+  .product-video-jc { width: 100%; height: 100%; object-fit: cover; }
+
+  .product-info-jc { padding: 120px 60px 60px 40px; position: relative; }
+  .product-info-inner-jc { position: sticky; top: 120px; }
+
+  .product-title-jc { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 400; line-height: 1.35; margin: 0 0 12px 0; color: #1c1a1a; letter-spacing: 0.01em; }
+  .product-description-short-jc { font-size: 0.9rem; color: #666; line-height: 1.65; margin: 0 0 20px 0; }
+  .product-short-desc-jc { font-size: 0.88rem; color: #555; line-height: 1.65; margin: 8px 0 16px 0; }
+
+  .product-price-jc { margin-bottom: 8px; }
+  .price-current-jc { font-size: 1.5rem; font-weight: 500; color: #1c1a1a; letter-spacing: 0.01em; }
+  .price-note-jc { font-size: 0.8rem; color: #888; margin: 0 0 16px 0; }
+  .price-compare-jc { text-decoration: line-through; margin-right: 10px; }
+  .price-save-jc { color: #476154; font-weight: 500; }
+
+  .financing-badge-jc { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 16px 0; padding: 10px 12px; background: rgba(222, 168, 130, 0.1); border: 1px solid rgba(222, 168, 130, 0.35); border-radius: 2px; font-size: 0.78rem; line-height: 1.5; color: #4a4a4a; }
+  .financing-badge-jc__icon { flex-shrink: 0; color: #dea882; line-height: 0; }
+  .financing-badge-jc__icon svg { display: block; }
+  .financing-badge-jc__text strong { color: #1c1a1a; font-weight: 600; }
+
+  .product-shipping-note-jc { font-size: 0.8rem; color: #666; font-style: italic; margin: 0 0 16px 0; line-height: 1.65; }
+  .product-shipping-note-jc em { font-style: italic; }
+
+  .product-hook-jc { font-size: 0.82rem; color: var(--text-muted, #7b8382); line-height: 1.6; margin: 0 0 22px 0; padding: 0 0 18px 0; border-bottom: 1px solid #e5e2dc; letter-spacing: 0.02em; }
+  .product-hook-jc em { font-style: italic; color: var(--text-dark, #1c1a1a); }
+
+  .variant-group-jc { margin-bottom: 20px; }
+  .variant-label-jc { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em; color: #666; margin-bottom: 8px; }
+  .variant-options-jc { display: flex; flex-wrap: wrap; gap: 8px; }
+  .variant-btn-jc { padding: 10px 20px; border: 1px solid #ccc; background: transparent; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.02em; }
+  .variant-btn-jc:hover, .variant-btn-jc.active { border-color: #1c1a1a; background: #1c1a1a; color: white; }
+
+  .ring-sizes-jc { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ring-size-btn-jc { min-width: 44px; padding: 8px 10px; font-size: 0.8rem; text-align: center; flex-shrink: 0; }
+
+  .size-guide-link-jc { font-size: 0.7rem; color: var(--accent-gold, #dea882); text-decoration: underline; text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 0.75rem; background: none; border: none; cursor: pointer; padding: 0; }
+  .size-guide-link-jc:hover { color: #1c1a1a; }
+
+  .size-guide-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 2000; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 40px 20px; backdrop-filter: blur(4px); }
+  .size-guide-overlay.open { display: block; }
+  .size-guide-modal { background: #fff; border-radius: 4px; max-width: 580px; width: 100%; margin: 0 auto; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3); animation: sizeGuideSlideIn 0.3s ease; position: relative; }
+  @keyframes sizeGuideSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .size-guide-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: #fff; border-radius: 4px 4px 0 0; z-index: 1; }
+  .size-guide-header h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.25rem; font-weight: 500; color: #1c1a1a; margin: 0; font-style: italic; }
+  .size-guide-close { background: none; border: none; cursor: pointer; color: #666; padding: 4px; display: flex; transition: color 0.2s; }
+  .size-guide-close:hover { color: #1c1a1a; }
+  .size-guide-body { padding: 24px; }
+  .size-guide-intro { font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.65; }
+  .size-guide-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.85rem; }
+  .size-guide-table thead th { background: #1c1a1a; color: #fff; padding: 10px 12px; text-align: center; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; }
+  .size-guide-table thead th:first-child { border-radius: 2px 0 0 0; }
+  .size-guide-table thead th:last-child { border-radius: 0 2px 0 0; }
+  .size-guide-table tbody td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #eee; color: #333; }
+  .size-guide-table tbody tr:hover { background: #efecec; }
+  .size-guide-highlight { background: rgba(222, 168, 130, 0.1) !important; font-weight: 600; }
+  .size-guide-highlight td { color: #1c1a1a !important; }
+  .size-guide-tips { background: #efecec; border-radius: 2px; padding: 20px; }
+  .size-guide-tips h4 { font-size: 0.9rem; font-weight: 600; color: #1c1a1a; margin: 0 0 12px 0; }
+  .size-guide-tips ol { padding-left: 20px; margin: 0 0 16px 0; }
+  .size-guide-tips li { font-size: 0.85rem; color: #555; line-height: 1.65; margin-bottom: 8px; }
+  .size-guide-note { font-size: 0.85rem; color: #1c1a1a; margin: 0; padding-top: 12px; border-top: 1px solid #e5e5e5; }
+
+  @media (max-width: 768px) {
+    .size-guide-overlay { padding: 20px 12px; }
+    .size-guide-modal { max-width: 100%; }
+    .size-guide-header { padding: 16px; }
+    .size-guide-header h3 { font-size: 1.1rem; }
+    .size-guide-body { padding: 16px; }
+    .size-guide-intro { font-size: 0.85rem; margin-bottom: 16px; }
+    .size-guide-table { font-size: 0.7rem; }
+    .size-guide-table thead th { padding: 8px 4px; font-size: 0.6rem; letter-spacing: 0; }
+    .size-guide-table tbody td { padding: 7px 4px; }
+    .size-guide-tips { padding: 14px; }
+    .size-guide-tips h4 { font-size: 0.85rem; }
+    .size-guide-tips li { font-size: 0.8rem; }
+    .size-guide-note { font-size: 0.8rem; }
+  }
+  @media (max-width: 375px) {
+    .size-guide-overlay { padding: 10px 8px; }
+    .size-guide-table thead th { font-size: 0.55rem; padding: 6px 3px; }
+    .size-guide-table tbody td { padding: 6px 3px; font-size: 0.65rem; }
+  }
+
+  /* Add to selection (CTA) */
+  .buy-now-btn-jc { width: 100%; padding: 16px 32px; background: #1c1a1a; color: white; border: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.22em; cursor: pointer; transition: background 0.3s ease; margin-bottom: 28px; text-transform: uppercase; }
+  .buy-now-btn-jc:hover { background: #322f2f; }
+
+  .trust-badges-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 0 20px; flex-wrap: wrap; }
+  .trust-badge { display: flex; align-items: center; gap: 5px; }
+  .trust-badge svg { color: #dea882; flex-shrink: 0; }
+  .trust-badge span { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; color: #555; white-space: nowrap; }
+  .trust-badge__divider { color: #ccc; font-size: 0.75rem; font-weight: 300; line-height: 1; }
+
+  .trust-list-jc { margin-bottom: 32px; border-bottom: 1px solid #ddd; padding-bottom: 24px; }
+  .trust-item-jc { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 0.85rem; color: #444; }
+  .trust-item-jc svg { color: #666; flex-shrink: 0; }
+
+  .details-section-jc { margin-top: 8px; }
+  .specs-tabs-jc { display: flex; gap: 0; border-bottom: 1px solid #ddd; margin-bottom: 16px; }
+  .specs-tab-jc { padding: 12px 20px; background: transparent; border: none; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #888; cursor: pointer; transition: all 0.2s ease; position: relative; }
+  .specs-tab-jc:hover { color: #1c1a1a; }
+  .specs-tab-jc.active { color: #1c1a1a; }
+  .specs-tab-jc.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: #1c1a1a; }
+  .specs-content-jc { display: none; }
+  .specs-content-jc.active { display: block; }
+  .spec-row-jc { display: flex; justify-content: space-between; padding: 10px 0; font-size: 0.85rem; border-bottom: 1px solid #eee; }
+  .spec-row-jc:last-child { border-bottom: none; }
+  .spec-row-jc span:first-child { color: #666; }
+  .spec-row-jc span:last-child { color: #1c1a1a; font-weight: 500; text-align: right; }
+
+  .lab-grown-section-jc { background: #fff; padding: 60px 40px; }
+  .lab-grown-container-jc { max-width: 1200px; margin: 0 auto; text-align: center; }
+  .lab-grown-heading-jc { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.75rem; font-weight: 400; margin: 0 0 16px 0; color: #1c1a1a; font-style: italic; }
+  .lab-grown-intro-jc { font-size: 0.95rem; color: #666; line-height: 1.75; max-width: 700px; margin: 0 auto 40px auto; }
+  .lab-grown-icons-jc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 50px; }
+  .lab-grown-icon-item-jc { text-align: center; }
+  .lab-grown-icon-circle-jc { width: 72px; height: 72px; border-radius: 50%; background: #efecec; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #1c1a1a; }
+  .lab-grown-icon-item-jc h3 { font-size: 1rem; font-weight: 600; margin: 0 0 8px 0; color: #1c1a1a; }
+  .lab-grown-icon-item-jc p { font-size: 0.85rem; color: #666; margin: 0; line-height: 1.6; }
+
+  .guarantee-section-jc { background: #efecec; padding: 32px; border-radius: 2px; }
+  .guarantee-heading-jc { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #1c1a1a; font-style: italic; }
+  .guarantee-text-jc { font-size: 0.9rem; color: #666; margin: 0 0 24px 0; line-height: 1.65; }
+  .guarantee-badges-jc { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+  .guarantee-badge-jc { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #444; }
+  .guarantee-badge-jc svg { color: #1c1a1a; }
+
+  @media (max-width: 992px) {
+    .product-container-jc { grid-template-columns: 1fr; }
+    .product-gallery-jc { padding: 80px 20px 20px 20px; }
+    .product-info-jc { padding: 20px; }
+    .product-info-inner-jc { position: static; }
+  }
+  @media (max-width: 768px) {
+    .product-section-jc { background: #fff; }
+    .product-gallery-jc { padding: 70px 16px 16px 16px; }
+    .gallery-image-jc { margin-bottom: 12px; border-radius: 4px; overflow: hidden; }
+    .gallery-video-jc { aspect-ratio: 1; border-radius: 4px; }
+    .product-info-jc { padding: 20px 16px 40px 16px; }
+    .product-title-jc { font-size: 1.35rem; line-height: 1.4; margin-bottom: 10px; }
+    .product-description-short-jc { font-size: 0.85rem; margin-bottom: 16px; }
+    .product-short-desc-jc { font-size: 0.82rem; margin: 6px 0 12px 0; }
+    .price-current-jc { font-size: 1.35rem; }
+    .product-shipping-note-jc { font-size: 0.75rem; margin-bottom: 16px; }
+    .variant-group-jc { margin-bottom: 16px; }
+    .variant-label-jc { font-size: 0.7rem; margin-bottom: 6px; }
+    .variant-btn-jc { padding: 10px 16px; font-size: 0.8rem; }
+    .buy-now-btn-jc { padding: 16px 24px; font-size: 0.85rem; position: sticky; bottom: 16px; z-index: 10; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
+    .trust-badges-row { gap: 6px 8px; padding: 10px 0 16px; }
+    .trust-badge svg { width: 14px; height: 14px; }
+    .trust-badge span { font-size: 0.65rem; }
+    .trust-badge__divider { font-size: 0.65rem; }
+    .trust-list-jc { margin-bottom: 24px; padding-bottom: 20px; }
+    .trust-item-jc { font-size: 0.8rem; padding: 6px 0; }
+    .trust-item-jc svg { width: 18px; height: 18px; }
+    .specs-tabs-jc { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+    .specs-tabs-jc::-webkit-scrollbar { display: none; }
+    .specs-tab-jc { padding: 10px 14px; font-size: 0.65rem; white-space: nowrap; }
+    .spec-row-jc { padding: 8px 0; font-size: 0.8rem; }
+    .lab-grown-section-jc { padding: 32px 16px; }
+    .lab-grown-heading-jc { font-size: 1.4rem; }
+    .lab-grown-intro-jc { font-size: 0.85rem; margin-bottom: 30px; }
+    .lab-grown-icons-jc { grid-template-columns: 1fr; gap: 24px; }
+    .lab-grown-icon-circle-jc { width: 56px; height: 56px; }
+    .lab-grown-icon-circle-jc svg { width: 24px; height: 24px; }
+    .lab-grown-icon-item-jc h3 { font-size: 0.9rem; }
+    .lab-grown-icon-item-jc p { font-size: 0.8rem; }
+    .guarantee-section-jc { padding: 24px 16px; }
+    .guarantee-heading-jc { font-size: 1rem; }
+    .guarantee-text-jc { font-size: 0.8rem; margin-bottom: 20px; }
+    .guarantee-badges-jc { flex-direction: column; gap: 12px; align-items: center; }
+    .guarantee-badge-jc { font-size: 0.8rem; }
+    .guarantee-badge-jc svg { width: 20px; height: 20px; }
+  }
+  @media (max-width: 375px) {
+    .product-title-jc { font-size: 1.2rem; }
+    .price-current-jc { font-size: 1.25rem; }
+    .variant-btn-jc { padding: 8px 12px; font-size: 0.75rem; }
+    .ring-sizes-jc { gap: 4px; }
+    .ring-size-btn-jc { min-width: 38px; padding: 7px 6px; font-size: 0.72rem; }
+  }
+</style>

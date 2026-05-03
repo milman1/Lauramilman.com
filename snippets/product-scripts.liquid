@@ -1,0 +1,144 @@
+{%- comment -%} Laura Milman — product page scripts (extracted from main-product). {%- endcomment -%}
+<script>
+  // Product variant data
+  const productVariants = [
+    {%- for variant in product.variants -%}
+      {
+        id: {{ variant.id }},
+        title: {{ variant.title | json }},
+        price: {{ variant.price }},
+        available: {{ variant.available }},
+        options: {{ variant.options | json }}
+      }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ];
+
+  // Variant selection
+  document.querySelectorAll('.variant-btn-jc:not(.ring-size-btn-jc)').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const position = parseInt(this.dataset.optionPosition);
+      const value = this.dataset.optionValue;
+
+      this.closest('.variant-options-jc').querySelectorAll('.variant-btn-jc').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const selectedOptions = [];
+      document.querySelectorAll('.variant-group-jc:not(.ring-size-selector-jc)').forEach(group => {
+        const activeBtn = group.querySelector('.variant-btn-jc.active');
+        if (activeBtn) selectedOptions.push(activeBtn.dataset.optionValue);
+      });
+
+      const matchedVariant = productVariants.find(v => v.options.every((opt, i) => opt === selectedOptions[i]));
+
+      if (matchedVariant) {
+        document.getElementById('selected-variant-id').value = matchedVariant.id;
+
+        const priceEl = document.querySelector('.price-current-jc');
+        if (priceEl) {
+          priceEl.textContent = '$' + (matchedVariant.price / 100).toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+        const financingEl = document.querySelector('.financing-per-payment-jc');
+        if (financingEl) {
+          const per = Math.floor(matchedVariant.price / 4) / 100;
+          financingEl.textContent = '$' + per.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        const buyBtn = document.querySelector('.buy-now-btn-jc');
+        if (buyBtn) {
+          if (matchedVariant.available) {
+            buyBtn.disabled = false;
+            buyBtn.textContent = 'Add to selection';
+          } else {
+            buyBtn.disabled = true;
+            buyBtn.textContent = 'Sold out';
+          }
+        }
+      }
+    });
+  });
+
+  // Ring size selection
+  document.querySelectorAll('.ring-size-btn-jc').forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.closest('.ring-sizes-jc').querySelectorAll('.ring-size-btn-jc').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const sizeInput = document.getElementById('ring-size-input');
+      if (sizeInput) sizeInput.value = this.dataset.ringSize;
+      document.querySelectorAll('.size-guide-table tbody tr').forEach(row => {
+        row.classList.remove('size-guide-highlight');
+        if (row.cells[0] && row.cells[0].textContent.trim() === this.dataset.ringSize) {
+          row.classList.add('size-guide-highlight');
+        }
+      });
+    });
+  });
+
+  // Size Guide Modal
+  const sizeGuideOpen = document.getElementById('openSizeGuide');
+  const sizeGuideOverlay = document.getElementById('sizeGuideOverlay');
+  const sizeGuideClose = document.getElementById('closeSizeGuide');
+
+  if (sizeGuideOpen && sizeGuideOverlay) {
+    sizeGuideOpen.addEventListener('click', function(e) {
+      e.preventDefault();
+      sizeGuideOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    sizeGuideClose.addEventListener('click', function() {
+      sizeGuideOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    sizeGuideOverlay.addEventListener('click', function(e) {
+      if (e.target === sizeGuideOverlay) {
+        sizeGuideOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sizeGuideOverlay.classList.contains('open')) {
+        sizeGuideOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  // Tab switching
+  document.querySelectorAll('.specs-tab-jc').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const targetId = this.dataset.tab;
+      document.querySelectorAll('.specs-tab-jc').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.specs-content-jc').forEach(content => content.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active');
+    });
+  });
+
+  // Extract video from product description
+  (function() {
+    const videoContainer = document.getElementById('description-video-container');
+    if (!videoContainer) return;
+    const productUrl = window.location.pathname + '.js';
+    fetch(productUrl)
+      .then(r => r.json())
+      .then(product => {
+        const description = product.description || '';
+        const mp4Match = description.match(/src=["']([^"']*\.mp4[^"']*)["']/i);
+        const webmMatch = description.match(/src=["']([^"']*\.webm[^"']*)["']/i);
+        const videoUrl = mp4Match ? mp4Match[1] : (webmMatch ? webmMatch[1] : null);
+        if (videoUrl) {
+          const video = document.createElement('video');
+          video.className = 'product-video-jc';
+          video.autoplay = true; video.loop = true; video.muted = true;
+          video.playsInline = true; video.controls = true;
+          const source = document.createElement('source');
+          source.src = videoUrl;
+          source.type = videoUrl.endsWith('.webm') ? 'video/webm' : 'video/mp4';
+          video.appendChild(source);
+          videoContainer.appendChild(video);
+        } else {
+          videoContainer.remove();
+        }
+      })
+      .catch(() => videoContainer.remove());
+  })();
+</script>
