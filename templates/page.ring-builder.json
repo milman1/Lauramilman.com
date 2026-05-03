@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ring-builder",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

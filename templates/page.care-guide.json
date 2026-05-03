@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "care-guide",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

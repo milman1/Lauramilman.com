@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "list-collections",
+      "settings": {
+        "title": "The collection",
+        "subtitle": "Each piece is designed and finished by hand in our New York atelier."
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
