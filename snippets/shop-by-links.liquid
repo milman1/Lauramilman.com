@@ -1,0 +1,83 @@
+{%- comment -%}
+  Shop-by Links — pill sub-navigation for SEO collection cross-links.
+  Renders only on the page that calls it; hides entirely if zero links resolve.
+{%- endcomment -%}
+
+{%- assign sb_1 = collections[col_handle_1] -%}
+{%- assign sb_2 = collections[col_handle_2] -%}
+{%- assign sb_3 = collections[col_handle_3] -%}
+{%- assign sb_4 = collections[col_handle_4] -%}
+{%- assign sb_5 = collections[col_handle_5] -%}
+{%- assign guide = pages[guide_handle] -%}
+
+{%- assign _link_count = 0 -%}
+{%- if sb_1 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if sb_2 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if sb_3 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if sb_4 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if sb_5 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if url_1 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if url_2 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if url_3 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if url_4 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+{%- if url_5 != blank -%}{%- assign _link_count = _link_count | plus: 1 -%}{%- endif -%}
+
+{%- if _link_count > 0 -%}
+<style>
+  .shop-by{max-width:900px;margin:0 auto 2rem;text-align:center}
+  .shop-by__heading{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted,#7b8382);margin:0 0 .75rem;font-weight:600}
+  .shop-by__pills{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;list-style:none;margin:0;padding:0}
+  .shop-by__pill{display:inline-flex;align-items:center;gap:.35rem;padding:.55rem 1.15rem;border:1.5px solid var(--border-light,#e5e2dc);border-radius:30px;background:var(--bg-white,#fff);color:var(--text-dark,#1c1a1a);font-size:.8rem;font-weight:500;letter-spacing:.02em;text-decoration:none;transition:border-color .25s ease,background .25s ease,color .25s ease,box-shadow .25s ease;white-space:nowrap}
+  .shop-by__pill:hover,.shop-by__pill:focus-visible{border-color:var(--accent-gold,#dea882);background:rgba(222,168,130,.08);color:var(--accent-gold-dark,#c89066);box-shadow:0 2px 8px rgba(222,168,130,.15)}
+  .shop-by__pill svg{flex-shrink:0;color:var(--accent-gold,#dea882);opacity:.7;transition:opacity .25s ease}
+  .shop-by__pill:hover svg{opacity:1}
+  .shop-by__help{margin-top:.65rem;font-size:.75rem;color:var(--text-muted,#7b8382)}
+  .shop-by__help a{color:var(--accent-gold,#dea882);text-decoration:underline;text-underline-offset:2px;font-weight:500;transition:opacity .2s ease}
+  .shop-by__help a:hover{opacity:.75}
+  @media(max-width:600px){.shop-by{margin-bottom:1.5rem}.shop-by__pills{gap:.4rem}.shop-by__pill{font-size:.72rem;padding:.45rem .85rem;white-space:normal;text-align:center}}
+</style>
+
+{%- capture _diamond_svg -%}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>{%- endcapture -%}
+
+<nav class="shop-by" aria-label="{{ heading | default: 'Shop by' }}">
+  <p class="shop-by__heading">{{ heading | default: 'Shop by' }}</p>
+  <ul class="shop-by__pills">
+
+    {%- if sb_1 != blank -%}
+      <li><a href="{{ sb_1.url }}" class="shop-by__pill">{{ _diamond_svg }}{{ sb_1.title }}</a></li>
+    {%- endif -%}
+    {%- if sb_2 != blank -%}
+      <li><a href="{{ sb_2.url }}" class="shop-by__pill">{{ _diamond_svg }}{{ sb_2.title }}</a></li>
+    {%- endif -%}
+    {%- if sb_3 != blank -%}
+      <li><a href="{{ sb_3.url }}" class="shop-by__pill">{{ _diamond_svg }}{{ sb_3.title }}</a></li>
+    {%- endif -%}
+    {%- if sb_4 != blank -%}
+      <li><a href="{{ sb_4.url }}" class="shop-by__pill">{{ _diamond_svg }}{{ sb_4.title }}</a></li>
+    {%- endif -%}
+    {%- if sb_5 != blank -%}
+      <li><a href="{{ sb_5.url }}" class="shop-by__pill">{{ _diamond_svg }}{{ sb_5.title }}</a></li>
+    {%- endif -%}
+
+    {%- if url_1 != blank -%}
+      <li><a href="{{ url_1 }}" class="shop-by__pill">{{ _diamond_svg }}{{ label_1 }}</a></li>
+    {%- endif -%}
+    {%- if url_2 != blank -%}
+      <li><a href="{{ url_2 }}" class="shop-by__pill">{{ _diamond_svg }}{{ label_2 }}</a></li>
+    {%- endif -%}
+    {%- if url_3 != blank -%}
+      <li><a href="{{ url_3 }}" class="shop-by__pill">{{ _diamond_svg }}{{ label_3 }}</a></li>
+    {%- endif -%}
+    {%- if url_4 != blank -%}
+      <li><a href="{{ url_4 }}" class="shop-by__pill">{{ _diamond_svg }}{{ label_4 }}</a></li>
+    {%- endif -%}
+    {%- if url_5 != blank -%}
+      <li><a href="{{ url_5 }}" class="shop-by__pill">{{ _diamond_svg }}{{ label_5 }}</a></li>
+    {%- endif -%}
+
+  </ul>
+  {%- if guide != blank and guide_text != blank -%}
+    <p class="shop-by__help">{{ guide_text }} <a href="{{ guide.url }}">View Buying Guide &rarr;</a></p>
+  {%- endif -%}
+</nav>
+{%- endif -%}
