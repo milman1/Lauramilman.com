@@ -1,0 +1,42 @@
+{%- comment -%}
+  Laura Milman — Heritage refinement overrides.
+  Loaded in <head> after laura-milman.css. Tightens chunky radii to
+  hairlines, reduces 2px borders to 1px, and reasserts uppercase
+  letter-spacing on heritage-register caps where section-inline CSS
+  drifted. Token redefs propagate to every component that uses
+  --radius-md or --radius-lg.
+{%- endcomment -%}
+<style>
+  :root {
+    --radius-md: 4px;   /* was 8px — propagates to product-card,
+                            category-card, why-card, blog-card,
+                            shape-btn, sidebar-filters */
+    --radius-lg: 6px;   /* was 12px — propagates to category-card
+                            (was the only consumer at 12px) */
+  }
+
+  /* Hairline strokes (was 2px) */
+  .mobile-toggle span { height: 1px; }
+  .checkbox-item input { border-width: 1px; }
+  .step-slider__step { border-width: 1px; }
+
+  /* Mobile product-card hardcoded radius override */
+  @media (max-width: 768px) {
+    .product-card { border-radius: 4px; }
+  }
+
+  /* Diamond results refinements */
+  .diamond-card { border-radius: 4px; }
+  .diamond-modal__content { border-radius: 4px; }
+  .diamond-card__video-badge { letter-spacing: 0.18em; }
+
+  /* Section-inline rules — !important required because the section's
+     <style> renders later in the cascade than <head>. */
+  .cart-trust__item { letter-spacing: 0.18em !important; }
+
+  @media (max-width: 992px) {
+    .header .nav__link,
+    .header .nav__item-link { letter-spacing: 0.18em !important; }
+    .header .nav__dropdown-link { border-left-width: 1px !important; }
+  }
+</style>
