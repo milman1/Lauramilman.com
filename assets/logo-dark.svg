@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" width="340" height="80">
+  <!-- TODO: Replace with the official LMNY logo. This is a text placeholder so the theme renders. -->
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#c89066"/>
+      <stop offset="50%" style="stop-color:#dea882"/>
+      <stop offset="100%" style="stop-color:#e8bf9e"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(170, 8)">
+    <path d="M0 0 L6 12 L0 18 L-6 12 Z" fill="none" stroke="url(#goldGradient)" stroke-width="1"/>
+    <line x1="0" y1="0" x2="0" y2="18" stroke="url(#goldGradient)" stroke-width="0.5" opacity="0.5"/>
+    <line x1="-6" y1="12" x2="6" y2="12" stroke="url(#goldGradient)" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <text x="75" y="55" font-family="Cormorant Garamond, Georgia, serif" font-size="32" font-weight="500" fill="#1c1a1a" letter-spacing="2">Laura</text>
+  <text x="180" y="55" font-family="Cormorant Garamond, Georgia, serif" font-size="32" font-weight="500" font-style="italic" fill="url(#goldGradient)" letter-spacing="1">Milman</text>
+</svg>
