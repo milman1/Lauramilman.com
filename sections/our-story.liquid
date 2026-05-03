@@ -1,0 +1,585 @@
+{%- comment -%}
+  Laura Milman — Heritage page (Milman Heritage).
+  Layout cloned from PD; palette swapped to LM heritage tokens; copy
+  rewritten for the Milman family workshop voice. Heavy CSS extracted
+  to snippets/our-story-styles.liquid.
+{%- endcomment -%}
+
+{% render 'our-story-styles' %}
+
+
+<!-- Floating Background Diamonds -->
+<div class="floating-diamonds">
+  <svg class="floating-diamond" width="150" height="180" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+  <svg class="floating-diamond" width="100" height="120" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+  <svg class="floating-diamond" width="120" height="144" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+  <svg class="floating-diamond" width="80" height="96" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+  <svg class="floating-diamond" width="200" height="240" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="0.5" fill="none"/></svg>
+</div>
+
+<div class="story-page">
+  <!-- Hero -->
+  <section class="story-hero">
+    <div class="story-hero__bg"></div>
+    <svg class="story-hero__diamond" viewBox="0 0 100 120" fill="none">
+      <path d="M50 5 L80 35 L50 115 L20 35 Z" stroke="#dea882" stroke-width="0.5" fill="none"/>
+      <path d="M20 35 L80 35" stroke="#dea882" stroke-width="0.3"/>
+      <path d="M50 5 L35 35 M50 5 L65 35" stroke="#dea882" stroke-width="0.3"/>
+      <circle cx="50" cy="50" r="25" stroke="#dea882" stroke-width="0.3" fill="none"/>
+    </svg>
+    <div class="story-hero__line-left"></div>
+    <div class="story-hero__line-right"></div>
+    <div class="story-hero__content">
+      <p class="story-hero__eyebrow">{{ section.settings.eyebrow | default: 'New York · Three generations' }}</p>
+      <h1 class="story-hero__title">{{ section.settings.hero_title | default: 'Three generations in the atelier' }}</h1>
+      <p class="story-hero__subtitle">{{ section.settings.hero_subtitle | default: 'The Milman family workshop, in New York since 1962. Heirloom pieces, hand-finished by master setters.' }}</p>
+      <div class="story-hero__buttons" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2.5rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 1s ease forwards 0.9s;">
+        {%- if section.settings.hero_button_text != blank -%}
+          <a href="{{ section.settings.hero_button_link | default: '/collections/rings' }}" class="btn btn--gold btn--lg">{{ section.settings.hero_button_text }}</a>
+        {%- else -%}
+          <a href="/collections/rings" class="btn btn--gold btn--lg">Explore the collection</a>
+        {%- endif -%}
+        {%- if section.settings.hero_button_2_text != blank -%}
+          <a href="{{ section.settings.hero_button_2_link | default: '#story-content' }}" class="btn btn--secondary btn--lg">{{ section.settings.hero_button_2_text }}</a>
+        {%- else -%}
+          <a href="#story-content" class="btn btn--secondary btn--lg">Read the heritage</a>
+        {%- endif -%}
+      </div>
+    </div>
+    <div class="hero-trust-badges" id="story-content">
+      <div class="hero-trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Insured delivery</span></div>
+      <span class="hero-trust-badge__sep">|</span>
+      <div class="hero-trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span>30-day returns</span></div>
+      <span class="hero-trust-badge__sep">|</span>
+      <div class="hero-trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><span>Hand-finished in NY</span></div>
+      <span class="hero-trust-badge__sep">|</span>
+      <div class="hero-trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg><span>Lifetime warranty</span></div>
+    </div>
+  </section>
+
+  <!-- Collection Spotlight — 5 Category Cards -->
+  {%- assign spot_collections = 'engagement-rings,earrings,bracelets,necklaces,pendants' | split: ',' -%}
+  <section class="spotlight">
+    <div class="spotlight__row">
+      {%- for col_handle in spot_collections -%}
+        {%- assign spot_col = collections[col_handle] -%}
+        {%- if spot_col != blank -%}
+          <a href="{{ spot_col.url }}" class="spotlight__card">
+            <div class="spotlight__media">
+              {%- if spot_col.image != blank -%}
+                <img class="spotlight__img" src="{{ spot_col.image | image_url: width: 600 }}" srcset="{{ spot_col.image | image_url: width: 300 }} 300w, {{ spot_col.image | image_url: width: 450 }} 450w, {{ spot_col.image | image_url: width: 600 }} 600w" sizes="(max-width: 768px) 50vw, 25vw" alt="{{ spot_col.title | escape }}" loading="lazy" decoding="async">
+              {%- elsif spot_col.products.first.featured_image != blank -%}
+                <img class="spotlight__img" src="{{ spot_col.products.first.featured_image | image_url: width: 600 }}" srcset="{{ spot_col.products.first.featured_image | image_url: width: 300 }} 300w, {{ spot_col.products.first.featured_image | image_url: width: 450 }} 450w, {{ spot_col.products.first.featured_image | image_url: width: 600 }} 600w" sizes="(max-width: 768px) 50vw, 25vw" alt="{{ spot_col.title | escape }}" loading="lazy" decoding="async">
+              {%- endif -%}
+            </div>
+            <div class="spotlight__info"><h3 class="spotlight__name">{{ spot_col.title }}</h3><svg class="spotlight__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+
+  <!-- Featured Products — Editorial -->
+  {%- assign grid_collection = section.settings.grid_collection -%}
+  {%- if grid_collection == blank or grid_collection.products.size == 0 -%}
+    {%- assign grid_collection = collections['all'] -%}
+  {%- endif -%}
+  {%- assign grid_limit = section.settings.grid_count | default: 8 -%}
+  <section class="fp">
+    <div class="fp__header">
+      <span class="fp__eyebrow">{{ section.settings.grid_eyebrow | default: 'From the atelier' }}</span>
+      <h2 class="fp__title">{{ section.settings.grid_heading | default: 'Pieces of note' }}</h2>
+      <div class="fp__title-line"></div>
+      <p class="fp__subtitle">{{ section.settings.grid_subtitle | default: 'Recent work from the atelier — hand-finished in New York.' }}</p>
+    </div>
+
+    {%- assign products_arr = grid_collection.products -%}
+    {%- if products_arr.size > 0 -%}
+      <div class="fp__bento">
+        {%- assign hero_product = products_arr[0] -%}
+        {%- assign hp_video_url = nil -%}
+        {%- assign hp_video_type = nil -%}
+        {%- for media in hero_product.media -%}
+          {%- if hp_video_url == nil -%}
+            {%- if media.media_type == 'video' -%}
+              {%- for source in media.sources -%}{%- if hp_video_url == nil -%}{%- assign hp_video_url = source.url -%}{%- assign hp_video_type = 'native' -%}{%- endif -%}{%- endfor -%}
+            {%- elsif media.media_type == 'external_video' and media.host == 'youtube' -%}
+              {%- assign hp_video_url = media.external_id -%}{%- assign hp_video_type = 'youtube' -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        <a href="{{ hero_product.url }}" class="fp__card{% if hp_video_url %} fp__card--has-video{% endif %}"{%- if hp_video_type == 'youtube' %} data-yt-id="{{ hp_video_url }}"{% endif -%}{%- if hp_video_url == nil and hero_product.images.size > 1 %} data-img-cycle="true"{% endif -%}>
+          <div class="fp__card-media">
+            {%- if hp_video_type == 'native' -%}<video class="fp__card-video" muted loop playsinline preload="none" data-src="{{ hp_video_url }}"></video>
+            {%- elsif hp_video_type == 'youtube' -%}<div class="fp__card-yt-wrap" data-yt-id="{{ hp_video_url }}"></div>{%- endif -%}
+            {%- if hp_video_url == nil and hero_product.images.size > 1 -%}
+              {%- for img in hero_product.images -%}<img class="fp__cycle-img{% if forloop.first %} fp__cycle-img--active{% endif %}" src="{{ img | image_url: width: 600 }}" alt="{{ img.alt | default: hero_product.title | escape }}" loading="lazy" decoding="async">{%- endfor -%}
+            {%- elsif hero_product.featured_image != blank -%}
+              <img src="{{ hero_product.featured_image | image_url: width: 600 }}" alt="{{ hero_product.featured_image.alt | default: hero_product.title | escape }}" loading="lazy" decoding="async">
+            {%- endif -%}
+          </div>
+          <div class="fp__card-info"><h3 class="fp__card-name">{{ hero_product.title }}</h3><p class="fp__card-price">{{ hero_product.price | money }}</p></div>
+        </a>
+        {%- for i in (1..2) -%}
+          {%- assign side_product = products_arr[i] -%}
+          {%- if side_product and side_product.featured_image != blank -%}
+            {%- assign sp_video_url = nil -%}{%- assign sp_video_type = nil -%}
+            {%- for media in side_product.media -%}{%- if sp_video_url == nil -%}{%- if media.media_type == 'video' -%}{%- for source in media.sources -%}{%- if sp_video_url == nil -%}{%- assign sp_video_url = source.url -%}{%- assign sp_video_type = 'native' -%}{%- endif -%}{%- endfor -%}{%- elsif media.media_type == 'external_video' and media.host == 'youtube' -%}{%- assign sp_video_url = media.external_id -%}{%- assign sp_video_type = 'youtube' -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+            <a href="{{ side_product.url }}" class="fp__card{% if sp_video_url %} fp__card--has-video{% endif %}"{%- if sp_video_type == 'youtube' %} data-yt-id="{{ sp_video_url }}"{% endif -%}{%- if sp_video_url == nil and side_product.images.size > 1 %} data-img-cycle="true"{% endif -%}>
+              <div class="fp__card-media">
+                {%- if sp_video_type == 'native' -%}<video class="fp__card-video" muted loop playsinline preload="none" data-src="{{ sp_video_url }}"></video>
+                {%- elsif sp_video_type == 'youtube' -%}<div class="fp__card-yt-wrap" data-yt-id="{{ sp_video_url }}"></div>{%- endif -%}
+                {%- if sp_video_url == nil and side_product.images.size > 1 -%}
+                  {%- for img in side_product.images -%}<img class="fp__cycle-img{% if forloop.first %} fp__cycle-img--active{% endif %}" src="{{ img | image_url: width: 600 }}" alt="{{ img.alt | default: side_product.title | escape }}" loading="lazy" decoding="async">{%- endfor -%}
+                {%- elsif side_product.featured_image != blank -%}
+                  <img src="{{ side_product.featured_image | image_url: width: 600 }}" alt="{{ side_product.featured_image.alt | default: side_product.title | escape }}" loading="lazy" decoding="async">
+                {%- endif -%}
+              </div>
+              <div class="fp__card-info"><h3 class="fp__card-name">{{ side_product.title }}</h3><p class="fp__card-price">{{ side_product.price | money }}</p></div>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div class="fp__footer"><a href="/collections" class="fp__view-all">Explore the collection<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+  </section>
+
+  <!-- Shop the Look — Bracelets -->
+  {%- assign stl_collection = collections['bracelets'] -%}
+  {%- if stl_collection == blank -%}{%- assign stl_collection = collections['tennis-bracelets'] -%}{%- endif -%}
+  {%- if stl_collection and stl_collection.products.size >= 3 -%}
+    <section class="stl">
+      <div class="stl__header"><span class="stl__eyebrow">Shop the Look</span><h2 class="stl__heading">Stack &amp; layer</h2><div class="stl__line"></div></div>
+      <div class="stl__grid">
+        <div class="stl__lifestyle">
+          {%- if stl_collection.image != blank -%}
+            <img src="{{ stl_collection.image | image_url: width: 900 }}" srcset="{{ stl_collection.image | image_url: width: 500 }} 500w, {{ stl_collection.image | image_url: width: 700 }} 700w, {{ stl_collection.image | image_url: width: 900 }} 900w" sizes="(max-width: 768px) 100vw, 55vw" alt="{{ stl_collection.title | escape }} lifestyle" loading="lazy" decoding="async">
+          {%- elsif stl_collection.products.first.featured_image != blank -%}
+            <img src="{{ stl_collection.products.first.featured_image | image_url: width: 900 }}" alt="{{ stl_collection.title | escape }}" loading="lazy" decoding="async">
+          {%- endif -%}
+          <div class="stl__lifestyle-overlay"><p class="stl__lifestyle-label">{{ stl_collection.title }}</p><p class="stl__lifestyle-sub">{{ stl_collection.products_count }} pieces · From the atelier</p></div>
+        </div>
+        <div class="stl__products">
+          {%- assign stl_count = 0 -%}
+          {%- for product in stl_collection.products -%}
+            {%- if stl_count >= 4 -%}{%- break -%}{%- endif -%}
+            {%- if product.featured_image != blank -%}{%- assign stl_count = stl_count | plus: 1 -%}
+              <a href="{{ product.url }}" class="stl__product"><div class="stl__product-img-wrap"><img src="{{ product.featured_image | image_url: width: 250 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async"></div><div class="stl__product-details"><h3 class="stl__product-name">{{ product.title }}</h3><p class="stl__product-price">{{ product.price | money }}</p><span class="stl__product-cta">View piece</span></div></a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+      <div class="stl__footer" style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <button class="stl__modal-trigger" id="stlModalOpen" aria-label="Open lookbook"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>View full lookbook</button>
+        <a href="{{ stl_collection.url }}" class="stl__view-all">View all {{ stl_collection.title | downcase }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a>
+      </div>
+    </section>
+
+    <div class="stl-modal-backdrop" id="stlModal">
+      <div class="stl-modal" role="dialog" aria-label="Shop the Look">
+        <button class="stl-modal__close" id="stlModalClose" aria-label="Close lookbook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div class="stl-modal__image-side">
+          {%- if stl_collection.image != blank -%}<img src="{{ stl_collection.image | image_url: width: 1000 }}" alt="{{ stl_collection.title | escape }} lookbook" loading="lazy">
+          {%- elsif stl_collection.products.first.featured_image != blank -%}<img src="{{ stl_collection.products.first.featured_image | image_url: width: 1000 }}" alt="{{ stl_collection.title | escape }}" loading="lazy">{%- endif -%}
+          <div class="stl-modal__image-overlay"><p class="stl-modal__image-title">{{ stl_collection.title }}</p><p class="stl-modal__image-sub">{{ stl_collection.products_count }} curated pieces</p></div>
+        </div>
+        <div class="stl-modal__product-side">
+          <div class="stl-modal__product-header"><h3 class="stl-modal__product-heading">Shop these pieces</h3><p class="stl-modal__product-count">{{ stl_collection.products_count }} pieces in this collection</p></div>
+          <div class="stl-modal__product-list">
+            {%- for product in stl_collection.products limit: 10 -%}{%- if product.featured_image != blank -%}
+              <a href="{{ product.url }}" class="stl-modal__item"><div class="stl-modal__item-img"><img src="{{ product.featured_image | image_url: width: 220 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy"></div><div class="stl-modal__item-info"><h4 class="stl-modal__item-name">{{ product.title }}</h4><p class="stl-modal__item-price">{{ product.price | money }}</p><span class="stl-modal__item-cta">View piece →</span></div></a>
+            {%- endif -%}{%- endfor -%}
+          </div>
+          <div class="stl-modal__view-all"><a href="{{ stl_collection.url }}">View full collection<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- More from the atelier -->
+  {%- if products_arr.size > 3 -%}
+    <section class="ring-carousel">
+      <div class="ring-carousel__header"><span class="ring-carousel__eyebrow">Keep browsing</span><h2 class="ring-carousel__title">More from the atelier</h2><div class="ring-carousel__line"></div></div>
+      <div class="ring-carousel__track-wrap">
+        <button class="ring-carousel__arrow ring-carousel__arrow--left rc-arrow-left" aria-label="Scroll left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="ring-carousel__arrow ring-carousel__arrow--right rc-arrow-right" aria-label="Scroll right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+        <div class="ring-carousel__track rc-track">
+          {%- for product in products_arr offset: 3 limit: grid_limit -%}{%- if product.featured_image != blank -%}
+            <a href="{{ product.url }}" class="ring-carousel__card"><div class="ring-carousel__img-wrap"><img class="ring-carousel__img" src="{{ product.featured_image | image_url: width: 500 }}" srcset="{{ product.featured_image | image_url: width: 280 }} 280w, {{ product.featured_image | image_url: width: 400 }} 400w, {{ product.featured_image | image_url: width: 500 }} 500w" sizes="(max-width: 768px) 200px, 280px" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async">{%- if product.compare_at_price > product.price -%}<span class="ring-carousel__badge">Sale</span>{%- endif -%}</div><div class="ring-carousel__body"><h3 class="ring-carousel__name">{{ product.title }}</h3><p class="ring-carousel__price">{{ product.price | money }}</p><span class="ring-carousel__cta-btn">View piece</span></div></a>
+          {%- endif -%}{%- endfor -%}
+        </div>
+      </div>
+      <div class="ring-carousel__footer"><a href="/collections" class="ring-carousel__view-all">Explore the collection<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- Engagement Rings -->
+  {%- assign ring_collection = collections['engagement-rings'] -%}
+  {%- if ring_collection == blank -%}{%- assign ring_collection = collections['rings'] -%}{%- endif -%}
+  {%- if ring_collection and ring_collection.products.size > 0 -%}
+    <section class="ring-carousel">
+      <div class="ring-carousel__header"><span class="ring-carousel__eyebrow">For the proposal</span><h2 class="ring-carousel__title">Engagement rings</h2><div class="ring-carousel__line"></div></div>
+      <div class="ring-carousel__track-wrap">
+        <button class="ring-carousel__arrow ring-carousel__arrow--left" aria-label="Scroll left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="ring-carousel__arrow ring-carousel__arrow--right" aria-label="Scroll right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+        <div class="ring-carousel__track">
+          {%- for product in ring_collection.products limit: 15 -%}{%- if product.featured_image != blank -%}
+            <a href="{{ product.url }}" class="ring-carousel__card"><div class="ring-carousel__img-wrap"><img class="ring-carousel__img" src="{{ product.featured_image | image_url: width: 500 }}" srcset="{{ product.featured_image | image_url: width: 280 }} 280w, {{ product.featured_image | image_url: width: 400 }} 400w, {{ product.featured_image | image_url: width: 500 }} 500w" sizes="(max-width: 768px) 200px, 280px" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async">{%- if product.compare_at_price > product.price -%}<span class="ring-carousel__badge">Sale</span>{%- endif -%}</div><div class="ring-carousel__body"><h3 class="ring-carousel__name">{{ product.title }}</h3><p class="ring-carousel__price">{{ product.price | money }}</p><span class="ring-carousel__cta-btn">View ring</span></div></a>
+          {%- endif -%}{%- endfor -%}
+        </div>
+      </div>
+      <div class="ring-carousel__footer"><a href="{{ ring_collection.url }}" class="ring-carousel__view-all">View all engagement rings<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- The Revelation (light section) -->
+  <section class="story-section story-section--centered story-section--light">
+    <div class="story-container story-container--narrow">
+      <span class="story-label">From the house</span>
+      <h2 class="story-heading story-heading--large">{{ section.settings.revelation_title | default: 'On choosing the stone honestly' }}</h2>
+      <div class="story-text story-text--centered">
+        {% if section.settings.revelation_text != blank %}{{ section.settings.revelation_text }}{% else %}<p>A lab-grown diamond is the same carbon crystal as a mined one — graded by the same authorities, set by the same hands, and honest about where it came from. The atelier sets them by choice.</p>{% endif %}
+      </div>
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="{{ section.settings.revelation_button_link | default: '/collections/diamonds' }}" class="btn btn--outline btn--dark">{{ section.settings.revelation_button_text | default: 'Browse the diamond selection' }}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Necklaces & Pendants -->
+  {%- assign necklace_collection = collections['necklaces'] -%}
+  {%- if necklace_collection == blank -%}{%- assign necklace_collection = collections['necklaces-pendants'] -%}{%- endif -%}
+  {%- if necklace_collection == blank -%}{%- assign necklace_collection = collections['pendants'] -%}{%- endif -%}
+  {%- if necklace_collection and necklace_collection.products.size > 0 -%}
+    <section class="spotlight">
+      <div class="spotlight__header"><span class="spotlight__eyebrow">Around the neck</span><h2 class="spotlight__title">Necklaces &amp; pendants</h2><div class="spotlight__line"></div></div>
+      <div class="spotlight__row">
+        {%- assign nk_count = 0 -%}
+        {%- for product in necklace_collection.products -%}{%- if nk_count >= 4 -%}{%- break -%}{%- endif -%}{%- if product.featured_image != blank -%}{%- assign nk_count = nk_count | plus: 1 -%}
+          <a href="{{ product.url }}" class="spotlight__card"><div class="spotlight__media"><img class="spotlight__img" src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async"></div><div class="spotlight__info"><h3 class="spotlight__name">{{ product.title }}</h3><p class="spotlight__price">{{ product.price | money }}</p></div></a>
+        {%- endif -%}{%- endfor -%}
+      </div>
+      <div class="spotlight__footer"><a href="{{ necklace_collection.url }}" class="spotlight__view-all">View all necklaces<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- Bracelets -->
+  {%- assign bracelet_collection = collections['bracelets'] -%}
+  {%- if bracelet_collection == blank -%}{%- assign bracelet_collection = collections['tennis-bracelets'] -%}{%- endif -%}
+  {%- if bracelet_collection and bracelet_collection.products.size > 0 -%}
+    <section class="ring-carousel">
+      <div class="ring-carousel__header"><span class="ring-carousel__eyebrow">On the wrist</span><h2 class="ring-carousel__title">Bracelets</h2><div class="ring-carousel__line"></div></div>
+      <div class="ring-carousel__track-wrap">
+        <button class="ring-carousel__arrow ring-carousel__arrow--left rc-arrow-left" aria-label="Scroll left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="ring-carousel__arrow ring-carousel__arrow--right rc-arrow-right" aria-label="Scroll right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+        <div class="ring-carousel__track rc-track">
+          {%- for product in bracelet_collection.products limit: 15 -%}{%- if product.featured_image != blank -%}
+            <a href="{{ product.url }}" class="ring-carousel__card"><div class="ring-carousel__img-wrap"><img class="ring-carousel__img" src="{{ product.featured_image | image_url: width: 500 }}" srcset="{{ product.featured_image | image_url: width: 280 }} 280w, {{ product.featured_image | image_url: width: 400 }} 400w, {{ product.featured_image | image_url: width: 500 }} 500w" sizes="(max-width: 768px) 200px, 280px" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async">{%- if product.compare_at_price > product.price -%}<span class="ring-carousel__badge">Sale</span>{%- endif -%}</div><div class="ring-carousel__body"><h3 class="ring-carousel__name">{{ product.title }}</h3><p class="ring-carousel__price">{{ product.price | money }}</p><span class="ring-carousel__cta-btn">View bracelet</span></div></a>
+          {%- endif -%}{%- endfor -%}
+        </div>
+      </div>
+      <div class="ring-carousel__footer"><a href="{{ bracelet_collection.url }}" class="ring-carousel__view-all">View all bracelets<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- Wedding Bands -->
+  {%- assign wedding_collection = collections['wedding-bands'] -%}
+  {%- if wedding_collection and wedding_collection.products.size > 0 -%}
+    <section class="spotlight">
+      <div class="spotlight__header"><span class="spotlight__eyebrow">The pair</span><h2 class="spotlight__title">Wedding bands</h2><div class="spotlight__line"></div></div>
+      <div class="spotlight__row">
+        {%- assign wb_count = 0 -%}
+        {%- for product in wedding_collection.products -%}{%- if wb_count >= 4 -%}{%- break -%}{%- endif -%}{%- if product.featured_image != blank -%}{%- assign wb_count = wb_count | plus: 1 -%}
+          <a href="{{ product.url }}" class="spotlight__card"><div class="spotlight__media"><img class="spotlight__img" src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async"></div><div class="spotlight__info"><h3 class="spotlight__name">{{ product.title }}</h3><p class="spotlight__price">{{ product.price | money }}</p></div></a>
+        {%- endif -%}{%- endfor -%}
+      </div>
+      <div class="spotlight__footer"><a href="{{ wedding_collection.url }}" class="spotlight__view-all">View all wedding bands<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- Earrings -->
+  {%- assign earring_collection = collections['earrings'] -%}
+  {%- if earring_collection and earring_collection.products.size > 0 -%}
+    <section class="ring-carousel">
+      <div class="ring-carousel__header"><span class="ring-carousel__eyebrow">For the ear</span><h2 class="ring-carousel__title">Earrings</h2><div class="ring-carousel__line"></div></div>
+      <div class="ring-carousel__track-wrap">
+        <button class="ring-carousel__arrow ring-carousel__arrow--left rc-arrow-left" aria-label="Scroll left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="ring-carousel__arrow ring-carousel__arrow--right rc-arrow-right" aria-label="Scroll right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+        <div class="ring-carousel__track rc-track">
+          {%- for product in earring_collection.products limit: 15 -%}{%- if product.featured_image != blank -%}
+            <a href="{{ product.url }}" class="ring-carousel__card"><div class="ring-carousel__img-wrap"><img class="ring-carousel__img" src="{{ product.featured_image | image_url: width: 500 }}" srcset="{{ product.featured_image | image_url: width: 280 }} 280w, {{ product.featured_image | image_url: width: 400 }} 400w, {{ product.featured_image | image_url: width: 500 }} 500w" sizes="(max-width: 768px) 200px, 280px" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy" decoding="async">{%- if product.compare_at_price > product.price -%}<span class="ring-carousel__badge">Sale</span>{%- endif -%}</div><div class="ring-carousel__body"><h3 class="ring-carousel__name">{{ product.title }}</h3><p class="ring-carousel__price">{{ product.price | money }}</p><span class="ring-carousel__cta-btn">View piece</span></div></a>
+          {%- endif -%}{%- endfor -%}
+        </div>
+      </div>
+      <div class="ring-carousel__footer"><a href="{{ earring_collection.url }}" class="ring-carousel__view-all">View all earrings<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </section>
+  {%- endif -%}
+
+  <!-- Mission Statement -->
+  <section class="story-section story-section--dark">
+    <div class="story-container">
+      <div class="story-mission">
+        <div class="story-mission__diamonds">
+          <svg class="story-mission__diamond-left" width="80" height="96" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+          <svg class="story-mission__diamond-right" width="80" height="96" viewBox="0 0 100 120"><path d="M50 5 L75 30 L50 115 L25 30 Z" stroke="#dea882" stroke-width="1" fill="none"/></svg>
+        </div>
+        <p class="story-mission__label">From the atelier</p>
+        <h2 class="story-mission__text">{{ section.settings.mission_text | default: '“A piece of fine jewellery should arrive with its history. The cut, the setter, the certificate. We have built the house on that promise for three generations.”' }}</h2>
+        <p class="story-mission__author">— The Milman atelier</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Origin Story -->
+  <section class="story-section story-section--split">
+    <div class="story-split">
+      <div class="story-visual">
+        <div class="story-visual__glow"></div>
+        <div class="story-visual__diamond story-visual__diamond--animated">
+          <svg viewBox="0 0 100 120" fill="none">
+            <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9"/><stop offset="50%" style="stop-color:#dea882;stop-opacity:0.7"/><stop offset="100%" style="stop-color:#8a7a40;stop-opacity:0.5"/></linearGradient></defs>
+            <polygon points="50,8 78,32 50,42 22,32" fill="url(#grad1)" opacity="0.3"/>
+            <path d="M50 8 L78 32 L50 42 L22 32 Z" stroke="#dea882" stroke-width="1.5" fill="none"/>
+            <polygon points="22,32 50,112 50,42" fill="url(#grad1)" opacity="0.2"/>
+            <polygon points="78,32 50,112 50,42" fill="url(#grad1)" opacity="0.15"/>
+            <path d="M22 32 L50 112 L78 32" stroke="#dea882" stroke-width="1.5" fill="none"/>
+            <path d="M50 8 L38 32 M50 8 L62 32" stroke="#dea882" stroke-width="0.75" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="story-visual__sparkles"><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div></div>
+      </div>
+      <div class="story-split__content">
+        <span class="story-label">The beginning</span>
+        <h2 class="story-heading">{{ section.settings.origin_title | default: 'A New York workshop since 1962' }}</h2>
+        <div class="story-text">
+          {% if section.settings.origin_text != blank %}{{ section.settings.origin_text }}{% else %}<p>The Milman atelier opened on West 47th Street in 1962. Three generations have worked at the bench since: cutters, setters, designers — the same family, the same standard.</p><p>What changed is the world. Lab-grown stones now arrive in our atelier with the same grading authority and a clearer line of provenance than the natural ones we set thirty years ago. The hand that finishes the piece is the same.</p>{% endif %}
+        </div>
+        <a href="/pages/our-story" class="story-text-link" style="display: inline-block; margin-top: 1rem; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-gold); text-decoration: none; border-bottom: 1px solid var(--accent-gold); padding-bottom: 2px; transition: opacity 0.3s ease;">Read the heritage</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Three Pillars -->
+  <section class="story-section story-section--dark story-section--pillars">
+    <div class="story-container">
+      <span class="story-label story-label--center">From the house</span>
+      <h2 class="story-heading story-heading--center">{{ section.settings.pillars_title | default: 'How we work' }}</h2>
+      <div class="story-pillars">
+        <div class="story-pillar">
+          <svg class="story-pillar__icon" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M30 5 L55 25 L55 45 L30 55 L5 45 L5 25 Z"/><circle cx="30" cy="30" r="8"/></svg>
+          <div class="story-pillar__number">01</div>
+          <h3 class="story-pillar__title">{{ section.settings.pillar_1_title | default: 'Every stone, hand-selected' }}</h3>
+          <p class="story-pillar__text">{{ section.settings.pillar_1_text | default: 'Every centre stone is reviewed by hand in the atelier and graded independently by IGI or GIA. We accept the stones we would set in our own family’s pieces.' }}</p>
+        </div>
+        <div class="story-pillar">
+          <svg class="story-pillar__icon" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="30" cy="30" r="25"/><path d="M30 5 L35 30 L30 55 L25 30 Z"/></svg>
+          <div class="story-pillar__number">02</div>
+          <h3 class="story-pillar__title">{{ section.settings.pillar_2_title | default: 'Provenance on paper' }}</h3>
+          <p class="story-pillar__text">{{ section.settings.pillar_2_text | default: 'Every piece arrives with its certificate. The path from seed crystal to finished setting is documented — and the documentation comes home with you.' }}</p>
+        </div>
+        <div class="story-pillar">
+          <svg class="story-pillar__icon" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M30 5 L45 25 L30 55 L15 25 Z"/><circle cx="30" cy="25" r="12"/></svg>
+          <div class="story-pillar__number">03</div>
+          <h3 class="story-pillar__title">{{ section.settings.pillar_3_title | default: 'Made by hand, in New York' }}</h3>
+          <p class="story-pillar__text">{{ section.settings.pillar_3_text | default: 'Designed and finished by master setters in our New York atelier. Three generations of hand. No work contracted abroad.' }}</p>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/collections" class="btn btn--gold btn--lg">Explore the collection</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Craft -->
+  <section class="story-section story-section--split story-section--reverse">
+    <div class="story-split">
+      <div class="story-split__content">
+        <span class="story-label">The work</span>
+        <h2 class="story-heading">{{ section.settings.craft_title | default: 'The atelier' }}</h2>
+        <div class="story-text">
+          {% if section.settings.craft_text != blank %}{{ section.settings.craft_text }}{% else %}<p>Each piece is finished at the bench in our New York atelier — by master setters from the Milman family workshop. Three generations of hand. Nothing contracted out, nothing assembled abroad.</p><p>We do not mass-produce. Each piece is sized, set, and polished individually before it leaves the atelier.</p>{% endif %}
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.25rem;">
+          <a href="/collections/all" class="btn btn--gold">Explore the collection</a>
+          <a href="/pages/contact" class="story-text-link" style="font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-gold); text-decoration: none; border-bottom: 1px solid var(--accent-gold); padding-bottom: 2px;">Book an appointment</a>
+        </div>
+      </div>
+      <div class="story-visual">
+        <div class="story-visual__glow"></div>
+        <div class="story-visual__diamond story-visual__diamond--animated">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="42" stroke="#dea882" stroke-width="1.5" fill="none"/>
+            <circle cx="50" cy="50" r="28" stroke="#dea882" stroke-width="1" fill="none"/>
+            <circle cx="50" cy="50" r="15" stroke="#dea882" stroke-width="0.75" fill="none"/>
+            <path d="M50 8 L50 92 M8 50 L92 50" stroke="#dea882" stroke-width="0.5" opacity="0.5"/>
+            <path d="M50 22 L62 50 L50 78 L38 50 Z" stroke="#dea882" stroke-width="0.75" fill="none"/>
+          </svg>
+        </div>
+        <div class="story-visual__sparkles"><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="story-section story-section--stats">
+    <div class="story-container">
+      <div class="story-stats">
+        <div class="story-stat"><svg class="story-stat__icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="20" cy="20" r="15"/><path d="M20 5 L20 20 L30 20"/></svg><span class="story-stat__number">3</span><span class="story-stat__label">Generations at the bench</span></div>
+        <div class="story-stat"><svg class="story-stat__icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="20" cy="20" r="15"/><path d="M12 20 L18 26 L28 14"/></svg><span class="story-stat__number">85%</span><span class="story-stat__label">Smaller footprint than mining</span></div>
+        <div class="story-stat"><svg class="story-stat__icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 5 L35 15 L35 30 L20 35 L5 30 L5 15 Z"/><path d="M12 18 L18 24 L28 14"/></svg><span class="story-stat__number">IGI / GIA</span><span class="story-stat__label">Independently graded</span></div>
+        <div class="story-stat"><svg class="story-stat__icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="12" width="24" height="20" rx="2"/><path d="M8 18 L20 24 L32 18"/></svg><span class="story-stat__number">NYC</span><span class="story-stat__label">Hand-finished in our atelier</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="story-section story-section--cta">
+    <div class="story-container">
+      <h2 class="story-cta__title">{{ section.settings.cta_title | default: 'Begin with a piece' }}</h2>
+      <p class="story-cta__text">{{ section.settings.cta_text | default: 'Choose from the atelier collection, or design something one of one.' }}</p>
+      <div class="story-cta__buttons">
+        <a href="{{ section.settings.cta_button_link | default: '/collections/rings' }}" class="btn btn--primary btn--lg">{{ section.settings.cta_button_text | default: 'Explore the collection' }}</a>
+        <a href="{{ section.settings.cta_button_2_link | default: '/pages/ring-builder' }}" class="btn btn--secondary btn--lg">{{ section.settings.cta_button_2_text | default: 'Design an heirloom' }}</a>
+      </div>
+      <p style="margin-top: 1.5rem; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 26, 26, 0.6);">Independently graded · Insured delivery · Lifetime warranty</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function() {
+  var stlBackdrop = document.getElementById('stlModal');
+  var stlOpen = document.getElementById('stlModalOpen');
+  var stlClose = document.getElementById('stlModalClose');
+
+  if (stlBackdrop && stlOpen) {
+    stlOpen.addEventListener('click', function() { stlBackdrop.classList.add('stl-modal--open'); document.body.style.overflow = 'hidden'; });
+    stlClose && stlClose.addEventListener('click', function() { stlBackdrop.classList.remove('stl-modal--open'); document.body.style.overflow = ''; });
+    stlBackdrop.addEventListener('click', function(e) { if (e.target === stlBackdrop) { stlBackdrop.classList.remove('stl-modal--open'); document.body.style.overflow = ''; } });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && stlBackdrop.classList.contains('stl-modal--open')) { stlBackdrop.classList.remove('stl-modal--open'); document.body.style.overflow = ''; } });
+  }
+
+  var runway = document.querySelector('.fp__runway');
+  if (runway) {
+    var leftBtn = document.querySelector('.fp__arrow--left');
+    var rightBtn = document.querySelector('.fp__arrow--right');
+    var scrollAmt = 280;
+    if (leftBtn) leftBtn.addEventListener('click', function() { runway.scrollBy({ left: -scrollAmt, behavior: 'smooth' }); });
+    if (rightBtn) rightBtn.addEventListener('click', function() { runway.scrollBy({ left: scrollAmt, behavior: 'smooth' }); });
+  }
+
+  document.querySelectorAll('.ring-carousel__track-wrap').forEach(function(wrap) {
+    var track = wrap.querySelector('.ring-carousel__track, .rc-track');
+    var left = wrap.querySelector('.ring-carousel__arrow--left, .rc-arrow-left');
+    var right = wrap.querySelector('.ring-carousel__arrow--right, .rc-arrow-right');
+    if (!track) return;
+    var amt = 300;
+    if (left) left.addEventListener('click', function() { track.scrollBy({ left: -amt, behavior: 'smooth' }); });
+    if (right) right.addEventListener('click', function() { track.scrollBy({ left: amt, behavior: 'smooth' }); });
+  });
+
+  var isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (!isTouch) {
+    var ytApiReady = false; var ytQueue = [];
+    function loadYTApi() { if (document.querySelector('script[src*="youtube.com/iframe_api"]')) return; var tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(tag); }
+    window.onYouTubeIframeAPIReady = function() { ytApiReady = true; ytQueue.forEach(function(fn) { fn(); }); ytQueue = []; };
+    function initYTPlayer(wrap, ytId) { var div = document.createElement('div'); wrap.appendChild(div); return new YT.Player(div, { videoId: ytId, playerVars: { autoplay: 0, controls: 0, mute: 1, loop: 1, playlist: ytId, modestbranding: 1, showinfo: 0, rel: 0, playsinline: 1 }, events: { onReady: function(e) { wrap._player = e.target; e.target.mute(); } } }); }
+    function setupCardHover(card) {
+      var nativeVideo = card.querySelector('.spotlight__video, .fp__card-video');
+      var ytWrap = card.querySelector('.spotlight__yt-wrap, .fp__card-yt-wrap');
+      var cycleImgs = card.querySelectorAll('.spotlight__img--cycle, .fp__cycle-img');
+      var cycleTimer = null; var cycleIdx = 0;
+      if (nativeVideo) {
+        card.addEventListener('mouseenter', function() {
+          if (!nativeVideo.src && nativeVideo.dataset.src) { nativeVideo.src = nativeVideo.dataset.src; nativeVideo.load(); }
+          nativeVideo.play().then(function() { nativeVideo.classList.add('spotlight__video--playing', 'fp__card-video--playing'); }).catch(function() {});
+        });
+        card.addEventListener('mouseleave', function() { nativeVideo.pause(); nativeVideo.currentTime = 0; nativeVideo.classList.remove('spotlight__video--playing', 'fp__card-video--playing'); });
+        return;
+      }
+      if (ytWrap) {
+        var ytId = ytWrap.dataset.ytId;
+        if (!ytId) return;
+        loadYTApi();
+        var ready = function() { initYTPlayer(ytWrap, ytId); };
+        if (ytApiReady) ready(); else ytQueue.push(ready);
+        card.addEventListener('mouseenter', function() { if (ytWrap._player && typeof ytWrap._player.playVideo === 'function') { ytWrap._player.playVideo(); ytWrap.classList.add('spotlight__yt-wrap--playing', 'fp__card-yt-wrap--playing'); } });
+        card.addEventListener('mouseleave', function() { if (ytWrap._player && typeof ytWrap._player.pauseVideo === 'function') { ytWrap._player.pauseVideo(); } ytWrap.classList.remove('spotlight__yt-wrap--playing', 'fp__card-yt-wrap--playing'); });
+        return;
+      }
+      if (cycleImgs.length > 1) {
+        card.addEventListener('mouseenter', function() {
+          cycleIdx = 0;
+          cycleTimer = setInterval(function() { cycleImgs[cycleIdx].classList.remove('spotlight__img--active', 'fp__cycle-img--active'); cycleIdx = (cycleIdx + 1) % cycleImgs.length; cycleImgs[cycleIdx].classList.add('spotlight__img--active', 'fp__cycle-img--active'); }, 1200);
+        });
+        card.addEventListener('mouseleave', function() { clearInterval(cycleTimer); cycleImgs.forEach(function(img, i) { img.classList.toggle('spotlight__img--active', i === 0); img.classList.toggle('fp__cycle-img--active', i === 0); }); cycleIdx = 0; });
+      }
+    }
+    document.querySelectorAll('.spotlight__card').forEach(setupCardHover);
+    document.querySelectorAll('.fp__card').forEach(setupCardHover);
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Our Story",
+  "settings": [
+    { "type": "header", "content": "Hero Section" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "New York · Three generations" },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Three generations in the atelier" },
+    { "type": "text", "id": "hero_subtitle", "label": "Hero subtitle", "default": "The Milman family workshop, in New York since 1962." },
+    { "type": "text", "id": "hero_button_text", "label": "Primary button text", "default": "Explore the collection" },
+    { "type": "url", "id": "hero_button_link", "label": "Primary button link" },
+    { "type": "text", "id": "hero_button_2_text", "label": "Secondary button text", "default": "Read the heritage" },
+    { "type": "url", "id": "hero_button_2_link", "label": "Secondary button link" },
+
+    { "type": "header", "content": "Featured Products Grid" },
+    { "type": "collection", "id": "grid_collection", "label": "Collection to feature" },
+    { "type": "text", "id": "grid_eyebrow", "label": "Eyebrow text", "default": "From the atelier" },
+    { "type": "text", "id": "grid_heading", "label": "Heading", "default": "Pieces of note" },
+    { "type": "text", "id": "grid_subtitle", "label": "Subtitle", "default": "Recent work from the atelier — hand-finished in New York." },
+    { "type": "range", "id": "grid_count", "label": "Products to show", "min": 4, "max": 12, "step": 1, "default": 8 },
+
+    { "type": "header", "content": "Mission Statement" },
+    { "type": "textarea", "id": "mission_text", "label": "Mission quote" },
+
+    { "type": "header", "content": "Origin Story" },
+    { "type": "text", "id": "origin_title", "label": "Origin title", "default": "A New York workshop since 1962" },
+    { "type": "richtext", "id": "origin_text", "label": "Origin text" },
+
+    { "type": "header", "content": "The Revelation" },
+    { "type": "text", "id": "revelation_title", "label": "Revelation title", "default": "On choosing the stone honestly" },
+    { "type": "richtext", "id": "revelation_text", "label": "Revelation text" },
+    { "type": "text", "id": "revelation_button_text", "label": "Button text", "default": "Browse the diamond selection" },
+    { "type": "url", "id": "revelation_button_link", "label": "Button link" },
+
+    { "type": "header", "content": "Three Pillars" },
+    { "type": "text", "id": "pillars_title", "label": "Section title", "default": "How we work" },
+    { "type": "text", "id": "pillar_1_title", "label": "Pillar 1 title", "default": "Every stone, hand-selected" },
+    { "type": "textarea", "id": "pillar_1_text", "label": "Pillar 1 text" },
+    { "type": "text", "id": "pillar_2_title", "label": "Pillar 2 title", "default": "Provenance on paper" },
+    { "type": "textarea", "id": "pillar_2_text", "label": "Pillar 2 text" },
+    { "type": "text", "id": "pillar_3_title", "label": "Pillar 3 title", "default": "Made by hand, in New York" },
+    { "type": "textarea", "id": "pillar_3_text", "label": "Pillar 3 text" },
+
+    { "type": "header", "content": "The Craft" },
+    { "type": "text", "id": "craft_title", "label": "Craft title", "default": "The atelier" },
+    { "type": "richtext", "id": "craft_text", "label": "Craft text" },
+
+    { "type": "header", "content": "The Future" },
+    { "type": "text", "id": "future_title", "label": "Future title", "default": "What we are building" },
+    { "type": "richtext", "id": "future_text", "label": "Future text" },
+
+    { "type": "header", "content": "Call to Action" },
+    { "type": "text", "id": "cta_title", "label": "CTA title", "default": "Begin with a piece" },
+    { "type": "text", "id": "cta_text", "label": "CTA description" },
+    { "type": "text", "id": "cta_button_text", "label": "Primary button text", "default": "Explore the collection" },
+    { "type": "url", "id": "cta_button_link", "label": "Primary button link" },
+    { "type": "text", "id": "cta_button_2_text", "label": "Secondary button text", "default": "Design an heirloom" },
+    { "type": "url", "id": "cta_button_2_link", "label": "Secondary button link" }
+  ],
+  "presets": [ { "name": "Our Story" } ]
+}
+{% endschema %}
