@@ -1,0 +1,111 @@
+/**
+ * Laura Milman — Diamond Results Styles.
+ * Cloned from PD; palette swapped to LM tokens.
+ */
+
+#diamondResults { margin-top: 3rem; }
+
+.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light, #e5e2dc); }
+.results-count { font-weight: 600; color: var(--text-dark, #1c1a1a); }
+.results-sort select { padding: 0.5rem 1rem; border: 1px solid var(--border-light, #e5e2dc); border-radius: 4px; background: white; font-size: 0.85rem; cursor: pointer; }
+
+.diamond-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+.diamond-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.diamond-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.10); }
+
+.diamond-card__image { position: relative; aspect-ratio: 1; background: linear-gradient(135deg, #f5f5f5 0%, #efecec 100%); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.diamond-card__image img { width: 100%; height: 100%; object-fit: cover; }
+.diamond-card__placeholder { color: #c1bcae; }
+.diamond-card__video-badge { position: absolute; top: 0.75rem; right: 0.75rem; background: rgba(28, 26, 26, 0.9); color: white; font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.diamond-card__content { padding: 1.25rem; }
+.diamond-card__title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; color: var(--text-dark, #1c1a1a); margin-bottom: 0.5rem; }
+.diamond-card__specs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.diamond-card__specs .spec { background: #f5f5f5; color: #4a4747; font-size: 0.75rem; font-weight: 500; padding: 0.25rem 0.5rem; border-radius: 2px; }
+.diamond-card__price { font-size: 1.4rem; font-weight: 600; color: var(--primary-dark, #1c1a1a); margin-bottom: 1rem; }
+.diamond-card__actions { display: flex; gap: 0.5rem; }
+.diamond-card__actions .btn { flex: 1; }
+
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-muted, #7b8382); }
+.loading-spinner { width: 48px; height: 48px; border: 2px solid #efecec; border-top-color: var(--accent-gold, #dea882); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-results { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-muted, #7b8382); text-align: center; }
+.no-results svg { margin-bottom: 1rem; opacity: 0.5; }
+.no-results h3 { margin-bottom: 0.5rem; color: var(--text-dark, #1c1a1a); }
+
+.pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-light, #e5e2dc); }
+.pagination__btn { padding: 0.75rem 1.5rem; background: var(--primary-dark, #1c1a1a); color: white; border: none; border-radius: 2px; font-weight: 500; cursor: pointer; transition: background 0.3s ease; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.78rem; }
+.pagination__btn:hover:not(:disabled) { background: var(--primary-dark-light, #322f2f); }
+.pagination__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pagination__info { font-size: 0.85rem; color: var(--text-muted, #7b8382); }
+
+/* Diamond modal */
+.diamond-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.diamond-modal__overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.diamond-modal__content { position: relative; background: linear-gradient(145deg, #1c1a1a 0%, #2a2828 100%); border-radius: 6px; max-width: 1100px; width: 100%; max-height: 92vh; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(222, 168, 130, 0.18); }
+.diamond-modal__close { position: absolute; top: 1rem; right: 1rem; z-index: 20; width: 44px; height: 44px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 50%; font-size: 1.6rem; color: rgba(255, 255, 255, 0.8); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; line-height: 1; }
+.diamond-modal__close:hover { background: rgba(222, 168, 130, 0.2); border-color: var(--accent-gold, #dea882); color: var(--accent-gold, #dea882); transform: rotate(90deg); }
+
+.diamond-modal__media { background: linear-gradient(180deg, #1c1a1a 0%, #2a2828 100%); display: flex; flex-direction: column; position: relative; }
+.diamond-modal__media-tabs { display: flex; gap: 0.5rem; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.media-tab { padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2px; color: rgba(255, 255, 255, 0.6); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; cursor: pointer; transition: all 0.25s ease; }
+.media-tab:hover { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.92); }
+.media-tab.active { background: rgba(222, 168, 130, 0.15); border-color: var(--accent-gold, #dea882); color: var(--accent-gold, #dea882); }
+
+.diamond-modal__media-viewer { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
+.media-content { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+.media-content.active { opacity: 1; visibility: visible; }
+.media-content[data-type="cert"] { background: white; }
+.diamond-modal__placeholder { display: flex; align-items: center; justify-content: center; color: rgba(222, 168, 130, 0.3); }
+
+.diamond-modal__info { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; max-height: 92vh; }
+.diamond-modal__header { display: flex; flex-direction: column; gap: 0.25rem; }
+.diamond-modal__title { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 500; color: #ffffff; margin: 0; font-style: italic; }
+.diamond-modal__stock { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.12em; text-transform: uppercase; }
+
+.diamond-modal__price-section { display: flex; align-items: baseline; gap: 1rem; }
+.diamond-modal__price { font-size: 2rem; font-weight: 600; color: var(--accent-gold, #dea882); }
+.diamond-modal__price-per-carat { font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); }
+
+.diamond-modal__4cs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.four-c { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 4px; padding: 1rem 0.75rem; text-align: center; transition: all 0.25s ease; }
+.four-c:hover { border-color: rgba(222, 168, 130, 0.32); background: rgba(222, 168, 130, 0.05); }
+.four-c__value { display: block; font-size: 1.25rem; font-weight: 600; color: #ffffff; margin-bottom: 0.25rem; }
+.four-c__label { display: block; font-size: 0.65rem; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.18em; }
+
+.diamond-modal__description { font-size: 0.92rem; line-height: 1.75; color: rgba(255, 255, 255, 0.72); margin: 0; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+
+.diamond-modal__specs { flex: 1; }
+.specs-title { font-size: 0.72rem; font-weight: 600; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.22em; margin: 0 0 1rem 0; }
+.specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.spec-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.spec-item--full { grid-column: 1 / -1; }
+.spec-label { font-size: 0.78rem; color: rgba(255, 255, 255, 0.5); }
+.spec-value { font-size: 0.85rem; font-weight: 600; color: #ffffff; }
+
+.diamond-modal__actions { display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; }
+.diamond-modal__actions .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 1.5rem; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; border-radius: 2px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; }
+.diamond-modal__actions .btn--primary { background: linear-gradient(135deg, #dea882 0%, #c89066 100%); color: #1c1a1a; border: none; }
+.diamond-modal__actions .btn--primary:hover { background: linear-gradient(135deg, #e8bf9e 0%, #dea882 100%); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(222, 168, 130, 0.32); }
+.diamond-modal__actions .btn--secondary { background: transparent; color: rgba(255, 255, 255, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); }
+.diamond-modal__actions .btn--secondary:hover { border-color: var(--accent-gold, #dea882); color: var(--accent-gold, #dea882); background: rgba(222, 168, 130, 0.08); }
+
+@media (max-width: 900px) {
+  .diamond-modal__content { grid-template-columns: 1fr; max-height: 95vh; overflow-y: auto; }
+  .diamond-modal__media { min-height: 300px; }
+  .diamond-modal__media-viewer { min-height: 300px; }
+  .diamond-modal__info { max-height: none; }
+  .diamond-modal__4cs { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .diamond-modal { padding: 0.5rem; }
+  .diamond-modal__content { border-radius: 4px; }
+  .diamond-modal__info { padding: 1.5rem; }
+  .diamond-modal__title { font-size: 1.4rem; }
+  .diamond-modal__price { font-size: 1.5rem; }
+  .specs-grid { grid-template-columns: 1fr; }
+  .diamond-modal__actions { flex-direction: column; }
+}

@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "diamond-filter": {
+      "type": "diamond-filter",
+      "settings": {
+        "heading": "The Diamond Selection",
+        "subheading": "Refine by shape, size, color, and clarity. Every stone is independently graded; many are filmed at 100x magnification so you can inspect them as a gemologist would."
+      }
+    }
+  },
+  "order": [
+    "diamond-filter"
+  ]
+}
