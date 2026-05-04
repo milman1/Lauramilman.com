@@ -57,14 +57,12 @@
   </div>
 </section>
 
+{%- comment -%} Ring builder asset bundle (CSS split into 2 files due to size). {%- endcomment -%}
 <link rel="stylesheet" href="{{ 'ring-builder.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'ring-builder-2.css' | asset_url }}">
 <script src="{{ 'diamond-api.js' | asset_url }}" defer></script>
 <script src="{{ 'ring-builder.js' | asset_url }}" defer></script>
-{%- comment -%}
-  TODO: ring-builder.css / ring-builder.js / diamond-api.js are referenced
-  above. Their full contents are copied from the PD theme with LM palette
-  swap in a follow-up commit (see Batch 4b).
-{%- endcomment -%}
+<script src="{{ 'ring-builder-2.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
