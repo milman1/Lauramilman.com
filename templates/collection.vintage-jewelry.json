@@ -1,0 +1,136 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "eyebrow": "Antique & Estate",
+        "products_per_page": 24
+      }
+    },
+    "designer-spotlight": {
+      "type": "antique-estate-spotlight",
+      "blocks": {
+        "cartier": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Paris maison",
+            "title": "Cartier",
+            "copy": "Signed Art Deco, panther, and diamond estate pieces.",
+            "collection_handle": "cartier",
+            "link_text": "/collections/cartier",
+            "cta_label": "Shop Cartier"
+          }
+        },
+        "van-cleef": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French house",
+            "title": "Van Cleef & Arpels",
+            "copy": "Alhambra, sculptural gold, and signed estate pieces.",
+            "collection_handle": "van-cleef-arpels",
+            "link_text": "/collections/van-cleef-arpels",
+            "cta_label": "Shop Van Cleef"
+          }
+        },
+        "tiffany": {
+          "type": "designer",
+          "settings": {
+            "kicker": "New York icon",
+            "title": "Tiffany & Co.",
+            "copy": "Schlumberger, diamond essentials, and signed Tiffany estate jewels.",
+            "collection_handle": "tiffany",
+            "link_text": "/collections/tiffany",
+            "cta_label": "Shop Tiffany"
+          }
+        },
+        "bvlgari": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Roman icon",
+            "title": "Bvlgari",
+            "copy": "Serpenti, Parentesi, and signed Bvlgari estate jewels.",
+            "collection_handle": "bvlgari",
+            "link_text": "/collections/bvlgari",
+            "cta_label": "Shop Bvlgari"
+          }
+        },
+        "harry-winston": {
+          "type": "designer",
+          "settings": {
+            "kicker": "King of diamonds",
+            "title": "Harry Winston",
+            "copy": "Cluster, wreath, and signed Winston diamond estate pieces.",
+            "collection_handle": "harry-winston",
+            "link_text": "/collections/harry-winston",
+            "cta_label": "Shop Harry Winston"
+          }
+        },
+        "hermes": {
+          "type": "designer",
+          "settings": {
+            "kicker": "French house",
+            "title": "Hermès",
+            "copy": "Chaîne d'Ancre, Kelly, and signed Hermès estate jewelry.",
+            "collection_handle": "hermes",
+            "link_text": "/collections/hermes",
+            "cta_label": "Shop Hermès"
+          }
+        },
+        "david-webb": {
+          "type": "designer",
+          "settings": {
+            "kicker": "American boldness",
+            "title": "David Webb",
+            "copy": "Enamel, carved stones, and architectural gold.",
+            "collection_handle": "david-webb",
+            "link_text": "/collections/david-webb",
+            "cta_label": "Shop David Webb"
+          }
+        },
+        "chopard": {
+          "type": "designer",
+          "settings": {
+            "kicker": "Geneva maison",
+            "title": "Chopard",
+            "copy": "Happy Diamonds, Imperiale, and signed Chopard estate pieces.",
+            "collection_handle": "chopard",
+            "link_text": "/collections/chopard",
+            "cta_label": "Shop Chopard"
+          }
+        }
+      },
+      "block_order": [
+        "cartier",
+        "van-cleef",
+        "tiffany",
+        "bvlgari",
+        "harry-winston",
+        "hermes",
+        "david-webb",
+        "chopard"
+      ],
+      "settings": {
+        "eyebrow": "Designer estate jewelry",
+        "title": "Shop the great jewelry houses",
+        "description": "Authenticated, one-of-a-kind antique and estate pieces from the world's most collected maisons.",
+        "layout": "tiles",
+        "cta_link_text": "/collections/vintage-jewelry",
+        "cta_label": "Browse all estate pieces"
+      }
+    },
+    "estate-designers": {
+      "type": "estate-designers",
+      "settings": {
+        "eyebrow": "Browse by designer",
+        "title": "Find your house",
+        "description": "Use the designer list to shop signed estate jewelry by house. All pieces are individually authenticated.",
+        "partner_note": "All estate pieces are pre-owned and individually authenticated."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "designer-spotlight",
+    "estate-designers"
+  ]
+}
