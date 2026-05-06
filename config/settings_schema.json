@@ -3,40 +3,84 @@
     "name": "theme_info",
     "theme_name": "Laura Milman",
     "theme_version": "1.0.0",
-    "theme_author": "Laura Milman Studio",
+    "theme_author": "Laura Milman New York",
     "theme_documentation_url": "https://lauramilman.com",
-    "theme_support_url": "https://lauramilman.com"
+    "theme_support_url": "https://lauramilman.com/pages/contact"
   },
   {
     "name": "Colors",
     "settings": [
       {
         "type": "color",
-        "id": "accent_color",
-        "label": "Accent Color",
-        "default": "#C1A784"
+        "id": "color_espresso",
+        "label": "Espresso",
+        "default": "#1E1109"
       },
       {
         "type": "color",
-        "id": "bg_color",
-        "label": "Background (deep)",
-        "default": "#1A0F08"
-      }
-    ]
-  },
-  {
-    "name": "Typography",
-    "settings": [
+        "id": "color_wine",
+        "label": "Wine",
+        "default": "#4A1428"
+      },
       {
-        "type": "select",
-        "id": "hero_variant",
-        "label": "Hero Layout",
-        "options": [
-          { "value": "dramatic", "label": "Dramatic (centered)" },
-          { "value": "editorial", "label": "Editorial (split)" },
-          { "value": "minimal", "label": "Minimal (type-forward)" }
-        ],
-        "default": "dramatic"
+        "type": "color",
+        "id": "color_off_white",
+        "label": "Off White",
+        "default": "#F5F0E8"
+      },
+      {
+        "type": "color",
+        "id": "color_warm_white",
+        "label": "Warm White",
+        "default": "#FDFAF6"
+      },
+      {
+        "type": "color",
+        "id": "color_cream",
+        "label": "Cream",
+        "default": "#FAF6F0"
+      },
+      {
+        "type": "color",
+        "id": "color_gold",
+        "label": "Gold",
+        "default": "#C9A050"
+      },
+      {
+        "type": "color",
+        "id": "color_gold_light",
+        "label": "Gold Light",
+        "default": "#E2C27A"
+      },
+      {
+        "type": "color",
+        "id": "color_gold_pale",
+        "label": "Gold Pale",
+        "default": "#F0DFB0"
+      },
+      {
+        "type": "color",
+        "id": "color_text_dark",
+        "label": "Text Dark",
+        "default": "#2C1810"
+      },
+      {
+        "type": "color",
+        "id": "color_text_wine",
+        "label": "Text Wine",
+        "default": "#4A2018"
+      },
+      {
+        "type": "color",
+        "id": "color_text_muted",
+        "label": "Text Muted",
+        "default": "#8A8070"
+      },
+      {
+        "type": "color",
+        "id": "color_rule",
+        "label": "Rule / Divider",
+        "default": "#DDD5C5"
       }
     ]
   },

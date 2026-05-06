@@ -1,0 +1,77 @@
+{%- comment -%}
+  Laura Milman New York — Announcement Bar
+  Gold text on espresso background, full-width above header
+{%- endcomment -%}
+
+{%- if section.settings.enable -%}
+  <div class="lm-announce" role="region" aria-label="Announcement">
+    <div class="lm-announce__inner">
+      {%- if section.settings.link != blank -%}
+        <a href="{{ section.settings.link }}" class="lm-announce__link">
+          {{ section.settings.text | default: 'Complimentary shipping on all orders' }}
+        </a>
+      {%- else -%}
+        <p class="lm-announce__text">
+          {{ section.settings.text | default: 'Complimentary shipping on all orders' }}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+  .lm-announce {
+    background: var(--espresso, #2C1810);
+    padding: 10px 1rem;
+    text-align: center;
+  }
+
+  .lm-announce__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .lm-announce__text,
+  .lm-announce__link {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin: 0;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .lm-announce__link:hover {
+    opacity: 0.75;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "tag": "section",
+  "class": "section-announcement-bar",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Announcement text",
+      "default": "Complimentary shipping on all orders"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link (optional)"
+    }
+  ]
+}
+{% endschema %}

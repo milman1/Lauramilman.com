@@ -1,0 +1,204 @@
+{%- comment -%}
+  Laura Milman New York — Newsletter Section
+  Espresso background, two-column layout with Shopify customer form
+{%- endcomment -%}
+
+<section class="lm-newsletter" aria-label="Newsletter signup">
+  <div class="lm-newsletter__container">
+
+    <div class="lm-newsletter__text">
+      <h2 class="lm-newsletter__title">{{ section.settings.title | default: 'Join the Inner Circle' }}</h2>
+      <p class="lm-newsletter__desc">{{ section.settings.description | default: 'Be the first to see new arrivals, receive exclusive offers, and discover rare estate pieces.' }}</p>
+    </div>
+
+    <div class="lm-newsletter__form-wrap">
+      {%- form 'customer', id: 'lm-newsletter-form', class: 'lm-newsletter__form' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <div class="lm-newsletter__field">
+          <input
+            type="email"
+            name="contact[email]"
+            class="lm-newsletter__input"
+            placeholder="{{ section.settings.placeholder | default: 'Your email address' }}"
+            required
+            autocomplete="email"
+            aria-label="Email address"
+          >
+          <button type="submit" class="lm-newsletter__btn">
+            {{ section.settings.button_text | default: 'Subscribe' }}
+          </button>
+        </div>
+        {%- if form.posted_successfully? -%}
+          <p class="lm-newsletter__success">{{ section.settings.success_message | default: 'Welcome to the inner circle.' }}</p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <p class="lm-newsletter__error">{{ form.errors.messages['email'] }}</p>
+        {%- endif -%}
+      {%- endform -%}
+      <p class="lm-newsletter__privacy">We respect your privacy. Unsubscribe anytime.</p>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-newsletter {
+    background: var(--espresso, #2C1810);
+    padding: 5rem 2rem;
+  }
+
+  .lm-newsletter__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .lm-newsletter__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 400;
+    color: var(--cream, #FAF7F2);
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .lm-newsletter__desc {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: rgba(250, 247, 242, 0.6);
+    margin: 0;
+  }
+
+  .lm-newsletter__field {
+    display: flex;
+    gap: 0;
+  }
+
+  .lm-newsletter__input {
+    flex: 1;
+    padding: 14px 20px;
+    background: rgba(250, 247, 242, 0.08);
+    border: 1px solid rgba(193, 167, 132, 0.25);
+    border-right: none;
+    color: var(--cream, #FAF7F2);
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .lm-newsletter__input::placeholder {
+    color: rgba(250, 247, 242, 0.35);
+  }
+
+  .lm-newsletter__input:focus {
+    border-color: var(--gold, #C1A784);
+  }
+
+  .lm-newsletter__btn {
+    padding: 14px 32px;
+    background: var(--gold, #C1A784);
+    color: var(--espresso, #2C1810);
+    border: 1px solid var(--gold, #C1A784);
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .lm-newsletter__btn:hover {
+    background: var(--gold-light, #D4C4A0);
+  }
+
+  .lm-newsletter__success {
+    color: var(--gold, #C1A784);
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+
+  .lm-newsletter__error {
+    color: #e8634d;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+
+  .lm-newsletter__privacy {
+    font-size: 0.72rem;
+    color: rgba(250, 247, 242, 0.3);
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .lm-newsletter {
+      padding: 3.5rem 1rem;
+    }
+    .lm-newsletter__container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      text-align: center;
+    }
+    .lm-newsletter__field {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .lm-newsletter__input {
+      border-right: 1px solid rgba(193, 167, 132, 0.25);
+    }
+    .lm-newsletter__btn {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "section",
+  "class": "section-newsletter",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Join the Inner Circle"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Be the first to see new arrivals, receive exclusive offers, and discover rare estate pieces."
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Input placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Welcome to the inner circle."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter"
+    }
+  ]
+}
+{% endschema %}

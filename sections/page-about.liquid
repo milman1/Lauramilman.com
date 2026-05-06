@@ -1,3 +1,362 @@
+<style>
+  /* ── Hero ── */
+  .about-hero {
+    background: var(--cream, #FAF7F2);
+    padding: 100px 24px 80px;
+    text-align: center;
+  }
+  .about-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .about-hero .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 20px;
+  }
+  .about-hero__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--espresso, #2C1810);
+    margin: 0 0 24px;
+  }
+  .about-hero__subtitle {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-muted, #6B5E54);
+    margin: 0;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Story ── */
+  .about-story {
+    background: var(--warm-white, #FBF9F6);
+    padding: 80px 0;
+  }
+  .about-story__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .about-story__image-wrap {
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: var(--cream, #FAF7F2);
+  }
+  .about-story__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .about-story__img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(193, 167, 132, 0.3);
+    background: repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(193, 167, 132, 0.03) 10px, rgba(193, 167, 132, 0.03) 11px);
+  }
+  .about-story .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+  }
+  .about-story__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 400;
+    color: var(--espresso, #2C1810);
+    margin: 0 0 28px;
+    line-height: 1.25;
+  }
+  .about-story__body p {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text-muted, #6B5E54);
+    margin: 0 0 18px;
+  }
+  .about-story__body p:last-child {
+    margin-bottom: 0;
+  }
+  .about-story__sig {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 20px;
+    font-style: italic;
+    color: var(--gold, #C1A784);
+    margin-top: 32px;
+  }
+
+  /* ── Values ── */
+  .about-values {
+    background: var(--off-white, #F5F2ED);
+    padding: 80px 0;
+  }
+  .about-values__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .about-values .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .about-values__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 400;
+    color: var(--espresso, #2C1810);
+    margin: 0 0 48px;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .about-values__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+  .about-value-card {
+    background: #fff;
+    border: 1px solid var(--rule-light, #E8E2DA);
+    border-radius: 8px;
+    padding: 40px 28px;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .about-value-card:hover {
+    border-color: var(--gold-pale, #E8DFD3);
+    box-shadow: 0 4px 24px rgba(44, 24, 16, 0.06);
+  }
+  .about-value-card__icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold, #C1A784);
+  }
+  .about-value-card__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--espresso, #2C1810);
+    margin: 0 0 12px;
+  }
+  .about-value-card__body {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted, #6B5E54);
+    margin: 0;
+  }
+
+  /* ── Sourcing ── */
+  .about-sourcing {
+    background: var(--warm-white, #FBF9F6);
+    padding: 80px 0;
+  }
+  .about-sourcing__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .about-sourcing .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+  }
+  .about-sourcing__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 400;
+    color: var(--espresso, #2C1810);
+    margin: 0 0 20px;
+    line-height: 1.25;
+  }
+  .about-sourcing__body {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text-muted, #6B5E54);
+    margin: 0;
+  }
+  .about-sourcing__cta {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 14px 36px;
+    background: var(--gold, #C1A784);
+    color: #fff;
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.25s;
+  }
+  .about-sourcing__cta:hover {
+    background: var(--espresso, #2C1810);
+  }
+  .about-sourcing__image-wrap {
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: var(--cream, #FAF7F2);
+  }
+  .about-sourcing__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Bottom CTA ── */
+  .about-cta {
+    background: var(--espresso, #2C1810);
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .about-cta__inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .about-cta .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+  }
+  .about-cta__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    color: var(--cream, #FAF7F2);
+    margin: 0 0 20px;
+    line-height: 1.2;
+  }
+  .about-cta__body {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(250, 247, 242, 0.7);
+    margin: 0 0 36px;
+  }
+  .about-cta__buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .about-cta__primary-btn {
+    display: inline-block;
+    padding: 14px 36px;
+    background: var(--gold, #C1A784);
+    color: #fff;
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.25s;
+  }
+  .about-cta__primary-btn:hover {
+    background: var(--gold-light, #D4B896);
+  }
+  .about-cta__secondary-btn {
+    display: inline-block;
+    padding: 14px 36px;
+    border: 1px solid rgba(193, 167, 132, 0.4);
+    color: var(--cream, #FAF7F2);
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: border-color 0.25s, background 0.25s;
+  }
+  .about-cta__secondary-btn:hover {
+    border-color: var(--gold, #C1A784);
+    background: rgba(193, 167, 132, 0.1);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .about-story__inner,
+    .about-sourcing__inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .about-story__image-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .about-sourcing__image-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      order: -1;
+    }
+    .about-values__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .about-hero { padding: 72px 24px 56px; }
+    .about-story,
+    .about-values,
+    .about-sourcing { padding: 56px 0; }
+    .about-cta { padding: 56px 24px; }
+    .about-values__grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .about-value-card { padding: 32px 24px; }
+  }
+</style>
+
+<!-- ── Hero ── -->
 <section class="about-hero">
   <div class="about-hero__inner">
     <div class="eyebrow">{{ section.settings.eyebrow | default: 'Our Story' }}</div>
@@ -8,6 +367,7 @@
   </div>
 </section>
 
+<!-- ── Story ── -->
 <section class="about-story">
   <div class="about-story__inner">
 
@@ -29,9 +389,9 @@
       <div class="eyebrow">{{ section.settings.story_eyebrow | default: 'Who We Are' }}</div>
       <h2 class="about-story__heading">{{ section.settings.story_heading | default: 'Fine Jewelry, Authentically Sourced' }}</h2>
       <div class="about-story__body">
-        <p>{{ section.settings.story_p1 | default: 'Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. We began with a single conviction: every woman deserves pieces that feel authentically, undeniably hers.' }}</p>
-        <p>{{ section.settings.story_p2 | default: 'From original fine jewelry crafted with traceable diamonds to hand-selected antique and estate pieces from the world\'s great houses — every item in our collection is chosen with purpose. We meticulously trace every diamond we carry to its source, and every estate piece is individually authenticated before it reaches you.' }}</p>
-        <p>{{ section.settings.story_p3 | default: 'Based in New York, we offer a wide selection spanning classic and timeless designs to rare vintage finds — ensuring there is something extraordinary for every chapter of your life.' }}</p>
+        <p>{{ section.settings.story_p1 }}</p>
+        <p>{{ section.settings.story_p2 }}</p>
+        <p>{{ section.settings.story_p3 }}</p>
       </div>
       {%- if section.settings.signature != blank -%}
         <div class="about-story__sig">{{ section.settings.signature }}</div>
@@ -41,48 +401,70 @@
   </div>
 </section>
 
+<!-- ── Values ── -->
 <section class="about-values">
   <div class="about-values__inner">
-    <div class="eyebrow" style="text-align:center;">{{ section.settings.values_eyebrow | default: 'What We Stand For' }}</div>
+    <div class="eyebrow">{{ section.settings.values_eyebrow | default: 'What We Stand For' }}</div>
     <h2 class="about-values__title">{{ section.settings.values_title | default: 'Our Commitments to You' }}</h2>
     <div class="about-values__grid">
 
       <div class="about-value-card">
-        <div class="about-value-card__icon">◇</div>
-        <h3 class="about-value-card__heading">Authenticity Guaranteed</h3>
-        <p class="about-value-card__body">Every estate and antique piece is individually authenticated by our in-house specialists before it is offered for sale. We stand behind every item with a full certificate of authenticity.</p>
+        <div class="about-value-card__icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M16 2L20 12H30L22 18L25 28L16 22L7 28L10 18L2 12H12L16 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
+        <h3 class="about-value-card__heading">{{ section.settings.v1_heading | default: 'Authenticity Guaranteed' }}</h3>
+        <p class="about-value-card__body">{{ section.settings.v1_body | default: 'Every piece in our collection is individually authenticated by our team of certified gemologists. We stand behind every item with a full certificate of authenticity.' }}</p>
       </div>
 
       <div class="about-value-card">
-        <div class="about-value-card__icon">⟡</div>
-        <h3 class="about-value-card__heading">Traceable Diamonds</h3>
-        <p class="about-value-card__body">We meticulously trace every rough diamond we use to its source, ensuring complete transparency in our supply chain. Conflict-free and ethically sourced — always.</p>
+        <div class="about-value-card__icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 4v4M16 24v4M4 16h4M24 16h4M7.5 7.5l2.8 2.8M21.7 21.7l2.8 2.8M7.5 24.5l2.8-2.8M21.7 10.3l2.8-2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="about-value-card__heading">{{ section.settings.v2_heading | default: 'Traceable Diamonds' }}</h3>
+        <p class="about-value-card__body">{{ section.settings.v2_body | default: 'We source our diamonds through fully traceable supply chains, ensuring complete transparency from mine to setting. Conflict-free and ethically sourced — always.' }}</p>
       </div>
 
       <div class="about-value-card">
-        <div class="about-value-card__icon">↻</div>
-        <h3 class="about-value-card__heading">Curated with Purpose</h3>
-        <p class="about-value-card__body">We offer a wide selection spanning classic and timeless designs to rare vintage finds. Our buyers spend thousands of hours sourcing only the pieces that meet our exacting standards.</p>
+        <div class="about-value-card__icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4 14h24" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="10" cy="20" r="2" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3 class="about-value-card__heading">{{ section.settings.v3_heading | default: 'Curated with Purpose' }}</h3>
+        <p class="about-value-card__body">{{ section.settings.v3_body | default: "We don't carry thousands of generic pieces. Each item is selected by our buyers who spend thousands of hours sourcing only pieces that meet our exacting standards." }}</p>
       </div>
 
       <div class="about-value-card">
-        <div class="about-value-card__icon">✦</div>
-        <h3 class="about-value-card__heading">New York Expertise</h3>
-        <p class="about-value-card__body">From our New York studio, we bring decades of expertise across fine jewelry, estate pieces, and bridal. Our team is always available to help you find the perfect piece for your story.</p>
+        <div class="about-value-card__icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M16 28c6.627 0 12-5.373 12-12S22.627 4 16 4 4 9.373 4 16s5.373 12 12 12z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 12l4 4 4-4M12 18l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="about-value-card__heading">{{ section.settings.v4_heading | default: 'New York Expertise' }}</h3>
+        <p class="about-value-card__body">{{ section.settings.v4_body | default: "With decades of experience in New York's Diamond District, our team is always available to help you find the perfect piece for every chapter of your story." }}</p>
       </div>
 
     </div>
   </div>
 </section>
 
+<!-- ── Sourcing ── -->
 <section class="about-sourcing">
   <div class="about-sourcing__inner">
 
     <div class="about-sourcing__content">
       <div class="eyebrow">{{ section.settings.sourcing_eyebrow | default: 'Our Source Materials' }}</div>
       <h2 class="about-sourcing__heading">{{ section.settings.sourcing_heading | default: 'From Mine to Setting' }}</h2>
-      <p class="about-sourcing__body">{{ section.settings.sourcing_body | default: 'We meticulously trace every rough diamond we use to its source — from the mine to our workshop — ensuring complete transparency in our process. We believe you should know where your jewelry comes from, and we make that possible with every purchase.' }}</p>
-      <a href="{{ section.settings.sourcing_cta_link | default: '/collections/all' }}" class="hero__cta" style="display:inline-block;margin-top:40px;">
+      <p class="about-sourcing__body">{{ section.settings.sourcing_body }}</p>
+      <a href="{{ section.settings.sourcing_cta_link | default: '/collections/all' }}" class="about-sourcing__cta">
         {{ section.settings.sourcing_cta_label | default: 'Explore the Collection' }}
       </a>
     </div>
@@ -104,13 +486,14 @@
   </div>
 </section>
 
+<!-- ── Bottom CTA ── -->
 <section class="about-cta">
   <div class="about-cta__inner">
     <div class="eyebrow">{{ section.settings.cta_eyebrow | default: 'Ready to Begin?' }}</div>
-    <h2 class="about-cta__title">{{ section.settings.cta_title | default: 'Find Your Piece' }}</h2>
-    <p class="about-cta__body">{{ section.settings.cta_body | default: 'From everyday elegance to once-in-a-lifetime occasions — explore our full collection or reach out to our team for personal styling.' }}</p>
+    <h2 class="about-cta__title">{{ section.settings.cta_title | default: 'Find Your Perfect Piece' }}</h2>
+    <p class="about-cta__body">{{ section.settings.cta_body }}</p>
     <div class="about-cta__buttons">
-      <a href="{{ section.settings.cta_shop_link | default: '/collections/all' }}" class="hero__cta">
+      <a href="{{ section.settings.cta_shop_link | default: '/collections/all' }}" class="about-cta__primary-btn">
         {{ section.settings.cta_shop_label | default: 'Shop All Jewelry' }}
       </a>
       <a href="{{ section.settings.cta_contact_link | default: '/pages/contact' }}" class="about-cta__secondary-btn">
@@ -126,6 +509,10 @@
   "tag": "article",
   "class": "section-page-about",
   "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
     {
       "type": "text",
       "id": "eyebrow",
@@ -143,6 +530,10 @@
       "id": "subtitle",
       "label": "Hero subtitle",
       "default": "Founded in New York. Built on transparency, curation, and a deep love for extraordinary jewelry."
+    },
+    {
+      "type": "header",
+      "content": "Story"
     },
     {
       "type": "image_picker",
@@ -186,6 +577,10 @@
       "default": "— Laura Milman"
     },
     {
+      "type": "header",
+      "content": "Values"
+    },
+    {
       "type": "text",
       "id": "values_eyebrow",
       "label": "Values eyebrow",
@@ -196,6 +591,58 @@
       "id": "values_title",
       "label": "Values title",
       "default": "Our Commitments to You"
+    },
+    {
+      "type": "text",
+      "id": "v1_heading",
+      "label": "Value 1 heading",
+      "default": "Authenticity Guaranteed"
+    },
+    {
+      "type": "textarea",
+      "id": "v1_body",
+      "label": "Value 1 body",
+      "default": "Every piece in our collection is individually authenticated by our team of certified gemologists. We stand behind every item with a full certificate of authenticity."
+    },
+    {
+      "type": "text",
+      "id": "v2_heading",
+      "label": "Value 2 heading",
+      "default": "Traceable Diamonds"
+    },
+    {
+      "type": "textarea",
+      "id": "v2_body",
+      "label": "Value 2 body",
+      "default": "We source our diamonds through fully traceable supply chains, ensuring complete transparency from mine to setting. Conflict-free and ethically sourced — always."
+    },
+    {
+      "type": "text",
+      "id": "v3_heading",
+      "label": "Value 3 heading",
+      "default": "Curated with Purpose"
+    },
+    {
+      "type": "textarea",
+      "id": "v3_body",
+      "label": "Value 3 body",
+      "default": "We don't carry thousands of generic pieces. Each item is selected by our buyers who spend thousands of hours sourcing only pieces that meet our exacting standards."
+    },
+    {
+      "type": "text",
+      "id": "v4_heading",
+      "label": "Value 4 heading",
+      "default": "New York Expertise"
+    },
+    {
+      "type": "textarea",
+      "id": "v4_body",
+      "label": "Value 4 body",
+      "default": "With decades of experience in New York's Diamond District, our team is always available to help you find the perfect piece for every chapter of your story."
+    },
+    {
+      "type": "header",
+      "content": "Sourcing"
     },
     {
       "type": "text",
@@ -233,21 +680,25 @@
       "default": "/collections/all"
     },
     {
+      "type": "header",
+      "content": "Bottom CTA"
+    },
+    {
       "type": "text",
       "id": "cta_eyebrow",
-      "label": "Bottom CTA eyebrow",
+      "label": "CTA eyebrow",
       "default": "Ready to Begin?"
     },
     {
       "type": "text",
       "id": "cta_title",
-      "label": "Bottom CTA title",
-      "default": "Find Your Piece"
+      "label": "CTA title",
+      "default": "Find Your Perfect Piece"
     },
     {
       "type": "textarea",
       "id": "cta_body",
-      "label": "Bottom CTA body",
+      "label": "CTA body",
       "default": "From everyday elegance to once-in-a-lifetime occasions — explore our full collection or reach out to our team for personal styling."
     },
     {

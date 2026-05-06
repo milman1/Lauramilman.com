@@ -1,11 +1,37 @@
 {
   "current": {
-    "accent_color": "#C1A784",
-    "bg_color": "#1A0F08",
-    "hero_variant": "dramatic",
-    "social_instagram": "",
+    "color_espresso": "#1E1109",
+    "color_wine": "#4A1428",
+    "color_off_white": "#F5F0E8",
+    "color_warm_white": "#FDFAF6",
+    "color_cream": "#FAF6F0",
+    "color_gold": "#C9A050",
+    "color_gold_light": "#E2C27A",
+    "color_gold_pale": "#F0DFB0",
+    "color_text_dark": "#2C1810",
+    "color_text_wine": "#4A2018",
+    "color_text_muted": "#8A8070",
+    "color_rule": "#DDD5C5",
+    "social_instagram": "https://www.instagram.com/lauramilmannewyork",
     "social_pinterest": "",
-    "social_facebook": ""
-  },
-  "presets": {}
+    "social_facebook": "",
+    "sections": {
+      "header": {
+        "type": "header",
+        "settings": {
+          "logo_position": "center",
+          "sticky_header": true,
+          "show_cart_count": true
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "settings": {
+          "show_social": true,
+          "show_newsletter": true,
+          "copyright_text": "© Laura Milman New York"
+        }
+      }
+    }
+  }
 }

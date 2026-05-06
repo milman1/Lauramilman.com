@@ -1,3 +1,9 @@
+{%- comment -%}
+  Laura Milman New York — Product Detail Page
+  Two-column: image gallery (left) + sticky product info (right)
+  Metafield display, variant selector, accordion details, trust badges
+{%- endcomment -%}
+
 {%- assign current_variant = product.selected_or_first_available_variant -%}
 {%- assign product_form_id = 'product-form-' | append: section.id -%}
 
@@ -47,7 +53,7 @@
 
       {%- if product.images.size > 1 -%}
         <div class="product-gallery__thumbs" role="list">
-          {%- for image in product.images limit: 5 -%}
+          {%- for image in product.images limit: 6 -%}
             <button
               class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
               data-src="{{ image | image_url: width: 1200 }}"
@@ -70,40 +76,19 @@
     <!-- Product Info -->
     <div class="product-info">
 
-      <!-- Rating (placeholder) -->
-      <div class="product-rating">
-        <div class="product-rating__stars stars" aria-label="4.8 out of 5 stars">
-          {%- for i in (1..5) -%}
-            <svg width="14" height="14" viewBox="0 0 24 24"
-              fill="{{ i | at_most: 4 | floor | times: 1 | at_least: 1 | minus: i | abs | at_most: 1 | times: -1 | plus: 1 | times: 193 | minus: 193 | at_most: 0 | abs | at_least: 0 | times: 0 }}{% if i <= 4 %}#C1A784{% else %}none{% endif %}"
-              stroke="#C1A784"
-              stroke-width="1.5"
-              aria-hidden="true"
-            >
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-          {%- endfor -%}
-        </div>
-        {%- if product.metafields.reviews.rating_count -%}
-          <span class="product-rating__text">
-            {{ product.metafields.reviews.rating.value }} ({{ product.metafields.reviews.rating_count.value }} reviews)
-          </span>
-        {%- endif -%}
-      </div>
+      {%- if product.vendor != blank -%}
+        <p class="product-vendor">{{ product.vendor }}</p>
+      {%- endif -%}
 
       <h1 class="product-title">{{ product.title }}</h1>
 
       <!-- Price -->
       <div class="product-price-row">
-        <span class="product-price">
-          {%- if current_variant.price -%}
-            {{ current_variant.price | money }}
-          {%- else -%}
-            {{ product.price_min | money }}
-          {%- endif -%}
+        <span class="product-price" id="product-price-display">
+          {{ current_variant.price | money }}
         </span>
         {%- if current_variant.compare_at_price > current_variant.price -%}
-          <s class="product-price--compare">{{ current_variant.compare_at_price | money }}</s>
+          <s class="product-price--compare" id="product-compare-price">{{ current_variant.compare_at_price | money }}</s>
           <span class="product-price--save">
             Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}
           </span>
@@ -114,12 +99,46 @@
         <div class="product-description">{{ product.description | strip_html | truncate: 300 }}</div>
       {%- endif -%}
 
+      <!-- Metafield Specs -->
+      {%- assign has_meta = false -%}
+      {%- if product.metafields.custom.carat_weight != blank or product.metafields.custom.color != blank or product.metafields.custom.clarity != blank or product.metafields.custom.metal != blank -%}
+        {%- assign has_meta = true -%}
+      {%- endif -%}
+
+      {%- if has_meta -%}
+        <div class="product-specs">
+          {%- if product.metafields.custom.carat_weight != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Carat</span>
+              <span class="product-spec__value">{{ product.metafields.custom.carat_weight }}</span>
+            </div>
+          {%- endif -%}
+          {%- if product.metafields.custom.color != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Color</span>
+              <span class="product-spec__value">{{ product.metafields.custom.color }}</span>
+            </div>
+          {%- endif -%}
+          {%- if product.metafields.custom.clarity != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Clarity</span>
+              <span class="product-spec__value">{{ product.metafields.custom.clarity }}</span>
+            </div>
+          {%- endif -%}
+          {%- if product.metafields.custom.metal != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Metal</span>
+              <span class="product-spec__value">{{ product.metafields.custom.metal }}</span>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
       <div class="gold-divider"></div>
 
       <!-- Product Form -->
       {%- form 'product', product, id: product_form_id, data-product-form: '' -%}
 
-        <!-- Variant select (hidden, controlled by option buttons) -->
         <select name="id" style="display:none;" aria-label="Variant">
           {%- for variant in product.variants -%}
             <option
@@ -182,7 +201,7 @@
             {%- endif -%}
           </button>
 
-          <button type="button" class="wishlist-btn" aria-label="{{ 'products.product.wishlist' | t }}">
+          <button type="button" class="wishlist-btn" aria-label="Add to wishlist">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C1A784" stroke-width="1.5" aria-hidden="true">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
             </svg>
@@ -191,25 +210,29 @@
 
       {%- endform -%}
 
-      <!-- Trust badges -->
+      <!-- Trust Badges -->
       <div class="trust-badges">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'trust_badge' -%}
-            <div class="trust-badge" {{ block.shopify_attributes }}>
-              <span class="trust-badge__icon" aria-hidden="true">{{ block.settings.icon }}</span>
-              <span class="trust-badge__label">{{ block.settings.label }}</span>
-            </div>
-          {%- endif -%}
-        {%- endfor -%}
+        <div class="trust-badge">
+          <span class="trust-badge__icon" aria-hidden="true">◇</span>
+          <span class="trust-badge__label">Authenticity Guaranteed</span>
+        </div>
+        <div class="trust-badge">
+          <span class="trust-badge__icon" aria-hidden="true">⟡</span>
+          <span class="trust-badge__label">Free Insured Shipping</span>
+        </div>
+        <div class="trust-badge">
+          <span class="trust-badge__icon" aria-hidden="true">↻</span>
+          <span class="trust-badge__label">30-Day Returns</span>
+        </div>
       </div>
 
-      <!-- Accordion -->
+      <!-- Accordion: Materials -->
       <div class="accordion-item" data-open>
-        <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-materials">
+        <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-materials-{{ section.id }}">
           Materials &amp; Craftsmanship
           <span class="accordion-icon" aria-hidden="true">+</span>
         </button>
-        <div class="accordion-body" id="acc-materials">
+        <div class="accordion-body" id="acc-materials-{{ section.id }}">
           <div class="accordion-content">
             {%- if product.metafields.custom.materials != blank -%}
               {{ product.metafields.custom.materials }}
@@ -220,33 +243,35 @@
         </div>
       </div>
 
+      <!-- Accordion: Shipping -->
       <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-shipping">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-shipping-{{ section.id }}">
           Shipping &amp; Returns
           <span class="accordion-icon" aria-hidden="true">+</span>
         </button>
-        <div class="accordion-body" id="acc-shipping">
+        <div class="accordion-body" id="acc-shipping-{{ section.id }}">
           <div class="accordion-content">
             {%- if section.settings.shipping_text != blank -%}
               {{ section.settings.shipping_text }}
             {%- else -%}
-              Complimentary insured shipping on all orders via FedEx. Estimated delivery: 3–5 business days. International shipping available.<br><br>Full refund within 30 days of delivery. Items must be unworn and in original packaging.
+              All pieces ship via insured FedEx with signature required. Free shipping on all orders. 30-day returns accepted for unworn items in original packaging.
             {%- endif -%}
           </div>
         </div>
       </div>
 
+      <!-- Accordion: Care -->
       <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-care">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-care-{{ section.id }}">
           Care Guide
           <span class="accordion-icon" aria-hidden="true">+</span>
         </button>
-        <div class="accordion-body" id="acc-care">
+        <div class="accordion-body" id="acc-care-{{ section.id }}">
           <div class="accordion-content">
             {%- if section.settings.care_text != blank -%}
               {{ section.settings.care_text }}
             {%- else -%}
-              Store in the provided jewelry box when not wearing. Clean gently with a soft cloth and warm water. Avoid contact with harsh chemicals, perfumes, and chlorine.
+              Store in provided jewelry box. Clean with soft cloth. Avoid contact with chemicals, perfumes, and chlorine.
             {%- endif -%}
           </div>
         </div>
@@ -254,10 +279,9 @@
 
       <!-- Share -->
       <div class="product-share">
-        <span class="product-share__label">{{ 'products.product.share' | t }}</span>
+        <span class="product-share__label">Share</span>
         <a href="https://pinterest.com/pin/create/button/?url={{ shop.url }}{{ product.url }}&media={{ product.featured_image | image_url: width: 1200 }}&description={{ product.title | url_encode }}"
           target="_blank" rel="noopener" class="product-share__link">Pinterest</a>
-        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="product-share__link">Instagram</a>
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ product.url }}"
           target="_blank" rel="noopener" class="product-share__link">Facebook</a>
       </div>
@@ -269,7 +293,7 @@
   <div class="promise-banner">
     <div class="eyebrow">The {{ shop.name }} Promise</div>
     <h2 class="promise-banner__title">Crafted to Last a Lifetime</h2>
-    <p class="promise-banner__body">Every piece is handcrafted in our New York atelier using ethically sourced materials and time-honored techniques passed down through generations.</p>
+    <p class="promise-banner__body">Every piece is handcrafted using ethically sourced materials and time-honored techniques passed down through generations of New York's finest jewelers.</p>
     <div class="promise-stats">
       {%- for block in section.blocks -%}
         {%- if block.type == 'stat' -%}
@@ -303,6 +327,94 @@
 
 </div><!-- /product-page -->
 
+<!-- Metafield specs inline styles -->
+<style>
+  .product-vendor {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin: 0 0 0.5rem;
+  }
+
+  .product-specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    margin: 1.5rem 0;
+    border: 1px solid var(--rule-light, rgba(193, 167, 132, 0.15));
+  }
+
+  .product-spec {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule-light, rgba(193, 167, 132, 0.15));
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .product-spec:nth-child(odd) {
+    border-right: 1px solid var(--rule-light, rgba(193, 167, 132, 0.15));
+  }
+
+  .product-spec:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+
+  .product-spec__label {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8B7D6B);
+  }
+
+  .product-spec__value {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+  }
+</style>
+
+<!-- Product JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "description": {{ product.description | strip_html | truncate: 200 | json }},
+  "image": [
+    {%- for image in product.images limit: 5 -%}
+      {{ image.src | image_url: width: 1024 | prepend: "https:" | json }}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ],
+  "url": "{{ shop.url }}{{ product.url }}",
+  "brand": {
+    "@type": "Brand",
+    "name": {{ shop.name | json }}
+  },
+  "sku": {{ current_variant.sku | json }},
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ shop.url }}{{ product.url }}",
+    "price": "{{ product.price | money_without_currency | remove: ',' }}",
+    "priceCurrency": "{{ cart.currency.iso_code }}",
+    "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }}
+    }
+  }
+  {%- if product.metafields.custom.metal != blank -%}
+  ,"material": {{ product.metafields.custom.metal | json }}
+  {%- endif -%}
+}
+</script>
+
 {% schema %}
 {
   "name": "Product",
@@ -312,12 +424,14 @@
     {
       "type": "textarea",
       "id": "shipping_text",
-      "label": "Shipping & Returns text"
+      "label": "Shipping & Returns text",
+      "default": "All pieces ship via insured FedEx with signature required. Free shipping on all orders. 30-day returns accepted for unworn items."
     },
     {
       "type": "textarea",
       "id": "care_text",
-      "label": "Care Guide text"
+      "label": "Care Guide text",
+      "default": "Store in provided jewelry box. Clean with soft cloth. Avoid contact with chemicals."
     }
   ],
   "blocks": [

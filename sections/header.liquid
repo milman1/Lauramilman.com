@@ -1,221 +1,1116 @@
-<a class="skip-to-content-link" href="#main-content">
-  {{- 'accessibility.skip_to_content' | t -}}
-</a>
+{%- comment -%}
+  Laura Milman New York - Header Section
+  Dark glass effect header with dropdown mega menus
+{%- endcomment -%}
 
-<header class="site-header" role="banner">
-  <div class="site-header__inner">
+<style>
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  background: rgba(30, 17, 9, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 
-    <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name }}">
-      {{ shop.name }}
-    </a>
+.header--scrolled {
+  background: rgba(30, 17, 9, 0.98);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 0;
+}
 
-    <nav class="site-header__nav" role="navigation" aria-label="Main navigation">
+.header .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
 
-      {%- comment -%} ── Jewelry dropdown ── {%- endcomment -%}
-      <div class="nav-dropdown" data-nav-dropdown>
-        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
-          Jewelry
-          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="nav-dropdown__panel nav-dropdown__panel--compact" role="menu" aria-label="Jewelry categories">
-          <div class="nav-dropdown__inner">
-            <a href="/collections/all"        class="nav-dropdown__item" role="menuitem">All Jewelry</a>
-            <a href="/collections/rings"       class="nav-dropdown__item" role="menuitem">Rings</a>
-            <a href="/collections/necklaces"   class="nav-dropdown__item" role="menuitem">Necklaces</a>
-            <a href="/collections/pendants"    class="nav-dropdown__item" role="menuitem">Pendants</a>
-            <a href="/collections/bracelets"   class="nav-dropdown__item" role="menuitem">Bracelets</a>
-            <a href="/collections/earrings"    class="nav-dropdown__item" role="menuitem">Earrings</a>
-            <a href="/collections/brooches"    class="nav-dropdown__item" role="menuitem">Brooches &amp; Pins</a>
-            <a href="/collections/charms"      class="nav-dropdown__item" role="menuitem">Charms</a>
-            <a href="/collections/new-arrivals" class="nav-dropdown__item nav-dropdown__item--accent" role="menuitem">New Arrivals</a>
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header .logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: opacity 0.3s ease;
+}
+
+.header .logo:hover {
+  opacity: 0.8;
+}
+
+.header .logo span {
+  color: var(--gold-light, #E2C27A);
+  font-style: italic;
+}
+
+.header .logo img {
+  height: 70px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header .nav {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.header .nav__link {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.header .nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold, #C9A050);
+  transition: width 0.3s ease;
+}
+
+.header .nav__link:hover {
+  color: var(--gold-light, #E2C27A);
+}
+
+.header .nav__link:hover::after,
+.header .nav__link--active::after {
+  width: 100%;
+}
+
+.header .nav__link--active {
+  color: var(--gold-light, #E2C27A);
+}
+
+.header .nav__icons {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.header .nav__icon {
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header .nav__icon:hover {
+  color: var(--gold-light, #E2C27A);
+  transform: translateY(-2px);
+}
+
+.header .nav__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.header .cart-icon {
+  position: relative;
+}
+
+.header .cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: var(--gold, #C9A050);
+  color: #1E1109;
+  font-size: 0.65rem;
+  font-weight: 600;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dropdown Menu */
+.header .nav__item {
+  position: relative;
+}
+
+.header .nav__item-link {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.header .nav__item-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold, #C9A050);
+  transition: width 0.3s ease;
+}
+
+.header .nav__item:hover .nav__item-link,
+.header .nav__item-link:hover {
+  color: var(--gold-light, #E2C27A);
+}
+
+.header .nav__item:hover .nav__item-link::after {
+  width: 100%;
+}
+
+.header .nav__item-link .dropdown-arrow {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.3s ease;
+}
+
+.header .nav__item:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.header .nav__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  min-width: 220px;
+  background: rgba(30, 17, 9, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 160, 80, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+}
+
+.header .nav__item:hover .nav__dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.header .nav__dropdown-link {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.header .nav__dropdown-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--gold, #C9A050);
+  transition: height 0.2s ease;
+}
+
+.header .nav__dropdown-link:hover {
+  color: var(--gold-light, #E2C27A);
+  background: rgba(201, 160, 80, 0.08);
+  padding-left: 1.75rem;
+}
+
+.header .nav__dropdown-link:hover::before {
+  height: 60%;
+}
+
+/* Mobile Toggle */
+.header .mobile-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  z-index: 1003;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header .mobile-toggle span {
+  width: 24px;
+  height: 2px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.header .mobile-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.header .mobile-toggle.active span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.header .mobile-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Menu Overlay */
+.header .nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.header .nav-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 992px) {
+  .header .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(30, 17, 9, 0.99);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding-top: 20px;
+    gap: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 2rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    z-index: 1002;
+    display: flex;
+  }
+
+  .header .nav.nav--open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .header .nav__link {
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 1rem 0;
+    width: 100%;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.05em;
+  }
+
+  .header .nav__item {
+    width: 100%;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .header .nav__item-link {
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    width: 100%;
+    letter-spacing: 0.05em;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .header .nav__dropdown {
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
+    width: 100%;
+    min-width: 100%;
+    margin-top: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: max-height 0.15s ease-out, opacity 0.1s ease-out;
+  }
+
+  .header .nav__item:hover .nav__dropdown,
+  .header .nav__item.open .nav__dropdown {
+    position: static;
+    transform: none;
+    left: auto;
+  }
+
+  .header .nav__item.open .nav__dropdown {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    padding: 0.5rem 0 0.75rem 0;
+    transition: max-height 0.2s ease-in, opacity 0.1s ease-in;
+  }
+
+  .header .nav__item:hover .nav__dropdown {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+  }
+  .header .nav__item.open:hover .nav__dropdown {
+    opacity: 1;
+    visibility: visible;
+    max-height: 500px;
+  }
+
+  .header .nav__item:hover .dropdown-arrow {
+    transform: none;
+  }
+
+  .header .nav__item.open .nav__item-link .dropdown-arrow,
+  .header .nav__item.open:hover .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .header .nav__dropdown-link {
+    text-align: left;
+    padding: 0.75rem 0 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 400;
+    display: block;
+    color: rgba(255, 255, 255, 0.65);
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .header .nav__dropdown-link:hover,
+  .header .nav__dropdown-link:active {
+    color: var(--gold-light, #E2C27A);
+    border-left-color: var(--gold, #C9A050);
+    background: transparent;
+    padding-left: 1.25rem;
+  }
+
+  .header .nav__dropdown-link::before {
+    display: none;
+  }
+
+  .header .mobile-toggle {
+    display: flex;
+  }
+
+  .header .nav__icons {
+    position: relative;
+    z-index: 1003;
+  }
+
+  .header .nav__mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 0 1.5rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .header .nav__mobile-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .header .nav__mobile-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 8px;
+    margin-right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+
+  .header .nav__mobile-close:hover {
+    color: var(--gold, #C9A050);
+  }
+}
+
+@media (min-width: 993px) {
+  .header .nav__mobile-header {
+    display: none;
+  }
+}
+</style>
+
+<header class="header {% if section.settings.enable_sticky %}header--sticky{% endif %}" id="header">
+  <div class="nav-overlay" id="navOverlay"></div>
+  <div class="container">
+    <div class="header__inner">
+      <a href="{{ routes.root_url }}" class="logo">
+        {%- if section.settings.logo != blank -%}
+          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="200" height="auto">
+        {%- else -%}
+          Laura <span>Milman</span>
+        {%- endif -%}
+      </a>
+
+      <nav class="nav" id="nav">
+        <div class="nav__mobile-header">
+          <span class="nav__mobile-title">Menu</span>
+          <button class="nav__mobile-close" id="navClose" aria-label="Close menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="nav__item">
+          <span class="nav__item-link">
+            Jewelry
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
+            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
+            <a href="/collections/pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
+            <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
+            <a href="/collections/brooches-pins" class="nav__dropdown-link">Brooches & Pins</a>
+            <a href="/collections/charms" class="nav__dropdown-link">Charms</a>
+            <a href="/collections/new-arrivals" class="nav__dropdown-link">New Arrivals</a>
           </div>
         </div>
-      </div>
 
-      {%- comment -%} ── Wedding dropdown ── {%- endcomment -%}
-      <div class="nav-dropdown" data-nav-dropdown>
-        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
-          Wedding
-          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="nav-dropdown__panel nav-dropdown__panel--compact" role="menu" aria-label="Wedding jewelry">
-          <div class="nav-dropdown__inner">
-            <a href="/collections/engagement-rings" class="nav-dropdown__item" role="menuitem">Engagement Rings</a>
-            <a href="/collections/wedding-bands"    class="nav-dropdown__item" role="menuitem">Wedding Bands</a>
-            <a href="/collections/bridal-sets"      class="nav-dropdown__item" role="menuitem">Bridal Sets</a>
-            <a href="/collections/bridal-gifts"     class="nav-dropdown__item" role="menuitem">Bridal Gifts</a>
+        <div class="nav__item">
+          <span class="nav__item-link">
+            Wedding
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+            <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
+            <a href="/collections/bridal-sets" class="nav__dropdown-link">Bridal Sets</a>
+            <a href="/collections/bridal-gifts" class="nav__dropdown-link">Bridal Gifts</a>
           </div>
         </div>
-      </div>
 
-      {%- comment -%} ── Antique & Estate dropdown ── {%- endcomment -%}
-      <div class="nav-dropdown" data-nav-dropdown>
-        <button class="site-header__nav-link nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true" data-dropdown-trigger>
-          {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
-          <svg class="nav-dropdown__caret" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="nav-dropdown__panel" role="menu" aria-label="Estate Jewelry Designers">
-          <div class="nav-dropdown__inner">
-            <a href="/collections/bvlgari"          class="nav-dropdown__item" role="menuitem">Bvlgari</a>
-            <a href="/collections/cartier"          class="nav-dropdown__item" role="menuitem">Cartier</a>
-            <a href="/collections/chopard"          class="nav-dropdown__item" role="menuitem">Chopard</a>
-            <a href="/collections/david-webb"       class="nav-dropdown__item" role="menuitem">David Webb</a>
-            <a href="/collections/hermes"           class="nav-dropdown__item" role="menuitem">Hermès</a>
-            <a href="/collections/marina-b"         class="nav-dropdown__item" role="menuitem">Marina B.</a>
-            <a href="/collections/seaman-schepps"   class="nav-dropdown__item" role="menuitem">Seaman Schepps</a>
-            <a href="/collections/tiffany-co"       class="nav-dropdown__item" role="menuitem">Tiffany &amp; Co.</a>
-            <a href="/collections/van-cleef-arpels" class="nav-dropdown__item" role="menuitem">Van Cleef &amp; Arpels</a>
-            <a href="/collections/verdura"          class="nav-dropdown__item" role="menuitem">Verdura</a>
+        <div class="nav__item">
+          <span class="nav__item-link">
+            {{ section.settings.estate_label | default: 'Antique & Estate' }}
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/antique-estate" class="nav__dropdown-link">All Estate Pieces</a>
+            <a href="/collections/estate-cartier" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/estate-tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
+            <a href="/collections/estate-van-cleef" class="nav__dropdown-link">Van Cleef & Arpels</a>
+            <a href="/collections/estate-bvlgari" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/estate-david-webb" class="nav__dropdown-link">David Webb</a>
+            <a href="/collections/estate-hermes" class="nav__dropdown-link">Hermès</a>
           </div>
         </div>
-      </div>
 
-      {%- comment -%} ── About (plain link) ── {%- endcomment -%}
-      <a href="/pages/about" class="site-header__nav-link">About</a>
+        <a href="/pages/about" class="nav__link">About</a>
+      </nav>
 
-      <div class="site-header__icons">
-        <button class="site-header__icon-btn" aria-label="{{ 'general.search' | t }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m21 21-4.35-4.35"/>
+      <div class="nav__icons">
+        <button type="button" class="nav__icon" id="searchToggle" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
           </svg>
         </button>
-
-        <a href="{{ routes.cart_url }}" class="site-header__icon-btn" aria-label="{{ 'accessibility.cart_count' | t: count: cart.item_count }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <path d="M3 6h18"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
+        <a href="{{ routes.account_url }}" class="nav__icon" aria-label="Account">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        <a href="{{ routes.cart_url }}" class="nav__icon cart-icon" aria-label="Cart">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+            <path d="M3 6h18"></path>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
           {%- if cart.item_count > 0 -%}
-            <span class="cart-count" data-count="{{ cart.item_count }}" aria-hidden="true">{{ cart.item_count }}</span>
-          {%- else -%}
-            <span class="cart-count" data-count="0" aria-hidden="true"></span>
+            <span class="cart-count">{{ cart.item_count }}</span>
           {%- endif -%}
         </a>
       </div>
 
-    </nav>
-
-    <button class="mobile-menu-toggle" aria-label="{{ 'general.menu' | t }}" aria-expanded="false" aria-controls="mobile-nav">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </div>
 </header>
 
-{%- comment -%} ── Mobile nav ── {%- endcomment -%}
-<nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
-
-  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
-    Jewelry
-    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
-  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
-    <a href="/collections/all">All Jewelry</a>
-    <a href="/collections/rings">Rings</a>
-    <a href="/collections/necklaces">Necklaces</a>
-    <a href="/collections/pendants">Pendants</a>
-    <a href="/collections/bracelets">Bracelets</a>
-    <a href="/collections/earrings">Earrings</a>
-    <a href="/collections/brooches">Brooches &amp; Pins</a>
-    <a href="/collections/charms">Charms</a>
-    <a href="/collections/new-arrivals">New Arrivals</a>
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-overlay__inner">
+    <button type="button" class="search-overlay__close" id="searchClose" aria-label="Close search">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <form action="{{ routes.search_url }}" method="get" class="search-overlay__form" role="search">
+      <input type="hidden" name="type" value="product">
+      <div class="search-overlay__input-wrap">
+        <svg class="search-overlay__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          class="search-overlay__input"
+          id="searchInput"
+          placeholder="Search rings, necklaces, earrings..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+      </div>
+    </form>
+    <div class="search-overlay__results" id="searchResults"></div>
+    <div class="search-overlay__links">
+      <p class="search-overlay__label">Popular Searches</p>
+      <div class="search-overlay__tags">
+        <a href="{{ routes.search_url }}?q=engagement+ring&type=product" class="search-overlay__tag">Engagement Rings</a>
+        <a href="{{ routes.search_url }}?q=necklace&type=product" class="search-overlay__tag">Necklaces</a>
+        <a href="{{ routes.search_url }}?q=earring&type=product" class="search-overlay__tag">Earrings</a>
+        <a href="{{ routes.search_url }}?q=bracelet&type=product" class="search-overlay__tag">Bracelets</a>
+        <a href="/collections/antique-estate" class="search-overlay__tag">Estate Jewelry</a>
+        <a href="/collections/new-arrivals" class="search-overlay__tag">New Arrivals</a>
+      </div>
+    </div>
   </div>
+</div>
 
-  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
-    Wedding
-    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
-  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
-    <a href="/collections/engagement-rings">Engagement Rings</a>
-    <a href="/collections/wedding-bands">Wedding Bands</a>
-    <a href="/collections/bridal-sets">Bridal Sets</a>
-    <a href="/collections/bridal-gifts">Bridal Gifts</a>
-  </div>
+<style>
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(30, 17, 9, 0.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
 
-  <button class="mobile-nav__accordion-trigger" aria-expanded="false" data-mobile-accordion>
-    {{ section.settings.estate_label | default: 'Antique &amp; Estate' }}
-    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
-  <div class="mobile-nav__accordion-panel" data-mobile-accordion-panel hidden>
-    <a href="/collections/bvlgari">Bvlgari</a>
-    <a href="/collections/cartier">Cartier</a>
-    <a href="/collections/chopard">Chopard</a>
-    <a href="/collections/david-webb">David Webb</a>
-    <a href="/collections/hermes">Hermès</a>
-    <a href="/collections/marina-b">Marina B.</a>
-    <a href="/collections/seaman-schepps">Seaman Schepps</a>
-    <a href="/collections/tiffany-co">Tiffany &amp; Co.</a>
-    <a href="/collections/van-cleef-arpels">Van Cleef &amp; Arpels</a>
-    <a href="/collections/verdura">Verdura</a>
-  </div>
+.search-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
 
-  <a href="/pages/about" class="mobile-nav__plain-link">About</a>
+.search-overlay__inner {
+  width: 100%;
+  max-width: 680px;
+  padding: 0 2rem;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
 
-  <a href="{{ routes.cart_url }}">Cart ({{ cart.item_count }})</a>
-</nav>
+.search-overlay.active .search-overlay__inner {
+  transform: translateY(0);
+}
+
+.search-overlay__close {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.search-overlay__close:hover {
+  color: var(--gold, #C9A050);
+  transform: rotate(90deg);
+}
+
+.search-overlay__form {
+  width: 100%;
+}
+
+.search-overlay__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.75rem;
+  transition: border-color 0.3s ease;
+}
+
+.search-overlay__input-wrap:focus-within {
+  border-color: var(--gold, #C9A050);
+}
+
+.search-overlay__icon {
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.search-overlay__input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.search-overlay__input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.search-overlay__results {
+  margin-top: 1.5rem;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.search-overlay__result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.search-overlay__result-item:hover {
+  opacity: 0.8;
+}
+
+.search-overlay__result-img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-overlay__result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-overlay__result-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-overlay__result-price {
+  font-size: 0.85rem;
+  color: var(--gold-light, #E2C27A);
+  margin-top: 0.15rem;
+}
+
+.search-overlay__no-results {
+  padding: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+}
+
+.search-overlay__links {
+  margin-top: 2.5rem;
+}
+
+.search-overlay__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 1rem;
+}
+
+.search-overlay__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search-overlay__tag {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  transition: all 0.2s ease;
+}
+
+.search-overlay__tag:hover {
+  color: var(--gold-light, #E2C27A);
+  border-color: var(--gold, #C9A050);
+  background: rgba(201, 160, 80, 0.08);
+}
+
+#searchToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .search-overlay {
+    padding-top: 8vh;
+  }
+  .search-overlay__input {
+    font-size: 1.4rem;
+  }
+  .search-overlay__inner {
+    padding: 0 1.25rem;
+  }
+  .search-overlay__close {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+}
+</style>
 
 <script>
-  /* Desktop dropdowns */
-  document.querySelectorAll('[data-nav-dropdown]').forEach(function(dropdown) {
-    var trigger = dropdown.querySelector('[data-dropdown-trigger]');
-    var panel   = dropdown.querySelector('.nav-dropdown__panel');
+  document.addEventListener('DOMContentLoaded', function() {
+    const header = document.getElementById('header');
 
-    function open() {
-      trigger.setAttribute('aria-expanded', 'true');
-      panel.classList.add('nav-dropdown__panel--open');
-    }
-    function close() {
-      trigger.setAttribute('aria-expanded', 'false');
-      panel.classList.remove('nav-dropdown__panel--open');
+    var headerScrollTicking = false;
+    function handleScroll() {
+      if (window.scrollY > 50) {
+        header.classList.add('header--scrolled');
+      } else {
+        header.classList.remove('header--scrolled');
+      }
     }
 
-    dropdown.addEventListener('mouseenter', open);
-    dropdown.addEventListener('mouseleave', close);
-    trigger.addEventListener('click', function() {
-      trigger.getAttribute('aria-expanded') === 'true' ? close() : open();
-    });
-    trigger.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') close();
-    });
-    document.addEventListener('click', function(e) {
-      if (!dropdown.contains(e.target)) close();
-    });
-  });
+    window.addEventListener('scroll', function() {
+      if (!headerScrollTicking) {
+        window.requestAnimationFrame(function() {
+          handleScroll();
+          headerScrollTicking = false;
+        });
+        headerScrollTicking = true;
+      }
+    }, { passive: true });
+    handleScroll();
 
-  /* Mobile accordions */
-  document.querySelectorAll('[data-mobile-accordion]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var panel    = btn.nextElementSibling;
-      var expanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', String(!expanded));
-      expanded ? panel.setAttribute('hidden', '') : panel.removeAttribute('hidden');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const nav = document.getElementById('nav');
+    const navOverlay = document.getElementById('navOverlay');
+
+    function isMobile() {
+      return window.innerWidth <= 992;
+    }
+
+    function openMobileMenu() {
+      nav.classList.add('nav--open');
+      mobileToggle.classList.add('active');
+      navOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      nav.classList.remove('nav--open');
+      mobileToggle.classList.remove('active');
+      navOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+      nav.querySelectorAll('.nav__item.open').forEach(function(item) {
+        item.classList.remove('open');
+      });
+    }
+
+    const navClose = document.getElementById('navClose');
+
+    if (mobileToggle && nav) {
+      mobileToggle.addEventListener('click', function() {
+        if (nav.classList.contains('nav--open')) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
+      });
+
+      if (navClose) {
+        navClose.addEventListener('click', closeMobileMenu);
+      }
+
+      if (navOverlay) {
+        navOverlay.addEventListener('click', closeMobileMenu);
+      }
+
+      var touchedDropdown = false;
+
+      nav.querySelectorAll('.nav__item').forEach(function(item) {
+        var parentLink = item.querySelector('.nav__item-link');
+
+        if (parentLink) {
+          function toggleDropdown() {
+            nav.querySelectorAll('.nav__item.open').forEach(function(openItem) {
+              if (openItem !== item) {
+                openItem.classList.remove('open');
+              }
+            });
+            item.classList.toggle('open');
+          }
+
+          parentLink.addEventListener('touchstart', function(e) {
+            if (isMobile()) {
+              e.preventDefault();
+              touchedDropdown = true;
+              toggleDropdown();
+            }
+          }, { passive: false });
+
+          parentLink.addEventListener('click', function(e) {
+            if (isMobile()) {
+              e.preventDefault();
+              if (touchedDropdown) {
+                touchedDropdown = false;
+                return;
+              }
+              toggleDropdown();
+            }
+          });
+        }
+      });
+
+      nav.querySelectorAll('.nav__dropdown-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (isMobile()) {
+            closeMobileMenu();
+          }
+        });
+      });
+
+      nav.querySelectorAll('.nav__link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (isMobile()) {
+            closeMobileMenu();
+          }
+        });
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && nav.classList.contains('nav--open')) {
+          closeMobileMenu();
+        }
+      });
+    }
+
+    // Search overlay
+    var searchToggle = document.getElementById('searchToggle');
+    var searchOverlay = document.getElementById('searchOverlay');
+    var searchClose = document.getElementById('searchClose');
+    var searchInput = document.getElementById('searchInput');
+    var searchResults = document.getElementById('searchResults');
+    var searchLinks = searchOverlay ? searchOverlay.querySelector('.search-overlay__links') : null;
+    var searchDebounce = null;
+
+    function openSearch() {
+      if (!searchOverlay) return;
+      searchOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function() { searchInput.focus(); }, 100);
+    }
+
+    function closeSearch() {
+      if (!searchOverlay) return;
+      searchOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+      searchInput.value = '';
+      searchResults.innerHTML = '';
+      if (searchLinks) searchLinks.style.display = '';
+    }
+
+    if (searchToggle) {
+      searchToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        openSearch();
+      });
+    }
+
+    if (searchClose) {
+      searchClose.addEventListener('click', closeSearch);
+    }
+
+    if (searchOverlay) {
+      searchOverlay.addEventListener('click', function(e) {
+        if (e.target === searchOverlay) closeSearch();
+      });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('active')) {
+        closeSearch();
+      }
     });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        var q = searchInput.value.trim();
+        clearTimeout(searchDebounce);
+        if (q.length < 2) {
+          searchResults.innerHTML = '';
+          if (searchLinks) searchLinks.style.display = '';
+          return;
+        }
+        searchDebounce = setTimeout(function() {
+          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              var products = (data.resources && data.resources.results && data.resources.results.products) || [];
+              if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';
+              if (products.length === 0) {
+                searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + q.replace(/</g, '&lt;') + '\u201d</p>';
+                return;
+              }
+              var html = '';
+              products.forEach(function(p) {
+                var img = p.image || '';
+                var price = p.price;
+                if (typeof price === 'string') price = parseFloat(price);
+                var formattedPrice = '$' + (price / 1).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                html += '<a href="' + p.url + '" class="search-overlay__result-item">';
+                if (img) html += '<img class="search-overlay__result-img" src="' + img.replace(/(\.\w+)$/, '_200x$1') + '" alt="" loading="lazy">';
+                html += '<div class="search-overlay__result-info">';
+                html += '<div class="search-overlay__result-title">' + p.title + '</div>';
+                html += '<div class="search-overlay__result-price">' + formattedPrice + '</div>';
+                html += '</div></a>';
+              });
+              searchResults.innerHTML = html;
+            })
+            .catch(function() { searchResults.innerHTML = ''; });
+        }, 300);
+      });
+    }
   });
 </script>
 
 {% schema %}
 {
   "name": "Header",
-  "class": "section-header",
   "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
     {
       "type": "text",
       "id": "estate_label",
-      "label": "Estate dropdown label",
+      "label": "Estate menu label",
       "default": "Antique & Estate"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "default": true,
+      "label": "Enable sticky header"
     }
   ]
 }

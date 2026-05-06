@@ -1,75 +1,119 @@
-<div class="featured-products">
-  <div class="featured-products__header">
-    {%- if section.settings.eyebrow != blank -%}
-      <div class="eyebrow">{{ section.settings.eyebrow }}</div>
-    {%- endif -%}
-    <h2 class="section-title">{{ section.settings.title }}</h2>
-    {%- if section.settings.description != blank -%}
-      <p class="featured-products__description">{{ section.settings.description }}</p>
-    {%- endif -%}
-  </div>
+{%- comment -%}
+  Laura Milman New York — Featured Products Section
+  Product grid from a selected collection with eyebrow/title/description header
+{%- endcomment -%}
 
-  {%- liquid
-    assign limit = section.settings.products_to_show | default: 4
-    assign products_to_render = empty
-    assign view_all_url = '/collections/all'
-  -%}
+{%- liquid
+  assign limit = section.settings.product_count | default: 8
+  assign featured_collection = section.settings.collection
+  assign view_all_url = '/collections/all'
+  if featured_collection != blank
+    assign view_all_url = featured_collection.url
+  endif
+-%}
 
-  {%- if section.settings.collection != blank -%}
-    {%- assign featured_collection = collections[section.settings.collection] -%}
-    {%- if featured_collection.products.size > 0 -%}
-      {%- assign products_to_render = featured_collection.products -%}
-      {%- assign view_all_url = featured_collection.url -%}
-    {%- endif -%}
-  {%- endif -%}
+<section class="lm-featured" aria-label="{{ section.settings.title | default: 'Featured Products' | escape }}">
+  <div class="lm-featured__container">
 
-  {%- comment -%} If still empty, fall back to manual blocks {%- endcomment -%}
-  {%- if products_to_render == empty and section.blocks.size > 0 -%}
-    {%- assign has_block_product = false -%}
-    {%- for block in section.blocks -%}
-      {%- if block.settings.product != blank -%}
-        {%- assign has_block_product = true -%}
-        {%- break -%}
+    <div class="lm-featured__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
       {%- endif -%}
-    {%- endfor -%}
-    {%- if has_block_product -%}
-      {%- assign products_to_render = 'blocks' -%}
-    {%- endif -%}
-  {%- endif -%}
-
-  {%- comment -%} Final fallback: pull from collections.all (every product in the store) {%- endcomment -%}
-  {%- if products_to_render == empty and collections.all.products.size > 0 -%}
-    {%- assign products_to_render = collections.all.products -%}
-    {%- assign view_all_url = '/collections/all' -%}
-  {%- endif -%}
-
-  <div class="products-grid">
-    {%- if products_to_render == 'blocks' -%}
-      {%- for block in section.blocks -%}
-        {%- assign product = all_products[block.settings.product] -%}
-        {%- if product != blank -%}
-          {%- render 'product-card', product: product -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- elsif products_to_render != empty -%}
-      {%- for product in products_to_render limit: limit -%}
-        {%- render 'product-card', product: product -%}
-      {%- endfor -%}
-    {%- else -%}
-      <p class="featured-products__empty">
-        Add products to your store to see them featured here.
-      </p>
-    {%- endif -%}
-  </div>
-
-  {%- if section.settings.show_view_all and products_to_render != empty and products_to_render != 'blocks' -%}
-    <div class="featured-products__footer">
-      <a href="{{ view_all_url }}" class="view-all-link">
-        {{ section.settings.view_all_label | default: 'View All' }} →
-      </a>
+      {%- if section.settings.title != blank -%}
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+      {%- if section.settings.description != blank -%}
+        <p class="lm-featured__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
     </div>
-  {%- endif -%}
-</div>
+
+    <div class="products-grid">
+      {%- if featured_collection != blank and featured_collection.products.size > 0 -%}
+        {%- for product in featured_collection.products limit: limit -%}
+          {%- render 'product-card', product: product -%}
+        {%- endfor -%}
+      {%- elsif collections.all.products.size > 0 -%}
+        {%- for product in collections.all.products limit: limit -%}
+          {%- render 'product-card', product: product -%}
+        {%- endfor -%}
+      {%- else -%}
+        <p class="lm-featured__empty">Add products to your store to see them here.</p>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.cta_text != blank -%}
+      <div class="lm-featured__footer">
+        <a href="{{ section.settings.cta_url | default: view_all_url }}" class="view-all-link">
+          {{ section.settings.cta_text }} →
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .lm-featured {
+    background: var(--warm-white, #FDFBF7);
+    padding: 5rem 2rem;
+  }
+
+  .lm-featured__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .lm-featured__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+  }
+
+  .lm-featured__desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8B7D6B);
+    margin: 1rem 0 0;
+  }
+
+  .lm-featured .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .lm-featured__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted, #8B7D6B);
+    padding: 3rem 0;
+  }
+
+  .lm-featured__footer {
+    text-align: center;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 1024px) {
+    .lm-featured .products-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-featured {
+      padding: 3.5rem 1rem;
+    }
+    .lm-featured .products-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .lm-featured__header {
+      margin-bottom: 2rem;
+    }
+  }
+</style>
 
 {% schema %}
 {
@@ -92,47 +136,32 @@
     {
       "type": "textarea",
       "id": "description",
-      "label": "Description (optional)"
+      "label": "Description"
     },
     {
       "type": "collection",
       "id": "collection",
-      "label": "Collection (auto-fills products)",
-      "info": "If empty, falls back to your store's All products."
+      "label": "Collection"
     },
     {
       "type": "range",
-      "id": "products_to_show",
+      "id": "product_count",
       "label": "Products to show",
       "min": 2,
       "max": 12,
       "step": 1,
-      "default": 4
-    },
-    {
-      "type": "checkbox",
-      "id": "show_view_all",
-      "label": "Show 'View All' link",
-      "default": true
+      "default": 8
     },
     {
       "type": "text",
-      "id": "view_all_label",
-      "label": "View All label",
+      "id": "cta_text",
+      "label": "View All text",
       "default": "View All"
-    }
-  ],
-  "blocks": [
+    },
     {
-      "type": "product",
-      "name": "Product",
-      "settings": [
-        {
-          "type": "product",
-          "id": "product",
-          "label": "Product"
-        }
-      ]
+      "type": "url",
+      "id": "cta_url",
+      "label": "View All link"
     }
   ],
   "presets": [

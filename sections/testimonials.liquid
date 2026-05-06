@@ -1,36 +1,154 @@
+<style>
+  .testimonials {
+    background: var(--espresso, #2C1810);
+    padding: 80px 0;
+  }
+  .testimonials__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .testimonials__header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .testimonials .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+  }
+  .testimonials .section-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    color: var(--cream, #FAF7F2);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .testimonials__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .testimonial-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(193, 167, 132, 0.15);
+    border-radius: 8px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.3s;
+  }
+  .testimonial-card:hover {
+    border-color: rgba(193, 167, 132, 0.35);
+  }
+  .testimonial-card__stars {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .testimonial-card__stars svg {
+    color: var(--gold, #C1A784);
+  }
+  .testimonial-card__quote {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--cream, #FAF7F2);
+    margin: 0 0 28px;
+    flex: 1;
+  }
+  .testimonial-card__quote::before {
+    content: "\201C";
+    color: var(--gold, #C1A784);
+    font-size: 28px;
+    line-height: 0;
+    vertical-align: -4px;
+    margin-right: 2px;
+  }
+  .testimonial-card__quote::after {
+    content: "\201D";
+    color: var(--gold, #C1A784);
+    font-size: 28px;
+    line-height: 0;
+    vertical-align: -4px;
+    margin-left: 2px;
+  }
+  .testimonial-card__divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold, #C1A784);
+    opacity: 0.4;
+    margin-bottom: 20px;
+  }
+  .testimonial-card__author {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--cream, #FAF7F2);
+    margin-bottom: 4px;
+  }
+  .testimonial-card__product {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 12px;
+    color: var(--gold, #C1A784);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 900px) {
+    .testimonials__grid {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+  }
+  @media (min-width: 901px) and (max-width: 1060px) {
+    .testimonials__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .testimonials { padding: 56px 0; }
+    .testimonial-card { padding: 32px 24px; }
+  }
+</style>
+
 <section class="testimonials">
   <div class="testimonials__inner">
-    <div class="testimonials__quotemark" aria-hidden="true">"</div>
 
-    {%- for block in section.blocks -%}
-      <p class="testimonials__quote" data-quote="{{ forloop.index0 }}" {{ block.shopify_attributes }}
-        style="{% unless forloop.first %}display:none;{% endunless %}">
-        {{ block.settings.quote }}
-      </p>
-    {%- endfor -%}
+    <div class="testimonials__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h2 class="section-title">{{ section.settings.title }}</h2>
+    </div>
 
-    {%- for block in section.blocks -%}
-      <div class="testimonials__author" data-author="{{ forloop.index0 }}"
-        style="{% unless forloop.first %}display:none;{% endunless %}">
-        {{ block.settings.author }}
-        {%- if block.settings.product != blank -%}
-          — {{ block.settings.product }}
-        {%- endif -%}
-      </div>
-    {%- endfor -%}
+    <div class="testimonials__grid">
+      {%- for block in section.blocks -%}
+        <div class="testimonial-card" {{ block.shopify_attributes }}>
+          <div class="testimonial-card__stars" aria-label="5 out of 5 stars">
+            {%- for i in (1..5) -%}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M8 0.5l2.47 5.01L16 6.26l-4 3.9.94 5.51L8 13.01l-4.94 2.66.94-5.51-4-3.9 5.53-.75z"/>
+              </svg>
+            {%- endfor -%}
+          </div>
+          <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
+          <div class="testimonial-card__divider"></div>
+          <div class="testimonial-card__author">{{ block.settings.author }}</div>
+          {%- if block.settings.product_name != blank -%}
+            <div class="testimonial-card__product">{{ block.settings.product_name }}</div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
 
-    {%- if section.blocks.size > 1 -%}
-      <div class="testimonials__dots" role="tablist" aria-label="Testimonials">
-        {%- for block in section.blocks -%}
-          <button
-            class="testimonials__dot{% if forloop.first %} active{% endif %}"
-            role="tab"
-            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-            aria-label="Testimonial {{ forloop.index }}"
-          ></button>
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
   </div>
 </section>
 
@@ -39,6 +157,20 @@
   "name": "Testimonials",
   "tag": "section",
   "class": "section-testimonials",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "What Our Clients Say"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Testimonials"
+    }
+  ],
   "blocks": [
     {
       "type": "testimonial",
@@ -47,20 +179,17 @@
         {
           "type": "textarea",
           "id": "quote",
-          "label": "Quote",
-          "default": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me."
+          "label": "Quote"
         },
         {
           "type": "text",
           "id": "author",
-          "label": "Customer name",
-          "default": "Alexandra K."
+          "label": "Customer name"
         },
         {
           "type": "text",
-          "id": "product",
-          "label": "Product purchased",
-          "default": "Aura Ring"
+          "id": "product_name",
+          "label": "Product name"
         }
       ]
     }
@@ -72,25 +201,25 @@
         {
           "type": "testimonial",
           "settings": {
-            "quote": "The craftsmanship is unlike anything I've ever owned. Each piece feels like it was made just for me.",
+            "quote": "The craftsmanship is extraordinary. My Aura Ring catches light from every angle—it's become my most treasured piece.",
             "author": "Alexandra K.",
-            "product": "Aura Ring"
+            "product_name": "Aura Ring"
           }
         },
         {
           "type": "testimonial",
           "settings": {
-            "quote": "I've never received so many compliments. The Lumière necklace is a true statement piece.",
+            "quote": "I've never felt so confident in a jewelry purchase. The team's expertise and transparency made all the difference.",
             "author": "Catherine M.",
-            "product": "Lumière Necklace"
+            "product_name": "Lumière Necklace"
           }
         },
         {
           "type": "testimonial",
           "settings": {
-            "quote": "Laura's designs have this rare quality — they're bold yet timeless. I wear mine every single day.",
+            "quote": "From the first consultation to unboxing, the experience was nothing short of exceptional. True luxury, authentically delivered.",
             "author": "Victoria S.",
-            "product": "Soleil Bracelet"
+            "product_name": "Soleil Bracelet"
           }
         }
       ]

@@ -1,107 +1,245 @@
-<footer class="site-footer" role="contentinfo">
-  <div class="site-footer__grid">
-    {%- comment -%} Brand column {%- endcomment -%}
-    <div>
-      <div class="site-footer__logo">{{ shop.name }}</div>
-      <p class="site-footer__desc">
-        {{ section.settings.description | default: 'Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique &amp; estate pieces.' }}
-      </p>
+{%- comment -%}
+  Laura Milman New York - Footer Section
+{%- endcomment -%}
 
-      <div class="site-footer__newsletter">
-        {%- form 'customer', id: 'newsletter-form', data-newsletter-form: '' -%}
-          <input type="hidden" name="contact[tags]" value="newsletter">
-          <div class="site-footer__newsletter-form">
-            <label for="newsletter-email" class="visually-hidden">
-              {{- 'newsletter.label' | t -}}
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              name="contact[email]"
-              class="site-footer__email-input"
-              placeholder="{{ 'newsletter.placeholder' | t }}"
-              required
-              autocomplete="email"
-            >
-            <button type="submit" class="site-footer__newsletter-btn" aria-label="Subscribe">
-              →
-            </button>
-          </div>
-          <p data-success hidden style="font-family:'Jost',sans-serif;font-size:12px;color:var(--accent);margin-top:8px;letter-spacing:1px;">
-            {{ 'newsletter.success' | t }}
-          </p>
-        {%- endform -%}
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="{{ routes.root_url }}" class="footer__logo">
+          {%- if section.settings.logo != blank -%}
+            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+          {%- else -%}
+            <span class="footer__logo-text">Laura <em>Milman</em></span>
+          {%- endif -%}
+        </a>
+        <p class="footer__description">{{ section.settings.description | default: 'Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.' }}</p>
+        <div class="footer__social">
+          {%- if section.settings.social_instagram != blank -%}
+            <a href="{{ section.settings.social_instagram }}" class="footer__social-link" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_pinterest != blank -%}
+            <a href="{{ section.settings.social_pinterest }}" class="footer__social-link" aria-label="Pinterest" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 12c0 3 2 6 4 6s4-6 4-6-2-6-4-6-4 3-4 6"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_facebook != blank -%}
+            <a href="{{ section.settings.social_facebook }}" class="footer__social-link" aria-label="Facebook" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_instagram == blank and section.settings.social_facebook == blank and section.settings.social_pinterest == blank -%}
+            <a href="https://instagram.com/lauramilmannewyork" class="footer__social-link" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">Shop
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/collections/all" class="footer__link">All Jewelry</a></li>
+          <li><a href="/collections/rings" class="footer__link">Rings</a></li>
+          <li><a href="/collections/necklaces" class="footer__link">Necklaces</a></li>
+          <li><a href="/collections/earrings" class="footer__link">Earrings</a></li>
+          <li><a href="/collections/bracelets" class="footer__link">Bracelets</a></li>
+          <li><a href="/collections/engagement-rings" class="footer__link">Engagement Rings</a></li>
+          <li><a href="/collections/antique-estate" class="footer__link">Estate Jewelry</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">About
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/pages/about" class="footer__link">Our Story</a></li>
+          <li><a href="/pages/about#sourcing" class="footer__link">Diamond Sourcing</a></li>
+          <li><a href="/pages/about#authentication" class="footer__link">Authentication</a></li>
+          <li><a href="/pages/estate-jewelry" class="footer__link">Estate Jewelry</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">Help
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/pages/contact" class="footer__link">Contact Us</a></li>
+          <li><a href="/pages/shipping-returns" class="footer__link">Shipping & Returns</a></li>
+          <li><a href="/pages/care-guide" class="footer__link">Care Guide</a></li>
+          <li><a href="/pages/faq" class="footer__link">FAQ</a></li>
+          <li><a href="/policies/privacy-policy" class="footer__link">Privacy Policy</a></li>
+        </ul>
       </div>
     </div>
 
-    {%- comment -%} Shop column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">Shop</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.shop_menu != blank and section.settings.shop_menu.links.size > 0 -%}
-          {%- for link in section.settings.shop_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/collections/all">All Jewelry</a></li>
-          <li><a href="/collections/new-arrivals">New Arrivals</a></li>
-          <li><a href="/collections/rings">Rings</a></li>
-          <li><a href="/collections/necklaces">Necklaces</a></li>
-          <li><a href="/collections/bracelets">Bracelets</a></li>
-          <li><a href="/collections/earrings">Earrings</a></li>
-          <li><a href="/collections/engagement-rings">Engagement Rings</a></li>
-        {%- endif -%}
-      </ul>
+    <div class="footer__bottom">
+      <p class="footer__copyright">Crafted in New York &middot; &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
+      <div class="footer__legal">
+        <a href="/policies/privacy-policy" class="footer__legal-link">Privacy Policy</a>
+        <a href="/policies/terms-of-service" class="footer__legal-link">Terms of Service</a>
+        <a href="/policies/refund-policy" class="footer__legal-link">Refund Policy</a>
+      </div>
+      <div class="footer__payments">
+        {%- for type in shop.enabled_payment_types -%}
+          {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+        {%- endfor -%}
+      </div>
     </div>
-
-    {%- comment -%} About column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">About</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.about_menu != blank and section.settings.about_menu.links.size > 0 -%}
-          {%- for link in section.settings.about_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/pages/about">Our Story</a></li>
-          <li><a href="/collections/antique-estate">Estate Jewelry</a></li>
-          <li><a href="/pages/sourcing">Diamond Sourcing</a></li>
-          <li><a href="/pages/authentication">Authentication</a></li>
-          <li><a href="/blogs/news">Journal</a></li>
-        {%- endif -%}
-      </ul>
-    </div>
-
-    {%- comment -%} Help column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">Help</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.help_menu != blank and section.settings.help_menu.links.size > 0 -%}
-          {%- for link in section.settings.help_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/pages/contact">Contact Us</a></li>
-          <li><a href="/pages/shipping-returns">Shipping &amp; Returns</a></li>
-          <li><a href="/pages/care-guide">Care Guide</a></li>
-          <li><a href="/pages/faq">FAQ</a></li>
-          <li><a href="/pages/privacy">Privacy Policy</a></li>
-        {%- endif -%}
-      </ul>
-    </div>
-  </div>
-
-  <div class="site-footer__bottom">
-    <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</span>
-    <span>Crafted in New York · Powered by Shopify</span>
   </div>
 </footer>
+
+<style>
+  .footer__accordion-icon {
+    display: none;
+  }
+
+  @media (max-width: 576px) {
+    .footer {
+      padding: 2rem 0 1.5rem;
+    }
+
+    .footer .container {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .footer__grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+      text-align: left;
+    }
+
+    .footer__brand {
+      margin-bottom: 1rem;
+      text-align: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(250, 246, 240, 0.08);
+    }
+
+    .footer__social {
+      justify-content: center;
+    }
+
+    .footer__accordion {
+      border-bottom: 1px solid rgba(250, 246, 240, 0.08);
+    }
+
+    .footer__accordion-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 0.9rem 0;
+      margin-bottom: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .footer__accordion-icon {
+      display: block;
+      color: rgba(250, 246, 240, 0.4);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .footer__accordion.open .footer__accordion-icon {
+      transform: rotate(180deg);
+    }
+
+    .footer__accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0;
+    }
+
+    .footer__accordion.open .footer__accordion-body {
+      max-height: 300px;
+      padding-bottom: 0.75rem;
+    }
+
+    .footer__bottom {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.75rem;
+      padding-top: 1.25rem;
+    }
+
+    .footer__legal {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    .footer__brand {
+      grid-column: 1 / -1;
+      padding-right: 0;
+      text-align: center;
+    }
+
+    .footer__social {
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    if (window.matchMedia('(max-width: 576px)').matches) {
+      document.querySelectorAll('.footer__accordion-toggle').forEach(function(toggle) {
+        toggle.addEventListener('click', function() {
+          var col = this.closest('.footer__accordion');
+          var wasOpen = col.classList.contains('open');
+          document.querySelectorAll('.footer__accordion.open').forEach(function(c) {
+            c.classList.remove('open');
+          });
+          if (!wasOpen) col.classList.add('open');
+        });
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
   "name": "Footer",
-  "class": "section-footer",
   "settings": [
+    {
+      "type": "header",
+      "content": "Brand"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Footer logo"
+    },
     {
       "type": "textarea",
       "id": "description",
@@ -109,22 +247,23 @@
       "default": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces."
     },
     {
-      "type": "link_list",
-      "id": "shop_menu",
-      "label": "Shop menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
+      "type": "header",
+      "content": "Social Media"
     },
     {
-      "type": "link_list",
-      "id": "about_menu",
-      "label": "About menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram URL"
     },
     {
-      "type": "link_list",
-      "id": "help_menu",
-      "label": "Help menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
+      "type": "url",
+      "id": "social_pinterest",
+      "label": "Pinterest URL"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook URL"
     }
   ]
 }
