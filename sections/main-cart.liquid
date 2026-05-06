@@ -1,0 +1,277 @@
+{%- comment -%}
+  Laura Milman — Cart section.
+  Cream layout with right-aligned summary card; palette + voice swapped
+  to LM. Ring-builder line-item properties preserved.
+{%- endcomment -%}
+
+<style>
+  .cart-page { background: #efecec; min-height: 100vh; padding-top: 100px; }
+  .cart-container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+  .cart-header { text-align: center; margin-bottom: 2.5rem; }
+  .cart-header__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 400; color: var(--text-dark, #1c1a1a); margin: 0 0 0.5rem; font-style: italic; }
+  .cart-header__count { font-size: 0.8rem; color: var(--text-muted, #7b8382); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .cart-layout { display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start; }
+  .cart-items { display: flex; flex-direction: column; gap: 0; }
+  .cart-item { display: flex; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid var(--border-light, #e5e2dc); }
+  .cart-item:first-child { padding-top: 0; }
+  .cart-item__image { width: 120px; height: 120px; border-radius: 4px; overflow: hidden; flex-shrink: 0; background: #fff; border: 1px solid var(--border-light, #e5e2dc); }
+  .cart-item__image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cart-item__details { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .cart-item__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.1rem; font-weight: 500; color: var(--text-dark, #1c1a1a); margin: 0 0 0.25rem; line-height: 1.3; }
+  .cart-item__title a { color: inherit; text-decoration: none; }
+  .cart-item__title a:hover { color: var(--accent-gold, #dea882); }
+  .cart-item__variant { font-size: 0.78rem; color: var(--text-muted, #7b8382); margin: 0 0 0.25rem; }
+  .cart-item__properties { font-size: 0.75rem; color: var(--text-muted, #7b8382); margin: 0 0 0.5rem; }
+  .cart-item--ring-builder { align-items: flex-start; }
+  .cart-item--ring-builder .cart-item__image { width: 120px; height: 120px; }
+  .cart-item__ring-specs { margin: 0.75rem 0 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--text-dark, #1c1a1a); line-height: 1.55; }
+  .cart-item__ring-specs li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+  .cart-item__ring-specs li:last-child { border-bottom: none; }
+  .cart-item__ring-specs span:first-child { color: var(--text-muted, #7b8382); flex-shrink: 0; letter-spacing: 0.05em; }
+  .cart-item__ring-specs a { color: var(--accent-gold, #dea882); text-decoration: underline; font-size: 0.75rem; }
+  .cart-item__bottom { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .cart-item__qty { display: flex; align-items: center; border: 1px solid var(--border-light, #e5e2dc); border-radius: 2px; overflow: hidden; background: #fff; }
+  .cart-item__qty-btn { width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--text-dark, #1c1a1a); transition: background 0.2s ease; }
+  .cart-item__qty-btn:hover { background: rgba(0,0,0,0.04); }
+  .cart-item__qty-val { width: 40px; text-align: center; font-size: 0.85rem; font-weight: 500; border: none; border-left: 1px solid var(--border-light, #e5e2dc); border-right: 1px solid var(--border-light, #e5e2dc); padding: 0; height: 36px; background: transparent; color: var(--text-dark, #1c1a1a); }
+  .cart-item__price { font-size: 1rem; font-weight: 600; color: var(--text-dark, #1c1a1a); white-space: nowrap; }
+  .cart-item__remove { background: none; border: none; cursor: pointer; color: var(--text-muted, #7b8382); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 4px 0; transition: color 0.2s ease; align-self: flex-start; margin-top: 0.25rem; }
+  .cart-item__remove:hover { color: #850000; }
+
+  .cart-summary { background: #fff; border-radius: 4px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); position: sticky; top: 110px; }
+  .cart-summary__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--text-dark, #1c1a1a); margin: 0 0 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light, #e5e2dc); font-style: italic; }
+  .cart-summary__row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--text-dark, #1c1a1a); }
+  .cart-summary__row--total { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light, #e5e2dc); font-size: 1.1rem; font-weight: 600; margin-bottom: 0; }
+  .cart-summary__row span:first-child { color: var(--text-muted, #7b8382); }
+  .cart-summary__row--total span:first-child { color: var(--text-dark, #1c1a1a); }
+  .cart-summary__shipping { font-size: 0.78rem; color: var(--text-muted, #7b8382); margin-top: 0.5rem; margin-bottom: 1.5rem; }
+  .cart-summary__note { margin-bottom: 1.5rem; }
+  .cart-summary__note label { display: block; font-size: 0.72rem; font-weight: 500; color: var(--text-muted, #7b8382); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 0.5rem; }
+  .cart-summary__note textarea { width: 100%; border: 1px solid var(--border-light, #e5e2dc); border-radius: 2px; padding: 10px 12px; font-size: 0.85rem; font-family: inherit; resize: vertical; min-height: 70px; color: var(--text-dark, #1c1a1a); transition: border-color 0.2s ease; }
+  .cart-summary__note textarea:focus { outline: none; border-color: var(--accent-gold, #dea882); }
+
+  .cart-checkout-btn { display: block; width: 100%; padding: 16px; background: var(--accent-gold, #dea882); color: #1c1a1a; border: none; border-radius: 2px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.3s ease, transform 0.2s ease; font-family: inherit; }
+  .cart-checkout-btn:hover { background: var(--accent-gold-dark, #c89066); transform: translateY(-1px); }
+
+  .cart-continue { display: block; text-align: center; margin-top: 1rem; font-size: 0.78rem; color: var(--text-muted, #7b8382); text-decoration: none; letter-spacing: 0.05em; transition: color 0.2s ease; }
+  .cart-continue:hover { color: var(--accent-gold, #dea882); }
+
+  .cart-trust { display: flex; justify-content: center; gap: 1.25rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-light, #e5e2dc); }
+  .cart-trust__item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.66rem; color: var(--text-muted, #7b8382); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cart-trust__item svg { flex-shrink: 0; }
+
+  .cart-empty { text-align: center; padding: 4rem 2rem; }
+  .cart-empty__icon { margin-bottom: 1.5rem; color: var(--border-light, #e5e2dc); }
+  .cart-empty__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.8rem; font-weight: 400; color: var(--text-dark, #1c1a1a); margin: 0 0 0.75rem; font-style: italic; }
+  .cart-empty__text { font-size: 0.95rem; color: var(--text-muted, #7b8382); margin: 0 0 2rem; }
+  .cart-empty__btn { display: inline-block; padding: 14px 36px; background: var(--accent-gold, #dea882); color: #1c1a1a; border-radius: 2px; text-decoration: none; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; transition: background 0.3s ease; }
+  .cart-empty__btn:hover { background: var(--accent-gold-dark, #c89066); }
+
+  @media (max-width: 768px) {
+    .cart-page { padding-top: 80px; }
+    .cart-container { padding: 1.25rem; }
+    .cart-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+    .cart-item { gap: 1rem; }
+    .cart-item__image { width: 90px; height: 90px; }
+    .cart-item__title { font-size: 0.95rem; }
+    .cart-summary { position: static; }
+    .cart-trust { flex-wrap: wrap; gap: 0.75rem; }
+  }
+</style>
+
+<div class="cart-page">
+  <div class="cart-container">
+    {%- if cart.item_count > 0 -%}
+      <div class="cart-header">
+        <h1 class="cart-header__title">Your selection</h1>
+        <p class="cart-header__count">{{ cart.item_count }} {{ cart.item_count | pluralize: 'piece', 'pieces' }}</p>
+      </div>
+
+      <div class="cart-layout">
+        <div class="cart-items">
+          {%- for item in cart.items -%}
+            {%- assign rb_preview = item.properties['Ring preview'] | default: item.properties['Diamond image'] -%}
+            {%- assign is_ring_builder = false -%}
+            {%- if item.properties['_ring_builder'] == 'true' -%}
+              {%- assign is_ring_builder = true -%}
+            {%- endif -%}
+            <div class="cart-item{% if is_ring_builder %} cart-item--ring-builder{% endif %}" data-line="{{ forloop.index }}">
+              <div class="cart-item__image">
+                {%- if is_ring_builder and rb_preview != blank -%}
+                  <a href="{{ item.url }}"><img src="{{ rb_preview }}" alt="{{ item.product.title | escape }}" loading="lazy" width="120" height="120"></a>
+                {%- elsif item.image -%}
+                  <a href="{{ item.url }}"><img src="{{ item.image | image_url: width: 300 }}" alt="{{ item.title | escape }}" loading="lazy"></a>
+                {%- endif -%}
+              </div>
+
+              <div class="cart-item__details">
+                <div>
+                  <h3 class="cart-item__title"><a href="{{ item.url }}">{{ item.product.title }}</a></h3>
+                  {%- unless item.product.has_only_default_variant -%}
+                    <p class="cart-item__variant">{{ item.variant.title }}</p>
+                  {%- endunless -%}
+                  {%- if is_ring_builder -%}
+                    <ul class="cart-item__ring-specs">
+                      {%- if item.properties['Diamond'] != blank -%}<li><span>Diamond</span><span>{{ item.properties['Diamond'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Diamond ID'] != blank -%}<li><span>Diamond ID</span><span>{{ item.properties['Diamond ID'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Setting'] != blank -%}<li><span>Setting</span><span>{{ item.properties['Setting'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Metal'] != blank -%}<li><span>Metal</span><span>{{ item.properties['Metal'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Band Style'] != blank -%}<li><span>Band</span><span>{{ item.properties['Band Style'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Ring Size'] != blank -%}<li><span>Ring size</span><span>{{ item.properties['Ring Size'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Prong style'] != blank -%}<li><span>Prong</span><span>{{ item.properties['Prong style'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Side Stones'] != blank -%}<li><span>Side stones</span><span>{{ item.properties['Side Stones'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Engraving'] != blank -%}<li><span>Engraving</span><span>{{ item.properties['Engraving'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Diamond Price'] != blank -%}<li><span>Stone price</span><span>{{ item.properties['Diamond Price'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Setting Price'] != blank -%}<li><span>Setting price</span><span>{{ item.properties['Setting Price'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Total Price'] != blank -%}<li><span>Quoted total</span><span>{{ item.properties['Total Price'] }}</span></li>{%- endif -%}
+                      {%- if item.properties['Certificate URL'] != blank -%}<li><span>Certificate</span><span><a href="{{ item.properties['Certificate URL'] }}" target="_blank" rel="noopener">View</a></span></li>{%- endif -%}
+                    </ul>
+                  {%- elsif item.properties.size > 0 -%}
+                    <div class="cart-item__properties">
+                      {%- for property in item.properties -%}
+                        {%- assign prop_key = property.first -%}
+                        {%- unless prop_key == '_ring_builder' or property.last == blank -%}
+                          <span>{{ property.first }}: {{ property.last }}</span><br>
+                        {%- endunless -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                  <button class="cart-item__remove" data-line="{{ forloop.index }}" aria-label="Remove {{ item.title }}">Remove</button>
+                </div>
+
+                <div class="cart-item__bottom">
+                  <div class="cart-item__qty">
+                    <button class="cart-item__qty-btn cart-qty-minus" data-line="{{ forloop.index }}" aria-label="Decrease quantity">−</button>
+                    <input class="cart-item__qty-val" type="text" value="{{ item.quantity }}" data-line="{{ forloop.index }}" readonly>
+                    <button class="cart-item__qty-btn cart-qty-plus" data-line="{{ forloop.index }}" aria-label="Increase quantity">+</button>
+                  </div>
+                  <span class="cart-item__price">{{ item.final_line_price | money }}</span>
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        <div class="cart-summary">
+          <h2 class="cart-summary__title">Summary</h2>
+
+          <div class="cart-summary__row">
+            <span>Subtotal</span>
+            <span>{{ cart.total_price | money }}</span>
+          </div>
+          <div class="cart-summary__row">
+            <span>Shipping</span>
+            <span style="color: #476154; font-weight: 500;">Complimentary</span>
+          </div>
+
+          <div class="cart-summary__row cart-summary__row--total">
+            <span>Total</span>
+            <span>{{ cart.total_price | money }}</span>
+          </div>
+
+          <p class="cart-summary__shipping">Taxes calculated at checkout</p>
+
+          <div class="cart-summary__note">
+            <label for="cart-note">A note for the atelier</label>
+            <form action="{{ routes.cart_url }}" method="post" id="cart-note-form">
+              <textarea id="cart-note" name="note" placeholder="Special requests, ring sizing, engraving…">{{ cart.note }}</textarea>
+            </form>
+          </div>
+
+          <a href="/checkout" class="cart-checkout-btn">Proceed to checkout</a>
+          <a href="/collections" class="cart-continue">← Continue browsing</a>
+
+          <div class="cart-trust">
+            <div class="cart-trust__item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Insured delivery
+            </div>
+            <div class="cart-trust__item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              30-day returns
+            </div>
+            <div class="cart-trust__item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              Secure checkout
+            </div>
+          </div>
+        </div>
+      </div>
+
+    {%- else -%}
+      <div class="cart-empty">
+        <div class="cart-empty__icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+            <path d="M3 6h18"></path>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <h1 class="cart-empty__title">Your selection is empty</h1>
+        <p class="cart-empty__text">Begin with a piece from the atelier.</p>
+        <a href="/collections" class="cart-empty__btn">Explore the collection</a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+(function() {
+  function updateCart(line, quantity) {
+    fetch('{{ routes.cart_change_url }}.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ line: line, quantity: quantity })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() { window.location.reload(); });
+  }
+
+  document.querySelectorAll('.cart-qty-minus').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var line = parseInt(this.dataset.line);
+      var input = this.parentElement.querySelector('.cart-item__qty-val');
+      var qty = parseInt(input.value) - 1;
+      if (qty < 1) qty = 0;
+      updateCart(line, qty);
+    });
+  });
+
+  document.querySelectorAll('.cart-qty-plus').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var line = parseInt(this.dataset.line);
+      var input = this.parentElement.querySelector('.cart-item__qty-val');
+      var qty = parseInt(input.value) + 1;
+      updateCart(line, qty);
+    });
+  });
+
+  document.querySelectorAll('.cart-item__remove').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var line = parseInt(this.dataset.line);
+      updateCart(line, 0);
+    });
+  });
+
+  var noteField = document.getElementById('cart-note');
+  if (noteField) {
+    var noteTimer;
+    noteField.addEventListener('input', function() {
+      clearTimeout(noteTimer);
+      var val = this.value;
+      noteTimer = setTimeout(function() {
+        fetch('{{ routes.cart_update_url }}.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note: val })
+        });
+      }, 500);
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{ "name": "Cart", "settings": [] }
+{% endschema %}

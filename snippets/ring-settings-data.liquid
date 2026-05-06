@@ -1,0 +1,184 @@
+{%- comment -%}
+  Ring Settings Data — Engagement ring settings for the Laura Milman ring builder.
+  Data structure copied from PD; no customer-facing strings here.
+{%- endcomment -%}
+
+<script type="application/json" id="ring-settings-data">
+{
+  "settings": [
+    {
+      "id": "solitaire",
+      "name": "The Solitaire",
+      "description": "A timeless classic that puts your diamond center stage",
+      "basePrice": 950,
+      "image": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}",
+      "metalImages": {
+        "14k-yellow-gold": "{{ 'solitaire_yellow_gold_1770613069793.png' | asset_url }}",
+        "14k-white-gold": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}",
+        "14k-rose-gold": "{{ 'solitaire_rose_gold_1770613097431.png' | asset_url }}",
+        "18k-yellow-gold": "{{ 'solitaire_yellow_gold_1770613069793.png' | asset_url }}",
+        "18k-white-gold": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}",
+        "18k-rose-gold": "{{ 'solitaire_rose_gold_1770613097431.png' | asset_url }}",
+        "platinum": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}"
+      },
+      "compatibleShapes": ["round", "princess", "cushion", "emerald", "oval", "radiant", "asscher", "marquise", "heart", "pear"],
+      "hasHalo": false,
+      "hasSideStones": false
+    },
+    {
+      "id": "halo",
+      "name": "The Halo",
+      "description": "A dazzling ring of diamonds surrounding your center stone",
+      "basePrice": 1450,
+      "image": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+      "metalImages": {
+        "14k-yellow-gold": "{{ 'halo_yellow_gold_1770613120767.png' | asset_url }}",
+        "14k-white-gold": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+        "14k-rose-gold": "{{ 'halo_rose_gold_1770613147228.png' | asset_url }}",
+        "18k-yellow-gold": "{{ 'halo_yellow_gold_1770613120767.png' | asset_url }}",
+        "18k-white-gold": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+        "18k-rose-gold": "{{ 'halo_rose_gold_1770613147228.png' | asset_url }}",
+        "platinum": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}"
+      },
+      "compatibleShapes": ["round", "princess", "cushion", "oval", "radiant", "pear"],
+      "hasHalo": true,
+      "hasSideStones": false
+    },
+    {
+      "id": "three-stone",
+      "name": "The Three Stone",
+      "description": "Symbolic of your past, present, and future together",
+      "basePrice": 1250,
+      "image": "{{ 'three_stone_white_gold_1770613181764.png' | asset_url }}",
+      "metalImages": {
+        "14k-yellow-gold": "{{ 'three_stone_yellow_gold_1770613169045.png' | asset_url }}",
+        "14k-white-gold": "{{ 'three_stone_white_gold_1770613181764.png' | asset_url }}",
+        "14k-rose-gold": "{{ 'three_stone_rose_gold_1770613195442.png' | asset_url }}",
+        "18k-yellow-gold": "{{ 'three_stone_yellow_gold_1770613169045.png' | asset_url }}",
+        "18k-white-gold": "{{ 'three_stone_white_gold_1770613181764.png' | asset_url }}",
+        "18k-rose-gold": "{{ 'three_stone_rose_gold_1770613195442.png' | asset_url }}",
+        "platinum": "{{ 'three_stone_white_gold_1770613181764.png' | asset_url }}"
+      },
+      "compatibleShapes": ["round", "princess", "cushion", "emerald", "oval", "radiant", "asscher", "marquise", "pear"],
+      "hasHalo": false,
+      "hasSideStones": true,
+      "sideStoneOptions": [
+        { "shape": "tapered-baguette", "name": "Tapered Baguette", "caratOptions": ["1/10ct x 2", "1/5ct x 2"] },
+        { "shape": "trillion", "name": "Trillion", "caratOptions": ["1/10ct x 2", "1/5ct x 2", "1/4ct x 2"] },
+        { "shape": "round", "name": "Round", "caratOptions": ["1/10ct x 2", "1/5ct x 2"] }
+      ]
+    },
+    {
+      "id": "vintage",
+      "name": "The Vintage",
+      "description": "Intricate details inspired by timeless elegance",
+      "basePrice": 1550,
+      "image": "{{ 'vintage_white_gold_1770613257015.png' | asset_url }}",
+      "metalImages": {
+        "14k-yellow-gold": "{{ 'vintage_yellow_gold_1770613214508.png' | asset_url }}",
+        "14k-white-gold": "{{ 'vintage_white_gold_1770613257015.png' | asset_url }}",
+        "14k-rose-gold": "{{ 'vintage_rose_gold_1770613275364.png' | asset_url }}",
+        "18k-yellow-gold": "{{ 'vintage_yellow_gold_1770613214508.png' | asset_url }}",
+        "18k-white-gold": "{{ 'vintage_white_gold_1770613257015.png' | asset_url }}",
+        "18k-rose-gold": "{{ 'vintage_rose_gold_1770613275364.png' | asset_url }}",
+        "platinum": "{{ 'vintage_white_gold_1770613257015.png' | asset_url }}"
+      },
+      "compatibleShapes": ["round", "cushion", "oval", "marquise"],
+      "hasHalo": true,
+      "hasSideStones": true
+    },
+    {
+      "id": "hidden-halo",
+      "name": "The Hidden Halo",
+      "description": "A subtle halo hidden beneath the center stone for extra sparkle",
+      "basePrice": 1350,
+      "image": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+      "metalImages": {
+        "14k-yellow-gold": "{{ 'halo_yellow_gold_1770613120767.png' | asset_url }}",
+        "14k-white-gold": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+        "14k-rose-gold": "{{ 'halo_rose_gold_1770613147228.png' | asset_url }}",
+        "18k-yellow-gold": "{{ 'halo_yellow_gold_1770613120767.png' | asset_url }}",
+        "18k-white-gold": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+        "18k-rose-gold": "{{ 'halo_rose_gold_1770613147228.png' | asset_url }}",
+        "platinum": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}"
+      },
+      "compatibleShapes": ["round", "princess", "cushion", "emerald", "oval", "radiant", "asscher", "pear"],
+      "hasHalo": true,
+      "haloHidden": true,
+      "hasSideStones": false
+    },
+    {
+      "id": "pave",
+      "name": "The Pavé",
+      "description": "Delicate diamonds adorn the entire band for maximum brilliance",
+      "basePrice": 1400,
+      "image": "{{ 'halo_white_gold_1770613133799.png' | asset_url }}",
+      "compatibleShapes": ["round", "princess", "cushion", "emerald", "oval", "radiant", "pear"],
+      "hasHalo": false,
+      "hasSideStones": true
+    },
+    {
+      "id": "cathedral",
+      "name": "The Cathedral",
+      "description": "Elegant arches rise to support and elevate your center diamond",
+      "basePrice": 1100,
+      "image": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}",
+      "compatibleShapes": ["round", "princess", "cushion", "emerald", "oval", "radiant", "asscher", "marquise", "pear"],
+      "hasHalo": false,
+      "hasSideStones": false
+    },
+    {
+      "id": "bezel",
+      "name": "The Bezel",
+      "description": "A sleek metal rim fully surrounds and secures your diamond",
+      "basePrice": 1200,
+      "image": "{{ 'solitaire_white_gold_1770613083089.png' | asset_url }}",
+      "compatibleShapes": ["round", "oval", "cushion"],
+      "hasHalo": false,
+      "hasSideStones": false
+    }
+  ],
+  "metals": [
+    { "id": "14k-yellow-gold", "name": "14k Yellow Gold", "color": "#d4af37", "priceModifier": 0 },
+    { "id": "14k-white-gold", "name": "14k White Gold", "color": "#e8e8e8", "priceModifier": 0 },
+    { "id": "14k-rose-gold", "name": "14k Rose Gold", "color": "#b76e79", "priceModifier": 0 },
+    { "id": "18k-yellow-gold", "name": "18k Yellow Gold", "color": "#ffd700", "priceModifier": 200 },
+    { "id": "18k-white-gold", "name": "18k White Gold", "color": "#f5f5f5", "priceModifier": 200 },
+    { "id": "18k-rose-gold", "name": "18k Rose Gold", "color": "#c9a07a", "priceModifier": 200 },
+    { "id": "platinum", "name": "Platinum", "color": "#e5e4e2", "priceModifier": 400 }
+  ],
+  "bands": [
+    { "id": "plain", "name": "Plain Band", "priceModifier": 0 },
+    { "id": "pave", "name": "Pavé Band", "priceModifier": 350 },
+    { "id": "channel", "name": "Channel Set", "priceModifier": 400 },
+    { "id": "cathedral", "name": "Cathedral", "priceModifier": 150 }
+  ],
+  "shapes": [
+    { "id": "round", "name": "Round" },
+    { "id": "princess", "name": "Princess" },
+    { "id": "cushion", "name": "Cushion" },
+    { "id": "emerald", "name": "Emerald" },
+    { "id": "oval", "name": "Oval" },
+    { "id": "radiant", "name": "Radiant" },
+    { "id": "asscher", "name": "Asscher" },
+    { "id": "marquise", "name": "Marquise" },
+    { "id": "heart", "name": "Heart" },
+    { "id": "pear", "name": "Pear" }
+  ],
+  "ringSizes": [
+    { "id": "4", "name": "4" },
+    { "id": "4.5", "name": "4.5" },
+    { "id": "5", "name": "5" },
+    { "id": "5.5", "name": "5.5" },
+    { "id": "6", "name": "6" },
+    { "id": "6.5", "name": "6.5" },
+    { "id": "7", "name": "7" },
+    { "id": "7.5", "name": "7.5" },
+    { "id": "8", "name": "8" },
+    { "id": "8.5", "name": "8.5" },
+    { "id": "9", "name": "9" },
+    { "id": "9.5", "name": "9.5" },
+    { "id": "10", "name": "10" }
+  ]
+}
+</script>

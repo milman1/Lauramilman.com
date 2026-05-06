@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ring-size-guide",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

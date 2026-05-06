@@ -1,0 +1,107 @@
+{%- comment -%}
+  Laura Milman — List Collections section (gallery of all collections).
+  Auto-deduplicates by title; skips 'all' and empty collections.
+  Palette + voice swapped to LM tokens.
+{%- endcomment -%}
+
+<style>
+.list-collections { padding: 120px 0 80px; background: var(--bg-cream, #efecec); min-height: 100vh; min-height: 100dvh; }
+.list-collections .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+.list-collections__header { text-align: center; margin-bottom: 3rem; }
+.list-collections__eyebrow { font-size: 0.7rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--accent-gold, #dea882); font-weight: 600; margin-bottom: 0.85rem; display: block; }
+.list-collections__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 400; color: var(--primary-dark, #1c1a1a); margin-bottom: 1rem; letter-spacing: 0.02em; font-style: italic; }
+.list-collections__subtitle { font-size: 1.05rem; color: var(--text-muted, #7b8382); max-width: 620px; margin: 0 auto; line-height: 1.8; }
+
+.list-collections__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
+
+.collection-card { position: relative; aspect-ratio: 4/5; border-radius: 4px; overflow: hidden; background: var(--bg-white, #ffffff); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); transition: transform 0.4s ease, box-shadow 0.4s ease; }
+.collection-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.10); }
+.collection-card__image-wrapper { position: absolute; inset: 0; overflow: hidden; }
+.collection-card__image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+.collection-card:hover .collection-card__image { transform: scale(1.06); }
+.collection-card__placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary-dark, #1c1a1a) 0%, #322f2f 100%); display: flex; align-items: center; justify-content: center; }
+.collection-card__placeholder svg { width: 64px; height: 64px; color: rgba(255, 255, 255, 0.3); }
+
+.collection-card__overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(28, 26, 26, 0.92) 0%, rgba(28, 26, 26, 0.4) 40%, transparent 70%); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; transition: background 0.3s ease; }
+.collection-card:hover .collection-card__overlay { background: linear-gradient(to top, rgba(28, 26, 26, 0.95) 0%, rgba(28, 26, 26, 0.5) 50%, transparent 80%); }
+.collection-card__content { transform: translateY(10px); transition: transform 0.3s ease; }
+.collection-card:hover .collection-card__content { transform: translateY(0); }
+.collection-card__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 400; color: #ffffff; margin-bottom: 0.5rem; font-style: italic; }
+.collection-card__count { font-size: 0.72rem; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; letter-spacing: 0.22em; margin-bottom: 1rem; }
+.collection-card__link { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; font-weight: 500; color: var(--accent-gold, #dea882); text-transform: uppercase; letter-spacing: 0.22em; text-decoration: none; opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease; }
+.collection-card:hover .collection-card__link { opacity: 1; transform: translateY(0); }
+.collection-card__link:hover { color: #ffffff; }
+.collection-card__link svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
+.collection-card__link:hover svg { transform: translateX(4px); }
+
+@media (max-width: 768px) {
+  .list-collections { padding: 100px 0 60px; }
+  .list-collections__grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .collection-card__link { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<section class="list-collections">
+  <div class="container">
+    <div class="list-collections__header">
+      <span class="list-collections__eyebrow">From the atelier</span>
+      <h1 class="list-collections__title">{{ section.settings.title | default: 'The collection' }}</h1>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="list-collections__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="list-collections__grid">
+      {%- assign shown_titles = '' -%}
+      {%- for collection in collections -%}
+        {%- if collection.handle == 'all' -%}{%- continue -%}{%- endif -%}
+        {%- if collection.products_count == 0 -%}{%- continue -%}{%- endif -%}
+        {%- assign title_check = collection.title | downcase | strip -%}
+        {%- if shown_titles contains title_check -%}{%- continue -%}{%- endif -%}
+        {%- assign shown_titles = shown_titles | append: title_check | append: '|' -%}
+
+          <a href="{{ collection.url }}" class="collection-card">
+            <div class="collection-card__image-wrapper">
+              {%- if collection.image -%}
+                <img src="{{ collection.image | image_url: width: 800 }}" alt="{{ collection.title | escape }}" class="collection-card__image" loading="lazy" width="800" height="1000">
+              {%- elsif collection.products.first.featured_image -%}
+                <img src="{{ collection.products.first.featured_image | image_url: width: 800 }}" alt="{{ collection.title | escape }}" class="collection-card__image" loading="lazy" width="800" height="1000">
+              {%- else -%}
+                <div class="collection-card__placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <path d="M3 6h18"></path>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                </div>
+              {%- endif -%}
+            </div>
+            <div class="collection-card__overlay">
+              <div class="collection-card__content">
+                <h2 class="collection-card__title">{{ collection.title }}</h2>
+                <p class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'piece', 'pieces' }}</p>
+                <span class="collection-card__link">
+                  View
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "List Collections",
+  "settings": [
+    { "type": "text", "id": "title", "default": "The collection", "label": "Title" },
+    { "type": "textarea", "id": "subtitle", "default": "Each piece is designed and finished by hand in our New York atelier.", "label": "Subtitle" }
+  ],
+  "presets": [ { "name": "List Collections" } ]
+}
+{% endschema %}

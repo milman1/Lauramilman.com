@@ -1,0 +1,15 @@
+{%- comment -%}
+  Fixed: was 'our-story-page' (a section that does not exist in this
+  theme); now references our existing 'our-story' section.
+{%- endcomment -%}
+{
+  "sections": {
+    "main": {
+      "type": "our-story",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

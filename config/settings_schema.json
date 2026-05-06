@@ -2,25 +2,42 @@
   {
     "name": "theme_info",
     "theme_name": "Laura Milman",
+    "theme_author": "Milman New York",
     "theme_version": "1.0.0",
-    "theme_author": "Laura Milman Studio",
     "theme_documentation_url": "https://lauramilman.com",
     "theme_support_url": "https://lauramilman.com"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "32 x 32px recommended."
+      },
+      {
+        "type": "image_picker",
+        "id": "share_image",
+        "label": "Default share image",
+        "info": "Shown when your pages are shared on iMessage, Facebook, Twitter, etc. Recommended size: 1200 x 628px."
+      }
+    ]
   },
   {
     "name": "Colors",
     "settings": [
       {
         "type": "color",
-        "id": "accent_color",
-        "label": "Accent (gold)",
-        "default": "#836630"
+        "id": "primary_color",
+        "label": "Primary (heritage dark)",
+        "default": "#1c1a1a"
       },
       {
         "type": "color",
-        "id": "bg_color",
-        "label": "Page background (cream)",
-        "default": "#F5EFE6"
+        "id": "accent_color",
+        "label": "Accent (warm tan)",
+        "default": "#dea882"
       }
     ]
   },
@@ -28,45 +45,16 @@
     "name": "Typography",
     "settings": [
       {
-        "type": "select",
-        "id": "hero_variant",
-        "label": "Hero Layout",
-        "options": [
-          { "value": "dramatic", "label": "Dramatic (centered)" },
-          { "value": "editorial", "label": "Editorial (split)" },
-          { "value": "minimal", "label": "Minimal (type-forward)" }
-        ],
-        "default": "dramatic"
-      }
-    ]
-  },
-  {
-    "name": "Favicon",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "favicon",
-        "label": "Favicon"
-      }
-    ]
-  },
-  {
-    "name": "Social Media",
-    "settings": [
-      {
-        "type": "url",
-        "id": "social_instagram",
-        "label": "Instagram URL"
+        "type": "font_picker",
+        "id": "type_header_font",
+        "label": "Headings",
+        "default": "monotype_news_gothic_n4"
       },
       {
-        "type": "url",
-        "id": "social_pinterest",
-        "label": "Pinterest URL"
-      },
-      {
-        "type": "url",
-        "id": "social_facebook",
-        "label": "Facebook URL"
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body",
+        "default": "quattrocento_sans_i4"
       }
     ]
   }

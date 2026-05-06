@@ -1,0 +1,183 @@
+{%- comment -%}
+  Laura Milman — On Diamond Origin (replaces PD's Why Lab Grown page).
+  Reframed as the Milman house view rather than lab-grown advocacy.
+  Technical content (CVD/HPHT, Mohs, IGI/GIA) preserved verbatim.
+  Template: page.why-lab-grown.json
+{%- endcomment -%}
+
+<style>
+.wlg-page { padding-top: 120px; padding-bottom: 5rem; background: #1c1a1a; color: #fff; min-height: 100vh; }
+.wlg-wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+.wlg-hero { text-align: center; margin-bottom: 3.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.wlg-hero__eyebrow { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.32em; color: var(--accent-gold, #dea882); margin: 0 0 1rem; }
+.wlg-hero__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 400; line-height: 1.2; margin: 0 0 1.25rem; color: #fff; font-style: italic; }
+.wlg-hero__lead { font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,.68); max-width: 620px; margin: 0 auto; }
+
+.wlg-section { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.wlg-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.wlg-section__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.75rem; font-weight: 400; margin: 0 0 1rem; color: #fff; line-height: 1.3; }
+.wlg-section__body { font-size: 1rem; line-height: 1.85; color: rgba(255,255,255,.72); }
+.wlg-section__body p { margin: 0 0 1.15rem; }
+.wlg-section__body strong { color: rgba(255,255,255,.92); font-weight: 600; }
+.wlg-section__body a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; transition: opacity .3s ease; }
+.wlg-section__body a:hover { opacity: .78; }
+
+.wlg-section__sub { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 400; color: #fff; margin: 1.75rem 0 .75rem; line-height: 1.35; font-style: italic; }
+
+.wlg-section__body ul { list-style: none; margin: .75rem 0 1.25rem; padding: 0; }
+.wlg-section__body li { position: relative; padding-left: 1.35rem; margin-bottom: .6rem; line-height: 1.6; }
+.wlg-section__body li::before { content: ''; position: absolute; left: 0; top: .55rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-gold, #dea882); opacity: .6; }
+
+.wlg-tip { margin: 1.25rem 0; padding: .9rem 1.15rem; border-left: 2px solid var(--accent-gold, #dea882); background: rgba(222,168,130,.04); border-radius: 0 4px 4px 0; font-size: .92rem; color: rgba(255,255,255,.82); line-height: 1.7; }
+
+.wlg-table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: .9rem; }
+.wlg-table th, .wlg-table td { text-align: left; padding: .65rem .85rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.wlg-table th { color: rgba(255,255,255,.45); font-weight: 600; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.wlg-table td { color: rgba(255,255,255,.82); }
+
+.wlg-faq { margin: 3rem 0 2.5rem; padding: 2rem 1.75rem; border: 1px solid rgba(255,255,255,.08); border-radius: 4px; background: rgba(255,255,255,.02); }
+.wlg-faq__heading { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: #fff; margin: 0 0 1.5rem; text-align: center; font-style: italic; }
+.wlg-faq__item { padding: .85rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.wlg-faq__item:last-child { border-bottom: none; padding-bottom: 0; }
+.wlg-faq__q { font-weight: 600; color: rgba(255,255,255,.92); margin: 0 0 .35rem; font-size: .95rem; }
+.wlg-faq__a { color: rgba(255,255,255,.68); margin: 0; line-height: 1.7; font-size: .92rem; }
+
+.wlg-cta { text-align: center; margin-top: 3rem; padding: 2.5rem 1.75rem; border: 1px solid rgba(222,168,130,.2); border-radius: 4px; background: rgba(222,168,130,.03); }
+.wlg-cta__heading { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 400; color: #fff; margin: 0 0 .75rem; font-style: italic; }
+.wlg-cta__text { color: rgba(255,255,255,.62); font-size: .95rem; margin: 0 0 1.5rem; line-height: 1.65; }
+.wlg-cta__btn { display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 2rem; background: var(--accent-gold, #dea882); color: #1c1a1a; font-size: .78rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; border-radius: 2px; transition: background .3s ease, transform .3s ease; }
+.wlg-cta__btn:hover { background: var(--accent-gold-light, #e8bf9e); transform: translateY(-1px); }
+
+@media (max-width: 600px) {
+  .wlg-page { padding-top: 100px; }
+  .wlg-table th, .wlg-table td { padding: .5rem .6rem; font-size: .82rem; }
+}
+</style>
+
+<section class="wlg-page">
+  <div class="wlg-wrap">
+
+    <div class="wlg-hero">
+      <p class="wlg-hero__eyebrow">From the House</p>
+      <h1 class="wlg-hero__title">On Diamond Origin</h1>
+      <p class="wlg-hero__lead">A diamond is a diamond. Whether it formed in the earth's mantle or in a New York laboratory, the carbon crystal in your ring is the same material, graded by the same authorities, and made to last every bit as long. What changes is the story behind it.</p>
+    </div>
+
+    <div class="wlg-section">
+      <h2 class="wlg-section__title">What a lab-grown diamond actually is</h2>
+      <div class="wlg-section__body">
+        <p>A lab-grown diamond is a genuine diamond created in a controlled facility rather than beneath the earth's surface. Two methods produce them: <strong>Chemical Vapor Deposition (CVD)</strong> and <strong>High Pressure High Temperature (HPHT)</strong>.</p>
+        <p>CVD begins with a thin diamond seed placed in a chamber filled with carbon-rich gas. The gas is heated until carbon atoms separate and settle onto the seed, building a crystal layer by layer over several weeks. HPHT mimics the geological conditions deep within the earth's mantle, applying roughly 1.5 million pounds per square inch of pressure at temperatures above 2,700 °F to a carbon source until it crystallizes into diamond.</p>
+        <p>The result in either case is a real carbon crystal with the same atomic structure, refractive index, and hardness (10 on the Mohs scale) as any mined diamond. A standard diamond tester cannot tell the difference — because there isn't one at the molecular level.</p>
+        <div class="wlg-tip"><strong>Worth noting:</strong> lab-grown diamonds are not simulants like cubic zirconia or moissanite. They are real diamonds, graded the same way as mined stones.</div>
+      </div>
+    </div>
+
+    <div class="wlg-section">
+      <h2 class="wlg-section__title">Side by side with a mined stone</h2>
+      <div class="wlg-section__body">
+        <p>Held next to one another, a lab-grown diamond and a mined diamond of the same grade are indistinguishable — even to trained gemologists working without specialized equipment. The meaningful differences come down to origin, price, and footprint.</p>
+        <table class="wlg-table">
+          <thead>
+            <tr><th>Property</th><th>Lab-grown</th><th>Mined</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chemical composition</td><td>Pure carbon crystal</td><td>Pure carbon crystal</td></tr>
+            <tr><td>Hardness (Mohs)</td><td>10</td><td>10</td></tr>
+            <tr><td>Brilliance &amp; fire</td><td>Identical</td><td>Identical</td></tr>
+            <tr><td>Certifications</td><td>IGI, GIA</td><td>IGI, GIA</td></tr>
+            <tr><td>Origin</td><td>Laboratory</td><td>Earth (mining)</td></tr>
+            <tr><td>Typical price</td><td>30–70% less</td><td>Full market price</td></tr>
+            <tr><td>Environmental impact</td><td>Significantly lower</td><td>Land disruption, water &amp; energy use</td></tr>
+          </tbody>
+        </table>
+        <p>The sparkle, the hardness, the durability — all the same. What changes is provenance and price.</p>
+      </div>
+    </div>
+
+    <div class="wlg-section">
+      <h2 class="wlg-section__title">The Milman view</h2>
+      <div class="wlg-section__body">
+        <p>For three generations, the Milman family has worked with both natural and lab-grown stones. We don't believe one origin is more legitimate than the other — a well-cut, well-graded diamond is a well-cut, well-graded diamond. What matters is the hand of the cutter, the skill of the setter, and the integrity of the certificate.</p>
+
+        <h3 class="wlg-section__sub">More stone for the same investment</h3>
+        <p>Lab-grown diamonds typically run <strong>30–70% below</strong> mined stones of equivalent cut, color, clarity, and carat weight. That difference can mean a larger center stone, a higher cut grade, or a more elaborate setting from the atelier — without changing your budget. A two-carat ring that was once out of reach is now within it.</p>
+
+        <h3 class="wlg-section__sub">A clean origin, fully documented</h3>
+        <p>Every lab-grown stone we set carries full traceability — from seed through finished gem. There is no question of where it came from, no community displaced, no uncertainty. The provenance is on paper.</p>
+
+        <h3 class="wlg-section__sub">A lighter footprint</h3>
+        <p>Diamond mining moves an estimated 250 tons of earth per single carat recovered. Lab-grown production removes that excavation entirely. Energy is still required, so it isn't a zero-impact process — but the environmental footprint is substantially smaller by every credible measure.</p>
+
+        <h3 class="wlg-section__sub">The same certificates</h3>
+        <p>Lab-grown stones are graded by the same independent laboratories — <strong>IGI</strong> and <strong>GIA</strong> — that grade mined diamonds. The criteria are identical: cut, color, clarity, carat weight. There is no separate, lesser standard for lab-grown.</p>
+
+        <div class="wlg-tip"><strong>From the atelier:</strong> if you choose lab-grown, put the savings into cut grade. Cut is the single biggest factor in how much a diamond actually sparkles — going from Very Good to Excellent or Astor transforms the stone. More on this in our <a href="/pages/buying-guide">guide to diamonds</a>.</div>
+      </div>
+    </div>
+
+    <div class="wlg-section">
+      <h2 class="wlg-section__title">Are lab-grown diamonds worth the investment?</h2>
+      <div class="wlg-section__body">
+        <p><strong>Yes.</strong> A lab-grown diamond gives you the same beauty, durability, and certification as a mined diamond at a fraction of the price. It will last a lifetime — a 10 on the Mohs scale doesn't fade or scratch over the decades, regardless of where the carbon formed.</p>
+        <p>The question of “worth” often comes down to what you value. If a geological origin story is essential to you, a mined stone carries that history. If you care about the look of the ring on the hand, the fire when it catches the light, and the confidence of full traceability — lab-grown is, by every honest measure, the smarter choice.</p>
+        <p>More buyers are arriving at the same conclusion. In 2023, lab-grown diamonds accounted for roughly half of all engagement-diamond sales in the United States — up from single digits a few years earlier. It is not a trend so much as a market correction toward better value.</p>
+        <p>Browse our <a href="/collections/engagement-rings">engagement ring collection</a> to see what's possible at every range.</p>
+      </div>
+    </div>
+
+    <div class="wlg-faq">
+      <h2 class="wlg-faq__heading">Frequently asked</h2>
+
+      <div class="wlg-faq__item">
+        <p class="wlg-faq__q">Are lab-grown diamonds real diamonds?</p>
+        <p class="wlg-faq__a">Yes. Lab-grown diamonds have the exact same chemical composition (pure carbon), crystal structure, hardness, and optical properties as mined diamonds. They are real diamonds by every scientific and gemological standard.</p>
+      </div>
+      <div class="wlg-faq__item">
+        <p class="wlg-faq__q">How long do lab-grown diamonds last?</p>
+        <p class="wlg-faq__a">Indefinitely. A lab-grown diamond is a 10 on the Mohs hardness scale — the hardest material on earth — and will not cloud, fade, or lose its brilliance. It is as permanent as any mined diamond.</p>
+      </div>
+      <div class="wlg-faq__item">
+        <p class="wlg-faq__q">Can you tell the difference between lab-grown and mined diamonds?</p>
+        <p class="wlg-faq__a">Not with the naked eye. Even trained gemologists need specialized laboratory equipment to distinguish the two, because the physical and optical properties are identical.</p>
+      </div>
+      <div class="wlg-faq__item">
+        <p class="wlg-faq__q">Do lab-grown diamonds come with certificates?</p>
+        <p class="wlg-faq__a">Yes. Lab-grown diamonds are graded and certified by the same independent labs — IGI and GIA — that certify mined stones. The grading covers cut, color, clarity, and carat weight using the same criteria.</p>
+      </div>
+      <div class="wlg-faq__item">
+        <p class="wlg-faq__q">Is a lab-grown diamond worth buying?</p>
+        <p class="wlg-faq__a">Yes. You receive the same sparkle, hardness, and certification at 30–70% below comparable mined stones. The savings allow a larger stone or a higher grade without exceeding your budget.</p>
+      </div>
+    </div>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Are lab-grown diamonds real diamonds?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Lab-grown diamonds have the exact same chemical composition (pure carbon), crystal structure, hardness, and optical properties as mined diamonds. They are real diamonds by every scientific and gemological standard." } },
+        { "@type": "Question", "name": "How long do lab-grown diamonds last?", "acceptedAnswer": { "@type": "Answer", "text": "Indefinitely. A lab-grown diamond is a 10 on the Mohs hardness scale and will not cloud, fade, or lose its brilliance. It is as permanent as any mined diamond." } },
+        { "@type": "Question", "name": "Can you tell the difference between lab-grown and mined diamonds?", "acceptedAnswer": { "@type": "Answer", "text": "Not with the naked eye. Even trained gemologists need specialized laboratory equipment to distinguish the two, because the physical and optical properties are identical." } },
+        { "@type": "Question", "name": "Do lab-grown diamonds come with certificates?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Lab-grown diamonds are graded and certified by the same independent labs — IGI and GIA — that certify mined diamonds." } },
+        { "@type": "Question", "name": "Is a lab-grown diamond worth buying?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The same sparkle, hardness, and certification at 30–70% below comparable mined stones." } }
+      ]
+    }
+    </script>
+
+    <div class="wlg-cta">
+      <h2 class="wlg-cta__heading">See the stones in person</h2>
+      <p class="wlg-cta__text">Each piece is designed and finished by hand in our New York atelier. Every center stone ships with IGI or GIA certification.</p>
+      <a href="/collections/engagement-rings" class="wlg-cta__btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>
+        Explore the collection
+      </a>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Why Lab Grown", "settings": [], "presets": [ { "name": "Why Lab Grown" } ] }
+{% endschema %}

@@ -1,0 +1,222 @@
+{%- comment -%}
+  Laura Milman — Diamond Filter section.
+  Gemologist-grade filtering with LM voice. Functional grid + sliders
+  cloned from PD; copy refined for the heritage register.
+{%- endcomment -%}
+
+<div class="filter-page">
+  <!-- Ring Builder Mode Banner -->
+  <div id="ringBuilderBanner" class="ring-builder-banner" style="display: none;">
+    <div class="container">
+      <div class="ring-builder-banner__content">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4m0 14v4m11-11h-4M5 12H1"/>
+        </svg>
+        <div class="ring-builder-banner__text">
+          <strong>Designing your ring</strong>
+          <span id="ringBuilderBannerDetail">Select a stone to pair with your setting</span>
+        </div>
+        <a href="/pages/ring-builder" class="btn btn--outline btn--sm">Back to ring builder</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    if (new URLSearchParams(window.location.search).get('ring_builder') === 'true') {
+      document.getElementById('ringBuilderBanner').style.display = 'block';
+    }
+  </script>
+
+  <div class="filter-header">
+    <div class="container">
+      <h1 class="filter-header__title">{{ section.settings.heading | default: 'The Diamond Selection' }}</h1>
+      <p class="filter-header__subtitle">{{ section.settings.subheading | default: 'Refine by shape, size, color, and clarity. Every stone is independently graded by IGI or GIA; many are filmed at 100x magnification so you can inspect them as a gemologist would.' }}</p>
+    </div>
+  </div>
+
+  <div class="filter-container">
+    <div class="container">
+      <form id="diamondFilterForm" action="{{ collection.url }}" method="get">
+        <div class="filter-grid">
+          <div class="filter-column">
+
+            <div class="filter-group">
+              <label class="filter-label">
+                Shape
+                <span class="filter-info" data-tooltip="The shape of the diamond determines its facet pattern and overall presence.">ⓘ</span>
+              </label>
+              <div class="shape-grid">
+                {%- assign shapes = 'round,princess,cushion,emerald,oval,radiant,asscher,marquise,heart,pear' | split: ',' -%}
+                {%- for shape in shapes -%}
+                  <button type="button" class="shape-btn{% if current_tags contains shape %} active{% endif %}" data-shape="{{ shape }}" data-tag="{{ shape }}">
+                    {% render 'diamond-shape-icon', shape: shape %}
+                    <span class="shape-btn__label">{{ shape | capitalize }}</span>
+                  </button>
+                {%- endfor -%}
+              </div>
+              <input type="hidden" name="filter.p.tag" id="shapeFilter" value="">
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">
+                Carat
+                <span class="filter-info" data-tooltip="Carat weight measures the mass of the diamond. 1 carat equals 200 milligrams.">ⓘ</span>
+              </label>
+              <div class="range-slider-container">
+                <div class="range-inputs">
+                  <div class="range-input-group">
+                    <label for="minCarat">Min carat</label>
+                    <input type="text" id="minCarat" name="filter.v.option.carat_min" class="range-input" value="{{ current_filters['carat_min'] | default: '0.50' }}">
+                  </div>
+                  <div class="range-input-group">
+                    <label for="maxCarat">Max carat</label>
+                    <input type="text" id="maxCarat" name="filter.v.option.carat_max" class="range-input" value="{{ current_filters['carat_max'] | default: '30.00' }}">
+                  </div>
+                </div>
+                <div class="range-slider" id="caratSlider">
+                  <div class="range-slider__track" style="left: 0%; width: 100%;"></div>
+                  <div class="range-slider__thumb" id="caratThumbMin" style="left: 0%;"></div>
+                  <div class="range-slider__thumb" id="caratThumbMax" style="left: 100%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">
+                Clarity
+                <span class="filter-info" data-tooltip="Clarity grades the presence of inclusions and surface marks. FL (Flawless) is the highest grade.">ⓘ</span>
+              </label>
+              <div class="step-slider-container">
+                <div class="step-slider" id="claritySlider" data-filter-name="clarity">
+                  <div class="step-slider__track">
+                    <div class="step-slider__progress" style="left: 25%; width: 75%;"></div>
+                  </div>
+                  <div class="step-slider__steps">
+                    {%- assign clarities = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' -%}
+                    {%- for clarity in clarities -%}
+                      <div class="step-slider__step{% if forloop.index > 2 %} in-range{% endif %}" data-value="{{ clarity }}"></div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+                <div class="step-slider__labels">
+                  {%- for clarity in clarities -%}
+                    <span class="step-slider__label{% if forloop.index > 2 %} active{% endif %}" data-value="{{ clarity }}">{{ clarity }}</span>
+                  {%- endfor -%}
+                </div>
+                <input type="hidden" name="filter.p.m.custom.clarity" id="clarityFilter" value="">
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-column">
+            <div class="filter-group">
+              <label class="filter-label">
+                Price
+                <span class="filter-info" data-tooltip="Set your range to refine the selection.">ⓘ</span>
+              </label>
+              <div class="range-slider-container">
+                <div class="range-inputs">
+                  <div class="range-input-group">
+                    <label for="minPrice">Min price</label>
+                    <input type="text" id="minPrice" name="filter.v.price.gte" class="range-input" value="{{ current_filters['price_min'] | default: '$200' }}">
+                  </div>
+                  <div class="range-input-group">
+                    <label for="maxPrice">Max price</label>
+                    <input type="text" id="maxPrice" name="filter.v.price.lte" class="range-input" value="{{ current_filters['price_max'] | default: '$50,000' }}">
+                  </div>
+                </div>
+                <div class="range-slider" id="priceSlider">
+                  <div class="range-slider__track" style="left: 0%; width: 100%;"></div>
+                  <div class="range-slider__thumb" id="priceThumbMin" style="left: 0%;"></div>
+                  <div class="range-slider__thumb" id="priceThumbMax" style="left: 100%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">
+                Color
+                <span class="filter-info" data-tooltip="Color grades range from D (colorless) to Z (visible color). D is the most prized.">ⓘ</span>
+              </label>
+              <div class="step-slider-container">
+                <div class="step-slider" id="colorSlider" data-filter-name="color">
+                  <div class="step-slider__track">
+                    <div class="step-slider__progress" style="left: 57%; width: 43%;"></div>
+                  </div>
+                  <div class="step-slider__steps">
+                    {%- assign colors = 'J,I,H,G,F,E,D' | split: ',' -%}
+                    {%- for color in colors -%}
+                      <div class="step-slider__step{% if forloop.index > 4 %} active{% endif %}" data-value="{{ color }}"></div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+                <div class="step-slider__labels">
+                  {%- for color in colors -%}
+                    <span class="step-slider__label{% if forloop.index > 4 %} active{% endif %}" data-value="{{ color }}">{{ color }}</span>
+                  {%- endfor -%}
+                </div>
+                <input type="hidden" name="filter.p.m.custom.color" id="colorFilter" value="">
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">
+                Cut
+                <span class="filter-info" data-tooltip="Cut quality determines a diamond's brilliance. Excellent and Astor cuts maximise light return.">ⓘ</span>
+              </label>
+              <div class="step-slider-container">
+                <div class="step-slider" id="cutSlider" data-filter-name="cut">
+                  <div class="step-slider__track">
+                    <div class="step-slider__progress" style="left: 50%; width: 50%;"></div>
+                  </div>
+                  <div class="step-slider__steps">
+                    {%- assign cuts = 'Good,Very Good,Excellent,Astor' | split: ',' -%}
+                    {%- for cut in cuts -%}
+                      <div class="step-slider__step{% if forloop.index > 2 %} active{% endif %}" data-value="{{ cut }}"></div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+                <div class="step-slider__labels">
+                  {%- for cut in cuts -%}
+                    <span class="step-slider__label{% if forloop.index > 2 %} active{% endif %}" data-value="{{ cut }}">{{ cut }}</span>
+                  {%- endfor -%}
+                </div>
+                <input type="hidden" name="filter.p.m.custom.cut" id="cutFilter" value="">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn--primary btn--lg" id="applyFilters">
+            Show stones
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div id="diamondResults">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Set your preferences, then “Show stones” to view the current selection.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ 'diamond-results.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'diamond-api.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Diamond Filter",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The Diamond Selection" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Refine by shape, size, color, and clarity. Every stone is independently graded by IGI or GIA; many are filmed at 100x magnification so you can inspect them as a gemologist would." }
+  ],
+  "presets": [ { "name": "Diamond Filter" } ]
+}
+{% endschema %}

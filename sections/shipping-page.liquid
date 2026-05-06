@@ -1,0 +1,150 @@
+{%- comment -%}
+  Laura Milman — Shipping & Returns.
+  Heritage-dark register; LM warranty + complimentary-resizing voice.
+  Template: page.shipping.json
+{%- endcomment -%}
+
+<style>
+.shp-page { padding-top: 120px; padding-bottom: 5rem; background: #1c1a1a; color: #fff; min-height: 100vh; }
+.shp-wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+.shp-hero { text-align: center; margin-bottom: 3.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.shp-hero__eyebrow { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.32em; color: var(--accent-gold, #dea882); margin: 0 0 1rem; }
+.shp-hero__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 400; line-height: 1.2; margin: 0; color: #fff; font-style: italic; }
+
+.shp-section { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.shp-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.shp-section__title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 400; margin: 0 0 1.25rem; color: #fff; line-height: 1.3; font-style: italic; }
+.shp-section__body { font-size: 1rem; line-height: 1.85; color: rgba(255,255,255,.72); }
+.shp-section__body p { margin: 0 0 1.15rem; }
+.shp-section__body strong { color: rgba(255,255,255,.92); font-weight: 600; }
+.shp-section__body a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; transition: opacity .3s ease; }
+.shp-section__body a:hover { opacity: .78; }
+
+.shp-list { list-style: none; margin: .75rem 0 1.25rem; padding: 0; }
+.shp-list li { position: relative; padding-left: 1.5rem; margin-bottom: .65rem; line-height: 1.7; color: rgba(255,255,255,.78); }
+.shp-list li::before { content: '\2726'; position: absolute; left: 0; top: 0; color: var(--accent-gold, #dea882); font-size: .7rem; line-height: 1.7; opacity: .7; }
+
+.shp-faq { margin: 3rem 0 2.5rem; padding: 2rem 1.75rem; border: 1px solid rgba(255,255,255,.08); border-radius: 4px; background: rgba(255,255,255,.02); }
+.shp-faq__heading { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: #fff; margin: 0 0 1.5rem; text-align: center; font-style: italic; }
+.shp-faq__item { padding: .85rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.shp-faq__item:last-child { border-bottom: none; padding-bottom: 0; }
+.shp-faq__q { font-weight: 600; color: rgba(255,255,255,.92); margin: 0 0 .35rem; font-size: .95rem; }
+.shp-faq__a { color: rgba(255,255,255,.68); margin: 0; line-height: 1.7; font-size: .92rem; }
+
+.shp-cta { text-align: center; margin-top: 3rem; padding: 2.5rem 1.75rem; border: 1px solid rgba(222,168,130,.2); border-radius: 4px; background: rgba(222,168,130,.03); }
+.shp-cta__text { color: rgba(255,255,255,.68); font-size: 1rem; margin: 0; line-height: 1.75; }
+.shp-cta__text a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; transition: opacity .3s ease; }
+.shp-cta__text a:hover { opacity: .78; }
+
+@media (max-width: 600px) {
+  .shp-page { padding-top: 100px; }
+  .shp-faq { padding: 1.5rem 1.25rem; }
+}
+</style>
+
+<section class="shp-page">
+  <div class="shp-wrap">
+
+    <div class="shp-hero">
+      <p class="shp-hero__eyebrow">The atelier</p>
+      <h1 class="shp-hero__title">Shipping &amp; returns</h1>
+    </div>
+
+    <div class="shp-section">
+      <h2 class="shp-section__title">Delivery</h2>
+      <div class="shp-section__body">
+        <ul class="shp-list">
+          <li>Complimentary, fully insured delivery on every order — within the United States, by USPS or UPS.</li>
+          <li>Standard arrival within five to seven business days from dispatch.</li>
+          <li>Expedited options available at checkout.</li>
+          <li>Each piece dispatches from our New York atelier with a tracking number sent by email.</li>
+          <li>Signature required on delivery for orders above $1,000.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="shp-section">
+      <h2 class="shp-section__title">Returns</h2>
+      <div class="shp-section__body">
+        <ul class="shp-list">
+          <li>A thirty-day return window from the date of delivery.</li>
+          <li>Pieces must arrive unworn, in their original packaging, with the certificate intact.</li>
+          <li>Complimentary return shipping with a prepaid label.</li>
+          <li>Refunds are processed within five to seven business days of receipt.</li>
+          <li>To begin a return, write to <a href="mailto:hello@lauramilman.com">hello@lauramilman.com</a>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="shp-section">
+      <h2 class="shp-section__title">Resizing &amp; exchanges</h2>
+      <div class="shp-section__body">
+        <ul class="shp-list">
+          <li>The first ring resizing is complimentary within thirty days of delivery.</li>
+          <li>Size exchanges are accepted within the same window.</li>
+          <li>Subsequent resizings are offered at cost.</li>
+          <li>Write to the atelier to arrange the exchange or resize.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="shp-section">
+      <h2 class="shp-section__title">Lifetime warranty</h2>
+      <div class="shp-section__body">
+        <ul class="shp-list">
+          <li>A lifetime warranty against manufacturing defects on every Laura Milman setting.</li>
+          <li>Covers defects in materials and workmanship from the moment a piece leaves our atelier.</li>
+          <li>Does not cover ordinary wear, accidental damage, or loss — these can be addressed through a paid repair.</li>
+          <li>For warranty enquiries, write to <a href="mailto:hello@lauramilman.com">hello@lauramilman.com</a>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="shp-faq">
+      <h2 class="shp-faq__heading">Frequently asked</h2>
+
+      <div class="shp-faq__item">
+        <p class="shp-faq__q">How long does delivery take?</p>
+        <p class="shp-faq__a">Five to seven business days from dispatch by standard delivery. Expedited options are offered at checkout for sooner arrival.</p>
+      </div>
+
+      <div class="shp-faq__item">
+        <p class="shp-faq__q">Can I return an engraved piece?</p>
+        <p class="shp-faq__a">Engraved and bespoke pieces are final sale and cannot be returned. Please review your engraving carefully before placing the order — we are happy to confirm spelling beforehand.</p>
+      </div>
+
+      <div class="shp-faq__item">
+        <p class="shp-faq__q">Do you ship internationally?</p>
+        <p class="shp-faq__a">At present we ship within the United States. International delivery is being arranged — write to us if you would like to be notified.</p>
+      </div>
+
+      <div class="shp-faq__item">
+        <p class="shp-faq__q">What if my ring does not fit?</p>
+        <p class="shp-faq__a">The first resizing is complimentary within thirty days of delivery. Write to <a href="mailto:hello@lauramilman.com">hello@lauramilman.com</a> and we will arrange the exchange and shipping in both directions.</p>
+      </div>
+    </div>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "How long does delivery take?", "acceptedAnswer": { "@type": "Answer", "text": "Five to seven business days from dispatch by standard delivery. Expedited options are offered at checkout for sooner arrival." } },
+        { "@type": "Question", "name": "Can I return an engraved piece?", "acceptedAnswer": { "@type": "Answer", "text": "Engraved and bespoke pieces are final sale and cannot be returned." } },
+        { "@type": "Question", "name": "Do you ship internationally?", "acceptedAnswer": { "@type": "Answer", "text": "At present we ship within the United States. International delivery is being arranged." } },
+        { "@type": "Question", "name": "What if my ring does not fit?", "acceptedAnswer": { "@type": "Answer", "text": "The first resizing is complimentary within thirty days of delivery. Write to hello@lauramilman.com to arrange." } }
+      ]
+    }
+    </script>
+
+    <div class="shp-cta">
+      <p class="shp-cta__text">Other questions? Write to the atelier at <a href="mailto:hello@lauramilman.com">hello@lauramilman.com</a>.</p>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Shipping & Returns", "settings": [], "presets": [ { "name": "Shipping & Returns" } ] }
+{% endschema %}

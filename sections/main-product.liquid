@@ -1,389 +1,628 @@
-{%- assign current_variant = product.selected_or_first_available_variant -%}
-{%- assign product_form_id = 'product-form-' | append: section.id -%}
+{%- comment -%}
+  Laura Milman — Main Product Section.
+  Vertical gallery + sticky info layout cloned from PD; brand voice and
+  palette swapped to LM heritage tokens. Heritage hook surfaces above
+  variants; CTA reads "Add to selection". Heavy CSS and JS extracted
+  to product-styles + product-scripts snippets to keep this file
+  reviewable.
+{%- endcomment -%}
 
-<div class="product-page">
-
-  <!-- Breadcrumb -->
-  <nav class="product-breadcrumb" aria-label="Breadcrumb">
-    <a href="{{ routes.root_url }}">Home</a>
-    <span class="sep" aria-hidden="true">/</span>
-    {%- if collection -%}
-      <a href="{{ collection.url }}">{{ collection.title }}</a>
-      <span class="sep" aria-hidden="true">/</span>
+<!-- Breadcrumbs -->
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol class="breadcrumbs__list">
+    <li class="breadcrumbs__item"><a href="/" class="breadcrumbs__link">Home</a></li>
+    {%- if product.collections.size > 0 -%}
+      {%- assign bc_collection = product.collections | sort: 'products_count' | last -%}
+      <li class="breadcrumbs__item"><a href="{{ bc_collection.url }}" class="breadcrumbs__link">{{ bc_collection.title }}</a></li>
     {%- endif -%}
-    <span class="current" aria-current="page">{{ product.title }}</span>
-  </nav>
+    <li class="breadcrumbs__item breadcrumbs__item--current" aria-current="page">{{ product.title | truncate: 50 }}</li>
+  </ol>
+</nav>
 
-  <!-- Product Layout -->
-  <div class="product-layout">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Home","item":"{{ shop.url }}"}
+    {%- if product.collections.size > 0 -%}
+      {%- assign bc_collection = product.collections | sort: 'products_count' | last -%}
+      ,{"@type":"ListItem","position":2,"name":{{ bc_collection.title | json }},"item":"{{ shop.url }}{{ bc_collection.url }}"}
+      ,{"@type":"ListItem","position":3,"name":{{ product.title | json }},"item":"{{ shop.url }}{{ product.url }}"}
+    {%- else -%}
+      ,{"@type":"ListItem","position":2,"name":{{ product.title | json }},"item":"{{ shop.url }}{{ product.url }}"}
+    {%- endif -%}
+  ]
+}
+</script>
 
-    <!-- Gallery -->
-    <div class="product-gallery">
-      <div class="product-gallery__main">
-        {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}
-          <div class="product-gallery__badge">New Arrival</div>
-        {%- endif -%}
-
-        {%- if product.featured_image -%}
-          <img
-            id="product-main-image"
-            src="{{ product.featured_image | image_url: width: 1200 }}"
-            alt="{{ product.featured_image.alt | default: product.title | escape }}"
-            width="{{ product.featured_image.width }}"
-            height="{{ product.featured_image.height }}"
-            loading="eager"
-          >
-        {%- endif -%}
-
-        <div class="product-gallery__zoom-hint" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(184,148,90,0.6)" stroke-width="1.5">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m21 21-4.35-4.35"/>
-            <path d="M11 8v6M8 11h6"/>
-          </svg>
-          Hover to zoom
-        </div>
-      </div>
-
-      {%- if product.images.size > 1 -%}
-        <div class="product-gallery__thumbs" role="list">
-          {%- for image in product.images limit: 5 -%}
-            <button
-              class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
-              data-src="{{ image | image_url: width: 1200 }}"
-              aria-label="View image {{ forloop.index }}"
-              role="listitem"
-            >
-              <img
-                src="{{ image | image_url: width: 120 }}"
-                alt="{{ image.alt | default: product.title | escape }}"
-                width="120"
-                height="120"
-                loading="lazy"
-              >
-            </button>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-    </div>
-
-    <!-- Product Info -->
-    <div class="product-info">
-
-      <!-- Rating (placeholder) -->
-      <div class="product-rating">
-        <div class="product-rating__stars stars" aria-label="4.8 out of 5 stars">
-          {%- for i in (1..5) -%}
-            <svg width="14" height="14" viewBox="0 0 24 24"
-              fill="{{ i | at_most: 4 | floor | times: 1 | at_least: 1 | minus: i | abs | at_most: 1 | times: -1 | plus: 1 | times: 193 | minus: 193 | at_most: 0 | abs | at_least: 0 | times: 0 }}{% if i <= 4 %}#836630{% else %}none{% endif %}"
-              stroke="#836630"
-              stroke-width="1.5"
-              aria-hidden="true"
-            >
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-          {%- endfor -%}
-        </div>
-        {%- if product.metafields.reviews.rating_count -%}
-          <span class="product-rating__text">
-            {{ product.metafields.reviews.rating.value }} ({{ product.metafields.reviews.rating_count.value }} reviews)
-          </span>
-        {%- endif -%}
-      </div>
-
-      <h1 class="product-title">{{ product.title }}</h1>
-
-      <!-- Price -->
-      <div class="product-price-row">
-        <span class="product-price">
-          {%- if current_variant.price -%}
-            {{ current_variant.price | money }}
-          {%- else -%}
-            {{ product.price_min | money }}
-          {%- endif -%}
-        </span>
-        {%- if current_variant.compare_at_price > current_variant.price -%}
-          <s class="product-price--compare">{{ current_variant.compare_at_price | money }}</s>
-          <span class="product-price--save">
-            Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}
-          </span>
-        {%- endif -%}
-      </div>
-
-      {%- if product.description != blank -%}
-        <div class="product-description">{{ product.description | strip_html | truncate: 300 }}</div>
+<section class="product-section-jc">
+  <div class="product-container-jc">
+    <div class="product-gallery-jc">
+      {%- assign description_video_check = product.description | downcase -%}
+      {%- if description_video_check contains '.mp4' or description_video_check contains '.webm' -%}
+        <div class="gallery-image-jc gallery-video-jc" id="description-video-container"></div>
       {%- endif -%}
 
-      <div class="gold-divider"></div>
-
-      <!-- Product Form -->
-      {%- form 'product', product, id: product_form_id, data-product-form: '' -%}
-
-        <!-- Variant select (hidden, controlled by option buttons) -->
-        <select name="id" style="display:none;" aria-label="Variant">
-          {%- for variant in product.variants -%}
-            <option
-              value="{{ variant.id }}"
-              data-options="{{ variant.options | json | escape }}"
-              data-available="{{ variant.available }}"
-              data-price="{{ variant.price }}"
-              data-compare-price="{{ variant.compare_at_price }}"
-              {% if variant == current_variant %}selected{% endif %}
-            >
-              {{ variant.title }}
-            </option>
-          {%- endfor -%}
-        </select>
-
-        <!-- Options -->
-        {%- for option in product.options_with_values -%}
-          <div class="product-option-label" style="margin-top:{{ forloop.first | if: '0', '28px' }}">
-            {{ option.name }} — <span>{{ current_variant.options[forloop.index0] }}</span>
+      {%- for media in product.media -%}
+        {%- if media.media_type == 'video' -%}
+          <div class="gallery-image-jc gallery-video-jc">
+            <video class="product-video-jc" autoplay loop muted playsinline controls>
+              {%- for source in media.sources -%}
+                <source src="{{ source.url }}" type="{{ source.mime_type }}">
+              {%- endfor -%}
+              Your browser does not support the video tag.
+            </video>
           </div>
-
-          <div class="product-option-row" data-option-group data-option-index="{{ forloop.index0 }}">
-            {%- for value in option.values -%}
-              {%- assign is_active = false -%}
-              {%- if current_variant.options[forloop.parentloop.index0] == value -%}
-                {%- assign is_active = true -%}
-              {%- endif -%}
-
-              <button
-                type="button"
-                class="product-option-btn{% if option.name == 'Size' %} size-btn{% endif %}{% if is_active %} active{% endif %}"
-                data-value="{{ value | escape }}"
-                aria-pressed="{{ is_active }}"
-              >
-                {{ value }}
-              </button>
-            {%- endfor -%}
-          </div>
-        {%- endfor -%}
-
-        <!-- Quantity + Add to Cart -->
-        <div class="atc-row">
-          <div class="quantity-selector">
-            <button type="button" class="qty-btn" data-action="minus" aria-label="Decrease quantity">−</button>
-            <div class="qty-display" aria-live="polite">1</div>
-            <button type="button" class="qty-btn" data-action="plus" aria-label="Increase quantity">+</button>
-          </div>
-          <input type="hidden" name="quantity" value="1">
-
-          <button
-            type="submit"
-            class="atc-btn"
-            {% unless current_variant.available %}disabled{% endunless %}
-            aria-label="Add {{ product.title }} to cart"
-          >
-            {%- if current_variant.available -%}
-              {{ 'products.product.add_to_cart' | t }}
-            {%- else -%}
-              {{ 'products.product.sold_out' | t }}
-            {%- endif -%}
-          </button>
-
-          <button type="button" class="wishlist-btn" aria-label="{{ 'products.product.wishlist' | t }}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#836630" stroke-width="1.5" aria-hidden="true">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-            </svg>
-          </button>
-        </div>
-
-      {%- endform -%}
-
-      <!-- Trust badges -->
-      <div class="trust-badges">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'trust_badge' -%}
-            <div class="trust-badge" {{ block.shopify_attributes }}>
-              <span class="trust-badge__icon" aria-hidden="true">{{ block.settings.icon }}</span>
-              <span class="trust-badge__label">{{ block.settings.label }}</span>
-            </div>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-
-      <!-- Accordion -->
-      <div class="accordion-item" data-open>
-        <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-materials">
-          Materials &amp; Craftsmanship
-          <span class="accordion-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="accordion-body" id="acc-materials">
-          <div class="accordion-content">
-            {%- if product.metafields.custom.materials != blank -%}
-              {{ product.metafields.custom.materials }}
-            {%- else -%}
-              {{ product.description }}
+        {%- elsif media.media_type == 'external_video' -%}
+          <div class="gallery-image-jc gallery-video-jc">
+            {%- if media.host == 'youtube' -%}
+              <iframe src="https://www.youtube.com/embed/{{ media.external_id }}?autoplay=1&mute=1&loop=1&playlist={{ media.external_id }}" class="product-video-jc" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            {%- elsif media.host == 'vimeo' -%}
+              <iframe src="https://player.vimeo.com/video/{{ media.external_id }}?autoplay=1&muted=1&loop=1" class="product-video-jc" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
             {%- endif -%}
           </div>
-        </div>
-      </div>
+        {%- endif -%}
+      {%- endfor -%}
 
-      <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-shipping">
-          Shipping &amp; Returns
-          <span class="accordion-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="accordion-body" id="acc-shipping">
-          <div class="accordion-content">
-            {%- if section.settings.shipping_text != blank -%}
-              {{ section.settings.shipping_text }}
-            {%- else -%}
-              Complimentary insured shipping on all orders via FedEx. Estimated delivery: 3–5 business days. International shipping available.<br><br>Full refund within 30 days of delivery. Items must be unworn and in original packaging.
-            {%- endif -%}
+      {%- assign has_media_video = false -%}
+      {%- for media in product.media -%}
+        {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+          {%- assign has_media_video = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign meta_video_raw = product.metafields.custom.video_url -%}
+      {%- assign meta_video = meta_video_raw.value | default: meta_video_raw -%}
+      {%- if has_media_video == false and meta_video != blank and meta_video != nil -%}
+          <div class="gallery-image-jc gallery-video-jc">
+            <video class="product-video-jc" autoplay loop muted playsinline controls>
+              <source src="{{ meta_video }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
           </div>
-        </div>
-      </div>
+      {%- endif -%}
 
-      <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-care">
-          Care Guide
-          <span class="accordion-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="accordion-body" id="acc-care">
-          <div class="accordion-content">
-            {%- if section.settings.care_text != blank -%}
-              {{ section.settings.care_text }}
-            {%- else -%}
-              Store in the provided jewelry box when not wearing. Clean gently with a soft cloth and warm water. Avoid contact with harsh chemicals, perfumes, and chlorine.
-            {%- endif -%}
-          </div>
-        </div>
-      </div>
-
-      <!-- Share -->
-      <div class="product-share">
-        <span class="product-share__label">{{ 'products.product.share' | t }}</span>
-        <a href="https://pinterest.com/pin/create/button/?url={{ shop.url }}{{ product.url }}&media={{ product.featured_image | image_url: width: 1200 }}&description={{ product.title | url_encode }}"
-          target="_blank" rel="noopener" class="product-share__link">Pinterest</a>
-        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="product-share__link">Instagram</a>
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ product.url }}"
-          target="_blank" rel="noopener" class="product-share__link">Facebook</a>
-      </div>
-
-    </div><!-- /product-info -->
-  </div><!-- /product-layout -->
-
-  <!-- Promise Banner -->
-  <div class="promise-banner">
-    <div class="eyebrow">The {{ shop.name }} Promise</div>
-    <h2 class="promise-banner__title">Crafted to Last a Lifetime</h2>
-    <p class="promise-banner__body">Every piece is handcrafted in our New York atelier using ethically sourced materials and time-honored techniques passed down through generations.</p>
-    <div class="promise-stats">
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'stat' -%}
-          <div {{ block.shopify_attributes }}>
-            <div class="promise-stat__num">{{ block.settings.number }}</div>
-            <div class="promise-stat__label">{{ block.settings.label }}</div>
+      {%- for media in product.media -%}
+        {%- if media.media_type == 'image' -%}
+          <div class="gallery-image-jc">
+            <img src="{{ media | image_url: width: 1200 }}" alt="{{ media.alt | escape }}" loading="lazy">
           </div>
         {%- endif -%}
       {%- endfor -%}
     </div>
-  </div>
 
-  <!-- Related Products -->
-  {%- assign related = product.metafields.custom.related_products.value | default: collections[product.collections.first.handle].products -%}
-  {%- if related.size > 1 -%}
-    <div class="related-products">
-      <div class="related-products__divider"></div>
-      <div class="related-products__header">
-        <div class="eyebrow">You May Also Love</div>
-        <h2 class="related-products__title">Complete the Look</h2>
-      </div>
-      <div class="products-grid">
-        {%- for related_product in related limit: 4 -%}
-          {%- unless related_product.handle == product.handle -%}
-            {%- render 'product-card', product: related_product -%}
-          {%- endunless -%}
-        {%- endfor -%}
+    <div class="product-info-jc">
+      <div class="product-info-inner-jc">
+        <h1 class="product-title-jc">{{ product.title }}</h1>
+
+        <div class="product-price-jc">
+          <span class="price-current-jc">{{ product.price | money }}</span>
+        </div>
+
+        {%- if product.compare_at_price > product.price -%}
+          <p class="price-note-jc">
+            <span class="price-compare-jc">{{ product.compare_at_price | money }}</span>
+            <span class="price-save-jc">Save {{ product.compare_at_price | minus: product.price | money }}</span>
+          </p>
+        {%- endif -%}
+
+        {%- if section.settings.show_financing_badge -%}
+          {%- assign _fin_price = product.selected_or_first_available_variant.price | divided_by: 4 -%}
+          <p class="financing-badge-jc">
+            <span class="financing-badge-jc__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
+            </span>
+            <span class="financing-badge-jc__text">
+              4 interest-free payments of <strong class="financing-per-payment-jc">{{ _fin_price | money }}</strong> with Shop Pay
+            </span>
+          </p>
+        {%- endif -%}
+
+        {%- assign desc_stripped = product.description | remove: 'Your browser does not support the video tag.' | remove: '360° View' -%}
+        {%- assign after_h2 = desc_stripped | split: '</h2>' -%}
+        {%- if after_h2.size > 1 -%}
+          {%- assign first_p_section = after_h2[1] | split: '</p>' | first -%}
+          {%- assign short_desc = first_p_section | strip_html | strip -%}
+        {%- else -%}
+          {%- assign short_desc = product.description | strip_html | remove: 'Your browser does not support the video tag.' | remove: '360° View' | strip | truncatewords: 40 -%}
+        {%- endif -%}
+        {%- if short_desc.size > 10 -%}
+          <p class="product-short-desc-jc">{{ short_desc }}</p>
+        {%- endif -%}
+
+        <p class="product-shipping-note-jc">
+          Complimentary insured delivery on every order
+        </p>
+
+        <p class="product-hook-jc"><em>Hand-finished in our New York atelier by third-generation master setters.</em></p>
+
+        {%- form 'product', product -%}
+          <input type="hidden" name="id" id="selected-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+
+          {%- if product.has_only_default_variant == false -%}
+            {%- for option in product.options_with_values -%}
+              {%- assign opt_name_lower = option.name | downcase -%}
+              {%- assign is_ring = false -%}
+              {%- assign p_type = product.type | downcase -%}
+              {%- assign p_title = product.title | downcase -%}
+              {%- if p_type contains 'ring' or p_title contains 'ring' or p_title contains 'engagement' or p_title contains 'wedding' or p_type contains 'wedding' -%}
+                {%- assign is_ring = true -%}
+              {%- endif -%}
+              {%- if opt_name_lower == 'size' and option.values.size <= 3 and is_ring -%}
+                {%- continue -%}
+              {%- endif -%}
+              <div class="variant-group-jc">
+                <label class="variant-label-jc">{{ option.name }}</label>
+                <div class="variant-options-jc">
+                  {%- for value in option.values -%}
+                    <button type="button" class="variant-btn-jc {% if option.selected_value == value %}active{% endif %}" data-option-position="{{ option.position }}" data-option-value="{{ value }}">
+                      {{ value }}
+                    </button>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- assign product_type_lower = product.type | downcase -%}
+          {%- assign product_title_lower = product.title | downcase -%}
+          {%- assign has_multiple_sizes = false -%}
+          {%- for option in product.options_with_values -%}
+            {%- assign option_lower = option.name | downcase -%}
+            {%- if option_lower == 'size' and option.values.size > 3 -%}
+              {%- assign has_multiple_sizes = true -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- assign is_ring_product = false -%}
+          {%- if product_type_lower == 'ring' or product_type_lower == 'engagement ring' or product_type_lower == 'wedding band' or product_type_lower contains 'wedding' -%}
+            {%- assign is_ring_product = true -%}
+          {%- elsif product_title_lower contains 'engagement ring' or product_title_lower contains 'wedding band' or product_title_lower contains 'wedding ring' -%}
+            {%- assign is_ring_product = true -%}
+          {%- endif -%}
+          {%- if product_type_lower == 'earring' or product_type_lower == 'earrings' -%}
+            {%- assign is_ring_product = false -%}
+          {%- endif -%}
+
+          {%- if is_ring_product and has_multiple_sizes == false -%}
+              <div class="variant-group-jc ring-size-selector-jc">
+                <label class="variant-label-jc">
+                  Ring Size
+                  <button type="button" class="size-guide-link-jc" id="openSizeGuide">Sizing</button>
+                </label>
+                <div class="variant-options-jc ring-sizes-jc">
+                  {%- assign ring_sizes = '4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10' | split: ',' -%}
+                  {%- for size in ring_sizes -%}
+                    <button type="button" class="variant-btn-jc ring-size-btn-jc {% if size == '7' %}active{% endif %}" data-ring-size="{{ size }}">{{ size }}</button>
+                  {%- endfor -%}
+                </div>
+                <input type="hidden" name="properties[Ring Size]" id="ring-size-input" value="7">
+              </div>
+
+              <div class="size-guide-overlay" id="sizeGuideOverlay">
+                <div class="size-guide-modal" id="sizeGuideModal">
+                  <div class="size-guide-header">
+                    <h3>Ring sizing</h3>
+                    <button type="button" class="size-guide-close" id="closeSizeGuide" aria-label="Close">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="size-guide-body">
+                    <p class="size-guide-intro">Find your size using the chart below. Between two sizes, take the larger — a ring should breathe.</p>
+                    <table class="size-guide-table">
+                      <thead>
+                        <tr><th>US</th><th>EU</th><th>UK</th><th>Diameter (mm)</th><th>Circumference (mm)</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>4</td><td>46.8</td><td>H</td><td>14.9</td><td>46.8</td></tr>
+                        <tr><td>4.5</td><td>47.8</td><td>I</td><td>15.3</td><td>47.8</td></tr>
+                        <tr><td>5</td><td>49.0</td><td>J ½</td><td>15.7</td><td>49.0</td></tr>
+                        <tr><td>5.5</td><td>50.3</td><td>K ½</td><td>16.1</td><td>50.3</td></tr>
+                        <tr><td>6</td><td>51.5</td><td>L ½</td><td>16.5</td><td>51.5</td></tr>
+                        <tr><td>6.5</td><td>52.8</td><td>M ½</td><td>16.9</td><td>52.8</td></tr>
+                        <tr class="size-guide-highlight"><td>7</td><td>54.0</td><td>N ½</td><td>17.3</td><td>54.0</td></tr>
+                        <tr><td>7.5</td><td>55.3</td><td>O ½</td><td>17.7</td><td>55.3</td></tr>
+                        <tr><td>8</td><td>56.6</td><td>P ½</td><td>18.1</td><td>56.6</td></tr>
+                        <tr><td>8.5</td><td>57.8</td><td>Q ½</td><td>18.5</td><td>57.8</td></tr>
+                        <tr><td>9</td><td>59.1</td><td>R ½</td><td>18.9</td><td>59.1</td></tr>
+                        <tr><td>9.5</td><td>60.3</td><td>S ½</td><td>19.4</td><td>60.3</td></tr>
+                        <tr><td>10</td><td>61.6</td><td>T ½</td><td>19.8</td><td>61.6</td></tr>
+                      </tbody>
+                    </table>
+                    <div class="size-guide-tips">
+                      <h4>How to measure</h4>
+                      <ol>
+                        <li><strong>String method:</strong> Wrap a thin string around your finger, mark where it overlaps, and measure the length in mm. Match it to the circumference column.</li>
+                        <li><strong>Existing ring:</strong> Place a ring that fits well on a ruler and measure the inside diameter in mm.</li>
+                        <li><strong>When to measure:</strong> Fingers are smallest in the morning and when cold. Measure at the end of the day for the truest fit.</li>
+                      </ol>
+                      <p class="size-guide-note">All Laura Milman rings include a <strong>complimentary first resizing</strong> within 30 days of delivery.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          {%- endif -%}
+
+          <button type="submit" class="buy-now-btn-jc">
+            Add to selection
+          </button>
+        {%- endform -%}
+
+        <div class="trust-badges-row">
+          <div class="trust-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span>Insured delivery</span>
+          </div>
+          <span class="trust-badge__divider">|</span>
+          <div class="trust-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <span>30-day returns</span>
+          </div>
+          <span class="trust-badge__divider">|</span>
+          <div class="trust-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            {%- assign _pt = product.type | downcase -%}
+            <span>{%- if _pt == 'engagement ring' or _pt == 'diamond' or _pt == 'loose diamond' -%}Certified stone{%- else -%}Hand-finished{%- endif -%}</span>
+          </div>
+          <span class="trust-badge__divider">|</span>
+          <div class="trust-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+            <span>Lifetime warranty</span>
+          </div>
+        </div>
+
+        <div class="trust-list-jc">
+          <div class="trust-item-jc">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Independently certified stones (IGI / GIA)</span>
+          </div>
+          <div class="trust-item-jc">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Designed and finished in New York</span>
+          </div>
+          <div class="trust-item-jc">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span>Insured worldwide delivery</span>
+          </div>
+          <div class="trust-item-jc">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Lifetime warranty against manufacturing defects</span>
+          </div>
+        </div>
+
+        {%- assign p_type_check = product.type | downcase -%}
+        {%- assign p_title_check = product.title | downcase -%}
+        {%- assign p_tags_joined = product.tags | join: ', ' | downcase -%}
+        {%- assign jewelry_category = 'jewelry' -%}
+        {%- if p_type_check contains 'ring' or p_title_check contains 'ring' or p_title_check contains 'engagement' or p_title_check contains 'wedding' -%}
+          {%- assign jewelry_category = 'ring' -%}
+        {%- elsif p_type_check contains 'bracelet' or p_title_check contains 'bracelet' or p_title_check contains 'bangle' -%}
+          {%- assign jewelry_category = 'bracelet' -%}
+        {%- elsif p_type_check contains 'necklace' or p_title_check contains 'necklace' or p_title_check contains 'pendant' -%}
+          {%- assign jewelry_category = 'necklace' -%}
+        {%- elsif p_type_check contains 'earring' or p_title_check contains 'earring' or p_title_check contains 'stud' or p_title_check contains 'hoop' -%}
+          {%- assign jewelry_category = 'earring' -%}
+        {%- endif -%}
+
+        {%- assign parsed_carat = '' -%}
+        {%- assign parsed_color = '' -%}
+        {%- assign parsed_clarity = '' -%}
+        {%- assign parsed_metal = '' -%}
+        {%- if product.title contains ' | ' -%}
+          {%- assign pipe_parts = product.title | split: ' | ' -%}
+          {%- assign parsed_metal = pipe_parts[1] | default: '' | strip -%}
+          {%- assign before_pipe = pipe_parts[0] | default: '' -%}
+          {%- assign title_words = before_pipe | split: ' ' -%}
+          {%- for word in title_words -%}
+            {%- if word == 'CT' and forloop.index0 > 0 -%}
+              {%- assign ct_idx = forloop.index0 | minus: 1 -%}
+              {%- assign parsed_carat = title_words[ct_idx] | append: ' carats' -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if before_pipe contains 'E-F' -%}
+            {%- assign parsed_color = 'E-F' -%}
+            {%- for word in title_words -%}
+              {%- if word contains 'VS' or word contains 'VVS' or word contains 'SI' -%}
+                {%- assign parsed_clarity = word -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        {%- elsif product.title contains ' - ' -%}
+          {%- assign title_segments = product.title | split: ' - ' -%}
+          {%- assign title_main = title_segments[0] | default: '' -%}
+          {%- assign title_color_clarity = title_segments[1] | default: '' -%}
+          {%- assign title_metal_seg = title_segments[2] | default: '' -%}
+          {%- assign old_words = title_main | split: ' ' -%}
+          {%- for word in old_words -%}
+            {%- if forloop.index0 == 0 -%}{%- assign maybe_carat = word -%}{%- endif -%}
+            {%- if word == 'Carat' or word == 'carat' -%}
+              {%- assign parsed_carat = maybe_carat | append: ' carats' -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if title_color_clarity != '' -%}
+            {%- assign cc_parts = title_color_clarity | split: ' ' -%}
+            {%- if cc_parts.size >= 1 -%}{%- assign parsed_color = cc_parts[0] -%}{%- endif -%}
+            {%- if cc_parts.size >= 2 -%}{%- assign parsed_clarity = cc_parts[1] -%}{%- endif -%}
+          {%- endif -%}
+          {%- assign parsed_metal = title_metal_seg | strip -%}
+        {%- endif -%}
+
+        {%- assign parsed_shape = '' -%}
+        {%- if p_tags_joined contains 'emerald cut' -%}{%- assign parsed_shape = 'Emerald Cut' -%}
+        {%- elsif p_tags_joined contains 'oval' -%}{%- assign parsed_shape = 'Oval' -%}
+        {%- elsif p_tags_joined contains 'round brilliant' -%}{%- assign parsed_shape = 'Round Brilliant' -%}
+        {%- elsif p_tags_joined contains 'round' -%}{%- assign parsed_shape = 'Round' -%}
+        {%- elsif p_tags_joined contains 'princess cut' -%}{%- assign parsed_shape = 'Princess Cut' -%}
+        {%- elsif p_tags_joined contains 'cushion cut' -%}{%- assign parsed_shape = 'Cushion Cut' -%}
+        {%- elsif p_tags_joined contains 'cushion' -%}{%- assign parsed_shape = 'Cushion' -%}
+        {%- elsif p_tags_joined contains 'pear' -%}{%- assign parsed_shape = 'Pear' -%}
+        {%- elsif p_tags_joined contains 'marquise' -%}{%- assign parsed_shape = 'Marquise' -%}
+        {%- elsif p_tags_joined contains 'radiant' -%}{%- assign parsed_shape = 'Radiant' -%}
+        {%- elsif p_tags_joined contains 'asscher' -%}{%- assign parsed_shape = 'Asscher' -%}
+        {%- elsif p_tags_joined contains 'heart' -%}{%- assign parsed_shape = 'Heart' -%}
+        {%- elsif p_tags_joined contains 'mixed shape' -%}{%- assign parsed_shape = 'Mixed Shape' -%}
+        {%- endif -%}
+
+        {%- assign parsed_setting = '' -%}
+        {%- if p_tags_joined contains 'hidden halo' -%}{%- assign parsed_setting = 'Hidden Halo' -%}
+        {%- elsif p_tags_joined contains 'halo' -%}{%- assign parsed_setting = 'Halo' -%}
+        {%- elsif p_tags_joined contains 'split shank' -%}{%- assign parsed_setting = 'Split Shank' -%}
+        {%- elsif p_tags_joined contains 'solitaire' -%}{%- assign parsed_setting = 'Solitaire' -%}
+        {%- elsif p_tags_joined contains 'three stone' or p_tags_joined contains '3 stone' -%}{%- assign parsed_setting = 'Three Stone' -%}
+        {%- elsif p_tags_joined contains 'pave' or p_tags_joined contains 'pavé' -%}{%- assign parsed_setting = 'Pavé' -%}
+        {%- elsif p_tags_joined contains 'bezel' -%}{%- assign parsed_setting = 'Bezel' -%}
+        {%- elsif p_tags_joined contains 'channel' -%}{%- assign parsed_setting = 'Channel Set' -%}
+        {%- elsif p_tags_joined contains 'prong' -%}{%- assign parsed_setting = 'Prong Set' -%}
+        {%- elsif p_tags_joined contains 'tennis' -%}{%- assign parsed_setting = 'Tennis' -%}
+        {%- endif -%}
+
+        {%- assign desc_lower = product.description | downcase -%}
+        {%- assign desc_parsed_color = '' -%}
+        {%- assign desc_parsed_clarity = '' -%}
+        {%- if desc_lower contains 'e-f color' or desc_lower contains 'e-f,' -%}{%- assign desc_parsed_color = 'E-F' -%}
+        {%- elsif desc_lower contains 'd-e-f color' or desc_lower contains 'd-e-f,' -%}{%- assign desc_parsed_color = 'D-E-F' -%}
+        {%- elsif desc_lower contains 'd-f color' -%}{%- assign desc_parsed_color = 'D-F' -%}
+        {%- elsif desc_lower contains 'g-h color' -%}{%- assign desc_parsed_color = 'G-H' -%}
+        {%- elsif desc_lower contains 'd color' -%}{%- assign desc_parsed_color = 'D' -%}
+        {%- elsif desc_lower contains 'e color' -%}{%- assign desc_parsed_color = 'E' -%}
+        {%- elsif desc_lower contains 'f color' -%}{%- assign desc_parsed_color = 'F' -%}
+        {%- endif -%}
+        {%- if desc_lower contains 'vvs1 clarity' or desc_lower contains 'vvs1,' -%}{%- assign desc_parsed_clarity = 'VVS1' -%}
+        {%- elsif desc_lower contains 'vvs2 clarity' or desc_lower contains 'vvs2,' -%}{%- assign desc_parsed_clarity = 'VVS2' -%}
+        {%- elsif desc_lower contains 'vs1 clarity' or desc_lower contains 'vs1,' -%}{%- assign desc_parsed_clarity = 'VS1' -%}
+        {%- elsif desc_lower contains 'vs2 clarity' or desc_lower contains 'vs2,' -%}{%- assign desc_parsed_clarity = 'VS2' -%}
+        {%- elsif desc_lower contains 'vs clarity' or desc_lower contains 'vs ' -%}{%- assign desc_parsed_clarity = 'VS' -%}
+        {%- elsif desc_lower contains 'si1 clarity' -%}{%- assign desc_parsed_clarity = 'SI1' -%}
+        {%- elsif desc_lower contains 'si2 clarity' -%}{%- assign desc_parsed_clarity = 'SI2' -%}
+        {%- endif -%}
+
+        {%- assign desc_parsed_setting = '' -%}
+        {%- if parsed_setting == blank -%}
+          {%- if desc_lower contains 'prong setting' or desc_lower contains 'prong set' -%}{%- assign desc_parsed_setting = 'Prong' -%}
+          {%- elsif desc_lower contains 'bezel setting' or desc_lower contains 'bezel set' -%}{%- assign desc_parsed_setting = 'Bezel' -%}
+          {%- elsif desc_lower contains 'channel setting' or desc_lower contains 'channel set' -%}{%- assign desc_parsed_setting = 'Channel' -%}
+          {%- elsif desc_lower contains 'pave setting' or desc_lower contains 'pavé' -%}{%- assign desc_parsed_setting = 'Pavé' -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- assign display_carat = product.metafields.custom.carat_weight | default: parsed_carat -%}
+        {%- if display_carat == blank -%}{%- assign display_carat = '—' -%}{%- endif -%}
+        {%- assign display_center_stone = product.metafields.custom.center_stone | default: '' -%}
+        {%- if display_center_stone == blank and parsed_carat != '' and parsed_shape != '' -%}
+          {%- assign display_center_stone = parsed_carat | append: ' ' | append: parsed_shape -%}
+        {%- endif -%}
+        {%- if display_center_stone == blank -%}{%- assign display_center_stone = '—' -%}{%- endif -%}
+        {%- assign display_shape = product.metafields.custom.shape | default: parsed_shape -%}
+        {%- if display_shape == blank -%}{%- assign display_shape = '—' -%}{%- endif -%}
+        {%- assign display_color = product.metafields.custom.color | default: parsed_color -%}
+        {%- if display_color == blank -%}{%- assign display_color = desc_parsed_color -%}{%- endif -%}
+        {%- if display_color == blank -%}{%- assign display_color = '—' -%}{%- endif -%}
+        {%- assign display_clarity = product.metafields.custom.clarity | default: parsed_clarity -%}
+        {%- if display_clarity == blank -%}{%- assign display_clarity = desc_parsed_clarity -%}{%- endif -%}
+        {%- if display_clarity == blank -%}{%- assign display_clarity = '—' -%}{%- endif -%}
+        {%- assign display_metal = product.metafields.custom.metal | default: parsed_metal -%}
+        {%- if display_metal == blank -%}{%- assign display_metal = '—' -%}{%- endif -%}
+        {%- assign display_setting = product.metafields.custom.setting | default: parsed_setting -%}
+        {%- if display_setting == blank -%}{%- assign display_setting = desc_parsed_setting -%}{%- endif -%}
+        {%- if display_setting == blank -%}{%- assign display_setting = '—' -%}{%- endif -%}
+
+        <div class="details-section-jc">
+          <div class="specs-tabs-jc">
+            <button class="specs-tab-jc active" data-tab="diamond-specs">The stone</button>
+            <button class="specs-tab-jc" data-tab="product-details">
+              {%- case jewelry_category -%}
+                {%- when 'ring' -%}The ring
+                {%- when 'bracelet' -%}The bracelet
+                {%- when 'necklace' -%}The necklace
+                {%- when 'earring' -%}The earrings
+                {%- else -%}The piece
+              {%- endcase -%}
+            </button>
+          </div>
+
+          <div class="specs-content-jc active" id="diamond-specs">
+            <div class="spec-row-jc"><span>Total carat weight</span><span>{{ display_carat }}</span></div>
+            {%- if jewelry_category == 'ring' -%}
+              <div class="spec-row-jc"><span>Center stone</span><span>{{ display_center_stone }}</span></div>
+            {%- endif -%}
+            <div class="spec-row-jc"><span>Shape</span><span>{{ display_shape }}</span></div>
+            <div class="spec-row-jc"><span>Color</span><span>{{ display_color }}</span></div>
+            <div class="spec-row-jc"><span>Clarity</span><span>{{ display_clarity }}</span></div>
+            <div class="spec-row-jc"><span>Origin</span><span>Lab-grown, fully traceable</span></div>
+          </div>
+
+          <div class="specs-content-jc" id="product-details">
+            <div class="spec-row-jc"><span>Metal</span><span>{{ display_metal }}</span></div>
+            <div class="spec-row-jc"><span>Setting</span><span>{{ display_setting }}</span></div>
+            {%- case jewelry_category -%}
+              {%- when 'ring' -%}
+                <div class="spec-row-jc"><span>Style</span><span>{{ product.type | default: 'Ring' }}</span></div>
+              {%- when 'bracelet' -%}
+                <div class="spec-row-jc"><span>Length</span><span>{{ product.variants.first.title | default: '7 inches' }}</span></div>
+                <div class="spec-row-jc"><span>Clasp</span><span>{{ product.metafields.custom.clasp | default: 'Hidden box clasp with safety latch' }}</span></div>
+              {%- when 'necklace' -%}
+                <div class="spec-row-jc"><span>Length</span><span>{{ product.variants.first.title | default: '18 inches' }}</span></div>
+                <div class="spec-row-jc"><span>Chain</span><span>{{ product.metafields.custom.chain_type | default: '—' }}</span></div>
+                <div class="spec-row-jc"><span>Clasp</span><span>{{ product.metafields.custom.clasp | default: 'Lobster claw' }}</span></div>
+              {%- when 'earring' -%}
+                {%- assign earring_style_display = product.metafields.custom.earring_style -%}
+                {%- if earring_style_display == blank -%}
+                  {%- if p_title_check contains 'huggie' -%}{%- assign earring_style_display = 'Huggie' -%}
+                  {%- elsif p_title_check contains 'hoop' -%}{%- assign earring_style_display = 'Hoop' -%}
+                  {%- elsif p_title_check contains 'stud' -%}{%- assign earring_style_display = 'Stud' -%}
+                  {%- elsif p_title_check contains 'drop' -%}{%- assign earring_style_display = 'Drop' -%}
+                  {%- elsif p_title_check contains 'martini' -%}{%- assign earring_style_display = 'Martini' -%}
+                  {%- elsif p_title_check contains 'dangle' -%}{%- assign earring_style_display = 'Dangle' -%}
+                  {%- elsif p_title_check contains 'climber' -%}{%- assign earring_style_display = 'Climber' -%}
+                  {%- elsif p_title_check contains 'designer' -%}{%- assign earring_style_display = 'Designer' -%}
+                  {%- elsif p_title_check contains 'c hoop' -%}{%- assign earring_style_display = 'C Hoop' -%}
+                  {%- else -%}{%- assign earring_style_display = 'Earring' -%}
+                  {%- endif -%}
+                {%- endif -%}
+                <div class="spec-row-jc"><span>Style</span><span>{{ earring_style_display }}</span></div>
+                <div class="spec-row-jc"><span>Back</span><span>{{ product.metafields.custom.back_type | default: 'Push back' }}</span></div>
+              {%- else -%}
+                <div class="spec-row-jc"><span>Type</span><span>{{ product.type | default: '—' }}</span></div>
+            {%- endcase -%}
+          </div>
+        </div>
       </div>
     </div>
-  {%- endif -%}
+  </div>
+</section>
 
-</div><!-- /product-page -->
+<section class="lab-grown-section-jc">
+  <div class="lab-grown-container-jc">
+    <h2 class="lab-grown-heading-jc">On the stone in this piece</h2>
+    <p class="lab-grown-intro-jc">
+      Lab-grown diamonds are real diamonds — chemically, physically, and optically identical to those formed in the earth. They cost 30–70% less, carry the same IGI / GIA grading, and arrive in your ring with full provenance documented from seed to setting.
+    </p>
+    <div class="lab-grown-icons-jc">
+      <div class="lab-grown-icon-item-jc">
+        <div class="lab-grown-icon-circle-jc">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h3>Identical brilliance</h3>
+        <p>The same carbon crystal, the same fire, the same hardness as a mined stone.</p>
+      </div>
+      <div class="lab-grown-icon-item-jc">
+        <div class="lab-grown-icon-circle-jc">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Considered value</h3>
+        <p>30–70% below comparable mined stones — reinvested into cut grade or carat.</p>
+      </div>
+      <div class="lab-grown-icon-item-jc">
+        <div class="lab-grown-icon-circle-jc">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <h3>Documented origin</h3>
+        <p>Conflict-free, traceable from seed to finished gem, with a lighter footprint than mining.</p>
+      </div>
+    </div>
+    <div class="guarantee-section-jc">
+      <h3 class="guarantee-heading-jc">The Laura Milman commitment</h3>
+      <p class="guarantee-text-jc">
+        Every piece arrives with its certificate of authenticity, complimentary insured delivery, 30-day returns, and a lifetime warranty against manufacturing defects.
+      </p>
+      <div class="guarantee-badges-jc">
+        <div class="guarantee-badge-jc"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg><span>Certificate of authenticity</span></div>
+        <div class="guarantee-badge-jc"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span>30-day returns</span></div>
+        <div class="guarantee-badge-jc"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Insured delivery</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% render 'product-styles' %}
+{% render 'product-scripts' %}
+
+{%- capture product_schema -%}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": {{ product.title | json }},
+    "description": {{ product.description | strip_html | truncate: 200 | json }},
+    "image": [
+      {%- for image in product.images limit: 5 -%}
+        {{ image.src | image_url: width: 1024 | prepend: "https:" | json }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ],
+    "url": "{{ shop.url }}{{ product.url }}",
+    "brand": { "@type": "Brand", "name": "Laura Milman" },
+    "sku": {{ product.selected_or_first_available_variant.sku | json }},
+    "mpn": {{ product.selected_or_first_available_variant.sku | json }},
+    "offers": {
+      "@type": "Offer",
+      "url": "{{ shop.url }}{{ product.url }}",
+      "price": "{{ product.price | money_without_currency | remove: ',' }}",
+      "priceCurrency": "{{ cart.currency.iso_code }}",
+      "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+      "seller": { "@type": "Organization", "name": "Laura Milman" }
+    }
+    {%- if product.metafields.custom.metal != blank -%}
+    ,"material": {{ product.metafields.custom.metal | json }}
+    {%- endif -%}
+    {%- assign has_additional = false -%}
+    {%- if product.metafields.custom.carat_weight != blank -%}{%- assign has_additional = true -%}{%- endif -%}
+    {%- if product.metafields.custom.diamond_shape != blank -%}{%- assign has_additional = true -%}{%- endif -%}
+    {%- if product.metafields.custom.color != blank -%}{%- assign has_additional = true -%}{%- endif -%}
+    {%- if product.metafields.custom.clarity != blank -%}{%- assign has_additional = true -%}{%- endif -%}
+    {%- if has_additional -%}
+    ,"additionalProperty": [
+      {%- assign prop_comma = false -%}
+      {%- if product.metafields.custom.carat_weight != blank -%}
+        {%- if prop_comma -%},{%- endif -%}
+        {"@type":"PropertyValue","name":"Carat Weight","value":{{ product.metafields.custom.carat_weight | json }}}
+        {%- assign prop_comma = true -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.diamond_shape != blank -%}
+        {%- if prop_comma -%},{%- endif -%}
+        {"@type":"PropertyValue","name":"Diamond Shape","value":{{ product.metafields.custom.diamond_shape | json }}}
+        {%- assign prop_comma = true -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.color != blank -%}
+        {%- if prop_comma -%},{%- endif -%}
+        {"@type":"PropertyValue","name":"Color","value":{{ product.metafields.custom.color | json }}}
+        {%- assign prop_comma = true -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.clarity != blank -%}
+        {%- if prop_comma -%},{%- endif -%}
+        {"@type":"PropertyValue","name":"Clarity","value":{{ product.metafields.custom.clarity | json }}}
+        {%- assign prop_comma = true -%}
+      {%- endif -%}
+    ]
+    {%- endif -%}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Are lab-grown diamonds real diamonds?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Lab-grown diamonds have the same chemical composition (pure carbon), crystal structure, hardness, and optical properties as mined diamonds. They are real diamonds by every scientific and gemological standard." } },
+      { "@type": "Question", "name": "How are Laura Milman pieces made?", "acceptedAnswer": { "@type": "Answer", "text": "Each piece is designed in our New York atelier and hand-finished by master setters from the Milman family workshop. Center stones are independently graded by IGI or GIA before they are set." } },
+      { "@type": "Question", "name": "What is the Laura Milman commitment?", "acceptedAnswer": { "@type": "Answer", "text": "Every piece from Laura Milman arrives with a certificate of authenticity, complimentary insured delivery, 30-day returns, and a lifetime warranty against manufacturing defects. Rings include a complimentary first resizing within 30 days." } }
+    ]
+  }
+]
+</script>
+{%- endcapture -%}
+{{ product_schema }}
 
 {% schema %}
 {
-  "name": "Product",
-  "tag": "section",
-  "class": "section-main-product",
+  "name": "Product Info",
   "settings": [
-    {
-      "type": "textarea",
-      "id": "shipping_text",
-      "label": "Shipping & Returns text"
-    },
-    {
-      "type": "textarea",
-      "id": "care_text",
-      "label": "Care Guide text"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "trust_badge",
-      "name": "Trust Badge",
-      "settings": [
-        {
-          "type": "text",
-          "id": "icon",
-          "label": "Icon (symbol or emoji)",
-          "default": "◇"
-        },
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Authenticity Guaranteed"
-        }
-      ]
-    },
-    {
-      "type": "stat",
-      "name": "Promise Stat",
-      "settings": [
-        {
-          "type": "text",
-          "id": "number",
-          "label": "Number / figure",
-          "default": "18k"
-        },
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Solid Gold"
-        }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "Product",
-      "blocks": [
-        {
-          "type": "trust_badge",
-          "settings": { "icon": "◇", "label": "Authenticity Guaranteed" }
-        },
-        {
-          "type": "trust_badge",
-          "settings": { "icon": "⟡", "label": "Free Insured Shipping" }
-        },
-        {
-          "type": "trust_badge",
-          "settings": { "icon": "↻", "label": "30-Day Returns" }
-        },
-        {
-          "type": "stat",
-          "settings": { "number": "18k", "label": "Solid Gold" }
-        },
-        {
-          "type": "stat",
-          "settings": { "number": "30", "label": "Day Returns" }
-        }
-      ]
-    }
+    { "type": "checkbox", "id": "show_trust_badges", "default": true, "label": "Show trust badges" },
+    { "type": "checkbox", "id": "show_financing_badge", "default": true, "label": "Show financing badge (Shop Pay installments)" }
   ]
 }
 {% endschema %}

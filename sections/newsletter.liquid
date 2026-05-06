@@ -1,0 +1,49 @@
+{%- comment -%}
+  Laura Milman — Newsletter Section ("The Atelier List").
+  Heritage voice: invitation-only feel, references the Milman atelier.
+{%- endcomment -%}
+
+<section class="newsletter section">
+  <div class="container">
+    <div class="newsletter__inner">
+      <div class="newsletter__content">
+        <h3 class="newsletter__title">{{ section.settings.heading | default: 'The Atelier List' }}</h3>
+        <p class="newsletter__text">{{ section.settings.text | default: 'Private invitations to new heirloom pieces, atelier viewings by appointment, and rarely-seen jewels from the Milman archive. Sent sparingly.' }}</p>
+      </div>
+      {%- comment -%} TODO: Replace with Klaviyo embed once LM list ID is wired in. {%- endcomment -%}
+      {% form 'customer', id: 'newsletter-form', class: 'newsletter__form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter, atelier-list">
+        <input
+          type="email"
+          name="contact[email]"
+          class="newsletter__input"
+          placeholder="{{ section.settings.placeholder | default: 'Your email address' }}"
+          required
+          autocomplete="email"
+        >
+        <button type="submit" class="btn btn--gold">
+          {{ section.settings.button_text | default: 'Request invitation' }}
+        </button>
+        {%- if form.posted_successfully? -%}
+          <p class="newsletter__success" style="color: var(--accent-gold); margin-top: 1rem;">
+            {{ section.settings.success_message | default: 'Welcome to the atelier list. We will be in touch.' }}
+          </p>
+        {%- endif -%}
+      {% endform %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The Atelier List" },
+    { "type": "textarea", "id": "text", "label": "Description", "default": "Private invitations to new heirloom pieces, atelier viewings by appointment, and rarely-seen jewels from the Milman archive. Sent sparingly." },
+    { "type": "text", "id": "placeholder", "label": "Input placeholder", "default": "Your email address" },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Request invitation" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Welcome to the atelier list. We will be in touch." }
+  ],
+  "presets": [ { "name": "Newsletter" } ]
+}
+{% endschema %}

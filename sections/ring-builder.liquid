@@ -1,0 +1,80 @@
+{%- comment -%}
+  Laura Milman — Ring Builder entry section.
+  Layout/JS architecture cloned from PD; voice rewritten in LM
+  heritage register ("design your heirloom", "the atelier archive").
+{%- endcomment -%}
+
+{% render 'ring-settings-data' %}
+
+<section class="ring-builder-section section">
+  <div class="container">
+    <div id="ringBuilderContainer"
+         {% if section.settings.custom_ring_product != blank %}
+           data-variant-id="{{ section.settings.custom_ring_product.selected_or_first_available_variant.id }}"
+         {% endif %}>
+      <div class="rb-entry">
+        <div class="rb-entry__header">
+          <h1 class="rb-entry__title">{{ section.settings.heading | default: 'Design Your Heirloom' }}</h1>
+          <p class="rb-entry__subtitle">{{ section.settings.subheading | default: 'Begin with a stone or a setting from the atelier archive. We will build the ring around the choice you make — and finish it by hand in New York.' }}</p>
+        </div>
+
+        <div class="rb-entry__paths">
+          <div class="entry-path-card" data-path="diamond-first">
+            <div class="entry-path-card__icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <h3 class="entry-path-card__title">Begin with the Stone</h3>
+            <p class="entry-path-card__description">Select your diamond first. We will pair it with a setting from the atelier matched to its proportions.</p>
+            <span class="entry-path-card__cta">
+              View stones
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </span>
+          </div>
+
+          <div class="entry-path-card" data-path="setting-first">
+            <div class="entry-path-card__icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4m0 14v4m11-11h-4M5 12H1m17.66-6.66l-2.83 2.83M9.17 14.83l-2.83 2.83m0-11.32l2.83 2.83m5.66 5.66l2.83 2.83"/>
+              </svg>
+            </div>
+            <h3 class="entry-path-card__title">Begin with the Setting</h3>
+            <p class="entry-path-card__description">Choose from our atelier settings — the Solitaire, the Vintage, the Hidden Halo — then select the stone to complete the ring.</p>
+            <span class="entry-path-card__cta">
+              View settings
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Ring builder asset bundle (CSS split into 2 files due to size). {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'ring-builder.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'ring-builder-2.css' | asset_url }}">
+<script src="{{ 'diamond-api.js' | asset_url }}" defer></script>
+<script src="{{ 'ring-builder.js' | asset_url }}" defer></script>
+<script src="{{ 'ring-builder-2.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Ring Builder",
+  "tag": "section",
+  "class": "ring-builder-section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Design Your Heirloom" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Begin with a stone or a setting from the atelier archive. We will build the ring around the choice you make — and finish it by hand in New York." },
+    { "type": "header", "content": "Cart Integration" },
+    { "type": "product", "id": "custom_ring_product", "label": "Custom Ring Product", "info": "Create a product called 'Bespoke Engagement Ring' and select it here. The ring details will be added as line item properties." }
+  ],
+  "presets": [ { "name": "Ring Builder" } ]
+}
+{% endschema %}

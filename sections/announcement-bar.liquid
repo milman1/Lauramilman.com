@@ -1,0 +1,29 @@
+{%- comment -%}
+  Laura Milman — Announcement Bar
+  Optional sticky bar above the header.
+{%- endcomment -%}
+
+{%- if section.settings.show_announcement -%}
+  <div class="announcement-bar" style="background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 10px; text-align: center; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase;">
+    <div class="container">
+      {%- if section.settings.link != blank -%}
+        <a href="{{ section.settings.link }}" style="color: inherit;">{{ section.settings.text }}</a>
+      {%- else -%}
+        {{ section.settings.text }}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    { "type": "checkbox", "id": "show_announcement", "default": true, "label": "Show announcement" },
+    { "type": "text", "id": "text", "default": "Complimentary shipping & insured delivery on every order", "label": "Announcement text" },
+    { "type": "url", "id": "link", "label": "Link (optional)" },
+    { "type": "color", "id": "background_color", "default": "#1c1a1a", "label": "Background color" },
+    { "type": "color", "id": "text_color", "default": "#efecec", "label": "Text color" }
+  ]
+}
+{% endschema %}

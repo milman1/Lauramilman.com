@@ -3,10 +3,15 @@
     "main": {
       "type": "main-collection",
       "settings": {
-        "eyebrow": "Collection",
-        "products_per_page": 24
+        "products_per_page": 12,
+        "show_filters": true,
+        "show_metal_filter": true,
+        "show_carat_filter": true,
+        "show_style_filter": true
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

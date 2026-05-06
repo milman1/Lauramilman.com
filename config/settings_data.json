@@ -1,11 +1,51 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
-    "accent_color": "#836630",
-    "bg_color": "#F5EFE6",
-    "hero_variant": "dramatic",
-    "social_instagram": "",
-    "social_pinterest": "",
-    "social_facebook": ""
-  },
-  "presets": {}
+    "primary_color": "#1c1a1a",
+    "accent_color": "#dea882",
+    "sections": {
+      "announcement-bar": {
+        "type": "announcement-bar",
+        "settings": {
+          "show_announcement": true,
+          "text": "Complimentary shipping on every Laura Milman order",
+          "link": "",
+          "background_color": "#1c1a1a",
+          "text_color": "#efecec"
+        }
+      },
+      "header": {
+        "type": "header",
+        "settings": {
+          "logo": "shopify://shop_images/LMNY_1200_x_628_px_58447a30-cfc7-465b-86a9-06b365d9aeac.png",
+          "menu": "main-menu",
+          "enable_sticky": true
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "settings": {
+          "logo": "shopify://shop_images/LMNY_1200_x_628_px_58447a30-cfc7-465b-86a9-06b365d9aeac.png",
+          "description": "Laura Milman — New York heritage fine jewelry from the Milman family workshop. Heirloom pieces designed and finished by hand.",
+          "social_instagram": "https://instagram.com/laurasgemsnyc",
+          "social_facebook": "https://facebook.com/laurasgemsnyc",
+          "social_pinterest": "",
+          "social_tiktok": "https://tiktok.com/@laurasgemsnyc",
+          "contact_email": "hello@lauramilman.com",
+          "contact_phone": "",
+          "contact_location": "New York, NY"
+        }
+      }
+    },
+    "content_for_index": [],
+    "blocks": {}
+  }
 }

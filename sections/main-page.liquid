@@ -1,0 +1,44 @@
+{%- comment -%}
+  Laura Milman — Generic Page section.
+  Renders title + Shopify rich-text content. Heritage palette.
+{%- endcomment -%}
+
+<style>
+.page-section { padding-top: 120px; padding-bottom: 4rem; background: #1c1a1a; color: #fff; min-height: 60vh; }
+.page-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.page-container h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; margin-bottom: 2rem; text-align: center; color: #fff; font-style: italic; }
+.page-content { font-size: 1.05rem; line-height: 1.85; color: rgba(255, 255, 255, 0.78); }
+.page-content h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.75rem; font-weight: 400; color: #fff; margin: 2.5rem 0 1rem; }
+.page-content h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; font-weight: 400; color: #fff; margin: 2rem 0 0.75rem; }
+.page-content p { margin-bottom: 1.25rem; }
+.page-content a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; transition: opacity 0.2s ease; }
+.page-content a:hover { opacity: 0.78; }
+.page-content ul, .page-content ol { margin: 1rem 0 1.5rem 1.5rem; }
+.page-content li { margin-bottom: 0.5rem; }
+.page-content img { max-width: 100%; height: auto; border-radius: 4px; margin: 1.5rem 0; }
+.page-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+.page-content table th, .page-content table td { padding: 0.75rem 1rem; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; }
+.page-content table th { background: rgba(222, 168, 130, 0.1); font-weight: 600; color: #fff; }
+.page-empty { text-align: center; padding: 4rem 2rem; }
+.page-empty p { color: rgba(255, 255, 255, 0.5); margin-bottom: 2rem; }
+@media (max-width: 768px) { .page-section { padding-top: 90px; padding-bottom: 3rem; } .page-container { padding: 1.25rem; } .page-content { font-size: 0.95rem; } }
+</style>
+
+<section class="page-section">
+  <div class="page-container">
+    <h1>{{ page.title }}</h1>
+
+    {%- if page.content != blank -%}
+      <div class="page-content">{{ page.content }}</div>
+    {%- else -%}
+      <div class="page-empty">
+        <p>This page is being prepared by the atelier.</p>
+        <a href="/" class="btn btn--gold">Return to home</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Page Content", "settings": [] }
+{% endschema %}

@@ -2,31 +2,19 @@
   "sections": {
     "main": {
       "type": "main-product",
-      "blocks": {
-        "badge1": {
-          "type": "trust_badge",
-          "settings": { "icon": "◇", "label": "Authenticity Guaranteed" }
-        },
-        "badge2": {
-          "type": "trust_badge",
-          "settings": { "icon": "⟡", "label": "Free Insured Shipping" }
-        },
-        "badge3": {
-          "type": "trust_badge",
-          "settings": { "icon": "↻", "label": "30-Day Returns" }
-        },
-        "stat1": {
-          "type": "stat",
-          "settings": { "number": "18k", "label": "Solid Gold" }
-        },
-        "stat2": {
-          "type": "stat",
-          "settings": { "number": "30", "label": "Day Returns" }
-        }
-      },
-      "blocks_order": ["badge1", "badge2", "badge3", "stat1", "stat2"],
       "settings": {}
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "heading": "Also from the atelier",
+        "subheading": "Pieces drawn from the same hand",
+        "products_to_show": 4
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main",
+    "recommendations"
+  ]
 }

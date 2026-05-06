@@ -1,108 +1,43 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
-    "hero": {
-      "type": "hero",
+    "our-story": {
+      "type": "our-story",
       "settings": {
-        "hero_variant": "dramatic",
-        "eyebrow": "New York · Fine Jewelry",
-        "heading": "Where Every\nPiece Tells\na Story",
-        "subheading": "Rare diamonds, vintage icons, and original designs — each piece selected for women who know exactly what they want.",
-        "cta_label": "Explore the Collection",
-        "cta_link": "/collections/all",
-        "minimal_monogram": "LM"
-      }
-    },
-    "collections-grid": {
-      "type": "collections-grid",
-      "settings": {
-        "eyebrow": "Explore Our World",
-        "title": "Shop the Collections",
-        "view_all_link": "/collections/all"
-      }
-    },
-    "featured-products": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Editor's Picks",
-        "title": "Pieces We Love Right Now",
-        "description": "A curated selection from our latest arrivals, hand-picked by our team.",
-        "collection": "",
-        "products_to_show": 8,
-        "show_view_all": true,
-        "view_all_label": "Shop All Pieces"
-      }
-    },
-    "best-sellers": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Customer Favorites",
-        "title": "Best Sellers",
-        "description": "The pieces our customers reach for most — timeless silhouettes that have earned their place.",
-        "collection": "best-sellers",
-        "products_to_show": 8,
-        "show_view_all": true,
-        "view_all_label": "Shop Best Sellers"
-      }
-    },
-    "engagement-rings": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "For The One",
-        "title": "Engagement Rings",
-        "description": "From classic solitaires to vintage-inspired settings — find the ring that begins your forever.",
-        "collection": "engagement-rings",
-        "products_to_show": 4,
-        "show_view_all": true,
-        "view_all_label": "Shop Engagement Rings"
-      }
-    },
-    "estate-products": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Antique & Estate",
-        "title": "Recently Acquired",
-        "description": "Newly authenticated pieces from the world's great houses. Each one-of-a-kind.",
-        "collection": "antique-estate",
-        "products_to_show": 4,
-        "show_view_all": true,
-        "view_all_label": "Browse All Estate Pieces"
-      }
-    },
-    "brand-story": {
-      "type": "brand-story",
-      "settings": {
-        "image_label": "Laura Milman Portrait",
-        "eyebrow": "Our Story",
-        "title": "Fine Jewelry,\nAuthentically Sourced",
-        "body": "Laura Milman New York was founded on the belief that the most beautiful jewelry carries a story worth telling. From original fine jewelry crafted with traceable diamonds to hand-selected antique pieces from the world's great houses — every item in our collection is chosen with purpose. We offer a wide selection spanning classic and timeless designs to rare vintage finds, ensuring there is something extraordinary for every chapter of your life. Based in New York, we believe in complete transparency: we trace every diamond we carry to its source, and every estate piece is individually authenticated before it reaches you.",
-        "signature": "— Laura Milman"
-      }
-    },
-    "instagram-feed": {
-      "type": "instagram-feed",
-      "settings": {
-        "handle": "lauramilmannewyork",
-        "title": "Follow the Journey"
+        "eyebrow": "New York · Three generations",
+        "hero_title": "Three generations in the atelier",
+        "hero_subtitle": "The Milman family workshop, in New York since 1962. Heirloom pieces, hand-finished by master setters.",
+        "hero_button_text": "Explore the collection",
+        "hero_button_link": "shopify://collections",
+        "hero_button_2_text": "Read the heritage",
+        "hero_button_2_link": "shopify://pages/our-story",
+        "mission_text": "“A piece of fine jewellery should arrive with its history. The cut, the setter, the certificate. We have built the house on that promise for three generations.”",
+        "origin_title": "A New York workshop since 1962",
+        "origin_text": "",
+        "revelation_title": "On choosing the stone honestly",
+        "revelation_text": "",
+        "revelation_button_text": "Browse the diamond selection",
+        "revelation_button_link": "shopify://collections/diamonds",
+        "pillars_title": "How we work",
+        "pillar_1_title": "Every stone, hand-selected",
+        "pillar_1_text": "",
+        "pillar_2_title": "Provenance on paper",
+        "pillar_2_text": "",
+        "pillar_3_title": "Made by hand, in New York",
+        "pillar_3_text": "",
+        "craft_title": "The atelier",
+        "craft_text": "",
+        "future_title": "What we are building",
+        "future_text": "",
+        "cta_title": "Begin with a piece",
+        "cta_text": "Choose from the atelier collection, or design something one of one.",
+        "cta_button_text": "Explore the collection",
+        "cta_button_link": "shopify://collections",
+        "cta_button_2_text": "Design an heirloom",
+        "cta_button_2_link": "shopify://pages/ring-builder"
       }
     }
   },
   "order": [
-    "hero",
-    "collections-grid",
-    "featured-products",
-    "best-sellers",
-    "engagement-rings",
-    "estate-products",
-    "brand-story",
-    "instagram-feed"
+    "our-story"
   ]
 }

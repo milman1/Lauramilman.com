@@ -1,0 +1,133 @@
+{%- comment -%}
+  Laura Milman — Product Recommendations section.
+  Server-rendered fallback from the same collection, enhanced via
+  Shopify's recommendations API on load. Palette + voice swapped.
+{%- endcomment -%}
+
+{%- assign product_type = product.type -%}
+{%- assign first_tag = product.tags | first -%}
+{%- assign product_collection = product.collections | first -%}
+
+<section class="recommendations-section section"
+  data-product-id="{{ product.id }}"
+  data-product-type="{{ product_type }}"
+  data-product-tag="{{ first_tag }}"
+  data-collection-handle="{{ product_collection.handle }}">
+  <div class="container">
+    <div class="recommendations__header">
+      <div>
+        <h2>{{ section.settings.heading | default: 'Also from the atelier' }}</h2>
+        <p class="text-muted">{{ section.settings.subheading | default: 'Pieces drawn from the same hand' }}</p>
+      </div>
+    </div>
+
+    <div class="recommendations-grid products-grid" id="product-recommendations">
+      {%- if product_collection != blank -%}
+        {%- assign shown_count = 0 -%}
+        {%- for rec_product in product_collection.products limit: 8 -%}
+          {%- if rec_product.id != product.id and shown_count < section.settings.products_to_show -%}
+            {% render 'product-card', product: rec_product %}
+            {%- assign shown_count = shown_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if shown_count == 0 -%}
+          <div class="recommendations-empty">
+            <p>Browse the full collection.</p>
+            <a href="/collections/all" class="btn btn--outline" style="margin-top: 1rem;">Explore the collection</a>
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        {%- assign shown_count = 0 -%}
+        {%- for rec_product in collections.all.products limit: 8 -%}
+          {%- if rec_product.id != product.id and shown_count < section.settings.products_to_show -%}
+            {% render 'product-card', product: rec_product %}
+            {%- assign shown_count = shown_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .recommendations-section { padding: 3rem 0; background: var(--bg-cream, #efecec); }
+  .recommendations__header { text-align: center; margin-bottom: 2rem; }
+  .recommendations__header h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.85rem; font-weight: 400; margin-bottom: 0.5rem; color: var(--primary-dark, #1c1a1a); font-style: italic; }
+  .recommendations__header .text-muted { color: var(--text-muted, #7b8382); font-size: 0.95rem; }
+  .recommendations-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .recommendations-loading { grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted, #7b8382); }
+  .recommendations-empty { grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted, #7b8382); }
+  @media (max-width: 992px) { .recommendations-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 576px) {
+    .recommendations-section { padding: 2rem 0; }
+    .recommendations__header h2 { font-size: 1.4rem; }
+    .recommendations-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const section = document.querySelector('.recommendations-section');
+  const container = document.getElementById('product-recommendations');
+  if (!section || !container) return;
+
+  const productId = section.dataset.productId;
+  const limit = {{ section.settings.products_to_show | default: 4 }};
+  const url = `${window.location.origin}/recommendations/products.json?product_id=${productId}&limit=${limit}&intent=related`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.products && data.products.length > 0) {
+        container.innerHTML = data.products.map(product => {
+          const price = (product.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+          const comparePrice = product.compare_at_price
+            ? (product.compare_at_price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+            : null;
+          const image = product.featured_image || product.images[0];
+          const imageUrl = image ? image.replace(/\.(jpg|jpeg|png|gif|webp)/i, '_600x600.$1') : '';
+          const hoverImage = product.images && product.images[1] ? product.images[1].replace(/\.(jpg|jpeg|png|gif|webp)/i, '_600x600.$1') : '';
+
+          return `
+            <article class="product-card">
+              <a href="${product.url}" class="product-card__link">
+                <div class="product-card__image-wrapper">
+                  ${imageUrl ? `
+                    <img class="product-card__image" src="${imageUrl}" alt="${product.title}" loading="lazy" width="600" height="600">
+                    ${hoverImage ? `<img class="product-card__image product-card__image--hover" src="${hoverImage}" alt="${product.title}" loading="lazy" width="600" height="600">` : ''}
+                  ` : `
+                    <div class="product-card__image" style="background: linear-gradient(135deg, #efecec 0%, #c1bcae 100%); display: flex; align-items: center; justify-content: center; aspect-ratio: 1;">
+                      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c1bcae" stroke-width="1"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>
+                    </div>
+                  `}
+                  ${!product.available ? '<span class="product-card__badge product-card__badge--sold-out">Sold out</span>' : ''}
+                  ${comparePrice ? '<span class="product-card__badge product-card__badge--sale">Sale</span>' : ''}
+                </div>
+              </a>
+              <div class="product-card__content">
+                <h4 class="product-card__title"><a href="${product.url}">${product.title}</a></h4>
+                <p class="product-card__price">
+                  ${comparePrice ? `<span class="product-card__price-old">${comparePrice}</span>` : ''}
+                  ${price}
+                </p>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+    })
+    .catch(() => { /* fall through to server-rendered fallback */ });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Product Recommendations",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Also from the atelier" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Pieces drawn from the same hand" },
+    { "type": "range", "id": "products_to_show", "min": 2, "max": 8, "step": 1, "default": 4, "label": "Products to show" }
+  ],
+  "presets": [ { "name": "Product Recommendations" } ]
+}
+{% endschema %}

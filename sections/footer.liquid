@@ -1,131 +1,259 @@
-<footer class="site-footer" role="contentinfo">
-  <div class="site-footer__grid">
-    {%- comment -%} Brand column {%- endcomment -%}
-    <div>
-      <div class="site-footer__logo">{{ shop.name }}</div>
-      <p class="site-footer__desc">
-        {{ section.settings.description | default: 'Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique &amp; estate pieces.' }}
-      </p>
+{%- comment -%}
+  Laura Milman — Footer Section.
+  Layout cloned from PD theme; brand voice rewritten for the Milman
+  heritage house. Includes a single discrete outbound link to
+  Peaceful Diamonds positioned as a separate accessible alternative.
+{%- endcomment -%}
 
-      <div class="site-footer__newsletter">
-        {%- form 'customer', id: 'newsletter-form', data-newsletter-form: '' -%}
-          <input type="hidden" name="contact[tags]" value="newsletter">
-          <div class="site-footer__newsletter-form">
-            <label for="newsletter-email" class="visually-hidden">
-              {{- 'newsletter.label' | t -}}
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              name="contact[email]"
-              class="site-footer__email-input"
-              placeholder="{{ 'newsletter.placeholder' | t }}"
-              required
-              autocomplete="email"
-            >
-            <button type="submit" class="site-footer__newsletter-btn" aria-label="Subscribe">
-              →
-            </button>
-          </div>
-          <p data-success hidden style="font-family:'Jost',sans-serif;font-size:12px;color:var(--accent);margin-top:8px;letter-spacing:1px;">
-            {{ 'newsletter.success' | t }}
-          </p>
-        {%- endform -%}
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <!-- Brand column -->
+      <div class="footer__brand">
+        <a href="{{ routes.root_url }}" class="footer__logo">
+          {%- if section.settings.logo != blank -%}
+            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+          {%- else -%}
+            <span class="footer__logo-text">Laura <em>Milman</em></span>
+          {%- endif -%}
+        </a>
+        <p class="footer__description">{{ section.settings.description | default: 'Laura Milman is a New York fine jewelry house drawn from three generations of the Milman family workshop. Each piece is designed in our atelier and hand-finished by master setters — heirlooms made to be worn for a lifetime and passed on.' }}</p>
+        <div class="footer__social">
+          {%- if section.settings.social_instagram != blank -%}
+            <a href="{{ section.settings.social_instagram }}" class="footer__social-link" aria-label="Laura Milman on Instagram" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_facebook != blank -%}
+            <a href="{{ section.settings.social_facebook }}" class="footer__social-link" aria-label="Laura Milman on Facebook" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_pinterest != blank -%}
+            <a href="{{ section.settings.social_pinterest }}" class="footer__social-link" aria-label="Laura Milman on Pinterest" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 12c0 3 2 6 4 6s4-6 4-6-2-6-4-6-4 3-4 6"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.social_tiktok != blank -%}
+            <a href="{{ section.settings.social_tiktok }}" class="footer__social-link" aria-label="Laura Milman on TikTok" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
+              </svg>
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- Atelier (Shop) column -->
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">The Collection
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/collections/engagement-rings" class="footer__link">Engagement Rings</a></li>
+          <li><a href="/collections/necklaces" class="footer__link">Necklaces</a></li>
+          <li><a href="/collections/earrings" class="footer__link">Earrings</a></li>
+          <li><a href="/collections/bracelets" class="footer__link">Bracelets</a></li>
+          <li><a href="/collections/pendants" class="footer__link">Pendants</a></li>
+          <li><a href="/pages/ring-builder" class="footer__link">Design Your Ring</a></li>
+        </ul>
+      </div>
+
+      <!-- The House (About) column -->
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">The House
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/pages/our-story" class="footer__link">Milman Heritage</a></li>
+          <li><a href="/pages/why-lab-grown" class="footer__link">On Diamond Origin</a></li>
+          <li><a href="/pages/sustainability" class="footer__link">Provenance &amp; Practice</a></li>
+          <li><a href="/pages/buying-guide" class="footer__link">A Guide to Diamonds</a></li>
+        </ul>
+      </div>
+
+      <!-- Concierge column -->
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">Concierge
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__accordion-body">
+          <li><a href="/pages/contact" class="footer__link">Speak with the Atelier</a></li>
+          <li><a href="/pages/faq" class="footer__link">Frequently Asked</a></li>
+          <li><a href="/pages/shipping" class="footer__link">Shipping &amp; Returns</a></li>
+          <li><a href="/pages/ring-size-guide" class="footer__link">Ring Sizing</a></li>
+          <li><a href="/pages/care-guide" class="footer__link">Caring for Your Piece</a></li>
+        </ul>
+      </div>
+
+      <!-- Visit (Contact) column -->
+      <div class="footer__column footer__accordion">
+        <h5 class="footer__column-title footer__accordion-toggle">Visit
+          <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </h5>
+        <ul class="footer__links footer__contact footer__accordion-body">
+          {%- assign email = section.settings.contact_email | default: 'hello@lauramilman.com' -%}
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <a href="mailto:{{ email }}" class="footer__link">{{ email }}</a>
+          </li>
+          {%- if section.settings.contact_phone != blank -%}
+            {%- assign phone = section.settings.contact_phone -%}
+            {%- assign phone_clean = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.' -%}
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <a href="tel:+1{{ phone_clean }}" class="footer__link">{{ phone }}</a>
+            </li>
+          {%- endif -%}
+          {%- assign location = section.settings.contact_location | default: 'New York, NY — by appointment' -%}
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span class="footer__address">{{ location }}</span>
+          </li>
+        </ul>
       </div>
     </div>
 
-    {%- comment -%} Shop column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">Shop</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.shop_menu != blank and section.settings.shop_menu.links.size > 0 -%}
-          {%- for link in section.settings.shop_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/collections/all">All Jewelry</a></li>
-          <li><a href="/collections/new-arrivals">New Arrivals</a></li>
-          <li><a href="/collections/rings">Rings</a></li>
-          <li><a href="/collections/necklaces">Necklaces</a></li>
-          <li><a href="/collections/bracelets">Bracelets</a></li>
-          <li><a href="/collections/earrings">Earrings</a></li>
-          <li><a href="/collections/engagement-rings">Engagement Rings</a></li>
-        {%- endif -%}
-      </ul>
+    <div class="footer__bottom">
+      <p class="footer__copyright">&copy; {{ 'now' | date: '%Y' }} Laura Milman, New York. All rights reserved.</p>
+      <p class="footer__sister">
+        Explore our accessible lab-grown collection at
+        <a href="https://peacefuldiamonds.com" target="_blank" rel="noopener">Peaceful Diamonds</a>.
+      </p>
+      <div class="footer__legal">
+        <a href="/policies/privacy-policy" class="footer__legal-link">Privacy</a>
+        <a href="/policies/terms-of-service" class="footer__legal-link">Terms</a>
+        <a href="/policies/refund-policy" class="footer__legal-link">Returns</a>
+      </div>
+      <div class="footer__payments">
+        {%- for type in shop.enabled_payment_types -%}
+          {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+        {%- endfor -%}
+      </div>
     </div>
-
-    {%- comment -%} About column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">About</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.about_menu != blank and section.settings.about_menu.links.size > 0 -%}
-          {%- for link in section.settings.about_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/pages/about">Our Story</a></li>
-          <li><a href="/collections/antique-estate">Estate Jewelry</a></li>
-          <li><a href="/pages/sourcing">Diamond Sourcing</a></li>
-          <li><a href="/pages/authentication">Authentication</a></li>
-          <li><a href="/blogs/news">Journal</a></li>
-        {%- endif -%}
-      </ul>
-    </div>
-
-    {%- comment -%} Help column {%- endcomment -%}
-    <div>
-      <div class="site-footer__col-title">Help</div>
-      <ul class="site-footer__links">
-        {%- if section.settings.help_menu != blank and section.settings.help_menu.links.size > 0 -%}
-          {%- for link in section.settings.help_menu.links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
-        {%- else -%}
-          <li><a href="/pages/contact">Contact Us</a></li>
-          <li><a href="/pages/shipping-returns">Shipping &amp; Returns</a></li>
-          <li><a href="/pages/care-guide">Care Guide</a></li>
-          <li><a href="/pages/faq">FAQ</a></li>
-          <li><a href="/pages/privacy">Privacy Policy</a></li>
-        {%- endif -%}
-      </ul>
-    </div>
-  </div>
-
-  <div class="site-footer__bottom">
-    <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</span>
-    <span>Crafted in New York · Powered by Shopify</span>
   </div>
 </footer>
+
+<style>
+  .footer { background: var(--primary-dark-darker, #0d0c0c); color: var(--text-white, #fff); padding: 4rem 0 2rem; }
+  .footer__grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
+  .footer__brand { padding-right: 2rem; }
+  .footer__logo { display: inline-block; margin-bottom: 1rem; text-decoration: none; }
+  .footer__logo img { height: 40px; width: auto; }
+  .footer__logo-text { font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.6rem; color: #fff; letter-spacing: 0.04em; }
+  .footer__logo-text em { color: var(--accent-gold, #dea882); font-style: italic; font-weight: 400; }
+  .footer__description { color: rgba(255, 255, 255, 0.62); font-size: 0.9rem; line-height: 1.75; margin-bottom: 1.5rem; }
+  .footer__social { display: flex; gap: 0.85rem; }
+  .footer__social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.78); transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; border: 1px solid rgba(255, 255, 255, 0.08); }
+  .footer__social-link:hover { background: var(--accent-gold, #dea882); border-color: var(--accent-gold, #dea882); color: #1c1a1a; transform: translateY(-2px); }
+  .footer__column-title { font-family: var(--font-body, 'Inter', sans-serif); font-size: 0.78rem; font-weight: 600; color: #fff; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.22em; }
+  .footer__links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+  .footer__link { color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease; }
+  .footer__link:hover { color: var(--accent-gold, #dea882); }
+  .footer__contact li { display: flex; align-items: center; gap: 0.5rem; }
+  .footer__contact svg { color: var(--accent-gold, #dea882); flex-shrink: 0; }
+  .footer__address { color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; }
+  .footer__bottom { padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer__copyright { color: rgba(255, 255, 255, 0.42); font-size: 0.78rem; margin: 0; letter-spacing: 0.05em; }
+  .footer__sister { color: rgba(255, 255, 255, 0.45); font-size: 0.75rem; margin: 0; letter-spacing: 0.04em; flex-basis: 100%; order: 4; padding-top: 0.85rem; margin-top: 0.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; }
+  .footer__sister a { color: var(--accent-gold, #dea882); text-decoration: underline; text-underline-offset: 3px; }
+  .footer__sister a:hover { color: var(--accent-gold-light, #e8bf9e); }
+  .footer__legal { display: flex; gap: 1.5rem; }
+  .footer__legal-link { color: rgba(255, 255, 255, 0.42); text-decoration: none; font-size: 0.78rem; letter-spacing: 0.08em; transition: color 0.3s ease; }
+  .footer__legal-link:hover { color: var(--accent-gold, #dea882); }
+  .footer__payments { display: flex; gap: 0.5rem; color: rgba(255, 255, 255, 0.4); }
+  .footer__payments .icon { height: 24px; width: auto; }
+
+  @media (max-width: 992px) {
+    .footer__grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+    .footer__brand { grid-column: 1 / -1; padding-right: 0; text-align: center; }
+    .footer__social { justify-content: center; }
+    .footer__column { text-align: center; }
+    .footer__contact li { justify-content: center; }
+  }
+
+  .footer__accordion-icon { display: none; }
+
+  @media (max-width: 576px) {
+    .footer { padding: 2rem 0 1.5rem; }
+    .footer .container { padding-left: 20px; padding-right: 20px; }
+    .footer__grid { grid-template-columns: 1fr; gap: 0; text-align: left; }
+    .footer__brand { margin-bottom: 1rem; text-align: center; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .footer__logo-text { font-size: 1.75rem; }
+    .footer__description { font-size: 0.85rem; max-width: 320px; margin: 0 auto 1.25rem auto; line-height: 1.65; }
+    .footer__social { justify-content: center; gap: 0.75rem; margin-top: 0; }
+    .footer__social-link { width: 42px; height: 42px; }
+    .footer__accordion { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .footer__accordion-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 0.9rem 0; margin-bottom: 0; -webkit-tap-highlight-color: transparent; }
+    .footer__accordion-icon { display: block; color: rgba(255,255,255,0.4); transition: transform 0.3s ease; flex-shrink: 0; }
+    .footer__accordion.open .footer__accordion-icon { transform: rotate(180deg); }
+    .footer__accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0; }
+    .footer__accordion.open .footer__accordion-body { max-height: 320px; padding-bottom: 0.75rem; }
+    .footer__column-title { font-size: 0.72rem; letter-spacing: 0.18em; }
+    .footer__links { gap: 0.5rem; align-items: flex-start; }
+    .footer__link { font-size: 0.85rem; padding: 0.2rem 0; display: inline-block; }
+    .footer__contact { gap: 0.5rem; }
+    .footer__contact li { font-size: 0.85rem; justify-content: flex-start; }
+    .footer__contact svg { width: 14px; height: 14px; }
+    .footer__address { font-size: 0.85rem; }
+    .footer__bottom { flex-direction: column; text-align: center; gap: 0.75rem; padding-top: 1.25rem; margin-top: 0.5rem; }
+    .footer__copyright { font-size: 0.72rem; order: 2; }
+    .footer__sister { order: 4; font-size: 0.72rem; }
+    .footer__legal { flex-wrap: wrap; justify-content: center; gap: 1.25rem; order: 1; }
+    .footer__legal-link { font-size: 0.72rem; }
+    .footer__payments { order: 3; justify-content: center; }
+  }
+</style>
+
+<script>
+  (function() {
+    if (window.matchMedia('(max-width: 576px)').matches) {
+      document.querySelectorAll('.footer__accordion-toggle').forEach(function(toggle) {
+        toggle.addEventListener('click', function() {
+          var col = this.closest('.footer__accordion');
+          var wasOpen = col.classList.contains('open');
+          document.querySelectorAll('.footer__accordion.open').forEach(function(c) { c.classList.remove('open'); });
+          if (!wasOpen) col.classList.add('open');
+        });
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
   "name": "Footer",
-  "class": "section-footer",
   "settings": [
-    {
-      "type": "textarea",
-      "id": "description",
-      "label": "Brand description",
-      "default": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces."
-    },
-    {
-      "type": "link_list",
-      "id": "shop_menu",
-      "label": "Shop menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
-    },
-    {
-      "type": "link_list",
-      "id": "about_menu",
-      "label": "About menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
-    },
-    {
-      "type": "link_list",
-      "id": "help_menu",
-      "label": "Help menu (optional)",
-      "info": "Falls back to a curated list if no menu is selected."
-    }
+    { "type": "header", "content": "Brand" },
+    { "type": "image_picker", "id": "logo", "label": "Footer logo" },
+    { "type": "textarea", "id": "description", "label": "Brand description", "default": "Laura Milman is a New York fine jewelry house drawn from three generations of the Milman family workshop. Each piece is designed in our atelier and hand-finished by master setters — heirlooms made to be worn for a lifetime and passed on." },
+    { "type": "header", "content": "Social Media" },
+    { "type": "url", "id": "social_instagram", "label": "Instagram URL", "info": "Leave blank to hide" },
+    { "type": "url", "id": "social_facebook", "label": "Facebook URL", "info": "Leave blank to hide" },
+    { "type": "url", "id": "social_pinterest", "label": "Pinterest URL", "info": "Leave blank to hide" },
+    { "type": "url", "id": "social_tiktok", "label": "TikTok URL", "info": "Leave blank to hide" },
+    { "type": "header", "content": "Contact" },
+    { "type": "text", "id": "contact_email", "label": "Email", "default": "hello@lauramilman.com" },
+    { "type": "text", "id": "contact_phone", "label": "Phone", "default": "" },
+    { "type": "text", "id": "contact_location", "label": "Location", "default": "New York, NY — by appointment" }
   ]
 }
 {% endschema %}
