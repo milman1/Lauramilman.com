@@ -33,7 +33,7 @@
 
     <div class="collection-toolbar">
       <span class="collection-count">
-        <strong>{{ collection.products_count }}</strong> {{ collection.products_count == 1 ? 'Piece' : 'Pieces' }}
+        <strong>{{ collection.products_count }}</strong> {% if collection.products_count == 1 %}Piece{% else %}Pieces{% endif %}
       </span>
 
       <div class="collection-sort">
