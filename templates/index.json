@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -7,37 +16,97 @@
         "heading": "Where Every\nPiece Tells\na Story",
         "subheading": "Rare diamonds… each piece selected for women who know exactly what they want.",
         "primary_cta_text": "Explore the Collection",
-        "primary_cta_url": "/collections/all"
+        "primary_cta_url": "/collections/all",
+        "secondary_cta_text": "Our Story",
+        "secondary_cta_url": ""
+      }
+    },
+    "category_cards_AVMpct": {
+      "type": "category-cards",
+      "blocks": {
+        "category_card_Pegw38": {
+          "type": "category_card",
+          "settings": {
+            "collection": "cartier",
+            "title": "Cartier"
+          }
+        },
+        "category_card_AMMxt9": {
+          "type": "category_card",
+          "settings": {
+            "collection": "",
+            "title": "Necklaces"
+          }
+        },
+        "category_card_aiFAxz": {
+          "type": "category_card",
+          "settings": {
+            "collection": "",
+            "title": "Earrings"
+          }
+        },
+        "category_card_fLazP3": {
+          "type": "category_card",
+          "settings": {
+            "collection": "",
+            "title": "Bracelets"
+          }
+        }
+      },
+      "block_order": [
+        "category_card_Pegw38",
+        "category_card_AMMxt9",
+        "category_card_aiFAxz",
+        "category_card_fLazP3"
+      ],
+      "name": "Category Cards",
+      "settings": {
+        "eyebrow": "Explore",
+        "title": "Shop by Category"
       }
     },
     "category-cards": {
       "type": "category-cards",
       "settings": {
-        "title": "Shop the Collections",
-        "eyebrow": "Explore Our World"
+        "eyebrow": "Explore Our World",
+        "title": "Shop the Collections"
       }
     },
     "featured-products": {
       "type": "featured-products",
       "settings": {
-        "title": "Pieces We Love Right Now",
         "eyebrow": "Editor's Picks",
+        "title": "Pieces We Love Right Now",
         "description": "A curated selection of our most captivating pieces, chosen for their exceptional beauty and craftsmanship.",
         "collection": "all",
-        "product_count": 8
+        "product_count": 8,
+        "cta_text": "View All",
+        "cta_url": ""
       }
     },
     "brand-story": {
       "type": "brand-story",
-      "settings": {}
+      "settings": {
+        "eyebrow": "Our Story",
+        "title": "Fine Jewelry,\nAuthentically Sourced",
+        "body_text": "<p>Laura Milman New York began with a simple belief: that fine jewelry should be both extraordinary and transparent. Every piece in our collection—whether a newly crafted design or an authenticated antique—is selected with the same discerning eye and commitment to excellence that has defined New York's jewelry tradition for generations.</p>",
+        "signature": "— Laura Milman"
+      }
     },
     "newsletter": {
       "type": "newsletter",
-      "settings": {}
+      "settings": {
+        "title": "Join the Inner Circle",
+        "description": "Be the first to see new arrivals, receive exclusive offers, and discover rare estate pieces.",
+        "placeholder": "Your email address",
+        "button_text": "Subscribe",
+        "success_message": "Welcome to the inner circle."
+      }
     }
   },
   "order": [
     "hero",
+    "category_cards_AVMpct",
     "category-cards",
     "featured-products",
     "brand-story",
