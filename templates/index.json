@@ -43,15 +43,17 @@
         "category_card_aiFAxz": {
           "type": "category_card",
           "settings": {
-            "collection": "",
-            "title": "Earrings"
+            "collection": "tiffany",
+            "title": "Tiffany & Co.",
+            "image": "shopify://shop_images/RR8197.jpg"
           }
         },
         "category_card_fLazP3": {
           "type": "category_card",
           "settings": {
-            "collection": "",
-            "title": "Bracelets"
+            "collection": "bvlgari",
+            "title": "Bvlgari",
+            "image": "shopify://shop_images/J10285-B.jpg"
           }
         }
       },
