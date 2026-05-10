@@ -55,13 +55,22 @@
             "title": "Bvlgari",
             "image": "shopify://shop_images/J10285-B.jpg"
           }
+        },
+        "category_card_tYxTjW": {
+          "type": "category_card",
+          "settings": {
+            "collection": "chopard",
+            "title": "",
+            "image": "shopify://shop_images/RR7954.jpg"
+          }
         }
       },
       "block_order": [
         "category_card_Pegw38",
         "category_card_AMMxt9",
         "category_card_aiFAxz",
-        "category_card_fLazP3"
+        "category_card_fLazP3",
+        "category_card_tYxTjW"
       ],
       "name": "Category Cards",
       "settings": {
