@@ -28,7 +28,8 @@
           "type": "category_card",
           "settings": {
             "collection": "cartier",
-            "title": "Cartier"
+            "title": "Cartier",
+            "image": "shopify://shop_images/J10403_5aae05bb-7c99-41c7-b3bc-f47878394105.jpg"
           }
         },
         "category_card_AMMxt9": {
