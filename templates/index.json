@@ -75,14 +75,7 @@
       "name": "Category Cards",
       "settings": {
         "eyebrow": "Explore",
-        "title": "Shop by Category"
-      }
-    },
-    "category-cards": {
-      "type": "category-cards",
-      "settings": {
-        "eyebrow": "Explore Our World",
-        "title": "Shop the Collections"
+        "title": "Pre-Owned Antique and Estate Jewelry"
       }
     },
     "featured-products": {
@@ -120,7 +113,6 @@
   "order": [
     "hero",
     "category_cards_AVMpct",
-    "category-cards",
     "featured-products",
     "brand-story",
     "newsletter"

@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "color_espresso": "#1E1109",
@@ -12,6 +21,7 @@
     "color_text_wine": "#4A2018",
     "color_text_muted": "#8A8070",
     "color_rule": "#DDD5C5",
+    "favicon": "shopify://shop_images/Untitled_design_22.png",
     "social_instagram": "https://www.instagram.com/lauramilmannewyork",
     "social_pinterest": "",
     "social_facebook": "",
@@ -19,19 +29,20 @@
       "header": {
         "type": "header",
         "settings": {
-          "logo_position": "center",
-          "sticky_header": true,
-          "show_cart_count": true
+          "estate_label": "Antique & Estate",
+          "enable_sticky": true
         }
       },
       "footer": {
         "type": "footer",
         "settings": {
-          "show_social": true,
-          "show_newsletter": true,
-          "copyright_text": "© Laura Milman New York"
+          "description": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.",
+          "social_instagram": "",
+          "social_pinterest": "",
+          "social_facebook": ""
         }
       }
-    }
+    },
+    "content_for_index": []
   }
 }
