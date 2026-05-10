@@ -35,8 +35,9 @@
         "category_card_AMMxt9": {
           "type": "category_card",
           "settings": {
-            "collection": "",
-            "title": "Necklaces"
+            "collection": "van-cleef-arpels",
+            "title": "Van Cleef & Arpels",
+            "image": "shopify://shop_images/RR9686.jpg"
           }
         },
         "category_card_aiFAxz": {
