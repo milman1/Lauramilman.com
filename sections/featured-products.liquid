@@ -10,6 +10,13 @@
   if featured_collection != blank
     assign view_all_url = featured_collection.url
   endif
+  assign has_picked_products = false
+  for block in section.blocks
+    if block.type == 'product' and block.settings.product != blank
+      assign has_picked_products = true
+      break
+    endif
+  endfor
 -%}
 
 <section class="lm-featured" aria-label="{{ section.settings.title | default: 'Featured Products' | escape }}">
@@ -28,7 +35,13 @@
     </div>
 
     <div class="products-grid">
-      {%- if featured_collection != blank and featured_collection.products.size > 0 -%}
+      {%- if has_picked_products -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'product' and block.settings.product != blank -%}
+            {%- render 'product-card', product: block.settings.product -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- elsif featured_collection != blank and featured_collection.products.size > 0 -%}
         {%- for product in featured_collection.products limit: limit -%}
           {%- render 'product-card', product: product -%}
         {%- endfor -%}
@@ -162,6 +175,19 @@
       "type": "url",
       "id": "cta_url",
       "label": "View All link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
     }
   ],
   "presets": [
