@@ -1,14 +1,63 @@
-<div style="padding-top:120px;min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 40px;">
-  <div style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#836630;margin-bottom:24px;">
-    404
+<section class="page-404">
+  <div class="page-404__inner">
+    <span class="page-404__eyebrow">404</span>
+    <h1 class="page-404__title">Page Not Found</h1>
+    <p class="page-404__description">
+      The page you were looking for doesn't exist. Let us guide you back to something beautiful.
+    </p>
+    <a href="/" class="btn btn--primary page-404__btn">Return Home</a>
   </div>
-  <h1 style="font-family:'DM Serif Display',serif;font-size:52px;color:#2E1A12;font-weight:400;margin:0 0 24px;">
-    Page Not Found
-  </h1>
-  <p style="font-family:'Jost',sans-serif;font-size:15px;line-height:1.8;color:rgba(46,26,18,0.65);max-width:420px;font-weight:300;margin-bottom:40px;">
-    The page you were looking for doesn't exist. Let us guide you back to something beautiful.
-  </p>
-  <a href="{{ routes.root_url }}" style="display:inline-block;padding:16px 48px;background:#2E1A12;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#F5EFE6;text-decoration:none;transition:background 0.4s;">
-    Return Home
-  </a>
-</div>
+</section>
+
+<style>
+  .page-404 {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 40px;
+  }
+  .page-404__inner {
+    max-width: 480px;
+  }
+  .page-404__eyebrow {
+    display: block;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--color-gold, #C9A050);
+    margin-bottom: 24px;
+  }
+  .page-404__title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 52px;
+    color: var(--color-text-dark, #2C1810);
+    font-weight: 400;
+    margin: 0 0 24px;
+  }
+  .page-404__description {
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-text-muted, #8A8070);
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+  .page-404__btn {
+    display: inline-block;
+    padding: 16px 48px;
+    background: var(--color-gold, #C9A050);
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--color-warm-white, #FDFAF6);
+    text-decoration: none;
+    transition: background 0.4s;
+  }
+  .page-404__btn:hover {
+    background: var(--color-gold-light, #E2C27A);
+  }
+</style>

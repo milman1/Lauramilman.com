@@ -3,7 +3,6 @@
     "main": {
       "type": "main-collection",
       "settings": {
-        "eyebrow": "Collection",
         "products_per_page": 24
       }
     }

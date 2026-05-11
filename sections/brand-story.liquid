@@ -1,38 +1,161 @@
-<section class="brand-story">
-  <div class="brand-story__inner">
-    <div class="brand-story__image-wrap">
-      {%- if section.settings.image != blank -%}
+{%- comment -%}
+  Laura Milman New York — Brand Story Section
+  Two-column: portrait left, narrative right
+{%- endcomment -%}
+
+<section class="lm-story" aria-label="Our Story">
+  <div class="lm-story__container">
+
+    <div class="lm-story__portrait">
+      {%- if section.settings.portrait_image != blank -%}
         <img
-          src="{{ section.settings.image | image_url: width: 900 }}"
-          alt="{{ section.settings.image.alt | default: shop.name | escape }}"
-          width="{{ section.settings.image.width }}"
-          height="{{ section.settings.image.height }}"
+          src="{{ section.settings.portrait_image | image_url: width: 800 }}"
+          srcset="{{ section.settings.portrait_image | image_url: width: 400 }} 400w,
+                  {{ section.settings.portrait_image | image_url: width: 600 }} 600w,
+                  {{ section.settings.portrait_image | image_url: width: 800 }} 800w"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          alt="{{ section.settings.title | default: 'Our Story' | escape }}"
           loading="lazy"
+          decoding="async"
         >
       {%- else -%}
-        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(184,148,90,0.5);background:repeating-linear-gradient(135deg,transparent,transparent 10px,rgba(184,148,90,0.08) 10px,rgba(184,148,90,0.08) 11px);">
-          {{ section.settings.image_label | default: 'Laura Milman Portrait' }}
+        <div class="lm-story__portrait-placeholder" aria-hidden="true">
+          <span>LM</span>
         </div>
       {%- endif -%}
     </div>
 
-    <div class="brand-story__content">
+    <div class="lm-story__narrative">
       {%- if section.settings.eyebrow != blank -%}
-        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
       {%- endif -%}
 
-      <h2 class="brand-story__title">{{ section.settings.title | newline_to_br }}</h2>
+      {%- if section.settings.title != blank -%}
+        <h2 class="lm-story__title">{{ section.settings.title | newline_to_br }}</h2>
+      {%- endif -%}
 
-      {%- if section.settings.body != blank -%}
-        <p class="brand-story__body">{{ section.settings.body }}</p>
+      <div class="gold-divider" aria-hidden="true"></div>
+
+      {%- if section.settings.body_text != blank -%}
+        <div class="lm-story__body">{{ section.settings.body_text }}</div>
       {%- endif -%}
 
       {%- if section.settings.signature != blank -%}
-        <div class="brand-story__sig">{{ section.settings.signature }}</div>
+        <p class="lm-story__signature">{{ section.settings.signature }}</p>
       {%- endif -%}
     </div>
+
   </div>
 </section>
+
+<style>
+  .lm-story {
+    background: var(--off-white, #F5F0E8);
+    padding: 6rem 2rem;
+  }
+
+  .lm-story__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .lm-story__portrait img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+  }
+
+  .lm-story__portrait-placeholder {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(135deg, rgba(193, 167, 132, 0.08) 0%, rgba(44, 24, 16, 0.05) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 4rem;
+    color: rgba(193, 167, 132, 0.15);
+    letter-spacing: 0.1em;
+  }
+
+  .lm-story__narrative {
+    max-width: 520px;
+  }
+
+  .lm-story__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-story__narrative .gold-divider {
+    width: 48px;
+    height: 1px;
+    background: var(--gold, #C1A784);
+    margin-bottom: 1.5rem;
+  }
+
+  .lm-story__body {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--text-muted, #8B7D6B);
+  }
+
+  .lm-story__body p {
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-story__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .lm-story__signature {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold, #C1A784);
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 992px) {
+    .lm-story__container {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    .lm-story__portrait img {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .lm-story__narrative {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .lm-story__narrative .gold-divider {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-story {
+      padding: 3.5rem 1rem;
+    }
+    .lm-story__portrait img {
+      max-width: 100%;
+    }
+  }
+</style>
 
 {% schema %}
 {
@@ -41,39 +164,33 @@
   "class": "section-brand-story",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Portrait / brand image"
-    },
-    {
-      "type": "text",
-      "id": "image_label",
-      "label": "Image placeholder label",
-      "default": "Laura Milman Portrait"
-    },
-    {
       "type": "text",
       "id": "eyebrow",
-      "label": "Eyebrow",
+      "label": "Eyebrow text",
       "default": "Our Story"
     },
     {
       "type": "textarea",
       "id": "title",
       "label": "Heading",
-      "default": "Crafted with Intention,\nWorn with Confidence"
+      "default": "Fine Jewelry,\nAuthentically Sourced"
     },
     {
-      "type": "textarea",
-      "id": "body",
-      "label": "Body copy",
-      "default": "Every Laura Milman piece begins with a vision — jewelry that transcends trends and becomes an extension of the wearer. Based in New York, our studio blends timeless design principles with contemporary sensibility."
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body text",
+      "default": "<p>Laura Milman New York began with a simple belief: that fine jewelry should be both extraordinary and transparent. Every piece in our collection—whether a newly crafted design or an authenticated antique—is selected with the same discerning eye and commitment to excellence that has defined New York's jewelry tradition for generations.</p>"
     },
     {
       "type": "text",
       "id": "signature",
       "label": "Signature",
-      "default": "— Laura"
+      "default": "— Laura Milman"
+    },
+    {
+      "type": "image_picker",
+      "id": "portrait_image",
+      "label": "Portrait image"
     }
   ],
   "presets": [

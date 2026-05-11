@@ -1,95 +1,212 @@
-{%- assign variant = section.settings.hero_variant | default: settings.hero_variant -%}
+{%- comment -%}
+  Laura Milman New York — Hero Section
+  Full-viewport hero with espresso gradient, gold accents, and scroll indicator
+{%- endcomment -%}
 
-{%- if variant == 'editorial' -%}
+<section class="lm-hero" aria-label="Hero">
+  <div class="lm-hero__bg" aria-hidden="true"></div>
+  <div class="lm-hero__glow" aria-hidden="true"></div>
 
-  <section class="hero hero--editorial" aria-label="Hero">
-    <div class="hero__editorial-left">
-      {%- if section.settings.eyebrow != blank -%}
-        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
-      {%- endif -%}
-      <h1 class="hero__editorial-title">
-        {{ section.settings.heading | newline_to_br }}
-      </h1>
-      {%- if section.settings.subheading != blank -%}
-        <p class="hero__subtitle" style="text-align:left; margin-top:36px; max-width:400px;">
-          {{ section.settings.subheading }}
-        </p>
-      {%- endif -%}
-      <a href="{{ section.settings.cta_link }}" class="hero__arrow-cta">
-        {{ section.settings.cta_label | default: 'Discover' }}
-        <span class="hero__arrow-line"></span>
-      </a>
-    </div>
+  {%- if section.settings.background_image != blank -%}
+    <img
+      class="lm-hero__image"
+      src="{{ section.settings.background_image | image_url: width: 1920 }}"
+      srcset="{{ section.settings.background_image | image_url: width: 600 }} 600w,
+              {{ section.settings.background_image | image_url: width: 900 }} 900w,
+              {{ section.settings.background_image | image_url: width: 1200 }} 1200w,
+              {{ section.settings.background_image | image_url: width: 1920 }} 1920w"
+      sizes="100vw"
+      alt="{{ section.settings.heading | strip_html | strip_newlines | escape }}"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+    >
+  {%- endif -%}
 
-    <div class="hero__editorial-right">
-      {%- if section.settings.hero_image != blank -%}
-        <img
-          src="{{ section.settings.hero_image | image_url: width: 1200 }}"
-          alt="{{ section.settings.hero_image.alt | escape }}"
-          width="{{ section.settings.hero_image.width }}"
-          height="{{ section.settings.hero_image.height }}"
-          loading="eager"
-        >
-      {%- endif -%}
-    </div>
-  </section>
-
-{%- elsif variant == 'minimal' -%}
-
-  <section class="hero hero--minimal" aria-label="Hero">
-    <h1 class="hero__big-type" aria-hidden="true">
-      {{- section.settings.minimal_monogram | default: 'LM' -}}
-    </h1>
-
-    <div class="hero__center-box">
-      {%- if section.settings.hero_image != blank -%}
-        <img
-          src="{{ section.settings.hero_image | image_url: width: 600 }}"
-          alt="{{ section.settings.hero_image.alt | escape }}"
-          loading="eager"
-        >
-      {%- endif -%}
-    </div>
-
-    <a href="{{ section.settings.cta_link }}" class="hero__minimal-cta">
-      {{ section.settings.cta_label | default: 'Enter the Collection' }} ↓
-    </a>
-  </section>
-
-{%- else -%}
-
-  <section class="hero hero--dramatic" aria-label="Hero">
-    <div class="hero__overlay" aria-hidden="true"></div>
-    <div class="hero__decor-line" aria-hidden="true"></div>
-
-    <div class="hero__content">
-      {%- if section.settings.eyebrow != blank -%}
-        <div class="hero__eyebrow">{{ section.settings.eyebrow }}</div>
-      {%- endif -%}
-
-      <h1 class="hero__title">{{ section.settings.heading | newline_to_br }}</h1>
-
-      {%- if section.settings.subheading != blank -%}
-        <p class="hero__subtitle">{{ section.settings.subheading }}</p>
-      {%- endif -%}
-
-      <a href="{{ section.settings.cta_link }}" class="hero__cta">
-        {{ section.settings.cta_label | default: 'Shop Collection' }}
-      </a>
-    </div>
-
-    {%- if section.settings.hero_image != blank -%}
-      <div class="hero__image-wrap">
-        <img
-          src="{{ section.settings.hero_image | image_url: width: 760 }}"
-          alt="{{ section.settings.hero_image.alt | escape }}"
-          loading="eager"
-        >
-      </div>
+  <div class="lm-hero__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="lm-hero__eyebrow">{{ section.settings.eyebrow }}</p>
     {%- endif -%}
-  </section>
 
-{%- endif -%}
+    <h1 class="lm-hero__title">{{ section.settings.heading | newline_to_br }}</h1>
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="lm-hero__description">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="lm-hero__buttons">
+      {%- if section.settings.primary_cta_text != blank -%}
+        <a href="{{ section.settings.primary_cta_url | default: '/collections/all' }}" class="btn btn--gold btn--lg">
+          {{ section.settings.primary_cta_text }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.secondary_cta_text != blank -%}
+        <a href="{{ section.settings.secondary_cta_url | default: '#' }}" class="btn btn--outline-light btn--lg">
+          {{ section.settings.secondary_cta_text }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="lm-hero__scroll" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .lm-hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--cream, #FAF7F2);
+  }
+
+  .lm-hero__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(170deg, var(--espresso, #2C1810) 0%, #1a0e08 60%, #0d0704 100%);
+    z-index: 0;
+  }
+
+  .lm-hero__glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 45%, rgba(193, 167, 132, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 75% 60%, rgba(193, 167, 132, 0.04) 0%, transparent 60%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .lm-hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.3;
+    z-index: 1;
+  }
+
+  .lm-hero__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    max-width: 800px;
+  }
+
+  .lm-hero__eyebrow {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: lmHeroFadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .lm-hero__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.5rem;
+    color: var(--cream, #FAF7F2);
+    opacity: 0;
+    animation: lmHeroFadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .lm-hero__description {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgba(250, 247, 242, 0.7);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    opacity: 0;
+    animation: lmHeroFadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .lm-hero__buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: lmHeroFadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .lm-hero__buttons .btn--outline-light {
+    display: inline-block;
+    padding: 14px 36px;
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid rgba(250, 247, 242, 0.35);
+    color: var(--cream, #FAF7F2);
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+
+  .lm-hero__buttons .btn--outline-light:hover {
+    background: rgba(250, 247, 242, 0.08);
+    border-color: rgba(250, 247, 242, 0.6);
+  }
+
+  .lm-hero__scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: rgba(250, 247, 242, 0.4);
+    animation: lmHeroBounce 2s ease-in-out infinite 1.5s;
+  }
+
+  @keyframes lmHeroFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes lmHeroBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+  }
+
+  @media (max-width: 768px) {
+    .lm-hero__title {
+      font-size: clamp(2.2rem, 10vw, 3.5rem);
+    }
+    .lm-hero__description {
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+    .lm-hero__buttons .btn--lg {
+      padding: 12px 28px;
+      font-size: 0.72rem;
+    }
+    .lm-hero__buttons .btn--outline-light {
+      padding: 12px 28px;
+    }
+    .lm-hero__scroll {
+      bottom: 1.25rem;
+    }
+  }
+</style>
 
 {% schema %}
 {
@@ -97,17 +214,6 @@
   "tag": "section",
   "class": "section-hero",
   "settings": [
-    {
-      "type": "select",
-      "id": "hero_variant",
-      "label": "Layout",
-      "options": [
-        { "value": "dramatic", "label": "Dramatic (centered hero)" },
-        { "value": "editorial", "label": "Editorial (split layout)" },
-        { "value": "minimal", "label": "Minimal (type-forward)" }
-      ],
-      "default": "dramatic"
-    },
     {
       "type": "text",
       "id": "eyebrow",
@@ -118,36 +224,40 @@
       "type": "textarea",
       "id": "heading",
       "label": "Heading",
-      "default": "Timeless\nElegance"
+      "default": "Where Every\nPiece Tells\na Story"
     },
     {
       "type": "textarea",
       "id": "subheading",
-      "label": "Subheading",
-      "default": "Meticulously crafted fine jewelry designed to become part of your story."
+      "label": "Description",
+      "default": "Rare diamonds and estate treasures — each piece selected for women who know exactly what they want."
     },
     {
       "type": "text",
-      "id": "cta_label",
-      "label": "Button label",
-      "default": "Shop Collection"
+      "id": "primary_cta_text",
+      "label": "Primary button text",
+      "default": "Explore the Collection"
     },
     {
       "type": "url",
-      "id": "cta_link",
-      "label": "Button link",
-      "default": "/collections/all"
-    },
-    {
-      "type": "image_picker",
-      "id": "hero_image",
-      "label": "Hero image"
+      "id": "primary_cta_url",
+      "label": "Primary button link"
     },
     {
       "type": "text",
-      "id": "minimal_monogram",
-      "label": "Monogram (Minimal variant only)",
-      "default": "LM"
+      "id": "secondary_cta_text",
+      "label": "Secondary button text",
+      "default": "Our Story"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
     }
   ],
   "presets": [

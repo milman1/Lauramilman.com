@@ -1,36 +1,206 @@
-<section class="instagram-section">
-  <div class="instagram-section__header">
-    {%- if section.settings.handle != blank -%}
-      <div class="eyebrow">@{{ section.settings.handle }}</div>
-    {%- endif -%}
-    <h2 class="section-title" style="font-size:32px;">{{ section.settings.title }}</h2>
-  </div>
+<style>
+  .instagram-section {
+    background: var(--off-white, #F5F2ED);
+    padding: 80px 0;
+  }
+  .instagram-section__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .instagram-section__header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .instagram-section .eyebrow {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    margin-bottom: 16px;
+  }
+  .instagram-section .section-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    color: var(--espresso, #2C1810);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .instagram-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  .instagram-cell {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--cream, #FAF7F2);
+  }
+  .instagram-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .instagram-cell:hover img {
+    transform: scale(1.06);
+  }
+  .instagram-cell__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(44, 24, 16, 0.55);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .instagram-cell:hover .instagram-cell__overlay {
+    opacity: 1;
+  }
+  .instagram-cell__overlay svg {
+    color: #fff;
+  }
+  .instagram-placeholder {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream, #FAF7F2);
+    border: 1px dashed var(--gold-pale, #E8DFD3);
+    border-radius: 4px;
+    color: var(--gold, #C1A784);
+    position: relative;
+    overflow: hidden;
+  }
+  .instagram-placeholder__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(44, 24, 16, 0.35);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .instagram-placeholder:hover .instagram-placeholder__overlay {
+    opacity: 1;
+  }
+  .instagram-placeholder__overlay svg {
+    color: #fff;
+  }
+  .instagram-section__footer {
+    text-align: center;
+    margin-top: 40px;
+  }
+  .instagram-section__follow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--espresso, #2C1810);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold, #C1A784);
+    padding-bottom: 4px;
+    transition: color 0.25s;
+  }
+  .instagram-section__follow:hover {
+    color: var(--gold, #C1A784);
+  }
 
-  <div class="instagram-grid">
-    {%- for block in section.blocks -%}
-      {%- if block.settings.image != blank -%}
-        <a
-          href="{{ block.settings.link | default: settings.social_instagram }}"
-          class="instagram-cell"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Instagram post {{ forloop.index }}"
-          {{ block.shopify_attributes }}
-        >
-          <img
-            src="{{ block.settings.image | image_url: width: 400 }}"
-            alt="{{ block.settings.image.alt | default: shop.name | escape }}"
-            loading="lazy"
-            width="400"
-            height="400"
+  @media (max-width: 900px) {
+    .instagram-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
+    .instagram-section { padding: 56px 0; }
+    .instagram-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+  }
+</style>
+
+{%- liquid
+  assign ig_handle = section.settings.handle | default: 'lauramilmannewyork'
+  assign ig_url = 'https://instagram.com/' | append: ig_handle
+-%}
+
+<section class="instagram-section">
+  <div class="instagram-section__inner">
+
+    <div class="instagram-section__header">
+      <div class="eyebrow">@{{ ig_handle }}</div>
+      <h2 class="section-title">{{ section.settings.title | default: 'Follow the Journey' }}</h2>
+    </div>
+
+    <div class="instagram-grid">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank -%}
+          <a
+            href="{{ block.settings.link | default: ig_url }}"
+            class="instagram-cell"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram post {{ forloop.index }}"
+            {{ block.shopify_attributes }}
           >
-        </a>
-      {%- else -%}
-        <div class="instagram-placeholder" {{ block.shopify_attributes }}>
-          IG Post
-        </div>
-      {%- endif -%}
-    {%- endfor -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 400 }}"
+              alt="{{ block.settings.image.alt | default: shop.name | escape }}"
+              loading="lazy"
+              width="400"
+              height="400"
+            >
+            <div class="instagram-cell__overlay">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+          </a>
+        {%- else -%}
+          <div class="instagram-placeholder" {{ block.shopify_attributes }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="instagram-placeholder__overlay">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <div class="instagram-section__footer">
+      <a href="{{ ig_url }}" class="instagram-section__follow" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+        </svg>
+        Follow @{{ ig_handle }}
+      </a>
+    </div>
+
   </div>
 </section>
 
@@ -44,7 +214,7 @@
       "type": "text",
       "id": "handle",
       "label": "Instagram handle (without @)",
-      "default": "lauramilman"
+      "default": "lauramilmannewyork"
     },
     {
       "type": "text",

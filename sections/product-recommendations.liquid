@@ -1,0 +1,124 @@
+<style>
+  .product-recs {
+    background: var(--warm-white, #FBF9F6);
+    padding: 80px 0;
+  }
+  .product-recs__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .product-recs__header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .product-recs .section-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 400;
+    color: var(--espresso, #2C1810);
+    margin: 0;
+    line-height: 1.25;
+  }
+  .product-recs__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .product-recs__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 14px;
+    color: var(--text-muted, #6B5E54);
+    padding: 40px 0;
+  }
+
+  @media (max-width: 900px) {
+    .product-recs__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
+    .product-recs { padding: 56px 0; }
+    .product-recs__grid {
+      grid-template-columns: 1fr;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+  }
+</style>
+
+{%- liquid
+  assign limit = section.settings.product_count | default: 4
+  assign rec_products = null
+  if product != blank and product.collections.size > 0
+    assign primary_collection = product.collections.first
+    assign rec_products = primary_collection.products
+  endif
+-%}
+
+<section class="product-recs">
+  <div class="product-recs__inner">
+
+    <div class="product-recs__header">
+      <h2 class="section-title">{{ section.settings.title | default: 'You May Also Love' }}</h2>
+    </div>
+
+    <div class="product-recs__grid">
+      {%- if rec_products != blank -%}
+        {%- assign shown = 0 -%}
+        {%- for rec in rec_products limit: limit -%}
+          {%- if rec.id != product.id -%}
+            {%- render 'product-card', product: rec -%}
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+          {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- if shown == 0 -%}
+          <p class="product-recs__empty">No related products found.</p>
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%} Fallback: show latest products from the store {%- endcomment -%}
+        {%- for rec in collections.all.products limit: limit -%}
+          {%- if rec.id != product.id -%}
+            {%- render 'product-card', product: rec -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Recommendations",
+  "tag": "section",
+  "class": "section-product-recs",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section title",
+      "default": "You May Also Love"
+    },
+    {
+      "type": "range",
+      "id": "product_count",
+      "label": "Products to show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "templates": ["product"],
+  "presets": [
+    {
+      "name": "Product Recommendations"
+    }
+  ]
+}
+{% endschema %}

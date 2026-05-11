@@ -1,0 +1,243 @@
+{%- comment -%}
+  Laura Milman New York — Category Cards Section
+  Grid of image cards with overlay gradient and collection links
+{%- endcomment -%}
+
+<section class="lm-categories" aria-label="{{ section.settings.title | default: 'Shop by Category' | escape }}">
+  <div class="lm-categories__container">
+
+    <div class="lm-categories__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      {%- if section.settings.title != blank -%}
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-categories__grid">
+      {%- for block in section.blocks -%}
+        {%- assign card_collection = block.settings.collection -%}
+        {%- assign card_title = block.settings.title -%}
+        {%- assign card_image = block.settings.image -%}
+        {%- assign card_url = '#' -%}
+
+        {%- if card_collection != blank -%}
+          {%- if card_title == blank -%}
+            {%- assign card_title = card_collection.title -%}
+          {%- endif -%}
+          {%- assign card_url = card_collection.url -%}
+          {%- if card_image == blank and card_collection.image != blank -%}
+            {%- assign card_image = card_collection.image -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        <a href="{{ card_url }}" class="lm-cat-card" {{ block.shopify_attributes }}>
+          <div class="lm-cat-card__media">
+            {%- if card_image != blank -%}
+              <img
+                src="{{ card_image | image_url: width: 600 }}"
+                srcset="{{ card_image | image_url: width: 300 }} 300w,
+                        {{ card_image | image_url: width: 450 }} 450w,
+                        {{ card_image | image_url: width: 600 }} 600w"
+                sizes="(max-width: 768px) 50vw, 25vw"
+                alt="{{ card_title | escape }}"
+                loading="lazy"
+                decoding="async"
+              >
+            {%- else -%}
+              <div class="lm-cat-card__placeholder" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <path d="M6 3h12l4 6-10 13L2 9z"/>
+                </svg>
+              </div>
+            {%- endif -%}
+          </div>
+          <div class="lm-cat-card__overlay">
+            <h3 class="lm-cat-card__title">{{ card_title | default: 'Collection' }}</h3>
+            <span class="lm-cat-card__cta">Shop Now →</span>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-categories {
+    padding: 5rem 2rem;
+    background: var(--warm-white, #FDFBF7);
+  }
+
+  .lm-categories__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .lm-categories__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .lm-categories__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .lm-cat-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    text-decoration: none;
+    color: var(--cream, #FAF7F2);
+  }
+
+  .lm-cat-card__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lm-cat-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .lm-cat-card:hover .lm-cat-card__media img {
+    transform: scale(1.05);
+  }
+
+  .lm-cat-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--espresso, #2C1810) 0%, #1a0e08 100%);
+    color: var(--gold, #C1A784);
+    opacity: 0.3;
+  }
+
+  .lm-cat-card__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(44, 24, 16, 0.8) 0%, rgba(44, 24, 16, 0.1) 50%, transparent 100%);
+    transition: background 0.3s ease;
+  }
+
+  .lm-cat-card:hover .lm-cat-card__overlay {
+    background: linear-gradient(to top, rgba(44, 24, 16, 0.9) 0%, rgba(44, 24, 16, 0.2) 60%, transparent 100%);
+  }
+
+  .lm-cat-card__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin: 0 0 0.4rem;
+    line-height: 1.2;
+  }
+
+  .lm-cat-card__cta {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold, #C1A784);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s ease;
+  }
+
+  .lm-cat-card:hover .lm-cat-card__cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 1024px) {
+    .lm-categories__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-categories {
+      padding: 3.5rem 1rem;
+    }
+    .lm-categories__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .lm-cat-card__title {
+      font-size: 1.1rem;
+    }
+    .lm-cat-card__cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Category Cards",
+  "tag": "section",
+  "class": "section-category-cards",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Explore"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Shop by Category"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category_card",
+      "name": "Category Card",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title (override)"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image (override)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Cards",
+      "blocks": [
+        { "type": "category_card", "settings": { "title": "Rings" } },
+        { "type": "category_card", "settings": { "title": "Necklaces" } },
+        { "type": "category_card", "settings": { "title": "Earrings" } },
+        { "type": "category_card", "settings": { "title": "Bracelets" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
