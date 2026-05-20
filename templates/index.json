@@ -38,9 +38,9 @@
   },
   "order": [
     "hero",
-    "category-cards",
     "featured-products",
     "brand-story",
+    "category-cards",
     "newsletter"
   ]
 }
