@@ -112,9 +112,9 @@
   },
   "order": [
     "hero",
-    "category_cards_AVMpct",
     "featured-products",
     "brand-story",
+    "category_cards_AVMpct",
     "newsletter"
   ]
 }
