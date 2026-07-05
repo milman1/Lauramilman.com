@@ -1,0 +1,152 @@
+{%- comment -%}
+  Laura Milman New York — Collections Index (/collections)
+  Crawlable hub page linking every collection.
+{%- endcomment -%}
+
+{%- paginate collections by 48 -%}
+
+<section class="lm-collections-index">
+  <div class="lm-collections-index__container">
+
+    <div class="lm-collections-index__header">
+      <h1 class="lm-collections-index__title">{{ section.settings.title | default: 'All Collections' }}</h1>
+      {%- if section.settings.description != blank -%}
+        <p class="lm-collections-index__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-collections-index__grid">
+      {%- for collection in collections -%}
+        <a href="{{ collection.url }}" class="lm-collections-index__card">
+          {%- if collection.image -%}
+            <img
+              src="{{ collection.image | image_url: width: 600 }}"
+              srcset="{{ collection.image | image_url: width: 300 }} 300w,
+                      {{ collection.image | image_url: width: 600 }} 600w"
+              sizes="(max-width: 768px) 50vw, 25vw"
+              alt="{{ collection.image.alt | default: collection.title | escape }}"
+              width="{{ collection.image.width }}"
+              height="{{ collection.image.height }}"
+              loading="lazy"
+            >
+          {%- elsif collection.products.first.featured_image -%}
+            <img
+              src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+              alt="{{ collection.title | escape }}"
+              width="{{ collection.products.first.featured_image.width }}"
+              height="{{ collection.products.first.featured_image.height }}"
+              loading="lazy"
+            >
+          {%- endif -%}
+          <span class="lm-collections-index__name">{{ collection.title }}</span>
+          <span class="lm-collections-index__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'piece', 'pieces' }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="lm-pagination" aria-label="Pagination">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}" class="lm-pagination__btn">&larr; Previous</a>
+        {%- endif -%}
+        <span class="lm-pagination__info">Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}" class="lm-pagination__btn">Next &rarr;</a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{%- endpaginate -%}
+
+<style>
+  .lm-collections-index {
+    padding: 8rem 2rem 4rem;
+    background: var(--warm-white, #FDFBF7);
+    min-height: 60vh;
+  }
+  .lm-collections-index__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .lm-collections-index__header {
+    text-align: center;
+    padding: 1rem 0 2.5rem;
+  }
+  .lm-collections-index__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.75rem;
+  }
+  .lm-collections-index__desc {
+    color: var(--text-muted, #8B7D6B);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .lm-collections-index__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+  .lm-collections-index__card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    text-align: center;
+  }
+  .lm-collections-index__card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    background: var(--cream, #FAF6F0);
+  }
+  .lm-collections-index__name {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.15rem;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-collections-index__count {
+    font-size: 0.8rem;
+    color: var(--text-muted, #8B7D6B);
+    margin-top: 0.25rem;
+  }
+  .lm-collections-index__card:hover .lm-collections-index__name {
+    color: var(--gold, #C9A050);
+  }
+  @media (max-width: 1024px) {
+    .lm-collections-index__grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  }
+  @media (max-width: 768px) {
+    .lm-collections-index { padding: 7rem 1rem 3rem; }
+    .lm-collections-index__grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Collections Index",
+  "tag": "section",
+  "class": "section-main-list-collections",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "All Collections"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Explore fine and estate jewelry by category, designer, and occasion — every piece individually authenticated in New York."
+    }
+  ]
+}
+{% endschema %}

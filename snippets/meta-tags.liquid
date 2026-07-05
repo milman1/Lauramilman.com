@@ -28,6 +28,11 @@
   {%- assign og_type = 'website' -%}
 {%- endif -%}
 
+{%- if og_image == blank and settings.org_logo != blank -%}
+  {%- assign og_image = settings.org_logo | image_url: width: 1200 -%}
+  {%- assign og_image_alt = shop.name -%}
+{%- endif -%}
+
 <meta property="og:site_name" content="{{ og_site_name }}">
 <meta property="og:url" content="{{ og_url }}">
 <meta property="og:title" content="{{ og_title }}">

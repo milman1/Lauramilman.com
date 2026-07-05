@@ -1,0 +1,177 @@
+{%- comment -%}
+  Laura Milman New York — Search Results Page
+{%- endcomment -%}
+
+{%- paginate search.results by 24 -%}
+
+<section class="lm-search">
+  <div class="lm-search__container">
+
+    <div class="lm-search__header">
+      <h1 class="lm-search__title">
+        {%- if search.performed -%}
+          Search Results
+        {%- else -%}
+          Search
+        {%- endif -%}
+      </h1>
+      {%- if search.performed -%}
+        <p class="lm-search__meta">
+          {{ search.results_count }}
+          {{ search.results_count | pluralize: 'result', 'results' }}
+          for &ldquo;{{ search.terms | escape }}&rdquo;
+        </p>
+      {%- endif -%}
+    </div>
+
+    <form action="{{ routes.search_url }}" method="get" class="lm-search__form" role="search">
+      <input type="hidden" name="type" value="product">
+      <input
+        type="search"
+        name="q"
+        class="lm-search__input"
+        value="{{ search.terms | escape }}"
+        placeholder="Search rings, necklaces, earrings..."
+        aria-label="Search"
+      >
+      <button type="submit" class="btn btn--gold lm-search__submit">Search</button>
+    </form>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <div class="products-grid lm-search__grid">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {%- render 'product-card', product: item -%}
+            {%- else -%}
+              <div class="lm-search__result">
+                <a href="{{ item.url }}" class="lm-search__result-link">
+                  <h3>{{ item.title }}</h3>
+                  {%- if item.content -%}
+                    <p>{{ item.content | strip_html | truncate: 140 }}</p>
+                  {%- endif -%}
+                </a>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav class="lm-pagination" aria-label="Pagination">
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}" class="lm-pagination__btn">&larr; Previous</a>
+            {%- endif -%}
+            <span class="lm-pagination__info">Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}" class="lm-pagination__btn">Next &rarr;</a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- else -%}
+        <div class="lm-search__empty">
+          <p>No results for &ldquo;{{ search.terms | escape }}&rdquo;. Try a different term, or explore the collection.</p>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Jewelry</a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+  </div>
+</section>
+
+{%- endpaginate -%}
+
+<style>
+  .lm-search {
+    padding: 8rem 2rem 4rem;
+    background: var(--warm-white, #FDFBF7);
+    min-height: 60vh;
+  }
+  .lm-search__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .lm-search__header {
+    text-align: center;
+    padding: 1rem 0;
+  }
+  .lm-search__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+  .lm-search__meta {
+    color: var(--text-muted, #8B7D6B);
+    font-size: 0.9rem;
+  }
+  .lm-search__form {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 560px;
+    margin: 1.5rem auto 3rem;
+  }
+  .lm-search__input {
+    flex: 1;
+    height: 50px;
+    padding: 0 18px;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    color: var(--text-dark, #2C1810);
+    background: #fff;
+  }
+  .lm-search__input:focus {
+    outline: none;
+    border-color: var(--gold, #C9A050);
+  }
+  .lm-search__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+  .lm-search__result {
+    padding: 1rem;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 4px;
+  }
+  .lm-search__result-link {
+    text-decoration: none;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-search__result-link h3 {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-weight: 400;
+    margin: 0 0 0.5rem;
+  }
+  .lm-search__result-link p {
+    font-size: 0.85rem;
+    color: var(--text-muted, #8B7D6B);
+    margin: 0;
+  }
+  .lm-search__empty {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--text-muted, #8B7D6B);
+  }
+  .lm-search__empty p {
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 1024px) {
+    .lm-search__grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  }
+  @media (max-width: 768px) {
+    .lm-search { padding: 7rem 1rem 3rem; }
+    .lm-search__grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .lm-search__form { flex-direction: column; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Search Results",
+  "tag": "section",
+  "class": "section-main-search",
+  "settings": []
+}
+{% endschema %}

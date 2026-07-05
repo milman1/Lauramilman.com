@@ -1,0 +1,206 @@
+{%- comment -%}
+  Laura Milman New York — Article Page
+{%- endcomment -%}
+
+<article class="lm-article">
+  <div class="lm-article__container">
+
+    <nav class="lm-article__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href="{{ blog.url }}">{{ blog.title }}</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <span class="current" aria-current="page">{{ article.title }}</span>
+    </nav>
+
+    <header class="lm-article__header">
+      <time class="lm-article__date" datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+        {{ article.published_at | date: '%B %-d, %Y' }}
+      </time>
+      <h1 class="lm-article__title">{{ article.title }}</h1>
+      {%- if article.author != blank -%}
+        <p class="lm-article__author">By {{ article.author }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- if article.image -%}
+      <img
+        class="lm-article__image"
+        src="{{ article.image | image_url: width: 1400 }}"
+        srcset="{{ article.image | image_url: width: 700 }} 700w,
+                {{ article.image | image_url: width: 1000 }} 1000w,
+                {{ article.image | image_url: width: 1400 }} 1400w"
+        sizes="(max-width: 768px) 100vw, 900px"
+        alt="{{ article.image.alt | default: article.title | escape }}"
+        width="{{ article.image.width }}"
+        height="{{ article.image.height }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+
+    <div class="lm-article__content rte">
+      {{ article.content }}
+    </div>
+
+    {%- if article.tags.size > 0 -%}
+      <div class="lm-article__tags">
+        {%- for tag in article.tags -%}
+          <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="lm-article__tag">{{ tag }}</a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div class="lm-article__footer">
+      <a href="{{ blog.url }}" class="btn btn--gold">&larr; Back to {{ blog.title }}</a>
+    </div>
+
+  </div>
+</article>
+
+<!-- Article JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ article.title | json }},
+  "url": "{{ shop.url }}{{ article.url }}",
+  {%- if article.image -%}
+  "image": [{{ article.image | image_url: width: 1400 | prepend: 'https:' | json }}],
+  {%- endif -%}
+  "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+  "dateModified": {{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+  "author": {
+    "@type": "Person",
+    "name": {{ article.author | json }}
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": "{{ shop.url }}"
+  },
+  "description": {{ article.excerpt_or_content | strip_html | truncate: 300 | json }}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ shop.url }}" },
+    { "@type": "ListItem", "position": 2, "name": {{ blog.title | json }}, "item": "{{ shop.url }}{{ blog.url }}" },
+    { "@type": "ListItem", "position": 3, "name": {{ article.title | json }}, "item": "{{ shop.url }}{{ article.url }}" }
+  ]
+}
+</script>
+
+<style>
+  .lm-article {
+    padding: 8rem 2rem 4rem;
+    background: var(--warm-white, #FDFBF7);
+  }
+  .lm-article__container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .lm-article__breadcrumb {
+    font-family: var(--font-body, 'Jost', sans-serif);
+    font-size: 0.78rem;
+    color: var(--text-muted, #8B7D6B);
+    margin-bottom: 2rem;
+  }
+  .lm-article__breadcrumb a {
+    color: var(--text-muted, #8B7D6B);
+    text-decoration: none;
+  }
+  .lm-article__breadcrumb a:hover {
+    color: var(--gold, #C9A050);
+  }
+  .lm-article__breadcrumb .sep {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+  }
+  .lm-article__header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .lm-article__date {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+  .lm-article__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.75rem 0 0.5rem;
+    line-height: 1.2;
+  }
+  .lm-article__author {
+    font-size: 0.85rem;
+    color: var(--text-muted, #8B7D6B);
+  }
+  .lm-article__image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 2.5rem;
+  }
+  .lm-article__content {
+    font-size: 1.02rem;
+    line-height: 1.85;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-article__content h2,
+  .lm-article__content h3 {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-weight: 400;
+    margin-top: 2.5rem;
+  }
+  .lm-article__content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .lm-article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 2.5rem 0 0;
+  }
+  .lm-article__tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8B7D6B);
+    text-decoration: none;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 100px;
+    padding: 0.4rem 1rem;
+  }
+  .lm-article__tag:hover {
+    color: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+  }
+  .lm-article__footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    text-align: center;
+  }
+  @media (max-width: 768px) {
+    .lm-article { padding: 7rem 1rem 3rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "class": "section-main-article",
+  "settings": []
+}
+{% endschema %}

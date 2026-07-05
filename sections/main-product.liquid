@@ -34,10 +34,16 @@
           <img
             id="product-main-image"
             src="{{ product.featured_image | image_url: width: 1200 }}"
+            srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
+                    {{ product.featured_image | image_url: width: 600 }} 600w,
+                    {{ product.featured_image | image_url: width: 900 }} 900w,
+                    {{ product.featured_image | image_url: width: 1200 }} 1200w"
+            sizes="(max-width: 768px) 100vw, 50vw"
             alt="{{ product.featured_image.alt | default: product.title | escape }}"
             width="{{ product.featured_image.width }}"
             height="{{ product.featured_image.height }}"
             loading="eager"
+            fetchpriority="high"
           >
         {%- endif -%}
 
@@ -99,36 +105,37 @@
         <div class="product-description">{{ product.description | strip_html | truncate: 300 }}</div>
       {%- endif -%}
 
-      <!-- Metafield Specs -->
+      <!-- Metafield Specs (definitions per SHOPIFY_SETUP.md §1) -->
+      {%- assign mf = product.metafields.custom -%}
       {%- assign has_meta = false -%}
-      {%- if product.metafields.custom.carat_weight != blank or product.metafields.custom.color != blank or product.metafields.custom.clarity != blank or product.metafields.custom.metal != blank -%}
+      {%- if mf.era != blank or mf.metal_type != blank or mf.diamond_weight != blank or mf.gemstones != blank -%}
         {%- assign has_meta = true -%}
       {%- endif -%}
 
       {%- if has_meta -%}
         <div class="product-specs">
-          {%- if product.metafields.custom.carat_weight != blank -%}
+          {%- if mf.era != blank -%}
             <div class="product-spec">
-              <span class="product-spec__label">Carat</span>
-              <span class="product-spec__value">{{ product.metafields.custom.carat_weight }}</span>
+              <span class="product-spec__label">Era</span>
+              <span class="product-spec__value">{{ mf.era }}</span>
             </div>
           {%- endif -%}
-          {%- if product.metafields.custom.color != blank -%}
-            <div class="product-spec">
-              <span class="product-spec__label">Color</span>
-              <span class="product-spec__value">{{ product.metafields.custom.color }}</span>
-            </div>
-          {%- endif -%}
-          {%- if product.metafields.custom.clarity != blank -%}
-            <div class="product-spec">
-              <span class="product-spec__label">Clarity</span>
-              <span class="product-spec__value">{{ product.metafields.custom.clarity }}</span>
-            </div>
-          {%- endif -%}
-          {%- if product.metafields.custom.metal != blank -%}
+          {%- if mf.metal_type != blank -%}
             <div class="product-spec">
               <span class="product-spec__label">Metal</span>
-              <span class="product-spec__value">{{ product.metafields.custom.metal }}</span>
+              <span class="product-spec__value">{{ mf.metal_type }}</span>
+            </div>
+          {%- endif -%}
+          {%- if mf.diamond_weight != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Diamonds</span>
+              <span class="product-spec__value">{{ mf.diamond_weight }}</span>
+            </div>
+          {%- endif -%}
+          {%- if mf.gemstones != blank -%}
+            <div class="product-spec">
+              <span class="product-spec__label">Gemstones</span>
+              <span class="product-spec__value">{{ mf.gemstones }}</span>
             </div>
           {%- endif -%}
         </div>
@@ -234,8 +241,16 @@
         </button>
         <div class="accordion-body" id="acc-materials-{{ section.id }}">
           <div class="accordion-content">
-            {%- if product.metafields.custom.materials != blank -%}
-              {{ product.metafields.custom.materials }}
+            {%- if mf.metal_type != blank or mf.metal_weight != blank or mf.measurements != blank or mf.condition != blank -%}
+              <ul class="product-detail-list">
+                {%- if mf.metal_type != blank -%}<li><strong>Metal:</strong> {{ mf.metal_type }}</li>{%- endif -%}
+                {%- if mf.metal_weight != blank -%}<li><strong>Metal weight:</strong> {{ mf.metal_weight }}</li>{%- endif -%}
+                {%- if mf.diamond_weight != blank -%}<li><strong>Diamond weight:</strong> {{ mf.diamond_weight }}</li>{%- endif -%}
+                {%- if mf.gemstones != blank -%}<li><strong>Gemstones:</strong> {{ mf.gemstones }}</li>{%- endif -%}
+                {%- if mf.measurements != blank -%}<li><strong>Measurements:</strong> {{ mf.measurements }}</li>{%- endif -%}
+                {%- if mf.era != blank -%}<li><strong>Era:</strong> {{ mf.era }}</li>{%- endif -%}
+                {%- if mf.condition != blank -%}<li><strong>Condition:</strong> {{ mf.condition }}</li>{%- endif -%}
+              </ul>
             {%- else -%}
               {{ product.description }}
             {%- endif -%}
@@ -292,8 +307,8 @@
   <!-- Promise Banner -->
   <div class="promise-banner">
     <div class="eyebrow">The {{ shop.name }} Promise</div>
-    <h2 class="promise-banner__title">Crafted to Last a Lifetime</h2>
-    <p class="promise-banner__body">Every piece is handcrafted using ethically sourced materials and time-honored techniques passed down through generations of New York's finest jewelers.</p>
+    <h2 class="promise-banner__title">{{ section.settings.promise_title | default: 'Authenticated. Guaranteed. Yours.' }}</h2>
+    <p class="promise-banner__body">{{ section.settings.promise_body | default: 'Every estate piece is individually inspected and authenticated by our specialists in New York, then carefully restored to its original splendor before it reaches you.' }}</p>
     <div class="promise-stats">
       {%- for block in section.blocks -%}
         {%- if block.type == 'stat' -%}
@@ -328,12 +343,21 @@
 </div><!-- /product-page -->
 
 <!-- Product JSON-LD -->
+{%- comment -%}
+  Estate pieces are pre-owned: mark UsedCondition when the condition
+  metafield is set or the product is tagged "estate", else NewCondition.
+{%- endcomment -%}
+{%- assign item_condition = 'NewCondition' -%}
+{%- if mf.condition != blank or product.tags contains 'estate' or product.tags contains 'pre-owned' -%}
+  {%- assign item_condition = 'UsedCondition' -%}
+{%- endif -%}
+{%- assign price_valid_until = 'now' | date: '%s' | plus: 31536000 | date: '%Y-%m-%d' -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Product",
   "name": {{ product.title | json }},
-  "description": {{ product.description | strip_html | truncate: 200 | json }},
+  "description": {{ product.description | strip_html | truncate: 500 | json }},
   "image": [
     {%- for image in product.images limit: 5 -%}
       {{ image.src | image_url: width: 1024 | prepend: "https:" | json }}{% unless forloop.last %},{% endunless %}
@@ -342,23 +366,63 @@
   "url": "{{ shop.url }}{{ product.url }}",
   "brand": {
     "@type": "Brand",
-    "name": {{ shop.name | json }}
+    "name": {{ product.vendor | default: shop.name | json }}
   },
   "sku": {{ current_variant.sku | json }},
+  "itemCondition": "https://schema.org/{{ item_condition }}",
   "offers": {
     "@type": "Offer",
     "url": "{{ shop.url }}{{ product.url }}",
-    "price": "{{ product.price | money_without_currency | remove: ',' }}",
+    "price": "{{ current_variant.price | money_without_currency | remove: ',' }}",
     "priceCurrency": "{{ cart.currency.iso_code }}",
-    "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+    "priceValidUntil": "{{ price_valid_until }}",
+    "itemCondition": "https://schema.org/{{ item_condition }}",
+    "availability": "https://schema.org/{% if current_variant.available %}InStock{% else %}OutOfStock{% endif %}",
     "seller": {
       "@type": "Organization",
       "name": {{ shop.name | json }}
     }
   }
-  {%- if product.metafields.custom.metal != blank -%}
-  ,"material": {{ product.metafields.custom.metal | json }}
+  {%- if mf.metal_type != blank -%}
+  ,"material": {{ mf.metal_type | json }}
   {%- endif -%}
+}
+</script>
+
+<!-- Breadcrumb JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ shop.url }}"
+    }
+    {%- if collection -%}
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": {{ collection.title | json }},
+      "item": "{{ shop.url }}{{ collection.url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": {{ product.title | json }},
+      "item": "{{ shop.url }}{{ product.url }}"
+    }
+    {%- else -%}
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": {{ product.title | json }},
+      "item": "{{ shop.url }}{{ product.url }}"
+    }
+    {%- endif -%}
+  ]
 }
 </script>
 
@@ -368,6 +432,18 @@
   "tag": "section",
   "class": "section-main-product",
   "settings": [
+    {
+      "type": "text",
+      "id": "promise_title",
+      "label": "Promise banner title",
+      "default": "Authenticated. Guaranteed. Yours."
+    },
+    {
+      "type": "textarea",
+      "id": "promise_body",
+      "label": "Promise banner text",
+      "default": "Every estate piece is individually inspected and authenticated by our specialists in New York, then carefully restored to its original splendor before it reaches you."
+    },
     {
       "type": "textarea",
       "id": "shipping_text",

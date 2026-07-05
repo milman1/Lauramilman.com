@@ -85,6 +85,24 @@
     ]
   },
   {
+    "name": "SEO",
+    "settings": [
+      {
+        "type": "textarea",
+        "id": "seo_meta_description",
+        "label": "Default meta description",
+        "info": "Used on the homepage and any page without its own description. Keep under 160 characters.",
+        "default": "Authenticated estate and fine jewelry in New York — signed pieces from Cartier, Van Cleef & Arpels, Tiffany & Co., Bvlgari and more. Individually authenticated, free insured shipping, 30-day returns."
+      },
+      {
+        "type": "image_picker",
+        "id": "org_logo",
+        "label": "Organization logo",
+        "info": "Square or wide logo used in structured data (Google) and as a social sharing fallback image."
+      }
+    ]
+  },
+  {
     "name": "Favicon",
     "settings": [
       {

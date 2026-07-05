@@ -1,0 +1,166 @@
+{%- comment -%}
+  Laura Milman New York — Blog Index
+  Editorial hub: designer guides, era guides, authentication articles.
+{%- endcomment -%}
+
+{%- paginate blog.articles by 12 -%}
+
+<section class="lm-blog">
+  <div class="lm-blog__container">
+
+    <div class="lm-blog__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h1 class="lm-blog__title">{{ blog.title }}</h1>
+    </div>
+
+    {%- if blog.articles.size > 0 -%}
+      <div class="lm-blog__grid">
+        {%- for article in blog.articles -%}
+          <article class="lm-blog__card">
+            <a href="{{ article.url }}" class="lm-blog__card-link">
+              {%- if article.image -%}
+                <img
+                  class="lm-blog__card-image"
+                  src="{{ article.image | image_url: width: 800 }}"
+                  srcset="{{ article.image | image_url: width: 400 }} 400w,
+                          {{ article.image | image_url: width: 800 }} 800w"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  alt="{{ article.image.alt | default: article.title | escape }}"
+                  width="{{ article.image.width }}"
+                  height="{{ article.image.height }}"
+                  loading="lazy"
+                >
+              {%- endif -%}
+              <div class="lm-blog__card-body">
+                <time class="lm-blog__card-date" datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                  {{ article.published_at | date: '%B %-d, %Y' }}
+                </time>
+                <h2 class="lm-blog__card-title">{{ article.title }}</h2>
+                <p class="lm-blog__card-excerpt">
+                  {{ article.excerpt_or_content | strip_html | truncate: 150 }}
+                </p>
+                <span class="lm-blog__card-more">Read More &rarr;</span>
+              </div>
+            </a>
+          </article>
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="lm-pagination" aria-label="Pagination">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="lm-pagination__btn">&larr; Previous</a>
+          {%- endif -%}
+          <span class="lm-pagination__info">Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="lm-pagination__btn">Next &rarr;</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- else -%}
+      <p class="lm-blog__empty">No articles yet — check back soon.</p>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{%- endpaginate -%}
+
+<style>
+  .lm-blog {
+    padding: 8rem 2rem 4rem;
+    background: var(--warm-white, #FDFBF7);
+    min-height: 60vh;
+  }
+  .lm-blog__container {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .lm-blog__header {
+    text-align: center;
+    padding: 1rem 0 2.5rem;
+  }
+  .lm-blog__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0;
+  }
+  .lm-blog__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem 2rem;
+  }
+  .lm-blog__card-link {
+    text-decoration: none;
+    display: block;
+  }
+  .lm-blog__card-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    background: var(--cream, #FAF6F0);
+  }
+  .lm-blog__card-date {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+  .lm-blog__card-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 0.5rem;
+    line-height: 1.3;
+  }
+  .lm-blog__card-link:hover .lm-blog__card-title {
+    color: var(--gold, #C9A050);
+  }
+  .lm-blog__card-excerpt {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8B7D6B);
+    margin: 0 0 0.75rem;
+  }
+  .lm-blog__card-more {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-blog__empty {
+    text-align: center;
+    color: var(--text-muted, #8B7D6B);
+    padding: 3rem 0;
+  }
+  @media (max-width: 1024px) {
+    .lm-blog__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .lm-blog { padding: 7rem 1rem 3rem; }
+    .lm-blog__grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Blog",
+  "tag": "section",
+  "class": "section-main-blog",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "The Journal"
+    }
+  ]
+}
+{% endschema %}

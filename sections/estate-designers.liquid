@@ -126,6 +126,45 @@
     color: var(--text-muted, #6B5E54);
     margin: 0;
   }
+  .estate-designers__index {
+    max-width: 680px;
+    margin: 0 auto 40px;
+    text-align: left;
+  }
+  .estate-designers__index-title {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    text-align: center;
+    margin: 0 0 20px;
+  }
+  .estate-designers__index-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 3;
+    column-gap: 32px;
+  }
+  .estate-designers__index-list li {
+    break-inside: avoid;
+    padding: 4px 0;
+  }
+  .estate-designers__index-link {
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-muted, #6B5E54);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .estate-designers__index-link:hover {
+    color: var(--gold, #C1A784);
+  }
+  @media (max-width: 600px) {
+    .estate-designers__index-list { columns: 2; column-gap: 20px; }
+  }
 
   @media (max-width: 600px) {
     .estate-designers { padding: 56px 0; }
@@ -225,6 +264,28 @@
       </div>
     </div>
 
+    {%- if section.settings.show_designer_index -%}
+      {%- comment -%}
+        Crawlable designer index. The <select> above is invisible to search
+        engines, so every brand collection also gets a real <a> link here.
+        Handles must match the automated collections in SHOPIFY_SETUP.md §2c.
+      {%- endcomment -%}
+      {%- assign designer_index = 'Adler|adler,Aldo Cipullo|aldo-cipullo,Aletto Brothers|aletto-brothers,Angela Cummings|angela-cummings,Asch Grossbardt|asch-grossbardt,Asprey|asprey,Audemars Piguet|audemars-piguet,Bailey Banks & Biddle|bailey-banks-biddle,Bert H. Satz|bert-h-satz,Boucheron|boucheron,Buccellati|buccellati,Bvlgari|bvlgari,Carrera Y Carrera|carrera-y-carrera,Cartier|cartier,Carvin French|carvin-french,Chanel|chanel,Charles Krypell|charles-krypell,Chaumet|chaumet,Chopard|chopard,Christian Dior|christian-dior,Craiger Drake|craiger-drake,David Webb|david-webb,De Grisogono|de-grisogono,Demner|demner,Di Modolo|di-modolo,Dinh Van|dinh-van,Dominique Paris|dominique-paris,Fabergé|faberge,Franck Muller|franck-muller,Fred|fred,Graff|graff,Harry Winston|harry-winston,Hermès|hermes,Ilias Lalaounis|ilias-lalaounis,Jean Schlumberger|jean-schlumberger,Marina B|marina-b,Mikimoto|mikimoto,Patek Philippe|patek-philippe,Tiffany & Co.|tiffany-co,Van Cleef & Arpels|van-cleef-arpels' | split: ',' -%}
+      <nav class="estate-designers__index" aria-label="Shop estate jewelry by designer">
+        <h3 class="estate-designers__index-title">Shop by Designer</h3>
+        <ul class="estate-designers__index-list">
+          {%- for entry in designer_index -%}
+            {%- assign entry_parts = entry | split: '|' -%}
+            <li>
+              <a href="/collections/{{ entry_parts[1] }}" class="estate-designers__index-link">
+                Estate {{ entry_parts[0] }} Jewelry
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
     {%- if section.settings.partner_note != blank -%}
       <div class="estate-designers__footer">
         <p class="estate-designers__partner-note">{{ section.settings.partner_note }}</p>
@@ -286,6 +347,13 @@
       "type": "image_picker",
       "id": "bg_image",
       "label": "Background image (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_designer_index",
+      "label": "Show crawlable designer link list",
+      "info": "Renders every designer collection as a real link so search engines can discover the brand pages (the dropdown alone is not crawlable).",
+      "default": true
     },
     {
       "type": "textarea",

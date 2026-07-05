@@ -23,10 +23,13 @@
       {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
     </title>
 
+    {%- assign default_meta_description = settings.seo_meta_description | default: shop.description -%}
     {% if request.page_type == 'index' %}
-      <meta name="description" content="Exceptional lab-grown diamond fine jewelry. Ethically grown, exquisitely crafted in New York. 10+ carat collections, free shipping, 30-day returns.">
+      <meta name="description" content="{{ default_meta_description | strip_html | strip_newlines | escape }}">
     {% elsif page_description %}
       <meta name="description" content="{{ page_description | escape }}">
+    {% elsif default_meta_description != blank %}
+      <meta name="description" content="{{ default_meta_description | strip_html | strip_newlines | escape }}">
     {% endif %}
 
     {% render 'meta-tags' %}
@@ -64,10 +67,12 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Laura Milman New York",
+      "name": {{ shop.name | json }},
       "url": "{{ shop.url }}",
-      "logo": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}",
-      "description": "Exceptional lab-grown diamond fine jewelry. Ethically grown, exquisitely crafted in New York. 10+ carat collections.",
+      {%- if settings.org_logo != blank -%}
+      "logo": {{ settings.org_logo | image_url: width: 600 | prepend: 'https:' | json }},
+      {%- endif -%}
+      "description": {{ default_meta_description | strip_html | strip_newlines | json }},
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "New York",
@@ -79,9 +84,34 @@
         "contactType": "customer service",
         "email": "hello@lauramilman.com"
       },
-      "sameAs": []
+      "sameAs": [
+        {%- assign same_as = '' -%}
+        {%- if settings.social_instagram != blank -%}{%- assign same_as = same_as | append: settings.social_instagram | append: '|' -%}{%- endif -%}
+        {%- if settings.social_pinterest != blank -%}{%- assign same_as = same_as | append: settings.social_pinterest | append: '|' -%}{%- endif -%}
+        {%- if settings.social_facebook != blank -%}{%- assign same_as = same_as | append: settings.social_facebook | append: '|' -%}{%- endif -%}
+        {%- assign same_as_list = same_as | split: '|' -%}
+        {%- for url in same_as_list -%}
+          {{ url | json }}{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
     }
     </script>
+
+    {% if request.page_type == 'index' %}
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": {{ shop.name | json }},
+        "url": "{{ shop.url }}",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "{{ shop.url }}/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+      </script>
+    {% endif %}
   </head>
 
   <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">

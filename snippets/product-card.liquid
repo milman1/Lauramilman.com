@@ -17,6 +17,11 @@
       <img
         class="product-card__image product-card__image--primary"
         src="{{ product.featured_image | image_url: width: 600 }}"
+        srcset="{{ product.featured_image | image_url: width: 300 }} 300w,
+                {{ product.featured_image | image_url: width: 450 }} 450w,
+                {{ product.featured_image | image_url: width: 600 }} 600w,
+                {{ product.featured_image | image_url: width: 900 }} 900w"
+        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         alt="{{ product.featured_image.alt | default: product.title | escape }}"
         width="{{ product.featured_image.width }}"
         height="{{ product.featured_image.height }}"
@@ -26,6 +31,11 @@
         <img
           class="product-card__image product-card__image--hover"
           src="{{ product.images[1] | image_url: width: 600 }}"
+          srcset="{{ product.images[1] | image_url: width: 300 }} 300w,
+                  {{ product.images[1] | image_url: width: 450 }} 450w,
+                  {{ product.images[1] | image_url: width: 600 }} 600w,
+                  {{ product.images[1] | image_url: width: 900 }} 900w"
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           alt="{{ product.images[1].alt | default: product.title | escape }}"
           width="{{ product.images[1].width }}"
           height="{{ product.images[1].height }}"
