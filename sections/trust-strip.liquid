@@ -1,0 +1,96 @@
+{%- comment -%}
+  Laura Milman New York — Trust strip
+  Slim reassurance band directly under the hero, mirroring PD's
+  "Free Shipping | 30-Day Returns | Ethically Sourced | Lifetime Warranty".
+{%- endcomment -%}
+
+<div class="trust-strip">
+  <div class="trust-strip__inner">
+    {%- for block in section.blocks -%}
+      <div class="trust-strip__item" {{ block.shopify_attributes }}>
+        <span class="trust-strip__text">{{ block.settings.text }}</span>
+      </div>
+      {%- unless forloop.last -%}
+        <span class="trust-strip__divider" aria-hidden="true">|</span>
+      {%- endunless -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<style>
+  .trust-strip {
+    background: var(--espresso, #1E1109);
+    border-top: 1px solid rgba(201, 160, 80, 0.15);
+    border-bottom: 1px solid rgba(201, 160, 80, 0.15);
+  }
+
+  .trust-strip__inner {
+    max-width: var(--container-max, 1400px);
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .trust-strip__text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-light, #E2C27A);
+    white-space: nowrap;
+  }
+
+  .trust-strip__divider {
+    color: rgba(201, 160, 80, 0.35);
+    font-size: 0.7rem;
+  }
+
+  @media (max-width: 768px) {
+    .trust-strip__inner {
+      padding: 0.75rem 1rem;
+      gap: 0.6rem;
+    }
+    .trust-strip__text {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Trust Strip",
+  "tag": "section",
+  "class": "section-trust-strip",
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Trust item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free Shipping"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Strip",
+      "blocks": [
+        { "type": "item", "settings": { "text": "Free Insured Shipping" } },
+        { "type": "item", "settings": { "text": "30-Day Returns" } },
+        { "type": "item", "settings": { "text": "Authenticity Guaranteed" } },
+        { "type": "item", "settings": { "text": "Lifetime Warranty" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

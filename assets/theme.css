@@ -20,6 +20,14 @@
   --gold-pale: #F0DFB0;
   --gold-dark: #A88340;
 
+  /* Peaceful Diamonds sub-brand — cool navy signature.
+     Reserved for the Peaceful Diamonds tier only; never mix into LMNY-proper sections. */
+  --navy: #1A1F3A;
+  --navy-deep: #12162B;
+  --navy-soft: #252C4F;
+  --pd-blue: #5B7FBD;
+  --pd-ice: #A9BEE3;
+
   /* Text */
   --text-dark: #2C1810;
   --text-wine: #4A2018;
@@ -42,7 +50,7 @@
 
   /* Typography */
   --font-heading: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -76,6 +84,9 @@
   /* Container */
   --container-max: 1400px;
   --container-padding: 2rem;
+
+  /* Fixed header offset — body padding keeps content clear of the glass header */
+  --header-height: 84px;
 }
 
 /* =============================================
@@ -100,6 +111,7 @@ body {
   line-height: 1.6;
   color: var(--text-dark);
   background-color: var(--off-white);
+  padding-top: var(--header-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -1075,7 +1087,7 @@ p {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 var(--container-padding);
-  padding-top: calc(var(--header-height, 80px) + var(--space-lg));
+  padding-top: var(--space-lg);
 }
 
 /* Breadcrumb */
@@ -1620,7 +1632,7 @@ p {
 }
 
 @media (max-width: 768px) {
-  .product-page { padding-top: calc(var(--header-height, 60px) + var(--space-md)); }
+  .product-page { padding-top: var(--space-md); }
 
   .product-gallery__main { aspect-ratio: 4/5; }
 
@@ -1656,7 +1668,6 @@ p {
    ============================================= */
 .breadcrumbs {
   padding: 0.75rem 2rem;
-  padding-top: calc(var(--header-height, 80px) + 0.75rem);
   background: transparent;
 }
 
@@ -1782,6 +1793,7 @@ p {
 @media (max-width: 768px) {
   :root {
     --container-padding: 1rem;
+    --header-height: 64px;
   }
 
   .header__inner {
@@ -1810,7 +1822,6 @@ p {
 
   .breadcrumbs {
     padding: 0.5rem 1rem;
-    padding-top: calc(var(--header-height, 70px) + 0.5rem);
   }
 
   .product-card {

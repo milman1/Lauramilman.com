@@ -1,0 +1,358 @@
+{%- comment -%}
+  Laura Milman New York — Peaceful Diamonds sub-brand block
+  The lab-grown tier, explicitly labeled as an endorsed sub-brand.
+  COOL NAVY treatment by design — parent brand stays warm (espresso/wine/gold),
+  this tier reads cool/navy so the two are never interchangeable.
+  Uses only --navy / --pd-blue / --pd-ice tokens; no gold or wine in here.
+{%- endcomment -%}
+
+{%- assign pd_collection = section.settings.collection -%}
+
+<section class="lm-peaceful" aria-label="Peaceful Diamonds by Laura Milman New York">
+  <div class="lm-peaceful__glow" aria-hidden="true"></div>
+  <div class="lm-peaceful__container">
+
+    <div class="lm-peaceful__content">
+      <span class="lm-peaceful__chip">{{ section.settings.chip_text }}</span>
+      <h2 class="lm-peaceful__title">
+        {{ section.settings.title }}
+        <span class="lm-peaceful__byline">{{ section.settings.byline }}</span>
+      </h2>
+      {%- if section.settings.description != blank -%}
+        <p class="lm-peaceful__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="lm-peaceful__points">
+          {%- for block in section.blocks -%}
+            <li class="lm-peaceful__point" {{ block.shopify_attributes }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ block.settings.text }}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <div class="lm-peaceful__buttons">
+        {%- if pd_collection != blank -%}
+          <a href="{{ pd_collection.url }}" class="lm-peaceful__btn lm-peaceful__btn--solid">
+            {{ section.settings.cta_text | default: 'Shop Peaceful Diamonds' }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.secondary_cta_text != blank and section.settings.secondary_cta_url != blank -%}
+          <a href="{{ section.settings.secondary_cta_url }}" class="lm-peaceful__btn lm-peaceful__btn--ghost">
+            {{ section.settings.secondary_cta_text }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="lm-peaceful__visual">
+      {%- if section.settings.image != blank -%}
+        <img
+          src="{{ section.settings.image | image_url: width: 900 }}"
+          srcset="{{ section.settings.image | image_url: width: 500 }} 500w,
+                  {{ section.settings.image | image_url: width: 900 }} 900w"
+          sizes="(max-width: 992px) 100vw, 45vw"
+          alt="{{ section.settings.title | escape }}"
+          loading="lazy"
+          decoding="async"
+        >
+      {%- elsif pd_collection != blank and pd_collection.products.first.featured_image -%}
+        <img
+          src="{{ pd_collection.products.first.featured_image | image_url: width: 900 }}"
+          alt="{{ section.settings.title | escape }}"
+          loading="lazy"
+          decoding="async"
+        >
+      {%- else -%}
+        <div class="lm-peaceful__visual-placeholder" aria-hidden="true">
+          <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+        </div>
+      {%- endif -%}
+      {%- if pd_collection != blank -%}
+        <span class="lm-peaceful__visual-count">{{ pd_collection.products_count }} certified pieces</span>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-peaceful {
+    position: relative;
+    background: linear-gradient(165deg, var(--navy, #1A1F3A) 0%, var(--navy-deep, #12162B) 100%);
+    padding: 6rem 2rem;
+    overflow: hidden;
+  }
+
+  .lm-peaceful__glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 60% at 78% 40%, rgba(91, 127, 189, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 15% 80%, rgba(169, 190, 227, 0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .lm-peaceful__container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .lm-peaceful__chip {
+    display: inline-block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--pd-ice, #A9BEE3);
+    border: 1px solid rgba(169, 190, 227, 0.35);
+    border-radius: 100px;
+    padding: 0.45rem 1.1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .lm-peaceful__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: #FFFFFF;
+    margin: 0 0 1.5rem;
+  }
+
+  .lm-peaceful__byline {
+    display: block;
+    font-size: 0.42em;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    color: var(--pd-ice, #A9BEE3);
+    margin-top: 0.6rem;
+  }
+
+  .lm-peaceful__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.72);
+    max-width: 520px;
+    margin: 0 0 1.75rem;
+  }
+
+  .lm-peaceful__points {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .lm-peaceful__point {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .lm-peaceful__point svg {
+    color: var(--pd-blue, #5B7FBD);
+    flex-shrink: 0;
+  }
+
+  .lm-peaceful__buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .lm-peaceful__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 34px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.3s ease;
+  }
+
+  .lm-peaceful__btn--solid {
+    background: var(--pd-blue, #5B7FBD);
+    color: #FFFFFF;
+  }
+
+  .lm-peaceful__btn--solid:hover {
+    background: #6D91CF;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(91, 127, 189, 0.35);
+  }
+
+  .lm-peaceful__btn--ghost {
+    border: 1px solid rgba(169, 190, 227, 0.4);
+    color: var(--pd-ice, #A9BEE3);
+    background: transparent;
+  }
+
+  .lm-peaceful__btn--ghost:hover {
+    border-color: var(--pd-ice, #A9BEE3);
+    background: rgba(169, 190, 227, 0.08);
+  }
+
+  .lm-peaceful__visual {
+    position: relative;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    border: 1px solid rgba(169, 190, 227, 0.25);
+    aspect-ratio: 4 / 5;
+    background: var(--navy-deep, #12162B);
+  }
+
+  .lm-peaceful__visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lm-peaceful__visual-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(169, 190, 227, 0.25);
+  }
+
+  .lm-peaceful__visual-count {
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1.25rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: rgba(18, 22, 43, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    border: 1px solid rgba(169, 190, 227, 0.3);
+  }
+
+  @media (max-width: 992px) {
+    .lm-peaceful__container {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    .lm-peaceful__visual {
+      max-width: 480px;
+      aspect-ratio: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-peaceful {
+      padding: 4rem 1.25rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Peaceful Diamonds",
+  "tag": "section",
+  "class": "section-peaceful-diamonds",
+  "settings": [
+    {
+      "type": "text",
+      "id": "chip_text",
+      "label": "Label chip",
+      "default": "The Lab-Grown Collection"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Peaceful Diamonds"
+    },
+    {
+      "type": "text",
+      "id": "byline",
+      "label": "Byline",
+      "default": "by Laura Milman New York"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Peaceful Diamonds collection"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "Shop Peaceful Diamonds"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_text",
+      "label": "Secondary CTA text"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_url",
+      "label": "Secondary CTA link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Feature image"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Benefit point",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "IGI-certified lab-grown diamonds"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Peaceful Diamonds",
+      "blocks": [
+        { "type": "point", "settings": { "text": "Certified lab-grown diamonds" } },
+        { "type": "point", "settings": { "text": "Crafted to the same LMNY standard" } },
+        { "type": "point", "settings": { "text": "Exceptional carat weight, accessible price" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

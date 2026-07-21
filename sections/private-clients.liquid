@@ -1,0 +1,289 @@
+{%- comment -%}
+  Laura Milman New York — Private Clients / Bespoke
+  The high-touch channel: consultations, sourcing, commissions.
+  Deliberately free of any Peaceful Diamonds cross-sell — this channel
+  stays natural-stone and estate only.
+{%- endcomment -%}
+
+<section class="lm-private" aria-label="Private clients">
+  <div class="lm-private__container">
+
+    <div class="lm-private__visual">
+      {%- if section.settings.image != blank -%}
+        <img
+          src="{{ section.settings.image | image_url: width: 900 }}"
+          srcset="{{ section.settings.image | image_url: width: 500 }} 500w,
+                  {{ section.settings.image | image_url: width: 900 }} 900w"
+          sizes="(max-width: 992px) 100vw, 45vw"
+          alt="{{ section.settings.title | escape }}"
+          loading="lazy"
+          decoding="async"
+        >
+      {%- else -%}
+        <div class="lm-private__visual-placeholder" aria-hidden="true">
+          <span>LM</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-private__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lm-private__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="lm-private__title">{{ section.settings.title }}</h2>
+      {%- if section.settings.description != blank -%}
+        <div class="lm-private__desc">{{ section.settings.description }}</div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="lm-private__services">
+          {%- for block in section.blocks -%}
+            <li class="lm-private__service" {{ block.shopify_attributes }}>
+              <span class="lm-private__service-marker" aria-hidden="true"></span>
+              <div>
+                <span class="lm-private__service-title">{{ block.settings.title }}</span>
+                {%- if block.settings.text != blank -%}
+                  <span class="lm-private__service-text">{{ block.settings.text }}</span>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <div class="lm-private__buttons">
+        <a href="{{ section.settings.cta_url | default: '/pages/private-clients' }}" class="btn btn--wine">
+          {{ section.settings.cta_text | default: 'Book a Consultation' }}
+        </a>
+        {%- if section.settings.note != blank -%}
+          <span class="lm-private__note">{{ section.settings.note }}</span>
+        {%- endif -%}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-private {
+    background: var(--off-white, #F5F0E8);
+    padding: 6rem 2rem;
+  }
+
+  .lm-private__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .lm-private__visual {
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-private__visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lm-private__visual-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 4rem;
+    color: rgba(201, 160, 80, 0.2);
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, rgba(74, 20, 40, 0.05) 0%, rgba(201, 160, 80, 0.08) 100%);
+  }
+
+  .lm-private__eyebrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--wine, #4A1428);
+    margin-bottom: 1rem;
+  }
+
+  .lm-private__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-private__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    margin-bottom: 2rem;
+    max-width: 520px;
+  }
+
+  .lm-private__services {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .lm-private__service {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .lm-private__service-marker {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold, #C9A050);
+    margin-top: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .lm-private__service-title {
+    display: block;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.15rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-private__service-text {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.83rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text-muted, #8A8070);
+    margin-top: 0.15rem;
+  }
+
+  .lm-private__buttons {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .lm-private__note {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-muted, #8A8070);
+  }
+
+  @media (max-width: 992px) {
+    .lm-private__container {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    .lm-private__visual {
+      max-width: 480px;
+      aspect-ratio: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-private {
+      padding: 4rem 1.25rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Private Clients",
+  "tag": "section",
+  "class": "section-private-clients",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Private Clients"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Bespoke, By Appointment"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "For the pieces that matter most, work directly with Laura. Private viewings in New York, diamond and gemstone sourcing, and one-of-a-kind commissions crafted in Italy."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "Book a Consultation"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link",
+      "info": "Defaults to /pages/private-clients"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Note",
+      "default": "Complimentary · No obligation"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Service",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Private Consultations"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Private Clients",
+      "blocks": [
+        { "type": "service", "settings": { "title": "Private Consultations", "text": "One-on-one appointments, in person in New York or by video." } },
+        { "type": "service", "settings": { "title": "Diamond & Gemstone Sourcing", "text": "Rare natural stones sourced to your brief through our Diamond District network." } },
+        { "type": "service", "settings": { "title": "Bespoke Commissions", "text": "One-of-a-kind pieces designed in New York and crafted in Italy." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

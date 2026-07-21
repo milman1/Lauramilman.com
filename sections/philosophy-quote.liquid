@@ -1,0 +1,96 @@
+{%- comment -%}
+  Laura Milman New York — Philosophy pull-quote
+  LMNY's version of PD's brand-quote block.
+{%- endcomment -%}
+
+<section class="lm-quote" aria-label="Our philosophy">
+  <div class="lm-quote__container">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    <blockquote class="lm-quote__text">
+      <span class="lm-quote__mark" aria-hidden="true">&ldquo;</span>
+      {{ section.settings.quote }}
+      <span class="lm-quote__mark" aria-hidden="true">&rdquo;</span>
+    </blockquote>
+    {%- if section.settings.attribution != blank -%}
+      <p class="lm-quote__attribution">&mdash; {{ section.settings.attribution }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .lm-quote {
+    background: var(--gradient-cream, linear-gradient(180deg, #F5F0E8 0%, #FDFAF6 100%));
+    padding: 6rem 2rem;
+    text-align: center;
+  }
+
+  .lm-quote__container {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .lm-quote__text {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--text-dark, #2C1810);
+    margin: 1.5rem 0 0;
+  }
+
+  .lm-quote__mark {
+    color: var(--gold, #C9A050);
+  }
+
+  .lm-quote__attribution {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--wine, #4A1428);
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .lm-quote {
+      padding: 4rem 1.25rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Philosophy Quote",
+  "tag": "section",
+  "class": "section-philosophy-quote",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote",
+      "default": "True luxury is never disposable. A jewel should outlast the moment it was bought for — carrying its story from one generation to the next."
+    },
+    {
+      "type": "text",
+      "id": "attribution",
+      "label": "Attribution",
+      "default": "Laura Milman"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Philosophy Quote"
+    }
+  ]
+}
+{% endschema %}

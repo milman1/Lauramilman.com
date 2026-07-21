@@ -1,0 +1,174 @@
+{%- comment -%}
+  Laura Milman New York — Closing CTA band
+  Final conversion band + trust line, mirroring PD's "Begin Your Journey".
+{%- endcomment -%}
+
+<section class="lm-closing" aria-label="Closing call to action">
+  <div class="lm-closing__glow" aria-hidden="true"></div>
+  <div class="lm-closing__container">
+    <h2 class="lm-closing__title">{{ section.settings.title }}</h2>
+    {%- if section.settings.description != blank -%}
+      <p class="lm-closing__desc">{{ section.settings.description }}</p>
+    {%- endif -%}
+
+    <div class="lm-closing__buttons">
+      {%- if section.settings.primary_cta_text != blank -%}
+        <a href="{{ section.settings.primary_cta_url | default: '/collections/all' }}" class="btn btn--gold btn--lg">
+          {{ section.settings.primary_cta_text }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.secondary_cta_text != blank -%}
+        <a href="{{ section.settings.secondary_cta_url | default: '/pages/private-clients' }}" class="lm-closing__btn-ghost">
+          {{ section.settings.secondary_cta_text }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.trust_line != blank -%}
+      <p class="lm-closing__trust">{{ section.settings.trust_line }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .lm-closing {
+    position: relative;
+    background: linear-gradient(170deg, var(--espresso, #1E1109) 0%, #170d06 70%, #0d0704 100%);
+    padding: 6rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .lm-closing__glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 60% at 50% 30%, rgba(201, 160, 80, 0.1) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 80% 80%, rgba(74, 20, 40, 0.3) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .lm-closing__container {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .lm-closing__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 400;
+    color: var(--cream, #FAF6F0);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-closing__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(250, 246, 240, 0.7);
+    margin: 0 auto 2.5rem;
+    max-width: 560px;
+  }
+
+  .lm-closing__buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .lm-closing__btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 40px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid rgba(250, 246, 240, 0.35);
+    border-radius: var(--radius-sm, 4px);
+    color: var(--cream, #FAF6F0);
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+
+  .lm-closing__btn-ghost:hover {
+    background: rgba(250, 246, 240, 0.08);
+    border-color: rgba(250, 246, 240, 0.6);
+  }
+
+  .lm-closing__trust {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: rgba(250, 246, 240, 0.45);
+    margin: 2.5rem 0 0;
+  }
+
+  @media (max-width: 768px) {
+    .lm-closing {
+      padding: 4rem 1.25rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Closing CTA",
+  "tag": "section",
+  "class": "section-closing-cta",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Begin Your Story"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Exceptional natural stones, storied estate pieces, and jewelry made to be inherited — designed in New York, crafted in Italy."
+    },
+    {
+      "type": "text",
+      "id": "primary_cta_text",
+      "label": "Primary CTA text",
+      "default": "Shop the Collection"
+    },
+    {
+      "type": "url",
+      "id": "primary_cta_url",
+      "label": "Primary CTA link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_text",
+      "label": "Secondary CTA text",
+      "default": "Book a Consultation"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_url",
+      "label": "Secondary CTA link"
+    },
+    {
+      "type": "text",
+      "id": "trust_line",
+      "label": "Trust line",
+      "default": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Closing CTA"
+    }
+  ]
+}
+{% endschema %}
