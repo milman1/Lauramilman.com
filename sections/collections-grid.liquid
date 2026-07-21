@@ -38,7 +38,7 @@
           </div>
           <div class="collection-card__info">
             <h3 class="collection-card__name">{{ collection.title }}</h3>
-            <div class="collection-card__count">{{ collection.products_count }} Pieces</div>
+            <div class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'Piece', 'Pieces' }}</div>
           </div>
         </a>
       {%- else -%}

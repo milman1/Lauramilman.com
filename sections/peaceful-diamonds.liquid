@@ -71,7 +71,7 @@
         </div>
       {%- endif -%}
       {%- if pd_collection != blank -%}
-        <span class="lm-peaceful__visual-count">{{ pd_collection.products_count }} certified pieces</span>
+        <span class="lm-peaceful__visual-count">{{ pd_collection.products_count }} certified {{ pd_collection.products_count | pluralize: 'piece', 'pieces' }}</span>
       {%- endif -%}
     </div>
 

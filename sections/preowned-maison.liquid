@@ -43,7 +43,7 @@
             </div>
             <div class="lm-maison__card-info">
               <span class="lm-maison__card-name">{{ block.settings.title | default: maison_collection.title }}</span>
-              <span class="lm-maison__card-count">{{ maison_collection.products_count }} pieces</span>
+              <span class="lm-maison__card-count">{{ maison_collection.products_count }} {{ maison_collection.products_count | pluralize: 'piece', 'pieces' }}</span>
             </div>
           </a>
         {%- endif -%}

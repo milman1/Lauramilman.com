@@ -59,7 +59,7 @@
         {%- if look_collection != blank -%}
           <div class="lm-look__editorial-caption">
             <span class="lm-look__editorial-name">{{ section.settings.caption_title | default: look_collection.title }}</span>
-            <span class="lm-look__editorial-count">{{ look_collection.products_count }} pieces · Curated for you</span>
+            <span class="lm-look__editorial-count">{{ look_collection.products_count }} {{ look_collection.products_count | pluralize: 'piece', 'pieces' }} · Curated for you</span>
           </div>
         {%- endif -%}
       </div>
