@@ -1,48 +1,121 @@
 {%- comment -%}
-  Laura Milman New York — Collection Page Section
-  Header, sort, product grid with pagination
+  Laura Milman New York — Collection Page
+  Mirrors PD's collection merchandising: SEO description block above the grid,
+  shop-by chips, "Refine By" drawer (snippet), sort, product count, numbered
+  pagination, and a filtered-empty state with Clear All.
+
+  "Navy mode" re-skins accents for the Peaceful Diamonds (lab-grown) tier —
+  assign templates/collection.peaceful.json to that collection.
 {%- endcomment -%}
+
+{%- liquid
+  assign navy_mode = section.settings.navy_mode
+
+  assign has_active_filters = false
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign has_active_filters = true
+      endif
+    elsif filter.active_values.size > 0
+      assign has_active_filters = true
+    endif
+  endfor
+-%}
 
 {%- paginate collection.products by section.settings.products_per_page -%}
 
-<section class="lm-collection" aria-label="{{ collection.title | escape }}">
+<section class="lm-collection{% if navy_mode %} lm-collection--navy{% endif %}" aria-label="{{ collection.title | escape }}">
   <div class="lm-collection__container">
 
-    <!-- Collection Header -->
-    <div class="lm-collection__header">
+    <!-- SEO-loaded collection intro -->
+    <header class="lm-collection__header">
       <h1 class="lm-collection__title">{{ collection.title }}</h1>
       {%- if collection.description != blank -%}
-        <p class="lm-collection__desc">{{ collection.description }}</p>
+        <div class="lm-collection__desc">{{ collection.description }}</div>
       {%- endif -%}
-    </div>
+    </header>
+
+    <!-- Shop-by chips -->
+    {%- if section.blocks.size > 0 -%}
+      <nav class="lm-collection__chips" aria-label="Shop by">
+        {%- if section.settings.chips_label != blank -%}
+          <span class="lm-collection__chips-label">{{ section.settings.chips_label }}</span>
+        {%- endif -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.label != blank -%}
+            {%- liquid
+              assign chip_href = block.settings.link
+              if chip_href == blank and block.settings.filter_query != blank
+                assign chip_href = collection.url | append: block.settings.filter_query
+              endif
+            -%}
+            {%- if chip_href != blank -%}
+              <a href="{{ chip_href }}" class="lm-collection__chip" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
 
     <!-- Toolbar -->
     <div class="lm-collection__toolbar">
-      <span class="lm-collection__count">
-        {{ collection.products_count }}
-        {{ collection.products_count | pluralize: 'piece', 'pieces' }}
+      <span class="lm-collection__count" role="status">
+        {%- if paginate.pages > 1 -%}
+          Showing {{ paginate.current_offset | plus: 1 }}&ndash;{{ paginate.current_offset | plus: collection.products.size }} of {{ collection.products_count }} products
+        {%- else -%}
+          Showing {{ collection.products_count }} {{ collection.products_count | pluralize: 'product', 'products' }}
+        {%- endif -%}
       </span>
 
-      <div class="lm-collection__sort">
-        <label for="lm-sort-select">Sort by</label>
-        <select id="lm-sort-select" onchange="window.location.href=this.value;">
-          {%- assign sort_options_list = 'manual|Best Selling,price-ascending|Price: Low to High,price-descending|Price: High to Low,created-descending|Newest,title-ascending|A – Z' | split: ',' -%}
-          {%- for opt in sort_options_list -%}
-            {%- assign parts = opt | split: '|' -%}
-            {%- assign sort_val = parts[0] -%}
-            {%- assign sort_label = parts[1] -%}
-            <option
-              value="{{ collection.url }}?sort_by={{ sort_val }}"
-              {% if collection.sort_by == sort_val or sort_val == 'manual' and collection.sort_by == blank %}selected{% endif %}
-            >
-              {{ sort_label }}
-            </option>
-          {%- endfor -%}
-        </select>
+      <div class="lm-collection__controls">
+        <button type="button" class="lm-collection__filter-btn" id="RefineOpen" aria-haspopup="dialog">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter &amp; Sort
+        </button>
+
+        <div class="lm-collection__sort">
+          <label for="lm-sort-select">Sort by</label>
+          <select id="lm-sort-select">
+            {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+            {%- assign sort_pairs = 'manual::Featured||best-selling::Best Selling||price-ascending::Price: Low to High||price-descending::Price: High to Low||created-descending::Date: New to Old||title-ascending::Alphabetically, A–Z' | split: '||' -%}
+            {%- for pair in sort_pairs -%}
+              {%- assign sort_parts = pair | split: '::' -%}
+              <option value="{{ sort_parts[0] }}" {% if current_sort == sort_parts[0] %}selected{% endif %}>{{ sort_parts[1] }}</option>
+            {%- endfor -%}
+          </select>
+        </div>
       </div>
     </div>
 
-    <!-- Product Grid -->
+    <!-- Active filter pills -->
+    {%- if has_active_filters -%}
+      <div class="lm-collection__active" aria-label="Active filters">
+        {%- for filter in collection.filters -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+              <a href="{{ filter.url_to_remove }}" class="lm-collection__active-pill">
+                {{ filter.label }}:
+                {% if filter.min_value.value %}{{ filter.min_value.value | money }}{% else %}{{ 0 | money }}{% endif %}
+                &ndash;
+                {% if filter.max_value.value %}{{ filter.max_value.value | money }}{% else %}{{ filter.range_max | money }}{% endif %}
+                <span aria-hidden="true">&times;</span>
+              </a>
+            {%- endif -%}
+          {%- else -%}
+            {%- for value in filter.active_values -%}
+              <a href="{{ value.url_to_remove }}" class="lm-collection__active-pill">
+                {{ value.label }}
+                <span aria-hidden="true">&times;</span>
+              </a>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+        <a href="{{ collection.url }}" class="lm-collection__clear-all">Clear all filters</a>
+      </div>
+    {%- endif -%}
+
+    <!-- Product grid -->
     {%- if collection.products.size > 0 -%}
       <div class="products-grid lm-collection__grid">
         {%- for product in collection.products -%}
@@ -54,50 +127,64 @@
       {%- if paginate.pages > 1 -%}
         <nav class="lm-pagination" aria-label="Pagination">
           {%- if paginate.previous -%}
-            <a href="{{ paginate.previous.url }}" class="lm-pagination__btn" aria-label="Previous page">
-              ← Previous
-            </a>
+            <a href="{{ paginate.previous.url }}" class="lm-pagination__arrow" aria-label="Previous page">&larr;</a>
           {%- endif -%}
 
-          <span class="lm-pagination__info">
-            Page {{ paginate.current_page }} of {{ paginate.pages }}
-          </span>
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="lm-pagination__page">{{ part.title }}</a>
+            {%- elsif part.title == paginate.current_page -%}
+              <span class="lm-pagination__page lm-pagination__page--current" aria-current="page">{{ part.title }}</span>
+            {%- else -%}
+              <span class="lm-pagination__ellipsis">{{ part.title }}</span>
+            {%- endif -%}
+          {%- endfor -%}
 
           {%- if paginate.next -%}
-            <a href="{{ paginate.next.url }}" class="lm-pagination__btn" aria-label="Next page">
-              Next →
-            </a>
+            <a href="{{ paginate.next.url }}" class="lm-pagination__arrow" aria-label="Next page">&rarr;</a>
           {%- endif -%}
         </nav>
       {%- endif -%}
 
+    {%- elsif has_active_filters -%}
+      <div class="lm-collection__empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <p class="lm-collection__empty-title">No products match your filters</p>
+        <p class="lm-collection__empty-text">Try removing a filter, or start over to see the full collection.</p>
+        <a href="{{ collection.url }}" class="btn btn--gold">Clear All Filters</a>
+      </div>
     {%- else -%}
       <div class="lm-collection__empty">
-        <p>No products found in this collection.</p>
-        <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Products</a>
+        <p class="lm-collection__empty-title">This collection is coming soon</p>
+        <p class="lm-collection__empty-text">In the meantime, explore the full Laura Milman New York collection.</p>
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Jewelry</a>
       </div>
     {%- endif -%}
 
   </div>
 </section>
 
+{%- render 'filter-drawer', results: collection -%}
+
 {%- endpaginate -%}
 
 <style>
   .lm-collection {
-    padding: 2rem 2rem 4rem;
-    background: var(--warm-white, #FDFBF7);
+    padding: 1rem 2rem 4rem;
+    background: var(--warm-white, #FDFAF6);
     min-height: 60vh;
   }
 
   .lm-collection__container {
-    max-width: 1280px;
+    max-width: 1320px;
     margin: 0 auto;
   }
 
   .lm-collection__header {
     text-align: center;
-    padding: 3rem 0 2rem;
+    padding: 2.5rem 0 1.5rem;
+    max-width: 820px;
+    margin: 0 auto;
   }
 
   .lm-collection__title {
@@ -105,30 +192,113 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 400;
     color: var(--text-dark, #2C1810);
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.85rem;
   }
 
   .lm-collection__desc {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--text-muted, #8B7D6B);
-    max-width: 600px;
-    margin: 0 auto;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
   }
 
+  .lm-collection__desc p {
+    margin: 0 0 0.75rem;
+  }
+
+  .lm-collection__desc p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Shop-by chips */
+  .lm-collection__chips {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .lm-collection__chips-label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+    margin-right: 0.5rem;
+  }
+
+  .lm-collection__chip {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+    padding: 0.45rem 1.1rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    transition: all 0.25s ease;
+    background: transparent;
+  }
+
+  .lm-collection__chip:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+    background: rgba(201, 160, 80, 0.06);
+  }
+
+  /* Toolbar */
   .lm-collection__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     padding: 1rem 0;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--rule-light, rgba(193, 167, 132, 0.15));
+    margin-bottom: 1rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
   }
 
   .lm-collection__count {
-    font-family: var(--font-body, 'Jost', sans-serif);
-    font-size: 0.85rem;
-    color: var(--text-muted, #8B7D6B);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-collection__controls {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .lm-collection__filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: none;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .lm-collection__filter-btn svg {
+    color: var(--gold, #C9A050);
+  }
+
+  .lm-collection__filter-btn:hover {
+    background: var(--text-dark, #2C1810);
+    box-shadow: var(--shadow-md);
   }
 
   .lm-collection__sort {
@@ -138,26 +308,71 @@
   }
 
   .lm-collection__sort label {
-    font-family: var(--font-body, 'Jost', sans-serif);
-    font-size: 0.75rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text-muted, #8B7D6B);
+    color: var(--text-muted, #8A8070);
   }
 
   .lm-collection__sort select {
-    font-family: var(--font-body, 'Jost', sans-serif);
-    font-size: 0.85rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
     color: var(--text-dark, #2C1810);
-    border: 1px solid var(--rule-light, rgba(193, 167, 132, 0.25));
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
     padding: 8px 32px 8px 12px;
     background: transparent;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7D6B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A8070' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
     cursor: pointer;
+  }
+
+  /* Active filter pills */
+  .lm-collection__active {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-collection__active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    color: var(--espresso, #1E1109);
+    text-decoration: none;
+    padding: 0.35rem 0.9rem;
+    background: rgba(201, 160, 80, 0.12);
+    border: 1px solid rgba(201, 160, 80, 0.4);
+    border-radius: 100px;
+    transition: all 0.2s ease;
+  }
+
+  .lm-collection__active-pill:hover {
+    background: rgba(201, 160, 80, 0.22);
+  }
+
+  .lm-collection__active-pill span {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  .lm-collection__clear-all {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--wine, #4A1428);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-left: 0.5rem;
   }
 
   .lm-collection__grid {
@@ -166,14 +381,29 @@
     gap: 2rem;
   }
 
+  /* Empty states */
   .lm-collection__empty {
     text-align: center;
-    padding: 4rem 0;
-    color: var(--text-muted, #8B7D6B);
+    padding: 5rem 1rem;
+    color: var(--text-muted, #8A8070);
   }
 
-  .lm-collection__empty p {
-    margin-bottom: 1.5rem;
+  .lm-collection__empty svg {
+    color: var(--rule-light, #DDD5C5);
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-collection__empty-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+
+  .lm-collection__empty-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    margin: 0 0 1.75rem;
   }
 
   /* Pagination */
@@ -181,35 +411,89 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
+    gap: 0.4rem;
     margin-top: 3rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--rule-light, rgba(193, 167, 132, 0.15));
+    border-top: 1px solid var(--rule-light, #DDD5C5);
   }
 
-  .lm-pagination__btn {
-    font-family: var(--font-body, 'Jost', sans-serif);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  .lm-pagination__page,
+  .lm-pagination__arrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
     text-decoration: none;
     color: var(--text-dark, #2C1810);
-    padding: 10px 24px;
-    border: 1px solid var(--rule-light, rgba(193, 167, 132, 0.3));
-    transition: all 0.3s ease;
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.2s ease;
   }
 
-  .lm-pagination__btn:hover {
-    background: var(--espresso, #2C1810);
-    color: var(--cream, #FAF7F2);
-    border-color: var(--espresso, #2C1810);
+  .lm-pagination__page:hover,
+  .lm-pagination__arrow:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
   }
 
-  .lm-pagination__info {
-    font-family: var(--font-body, 'Jost', sans-serif);
-    font-size: 0.8rem;
-    color: var(--text-muted, #8B7D6B);
+  .lm-pagination__page--current {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-pagination__ellipsis {
+    color: var(--text-muted, #8A8070);
+    padding: 0 0.25rem;
+  }
+
+  /* ── Navy mode: Peaceful Diamonds tier ── */
+  .lm-collection--navy {
+    background: linear-gradient(180deg, #F4F6FB 0%, var(--warm-white, #FDFAF6) 320px);
+  }
+
+  .lm-collection--navy .lm-collection__title {
+    color: var(--navy, #1A1F3A);
+  }
+
+  .lm-collection--navy .lm-collection__filter-btn {
+    background: var(--navy, #1A1F3A);
+  }
+
+  .lm-collection--navy .lm-collection__filter-btn svg {
+    color: var(--pd-ice, #A9BEE3);
+  }
+
+  .lm-collection--navy .lm-collection__filter-btn:hover {
+    background: var(--navy-deep, #12162B);
+  }
+
+  .lm-collection--navy .lm-collection__chip:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.06);
+  }
+
+  .lm-collection--navy .lm-collection__active-pill {
+    color: var(--navy, #1A1F3A);
+    background: rgba(91, 127, 189, 0.1);
+    border-color: rgba(91, 127, 189, 0.35);
+  }
+
+  .lm-collection--navy .lm-collection__clear-all {
+    color: var(--pd-blue, #5B7FBD);
+  }
+
+  .lm-collection--navy .lm-pagination__page--current {
+    background: var(--navy, #1A1F3A);
+  }
+
+  .lm-collection--navy .lm-pagination__page:hover,
+  .lm-collection--navy .lm-pagination__arrow:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
   }
 
   @media (max-width: 1024px) {
@@ -221,10 +505,10 @@
 
   @media (max-width: 768px) {
     .lm-collection {
-      padding: 1rem 1rem 3rem;
+      padding: 0.5rem 1rem 3rem;
     }
     .lm-collection__header {
-      padding: 2rem 0 1.5rem;
+      padding: 1.75rem 0 1.25rem;
     }
     .lm-collection__grid {
       grid-template-columns: repeat(2, 1fr);
@@ -232,22 +516,106 @@
     }
     .lm-collection__toolbar {
       flex-direction: column;
-      gap: 0.75rem;
       align-items: stretch;
+      gap: 0.75rem;
+    }
+    .lm-collection__count {
       text-align: center;
     }
-    .lm-collection__sort {
-      justify-content: center;
+    .lm-collection__controls {
+      justify-content: space-between;
     }
-    .lm-collection__sort select {
-      width: 100%;
+    .lm-collection__sort label {
+      display: none;
     }
-    .lm-pagination {
-      gap: 1rem;
-      flex-wrap: wrap;
+    .lm-collection__chips {
+      justify-content: flex-start;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.25rem;
+    }
+    .lm-collection__chips::-webkit-scrollbar {
+      display: none;
+    }
+    .lm-collection__chip {
+      white-space: nowrap;
     }
   }
 </style>
+
+<script>
+  (function () {
+    var drawer = document.getElementById('RefineDrawer');
+    var overlay = document.getElementById('RefineOverlay');
+    var openBtn = document.getElementById('RefineOpen');
+    var closeBtn = document.getElementById('RefineClose');
+    var form = document.getElementById('RefineForm');
+    var sortSelect = document.getElementById('lm-sort-select');
+
+    function openDrawer() {
+      if (!drawer) return;
+      overlay.hidden = false;
+      requestAnimationFrame(function () {
+        overlay.classList.add('active');
+        drawer.classList.add('active');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (!drawer) return;
+      overlay.classList.remove('active');
+      drawer.classList.remove('active');
+      document.body.style.overflow = '';
+      setTimeout(function () { overlay.hidden = true; }, 300);
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openDrawer);
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && drawer && drawer.classList.contains('active')) closeDrawer();
+    });
+
+    // Collapsible groups
+    document.querySelectorAll('[data-refine-group] .refine__group-head').forEach(function (head) {
+      head.addEventListener('click', function () {
+        var group = head.closest('[data-refine-group]');
+        var collapsed = group.classList.toggle('collapsed');
+        head.setAttribute('aria-expanded', String(!collapsed));
+      });
+    });
+
+    if (form) {
+      // Empty inputs stay out of the URL
+      form.addEventListener('submit', function () {
+        form.querySelectorAll('input[type="number"]').forEach(function (input) {
+          if (input.value === '') input.disabled = true;
+        });
+      });
+
+      // Checkboxes and sort radios apply immediately; price waits for Apply
+      form.addEventListener('change', function (e) {
+        if (e.target.matches('input[type="checkbox"], input[type="radio"]')) {
+          if (typeof form.requestSubmit === 'function') form.requestSubmit();
+          else form.submit();
+        }
+      });
+    }
+
+    // Toolbar sort preserves active filter params
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function () {
+        var params = new URLSearchParams(window.location.search);
+        params.set('sort_by', sortSelect.value);
+        params.delete('page');
+        window.location.href = window.location.pathname + '?' + params.toString();
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
@@ -263,6 +631,49 @@
       "max": 48,
       "step": 4,
       "default": 24
+    },
+    {
+      "type": "text",
+      "id": "chips_label",
+      "label": "Shop-by label",
+      "default": "Shop by"
+    },
+    {
+      "type": "checkbox",
+      "id": "navy_mode",
+      "label": "Navy mode (Peaceful Diamonds tier)",
+      "info": "Cool navy accents for the lab-grown sub-brand. Leave off for LMNY-proper collections.",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Shop-by chip",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (absolute)",
+          "info": "Use for landing collections, e.g. /collections/sapphire-engagement-rings"
+        },
+        {
+          "type": "text",
+          "id": "filter_query",
+          "label": "Filter query (relative)",
+          "info": "Appended to the current collection URL, e.g. ?filter.v.price.lte=5000. Used only when Link is empty."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Products"
     }
   ]
 }
