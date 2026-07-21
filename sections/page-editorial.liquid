@@ -1,0 +1,317 @@
+{%- comment -%}
+  Laura Milman New York — Editorial page section
+  Flexible block-based layout powering the education & trust pages
+  (Buying Guide, Estate Authentication, Care Guide, Shipping & Returns…).
+{%- endcomment -%}
+
+<article class="lm-editorial">
+  <div class="lm-editorial__container">
+
+    <header class="lm-editorial__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="lm-editorial__title">{{ section.settings.title | default: page.title }}</h1>
+      {%- if section.settings.intro != blank -%}
+        <p class="lm-editorial__intro">{{ section.settings.intro }}</p>
+      {%- endif -%}
+      <div class="gold-divider" aria-hidden="true"></div>
+    </header>
+
+    <div class="lm-editorial__body">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'heading' -%}
+            <h2 class="lm-editorial__heading" {{ block.shopify_attributes }}>{{ block.settings.text }}</h2>
+
+          {%- when 'text' -%}
+            <div class="lm-editorial__text" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+
+          {%- when 'image_text' -%}
+            <div class="lm-editorial__split{% if block.settings.reverse %} lm-editorial__split--reverse{% endif %}" {{ block.shopify_attributes }}>
+              <div class="lm-editorial__split-image">
+                {%- if block.settings.image != blank -%}
+                  <img
+                    src="{{ block.settings.image | image_url: width: 800 }}"
+                    alt="{{ block.settings.heading | default: section.settings.title | escape }}"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                {%- else -%}
+                  <div class="lm-editorial__split-placeholder" aria-hidden="true"><span>LM</span></div>
+                {%- endif -%}
+              </div>
+              <div class="lm-editorial__split-copy">
+                {%- if block.settings.heading != blank -%}
+                  <h2 class="lm-editorial__heading">{{ block.settings.heading }}</h2>
+                {%- endif -%}
+                <div class="lm-editorial__text">{{ block.settings.text }}</div>
+              </div>
+            </div>
+
+          {%- when 'point' -%}
+            <div class="lm-editorial__point" {{ block.shopify_attributes }}>
+              <span class="lm-editorial__point-marker" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <div>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="lm-editorial__point-title">{{ block.settings.title }}</h3>
+                {%- endif -%}
+                <div class="lm-editorial__point-text">{{ block.settings.text }}</div>
+              </div>
+            </div>
+
+          {%- when 'cta' -%}
+            <div class="lm-editorial__cta" {{ block.shopify_attributes }}>
+              <a href="{{ block.settings.link }}" class="btn btn--gold">{{ block.settings.label }}</a>
+            </div>
+
+        {%- endcase -%}
+      {%- endfor -%}
+
+      {%- if section.blocks.size == 0 and page.content != blank -%}
+        <div class="lm-editorial__text">{{ page.content }}</div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</article>
+
+<style>
+  .lm-editorial {
+    background: var(--warm-white, #FDFAF6);
+    padding: 3rem 2rem 5rem;
+  }
+
+  .lm-editorial__container {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .lm-editorial__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .lm-editorial__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .lm-editorial__intro {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    max-width: 620px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .lm-editorial__header .gold-divider {
+    width: 56px;
+    margin: 0 auto;
+    background: var(--gold, #C9A050);
+  }
+
+  .lm-editorial__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 2.75rem 0 1rem;
+  }
+
+  .lm-editorial__text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.93rem;
+    font-weight: 300;
+    line-height: 1.85;
+    color: var(--text-wine, #4A2018);
+  }
+
+  .lm-editorial__text p {
+    margin: 0 0 1.1rem;
+  }
+
+  .lm-editorial__text ul,
+  .lm-editorial__text ol {
+    margin: 0 0 1.1rem 1.25rem;
+    list-style: disc;
+  }
+
+  .lm-editorial__text ol {
+    list-style: decimal;
+  }
+
+  .lm-editorial__text li {
+    margin-bottom: 0.4rem;
+  }
+
+  .lm-editorial__split {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2.5rem;
+    align-items: center;
+    margin: 2.75rem 0;
+  }
+
+  .lm-editorial__split--reverse .lm-editorial__split-image {
+    order: 2;
+  }
+
+  .lm-editorial__split-image img {
+    width: 100%;
+    border-radius: var(--radius-md, 8px);
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .lm-editorial__split-placeholder {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md, 8px);
+    background: linear-gradient(135deg, rgba(201, 160, 80, 0.08) 0%, rgba(74, 20, 40, 0.05) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 2.5rem;
+    color: rgba(201, 160, 80, 0.2);
+  }
+
+  .lm-editorial__split-copy .lm-editorial__heading {
+    margin-top: 0;
+  }
+
+  .lm-editorial__point {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin: 1.4rem 0;
+  }
+
+  .lm-editorial__point-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(201, 160, 80, 0.15);
+    color: var(--gold-dark, #A88340);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .lm-editorial__point-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.35rem;
+  }
+
+  .lm-editorial__point-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-editorial__cta {
+    text-align: center;
+    margin: 3rem 0 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .lm-editorial {
+      padding: 2rem 1.25rem 3.5rem;
+    }
+    .lm-editorial__split {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .lm-editorial__split--reverse .lm-editorial__split-image {
+      order: 0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Editorial Page",
+  "tag": "section",
+  "class": "section-page-editorial",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "info": "Defaults to the page title"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Heading" }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "image_text",
+      "name": "Image + text",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "richtext", "id": "text", "label": "Text" },
+        { "type": "checkbox", "id": "reverse", "label": "Image on right", "default": false }
+      ]
+    },
+    {
+      "type": "point",
+      "name": "Checklist point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "richtext", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "cta",
+      "name": "Button",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Book a Consultation" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial Page"
+    }
+  ]
+}
+{% endschema %}

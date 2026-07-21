@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "h-daily": { "type": "heading", "settings": { "text": "Everyday Care" } },
+        "t-daily": { "type": "text", "settings": { "text": "<p>Jewelry goes on last and comes off first. Perfume, sunscreen and hairspray dull gold and cloud stones — let them dry before dressing. Remove your pieces for the gym, the pool, and the garden; chlorine is the fastest way to damage gold alloys.</p>" } },
+        "h-cleaning": { "type": "heading", "settings": { "text": "Cleaning at Home" } },
+        "t-cleaning": { "type": "text", "settings": { "text": "<p>Warm water, a drop of mild dish soap, and a soft brush will handle most diamonds and gold. Rinse, then dry with a lint-free cloth. Avoid ultrasonic cleaners for emeralds, opals, pearls and any estate piece — vintage settings deserve gentler hands.</p>" } },
+        "h-storage": { "type": "heading", "settings": { "text": "Storage" } },
+        "t-storage": { "type": "text", "settings": { "text": "<p>Store pieces separately — diamonds scratch everything, including other diamonds. Keep chains fastened to avoid tangling, and pearls away from dry heat. The original box is usually the right home.</p>" } },
+        "h-pro": { "type": "heading", "settings": { "text": "Professional Care" } },
+        "t-pro": { "type": "text", "settings": { "text": "<p>Once a year, let us inspect prongs, clasps and settings — complimentary for the life of the piece. If a stone ever feels loose, stop wearing the piece and contact us straight away.</p>" } },
+        "cta-care": { "type": "cta", "settings": { "label": "Arrange a Cleaning & Inspection", "link": "/pages/private-clients" } }
+      },
+      "block_order": ["h-daily", "t-daily", "h-cleaning", "t-cleaning", "h-storage", "t-storage", "h-pro", "t-pro", "cta-care"],
+      "settings": {
+        "eyebrow": "Keep It Forever",
+        "title": "Jewelry Care Guide",
+        "intro": "A piece made to last generations still needs a little care. Here's how to keep yours brilliant."
+      }
+    }
+  },
+  "order": ["main"]
+}

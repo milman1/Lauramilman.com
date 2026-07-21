@@ -1,0 +1,27 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "h-stones": { "type": "heading", "settings": { "text": "Start with the Stone" } },
+        "t-stones": { "type": "text", "settings": { "text": "<p>Every diamond is graded on the four Cs — cut, color, clarity and carat. Of the four, cut does the most work: it is what makes a stone alive in the light. We favor exceptionally cut natural stones, then balance color and clarity to the eye rather than the certificate alone. A diamond should be beautiful on a hand, not just on paper.</p>" } },
+        "h-tiers": { "type": "heading", "settings": { "text": "Three Ways to Buy" } },
+        "p-natural": { "type": "point", "settings": { "title": "Natural & Fine Jewelry", "text": "<p>Our flagship: natural diamonds and colored gemstones, designed in New York and crafted in Italy. Made to be worn for decades and handed down.</p>" } },
+        "p-estate": { "type": "point", "settings": { "title": "The Pre-Owned Maison", "text": "<p>Authenticated estate pieces from Cartier, Van Cleef & Arpels, Bvlgari, Tiffany & Co. and other great houses — history you can wear, verified by our specialists.</p>" } },
+        "p-peaceful": { "type": "point", "settings": { "title": "Peaceful Diamonds (Lab-Grown)", "text": "<p>Certified lab-grown stones with the same fire at a more accessible price — the modern way to begin a collection before graduating to natural and estate pieces.</p>" } },
+        "h-budget": { "type": "heading", "settings": { "text": "Buying to a Budget" } },
+        "t-budget": { "type": "text", "settings": { "text": "<p>A confident budget buys better jewelry than a stretched one. Under $2,500, look to stackable bands, pendants and huggie earrings. Between $2,500 and $10,000, tennis bracelets, statement earrings, and engagement rings open up. Above that, rare stones and signed estate pieces become investment territory — and worth a conversation with us first.</p>" } },
+        "h-papers": { "type": "heading", "settings": { "text": "Papers, Provenance & Peace of Mind" } },
+        "t-papers": { "type": "text", "settings": { "text": "<p>Certified stones ship with their grading reports. Estate pieces ship with authentication documentation. Everything ships insured, and everything we make carries a lifetime warranty. If you're ever unsure, ask — no pressure, ever.</p>" } },
+        "cta-consult": { "type": "cta", "settings": { "label": "Talk Through Your Purchase", "link": "/pages/private-clients" } }
+      },
+      "block_order": ["h-stones", "t-stones", "h-tiers", "p-natural", "p-estate", "p-peaceful", "h-budget", "t-budget", "h-papers", "t-papers", "cta-consult"],
+      "settings": {
+        "eyebrow": "The LMNY Guide",
+        "title": "Fine Jewelry Buying Guide",
+        "intro": "How to buy a piece you'll never regret — stones, settings, budgets, and the questions worth asking."
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,68 @@
+{
+  "sections": {
+    "main": {
+      "type": "faq",
+      "blocks": {
+        "qa-authentic": {
+          "type": "qa",
+          "settings": {
+            "question": "How do I know an estate piece is authentic?",
+            "answer": "<p>Every pre-owned maison piece — Cartier, Van Cleef & Arpels, Bvlgari, Tiffany & Co. and others — is examined and authenticated by our specialists before it is offered for sale. Hallmarks, serial numbers, construction and materials are all verified, and your piece ships with documentation of its provenance.</p>"
+          }
+        },
+        "qa-natural-lab": {
+          "type": "qa",
+          "settings": {
+            "question": "What's the difference between your natural and Peaceful Diamonds pieces?",
+            "answer": "<p>Laura Milman New York collections feature natural diamonds and gemstones. Peaceful Diamonds by Laura Milman New York is our lab-grown line — certified stones that are chemically identical to mined diamonds, offered at a more accessible price. Both are held to the same design and craftsmanship standards; they are simply different stones for different chapters.</p>"
+          }
+        },
+        "qa-shipping": {
+          "type": "qa",
+          "settings": {
+            "question": "How is my jewelry shipped?",
+            "answer": "<p>Every order ships free within the United States, fully insured and signature-required. Most in-stock pieces leave our workshop within 2–3 business days; bespoke and made-to-order pieces are quoted individually.</p>"
+          }
+        },
+        "qa-returns": {
+          "type": "qa",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>Unworn pieces in their original condition may be returned within 30 days for a full refund. Bespoke commissions and specially sourced stones are final sale — something we'll always make clear before you commit.</p>"
+          }
+        },
+        "qa-sizing": {
+          "type": "qa",
+          "settings": {
+            "question": "Can my ring be resized?",
+            "answer": "<p>Most rings include one complimentary resizing. Some designs — eternity bands and certain estate pieces — can't be resized without compromising the piece, and we'll tell you before purchase. See our <a href=\"/pages/ring-size-guide\">Ring Size Guide</a> to find your fit.</p>"
+          }
+        },
+        "qa-bespoke": {
+          "type": "qa",
+          "settings": {
+            "question": "How does a bespoke commission work?",
+            "answer": "<p>It starts with a conversation — the occasion, the budget, the taste. We then source stones to your brief, share designs, and craft the final piece with our goldsmiths in Italy. Most commissions take 4–8 weeks. <a href=\"/pages/private-clients\">Book a consultation</a> to begin.</p>"
+          }
+        },
+        "qa-warranty": {
+          "type": "qa",
+          "settings": {
+            "question": "Is my purchase covered by a warranty?",
+            "answer": "<p>Yes — every Laura Milman New York piece carries a lifetime warranty against manufacturing defects, and we offer cleaning and inspection for the life of the piece.</p>"
+          }
+        }
+      },
+      "block_order": ["qa-authentic", "qa-natural-lab", "qa-shipping", "qa-returns", "qa-sizing", "qa-bespoke", "qa-warranty"],
+      "settings": {
+        "eyebrow": "Help & Answers",
+        "title": "Frequently Asked Questions",
+        "intro": "Everything you need to know about buying, owning, and caring for a Laura Milman New York piece.",
+        "footer_text": "Didn't find your answer? We're happy to help in person.",
+        "cta_text": "Contact Us",
+        "cta_url": "/pages/private-clients"
+      }
+    }
+  },
+  "order": ["main"]
+}

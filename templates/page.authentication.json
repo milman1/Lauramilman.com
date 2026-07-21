@@ -1,0 +1,24 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "t-open": { "type": "text", "settings": { "text": "<p>A signed Cartier bracelet or Van Cleef pendant is more than jewelry — it's a piece of a house's history. It's also exactly what counterfeiters imitate most. That's why every pre-owned maison piece we sell passes through the same authentication process before it ever reaches the site.</p>" } },
+        "h-process": { "type": "heading", "settings": { "text": "How We Authenticate" } },
+        "p-hallmarks": { "type": "point", "settings": { "title": "Hallmarks & Serial Numbers", "text": "<p>Maker's marks, metal hallmarks and serial numbers are verified against each maison's known conventions for the period.</p>" } },
+        "p-construction": { "type": "point", "settings": { "title": "Construction & Materials", "text": "<p>Our specialists examine clasps, hinges, settings and stone quality — the details houses never compromise on and imitations always do.</p>" } },
+        "p-provenance": { "type": "point", "settings": { "title": "Provenance & Papers", "text": "<p>Where original boxes, certificates or service records exist, they're documented and included. Where they don't, our own authentication documentation ships with the piece.</p>" } },
+        "h-why": { "type": "heading", "settings": { "text": "Why Buy Pre-Owned Maison" } },
+        "t-why": { "type": "text", "settings": { "text": "<p>Signed estate pieces hold their value, carry designs the houses no longer make, and arrive with a patina no new piece can imitate. Bought well — and authenticated properly — they are among the smartest purchases in fine jewelry.</p>" } },
+        "cta-vault": { "type": "cta", "settings": { "label": "Explore the Maison Vault", "link": "/collections/vintage-jewelry" } }
+      },
+      "block_order": ["t-open", "h-process", "p-hallmarks", "p-construction", "p-provenance", "h-why", "t-why", "cta-vault"],
+      "settings": {
+        "eyebrow": "Pre-Owned Maison",
+        "title": "Estate Authentication",
+        "intro": "Every estate piece we offer is examined, verified and documented before it's listed. Here's what that actually means."
+      }
+    }
+  },
+  "order": ["main"]
+}
