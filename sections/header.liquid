@@ -102,6 +102,30 @@
   color: var(--gold-light, #E2C27A);
 }
 
+/* Peaceful Diamonds nav entry — cool navy signal dot marks the sub-brand tier */
+.header .nav__link--peaceful {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header .nav__link--peaceful::after {
+  background: var(--pd-blue, #5B7FBD);
+}
+
+.header .nav__link--peaceful:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+.header .nav__peaceful-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pd-blue, #5B7FBD);
+  box-shadow: 0 0 6px rgba(91, 127, 189, 0.8);
+  flex-shrink: 0;
+}
+
 .header .nav__icons {
   display: flex;
   align-items: center;
@@ -548,12 +572,10 @@
             <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
             <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
             <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
             <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
             <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/brooches-pins" class="nav__dropdown-link">Brooches & Pins</a>
-            <a href="/collections/charms" class="nav__dropdown-link">Charms</a>
-            <a href="/collections/new-arrivals" class="nav__dropdown-link">New Arrivals</a>
+            <a href="/collections/designer-watches" class="nav__dropdown-link">Watches</a>
           </div>
         </div>
 
@@ -567,28 +589,35 @@
           <div class="nav__dropdown">
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
             <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-            <a href="/collections/bridal-sets" class="nav__dropdown-link">Bridal Sets</a>
-            <a href="/collections/bridal-gifts" class="nav__dropdown-link">Bridal Gifts</a>
+            <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">Men's Wedding Bands</a>
+            <a href="/collections/stackable-bands" class="nav__dropdown-link">Stackable Bands</a>
+            <a href="/pages/ring-builder" class="nav__dropdown-link">Ring Builder</a>
           </div>
         </div>
 
         <div class="nav__item">
           <span class="nav__item-link">
-            {{ section.settings.estate_label | default: 'Antique & Estate' }}
+            {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
           <div class="nav__dropdown">
-            <a href="/collections/antique-estate" class="nav__dropdown-link">All Estate Pieces</a>
-            <a href="/collections/estate-cartier" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/estate-tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
-            <a href="/collections/estate-van-cleef" class="nav__dropdown-link">Van Cleef & Arpels</a>
-            <a href="/collections/estate-bvlgari" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/estate-david-webb" class="nav__dropdown-link">David Webb</a>
-            <a href="/collections/estate-hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
+            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
+            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
+            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
+            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
           </div>
         </div>
+
+        <a href="{{ section.settings.peaceful_url | default: '/collections/lab-grown-jewelry' }}" class="nav__link nav__link--peaceful">
+          <span class="nav__peaceful-dot" aria-hidden="true"></span>
+          {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
+        </a>
 
         <a href="/pages/about" class="nav__link">About</a>
       </nav>
@@ -664,8 +693,8 @@
         <a href="{{ routes.search_url }}?q=necklace&type=product" class="search-overlay__tag">Necklaces</a>
         <a href="{{ routes.search_url }}?q=earring&type=product" class="search-overlay__tag">Earrings</a>
         <a href="{{ routes.search_url }}?q=bracelet&type=product" class="search-overlay__tag">Bracelets</a>
-        <a href="/collections/antique-estate" class="search-overlay__tag">Estate Jewelry</a>
-        <a href="/collections/new-arrivals" class="search-overlay__tag">New Arrivals</a>
+        <a href="/collections/vintage-jewelry" class="search-overlay__tag">Estate Jewelry</a>
+        <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
       </div>
     </div>
   </div>
@@ -1104,7 +1133,19 @@
       "type": "text",
       "id": "estate_label",
       "label": "Estate menu label",
-      "default": "Antique & Estate"
+      "default": "Pre-Owned Maison"
+    },
+    {
+      "type": "text",
+      "id": "peaceful_label",
+      "label": "Peaceful Diamonds label",
+      "default": "Peaceful Diamonds"
+    },
+    {
+      "type": "url",
+      "id": "peaceful_url",
+      "label": "Peaceful Diamonds link",
+      "info": "Point at the Peaceful Diamonds collection. Defaults to /collections/lab-grown-jewelry until the migration renames it."
     },
     {
       "type": "checkbox",
