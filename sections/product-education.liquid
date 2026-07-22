@@ -1,0 +1,307 @@
+{%- comment -%}
+  Laura Milman New York — PDP education block
+  Conditional on product tags:
+    · "Lab Grown Diamond"                → lab-grown education
+    · "Estate Jewelry" / "Pre-Owned" / "Vintage" → pre-owned maison education
+    · otherwise                          → LMNY craftsmanship / heritage
+  All copy is editable in the theme editor; blocks are typed per variant so
+  each mode keeps its own three feature cards.
+{%- endcomment -%}
+
+{%- liquid
+  assign tag_str = product.tags | join: '||' | downcase
+  assign edu_mode = 'heritage'
+  if tag_str contains 'lab grown'
+    assign edu_mode = 'lab'
+  elsif tag_str contains 'estate' or tag_str contains 'pre-owned' or tag_str contains 'vintage'
+    assign edu_mode = 'estate'
+  endif
+
+  case edu_mode
+    when 'lab'
+      assign edu_title = section.settings.lab_title
+      assign edu_intro = section.settings.lab_intro
+      assign edu_block_type = 'lab_point'
+    when 'estate'
+      assign edu_title = section.settings.estate_title
+      assign edu_intro = section.settings.estate_intro
+      assign edu_block_type = 'estate_point'
+    else
+      assign edu_title = section.settings.heritage_title
+      assign edu_intro = section.settings.heritage_intro
+      assign edu_block_type = 'heritage_point'
+  endcase
+-%}
+
+<section class="pdp-edu" aria-label="{{ edu_title | escape }}">
+  <div class="pdp-edu__container">
+
+    <header class="pdp-edu__header">
+      <h2 class="pdp-edu__title">{{ edu_title }}</h2>
+      {%- if edu_intro != blank -%}
+        <p class="pdp-edu__intro">{{ edu_intro }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="pdp-edu__grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == edu_block_type -%}
+          <div class="pdp-edu__card" {{ block.shopify_attributes }}>
+            <span class="pdp-edu__card-rule" aria-hidden="true"></span>
+            <h3 class="pdp-edu__card-title">{{ block.settings.title }}</h3>
+            <p class="pdp-edu__card-text">{{ block.settings.text }}</p>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.guarantee_title != blank -%}
+      <div class="pdp-edu__guarantee">
+        <span class="pdp-edu__guarantee-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </span>
+        <div>
+          <h3 class="pdp-edu__guarantee-title">{{ section.settings.guarantee_title }}</h3>
+          {%- if section.settings.guarantee_text != blank -%}
+            <p class="pdp-edu__guarantee-text">{{ section.settings.guarantee_text }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .pdp-edu {
+    background: var(--gradient-cream, linear-gradient(180deg, #F5F0E8 0%, #FDFAF6 100%));
+    padding: 4.5rem 2rem;
+  }
+
+  .pdp-edu__container {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  .pdp-edu__header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 2.75rem;
+  }
+
+  .pdp-edu__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.9rem;
+  }
+
+  .pdp-edu__intro {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .pdp-edu__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .pdp-edu__card {
+    background: var(--warm-white, #FDFAF6);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    padding: 1.75rem 1.5rem;
+  }
+
+  .pdp-edu__card-rule {
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--gold, #C9A050);
+    margin-bottom: 1rem;
+  }
+
+  .pdp-edu__card-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+
+  .pdp-edu__card-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.84rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .pdp-edu__guarantee {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 640px;
+    margin: 2.5rem auto 0;
+    padding: 1.4rem 1.6rem;
+    border: 1px solid rgba(201, 160, 80, 0.45);
+    border-radius: var(--radius-md, 8px);
+    background: rgba(201, 160, 80, 0.06);
+  }
+
+  .pdp-edu__guarantee-icon {
+    color: var(--gold-dark, #A88340);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .pdp-edu__guarantee-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.3rem;
+  }
+
+  .pdp-edu__guarantee-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.84rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--text-wine, #4A2018);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .pdp-edu {
+      padding: 3rem 1.25rem;
+    }
+    .pdp-edu__grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Education",
+  "tag": "section",
+  "class": "section-product-education",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Lab-grown products (tag: Lab Grown Diamond)"
+    },
+    {
+      "type": "text",
+      "id": "lab_title",
+      "label": "Heading",
+      "default": "Why Choose Lab-Grown Diamonds?"
+    },
+    {
+      "type": "textarea",
+      "id": "lab_intro",
+      "label": "Intro",
+      "default": "Lab-grown diamonds are real diamonds — identical to mined stones in every physical, chemical and optical property. The difference is where they begin, and what they cost."
+    },
+    {
+      "type": "header",
+      "content": "Estate products (tags: Estate Jewelry, Pre-Owned, Vintage)"
+    },
+    {
+      "type": "text",
+      "id": "estate_title",
+      "label": "Heading",
+      "default": "The Pre-Owned Maison Standard"
+    },
+    {
+      "type": "textarea",
+      "id": "estate_intro",
+      "label": "Intro",
+      "default": "A signed estate piece carries a house's history on your hand. Ours arrive the same way every time: authenticated, documented, and honestly described."
+    },
+    {
+      "type": "header",
+      "content": "All other products (LMNY craftsmanship)"
+    },
+    {
+      "type": "text",
+      "id": "heritage_title",
+      "label": "Heading",
+      "default": "The Laura Milman Standard"
+    },
+    {
+      "type": "textarea",
+      "id": "heritage_intro",
+      "label": "Intro",
+      "default": "Thirty years in New York's Diamond District taught us the difference between jewelry that's bought and jewelry that's kept. We only make the second kind."
+    },
+    {
+      "type": "header",
+      "content": "Guarantee (shown for every product)"
+    },
+    {
+      "type": "text",
+      "id": "guarantee_title",
+      "label": "Guarantee heading",
+      "default": "The Laura Milman New York Guarantee"
+    },
+    {
+      "type": "textarea",
+      "id": "guarantee_text",
+      "label": "Guarantee text",
+      "default": "Every purchase includes authenticity documentation, complimentary insured shipping, 30-day returns, and a lifetime warranty."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "lab_point",
+      "name": "Lab-grown point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Identical Brilliance" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Same fire, same hardness, same sparkle as a mined diamond — because it is a diamond." }
+      ]
+    },
+    {
+      "type": "estate_point",
+      "name": "Estate point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Authenticated by Specialists" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Hallmarks, serial numbers and construction verified before a piece is ever listed." }
+      ]
+    },
+    {
+      "type": "heritage_point",
+      "name": "Heritage point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Designed in New York" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Education",
+      "blocks": [
+        { "type": "lab_point", "settings": { "title": "Identical Brilliance", "text": "Same fire, same hardness, same sparkle as a mined diamond — because it is a diamond." } },
+        { "type": "lab_point", "settings": { "title": "Certified & Transparent", "text": "Every stone arrives with an independent grading certificate documenting its cut, color, clarity and carat." } },
+        { "type": "lab_point", "settings": { "title": "Exceptional Value", "text": "Larger, finer stones for your budget — typically 40–60% less than comparable mined diamonds." } },
+        { "type": "estate_point", "settings": { "title": "Authenticated by Specialists", "text": "Hallmarks, serial numbers and construction verified against each maison's conventions before a piece is ever listed." } },
+        { "type": "estate_point", "settings": { "title": "Provenance & Papers", "text": "Original boxes and certificates included where they exist; our own authentication documentation ships either way." } },
+        { "type": "estate_point", "settings": { "title": "Condition, Honestly Graded", "text": "Every piece is condition-graded and photographed as it truly is — wear is described, never hidden." } },
+        { "type": "heritage_point", "settings": { "title": "Designed in New York", "text": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house." } },
+        { "type": "heritage_point", "settings": { "title": "Crafted in Italy", "text": "Master goldsmiths finish each piece by hand — old-world technique, modern precision." } },
+        { "type": "heritage_point", "settings": { "title": "Made to Be Inherited", "text": "Built for decades of wear, with a lifetime warranty and service for the life of the piece." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
