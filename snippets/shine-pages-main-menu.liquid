@@ -1,0 +1,259 @@
+{% if drawer != true %}
+    <div class="sp-main-navigation" data-text-style="{{ setting.menu_text_style }}">
+        <nav class="sp-menu-inline">
+            <ul class="sp-list-menu" role="list">
+                {%- for link in setting.menu.links -%}
+                    <li class="sp-menu-item-main {% if link.links != blank %} sp-dropdown has-menu-child {% endif %}">
+                        {%- if link.links != blank -%}
+                            <span class="sp-menu-item-in-parent {%- if link.child_active %} active-menu-item {% endif %} body-font">
+                            {{- link.title | escape -}}
+                        </span>
+                            <svg class="sp-icon icon-caret" width="11" height="11" viewBox="0 0 11 11" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <g clip-path="url(#clip0_140_3417)">
+                                    <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5" stroke="currentColor"
+                                          stroke-linecap="square"/>
+                                </g>
+                                <defs>
+                                    <clipPath>
+                                        <rect width="10" height="10" fill="white" transform="translate(0.667969 0.5)"/>
+                                    </clipPath>
+                                </defs>
+                            </svg>
+                            <ul id="sp-menu-child-{{ forloop.index }}" class="sp-menu-child sp-dropdown-list"
+                                role="list"
+                                tabindex="-1">
+                                {%- for childlink in link.links -%}
+                                    <li class="sp-dropdown-list-item {% if childlink.links != blank %}sp-dropdown has-menu-child{% endif %}">
+                                        {%- if childlink.links == blank -%}
+                                            <a id="sp-menu-link-item-{{ link.handle }}-{{ childlink.handle }}"
+                                               href="{{ childlink.url }}"
+                                               class="sp-menu-link-item body-font {% if childlink.current %} sp-menu-link-item-active{% endif %}"
+                                                    {% if childlink.current %}
+                                                        aria-current="page"
+                                                    {% endif %}
+                                            >
+                                                {{ childlink.title | escape }}
+                                            </a>
+                                        {%- else -%}
+                                            <span class="sp-menu-item-in-parent {%- if childlink.child_active %} active-menu-item {% endif %} body-font">{{ childlink.title | escape }}</span>
+                                            <svg class="sp-icon icon-caret" width="11" height="11" viewBox="0 0 11 11"
+                                                 fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <g clip-path="url(#clip0_140_3417)">
+                                                    <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5" stroke="currentColor"
+                                                          stroke-linecap="square"/>
+                                                </g>
+                                                <defs>
+                                                    <clipPath>
+                                                        <rect width="10" height="10" fill="white"
+                                                              transform="translate(0.667969 0.5)"/>
+                                                    </clipPath>
+                                                </defs>
+                                            </svg>
+                                            <ul id="sp-menu-child-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                                class="sp-menu-child sp-dropdown-list">
+                                                {%- for grandchildlink in childlink.links -%}
+                                                    <li class="sp-dropdown-list-item">
+                                                        <a id="sp-menu-link-item-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                                           href="{{ grandchildlink.url }}"
+                                                           class="sp-menu-link-item {% if grandchildlink.current %} sp-menu-link-item-active{% endif %}"
+                                                           {% if grandchildlink.current %}aria-current="page"{% endif %}>
+                                                            {{ grandchildlink.title | escape }}
+                                                        </a>
+                                                    </li>
+                                                {%- endfor -%}
+                                            </ul>
+                                        {%- endif -%}
+                                    </li>
+                                {%- endfor -%}
+                            </ul>
+                        {%- else -%}
+                            <a id="sp-menu-link-item-{{ link.handle }}" href="{{ link.url }}"
+                               class="sp-menu-link-item body-font" {% if link.current %} aria-current="page"{% endif %}>
+                                {{- link.title | escape -}}
+                            </a>
+                        {%- endif -%}
+                    </li>
+                {%- endfor -%}
+            </ul>
+        </nav>
+    </div>
+{% endif %}
+<sp-drawer id="sp-drawer-{{ block.id }}" class="sp-drawer" data-type="navigation" data-init="false" data-open="false">
+    <div class="sp-drawer-content">
+        <div class="sp-close-button sp-drawer-close-button">
+            <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L22 22M1 22L22 1" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <div class="sp-main-navigation" data-text-style="{{ setting.menu_text_style }}">
+            <sp-navigation-drawer class="sp-navigation-drawer">
+                <div class="sp-list-menu" role="list">
+                    {%- for link in setting.menu.links -%}
+                        <div class="sp-list-menu-item {% if link.links != blank %}has-drawer{% endif %}">
+                            {%- if link.links != blank -%}
+                                <div class="sp-drawer-sub-toggle-button" data-expanded="false"
+                                     data-drawer-sub="sp-drawer-sub-{{ block.id }}-{{ link.handle }}-{{ forloop.index }}">
+                                    <span class="sp-menu-item-in-parent {%- if link.child_active %} active-menu-item {% endif %} body-font">
+                                        {{- link.title | escape -}}
+                                    </span>
+                                    <svg class="sp-icon icon-caret" width="12" height="12" viewBox="0 0 11 11"
+                                         fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_140_3417)">
+                                            <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5" stroke="currentColor"
+                                                  stroke-linecap="square"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath>
+                                                <rect width="10" height="10" fill="white"
+                                                      transform="translate(0.667969 0.5)"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <div id="sp-drawer-sub-{{ block.id }}-{{ link.handle }}-{{ forloop.index }}"
+                                     class="sp-drawer-sub">
+                                    <div class="sp-drawer-sub-back-button body-font">
+                                        <svg class="sp-icon icon-caret" width="12" height="12" viewBox="0 0 11 11"
+                                             fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <g clip-path="url(#clip0_140_3417)">
+                                                <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5" stroke="currentColor"
+                                                      stroke-linecap="square"/>
+                                            </g>
+                                            <defs>
+                                                <clipPath>
+                                                    <rect width="10" height="10" fill="white"
+                                                          transform="translate(0.667969 0.5)"/>
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                        <span>
+                                            {{- link.title | escape -}}
+                                        </span>
+                                    </div>
+                                    <div class="sp-list-menu" role="list">
+                                        {%- for childlink in link.links -%}
+                                            <div class="sp-list-menu-item {% if childlink.links != blank %}has-drawer{% endif %}"
+                                                 data-drawer-sub="sp-drawer-sub-{{ childlink.handle }}-{{ forloop.index }}">
+                                                {%- if childlink.links != blank -%}
+                                                    <div class="sp-drawer-sub-toggle-button"
+                                                         data-drawer-sub="sp-drawer-sub-{{ block.id }}-{{ childlink.handle }}-{{ forloop.index }}">
+                                                <span class="sp-menu-item-in-parent {%- if childlink.child_active %} active-menu-item {% endif %} body-font">
+                                                    {{- childlink.title | escape -}}
+                                                </span>
+                                                        <svg class="sp-icon icon-caret" width="12" height="12"
+                                                             viewBox="0 0 11 11"
+                                                             fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg">
+                                                            <g clip-path="url(#clip0_140_3417)">
+                                                                <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5"
+                                                                      stroke="currentColor"
+                                                                      stroke-linecap="square"/>
+                                                            </g>
+                                                            <defs>
+                                                                <clipPath>
+                                                                    <rect width="10" height="10" fill="white"
+                                                                          transform="translate(0.667969 0.5)"/>
+                                                                </clipPath>
+                                                            </defs>
+                                                        </svg>
+                                                    </div>
+                                                    <div
+                                                            id="sp-drawer-sub-{{ block.id }}-{{ childlink.handle }}-{{ forloop.index }}"
+                                                            class="sp-drawer-sub">
+                                                        <div class="sp-drawer-sub-back-button">
+                                                            <svg class="sp-icon icon-caret" width="12" height="12"
+                                                                 viewBox="0 0 11 11" fill="none"
+                                                                 xmlns="http://www.w3.org/2000/svg">
+                                                                <g clip-path="url(#clip0_140_3417)">
+                                                                    <path d="M1.66797 3.5L5.66797 7.5L9.66797 3.5"
+                                                                          stroke="currentColor"
+                                                                          stroke-linecap="square"/>
+                                                                </g>
+                                                                <defs>
+                                                                    <clipPath>
+                                                                        <rect width="10" height="10" fill="white"
+                                                                              transform="translate(0.667969 0.5)"/>
+                                                                    </clipPath>
+                                                                </defs>
+                                                            </svg>
+                                                            <span>
+                                                                {{- childlink.title | escape -}}
+                                                            </span>
+                                                        </div>
+                                                        <div class="sp-list-menu" role="list">
+                                                            {%- for grandchildlink in childlink.links -%}
+                                                                <div class="sp-list-menu-item {% if grandchildlink.links != blank %}has-drawer{% endif %}"
+                                                                     data-drawer-sub="sp-drawer-sub-{{ block.id }}-{{ grandchildlink.handle }}-{{ forloop.index }}">
+                                                                    <a id="sp-menu-link-item-{{ grandchildlink.handle }}"
+                                                                       href="{{ grandchildlink.url }}"
+                                                                       class="sp-menu-link-item body-font {% if grandchildlink.current %}sp-menu-link-item-active{% endif %}" {% if grandchildlink.current %} aria-current="page"{% endif %}>
+                                                                        {{- grandchildlink.title | escape -}}
+                                                                    </a>
+                                                                </div>
+                                                            {%- endfor -%}
+                                                        </div>
+                                                    </div>
+                                                {%- else -%}
+                                                    <a id="sp-menu-link-item-{{ childlink.handle }}"
+                                                       href="{{ childlink.url }}"
+                                                       class="sp-menu-link-item body-font {% if childlink.current %}sp-menu-link-item-active{% endif %}" {% if childlink.current %} aria-current="page"{% endif %}>
+                                                        {{- childlink.title | escape -}}
+                                                    </a>
+                                                {%- endif -%}
+                                            </div>
+                                        {%- endfor -%}
+                                    </div>
+                                </div>
+                            {%- else -%}
+                                <a id="sp-menu-link-item-{{ link.handle }}" href="{{ link.url }}"
+                                   class="sp-menu-link-item body-font {% if link.current %}sp-menu-link-item-active{% endif %}" {% if link.current %} aria-current="page"{% endif %}>
+                                    {{- link.title | escape -}}
+                                </a>
+                            {%- endif -%}
+                        </div>
+                    {%- endfor -%}
+                </div>
+            </sp-navigation-drawer>
+        </div>
+        <div class="sp-drawer-footer">
+            {% for block in region_block %}
+                {% assign setting = block.settings %}
+                {% if localization.available_countries.size > 1 %}
+                    <div id="sp-header-{{ block.id }}"
+                         class="sp-header-item sp-header-region" {{ block.shopify_attributes }}>
+                        <localization-form>
+                            {%- form 'localization', id: 'sp-header-region-form', class: 'sp-localization-form' -%}
+                                <h2 class="visually-hidden"
+                                    id="sp-header-{{ block.id }}-label">{{ 'shinepages.localization.country_label' | t }}</h2>
+                                {%- render 'shine-pages-country-localization', style: "dropup" -%}
+                                <input type="hidden" name="country_code"
+                                       value="{{ localization.country.iso_code }}">
+                            {%- endform -%}
+                        </localization-form>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% for block in language_block %}
+                {% assign setting = block.settings %}
+                {% if localization.available_countries.size > 1 %}
+                    <div id="sp-header-{{ block.id }}"
+                         class="sp-header-item sp-header-language" {{ block.shopify_attributes }}>
+                        <localization-form>
+                            {%- form 'localization', id: 'sp-header-language-form', class: 'sp-localization-form' -%}
+                                <h2 class="visually-hidden"
+                                    id="sp-header-{{ block.id }}-label">{{ 'shinepages.localization.language_label' | t }}</h2>
+                                {%- render 'shine-pages-language', style: "dropup" -%}
+                                <input type="hidden" name="locale_code"
+                                       value="{{ localization.language.iso_code }}">
+                            {%- endform -%}
+                        </localization-form>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</sp-drawer>

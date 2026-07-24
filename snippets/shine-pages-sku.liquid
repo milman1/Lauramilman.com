@@ -1,0 +1,19 @@
+<div id="sp-{{ section.id }}-sku"
+     class="sp-sku {% if product.selected_or_first_available_variant.sku.size == 0 %}visually-hidden{% endif %}" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} #sp-{{ section.id }}-sku .sp-sku-text {
+            --sp-text-size: {{ setting.sku_font_size }}px;
+            --sp-text-letter-spacing: {{ setting.sku_text_spacing }}px;
+            --sp-text-color: {{ setting.sku_text_color }};
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} #sp-{{ section.id }}-sku .sp-sku-text {
+                --sp-text-size: {{ setting.sku_font_size_mobile }}px;
+            }
+        }
+    </style>
+    <p class="sp-sku-text body-font sp-text-{{ setting.sku_text_style }}">
+        <span>{{ 'shinepages.product.sku' | t }}:</span> {{ product.selected_or_first_available_variant.sku }}
+    </p>
+</div>

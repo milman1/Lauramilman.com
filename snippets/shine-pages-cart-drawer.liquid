@@ -1,0 +1,332 @@
+<sp-drawer id="sp-drawer-{{ block.id }}" class="sp-drawer" data-position="right" data-type="cart" data-init="false"
+           data-open="false" data-enable-free-shipping="{{- setting.cart_free_shipping -}}"
+           data-free-shipping-goal="{{- setting.cart_free_shipping_goal -}}">
+    <sp-cart-drawer>
+        {% assign button_selector = "sp-drawer " | append: " .sp-button-wrapper .sp-button.sp-button-primary" %}
+        <style>
+            {{ button_selector }}
+            {
+                --sp-button-border-width:
+            {{ setting.button_border_width | append:"px" }}
+            ;
+                --sp-button-radius:
+            {{ setting.button_radius | append:"px" }}
+            ;
+                --sp-button-text-spacing:
+            {{ setting.button_text_spacing | append:"px" }}
+            ;
+                --sp-button-scale:
+            {{ setting.button_scale_mobile | divided_by: 100.0 }}
+            ;
+            {% if setting.button_scale_mobile >= 100 %}
+                --sp-button-font-scale:
+            {{ setting.button_scale_mobile | minus: 100.0 | divided_by: 2 | plus: 100 | divided_by: 100.0 }}
+            ;
+            {% endif %}
+            {% if setting.button_scale_mobile < 100 %}
+                --sp-button-font-scale:
+            {{ 100.0 | minus: setting.button_scale_mobile | divided_by: 2 | plus: setting.button_scale_mobile | divided_by: 100.0 }}
+            ;
+            {% endif %}
+            }
+            @media (min-width: 992px) {
+            {{ button_selector }} {
+                --sp-button-scale: {{ setting.button_scale | divided_by: 100.0 }};
+            {% if setting.button_scale >= 100 %}
+                --sp-button-font-scale: {{ setting.button_scale | minus: 100.0 | divided_by: 2 | plus: 100 | divided_by: 100.0 }};
+            {% endif %}
+            {% if setting.button_scale < 100 %}
+                --sp-button-font-scale: {{ 100.0 | minus: setting.button_scale | divided_by: 2 | plus: setting.button_scale | divided_by: 100.0 }};
+            {% endif %}
+            }
+            }
+
+            sp-drawer .sp-button-wrapper .sp-button.sp-button-primary,
+            sp-drawer .sp-button-wrapper .sp-button.sp-button-primary .sp-loading-spinner {
+                --sp-button-margin-top: 0;
+                --sp-button-background-color: {{ setting.button_background_color | default: "transparent" }};
+            {% if setting.button_background_gradient_color == null %} --sp-button-background-color: "transparent";
+            {% endif %} --sp-button-background-gradient-color: {{ setting.button_background_gradient_color | default: "null" }};
+                --sp-button-text-color: {{ setting.button_text_color | default: "transparent" }};
+            }
+
+            sp-drawer .sp-button-wrapper .sp-loading-spinner span {
+                --sp-section-text-color: {{ setting.button_text_color | default: "transparent" }};;
+            }
+
+            sp-drawer[data-type="cart"] .sp-drawer-cart-wrapper .sp-drawer-cart-heading-wrapper .sp-cart-drawer-free-shipping .sp-cart-drawer-free-shipping-header span strong,
+            sp-drawer[data-type="cart"] .sp-drawer-cart-wrapper .sp-drawer-cart-heading-wrapper .sp-cart-drawer-free-shipping .sp-cart-drawer-free-shipping-progress-bar span{
+                --sp-drawer-text-highlight-color: {{ setting.cart_highlight_color }};
+            }
+        </style>
+        <div class="sp-drawer-content">
+            {%- if cart == empty -%}
+                <div class="sp-cart-empty-wrapper">
+                    <div class="sp-cart-empty-content">
+                        <svg class="sp-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.5 8.25V6.75C7.5 5.55653 7.97411 4.41193 8.81802 3.56802C9.66193 2.72411 10.8065 2.25 12 2.25C13.1935 2.25 14.3381 2.72411 15.182 3.56802C16.0259 4.41193 16.5 5.55653 16.5 6.75V8.25M4.75 8.25C4.55109 8.25 4.36032 8.32902 4.21967 8.46967C4.07902 8.61032 4 8.80109 4 9L3 19.125C3 20.543 4.207 21.75 5.625 21.75H18.375C19.793 21.75 21 20.601 21 19.184L20 9C20 8.80109 19.921 8.61032 19.7803 8.46967C19.6397 8.32902 19.4489 8.25 19.25 8.25H4.75Z"
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                  stroke-linejoin="round"/>
+                        </svg>
+                        <h4 class="sp-cart-empty-heading body-font">{{ "shinepages.general.cart.cart_empty" | t }}</h4>
+                        <div id="sp-button-{{ block.id }}" class="sp-button-wrapper"
+                             data-alignment="center">
+                            <a href="{{ routes.all_products_collection_url }}"
+                               class="sp-button sp-button-primary  body-font sp-button-fill"
+                               data-text-style="{{ setting.button_text_style }}"
+                               data-button-hover="opacity">{{ "shinepages.general.cart.continue_shopping" | t }}</a>
+                        </div>
+                    </div>
+                    {% if setting.cart_empty_banner != null %}
+                        <div class="sp-cart-empty-banner">
+                        {% if setting.cart_empty_banner_url != blank %}
+                            <a href="{{ setting.cart_empty_banner_url }}">
+                                {% endif %}
+                                {{ setting.cart_empty_banner | image_url: width: 1024 | image_tag }}
+                                {% if setting.cart_empty_banner_url != blank %}
+                            </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="sp-drawer-cart-wrapper">
+                    <div class="sp-drawer-cart-heading-wrapper">
+                        <h2 class="sp-drawer-cart-heading body-font">{{ "shinepages.general.cart.cart_heading" | t }}{% if cart.item_count > 0 %}
+                                <span class="sp-cart-count">({{ cart.item_count }})</span>{% endif %}</h2>
+                        <div class="sp-close-button sp-drawer-close-button">
+                            <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L22 22M1 22L22 1" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="sp-cart-drawer-free-shipping" data-total-price="{{- cart.total_price -}}"
+                             data-active="false">
+                            <div class="sp-cart-drawer-free-shipping-header body-font">
+                                <svg class="sp-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4.28053 17.951C3.82928 17.951 3.38798 17.951 2.94336 17.951C2.13707 17.951 1.52323 17.3571 1.5 16.5508C1.5 16.5276 1.5 16.5077 1.5 16.4845C1.5 12.8844 1.5 9.28426 1.5 5.68417C1.5 5.0836 1.76876 4.63566 2.30961 4.36358C2.49874 4.26736 2.70446 4.22754 2.92013 4.22754C6.55009 4.22754 10.18 4.22754 13.81 4.22754C14.5566 4.22754 15.2401 4.82479 15.2268 5.68749C15.2202 6.0757 15.2268 6.46059 15.2268 6.84881C15.2268 6.88199 15.2268 6.91517 15.2268 6.95498C15.2666 6.95498 15.2998 6.95498 15.333 6.95498C16.3881 6.95498 17.4466 6.95498 18.5017 6.95498C19.2118 6.95498 19.7792 7.42615 19.9152 8.12294C20.1442 9.28426 20.3798 10.4456 20.612 11.6069C20.6187 11.6401 20.6552 11.6766 20.685 11.6932C21.0168 11.8624 21.3519 12.0283 21.6838 12.1942C22.2113 12.4596 22.49 12.8943 22.4934 13.4816C22.5033 14.5003 22.5 15.5156 22.4934 16.5342C22.49 17.2343 22.0222 17.7984 21.332 17.9245C21.1429 17.961 20.9405 17.951 20.7447 17.9477C20.6518 17.9477 20.6153 17.9709 20.5888 18.0638C20.3001 19.1422 19.2483 19.8689 18.1367 19.7594C17.1646 19.6632 16.3583 18.9763 16.1161 18.0307C16.0995 17.9643 16.0729 17.951 16.0099 17.951C13.6375 17.951 11.265 17.9544 8.89264 17.951C8.82296 17.951 8.80305 17.9709 8.78314 18.0373C8.50111 18.983 7.87731 19.5636 6.90512 19.7395C5.75043 19.9485 4.58911 19.182 4.30044 18.0373C4.29712 18.0108 4.29049 17.9842 4.28053 17.951ZM14.2214 13.3157C14.2248 13.2825 14.2248 13.2593 14.2248 13.2361C14.2248 10.711 14.2248 8.18598 14.2248 5.66426C14.2248 5.3955 14.0555 5.23291 13.7901 5.23291C10.1734 5.23291 6.55672 5.23291 2.94004 5.23291C2.66796 5.23291 2.50205 5.39881 2.50205 5.67421C2.50205 8.19262 2.50205 10.711 2.50205 13.2294C2.50205 13.2593 2.50537 13.2892 2.50537 13.319C6.41405 13.3157 10.3128 13.3157 14.2214 13.3157ZM15.2268 7.9504C15.2268 7.99685 15.2268 8.03667 15.2268 8.07317C15.2268 10.3394 15.2268 12.6056 15.2268 14.8752C15.2268 15.5388 15.2268 16.2024 15.2268 16.866C15.2268 16.9357 15.2467 16.9556 15.3164 16.9556C15.5487 16.9523 15.7809 16.9523 16.0132 16.9556C16.0829 16.9556 16.1061 16.9357 16.1227 16.8693C16.4379 15.6616 17.6523 14.9084 18.8634 15.1904C19.7726 15.4028 20.3532 15.9834 20.6087 16.8793C20.6253 16.939 20.6518 16.9556 20.7082 16.9556C20.8177 16.9523 20.9306 16.9556 21.0401 16.9556C21.332 16.9556 21.4979 16.7897 21.4979 16.501C21.4979 15.5056 21.4979 14.5102 21.4979 13.5148C21.4979 13.3124 21.415 13.173 21.2325 13.0868C20.8642 12.9043 20.4959 12.7185 20.1276 12.536C20.0811 12.5127 20.028 12.5028 19.9783 12.5028C19.0227 12.4995 18.0638 12.5028 17.1082 12.4995C16.4976 12.4995 16.0431 12.0449 16.0431 11.4377C16.0431 10.9035 16.0431 10.3693 16.0431 9.83838C16.0431 9.2544 16.4711 8.79651 17.0517 8.78323C17.6722 8.76996 18.2894 8.77992 18.9099 8.7766C18.943 8.7766 18.9762 8.7766 19.0194 8.7766C18.9862 8.61733 18.9596 8.47797 18.9298 8.33861C18.88 8.07981 18.734 7.95704 18.4686 7.95704C17.4167 7.95704 16.3682 7.95704 15.3164 7.95704C15.2932 7.9504 15.2633 7.9504 15.2268 7.9504ZM14.2214 14.3244C10.3128 14.3244 6.41073 14.3244 2.50205 14.3244C2.50205 14.3609 2.50205 14.3874 2.50205 14.414C2.50205 15.1108 2.50205 15.8076 2.50205 16.5044C2.50205 16.7864 2.66796 16.9523 2.94999 16.9556C3.21212 16.9556 3.47425 16.9556 3.73637 16.9556C3.91555 16.9556 4.09472 16.9556 4.27722 16.9556C4.28717 16.9258 4.29381 16.8992 4.30044 16.8727C4.59243 15.7412 5.7073 14.9781 6.85535 15.1605C7.85408 15.3165 8.49779 15.9038 8.78646 16.876C8.80637 16.9423 8.83291 16.9589 8.89927 16.9589C10.6413 16.9556 12.3832 16.9589 14.1252 16.9589C14.1551 16.9589 14.1849 16.9589 14.2181 16.9589C14.2214 16.073 14.2214 15.2004 14.2214 14.3244ZM6.54345 18.7673C7.27342 18.7673 7.86404 18.18 7.86404 17.4533C7.86404 16.7267 7.27011 16.1327 6.54677 16.1327C5.8168 16.1327 5.2295 16.7234 5.2295 17.45C5.2295 18.18 5.81348 18.7673 6.54345 18.7673ZM18.3591 18.7673C19.089 18.7673 19.6796 18.18 19.6796 17.4533C19.6796 16.7267 19.0857 16.1327 18.3624 16.1327C17.6357 16.1327 17.0418 16.7234 17.0418 17.45C17.0418 18.18 17.6291 18.7673 18.3591 18.7673ZM19.5635 11.5007C19.5635 11.4808 19.5668 11.4675 19.5635 11.4576C19.4573 10.9201 19.3478 10.3859 19.2417 9.84833C19.2284 9.78529 19.2018 9.77202 19.1454 9.77202C18.4785 9.77533 17.8116 9.77533 17.148 9.77202C17.0683 9.77202 17.0451 9.79524 17.0451 9.87488C17.0484 10.3792 17.0451 10.8802 17.0484 11.3846C17.0484 11.5007 17.0484 11.5007 17.1646 11.5007C17.9343 11.5007 18.7075 11.5007 19.4772 11.5007C19.5005 11.5007 19.527 11.5007 19.5635 11.5007Z"
+                                          fill="currentColor"/>
+                                </svg>
+                                <span class="sp-free-shipping-spend">{{- "shinepages.general.cart.free_shipping_spend_html" | t: spend: "[SPEND]" -}}</span>
+                                <span class="sp-free-shipping-done">{{- "shinepages.general.cart.free_shipping" | t -}}</span>
+                            </div>
+                            <div class="sp-cart-drawer-free-shipping-progress-bar">
+                                <span style="width: 0;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <form action="/cart" id="sp-cart-drawer-form" class="sp-cart-drawer-form" method="post">
+                        <sp-cart-items class="sp-drawer-cart-items-wrapper" data-loading="false">
+                            <div class="sp-loading-spinner">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            {%- for item in cart.items -%}
+                                <div class="sp-drawer-cart-item">
+                                    {% if item.image %}
+                                        <div class="sp-drawer-cart-item-media">
+                                            <a href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+                                                <img src="{{ item.image | image_url: width: 320 }}"
+                                                     alt="{{ item.image.alt | escape }}"
+                                                     width="320"
+                                                     height="{{ 320 | divided_by: item.image.aspect_ratio | ceil }}"
+                                                >
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="sp-drawer-cart-item-content">
+                                        <a href="{{ item.url }}" class="sp-drawer-cart-item-name body-font">
+                                            {{- item.product.title | escape -}}
+                                        </a>
+                                        {%- if item.original_price != item.final_price -%}
+                                            <div class="sp-drawer-cart-item-price body-font">
+                                                <span class="cart-item-old-price">
+                                                    {{- item.original_price | money -}}
+                                                </span>
+                                                <span class="cart-item-final-price">
+                                                    {{ item.final_price | money }}
+                                                </span>
+                                            </div>
+                                        {%- else -%}
+                                            <div class="sp-drawer-cart-item-price body-font">
+                                                <span class="cart-item-final-price">
+                                                    {{ item.original_price | money }}
+                                                </span>
+                                            </div>
+                                        {%- endif -%}
+                                        {%- if item.product.has_only_default_variant == false or item.selling_plan_allocation != null -%}
+                                            {%- if item.product.has_only_default_variant == false -%}
+                                                <div class="sp-drawer-cart-item-options body-font">
+                                                    {%- for option in item.options_with_values -%}
+                                                        <div class="sp-drawer-cart-item-option-item">
+                                                            {{- option.value -}}
+                                                        </div>
+                                                    {%- endfor -%}
+                                                </div>
+                                            {%- endif -%}
+                                            {% if item.selling_plan_allocation != null %}
+                                                <div class="sp-drawer-cart-item-options body-font">
+                                                    <div class="sp-drawer-cart-item-option-item">
+                                                        {{ item.selling_plan_allocation.selling_plan.name }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {%- endif -%}
+                                        {% if item.line_level_discount_allocations.size > 0 %}
+                                            <div class="sp-drawer-cart-item-options body-font">
+                                                {%- for discount in item.line_level_discount_allocations -%}
+                                                    <div class="sp-drawer-cart-item-option-item">
+                                                        <svg class="sp-icon" aria-hidden="true" focusable="false"
+                                                             viewBox="0 0 12 12">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                  d="M7 0h3a2 2 0 012 2v3a1 1 0 01-.3.7l-6 6a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4l6-6A1 1 0 017 0zm2 2a1 1 0 102 0 1 1 0 00-2 0z"
+                                                                  fill="currentColor"/>
+                                                        </svg>
+                                                        {{ discount.discount_application.title }}
+                                                    </div>
+                                                {%- endfor -%}
+                                            </div>
+                                        {% endif %}
+                                        <div class="sp-drawer-cart-item-actions">
+                                            <sp-quantity-input class="body-font sp-quantity cart-quantity">
+                                                <button class="sp-quantity-button" name="minus" type="button">
+                                                    <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            aria-hidden="true"
+                                                            focusable="false"
+                                                            class="sp-icon sp-icon-minus"
+                                                            fill="none"
+                                                            viewBox="0 0 10 2"
+                                                    >
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                              d="M.5 1C.5.7.7.5 1 .5h8a.5.5 0 110 1H1A.5.5 0 01.5 1z"
+                                                              fill="currentColor"/>
+                                                    </svg>
+                                                </button>
+                                                <input
+                                                        id="sp-cart-drawer-item-quantity-{{ item.index | plus: 1 }}"
+                                                        class="sp-quantity-input"
+                                                        type="number"
+                                                        name="updates[]"
+                                                        data-quantity-variant-id="{{ item.variant.id }}"
+                                                        data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                                                        data-min="{{ variant.quantity_rule.min }}"
+                                                        min="{{ item.variant.quantity_rule.min }}"
+                                                        {% if item.variant.quantity_rule.max != null %}
+                                                            max="{{ item.variant.quantity_rule.max }}"
+                                                        {% endif %}
+                                                        step="{{ item.variant.quantity_rule.increment }}"
+                                                        step="{{ variant.quantity_rule.increment }}"
+                                                        value="{{ item.quantity }}"
+                                                        aria-label="{{ 'shinepages.product.quantity.label' | t }}"
+                                                        data-index="{{ item.index | plus: 1 }}"
+                                                />
+                                                <button class="sp-quantity-button" name="plus" type="button">
+                                                    <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            aria-hidden="true"
+                                                            focusable="false"
+                                                            class="sp-icon sp-icon-plus"
+                                                            fill="none"
+                                                            viewBox="0 0 10 10"
+                                                    >
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                              d="M1 4.51a.5.5 0 000 1h3.5l.01 3.5a.5.5 0 001-.01V5.5l3.5-.01a.5.5 0 00-.01-1H5.5L5.49.99a.5.5 0 00-1 .01v3.5l-3.5.01H1z"
+                                                              fill="currentColor"/>
+                                                    </svg>
+                                                </button>
+                                            </sp-quantity-input>
+                                            <sp-cart-remove-button data-index="{{ item.index | plus: 1 }}">
+                                                <button class="sp-drawer-cart-item-remove body-font"
+                                                        data-index="{{ item.index | plus: 1 }}">
+                                                    {{- 'shinepages.general.cart.remove' | t -}}
+                                                </button>
+                                            </sp-cart-remove-button>
+                                        </div>
+                                        <div id="sp-line-item-error-{{ item.index | plus: 1 }}"
+                                             class="sp-drawer-cart-item-line-error" aria-hidden="true"></div>
+                                    </div>
+                                </div>
+                            {%- endfor -%}
+                        </sp-cart-items>
+                    </form>
+                    <div class="sp-drawer-cart-footer-wrapper">
+                        <div class="sp-drawer-cart-totals">
+                            <h2 class="sp-drawer-total-heading body-font">{{ 'shinepages.general.cart.estimated_total' | t }}</h2>
+                            <p class="sp-drawer-total-value body-font">{{ cart.total_price | money_with_currency }}</p>
+                        </div>
+                        <div class="sp-drawer-cart-notes">
+                            <p class="sp-drawer-cart-tax-note body-font body-font sp-text-capitalize">
+                                {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+                                    {{ 'shinepages.general.cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                                {%- elsif cart.taxes_included -%}
+                                    {{ 'shinepages.general.cart.taxes_included_but_shipping_at_checkout' | t }}
+                                {%- elsif shop.shipping_policy.body != blank -%}
+                                    {{ 'shinepages.general.cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+                                {%- else -%}
+                                    {{ 'shinepages.general.cart.taxes_and_shipping_at_checkout' | t }}
+                                {%- endif -%}
+                            </p>
+                            <a href="#." data-drawer="sp-cart-note-{{ block.id }}"
+                               class="sp-drawer-cart-note body-font sp-text-capitalize">{{ "shinepages.general.cart.note" | t }}</a>
+                        </div>
+                        <div class="sp-button-wrapper"
+                             data-alignment="center">
+                            <button name="checkout" type="submit" form="sp-cart-drawer-form"
+                                    class="sp-button sp-relative sp-button-primary body-font sp-button-fill"
+                                    data-text-style="{{ setting.button_text_style }}"
+                                    data-button-hover="opacity">{{ "shinepages.general.cart.checkout" | t }}
+                            </button>
+                        </div>
+                        <div class="sp-button-wrapper"
+                             data-alignment="center">
+                            <a href="{{ routes.cart_url }}"
+                               class="sp-drawer-cart-goto-cart-button body-font sp-text-uppercase">{{ "shinepages.general.cart.view_cart" | t }}</a>
+                        </div>
+                    </div>
+                </div>
+                <sp-cart-note id="sp-cart-note-{{ block.id }}" class="sp-drawer-cart-note-wrapper" data-expanded="false"
+                              data-sp-loading="" data-sp-loading-postion="top">
+                    <div class="sp-drawer-cart-note-heading">
+                        <h4 class="sp-drawer-cart-note-title sp-text-capitalize body-font">{{ "shinepages.general.cart.note" | t }}</h4>
+                        <div class="sp-close-button">
+                            <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L22 22M1 22L22 1" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="sp-drawer-cart-note-detail">
+                        <label class="visually-hidden"
+                               for="sp-cart-drawer-note">{{ "shinepages.general.cart.note" | t }}</label>
+                        <div class="sp-form body-font">
+                            <div class="sp-field sp-field-input">
+                                    <textarea id="sp-cart-drawer-note"
+                                              class="body-font"
+                                              name="note"
+                                              placeholder="{{ "shinepages.general.cart.note" | t }}"
+                                    >{{ cart.note }}</textarea>
+                            </div>
+                        </div>
+                        <div class="sp-button-wrapper"
+                             data-alignment="center">
+                            <a href="#." data-loading="false"
+                               class="sp-button sp-relative sp-button-primary body-font sp-button-fill}"
+                               data-text-style="{{ setting.button_text_style }}"
+                               data-button-hover="opacity">{{ "shinepages.general.cart.save_note" | t }}
+                                <div class="sp-loading-spinner">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </sp-cart-note>
+            {% endif %}
+        </div>
+    </sp-cart-drawer>
+</sp-drawer>
