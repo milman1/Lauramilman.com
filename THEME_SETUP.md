@@ -46,14 +46,36 @@ chosen by group **label**, so name the filters exactly:
 - **Price** → native min/max inputs
 - Anything else (Maison, Stone Type, Setting, Style…) → checkbox list
 
-### Tagging namespace (apply during product migration)
+### Facet vocabulary (DECIDED + EXECUTED 2026-07-24 — human-readable, no slug namespace)
 
-Structured tags (or metafields exposed as filters): `shape:oval`,
-`metal:14k-white`, `stone:lab-grown` / `stone:natural`, `maison:cartier`,
-`setting:hidden-halo`, `carat:1-2ct` (bands: `under-1ct`, `1-2ct`, `2-3ct`,
-`3-5ct`, `5ct-plus`). Price uses Shopify's native price filter — no tag.
-Existing free-text tags ("21st Century", "Women's") get normalized in the
-catalog-cleanup phase, **not** during the theme build.
+Filters ride on the catalog's **existing human-readable vocabulary** — the one
+the PD pieces and LMNY lab-grown pieces already use: `14K White Gold` /
+`White Gold` (both forms, mirroring the reference products), `Round`, `Oval`,
+`Emerald Cut`, `Lab Grown Diamond`, `Cartier`, `Van Cleef & Arpels`. A parallel
+slug namespace (`metal:14k-white`) was considered and **rejected** — it would
+have split every filter group in two.
+
+An automated pass derived missing facet tags from titles/descriptions
+(additive `tagsAdd` only — nothing removed, no status changes) and populated
+the seven `custom.*` metafield definitions the PDP spec table reads
+(`diamond_shape`, `carat_weight` [number_decimal], `metal`, `clarity`,
+`color`, `setting_style`, `length` — all pinned, storefront-readable).
+Sources: labeled description specs ("Metal Type:", "Total Carat Weight:"),
+title patterns ("– 5.80 CT | 14K White Gold", "D VVS2 - IGI Certified"),
+VCA's "quality DEF, IF to VVS" boilerplate → `D-F` / `IF-VVS`, and
+`uploadify_product.*` metafields. Only confident extractions were written;
+ambiguous products were skipped (PDP hides empty rows by design).
+Rollback spec: scratchpad `facet-rollback.jsonl` (tags to remove +
+metafield keys to delete per product). Maison tags were already complete
+(vendor↔tag counts match exactly for all nine houses) — untouched.
+
+Known cleanup-phase items (do NOT fix during theme/filter work): lowercase
+tag variants (`14k white gold`, `White gold`) and near-duplicates
+(`Lab Diamond`, `Lab Created Diamond`, `Synthetic Diamond`) still fragment
+filter values — unifying them requires tag *removal*, deferred to catalog
+cleanup. Carat-band tags (`1-2 Carats` vs `1-3 Carat`…) were left as-is;
+the carat range filter should come from the `custom.carat_weight` decimal
+metafield instead.
 
 ### Filter groups per collection type
 
@@ -90,11 +112,16 @@ unfiltered view before that, never to a 404.
 
 ## 5. Peaceful Diamonds migration (decided, not yet run)
 
-1. Migrate lab-grown products into one collection titled **"Peaceful Diamonds
-   by Laura Milman New York"** (today's stand-in: `lab-grown-jewelry`, which
-   the theme links by default — swap the header setting, footer link, homepage
-   block and this doc's template assignment when the final handle exists).
-2. Tag them `stone:lab-grown` so filters and exclusion rules work.
+1. The collection **already exists**: "Peaceful Diamonds by Laura Milman
+   New York", handle `peaceful-diamonds-by-laura-milman-new-york`
+   (gid://shopify/Collection/295877705799), smart rules
+   `VENDOR = "Peaceful Diamonds" OR TITLE CONTAINS "Lab Grown"`, 121 products.
+   Do **not** create another. Remaining move: swap the theme's Peaceful links
+   (header setting, footer link, homepage block) from the `lab-grown-jewelry`
+   stand-in to this handle when the user says go.
+2. Tag stragglers `Lab Grown Diamond` (existing vocabulary — applied
+   2026-07-24 to the 11 that were missing it; final counts in the tagging
+   pass report) so filters and exclusion rules work.
 3. **301-redirect peacefuldiamonds.com** to the in-site collection — do not
    run two live storefronts on one catalog.
 4. Hierarchy rule stays load-bearing: navy = Peaceful only; espresso/wine/gold
