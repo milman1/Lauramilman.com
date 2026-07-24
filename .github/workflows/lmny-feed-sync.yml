@@ -1,0 +1,86 @@
+# LMNY Belgium Dia → Shopify feed sync.
+#
+# Lives alongside the theme without touching theme deploys (the Shopify
+# GitHub integration only syncs theme directories).
+#
+# Write gating:
+#   - pull_request runs are ALWAYS --dry-run (safe CI signal on the sync PR)
+#   - workflow_dispatch defaults to dry-run; mode=live is the explicit lever
+#   - scheduled runs are dry-run until the repo variable LMNY_SYNC_LIVE=true
+name: LMNY feed sync
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # 04:00 ET daily (off-peak)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        type: choice
+        options: [dry-run, live]
+        default: dry-run
+  pull_request:
+    paths:
+      - 'lmny-feeds/**'
+      - '.github/workflows/lmny-feed-sync.yml'
+
+concurrency:
+  group: lmny-feed-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Run sync
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+          HOURS_API_URL: ${{ secrets.HOURS_API_URL }}
+          HOURS_API_KEY: ${{ secrets.HOURS_API_KEY }}
+          EVENT: ${{ github.event_name }}
+          MODE: ${{ inputs.mode }}
+          LIVE_VAR: ${{ vars.LMNY_SYNC_LIVE }}
+        run: |
+          if { [ "$EVENT" = "workflow_dispatch" ] && [ "$MODE" = "live" ]; } \
+             || { [ "$EVENT" = "schedule" ] && [ "$LIVE_VAR" = "true" ]; }; then
+            echo "Mode: LIVE"
+            npx tsx src/sync.ts
+          else
+            echo "Mode: dry run"
+            npx tsx src/sync.ts --dry-run
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lmny-sync-report-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/report.json
+            lmny-feeds/out/report.md
+          if-no-files-found: ignore

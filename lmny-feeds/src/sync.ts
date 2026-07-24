@@ -1,0 +1,236 @@
+/**
+ * LMNY feed sync — Shopify is the database.
+ *
+ * Full pass per run: fetch feeds → normalize → price → diff against the
+ * Shopify catalog by handle + content_hash → create / update / archive.
+ * Unchanged hashes are skipped entirely. --dry-run does everything except
+ * writes and produces the full report.
+ */
+
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
+import { HoursClient, mapConcurrent } from './feeds/hours.js';
+import { diffCatalog } from './diff.js';
+import { priceLab, priceNatural, priceWatch } from './markup.js';
+import { normalizeStones, normalizeWatches } from './normalize.js';
+import { buildProductSetInput, contentHashFor, handleFor, titleFor } from './product.js';
+import {
+  holdHistogram,
+  naturalMarginStats,
+  renderMarkdown,
+  summarizeDecisions,
+  type SyncReport,
+  type WatchLine,
+} from './report.js';
+import { ShopifyClient } from './shopify.js';
+import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchItem } from './types.js';
+
+const BULK_THRESHOLD = 100;
+const OUT_DIR = 'out';
+
+interface Flags {
+  dryRun: boolean;
+  limit: number | null;
+}
+
+function parseFlags(argv: string[]): Flags {
+  const dryRun = argv.includes('--dry-run');
+  const limitArg = argv.find((a) => a.startsWith('--limit='));
+  return { dryRun, limit: limitArg ? Number(limitArg.split('=')[1]) : null };
+}
+
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is not set`);
+  return value;
+}
+
+async function main() {
+  const flags = parseFlags(process.argv.slice(2));
+  const startedAt = new Date().toISOString();
+  const notes: string[] = [];
+
+  const shopify = new ShopifyClient(requireEnv('SHOPIFY_STORE_DOMAIN'), requireEnv('SHOPIFY_ADMIN_TOKEN'));
+  const { shop } = await shopify.verifyAuth();
+  console.log(`Shopify auth OK: ${shop}${flags.dryRun ? ' (dry run — zero writes)' : ''}`);
+
+  // 1. Fetch + normalize the three feeds. A feed that fails to fetch is
+  //    excluded from archive decisions so an outage can't archive its segment.
+  const items: FeedItem[] = [];
+  const holds: Hold[] = [];
+  const fetchedKinds = new Set<Kind>();
+  const feeds: SyncReport['feeds'] = {
+    natural: { fetched: 0, publishable: 0, held: 0 },
+    lab: { fetched: 0, publishable: 0, held: 0 },
+    watch: { fetched: 0, publishable: 0, held: 0 },
+  };
+
+  for (const kind of ['natural', 'lab', 'watch'] as const) {
+    try {
+      let rows = await fetchBelgiumDiaFeed(kind);
+      if (flags.limit) rows = rows.slice(0, flags.limit);
+      const result = kind === 'watch' ? normalizeWatches(rows) : normalizeStones(rows, kind);
+      feeds[kind].fetched = rows.length;
+      items.push(...result.items);
+      holds.push(...result.holds);
+      fetchedKinds.add(kind);
+      console.log(`Fetched ${kind}: ${rows.length} rows, ${result.items.length} past gates`);
+    } catch (err) {
+      feeds[kind].fetchError = err instanceof Error ? err.message : String(err);
+      console.error(`Feed ${kind} failed: ${feeds[kind].fetchError} — its catalog segment will not be archived`);
+    }
+  }
+
+  // 2. Price. Watches go through Hours per-reference; 404-no-comp is a hold.
+  const publishable: Publishable[] = [];
+  const hours = new HoursClient();
+  const watchLines: WatchLine[] = [];
+  let compsChecked = 0;
+  let compHits = 0;
+
+  const watches = items.filter((i): i is WatchItem => i.kind === 'watch');
+  const compByRef = new Map(
+    (
+      await mapConcurrent(watches, 4, async (w) => {
+        const comp = await hours.compFor(w.brand, w.reference);
+        return [w.stockRef, comp] as const;
+      })
+    ),
+  );
+
+  for (const item of items) {
+    let result;
+    if (item.kind !== 'watch') {
+      result = item.kind === 'natural' ? priceNatural(item) : priceLab(item);
+    } else {
+      const comp = compByRef.get(item.stockRef) ?? null;
+      compsChecked++;
+      if (comp) compHits++;
+      result = priceWatch(item, comp);
+      watchLines.push({
+        stockRef: item.stockRef,
+        title: titleFor(item),
+        costUsd: item.costUsd,
+        compMidUsd: comp?.midUsd ?? null,
+        retailUsd: result.ok ? result.priced.retailUsd : null,
+        holdReason: result.ok ? null : result.hold.reason,
+      });
+    }
+    if (result.ok) {
+      publishable.push({ item, priced: result.priced });
+    } else {
+      holds.push(result.hold);
+    }
+  }
+
+  for (const kind of ['natural', 'lab', 'watch'] as const) {
+    feeds[kind].publishable = publishable.filter((p) => p.item.kind === kind).length;
+    feeds[kind].held = holds.filter((h) => h.kind === kind).length;
+  }
+
+  // 3. Read the catalog and diff. Held items are never created; items that
+  //    left the feed or newly fail gates get archived (never deleted).
+  const catalog: CatalogEntry[] = await shopify.fetchCatalog();
+  console.log(`Catalog: ${catalog.length} feed-managed products`);
+  const desired = publishable.map((p) => ({
+    handle: handleFor(p.item),
+    contentHash: contentHashFor(p.item, p.priced),
+  }));
+  const dupes = desired.length - new Set(desired.map((d) => d.handle)).size;
+  if (dupes > 0) notes.push(`${dupes} duplicate handles in feed data — last occurrence wins`);
+  const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds);
+  const summary = summarizeDecisions(decisions);
+  console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length}, skip ${summary.skipped}`);
+
+  // 4. Execute (live only).
+  const writeErrors: string[] = [];
+  let mediaQuarantined: string[] = [];
+  let collectionsCreated: string[] = [];
+
+  if (!flags.dryRun) {
+    await shopify.ensureMetafieldDefinitions();
+    collectionsCreated = await shopify.ensureCollections();
+
+    try {
+      mediaQuarantined = (await shopify.auditMedia()).quarantined;
+    } catch (err) {
+      writeErrors.push(`media audit: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    const syncedAt = new Date().toISOString();
+    const byHandle = new Map(publishable.map((p) => [handleFor(p.item), p]));
+    const toWrite = decisions.filter((d) => d.action === 'create' || d.action === 'update');
+    const inputs = toWrite
+      .map((d) => byHandle.get(d.handle))
+      .filter((p): p is Publishable => Boolean(p))
+      .map((p) => buildProductSetInput(p.item, p.priced, syncedAt));
+
+    let createdIds: string[] = [];
+    if (inputs.length >= BULK_THRESHOLD) {
+      console.log(`Writing ${inputs.length} products via bulk productSet…`);
+      const result = await shopify.bulkProductSet(inputs);
+      createdIds = result.ids;
+      writeErrors.push(...result.errors);
+    } else if (inputs.length > 0) {
+      console.log(`Writing ${inputs.length} products via direct productSet…`);
+      for (const input of inputs) {
+        const result = await shopify.productSet(input);
+        if (result.id) createdIds.push(result.id);
+        writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
+      }
+    }
+
+    if (createdIds.length > 0) {
+      const publicationId = await shopify.onlineStorePublicationId();
+      console.log(`Publishing ${createdIds.length} products to Online Store…`);
+      for (const id of createdIds) {
+        const errors = await shopify.publishProduct(id, publicationId);
+        writeErrors.push(...errors.map((e) => `publish ${id}: ${e}`));
+      }
+    }
+
+    const toArchive = decisions.filter((d) => d.action === 'archive');
+    for (const d of toArchive) {
+      if (!d.productId) continue;
+      const errors = await shopify.archiveProduct(d.productId);
+      writeErrors.push(...errors.map((e) => `archive ${d.handle}: ${e}`));
+    }
+  }
+
+  // 5. Report — run summary plus JSON artifact as the audit trail.
+  const report: SyncReport = {
+    dryRun: flags.dryRun,
+    startedAt,
+    finishedAt: new Date().toISOString(),
+    feeds,
+    holdHistogram: holdHistogram(holds),
+    naturalMargins: naturalMarginStats(publishable, holds),
+    watchComps: {
+      checked: compsChecked,
+      hits: compHits,
+      hitRate: compsChecked > 0 ? compHits / compsChecked : null,
+      lines: watchLines,
+    },
+    decisions: summary,
+    writeErrors,
+    mediaQuarantined,
+    collectionsCreated,
+    notes,
+  };
+
+  await mkdir(OUT_DIR, { recursive: true });
+  await writeFile(path.join(OUT_DIR, 'report.json'), JSON.stringify(report, null, 2));
+  await writeFile(path.join(OUT_DIR, 'report.md'), renderMarkdown(report));
+  console.log(renderMarkdown(report));
+
+  if (writeErrors.length > 0) {
+    console.error(`${writeErrors.length} write errors — see report`);
+    process.exitCode = 1;
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
