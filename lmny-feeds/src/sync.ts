@@ -46,11 +46,43 @@ function requireEnv(name: string): string {
   return value;
 }
 
+const REQUIRED_ENV = [
+  'SHOPIFY_STORE_DOMAIN',
+  'SHOPIFY_ADMIN_TOKEN',
+  'BELGIUMDIA_API_URL',
+  'BELGIUMDIA_API_KEY',
+  'HOURS_API_URL',
+  'HOURS_API_KEY',
+];
+
+/** Fail with a readable report (not a stack trace) when Actions config is absent. */
+async function checkConfiguration(): Promise<void> {
+  const missing = REQUIRED_ENV.filter((name) => !process.env[name]);
+  if (missing.length === 0) return;
+  const md = [
+    '# LMNY feed sync — missing configuration',
+    '',
+    'The sync cannot run because these are not set:',
+    '',
+    ...missing.map((m) => `- \`${m}\``),
+    '',
+    'Configure them in the repo under **Settings → Secrets and variables → Actions**',
+    '(`BELGIUMDIA_API_URL` is a *variable*, the rest are *secrets*), then re-run.',
+    '',
+  ].join('\n');
+  await mkdir(OUT_DIR, { recursive: true });
+  await writeFile(path.join(OUT_DIR, 'report.md'), md);
+  await writeFile(path.join(OUT_DIR, 'report.json'), JSON.stringify({ error: 'missing_configuration', missing }, null, 2));
+  console.error(`Missing configuration: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
 async function main() {
   const flags = parseFlags(process.argv.slice(2));
   const startedAt = new Date().toISOString();
   const notes: string[] = [];
 
+  await checkConfiguration();
   const shopify = new ShopifyClient(requireEnv('SHOPIFY_STORE_DOMAIN'), requireEnv('SHOPIFY_ADMIN_TOKEN'));
   const { shop } = await shopify.verifyAuth();
   console.log(`Shopify auth OK: ${shop}${flags.dryRun ? ' (dry run — zero writes)' : ''}`);
