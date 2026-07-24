@@ -126,6 +126,15 @@ These 38 brands already have dropdown entries wired up in
 "back-vault", "thebackvault") must not appear anywhere on a Laura Milman
 product. Scrub the CSV before import and re-audit post-import.
 
+> **Audit completed 2026-07-24.** A store-wide scan (bulk export of all 950
+> products across title, handle, vendor, tags, description, SEO title, SEO
+> description, and image alt text) found 307 estate imports carrying the
+> phrase in descriptions/SEO fields. All 307 were updated via the Admin API
+> ("The Back Vault" → "Laura Milman New York"), and a re-scan confirmed
+> **zero remaining references** across products, pages, blog articles, CDN
+> file names, and theme code. Rollback snapshot: `backvault-rollback.csv`
+> (delivered in the build session). Future imports must still run §3b first.
+
 ### 3a. Fields to check per product
 
 These live on the product row in Shopify and must all be clean:
