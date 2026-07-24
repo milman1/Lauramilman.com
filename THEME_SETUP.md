@@ -69,6 +69,15 @@ Rollback spec: scratchpad `facet-rollback.jsonl` (tags to remove +
 metafield keys to delete per product). Maison tags were already complete
 (vendor↔tag counts match exactly for all nine houses) — untouched.
 
+**Verified 2026-07-24 against a fresh bulk export:** 1,598/1,598 metafields
+landed (metal 679, diamond_shape 209, carat_weight 195, clarity 164,
+setting_style 141, color 130, length 80 across 715 products); 462 tag adds
+landed exactly; 7 "Lab Grown Diamond" adds were Shopify-dedupe no-ops
+because those products carry the hyphenated variant `Lab-Grown Diamond`
+(cleanup-phase item; Peaceful membership unaffected — vendor rule covers
+them). Product statuses byte-identical before/after (668 active / 273
+draft / 9 archived). Live PDP spec table confirmed rendering.
+
 Known cleanup-phase items (do NOT fix during theme/filter work): lowercase
 tag variants (`14k white gold`, `White gold`) and near-duplicates
 (`Lab Diamond`, `Lab Created Diamond`, `Synthetic Diamond`) still fragment
@@ -120,8 +129,9 @@ unfiltered view before that, never to a 404.
    (header setting, footer link, homepage block) from the `lab-grown-jewelry`
    stand-in to this handle when the user says go.
 2. Tag stragglers `Lab Grown Diamond` (existing vocabulary — applied
-   2026-07-24 to the 11 that were missing it; final counts in the tagging
-   pass report) so filters and exclusion rules work.
+   2026-07-24: 4 added; the other 7 already carried the hyphenated
+   `Lab-Grown Diamond` variant, deferred to cleanup) so filters and
+   exclusion rules work.
 3. **301-redirect peacefuldiamonds.com** to the in-site collection — do not
    run two live storefronts on one catalog.
 4. Hierarchy rule stays load-bearing: navy = Peaceful only; espresso/wine/gold
