@@ -159,7 +159,7 @@
 
   .lm-search__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2rem;
   }
 
@@ -252,7 +252,7 @@
 
   @media (max-width: 1024px) {
     .lm-search__grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1.5rem;
     }
   }
@@ -262,7 +262,7 @@
       padding: 1rem 1rem 3rem;
     }
     .lm-search__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 1rem;
     }
   }

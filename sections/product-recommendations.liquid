@@ -81,13 +81,13 @@
 
   .product-recs__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 24px;
   }
 
   @media (max-width: 900px) {
     .product-recs__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
@@ -96,7 +96,7 @@
       padding: 3.5rem 0;
     }
     .product-recs__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
   }

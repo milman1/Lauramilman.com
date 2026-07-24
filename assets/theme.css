@@ -103,6 +103,9 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* iOS Safari inflates text on rotation/first paint, widening min-content
+     and pushing 1fr grid tracks past the viewport. */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -514,7 +517,7 @@ p {
 
 .categories__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-lg);
 }
 
@@ -586,7 +589,7 @@ p {
 
 .values-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-xl);
 }
 
@@ -637,8 +640,17 @@ p {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-lg);
+}
+
+/* iOS Safari keeps a min-content floor on grid items even in minmax(0,1fr)
+   tracks; without this the second card in a 2-up mobile grid overflows the
+   viewport edge. */
+.products-grid > *,
+.product-recs__grid > *,
+.collections-grid > * {
+  min-width: 0;
 }
 
 .product-card {
@@ -768,6 +780,9 @@ p {
   font-size: 1.125rem;
   margin-bottom: var(--space-sm);
   color: var(--text-dark);
+  /* Raw-SKU titles are single unbreakable tokens; without a break opportunity
+     they set the card's min-content width wider than a mobile grid track. */
+  overflow-wrap: anywhere;
 }
 
 .product-card__price {
@@ -827,7 +842,7 @@ p {
 
 .collections-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1.25rem;
 }
 
@@ -895,7 +910,7 @@ p {
 
 @media (max-width: 1024px) {
   .collections-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -904,7 +919,7 @@ p {
     padding: 3.5rem 1rem;
   }
   .collections-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
   }
 }
@@ -976,7 +991,7 @@ p {
 
 .footer__grid {
   display: grid;
-  grid-template-columns: 2fr repeat(3, 1fr);
+  grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
   gap: var(--space-2xl);
   margin-bottom: var(--space-3xl);
 }
@@ -1241,7 +1256,7 @@ p {
 /* Two-column layout */
 .product-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-3xl);
   align-items: start;
   margin-bottom: var(--space-4xl);
@@ -1402,7 +1417,7 @@ p {
 /* Specs grid */
 .product-specs {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin: var(--space-lg) 0;
   border: 1px solid var(--border-light);
@@ -1871,11 +1886,11 @@ p {
    ============================================= */
 @media (max-width: 1200px) {
   .products-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .categories__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1905,7 +1920,7 @@ p {
   }
 
   .footer__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .listing-layout {
@@ -1928,7 +1943,7 @@ p {
   }
 
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -1989,7 +2004,7 @@ p {
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 

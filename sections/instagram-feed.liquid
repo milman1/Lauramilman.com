@@ -30,7 +30,7 @@
   }
   .instagram-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 12px;
   }
   .instagram-cell {
@@ -120,13 +120,13 @@
 
   @media (max-width: 900px) {
     .instagram-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   @media (max-width: 480px) {
     .instagram-section { padding: 56px 0; }
     .instagram-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
     }
   }

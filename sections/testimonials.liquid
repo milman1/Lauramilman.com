@@ -30,7 +30,7 @@
   }
   .testimonials__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 32px;
   }
   .testimonial-card {
@@ -110,7 +110,7 @@
   }
   @media (min-width: 901px) and (max-width: 1060px) {
     .testimonials__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (max-width: 600px) {
