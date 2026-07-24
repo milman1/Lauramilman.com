@@ -46,10 +46,10 @@ function requireEnv(name: string): string {
   return value;
 }
 
+/** The five documented Actions secrets. BELGIUMDIA_API_URL is an optional override. */
 const REQUIRED_ENV = [
   'SHOPIFY_STORE_DOMAIN',
   'SHOPIFY_ADMIN_TOKEN',
-  'BELGIUMDIA_API_URL',
   'BELGIUMDIA_API_KEY',
   'HOURS_API_URL',
   'HOURS_API_KEY',
@@ -66,8 +66,8 @@ async function checkConfiguration(): Promise<void> {
     '',
     ...missing.map((m) => `- \`${m}\``),
     '',
-    'Configure them in the repo under **Settings → Secrets and variables → Actions**',
-    '(`BELGIUMDIA_API_URL` is a *variable*, the rest are *secrets*), then re-run.',
+    'Configure them as repository secrets under **Settings → Secrets and variables →',
+    'Actions → Secrets**, then re-run.',
     '',
   ].join('\n');
   await mkdir(OUT_DIR, { recursive: true });

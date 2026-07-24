@@ -18,9 +18,10 @@ const DEFAULT_PATHS = {
 
 export type BelgiumDiaKind = keyof typeof DEFAULT_PATHS;
 
+const DEFAULT_BASE_URL = 'https://api.belgiumdia.com';
+
 function baseUrl(): string {
-  const url = process.env.BELGIUMDIA_API_URL;
-  if (!url) throw new Error('BELGIUMDIA_API_URL is not set');
+  const url = process.env.BELGIUMDIA_API_URL ?? DEFAULT_BASE_URL;
   return url.replace(/\/+$/, '');
 }
 

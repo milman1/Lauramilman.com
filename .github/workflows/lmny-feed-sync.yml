@@ -5,8 +5,13 @@
 #
 # Write gating:
 #   - pull_request runs are ALWAYS --dry-run (safe CI signal on the sync PR)
-#   - workflow_dispatch defaults to dry-run; mode=live is the explicit lever
+#   - workflow_dispatch: dry_run input defaults to true; untick it for a live run
 #   - scheduled runs are dry-run until the repo variable LMNY_SYNC_LIVE=true
+#
+# Secrets (Settings → Secrets and variables → Actions → Secrets):
+#   SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN, BELGIUMDIA_API_KEY,
+#   HOURS_API_URL, HOURS_API_KEY
+# Optional variable: BELGIUMDIA_API_URL (overrides the default feed base URL)
 name: LMNY feed sync
 
 on:
@@ -14,11 +19,10 @@ on:
     - cron: '0 8 * * *' # 04:00 ET daily (off-peak)
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'Run mode'
-        type: choice
-        options: [dry-run, live]
-        default: dry-run
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
   pull_request:
     paths:
       - 'lmny-feeds/**'
@@ -59,10 +63,10 @@ jobs:
           HOURS_API_URL: ${{ secrets.HOURS_API_URL }}
           HOURS_API_KEY: ${{ secrets.HOURS_API_KEY }}
           EVENT: ${{ github.event_name }}
-          MODE: ${{ inputs.mode }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
           LIVE_VAR: ${{ vars.LMNY_SYNC_LIVE }}
         run: |
-          if { [ "$EVENT" = "workflow_dispatch" ] && [ "$MODE" = "live" ]; } \
+          if { [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; } \
              || { [ "$EVENT" = "schedule" ] && [ "$LIVE_VAR" = "true" ]; }; then
             echo "Mode: LIVE"
             npx tsx src/sync.ts

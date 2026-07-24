@@ -54,17 +54,19 @@ Flags: `--dry-run`, `--limit=N` (truncate each feed for testing).
 
 ### Environment
 
-| Var | Notes |
+Five Actions secrets:
+
+| Secret | Notes |
 |---|---|
 | `SHOPIFY_STORE_DOMAIN` | e.g. `laura-milman.myshopify.com` |
 | `SHOPIFY_ADMIN_TOKEN` | Admin API token (`read/write_products`, `read/write_publications`) |
-| `BELGIUMDIA_API_URL` | Feed base URL (repo Actions **variable**) |
 | `BELGIUMDIA_API_KEY` | Secret only — never logged, sent via header. Slated for rotation |
 | `HOURS_API_URL` | Direct Supabase function URL used as-is; a site root gets `/api/comps` appended |
 | `HOURS_API_KEY` | Hours auth |
 
-Optional: `BELGIUMDIA_NATURAL_PATH` / `BELGIUMDIA_LAB_PATH` /
-`BELGIUMDIA_WATCH_PATH` override the default endpoint paths.
+Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
+`https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
+`BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.
 
 ## CI / schedule
 
@@ -72,7 +74,7 @@ Optional: `BELGIUMDIA_NATURAL_PATH` / `BELGIUMDIA_LAB_PATH` /
 
 - **pull_request** touching `lmny-feeds/` → always dry-run (the PR's CI signal
   *is* the dry-run report).
-- **workflow_dispatch** → `mode: dry-run` (default) or `live`.
+- **workflow_dispatch** → `dry_run` input, default `true`; untick for live.
 - **schedule** (daily 04:00 ET) → dry-run until the repo variable
   `LMNY_SYNC_LIVE` is set to `true`. That variable is the rollout gate: flip it
   only after a reviewed dry-run.
