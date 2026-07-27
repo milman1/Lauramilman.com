@@ -17,3 +17,5 @@ export function parseEnabledFeeds(raw: string | undefined = process.env.SYNC_FEE
   if (set.size === 0) set.add('natural');
   return set;
 }
+
+// rev: re-verify feed recovery 431bf17
