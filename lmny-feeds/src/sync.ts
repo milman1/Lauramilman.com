@@ -158,6 +158,15 @@ async function main() {
     try {
       let rows = await fetchBelgiumDiaFeed(kind);
       if (flags.limit) rows = rows.slice(0, flags.limit);
+      // A live feed returning 0 rows is almost always an outage or rate-limit
+      // (the API answers 200 with an empty array), NOT a real emptying. Treat
+      // it as a soft failure so it never archives the whole catalog segment.
+      if (rows.length === 0) {
+        feeds[kind].fetched = 0;
+        feeds[kind].fetchError = 'returned 0 rows (likely rate-limit/outage) — segment protected, not archived';
+        console.error(`Feed ${kind}: 0 rows — treating as outage; catalog segment will NOT be archived`);
+        continue;
+      }
       const result = kind === 'watch' ? normalizeWatches(rows) : normalizeStones(rows, kind);
       feeds[kind].fetched = rows.length;
       items.push(...result.items);
