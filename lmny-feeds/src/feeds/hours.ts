@@ -8,6 +8,11 @@
 
 import type { WatchComp } from '../markup.js';
 
+// Hours response fields (camelCase, e.g. { asOf, lowUsd, midUsd, sourceCount }),
+// with snake_case fallbacks for resilience.
+const MID_KEYS = ['midUsd', 'comp_mid_usd', 'comp_mid', 'mid', 'median', 'mid_usd', 'price_mid', 'market_mid'];
+const ASOF_KEYS = ['asOf', 'comp_as_of', 'as_of', 'updated_at', 'date'];
+
 export function resolveUrl(raw: string | undefined = process.env.HOURS_API_URL): string {
   if (!raw) throw new Error('HOURS_API_URL is not set');
   const url = raw.replace(/\/+$/, '');
@@ -72,7 +77,7 @@ export class HoursClient {
       try {
         const payload = JSON.parse(text) as Record<string, unknown>;
         const body = (payload.data && typeof payload.data === 'object' ? payload.data : payload) as Record<string, unknown>;
-        parsedMid = pickNumber(body, ['comp_mid_usd', 'comp_mid', 'mid', 'median', 'mid_usd', 'price_mid', 'market_mid']) ?? null;
+        parsedMid = pickNumber(body, MID_KEYS) ?? null;
       } catch {
         /* body wasn't JSON */
       }
@@ -109,9 +114,9 @@ export class HoursClient {
     if (!res.ok) throw new Error(`Hours comp lookup for ${reference}: HTTP ${res.status}`);
     const payload = (await res.json()) as Record<string, unknown>;
     const body = (payload.data && typeof payload.data === 'object' ? payload.data : payload) as Record<string, unknown>;
-    const midUsd = pickNumber(body, ['comp_mid_usd', 'comp_mid', 'mid', 'median', 'mid_usd', 'price_mid', 'market_mid']);
+    const midUsd = pickNumber(body, MID_KEYS);
     if (midUsd === undefined) return null;
-    const asOf = pickString(body, ['comp_as_of', 'as_of', 'updated_at', 'date']);
+    const asOf = pickString(body, ASOF_KEYS);
     return { midUsd, asOf: asOf?.slice(0, 10) };
   }
 }
