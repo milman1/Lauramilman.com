@@ -80,6 +80,23 @@ export interface NormalizeResult {
   holds: Hold[];
 }
 
+/**
+ * LMNY's cost for a stone. Belgium Dia reports the supplier Buy_Price and,
+ * commonly, a Buy_Price_Discount_PER (a negative % off Rapaport). When
+ * Buy_Price is 0 but a Rap price and discount exist, cost = Rap × (1 + disc/100).
+ */
+function stoneCost(raw: Raw, rapPriceUsd: number | undefined): number | undefined {
+  const buy = num(raw, ['buy_price', 'cost', 'cost_usd', 'net_price', 'price', 'price_usd', 'total_price', 'amount', 'memo_price']);
+  if (buy) return buy;
+  const discRaw = pick(raw, ['buy_price_discount_per', 'buy_discount', 'buy_price_discount', 'memo_discount_per']);
+  const disc = discRaw === undefined ? Number.NaN : Number(String(discRaw).replace(/[%\s]/g, ''));
+  if (rapPriceUsd && Number.isFinite(disc)) {
+    const c = rapPriceUsd * (1 + disc / 100);
+    if (c > 0) return Math.round(c);
+  }
+  return undefined;
+}
+
 export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): NormalizeResult {
   const items: FeedItem[] = [];
   const holds: Hold[] = [];
@@ -89,12 +106,15 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       holds.push({ kind, stockRef: '(unknown)', reason: 'missing_stock_ref' });
       continue;
     }
+    // Field names follow the Belgium Dia developer API (PascalCase_underscore);
+    // pick() is case-insensitive so lowercase candidates match.
     const carat = num(raw, ['carat', 'carats', 'weight', 'carat_weight', 'size']);
     const shape = str(raw, ['shape', 'cut_shape', 'stone_shape']);
     const color = str(raw, ['color', 'colour', 'color_grade']);
     const clarity = str(raw, ['clarity', 'clarity_grade']);
     const lab = str(raw, ['lab', 'cert_lab', 'certificate_lab', 'grading_lab', 'cert']);
-    const costUsd = num(raw, ['cost', 'cost_usd', 'price', 'price_usd', 'total_price', 'net_price', 'amount']);
+    const rapPriceUsd = num(raw, ['rap_price', 'rap', 'rapaport', 'rap_total', 'rap_price_total', 'list_price']);
+    const costUsd = stoneCost(raw, rapPriceUsd);
     if (!carat || !shape || !color || !clarity || !lab) {
       holds.push({ kind, stockRef, reason: 'missing_grading_fields' });
       continue;
@@ -121,15 +141,15 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       cut: str(raw, ['cut', 'cut_grade', 'make']),
       polish: str(raw, ['polish']),
       symmetry: str(raw, ['symmetry', 'sym']),
-      fluorescence: str(raw, ['fluorescence', 'fluor', 'fl']),
+      fluorescence: str(raw, ['fluorescence_intensity', 'fluorescence', 'fluor', 'fl']),
       lab: lab.toUpperCase(),
-      certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no']),
-      certUrl: str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link']),
+      certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']),
+      certUrl: str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink']),
       measurements: str(raw, ['measurements', 'measurement', 'dimensions']),
       costUsd,
-      rapPriceUsd: num(raw, ['rap_price', 'rap', 'rapaport', 'rap_total', 'rap_price_total', 'list_price']),
-      imageUrls: urls(raw, ['image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'diamond_image']),
-      videoUrls: urls(raw, ['video', 'video_url', 'videos', 'v360', 'video_link', 'diamond_video']),
+      rapPriceUsd,
+      imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'diamond_image']),
+      videoUrls: urls(raw, ['videolink', 'video_html', 'video', 'video_url', 'videos', 'v360', 'video_link', 'diamond_video']),
     };
     items.push(item);
   }
@@ -149,7 +169,7 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
     const brand = str(raw, ['brand', 'make', 'manufacturer']);
     const model = str(raw, ['model', 'model_name', 'collection']);
     const reference = str(raw, ['reference', 'reference_number', 'ref_no', 'model_ref', 'model_number']);
-    const costUsd = num(raw, ['cost', 'cost_usd', 'price', 'price_usd', 'total_price', 'net_price', 'amount']);
+    const costUsd = num(raw, ['price', 'cost', 'cost_usd', 'price_usd', 'total_price', 'net_price', 'amount']);
     if (!brand || !model || !reference) {
       holds.push({ kind, stockRef, reason: 'missing_watch_fields' });
       continue;
@@ -163,7 +183,7 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       continue;
     }
     const box = bool(raw, ['box', 'has_box', 'with_box', 'original_box']);
-    const papers = bool(raw, ['papers', 'has_papers', 'with_papers', 'original_papers', 'card']);
+    const papers = bool(raw, ['paper', 'papers', 'has_papers', 'with_papers', 'original_papers', 'card']);
     const item: WatchItem = {
       kind,
       stockRef,
@@ -176,8 +196,8 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       papers,
       isNaked: !box && !papers,
       costUsd,
-      imageUrls: urls(raw, ['image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture']),
-      videoUrls: urls(raw, ['video', 'video_url', 'videos', 'video_link']),
+      imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture']),
+      videoUrls: urls(raw, ['videolink', 'video', 'video_url', 'videos', 'video_link']),
     };
     items.push(item);
   }
