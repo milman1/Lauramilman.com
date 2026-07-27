@@ -66,8 +66,34 @@ export function extractRows(payload: unknown, depth = 0): Raw[] | null {
   return null;
 }
 
+const REQUEST_HEADERS = {
+  Accept: 'application/json',
+  // Some WAFs reject requests without a browser-like UA by resetting the
+  // connection (surfaces as a network-level "fetch failed", not an HTTP code).
+  'User-Agent': 'Mozilla/5.0 (compatible; LMNY-FeedSync/1.0; +https://lauramilman.com)',
+} as const;
+
 async function fetchPage(kind: BelgiumDiaKind, page: number): Promise<Raw[]> {
-  const res = await fetch(buildUrl(kind, page), { headers: { Accept: 'application/json' } });
+  const url = buildUrl(kind, page);
+  let res: Response | undefined;
+  let lastNetErr = '';
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      res = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(30_000) });
+      break;
+    } catch (err) {
+      // Surface the underlying cause (DNS/reset/TLS/timeout) without leaking
+      // the URL — undici causes carry a host at most, never the key query.
+      const cause = (err as { cause?: { code?: string; name?: string; message?: string } }).cause;
+      lastNetErr =
+        [cause?.code, cause?.name, cause?.message].filter(Boolean).join(': ') ||
+        (err instanceof Error ? err.message : String(err));
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    }
+  }
+  if (!res) {
+    throw new Error(`Belgium Dia ${kind} feed: request failed (${lastNetErr})`);
+  }
   if (!res.ok) {
     // Status only — never the URL (it carries the key).
     throw new Error(`Belgium Dia ${kind} feed: HTTP ${res.status}`);
