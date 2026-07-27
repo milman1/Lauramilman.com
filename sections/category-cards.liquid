@@ -66,13 +66,14 @@
 
 <style>
   .lm-categories {
-    padding: 5rem 2rem;
+    padding: 5rem 0;
     background: var(--warm-white, #FDFBF7);
   }
 
   .lm-categories__container {
-    max-width: 1280px;
+    max-width: var(--container-max);
     margin: 0 auto;
+    padding: 0 var(--container-padding);
   }
 
   .lm-categories__header {
@@ -170,7 +171,7 @@
 
   @media (max-width: 768px) {
     .lm-categories {
-      padding: 3.5rem 1rem;
+      padding: 3.5rem 0;
     }
     .lm-categories__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -70,7 +70,7 @@
 <style>
   .lm-story {
     background: var(--off-white, #F5F0E8);
-    padding: 6rem 2rem;
+    padding: 6rem 0;
   }
 
   .lm-story__container {
@@ -78,8 +78,9 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 4rem;
     align-items: center;
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
+    padding: 0 var(--container-padding);
   }
 
   .lm-story__portrait img {
@@ -203,7 +204,7 @@
 
   @media (max-width: 768px) {
     .lm-story {
-      padding: 3.5rem 1rem;
+      padding: 3.5rem 0;
     }
     .lm-story__portrait img {
       max-width: 100%;

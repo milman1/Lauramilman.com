@@ -67,16 +67,17 @@
 <style>
   .lm-private {
     background: var(--off-white, #F5F0E8);
-    padding: 6rem 2rem;
+    padding: 6rem 0;
   }
 
   .lm-private__container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1.15fr;
     gap: 4rem;
     align-items: center;
+    padding: 0 var(--container-padding);
   }
 
   .lm-private__visual {
@@ -203,7 +204,7 @@
 
   @media (max-width: 768px) {
     .lm-private {
-      padding: 4rem 1.25rem;
+      padding: 4rem 0;
     }
   }
 </style>

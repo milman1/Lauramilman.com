@@ -10,9 +10,11 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 1rem 0;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   background: rgba(30, 17, 9, 0.98);
+  /* theme.css section 5 still sets a light 1px rule, which shows as a pale
+     hairline under the dark bar and makes the header 1px taller than the token. */
+  border-bottom: none;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -20,24 +22,30 @@
 .header--scrolled {
   background: rgba(30, 17, 9, 0.98);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-  padding: 0.75rem 0;
 }
 
 .header .container {
-  max-width: 1400px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 2rem;
+  /* Was a hardcoded 2rem at every width, so the logo sat 16px further in than
+     page content on phones. */
+  padding: 0 var(--container-padding);
 }
 
+/* --header-height is the single source of truth: body reserves exactly this
+   much, so the bar must be exactly this tall. Do not add vertical padding. */
 .header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: var(--header-height);
 }
 
 .header .logo {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
@@ -56,6 +64,7 @@
 
 .header .logo img {
   height: 70px;
+  max-height: calc(var(--header-height) - 16px);
   width: auto;
   object-fit: contain;
 }
@@ -493,6 +502,38 @@
   .header .nav__icons {
     position: relative;
     z-index: 1003;
+    gap: 0.5rem;
+  }
+
+  /* At 1.75rem the wordmark needs ~166px, but the icon row plus the burger
+     left only 68-138px on a phone, so it broke onto two lines. */
+  .header .logo {
+    font-size: 1.3rem;
+  }
+
+  .header .nav__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .header .nav__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header .mobile-toggle {
+    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* The icon row and burger sit above the drawer (z-index 1003 vs 1002), so
+     with the menu open they landed on top of its "Menu" heading and stacked a
+     second X next to the drawer's own close button. */
+  .header--nav-open .nav__icons,
+  .header--nav-open .mobile-toggle {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .header .nav__mobile-header {
@@ -531,8 +572,18 @@
   }
 }
 
+@media (max-width: 380px) {
+  .header .nav__icon--account {
+    display: none;
+  }
+}
+
 @media (min-width: 993px) {
   .header .nav__mobile-header {
+    display: none;
+  }
+
+  .header .nav__link--account {
     display: none;
   }
 }
@@ -620,6 +671,7 @@
         </a>
 
         <a href="/pages/about" class="nav__link">About</a>
+        <a href="{{ routes.account_url }}" class="nav__link nav__link--account">Account</a>
       </nav>
 
       <div class="nav__icons">
@@ -629,7 +681,7 @@
             <path d="m21 21-4.3-4.3"></path>
           </svg>
         </button>
-        <a href="{{ routes.account_url }}" class="nav__icon" aria-label="Account">
+        <a href="{{ routes.account_url }}" class="nav__icon nav__icon--account" aria-label="Account">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
@@ -938,6 +990,7 @@
 
     function openMobileMenu() {
       nav.classList.add('nav--open');
+      header.classList.add('header--nav-open');
       mobileToggle.classList.add('active');
       navOverlay.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -945,6 +998,7 @@
 
     function closeMobileMenu() {
       nav.classList.remove('nav--open');
+      header.classList.remove('header--nav-open');
       mobileToggle.classList.remove('active');
       navOverlay.classList.remove('active');
       document.body.style.overflow = '';

@@ -68,12 +68,13 @@
 <style>
   .lm-featured {
     background: var(--warm-white, #FDFBF7);
-    padding: 5rem 2rem;
+    padding: 5rem 0;
   }
 
   .lm-featured__container {
-    max-width: 1280px;
+    max-width: var(--container-max);
     margin: 0 auto;
+    padding: 0 var(--container-padding);
   }
 
   .lm-featured__header {
@@ -116,7 +117,7 @@
 
   @media (max-width: 768px) {
     .lm-featured {
-      padding: 3.5rem 1rem;
+      padding: 3.5rem 0;
     }
     .lm-featured .products-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));

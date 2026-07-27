@@ -81,13 +81,14 @@
 <style>
   .lm-search {
     background: var(--warm-white, #FDFAF6);
-    padding: 2rem 2rem 4rem;
+    padding: 2rem 0 4rem;
     min-height: 60vh;
   }
 
   .lm-search__container {
-    max-width: 1320px;
+    max-width: var(--container-max);
     margin: 0 auto;
+    padding: 0 var(--container-padding);
   }
 
   .lm-search__header {
@@ -259,7 +260,7 @@
 
   @media (max-width: 768px) {
     .lm-search {
-      padding: 1rem 1rem 3rem;
+      padding: 1rem 0 3rem;
     }
     .lm-search__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
