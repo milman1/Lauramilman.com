@@ -22,6 +22,42 @@ export const PRODUCT_SET_MUTATION = `mutation call($input: ProductSetInput!) {
   }
 }`;
 
+/**
+ * Client-credentials grant for Dev Dashboard apps: exchanges the app's
+ * Client ID + Secret for a 24h Admin API access token. This is the auth
+ * path for stores migrated to the new dev platform, where static shpat_
+ * custom-app tokens no longer exist. The token is minted fresh per run,
+ * so expiry never matters for a CI job.
+ */
+export async function exchangeClientCredentials(
+  domain: string,
+  clientId: string,
+  clientSecret: string,
+): Promise<{ token: string; scope: string }> {
+  const host = domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const res = await fetch(`https://${host}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    const hint = text.includes('shop_not_permitted')
+      ? ' (the app and store must belong to the same Dev Dashboard organization, and the app must be installed on the store)'
+      : '';
+    throw new Error(`Client-credentials token exchange failed: HTTP ${res.status}${hint}: ${text.slice(0, 300)}`);
+  }
+  const body = JSON.parse(text) as { access_token?: string; scope?: string };
+  if (!body.access_token) {
+    throw new Error('Client-credentials token exchange returned no access_token');
+  }
+  return { token: body.access_token, scope: body.scope ?? '' };
+}
+
 export class ShopifyClient {
   private endpoint: string;
   private token: string;

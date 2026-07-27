@@ -23,7 +23,7 @@ import {
   type SyncReport,
   type WatchLine,
 } from './report.js';
-import { ShopifyClient } from './shopify.js';
+import { ShopifyClient, exchangeClientCredentials } from './shopify.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchItem } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -46,18 +46,28 @@ function requireEnv(name: string): string {
   return value;
 }
 
-/** The five documented Actions secrets. BELGIUMDIA_API_URL is an optional override. */
-const REQUIRED_ENV = [
-  'SHOPIFY_STORE_DOMAIN',
-  'SHOPIFY_ADMIN_TOKEN',
-  'BELGIUMDIA_API_KEY',
-  'HOURS_API_URL',
-  'HOURS_API_KEY',
-];
+/**
+ * Shopify auth accepts EITHER a static Admin API token (SHOPIFY_ADMIN_TOKEN,
+ * `shpat_…`) OR a Dev Dashboard app's Client ID + Secret
+ * (SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET), which are exchanged for a
+ * fresh 24h token at runtime. Stores migrated to the new dev platform have
+ * no static token, so the client-credentials pair is the supported path.
+ */
+const BASE_REQUIRED_ENV = ['SHOPIFY_STORE_DOMAIN', 'BELGIUMDIA_API_KEY', 'HOURS_API_URL', 'HOURS_API_KEY'];
+
+function hasShopifyAuth(): boolean {
+  return Boolean(
+    process.env.SHOPIFY_ADMIN_TOKEN ||
+      (process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET),
+  );
+}
 
 /** Fail with a readable report (not a stack trace) when Actions config is absent. */
 async function checkConfiguration(): Promise<void> {
-  const missing = REQUIRED_ENV.filter((name) => !process.env[name]);
+  const missing = BASE_REQUIRED_ENV.filter((name) => !process.env[name]);
+  if (!hasShopifyAuth()) {
+    missing.push('SHOPIFY_ADMIN_TOKEN (or SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET)');
+  }
   if (missing.length === 0) return;
   const md = [
     '# LMNY feed sync — missing configuration',
@@ -67,7 +77,9 @@ async function checkConfiguration(): Promise<void> {
     ...missing.map((m) => `- \`${m}\``),
     '',
     'Configure them as repository secrets under **Settings → Secrets and variables →',
-    'Actions → Secrets**, then re-run.',
+    'Actions → Secrets**, then re-run. For Shopify auth, either set',
+    '`SHOPIFY_ADMIN_TOKEN` (a `shpat_…` token) **or** the Dev Dashboard app pair',
+    '`SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`.',
     '',
   ].join('\n');
   await mkdir(OUT_DIR, { recursive: true });
@@ -77,13 +89,29 @@ async function checkConfiguration(): Promise<void> {
   process.exit(1);
 }
 
+/**
+ * Resolve a Shopify Admin API token: use SHOPIFY_ADMIN_TOKEN directly if set,
+ * else exchange the Dev Dashboard Client ID + Secret for one.
+ */
+async function resolveShopifyToken(domain: string): Promise<string> {
+  if (process.env.SHOPIFY_ADMIN_TOKEN) return process.env.SHOPIFY_ADMIN_TOKEN;
+  const { token, scope } = await exchangeClientCredentials(
+    domain,
+    requireEnv('SHOPIFY_CLIENT_ID'),
+    requireEnv('SHOPIFY_CLIENT_SECRET'),
+  );
+  console.log(`Obtained Shopify token via client-credentials grant (scopes: ${scope || 'unknown'})`);
+  return token;
+}
+
 async function main() {
   const flags = parseFlags(process.argv.slice(2));
   const startedAt = new Date().toISOString();
   const notes: string[] = [];
 
   await checkConfiguration();
-  const shopify = new ShopifyClient(requireEnv('SHOPIFY_STORE_DOMAIN'), requireEnv('SHOPIFY_ADMIN_TOKEN'));
+  const domain = requireEnv('SHOPIFY_STORE_DOMAIN');
+  const shopify = new ShopifyClient(domain, await resolveShopifyToken(domain));
   const { shop } = await shopify.verifyAuth();
   console.log(`Shopify auth OK: ${shop}${flags.dryRun ? ' (dry run — zero writes)' : ''}`);
 

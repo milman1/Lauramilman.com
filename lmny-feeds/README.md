@@ -59,7 +59,8 @@ Five Actions secrets:
 | Secret | Notes |
 |---|---|
 | `SHOPIFY_STORE_DOMAIN` | e.g. `laura-milman.myshopify.com` |
-| `SHOPIFY_ADMIN_TOKEN` | Admin API token (`read/write_products`, `read/write_publications`) |
+| `SHOPIFY_ADMIN_TOKEN` | Admin API token (`shpat_…`). **Or** use the client-credentials pair below |
+| `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` | Dev Dashboard app Client ID + Secret; exchanged for a 24h token at runtime. Use this on stores migrated to the new dev platform (no static `shpat_`). The app must be **installed** and in the **same org** as the store, with the five scopes below granted |
 | `BELGIUMDIA_API_KEY` | Secret only — never logged, sent via header. Slated for rotation |
 | `HOURS_API_URL` | Direct Supabase function URL used as-is; a site root gets `/api/comps` appended |
 | `HOURS_API_KEY` | Hours auth |

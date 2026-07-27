@@ -57,7 +57,11 @@ jobs:
       - name: Run sync
         env:
           SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          # Shopify auth: set SHOPIFY_ADMIN_TOKEN (shpat_…) OR the Dev Dashboard
+          # app pair SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET (exchanged at runtime).
           SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
           BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
           BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
           HOURS_API_URL: ${{ secrets.HOURS_API_URL }}
