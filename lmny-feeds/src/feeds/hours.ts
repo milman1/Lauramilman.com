@@ -33,8 +33,53 @@ function pickString(obj: Record<string, unknown>, keys: string[]): string | unde
   return undefined;
 }
 
+export interface HoursProbeResult {
+  /** Resolved request URL, key never included (key travels in headers). */
+  url: string;
+  brandSent: string;
+  referenceSent: string;
+  status: number | null;
+  ok: boolean;
+  bodySnippet: string;
+  parsedMid: number | null;
+  networkError?: string;
+}
+
 export class HoursClient {
   private cache = new Map<string, WatchComp | null>();
+
+  /**
+   * One-shot diagnostic: send a known reference and report the raw HTTP
+   * status + body, so a 401 (auth) / 404 (wrong URL) / 200-no_comp (format
+   * mismatch) can be told apart. The key is sent in headers, never the URL.
+   */
+  async probe(brand: string, reference: string): Promise<HoursProbeResult> {
+    const key = process.env.HOURS_API_KEY ?? '';
+    const u = new URL(resolveUrl());
+    u.searchParams.set('brand', brand);
+    u.searchParams.set('reference', reference);
+    const safeUrl = `${u.origin}${u.pathname}?brand=${encodeURIComponent(brand)}&reference=${encodeURIComponent(reference)}`;
+    try {
+      const res = await fetch(u, {
+        headers: { Accept: 'application/json', Authorization: `Bearer ${key}`, apikey: key },
+        signal: AbortSignal.timeout(20_000),
+      });
+      const text = await res.text();
+      let parsedMid: number | null = null;
+      try {
+        const payload = JSON.parse(text) as Record<string, unknown>;
+        const body = (payload.data && typeof payload.data === 'object' ? payload.data : payload) as Record<string, unknown>;
+        parsedMid = pickNumber(body, ['comp_mid_usd', 'comp_mid', 'mid', 'median', 'mid_usd', 'price_mid', 'market_mid']) ?? null;
+      } catch {
+        /* body wasn't JSON */
+      }
+      return { url: safeUrl, brandSent: brand, referenceSent: reference, status: res.status, ok: res.ok, bodySnippet: text.slice(0, 600), parsedMid };
+    } catch (err) {
+      const cause = (err as { cause?: { code?: string; name?: string; message?: string } }).cause;
+      const networkError = [cause?.code, cause?.name, cause?.message].filter(Boolean).join(': ') || (err instanceof Error ? err.message : String(err));
+      return { url: safeUrl, brandSent: brand, referenceSent: reference, status: null, ok: false, bodySnippet: '', parsedMid: null, networkError };
+    }
+  }
 
   async compFor(brand: string, reference: string): Promise<WatchComp | null> {
     const cacheKey = `${brand}::${reference}`.toLowerCase();

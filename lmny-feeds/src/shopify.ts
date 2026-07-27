@@ -108,6 +108,14 @@ export class ShopifyClient {
     return { shop: data.shop.myshopifyDomain };
   }
 
+  /** Access scopes actually granted to this token (write_* implies read_*). */
+  async grantedScopes(): Promise<string[]> {
+    const data = await this.gql<{ currentAppInstallation: { accessScopes: Array<{ handle: string }> } }>(
+      `{ currentAppInstallation { accessScopes { handle } } }`,
+    );
+    return data.currentAppInstallation.accessScopes.map((s) => s.handle);
+  }
+
   // ---------------------------------------------------------------- metafields
 
   /**

@@ -11,6 +11,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
+import { ALL_KINDS, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
@@ -28,6 +29,10 @@ import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchIt
 
 const BULK_THRESHOLD = 100;
 const OUT_DIR = 'out';
+/** Required Shopify scopes for a live write (write_* implies read_*). */
+const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications'];
+/** Known-good reference for the Hours single-reference diagnostic. */
+const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
 
 interface Flags {
   dryRun: boolean;
@@ -115,8 +120,26 @@ async function main() {
   const { shop } = await shopify.verifyAuth();
   console.log(`Shopify auth OK: ${shop}${flags.dryRun ? ' (dry run — zero writes)' : ''}`);
 
-  // 1. Fetch + normalize the three feeds. A feed that fails to fetch is
+  const enabledFeeds = parseEnabledFeeds();
+  console.log(`Enabled feeds (SYNC_FEEDS): ${[...enabledFeeds].join(', ')}`);
+
+  // Hours single-reference diagnostic (dry-run only): tells apart a 401/404/
+  // no_comp cause without needing the watch feed enabled.
+  let hoursProbe: SyncReport['hoursProbe'];
+  if (flags.dryRun) {
+    try {
+      hoursProbe = await new HoursClient().probe(HOURS_PROBE.brand, HOURS_PROBE.reference);
+      console.log(
+        `Hours probe [${HOURS_PROBE.reference}]: ${hoursProbe.networkError ? `network error ${hoursProbe.networkError}` : `HTTP ${hoursProbe.status}, mid ${hoursProbe.parsedMid ?? 'none'}`} @ ${hoursProbe.url}`,
+      );
+    } catch (err) {
+      console.error(`Hours probe threw: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  // 1. Fetch + normalize the enabled feeds. A feed that fails to fetch is
   //    excluded from archive decisions so an outage can't archive its segment.
+  //    A feed not in SYNC_FEEDS is skipped entirely (never fetched).
   const items: FeedItem[] = [];
   const holds: Hold[] = [];
   const fetchedKinds = new Set<Kind>();
@@ -126,7 +149,12 @@ async function main() {
     watch: { fetched: 0, publishable: 0, held: 0 },
   };
 
-  for (const kind of ['natural', 'lab', 'watch'] as const) {
+  for (const kind of ALL_KINDS) {
+    if (!enabledFeeds.has(kind)) {
+      feeds[kind].skipped = true;
+      console.log(`Feed ${kind}: skipped (not in SYNC_FEEDS)`);
+      continue;
+    }
     try {
       let rows = await fetchBelgiumDiaFeed(kind);
       if (flags.limit) rows = rows.slice(0, flags.limit);
@@ -209,6 +237,17 @@ async function main() {
   let collectionsCreated: string[] = [];
 
   if (!flags.dryRun) {
+    // Assert write scopes before the first real write; fail loudly if missing.
+    const scopes = await shopify.grantedScopes();
+    const missingScopes = REQUIRED_WRITE_SCOPES.filter((s) => !scopes.includes(s));
+    if (missingScopes.length > 0) {
+      throw new Error(
+        `Refusing to write: Shopify token is missing required scopes ${missingScopes.join(', ')} ` +
+          `(granted: ${scopes.join(', ') || 'none'}). write_products/write_publications include read access.`,
+      );
+    }
+    console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
+
     await shopify.ensureMetafieldDefinitions();
     collectionsCreated = await shopify.ensureCollections();
 
@@ -263,7 +302,9 @@ async function main() {
     dryRun: flags.dryRun,
     startedAt,
     finishedAt: new Date().toISOString(),
+    enabledFeeds: [...enabledFeeds],
     feeds,
+    hoursProbe,
     holdHistogram: holdHistogram(holds),
     naturalMargins: naturalMarginStats(publishable, holds),
     watchComps: {

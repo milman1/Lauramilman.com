@@ -1,3 +1,4 @@
+import type { HoursProbeResult } from './feeds/hours.js';
 import type { Decision, Hold, Kind, Publishable } from './types.js';
 
 export interface FeedStats {
@@ -5,6 +6,8 @@ export interface FeedStats {
   publishable: number;
   held: number;
   fetchError?: string;
+  /** Feed not in SYNC_FEEDS — skipped entirely (not fetched, not held). */
+  skipped?: boolean;
 }
 
 export interface WatchLine {
@@ -20,6 +23,7 @@ export interface SyncReport {
   dryRun: boolean;
   startedAt: string;
   finishedAt: string;
+  enabledFeeds: Kind[];
   feeds: Record<Kind, FeedStats>;
   holdHistogram: Record<string, number>;
   naturalMargins: { p25: number | null; median: number | null; p75: number | null; rejectedByFloor: number };
@@ -28,6 +32,7 @@ export interface SyncReport {
   writeErrors: string[];
   mediaQuarantined: string[];
   collectionsCreated: string[];
+  hoursProbe?: HoursProbeResult;
   notes: string[];
 }
 
@@ -80,12 +85,14 @@ export function renderMarkdown(r: SyncReport): string {
   lines.push('');
   lines.push(`Started ${r.startedAt} · finished ${r.finishedAt}`);
   lines.push('');
+  lines.push(`Enabled feeds (\`SYNC_FEEDS\`): **${r.enabledFeeds.join(', ') || 'none'}** — others skipped.`);
+  lines.push('');
   lines.push('## Feeds');
   lines.push('');
   lines.push('| Feed | Fetched | Publishable | Held |');
   lines.push('|---|---|---|---|');
   for (const [kind, s] of Object.entries(r.feeds)) {
-    const fetched = s.fetchError ? `⚠️ ${s.fetchError}` : String(s.fetched);
+    const fetched = s.skipped ? '_skipped_' : s.fetchError ? `⚠️ ${s.fetchError}` : String(s.fetched);
     lines.push(`| ${kind} | ${fetched} | ${s.publishable} | ${s.held} |`);
   }
   lines.push('');
@@ -99,6 +106,34 @@ export function renderMarkdown(r: SyncReport): string {
   lines.push('');
   lines.push(`p25 ${pct(r.naturalMargins.p25)} · median ${pct(r.naturalMargins.median)} · p75 ${pct(r.naturalMargins.p75)} · rejected by 20% floor: ${r.naturalMargins.rejectedByFloor}`);
   lines.push('');
+  if (r.hoursProbe) {
+    const p = r.hoursProbe;
+    lines.push('## Hours diagnostic (single reference)');
+    lines.push('');
+    lines.push(`Probe: brand \`${p.brandSent}\`, reference \`${p.referenceSent}\``);
+    lines.push(`URL: \`${p.url}\``);
+    if (p.networkError) {
+      lines.push(`Result: **network error** — \`${p.networkError}\` → URL unreachable (check \`HOURS_API_URL\`).`);
+    } else {
+      lines.push(`HTTP **${p.status}**${p.ok ? '' : ' (not ok)'} · parsed comp mid: ${p.parsedMid == null ? '—' : usd(p.parsedMid)}`);
+      lines.push('');
+      lines.push('```');
+      lines.push(p.bodySnippet || '(empty body)');
+      lines.push('```');
+      const hint =
+        p.status === 401 || p.status === 403
+          ? 'auth — `HOURS_API_KEY` not accepted.'
+          : p.status === 404
+            ? 'wrong URL — `HOURS_API_URL` points at nothing; use the direct Supabase function URL.'
+            : p.status === 200 && p.parsedMid == null
+              ? 'reference-format mismatch — endpoint reached but no comp for this input string.'
+              : p.status === 200 && p.parsedMid != null
+                ? 'endpoint works with a clean reference → the live 0-comp result is an input-format issue from the feed.'
+                : 'see body above.';
+      lines.push(`Diagnosis: ${hint}`);
+    }
+    lines.push('');
+  }
   lines.push('## Watch comps');
   lines.push('');
   lines.push(`Comp hit rate: ${r.watchComps.hits}/${r.watchComps.checked} (${pct(r.watchComps.hitRate)})`);
