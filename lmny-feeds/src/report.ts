@@ -28,6 +28,7 @@ export interface SyncReport {
   holdHistogram: Record<string, number>;
   naturalMargins: { p25: number | null; median: number | null; p75: number | null; rejectedByFloor: number };
   watchComps: { checked: number; hits: number; hitRate: number | null; lines: WatchLine[] };
+  sampleNaturals: Array<{ stockRef: string; title: string; costUsd: number; retailUsd: number; marginPct: number }>;
   decisions: { create: string[]; update: string[]; archive: string[]; skipped: number };
   writeErrors: string[];
   mediaQuarantined: string[];
@@ -131,6 +132,16 @@ export function renderMarkdown(r: SyncReport): string {
                 ? 'endpoint works with a clean reference → the live 0-comp result is an input-format issue from the feed.'
                 : 'see body above.';
       lines.push(`Diagnosis: ${hint}`);
+    }
+    lines.push('');
+  }
+  if (r.sampleNaturals.length) {
+    lines.push('## Sample publishable naturals (cost → retail)');
+    lines.push('');
+    lines.push('| Stock | Title | Cost | Retail | Margin |');
+    lines.push('|---|---|---|---|---|');
+    for (const s of r.sampleNaturals) {
+      lines.push(`| ${s.stockRef} | ${s.title} | ${usd(s.costUsd)} | ${usd(s.retailUsd)} | ${pct(s.marginPct)} |`);
     }
     lines.push('');
   }

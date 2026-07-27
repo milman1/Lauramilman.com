@@ -307,6 +307,16 @@ async function main() {
     hoursProbe,
     holdHistogram: holdHistogram(holds),
     naturalMargins: naturalMarginStats(publishable, holds),
+    sampleNaturals: publishable
+      .filter((p) => p.item.kind === 'natural')
+      .slice(0, 5)
+      .map((p) => ({
+        stockRef: p.item.stockRef,
+        title: titleFor(p.item),
+        costUsd: p.item.costUsd,
+        retailUsd: p.priced.retailUsd,
+        marginPct: p.priced.marginPct,
+      })),
     watchComps: {
       checked: compsChecked,
       hits: compHits,
