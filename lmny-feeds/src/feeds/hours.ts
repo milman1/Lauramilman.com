@@ -8,11 +8,14 @@
 
 import type { WatchComp } from '../markup.js';
 
-function resolveUrl(): string {
-  const raw = process.env.HOURS_API_URL;
+export function resolveUrl(raw: string | undefined = process.env.HOURS_API_URL): string {
   if (!raw) throw new Error('HOURS_API_URL is not set');
   const url = raw.replace(/\/+$/, '');
-  if (/supabase|\/functions\//i.test(url) || /\/api\//i.test(url)) return url;
+  // Already a full function/api path — use as-is.
+  if (/\/functions\/|\/api\//i.test(url)) return url;
+  // Bare Supabase origin (no function path): append the comps function path.
+  if (/\bsupabase\.(co|in|net)\b/i.test(url)) return `${url}/functions/v1/comps`;
+  // Site root: the provider appends /api/comps.
   return `${url}/api/comps`;
 }
 
