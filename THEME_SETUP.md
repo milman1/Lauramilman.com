@@ -104,15 +104,15 @@ Note: the sort dropdown ships with Shopify's native sort keys (Featured, Best
 Selling, Price ↑↓, Date, A–Z). "Sort by carat" is not a native sort key — it
 can be approximated later with a carat metafield + search, or dropped.
 
-## 4. Collection template assignments
+## 4. Collection template assignments — DONE 2026-07-28 (via API)
 
-In Admin → Collections, assign:
-
-- `collection.peaceful` → the Peaceful Diamonds collection (navy tier styling
-  + budget chips)
+- `collection.peaceful` → `peaceful-diamonds-by-laura-milman-new-york` ✅
+  (navy tier styling + budget/carat chips)
 - `collection.estate` → `vintage-jewelry`, `cartier`, `van-cleef-arpels`,
-  `bvlgari`, `tiffany` (maison chips instead of budget chips)
-- default `collection` template (budget chips) → everything else
+  `bvlgari`, `tiffany` ✅ (maison chips instead of budget chips; verified
+  live on /collections/cartier)
+- default `collection` template (budget chips) → everything else (no
+  assignment needed)
 
 Chips are editable per template in the customizer: absolute links (landing
 collections) or relative filter queries (`?filter.v.price.lte=5000`). Budget
