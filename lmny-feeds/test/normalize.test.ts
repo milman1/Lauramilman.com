@@ -70,3 +70,28 @@ describe('watch normalization', () => {
     expect(items).toHaveLength(1);
   });
 });
+
+describe('cert URL coercion', () => {
+  it('adds https:// to a scheme-less feed URL (the record that failed the live run)', () => {
+    const { items } = normalizeStones(
+      [{ ...stoneRow, CertificateLink: 'dnalinks.in/certificate_images/123.pdf' }],
+      'natural',
+    );
+    expect(items[0]?.kind !== 'watch' && items[0]?.certUrl).toBe('https://dnalinks.in/certificate_images/123.pdf');
+  });
+
+  it('keeps a well-formed URL unchanged', () => {
+    const { items } = normalizeStones(
+      [{ ...stoneRow, CertificateLink: 'https://www.gia.edu/report?x=1' }],
+      'natural',
+    );
+    expect(items[0]?.kind !== 'watch' && items[0]?.certUrl).toBe('https://www.gia.edu/report?x=1');
+  });
+
+  it('drops junk rather than emitting an invalid URL', () => {
+    for (const junk of ['', '-', 'N/A', 'pending']) {
+      const { items } = normalizeStones([{ ...stoneRow, CertificateLink: junk }], 'natural');
+      expect(items[0]?.kind !== 'watch' && items[0]?.certUrl).toBeUndefined();
+    }
+  });
+});

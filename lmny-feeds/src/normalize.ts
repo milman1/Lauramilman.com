@@ -51,6 +51,28 @@ function urls(raw: Raw, keys: string[]): string[] {
     .filter((u) => /^https?:\/\//i.test(u));
 }
 
+/**
+ * Coerce a feed URL to something Shopify's `url` metafield type accepts.
+ * The feed emits scheme-less values (e.g. `dnalinks.in/cert/123.pdf`), which
+ * Shopify rejects outright — one such record failed an entire live run.
+ * Returns undefined when the value can't be made into a plausible URL.
+ */
+export function normalizeUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (v === '' || v === '-' || v === 'N/A') return undefined;
+  if (/^https?:\/\//i.test(v)) return v;
+  // Protocol-relative (//host/path) or bare host/path → assume https.
+  const candidate = v.startsWith('//') ? `https:${v}` : `https://${v.replace(/^\/+/, '')}`;
+  try {
+    const u = new URL(candidate);
+    // Require a dotted host so we don't turn junk like "pending" into a URL.
+    return u.hostname.includes('.') ? u.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function normalizeColorGrade(s: string): string {
   return s.trim().toUpperCase();
 }
@@ -144,7 +166,7 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       fluorescence: str(raw, ['fluorescence_intensity', 'fluorescence', 'fluor', 'fl']),
       lab: lab.toUpperCase(),
       certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']),
-      certUrl: str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink']),
+      certUrl: normalizeUrl(str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink'])),
       measurements: str(raw, ['measurements', 'measurement', 'dimensions']),
       costUsd,
       rapPriceUsd,

@@ -29,6 +29,8 @@ import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchIt
 
 const BULK_THRESHOLD = 100;
 const OUT_DIR = 'out';
+/** Fail the run only if more than this share of attempted writes error. */
+const WRITE_ERROR_FAIL_RATE = 0.01;
 /** Required Shopify scopes for a live write (write_* implies read_*). */
 const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications'];
 /** Known-good reference for the Hours single-reference diagnostic. */
@@ -344,9 +346,19 @@ async function main() {
   await writeFile(path.join(OUT_DIR, 'report.md'), renderMarkdown(report));
   console.log(renderMarkdown(report));
 
+  // Isolated per-record rejections (a malformed feed field) shouldn't fail an
+  // otherwise-good run of thousands of products — they're reported either way.
+  // Fail only when the failure rate suggests something systemic.
   if (writeErrors.length > 0) {
-    console.error(`${writeErrors.length} write errors — see report`);
-    process.exitCode = 1;
+    const attempted = summary.create.length + summary.update.length;
+    const failureRate = attempted > 0 ? writeErrors.length / attempted : 1;
+    console.error(`${writeErrors.length} write error(s) across ${attempted} attempted — see report`);
+    if (failureRate > WRITE_ERROR_FAIL_RATE) {
+      console.error(`Failure rate ${(failureRate * 100).toFixed(1)}% exceeds ${(WRITE_ERROR_FAIL_RATE * 100).toFixed(0)}% — failing the run`);
+      process.exitCode = 1;
+    } else {
+      console.error('Below the failure threshold — run reported as successful with errors logged');
+    }
   }
 }
 
