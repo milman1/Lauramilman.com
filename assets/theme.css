@@ -2484,3 +2484,122 @@ html, body {
     align-self: center;
   }
 }
+
+/* =============================================
+   21. DAWN-SECTION BRIDGE
+   Dawn-derived sections (contact form, main-page) expect .page-width and
+   field styles from Dawn's base.css, which this theme does not load.
+   Map them onto the theme's container system and tokens.
+   ============================================= */
+.page-width {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.page-width--narrow {
+  max-width: 760px;
+}
+
+.main-page-title,
+.contact .title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  color: var(--text-dark);
+}
+
+.main-page-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: var(--space-xl) 0 var(--space-lg);
+}
+
+.contact {
+  padding-bottom: var(--space-4xl);
+}
+
+.contact .field {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.contact .field__input,
+.contact .text-area {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background: var(--warm-white);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.contact .field__input:focus,
+.contact .text-area:focus {
+  border-color: var(--gold);
+}
+
+.contact .field__label {
+  display: block;
+  margin: 0 0 6px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Dawn floats the label inside the input; with our static labels the
+   duplicate placeholder text is noise. */
+.contact .field__input::placeholder {
+  color: transparent;
+}
+
+.contact .text-area {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.contact__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.contact .form__message {
+  font-size: 0.9rem;
+}
+
+.contact .button,
+.contact button[type='submit'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-md);
+  padding: 14px 40px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--espresso);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.contact .button:hover,
+.contact button[type='submit']:hover {
+  background: var(--text-dark);
+}
+
+@media (max-width: 640px) {
+  .contact__fields {
+    grid-template-columns: 1fr;
+  }
+}
