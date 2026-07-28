@@ -1,6 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { buildProductSetInput, caratBand, handleFor, sanitizeRef, tagsFor, titleFor, vendorFor } from '../src/product.js';
+import {
+  buildProductSetInput,
+  caratBand,
+  contentHashFor,
+  handleFor,
+  metafieldsFor,
+  sanitizeRef,
+  tagsFor,
+  titleFor,
+  vendorFor,
+} from '../src/product.js';
 import { labStone, naturalStone, priced, watch } from './fixtures.js';
+
+interface Metafield {
+  namespace: string;
+  key: string;
+  type: string;
+  value: string;
+}
+
+function find(fields: Metafield[], namespace: string, key: string): Metafield | undefined {
+  return fields.find((f) => f.namespace === namespace && f.key === key);
+}
 
 describe('handle generation', () => {
   it('prefixes by kind and lowercases', () => {
@@ -67,6 +88,65 @@ describe('vendor', () => {
   it('stones are LMNY, watches are the brand', () => {
     expect(vendorFor(naturalStone())).toBe('Laura Milman New York');
     expect(vendorFor(watch())).toBe('Rolex');
+  });
+});
+
+describe('storefront-readable facet metafields', () => {
+  const at = '2026-07-28T00:00:00Z';
+
+  it('stones carry the custom.* facets the diamond filter faces on', () => {
+    const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
+    expect(find(fields, 'custom', 'diamond_shape')?.value).toBe('Round Brilliant');
+    expect(find(fields, 'custom', 'color')?.value).toBe('F');
+    expect(find(fields, 'custom', 'clarity')?.value).toBe('VS1');
+    expect(find(fields, 'custom', 'cut')?.value).toBe('Excellent');
+  });
+
+  it('carat is numeric so the filter can be a true range, not a band', () => {
+    const carat = find(metafieldsFor(naturalStone(), priced(), 'hash', at), 'custom', 'carat_weight');
+    expect(carat?.type).toBe('number_decimal');
+    expect(carat?.value).toBe('2.01');
+  });
+
+  it('omits cut when the feed row has none', () => {
+    const fields = metafieldsFor(naturalStone({ cut: undefined }), priced(), 'hash', at);
+    expect(find(fields, 'custom', 'cut')).toBeUndefined();
+    expect(find(fields, 'custom', 'diamond_shape')).toBeDefined();
+  });
+
+  it('lab-grown stones get the same facets as naturals', () => {
+    const fields = metafieldsFor(labStone(), priced(), 'hash', at);
+    expect(find(fields, 'custom', 'diamond_shape')?.value).toBe('Round Brilliant');
+    expect(find(fields, 'custom', 'carat_weight')?.value).toBe('2.01');
+  });
+
+  it('watches get no diamond facets', () => {
+    const fields = metafieldsFor(watch(), priced(), 'hash', at);
+    expect(fields.filter((f) => f.namespace === 'custom')).toHaveLength(0);
+  });
+
+  it('cost_cents stays in the app-reserved namespace, never in custom', () => {
+    const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
+    expect(find(fields, '$app', 'cost_cents')?.value).toBe('1000000');
+    expect(fields.filter((f) => f.key === 'cost_cents').map((f) => f.namespace)).toEqual(['$app']);
+  });
+});
+
+describe('content hash', () => {
+  it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
+    // Guards the upgrade path: without the schema version in the hash, the
+    // 2,541 products already live would hash-match and be skipped as
+    // unchanged, never receiving the new custom.* facets.
+    expect(contentHashFor(naturalStone(), priced())).not.toBe(
+      contentHashFor(naturalStone(), priced({ retailUsd: 15001 })),
+    );
+    expect(contentHashFor(naturalStone(), priced())).toBe(contentHashFor(naturalStone(), priced()));
+  });
+
+  it('changes when a faceted field changes', () => {
+    const base = contentHashFor(naturalStone(), priced());
+    expect(contentHashFor(naturalStone({ cut: 'Very Good' }), priced())).not.toBe(base);
+    expect(contentHashFor(naturalStone({ carat: 2.02 }), priced())).not.toBe(base);
   });
 });
 

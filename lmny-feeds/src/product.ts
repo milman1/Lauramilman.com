@@ -7,6 +7,19 @@ export const STONE_VENDOR = 'Laura Milman New York';
 export const METAFIELD_NAMESPACE = 'lmny_feed';
 /** App-reserved namespace: private to the sync app, invisible to theme/Storefront API. */
 export const APP_NAMESPACE = '$app';
+/**
+ * Merchant-owned namespace the storefront can read. These power the collection
+ * filters (shape / carat / colour / clarity / cut) and are the same definitions
+ * the estate catalogue already uses, so filtering is consistent store-wide.
+ */
+export const CUSTOM_NAMESPACE = 'custom';
+
+/**
+ * Bump when the product payload changes shape (new metafields, new tags…).
+ * It feeds the content hash, so an existing catalogue is refreshed once
+ * instead of being skipped as "unchanged".
+ */
+export const PRODUCT_SCHEMA_VERSION = 2;
 
 export const PRODUCT_TYPES = {
   natural: 'Natural Diamond',
@@ -91,6 +104,16 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
   if (item.kind !== 'watch') {
     if (item.certNumber) fields.push({ namespace: ns, key: 'cert_number', type: 'single_line_text_field', value: item.certNumber });
     if (item.certUrl) fields.push({ namespace: ns, key: 'cert_url', type: 'url', value: item.certUrl });
+    // Storefront-readable copies that drive the collection filters. carat_weight
+    // is numeric so the carat control can be a true range, not a band.
+    const c = CUSTOM_NAMESPACE;
+    fields.push(
+      { namespace: c, key: 'diamond_shape', type: 'single_line_text_field', value: item.shape },
+      { namespace: c, key: 'carat_weight', type: 'number_decimal', value: String(item.carat) },
+      { namespace: c, key: 'color', type: 'single_line_text_field', value: item.color },
+      { namespace: c, key: 'clarity', type: 'single_line_text_field', value: item.clarity },
+    );
+    if (item.cut) fields.push({ namespace: c, key: 'cut', type: 'single_line_text_field', value: item.cut });
   } else {
     fields.push({ namespace: ns, key: 'is_naked', type: 'boolean', value: String(item.isNaked) });
     if (priced.compMidUsd !== undefined) {
@@ -151,6 +174,7 @@ function escapeHtml(s: string): string {
  */
 export function contentHashFor(item: FeedItem, priced: Priced): string {
   return contentHash({
+    schemaVersion: PRODUCT_SCHEMA_VERSION,
     handle: handleFor(item),
     title: titleFor(item),
     vendor: vendorFor(item),

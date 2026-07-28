@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { APP_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, PRODUCT_TYPES } from './product.js';
+import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, PRODUCT_TYPES } from './product.js';
 import type { CatalogEntry } from './types.js';
 
 const API_VERSION = '2026-01';
@@ -119,13 +119,28 @@ export class ShopifyClient {
   // ---------------------------------------------------------------- metafields
 
   /**
-   * Ensure lmny_feed.* definitions (storefront NONE) and the app-private
-   * cost_cents definition. cost_cents uses the app-reserved namespace so it
-   * never reaches the Storefront API or theme. Existing definitions are left
-   * untouched (TAKEN errors are ignored).
+   * Ensure the metafield definitions the sync writes to.
+   *
+   * Three groups, with deliberately different storefront access:
+   *  - lmny_feed.*  sync bookkeeping, storefront NONE.
+   *  - $app.*       cost_cents, app-reserved so it can never reach the
+   *                 Storefront API or the theme.
+   *  - custom.*     the gemological facets, PUBLIC_READ because the diamond
+   *                 filter faces on them (filter.p.m.custom.<key>). These
+   *                 mirror the definitions the estate catalogue already uses,
+   *                 so filtering behaves the same store-wide.
+   *
+   * Existing definitions are left untouched (TAKEN errors are ignored) — the
+   * store already has most of the custom.* set; only custom.cut is new.
    */
   async ensureMetafieldDefinitions(): Promise<void> {
-    const definitions: Array<{ namespace: string; key: string; name: string; type: string }> = [
+    const definitions: Array<{
+      namespace: string;
+      key: string;
+      name: string;
+      type: string;
+      storefront?: 'NONE' | 'PUBLIC_READ';
+    }> = [
       { namespace: METAFIELD_NAMESPACE, key: 'stock_ref', name: 'Stock ref', type: 'single_line_text_field' },
       { namespace: METAFIELD_NAMESPACE, key: 'kind', name: 'Feed kind', type: 'single_line_text_field' },
       { namespace: METAFIELD_NAMESPACE, key: 'cert_number', name: 'Cert number', type: 'single_line_text_field' },
@@ -136,6 +151,11 @@ export class ShopifyClient {
       { namespace: METAFIELD_NAMESPACE, key: 'comp_mid_usd', name: 'Comp mid (USD)', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_as_of', name: 'Comp as of', type: 'date' },
       { namespace: APP_NAMESPACE, key: 'cost_cents', name: 'Cost (cents)', type: 'number_integer' },
+      { namespace: CUSTOM_NAMESPACE, key: 'diamond_shape', name: 'Diamond shape', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'carat_weight', name: 'Carat weight', type: 'number_decimal', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'color', name: 'Color', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'clarity', name: 'Clarity', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'cut', name: 'Cut', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
     ];
     const mutation = `mutation def($definition: MetafieldDefinitionInput!) {
       metafieldDefinitionCreate(definition: $definition) {
@@ -143,14 +163,14 @@ export class ShopifyClient {
         userErrors { code message }
       }
     }`;
-    for (const def of definitions) {
+    for (const { storefront = 'NONE', ...def } of definitions) {
       const data = await this.gql<{
         metafieldDefinitionCreate: { userErrors: Array<{ code: string; message: string }> };
       }>(mutation, {
         definition: {
           ...def,
           ownerType: 'PRODUCT',
-          access: { storefront: 'NONE' },
+          access: { storefront },
         },
       });
       const errors = data.metafieldDefinitionCreate.userErrors.filter((e) => e.code !== 'TAKEN');
