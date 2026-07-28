@@ -174,14 +174,19 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
  */
 export function buildProductSetInput(item: FeedItem, priced: Priced, syncedAt: string): Record<string, unknown> {
   const hash = contentHashFor(item, priced);
+  // A feed row with no image would otherwise go live with no photo and only be
+  // caught by the next run's media audit. Quarantine it up front instead, so
+  // there is never a window where an imageless product is ACTIVE.
+  const hasImages = item.imageUrls.length > 0;
+  const tags = hasImages ? tagsFor(item) : [...tagsFor(item), MEDIA_MISSING_TAG].sort();
   return {
     handle: handleFor(item),
     title: titleFor(item),
     descriptionHtml: descriptionFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
-    status: 'ACTIVE',
-    tags: tagsFor(item),
+    status: hasImages ? 'ACTIVE' : 'DRAFT',
+    tags,
     metafields: metafieldsFor(item, priced, hash, syncedAt),
     files: item.imageUrls.map((url, i) => ({
       originalSource: url,

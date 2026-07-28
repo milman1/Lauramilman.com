@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { caratBand, handleFor, sanitizeRef, tagsFor, titleFor, vendorFor } from '../src/product.js';
-import { labStone, naturalStone, watch } from './fixtures.js';
+import { buildProductSetInput, caratBand, handleFor, sanitizeRef, tagsFor, titleFor, vendorFor } from '../src/product.js';
+import { labStone, naturalStone, priced, watch } from './fixtures.js';
 
 describe('handle generation', () => {
   it('prefixes by kind and lowercases', () => {
@@ -67,5 +67,20 @@ describe('vendor', () => {
   it('stones are LMNY, watches are the brand', () => {
     expect(vendorFor(naturalStone())).toBe('Laura Milman New York');
     expect(vendorFor(watch())).toBe('Rolex');
+  });
+});
+
+describe('imageless products are quarantined at creation', () => {
+  it('an item with images is ACTIVE and untagged', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), '2026-07-28T00:00:00Z');
+    expect(input.status).toBe('ACTIVE');
+    expect(input.tags as string[]).not.toContain('media-missing');
+  });
+
+  it('an item with no images is DRAFT and tagged media-missing', () => {
+    const input = buildProductSetInput(naturalStone({ imageUrls: [] }), priced(), '2026-07-28T00:00:00Z');
+    expect(input.status).toBe('DRAFT');
+    expect(input.tags as string[]).toContain('media-missing');
+    expect(input.files as unknown[]).toHaveLength(0);
   });
 });
