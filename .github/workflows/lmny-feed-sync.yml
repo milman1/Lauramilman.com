@@ -16,7 +16,9 @@ name: LMNY feed sync
 
 on:
   schedule:
-    - cron: '0 8 * * *' # 04:00 ET daily (off-peak)
+    # 05:17 ET daily. Deliberately off the top of the hour: GitHub's scheduler
+    # is best-effort and drops/delays runs most often at :00, the busiest slot.
+    - cron: '17 9 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
