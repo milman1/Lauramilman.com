@@ -47,7 +47,7 @@ describe('Belgium Dia real-schema diamond record', () => {
       carat: 1.32,
       color: 'F',
       clarity: 'VS1',
-      cut: 'EX',
+      cut: 'Excellent', // feed says EX
       lab: 'GIA',
       rapPriceUsd: 20000,
       costUsd: 12000, // 20000 × (1 − 0.40)

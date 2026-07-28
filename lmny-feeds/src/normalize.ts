@@ -73,6 +73,86 @@ export function normalizeUrl(value: string | undefined): string | undefined {
   }
 }
 
+/**
+ * Belgium Dia reports shape as a trade code, and inconsistently cased
+ * ("Round" and "ROUND" both appear). Left raw they can't drive a shape filter:
+ * SQCU, LCU and CUSHION are one shape to a shopper, and "SQCU" means nothing
+ * on a button. Map to the ten canonical shapes the filter shows; the finer
+ * distinction (long vs square cushion) isn't something we merchandise on.
+ *
+ * Codes observed in the live natural feed: ROUND, MRB, RMB, PRINCESS, CUSHION,
+ * LCU, SQCU, EMERALD, OVAL, OVR, RADIANT, LRAD, ASSCHER, MARQUISE, HEART,
+ * PEAR, TRISTPR. The rest are standard RapNet codes, mapped pre-emptively so a
+ * new shape appearing in the feed doesn't surface as a code.
+ */
+const SHAPE_CODES: Record<string, string> = {
+  RD: 'Round', RB: 'Round', RBC: 'Round', BR: 'Round', ROUND: 'Round', MRB: 'Round', RMB: 'Round',
+  PR: 'Princess', PRIN: 'Princess', PRINCESS: 'Princess',
+  CU: 'Cushion', CUSH: 'Cushion', CUSHION: 'Cushion', LCU: 'Cushion', SQCU: 'Cushion', CMB: 'Cushion',
+  EM: 'Emerald', EC: 'Emerald', EMER: 'Emerald', EMERALD: 'Emerald', SQEM: 'Emerald',
+  OV: 'Oval', OVR: 'Oval', OVAL: 'Oval',
+  RA: 'Radiant', RAD: 'Radiant', LRAD: 'Radiant', SQRAD: 'Radiant', RADIANT: 'Radiant',
+  AS: 'Asscher', ASC: 'Asscher', ASSCHER: 'Asscher',
+  MQ: 'Marquise', MRQ: 'Marquise', MARQ: 'Marquise', MARQUISE: 'Marquise',
+  HS: 'Heart', HT: 'Heart', HEART: 'Heart',
+  PS: 'Pear', PE: 'Pear', PEAR: 'Pear',
+  TR: 'Trilliant', TRI: 'Trilliant', TRIL: 'Trilliant', TRISTPR: 'Trilliant', TRILLIANT: 'Trilliant',
+  BAG: 'Baguette', BGT: 'Baguette', BAGUETTE: 'Baguette',
+};
+
+/** The shapes the filter offers a button for, best-seller order (PD's order). */
+export const CANONICAL_SHAPES = [
+  'Round', 'Princess', 'Cushion', 'Emerald', 'Oval',
+  'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear',
+] as const;
+
+export function normalizeShape(s: string): string {
+  const key = s.trim().toUpperCase().replace(/[\s._-]+/g, '');
+  return SHAPE_CODES[key] ?? titleCase(s);
+}
+
+/**
+ * Cut, polish and symmetry share the GIA scale and arrive as codes. Left raw,
+ * a Good cut becomes the tag "G" — indistinguishable from colour G.
+ */
+const GRADE_CODES: Record<string, string> = {
+  ID: 'Ideal', IDEAL: 'Ideal',
+  EX: 'Excellent', EXC: 'Excellent', XX: 'Excellent', EXCELLENT: 'Excellent',
+  VG: 'Very Good', VGD: 'Very Good', VERYGOOD: 'Very Good',
+  G: 'Good', GD: 'Good', GOOD: 'Good',
+  F: 'Fair', FR: 'Fair', FAIR: 'Fair',
+  P: 'Poor', PR: 'Poor', POOR: 'Poor',
+};
+
+export function normalizeCutGrade(s: string | undefined): string | undefined {
+  if (!s) return undefined;
+  const key = s.trim().toUpperCase().replace(/[\s._-]+/g, '');
+  if (key === '') return undefined;
+  return GRADE_CODES[key] ?? titleCase(s);
+}
+
+const FLUORESCENCE_CODES: Record<string, string> = {
+  NON: 'None', N: 'None', NONE: 'None', NIL: 'None',
+  FNT: 'Faint', F: 'Faint', FAINT: 'Faint',
+  MED: 'Medium', M: 'Medium', MEDIUM: 'Medium',
+  STG: 'Strong', ST: 'Strong', S: 'Strong', STRONG: 'Strong',
+  VST: 'Very Strong', VSTG: 'Very Strong', VS: 'Very Strong', VERYSTRONG: 'Very Strong',
+};
+
+export function normalizeFluorescence(s: string | undefined): string | undefined {
+  if (!s) return undefined;
+  const key = s.trim().toUpperCase().replace(/[\s._-]+/g, '');
+  if (key === '') return undefined;
+  return FLUORESCENCE_CODES[key] ?? titleCase(s);
+}
+
+function titleCase(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/\b[a-z]/g, (c) => c.toUpperCase());
+}
+
 export function normalizeColorGrade(s: string): string {
   return s.trim().toUpperCase();
 }
@@ -156,14 +236,14 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
     const item: StoneItem = {
       kind,
       stockRef,
-      shape,
+      shape: normalizeShape(shape),
       carat,
       color: normalizeColorGrade(color),
       clarity: normalizeClarityGrade(clarity),
-      cut: str(raw, ['cut', 'cut_grade', 'make']),
-      polish: str(raw, ['polish']),
-      symmetry: str(raw, ['symmetry', 'sym']),
-      fluorescence: str(raw, ['fluorescence_intensity', 'fluorescence', 'fluor', 'fl']),
+      cut: normalizeCutGrade(str(raw, ['cut', 'cut_grade', 'make'])),
+      polish: normalizeCutGrade(str(raw, ['polish'])),
+      symmetry: normalizeCutGrade(str(raw, ['symmetry', 'sym'])),
+      fluorescence: normalizeFluorescence(str(raw, ['fluorescence_intensity', 'fluorescence', 'fluor', 'fl'])),
       lab: lab.toUpperCase(),
       certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']),
       certUrl: normalizeUrl(str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink'])),

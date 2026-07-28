@@ -95,3 +95,65 @@ describe('cert URL coercion', () => {
     }
   });
 });
+
+describe('shape normalization', () => {
+  function shapeOf(shape: string): string {
+    const { items } = normalizeStones([{ ...stoneRow, shape }], 'natural');
+    const item = items[0]!;
+    return item.kind !== 'watch' ? item.shape : '';
+  }
+
+  it('collapses the trade codes the feed actually emits', () => {
+    expect(shapeOf('MRB')).toBe('Round');
+    expect(shapeOf('RMB')).toBe('Round');
+    expect(shapeOf('ROUND')).toBe('Round');
+    expect(shapeOf('SQCU')).toBe('Cushion');
+    expect(shapeOf('LCU')).toBe('Cushion');
+    expect(shapeOf('LRAD')).toBe('Radiant');
+    expect(shapeOf('OVR')).toBe('Oval');
+    expect(shapeOf('TRISTPR')).toBe('Trilliant');
+  });
+
+  it('gives one casing per shape, so the filter has one button not two', () => {
+    expect(shapeOf('ROUND')).toBe(shapeOf('Round'));
+    expect(shapeOf('ASSCHER')).toBe('Asscher');
+    expect(shapeOf('emerald')).toBe('Emerald');
+  });
+
+  it('passes an unknown shape through readably rather than dropping it', () => {
+    expect(shapeOf('OLD MINE')).toBe('Old Mine');
+  });
+});
+
+describe('grade normalization', () => {
+  function gradesOf(row: Record<string, unknown>) {
+    const { items } = normalizeStones([{ ...stoneRow, ...row }], 'natural');
+    const item = items[0]!;
+    if (item.kind === 'watch') throw new Error('expected a stone');
+    return item;
+  }
+
+  it('spells out cut, so a Good cut is not tagged "G" like colour G', () => {
+    expect(gradesOf({ cut: 'EX' }).cut).toBe('Excellent');
+    expect(gradesOf({ cut: 'VG' }).cut).toBe('Very Good');
+    expect(gradesOf({ cut: 'G' }).cut).toBe('Good');
+    expect(gradesOf({ cut: 'ID' }).cut).toBe('Ideal');
+  });
+
+  it('applies the same scale to polish and symmetry', () => {
+    const item = gradesOf({ polish: 'VG', symmetry: 'EX' });
+    expect(item.polish).toBe('Very Good');
+    expect(item.symmetry).toBe('Excellent');
+  });
+
+  it('spells out fluorescence', () => {
+    expect(gradesOf({ fluorescence: 'NON' }).fluorescence).toBe('None');
+    expect(gradesOf({ fluorescence: 'FNT' }).fluorescence).toBe('Faint');
+    expect(gradesOf({ fluorescence: 'VST' }).fluorescence).toBe('Very Strong');
+  });
+
+  it('leaves cut undefined when the feed omits it', () => {
+    expect(gradesOf({}).cut).toBeUndefined();
+    expect(gradesOf({ cut: '  ' }).cut).toBeUndefined();
+  });
+});
