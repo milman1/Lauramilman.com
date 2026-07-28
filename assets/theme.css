@@ -2487,29 +2487,28 @@ html, body {
 
 /* =============================================
    21. DAWN-SECTION BRIDGE
-   Dawn-derived sections (contact form, main-page) expect .page-width and
-   field styles from Dawn's base.css, which this theme does not load.
-   Map them onto the theme's container system and tokens.
+   The contact + main-page sections come from Dawn and expect base.css,
+   which this theme never loads: .field has no layout and .field__input no
+   width, so the form rendered as bare boxes with labels beside them.
+   Dawn's section-contact-form.css also loads AFTER theme.css, so these
+   rules are anchored on #ContactForm to win outright.
    ============================================= */
 .page-width {
+  width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 var(--container-padding);
 }
 
 .page-width--narrow {
-  max-width: 760px;
-}
-
-.main-page-title,
-.contact .title {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  color: var(--text-dark);
+  max-width: 780px;
 }
 
 .main-page-title {
+  font-family: var(--font-heading);
   font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--text-dark);
   margin: var(--space-xl) 0 var(--space-lg);
 }
 
@@ -2517,15 +2516,30 @@ html, body {
   padding-bottom: var(--space-4xl);
 }
 
-.contact .field {
+.contact .title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: var(--space-lg);
+}
+
+/* Name + email side by side, everything else full width. */
+#ContactForm .contact__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+#ContactForm .field {
   position: relative;
   margin-bottom: var(--space-md);
 }
 
-.contact .field__input,
-.contact .text-area {
+/* Dawn renders <input> then <label>; the label floats over the input. */
+#ContactForm .field__input,
+#ContactForm .text-area {
   width: 100%;
-  padding: 14px 16px;
+  padding: 26px 16px 10px;
   font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--text-dark);
@@ -2536,50 +2550,45 @@ html, body {
   transition: border-color var(--transition-fast);
 }
 
-.contact .field__input:focus,
-.contact .text-area:focus {
+#ContactForm .field__input:focus,
+#ContactForm .text-area:focus {
   border-color: var(--gold);
 }
 
-.contact .field__label {
-  display: block;
-  margin: 0 0 6px;
+#ContactForm .field__label {
+  position: absolute;
+  top: 9px;
+  left: 17px;
   font-family: var(--font-body);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
+  pointer-events: none;
 }
 
-/* Dawn floats the label inside the input; with our static labels the
-   duplicate placeholder text is noise. */
-.contact .field__input::placeholder {
+/* The placeholder duplicates the label text. */
+#ContactForm .field__input::placeholder,
+#ContactForm .text-area::placeholder {
   color: transparent;
 }
 
-.contact .text-area {
-  min-height: 140px;
+#ContactForm .text-area {
+  min-height: 150px;
   resize: vertical;
+  display: block;
 }
 
-.contact__fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+#ContactForm .contact__button {
+  margin-top: var(--space-lg);
 }
 
-.contact .form__message {
-  font-size: 0.9rem;
-}
-
-.contact .button,
-.contact button[type='submit'] {
+#ContactForm .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: var(--space-md);
-  padding: 14px 40px;
+  padding: 15px 44px;
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
@@ -2593,13 +2602,17 @@ html, body {
   transition: background var(--transition-base);
 }
 
-.contact .button:hover,
-.contact button[type='submit']:hover {
+#ContactForm .button:hover {
   background: var(--text-dark);
 }
 
+#ContactForm .form__message {
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
 @media (max-width: 640px) {
-  .contact__fields {
+  #ContactForm .contact__fields {
     grid-template-columns: 1fr;
   }
 }

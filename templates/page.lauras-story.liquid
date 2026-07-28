@@ -1,6 +1,6 @@
 {%- comment -%}
   Laura's Story — content lives in the theme so it deploys through git.
-  Copy migrated verbatim from the Shopify page body (handle: lauras-story).
+  First-person founder narrative; supersedes the third-person page body.
 {%- endcomment -%}
 
 <section class="lm-founder">
@@ -14,21 +14,21 @@
     <div class="lm-founder__layout">
       <figure class="lm-founder__portrait">
         <img
-          src="https://cdn.shopify.com/s/files/1/1727/2565/files/IMG_1987_480x480.jpg?v=1592603299"
-          alt="Laura Milman"
-          width="480"
-          height="480"
+          src="https://cdn.shopify.com/s/files/1/1727/2565/files/IMG_1987.jpg?v=1615320029"
+          alt="Laura Milman, founder of Laura Milman New York"
+          width="294"
+          height="277"
           loading="lazy"
         >
       </figure>
 
       <div class="lm-founder__story">
-        <p>Laura Milman came to America from the former USSR because her family wanted a better life.</p>
-        <p>Laura started her journey by studying to become a nurse, but that wasn&rsquo;t her passion. She loves to design and soon after started to study design and designed clothing.</p>
-        <p>Laura eventually shifted her sights to jewelry design after her brother, King of bling, Jacob Arabo, asked her to help and work with him when he was just starting out.</p>
-        <p>After a few amazing years working with her brother, Laura decided to take the next step and grow, and she started her own company. To her that was very meaningful, a woman running her own business. Coming from the former USSR, that was the epitome of an American Dream.</p>
+        <p>I came to America in my twenties, from the former USSR, because my family wanted a better life. I arrived with almost nothing and did what immigrants do — I worked.</p>
+        <p>I trained as a nurse. My husband and I raised our family. But the thing I had always wanted to be was an artist, and that doesn't leave you. After the long shifts, when the house was finally quiet, I would sit at the kitchen table and draw. The drawings kept turning into jewelry.</p>
+        <p>My first years in the trade were spent working alongside my brother Jacob at Diamond Quasar — the house the world now knows as Jacob &amp; Co. I learned New York's Diamond District the only way you really can: from the inside, stone by stone, bench by bench.</p>
+        <p>And then I did the thing that women like me were not expected to do in that industry, in those years. I opened my own company. Coming from where I came from, a woman running her own business was the whole American dream in one sentence.</p>
         <blockquote class="lm-founder__quote">
-          &ldquo;What I hold more closely to my heart is that I can help my clients create precious memories. 30 years later, I'm greeting old and new clients in midtown Manhattan, the heart of the city.&rdquo;
+          &ldquo;What I hold most closely is that I get to help my clients create precious memories. Thirty years later, I&rsquo;m still greeting old and new clients in midtown Manhattan, in the heart of the city.&rdquo;
           <cite>&mdash; Laura</cite>
         </blockquote>
       </div>
@@ -83,6 +83,8 @@
 
   .lm-founder__portrait img {
     width: 100%;
+    /* Source is 294x277 — upscaling past native just looks soft. */
+    max-width: 294px;
     height: auto;
     border-radius: var(--radius-md, 8px);
     background: var(--cream, #FAF6F0);
