@@ -270,11 +270,18 @@ async function main() {
 
     const syncedAt = new Date().toISOString();
     const byHandle = new Map(publishable.map((p) => [handleFor(p.item), p]));
+    // productSet keys on id. An update sent without one is treated as a create
+    // and rejected as a duplicate handle, so every write carries the catalogue
+    // id when the handle is already known.
+    const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
     const toWrite = decisions.filter((d) => d.action === 'create' || d.action === 'update');
     const inputs = toWrite
       .map((d) => byHandle.get(d.handle))
       .filter((p): p is Publishable => Boolean(p))
-      .map((p) => buildProductSetInput(p.item, p.priced, syncedAt));
+      .map((p) => {
+        const existing = catalogByHandle.get(handleFor(p.item));
+        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, mediaCount: existing.mediaCount });
+      });
 
     let createdIds: string[] = [];
     if (inputs.length >= BULK_THRESHOLD) {

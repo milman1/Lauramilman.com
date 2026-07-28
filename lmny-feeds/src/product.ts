@@ -191,19 +191,37 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
   });
 }
 
+/** What the Shopify catalogue already holds for this handle, if anything. */
+export interface ExistingProduct {
+  id: string;
+  mediaCount: number;
+}
+
 /**
  * Build the full ProductSetInput. Images attach by external URL so Shopify
  * copies them to its own CDN. Feed-hosted .mp4 videos can't attach by URL
  * (Shopify requires staged uploads for video) and are skipped for now.
+ *
+ * `existing` must be passed whenever the product is already in the catalogue.
+ * productSet keys on `id`, not on `handle`: given a handle alone it tries to
+ * CREATE and fails with HANDLE_NOT_UNIQUE. That stayed invisible for as long
+ * as the sync only ever created — matching hashes meant updates never ran at
+ * volume — and then failed 2,506 writes the first time a schema change made
+ * every product an update.
  */
-export function buildProductSetInput(item: FeedItem, priced: Priced, syncedAt: string): Record<string, unknown> {
+export function buildProductSetInput(
+  item: FeedItem,
+  priced: Priced,
+  syncedAt: string,
+  existing?: ExistingProduct,
+): Record<string, unknown> {
   const hash = contentHashFor(item, priced);
   // A feed row with no image would otherwise go live with no photo and only be
   // caught by the next run's media audit. Quarantine it up front instead, so
   // there is never a window where an imageless product is ACTIVE.
   const hasImages = item.imageUrls.length > 0;
   const tags = hasImages ? tagsFor(item) : [...tagsFor(item), MEDIA_MISSING_TAG].sort();
-  return {
+  const input: Record<string, unknown> = {
     handle: handleFor(item),
     title: titleFor(item),
     descriptionHtml: descriptionFor(item),
@@ -212,12 +230,6 @@ export function buildProductSetInput(item: FeedItem, priced: Priced, syncedAt: s
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     tags,
     metafields: metafieldsFor(item, priced, hash, syncedAt),
-    files: item.imageUrls.map((url, i) => ({
-      originalSource: url,
-      contentType: 'IMAGE',
-      alt: `${titleFor(item)}${i > 0 ? ` — view ${i + 1}` : ''}`,
-      duplicateResolutionMode: 'APPEND_UUID',
-    })),
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
     variants: [
       {
@@ -230,4 +242,21 @@ export function buildProductSetInput(item: FeedItem, priced: Priced, syncedAt: s
       },
     ],
   };
+  if (existing) input.id = existing.id;
+  // productSet fully replaces any field it's given, so re-sending `files` on a
+  // product that already has media makes Shopify detach and re-download every
+  // image — thousands of pointless fetches, and a window with no photo. Send
+  // files only when there's nothing to preserve: a new product, or one whose
+  // media is missing and worth retrying. Feed image URLs are stable per stock
+  // ref, so a swapped-out image on an existing product won't be picked up
+  // until it's archived and recreated.
+  if (!existing || existing.mediaCount === 0) {
+    input.files = item.imageUrls.map((url, i) => ({
+      originalSource: url,
+      contentType: 'IMAGE',
+      alt: `${titleFor(item)}${i > 0 ? ` — view ${i + 1}` : ''}`,
+      duplicateResolutionMode: 'APPEND_UUID',
+    }));
+  }
+  return input;
 }

@@ -67,6 +67,8 @@ export interface CatalogEntry {
   status: string;
   contentHash: string | null;
   tags: string[];
+  /** Drives whether an update re-attaches media or leaves what's already there. */
+  mediaCount: number;
 }
 
 export interface DesiredEntry {

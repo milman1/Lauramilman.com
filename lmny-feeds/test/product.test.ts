@@ -150,6 +150,44 @@ describe('content hash', () => {
   });
 });
 
+describe('updates target the existing product by id', () => {
+  const at = '2026-07-28T00:00:00Z';
+
+  it('a create carries no id and attaches its media', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at);
+    expect(input.id).toBeUndefined();
+    expect(input.files as unknown[]).toHaveLength(1);
+  });
+
+  it('an update carries the catalogue id — without it productSet creates and collides', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, {
+      id: 'gid://shopify/Product/7615054741575',
+      mediaCount: 1,
+    });
+    expect(input.id).toBe('gid://shopify/Product/7615054741575');
+    expect(input.handle).toBe('nd-bd-1234');
+  });
+
+  it('an update leaves existing media alone rather than re-downloading it', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 1 });
+    // `files` absent, not empty — an empty list would detach every image.
+    expect('files' in input).toBe(false);
+  });
+
+  it('an update retries media when the product has none', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 0 });
+    expect(input.files as unknown[]).toHaveLength(1);
+  });
+
+  it('everything else is still sent on an update', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 1 });
+    expect(input.title).toBe('2.01ct Round Brilliant, F VS1 — GIA');
+    expect(input.status).toBe('ACTIVE');
+    expect((input.variants as Array<{ price: string }>)[0]!.price).toBe('15000.00');
+    expect(input.metafields as unknown[]).not.toHaveLength(0);
+  });
+});
+
 describe('imageless products are quarantined at creation', () => {
   it('an item with images is ACTIVE and untagged', () => {
     const input = buildProductSetInput(naturalStone(), priced(), '2026-07-28T00:00:00Z');

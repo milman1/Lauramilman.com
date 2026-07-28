@@ -285,6 +285,7 @@ export class ShopifyClient {
             handle
             status
             tags
+            mediaCount { count }
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
           }
         }
@@ -294,12 +295,20 @@ export class ShopifyClient {
     if (!url) return []; // zero results → Shopify provides no file
     const lines = await downloadJsonl(url);
     return lines.map((row) => {
-      const r = row as { id: string; handle: string; status: string; tags: string[]; metafield: { value: string } | null };
+      const r = row as {
+        id: string;
+        handle: string;
+        status: string;
+        tags: string[];
+        mediaCount: { count: number } | null;
+        metafield: { value: string } | null;
+      };
       return {
         id: r.id,
         handle: r.handle,
         status: r.status,
         tags: r.tags ?? [],
+        mediaCount: r.mediaCount?.count ?? 0,
         contentHash: r.metafield?.value ?? null,
       };
     });

@@ -5,7 +5,14 @@ import type { CatalogEntry, DesiredEntry, Kind } from '../src/types.js';
 const ALL_KINDS = new Set<Kind>(['natural', 'lab', 'watch']);
 
 function entry(overrides: Partial<CatalogEntry> & { handle: string }): CatalogEntry {
-  return { id: `gid://shopify/Product/${overrides.handle}`, status: 'ACTIVE', contentHash: 'h1', tags: ['lmny-feed'], ...overrides };
+  return {
+    id: `gid://shopify/Product/${overrides.handle}`,
+    status: 'ACTIVE',
+    contentHash: 'h1',
+    tags: ['lmny-feed'],
+    mediaCount: 1,
+    ...overrides,
+  };
 }
 
 function want(handle: string, contentHash = 'h1'): DesiredEntry {
