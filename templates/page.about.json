@@ -20,7 +20,8 @@
         "cta_shop_label": "Shop All Jewelry",
         "cta_shop_link": "/collections/all",
         "cta_contact_label": "Book a Consultation",
-        "cta_contact_link": "/pages/private-clients"
+        "cta_contact_link": "/pages/private-clients",
+        "portrait": "shopify://shop_images/IMG_1987.jpg"
       }
     }
   },
