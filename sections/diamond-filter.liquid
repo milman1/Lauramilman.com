@@ -1,0 +1,1096 @@
+{%- comment -%}
+  Laura Milman New York — Diamond Filter
+
+  The Peaceful Diamonds filter, rebuilt on Shopify's native storefront facets
+  instead of a live supplier API. Everything here is driven by
+  `collection.filters`, so the param names always match what Search &
+  Discovery has actually published — nothing is hard-coded and guessed.
+
+  Expects these product metafield filters to be enabled in Search &
+  Discovery (the feed sync writes them, storefront-readable):
+    custom.diamond_shape   custom.carat_weight   custom.color
+    custom.clarity         custom.cut
+  Plus the built-in Price filter.
+
+  Controls not backed by a published filter are skipped rather than rendered
+  dead; in the theme editor a setup notice lists what's missing.
+
+  Filter and results live in one section, as they did on PD — it owns the
+  whole page, so use it instead of main-collection, not above it. See
+  templates/collection.diamonds.json.
+{%- endcomment -%}
+
+{%- liquid
+  assign navy_mode = section.settings.navy_mode
+
+  assign shape_filter = nil
+  assign carat_filter = nil
+  assign color_filter = nil
+  assign clarity_filter = nil
+  assign cut_filter = nil
+  assign price_filter = nil
+  assign passthrough_filters = ''
+
+  for filter in collection.filters
+    assign p = filter.param_name
+    if p contains 'custom.diamond_shape'
+      assign shape_filter = filter
+    elsif p contains 'custom.carat_weight'
+      assign carat_filter = filter
+    elsif p contains 'custom.clarity'
+      assign clarity_filter = filter
+    elsif p contains 'custom.color'
+      assign color_filter = filter
+    elsif p contains 'custom.cut'
+      assign cut_filter = filter
+    elsif filter.type == 'price_range'
+      assign price_filter = filter
+    else
+      assign passthrough_filters = passthrough_filters | append: filter.param_name | append: '|'
+    endif
+  endfor
+
+  assign has_any = false
+  if shape_filter or carat_filter or clarity_filter or color_filter or cut_filter or price_filter
+    assign has_any = true
+  endif
+
+  comment
+    Gemological order, worst → best. Shopify returns facet values by count or
+    alphabetically, neither of which is meaningful for a grade scale.
+  endcomment
+  assign clarity_order = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ','
+  assign color_order = 'M,L,K,J,I,H,G,F,E,D' | split: ','
+  assign cut_order = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ','
+  assign shape_order = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
+-%}
+
+{%- paginate collection.products by section.settings.products_per_page -%}
+
+<section class="lm-dfilter{% if navy_mode %} lm-dfilter--navy{% endif %}" aria-label="{{ collection.title | escape }}">
+  <div class="lm-dfilter__container">
+
+    <header class="lm-dfilter__header">
+      <h1 class="lm-dfilter__title">{{ section.settings.heading | default: collection.title }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p class="lm-dfilter__subtitle">{{ section.settings.subheading }}</p>
+      {%- elsif collection.description != blank -%}
+        <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+      {%- endif -%}
+    </header>
+
+{%- if has_any -%}
+
+    <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ collection.url }}" method="get">
+      {%- comment -%} Keep sort and any filter this panel doesn't own. {%- endcomment -%}
+      {%- if collection.sort_by != blank -%}
+        <input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">
+      {%- endif -%}
+      {%- for filter in collection.filters -%}
+        {%- if passthrough_filters contains filter.param_name -%}
+          {%- for value in filter.active_values -%}
+            <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div class="lm-dfilter__grid">
+
+        {%- if shape_filter -%}
+          <div class="lm-dfilter__group lm-dfilter__group--wide">
+            <span class="lm-dfilter__label">
+              Shape
+              <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
+            </span>
+            <div class="lm-dfilter__shapes">
+              {%- comment -%} Canonical order first, then anything else the feed brought in. {%- endcomment -%}
+              {%- for name in shape_order -%}
+                {%- for value in shape_filter.values -%}
+                  {%- if value.label == name -%}
+                    {%- assign icon_key = value.label | downcase -%}
+                    <label class="lm-shape{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
+                      <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                      {%- render 'diamond-shape-icon', shape: icon_key -%}
+                      <span class="lm-shape__name">{{ value.label }}</span>
+                      <span class="lm-shape__count">{{ value.count }}</span>
+                    </label>
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endfor -%}
+              {%- for value in shape_filter.values -%}
+                {%- unless shape_order contains value.label -%}
+                  {%- assign icon_key = value.label | downcase -%}
+                  <label class="lm-shape{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
+                    <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                    {%- render 'diamond-shape-icon', shape: icon_key -%}
+                    <span class="lm-shape__name">{{ value.label }}</span>
+                    <span class="lm-shape__count">{{ value.count }}</span>
+                  </label>
+                {%- endunless -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if carat_filter -%}
+          <div class="lm-dfilter__group">
+            <span class="lm-dfilter__label">
+              Carat
+              <button type="button" class="lm-dfilter__info" aria-label="About carat" data-tip="Carat is weight, not size: one carat is 200 milligrams. Two stones of equal weight can look different sizes depending on cut.">i</button>
+            </span>
+            {%- if carat_filter.min_value -%}
+              {%- liquid
+                assign carat_min = carat_filter.min_value.value | default: carat_filter.range_min
+                assign carat_max = carat_filter.max_value.value | default: carat_filter.range_max
+              -%}
+              <div class="lm-range" data-range data-floor="{{ carat_filter.range_min | default: 0 }}" data-ceil="{{ carat_filter.range_max | default: 30 }}" data-step="0.01">
+                <div class="lm-range__inputs">
+                  <label class="lm-range__field">
+                    <span>Min</span>
+                    <input type="number" inputmode="decimal" step="0.01" min="{{ carat_filter.range_min | default: 0 }}" max="{{ carat_filter.range_max | default: 30 }}"
+                           name="{{ carat_filter.min_value.param_name }}" value="{{ carat_min }}" data-range-min>
+                  </label>
+                  <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+                  <label class="lm-range__field">
+                    <span>Max</span>
+                    <input type="number" inputmode="decimal" step="0.01" min="{{ carat_filter.range_min | default: 0 }}" max="{{ carat_filter.range_max | default: 30 }}"
+                           name="{{ carat_filter.max_value.param_name }}" value="{{ carat_max }}" data-range-max>
+                  </label>
+                </div>
+                <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+              </div>
+            {%- else -%}
+              {%- comment -%} Carat published as a list of values rather than a range. {%- endcomment -%}
+              <div class="lm-chips">
+                {%- for value in carat_filter.values -%}
+                  <label class="lm-chip{% if value.active %} is-active{% endif %}">
+                    <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                    {{ value.label }} <span class="lm-chip__count">{{ value.count }}</span>
+                  </label>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if price_filter -%}
+          <div class="lm-dfilter__group">
+            <span class="lm-dfilter__label">
+              Price
+              <button type="button" class="lm-dfilter__info" aria-label="About price" data-tip="Every stone is priced individually against the current market. Set the range you're working to.">i</button>
+            </span>
+            {%- liquid
+              assign price_min = 0
+              assign price_max = price_filter.range_max | money_without_currency | replace: ',', ''
+              if price_filter.min_value.value
+                assign price_min = price_filter.min_value.value | money_without_currency | replace: ',', ''
+              endif
+              if price_filter.max_value.value
+                assign price_max = price_filter.max_value.value | money_without_currency | replace: ',', ''
+              endif
+              assign price_ceil = price_filter.range_max | money_without_currency | replace: ',', ''
+            -%}
+            <div class="lm-range" data-range data-floor="0" data-ceil="{{ price_ceil }}" data-step="1">
+              <div class="lm-range__inputs">
+                <label class="lm-range__field">
+                  <span>Min {{ cart.currency.symbol }}</span>
+                  <input type="number" inputmode="numeric" step="1" min="0" max="{{ price_ceil }}"
+                         name="{{ price_filter.min_value.param_name }}" value="{{ price_min }}" data-range-min>
+                </label>
+                <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+                <label class="lm-range__field">
+                  <span>Max {{ cart.currency.symbol }}</span>
+                  <input type="number" inputmode="numeric" step="1" min="0" max="{{ price_ceil }}"
+                         name="{{ price_filter.max_value.param_name }}" value="{{ price_max }}" data-range-max>
+                </label>
+              </div>
+              <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if clarity_filter -%}
+          {%- render 'diamond-grade-scale',
+              filter: clarity_filter,
+              order: clarity_order,
+              title: 'Clarity',
+              tip: 'Clarity grades the inclusions inside the stone. From SI2 up, most are invisible without magnification; FL is flawless under 10x.' -%}
+        {%- endif -%}
+
+        {%- if color_filter -%}
+          {%- render 'diamond-grade-scale',
+              filter: color_filter,
+              order: color_order,
+              title: 'Colour',
+              tip: 'Colour runs D (completely colourless) down through the alphabet. Warmth becomes noticeable around J and below, and reads differently in white versus yellow gold.' -%}
+        {%- endif -%}
+
+        {%- if cut_filter -%}
+          {%- render 'diamond-grade-scale',
+              filter: cut_filter,
+              order: cut_order,
+              title: 'Cut',
+              tip: 'Cut is the one grade that is craftsmanship rather than nature — it governs how much light the stone returns. It is the grade worth paying up for.' -%}
+        {%- endif -%}
+
+      </div>
+
+      <div class="lm-dfilter__actions">
+        <button type="submit" class="lm-dfilter__apply">
+          View Diamonds
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <a href="{{ collection.url }}" class="lm-dfilter__reset">Reset all</a>
+      </div>
+    </form>
+
+{%- elsif request.design_mode -%}
+    <div class="lm-dfilter__setup">
+      <p><strong>Diamond filter — not yet configured.</strong></p>
+      <p>
+        This collection has no published filters to drive the controls. In the Shopify admin open
+        <em>Search &amp; Discovery → Filters</em> and add product-metafield filters for
+        <code>custom.diamond_shape</code>, <code>custom.carat_weight</code> (as a range),
+        <code>custom.color</code>, <code>custom.clarity</code> and <code>custom.cut</code>,
+        plus the built-in <em>Price</em> filter. The panel appears once they're live.
+      </p>
+      <p>This notice is only visible in the theme editor. The diamonds below are unaffected.</p>
+    </div>
+{%- endif -%}
+
+    <!-- Results -->
+    <div class="lm-dfilter__toolbar">
+      <span class="lm-dfilter__count" role="status">
+        {%- if paginate.pages > 1 -%}
+          Showing {{ paginate.current_offset | plus: 1 }}&ndash;{{ paginate.current_offset | plus: collection.products.size }} of {{ collection.products_count }} diamonds
+        {%- else -%}
+          Showing {{ collection.products_count }} {{ collection.products_count | pluralize: 'diamond', 'diamonds' }}
+        {%- endif -%}
+      </span>
+
+      <div class="lm-dfilter__sort">
+        <label for="lm-diamond-sort">Sort by</label>
+        <select id="lm-diamond-sort">
+          {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_pairs = 'manual::Featured||price-ascending::Price: Low to High||price-descending::Price: High to Low||created-descending::Newest First||title-ascending::Alphabetically, A–Z' | split: '||' -%}
+          {%- for pair in sort_pairs -%}
+            {%- assign sort_parts = pair | split: '::' -%}
+            <option value="{{ sort_parts[0] }}" {% if current_sort == sort_parts[0] %}selected{% endif %}>{{ sort_parts[1] }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+    </div>
+
+    {%- if collection.products.size > 0 -%}
+      <div class="products-grid lm-dfilter__results">
+        {%- for product in collection.products -%}
+          {%- render 'product-card', product: product -%}
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="lm-pagination" aria-label="Pagination">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="lm-pagination__arrow" aria-label="Previous page">&larr;</a>
+          {%- endif -%}
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="lm-pagination__page">{{ part.title }}</a>
+            {%- elsif part.title == paginate.current_page -%}
+              <span class="lm-pagination__page lm-pagination__page--current" aria-current="page">{{ part.title }}</span>
+            {%- else -%}
+              <span class="lm-pagination__ellipsis">{{ part.title }}</span>
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="lm-pagination__arrow" aria-label="Next page">&rarr;</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+
+    {%- else -%}
+      <div class="lm-dfilter__empty">
+        <p class="lm-dfilter__empty-title">No diamonds match these criteria</p>
+        <p class="lm-dfilter__empty-text">
+          Try widening the carat or price range, or relaxing a grade by one step. If you have
+          something specific in mind, we can source it.
+        </p>
+        <a href="{{ collection.url }}" class="lm-dfilter__apply">Reset Filters</a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{%- endpaginate -%}
+
+<style>
+  .lm-dfilter {
+    background: var(--warm-white, #FDFAF6);
+    padding: 2.5rem 0 0.5rem;
+  }
+
+  .lm-dfilter__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-dfilter__header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+
+  .lm-dfilter__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.85rem;
+  }
+
+  .lm-dfilter__subtitle {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .lm-dfilter__form {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    padding: 2rem;
+  }
+
+  .lm-dfilter__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 3rem;
+  }
+
+  .lm-dfilter__group--wide {
+    grid-column: 1 / -1;
+  }
+
+  .lm-dfilter__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    margin-bottom: 1rem;
+  }
+
+  .lm-dfilter__info {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    border-radius: 50%;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    background: transparent;
+    color: var(--text-muted, #8A8070);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+    position: relative;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .lm-dfilter__info:hover,
+  .lm-dfilter__info:focus-visible {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-dfilter__info::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    width: 240px;
+    padding: 0.65rem 0.8rem;
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    border-radius: var(--radius-sm, 4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .lm-dfilter__info:hover::after,
+  .lm-dfilter__info:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ── Shapes ── */
+  .lm-dfilter__shapes {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .lm-shape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.7rem 0.25rem 0.55rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .lm-shape input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .lm-shape:hover {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.06);
+  }
+
+  .lm-shape.is-active {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.14);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+
+  .lm-shape.is-empty {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .lm-shape .shape-btn__icon {
+    width: 34px;
+    height: 34px;
+    color: currentColor;
+  }
+
+  .lm-shape__name {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .lm-shape__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.6rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  /* ── Ranges ── */
+  .lm-range__inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+
+  .lm-range__field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .lm-range__field span {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-range__field input {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    color: var(--text-dark, #2C1810);
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--warm-white, #FDFAF6);
+    width: 100%;
+  }
+
+  .lm-range__field input:focus {
+    outline: none;
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-range__dash {
+    color: var(--text-muted, #8A8070);
+    padding-bottom: 0.7rem;
+  }
+
+  .lm-range__track {
+    position: relative;
+    height: 3px;
+    margin: 1.1rem 0 0.25rem;
+    background: var(--rule-light, #DDD5C5);
+    border-radius: 3px;
+  }
+
+  .lm-range__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--gold, #C9A050);
+    border-radius: 3px;
+  }
+
+  /* ── Grade scales ── */
+  .lm-scale__row {
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .lm-grade {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.15rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .lm-grade input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .lm-grade__label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    white-space: nowrap;
+  }
+
+  .lm-grade__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.58rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-grade:hover {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-grade.is-in-range {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.14);
+  }
+
+  .lm-scale__hint {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0.6rem 0 0;
+  }
+
+  /* ── Chips fallback ── */
+  .lm-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .lm-chip {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    cursor: pointer;
+  }
+
+  .lm-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .lm-chip.is-active {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.14);
+  }
+
+  .lm-chip__count {
+    color: var(--text-muted, #8A8070);
+    font-size: 0.65rem;
+  }
+
+  /* ── Actions ── */
+  .lm-dfilter__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-dfilter__apply {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2.25rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: none;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .lm-dfilter__apply:hover {
+    background: var(--text-dark, #2C1810);
+    box-shadow: var(--shadow-md);
+  }
+
+  .lm-dfilter__reset {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--wine, #4A1428);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ── Results ── */
+  .lm-dfilter__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    margin: 2rem 0 1.5rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-dfilter__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-dfilter__sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .lm-dfilter__sort label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-dfilter__sort select {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-dark, #2C1810);
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    padding: 8px 32px 8px 12px;
+    background: transparent;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A8070' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+  }
+
+  .lm-dfilter__results {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .lm-dfilter__empty {
+    text-align: center;
+    padding: 4rem 1rem 5rem;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .lm-dfilter__empty-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+
+  .lm-dfilter__empty-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.75rem;
+  }
+
+  /* Pagination — main-collection's copy isn't on this template. */
+  .lm-dfilter .lm-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    padding: 2rem 0 4rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-dfilter .lm-pagination__page,
+  .lm-dfilter .lm-pagination__arrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--text-dark, #2C1810);
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.2s ease;
+  }
+
+  .lm-dfilter .lm-pagination__page:hover,
+  .lm-dfilter .lm-pagination__arrow:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-dfilter .lm-pagination__page--current {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-dfilter .lm-pagination__ellipsis {
+    color: var(--text-muted, #8A8070);
+    padding: 0 0.25rem;
+  }
+
+  .lm-dfilter--navy .lm-pagination__page--current {
+    background: var(--navy, #1A1F3A);
+  }
+
+  .lm-dfilter--navy .lm-pagination__page:hover,
+  .lm-dfilter--navy .lm-pagination__arrow:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
+  }
+
+  .lm-dfilter__setup {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border: 1px dashed var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-dfilter__setup code {
+    background: rgba(201, 160, 80, 0.12);
+    padding: 0 0.25rem;
+    border-radius: 3px;
+  }
+
+  /* ── Navy mode: Peaceful Diamonds tier ── */
+  .lm-dfilter--navy {
+    background: linear-gradient(180deg, #F4F6FB 0%, var(--warm-white, #FDFAF6) 100%);
+  }
+
+  .lm-dfilter--navy .lm-dfilter__title {
+    color: var(--navy, #1A1F3A);
+  }
+
+  .lm-dfilter--navy .lm-shape:hover,
+  .lm-dfilter--navy .lm-grade:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.06);
+  }
+
+  .lm-dfilter--navy .lm-shape.is-active {
+    border-color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.14);
+    box-shadow: inset 0 0 0 1px var(--pd-blue, #5B7FBD);
+  }
+
+  .lm-dfilter--navy .lm-grade.is-in-range,
+  .lm-dfilter--navy .lm-chip.is-active {
+    border-color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.14);
+  }
+
+  .lm-dfilter--navy .lm-range__fill {
+    background: var(--pd-blue, #5B7FBD);
+  }
+
+  .lm-dfilter--navy .lm-dfilter__apply {
+    background: var(--navy, #1A1F3A);
+  }
+
+  .lm-dfilter--navy .lm-dfilter__apply:hover {
+    background: var(--navy-deep, #12162B);
+  }
+
+  .lm-dfilter--navy .lm-dfilter__reset {
+    color: var(--pd-blue, #5B7FBD);
+  }
+
+  @media (max-width: 1024px) {
+    .lm-dfilter__results {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .lm-dfilter__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.75rem;
+    }
+    .lm-dfilter__shapes {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-dfilter__results {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .lm-dfilter__toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+      text-align: center;
+    }
+    .lm-dfilter__sort label {
+      display: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .lm-dfilter {
+      padding-top: 1.5rem;
+    }
+    .lm-dfilter__form {
+      padding: 1.25rem;
+    }
+    .lm-dfilter__shapes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lm-scale__row {
+      flex-wrap: wrap;
+    }
+    .lm-grade {
+      flex: 0 0 calc(25% - 0.3rem);
+    }
+    .lm-dfilter__actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .lm-dfilter__apply {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    /* Sort has to preserve the active facets, so rebuild the query rather
+       than navigating to a bare ?sort_by. */
+    var sortSelect = document.getElementById('lm-diamond-sort');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function () {
+        var params = new URLSearchParams(window.location.search);
+        params.set('sort_by', sortSelect.value);
+        params.delete('page');
+        window.location.href = window.location.pathname + '?' + params.toString();
+      });
+    }
+
+    var form = document.getElementById('DiamondFilterForm');
+    if (!form) return;
+
+    /* Grade scales are "this grade and better": clicking G selects G and
+       everything above it, which is how people actually shop a grade scale. */
+    form.querySelectorAll('[data-scale]').forEach(function (scale) {
+      var grades = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
+
+      function paint() {
+        grades.forEach(function (grade) {
+          var checked = grade.querySelector('input').checked;
+          grade.classList.toggle('is-in-range', checked);
+        });
+        var chosen = grades.filter(function (g) { return g.querySelector('input').checked; });
+        var hint = scale.parentNode.querySelector('[data-scale-hint]');
+        if (!hint) return;
+        if (chosen.length === 0 || chosen.length === grades.length) {
+          hint.textContent = 'All grades';
+        } else {
+          hint.textContent = chosen[0].dataset.grade + ' and better';
+        }
+      }
+
+      function selectFrom(index) {
+        grades.forEach(function (grade, i) {
+          grade.querySelector('input').checked = i >= index;
+        });
+        paint();
+      }
+
+      grades.forEach(function (grade, index) {
+        grade.addEventListener('click', function (event) {
+          event.preventDefault();
+          var alreadyTheFloor = grade.querySelector('input').checked &&
+            (index === 0 || !grades[index - 1].querySelector('input').checked);
+          /* Clicking the current floor again clears the scale entirely. */
+          if (alreadyTheFloor) {
+            grades.forEach(function (g) { g.querySelector('input').checked = false; });
+            paint();
+          } else {
+            selectFrom(index);
+          }
+        });
+      });
+
+      paint();
+    });
+
+    /* Shape tiles are plain checkboxes; keep the active class in step. */
+    form.querySelectorAll('.lm-shape input, .lm-chip input').forEach(function (input) {
+      input.addEventListener('change', function () {
+        input.closest('.lm-shape, .lm-chip').classList.toggle('is-active', input.checked);
+      });
+    });
+
+    /* Paint the range track from the current min/max. */
+    form.querySelectorAll('[data-range]').forEach(function (range) {
+      var floor = parseFloat(range.dataset.floor) || 0;
+      var ceil = parseFloat(range.dataset.ceil) || 0;
+      var minInput = range.querySelector('[data-range-min]');
+      var maxInput = range.querySelector('[data-range-max]');
+      var fill = range.querySelector('[data-range-fill]');
+      if (!fill || ceil <= floor) return;
+
+      function paint() {
+        var lo = parseFloat(minInput.value);
+        var hi = parseFloat(maxInput.value);
+        if (isNaN(lo)) lo = floor;
+        if (isNaN(hi)) hi = ceil;
+        var left = Math.max(0, Math.min(100, ((lo - floor) / (ceil - floor)) * 100));
+        var right = Math.max(0, Math.min(100, ((hi - floor) / (ceil - floor)) * 100));
+        fill.style.left = Math.min(left, right) + '%';
+        fill.style.right = (100 - Math.max(left, right)) + '%';
+      }
+
+      minInput.addEventListener('input', paint);
+      maxInput.addEventListener('input', paint);
+      paint();
+    });
+
+    /* An empty or full-range input would otherwise land in the URL as noise. */
+    form.addEventListener('submit', function () {
+      form.querySelectorAll('input[type="number"]').forEach(function (input) {
+        if (input.value === '') input.disabled = true;
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Diamond Filter",
+  "tag": "section",
+  "class": "section-diamond-filter",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Defaults to the collection title."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Falls back to the collection description."
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Diamonds per page",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "checkbox",
+      "id": "navy_mode",
+      "label": "Navy mode (Peaceful Diamonds tier)",
+      "info": "Match the collection section below it: navy for lab-grown, off for LMNY naturals.",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Diamond Filter"
+    }
+  ]
+}
+{% endschema %}
