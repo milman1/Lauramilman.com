@@ -1,0 +1,43 @@
+{%- comment -%}
+  Google Reviews — SociableKit embed migrated from the Shopify page body
+  (handle: google-reviews) so it deploys through git.
+{%- endcomment -%}
+
+<section class="lm-reviews">
+  <div class="lm-reviews__inner">
+    <header class="lm-reviews__hero">
+      <p class="eyebrow">Client Words</p>
+      <h1 class="lm-reviews__title">{{ page.title | default: 'Google Reviews' }}</h1>
+    </header>
+
+    <div class="sk-ww-google-reviews" data-embed-id="25387276"></div>
+    <script src="https://widgets.sociablekit.com/google-reviews/widget.js" async defer></script>
+  </div>
+</section>
+
+<style>
+  .lm-reviews {
+    background: var(--warm-white, #FDFAF6);
+    padding: var(--space-3xl, 4rem) 0 var(--space-4xl, 6rem);
+    min-height: 60vh;
+  }
+
+  .lm-reviews__inner {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-reviews__hero {
+    text-align: center;
+    margin-bottom: var(--space-2xl, 3rem);
+  }
+
+  .lm-reviews__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark);
+    margin: 0.5rem 0 0;
+  }
+</style>

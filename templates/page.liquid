@@ -9,7 +9,7 @@
 
 <style>
   .page-default {
-    padding: 120px 40px 80px;
+    padding: var(--space-2xl, 3rem) var(--container-padding) var(--space-4xl, 6rem);
     min-height: 60vh;
   }
   .page-default__inner {
@@ -17,17 +17,17 @@
     margin: 0 auto;
   }
   .page-default__title {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-heading);
     font-size: 42px;
-    color: var(--color-text-dark, #2C1810);
+    color: var(--text-dark, #2C1810);
     font-weight: 400;
     margin-bottom: 32px;
   }
   .page-default__content {
-    font-family: 'Jost', sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     line-height: 1.9;
-    color: var(--color-text-muted, #8A8070);
+    color: var(--text-muted, #8A8070);
     font-weight: 300;
   }
   .page-default__content p {
@@ -35,7 +35,7 @@
   }
   .page-default__content h2,
   .page-default__content h3 {
-    color: var(--color-text-dark, #2C1810);
+    color: var(--text-dark, #2C1810);
     margin-top: 2em;
     margin-bottom: 0.75em;
   }

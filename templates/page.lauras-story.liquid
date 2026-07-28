@@ -1,0 +1,144 @@
+{%- comment -%}
+  Laura's Story — content lives in the theme so it deploys through git.
+  Copy migrated verbatim from the Shopify page body (handle: lauras-story).
+{%- endcomment -%}
+
+<section class="lm-founder">
+  <div class="lm-founder__inner">
+
+    <header class="lm-founder__hero">
+      <p class="eyebrow">The Founder</p>
+      <h1 class="lm-founder__title">{{ page.title | default: "Laura's Story" }}</h1>
+    </header>
+
+    <div class="lm-founder__layout">
+      <figure class="lm-founder__portrait">
+        <img
+          src="https://cdn.shopify.com/s/files/1/1727/2565/files/IMG_1987_480x480.jpg?v=1592603299"
+          alt="Laura Milman"
+          width="480"
+          height="480"
+          loading="lazy"
+        >
+      </figure>
+
+      <div class="lm-founder__story">
+        <p>Laura Milman came to America from the former USSR because her family wanted a better life.</p>
+        <p>Laura started her journey by studying to become a nurse, but that wasn&rsquo;t her passion. She loves to design and soon after started to study design and designed clothing.</p>
+        <p>Laura eventually shifted her sights to jewelry design after her brother, King of bling, Jacob Arabo, asked her to help and work with him when he was just starting out.</p>
+        <p>After a few amazing years working with her brother, Laura decided to take the next step and grow, and she started her own company. To her that was very meaningful, a woman running her own business. Coming from the former USSR, that was the epitome of an American Dream.</p>
+        <blockquote class="lm-founder__quote">
+          &ldquo;What I hold more closely to my heart is that I can help my clients create precious memories. 30 years later, I'm greeting old and new clients in midtown Manhattan, the heart of the city.&rdquo;
+          <cite>&mdash; Laura</cite>
+        </blockquote>
+      </div>
+    </div>
+
+    <div class="lm-founder__cta">
+      <a href="/collections/all" class="btn btn--gold">Shop the Collection</a>
+      <a href="/pages/private-clients" class="btn btn--outline">Book a Consultation</a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-founder {
+    background: var(--warm-white, #FDFAF6);
+    padding: var(--space-3xl, 4rem) 0 var(--space-4xl, 6rem);
+    min-height: 60vh;
+  }
+
+  .lm-founder__inner {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-founder__hero {
+    text-align: center;
+    margin-bottom: var(--space-3xl, 4rem);
+  }
+
+  .lm-founder__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark);
+    margin: 0.5rem 0 0;
+  }
+
+  .lm-founder__layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 420px) 1fr;
+    gap: var(--space-3xl, 4rem);
+    align-items: start;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .lm-founder__portrait {
+    margin: 0;
+  }
+
+  .lm-founder__portrait img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md, 8px);
+    background: var(--cream, #FAF6F0);
+  }
+
+  .lm-founder__story p {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--text-muted);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-founder__quote {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--text-dark);
+    border-left: 2px solid var(--gold, #C9A050);
+    margin: 2rem 0 0;
+    padding-left: 1.5rem;
+  }
+
+  .lm-founder__quote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-style: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-founder__cta {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--space-3xl, 4rem);
+  }
+
+  @media (max-width: 768px) {
+    .lm-founder__layout {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl, 2rem);
+    }
+
+    .lm-founder__portrait {
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .lm-founder__hero {
+      margin-bottom: var(--space-xl, 2rem);
+    }
+  }
+</style>
