@@ -166,6 +166,14 @@ export class ShopifyClient {
    * Ensure the three automated feed collections. Keyed on the lmny-feed tag
    * plus product type, so existing (non-feed) estate watches and jewelry are
    * never swept in. "Peaceful Diamonds by LMNY" is deliberately left alone.
+   *
+   * collectionCreate does NOT publish to the Online Store (unlike the admin
+   * UI, which publishes by default) — an unpublished collection 404s on the
+   * storefront. Collections created here are therefore published explicitly.
+   * Collections that already exist are left as-is: whether an existing
+   * collection is visible is a merchandising decision, not the sync's call.
+   * Unpublished pre-existing ones are reported so they aren't silently
+   * invisible.
    */
   async ensureCollections(): Promise<string[]> {
     const wanted = [
@@ -174,15 +182,44 @@ export class ShopifyClient {
       { title: 'Timepieces', type: PRODUCT_TYPES.watch },
     ];
     const created: string[] = [];
+    const publicationId = await this.onlineStorePublicationId();
     for (const want of wanted) {
-      const existing = await this.gql<{ collections: { nodes: Array<{ id: string; title: string; ruleSet: unknown }> } }>(
-        `query($q: String!) { collections(first: 10, query: $q) { nodes { id title ruleSet { rules { column condition } } } } }`,
+      const existing = await this.gql<{
+        collections: {
+          nodes: Array<{
+            id: string;
+            title: string;
+            handle: string;
+            ruleSet: unknown;
+            resourcePublications: { nodes: Array<{ isPublished: boolean }> };
+          }>;
+        };
+      }>(
+        `query($q: String!) {
+          collections(first: 10, query: $q) {
+            nodes {
+              id title handle
+              ruleSet { rules { column condition } }
+              resourcePublications(first: 10) { nodes { isPublished } }
+            }
+          }
+        }`,
         { q: `title:'${want.title}'` },
       );
       const match = existing.collections.nodes.find(
         (c) => c.title === want.title && JSON.stringify(c.ruleSet ?? '').includes(FEED_TAG),
       );
-      if (match) continue;
+      if (match) {
+        // Report, don't silently change: publishing an existing collection is
+        // a storefront-visibility decision for the merchant to make.
+        const published = match.resourcePublications.nodes.some((p) => p.isPublished);
+        if (!published) {
+          console.warn(
+            `Collection "${match.title}" (/collections/${match.handle}) exists but is not published — it will 404 on the storefront until published.`,
+          );
+        }
+        continue;
+      }
       const data = await this.gql<{ collectionCreate: { collection: { id: string } | null; userErrors: Array<{ message: string }> } }>(
         `mutation($input: CollectionInput!) {
           collectionCreate(input: $input) { collection { id } userErrors { message } }
@@ -202,6 +239,14 @@ export class ShopifyClient {
       );
       if (data.collectionCreate.userErrors.length) {
         throw new Error(`collectionCreate ${want.title}: ${data.collectionCreate.userErrors.map((e) => e.message).join('; ')}`);
+      }
+      const collectionId = data.collectionCreate.collection?.id;
+      if (collectionId) {
+        // Without this the collection exists in admin but 404s on the storefront.
+        const errors = await this.publishResource(collectionId, publicationId);
+        if (errors.length) {
+          throw new Error(`publish collection ${want.title}: ${errors.join('; ')}`);
+        }
       }
       created.push(want.title);
     }
@@ -390,7 +435,7 @@ export class ShopifyClient {
     return online.id;
   }
 
-  async publishProduct(id: string, publicationId: string): Promise<string[]> {
+  async publishResource(id: string, publicationId: string): Promise<string[]> {
     const data = await this.gql<{
       publishablePublish: { userErrors: Array<{ message: string }> };
     }>(

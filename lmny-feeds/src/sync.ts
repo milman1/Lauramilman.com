@@ -295,7 +295,7 @@ async function main() {
       const publicationId = await shopify.onlineStorePublicationId();
       console.log(`Publishing ${createdIds.length} products to Online Store…`);
       for (const id of createdIds) {
-        const errors = await shopify.publishProduct(id, publicationId);
+        const errors = await shopify.publishResource(id, publicationId);
         writeErrors.push(...errors.map((e) => `publish ${id}: ${e}`));
       }
     }
