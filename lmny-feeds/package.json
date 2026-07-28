@@ -1,0 +1,22 @@
+{
+  "name": "lmny-feeds",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Belgium Dia feed → Shopify catalog sync for Laura Milman New York. Shopify is the database; all state lives in product metafields.",
+  "scripts": {
+    "sync": "tsx src/sync.ts",
+    "sync:dry": "tsx src/sync.ts --dry-run",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
