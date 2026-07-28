@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "diamond-filter",
+      "settings": {
+        "heading": "Lab-Grown Diamonds",
+        "subheading": "Identical to mined diamonds in every measurable way, grown rather than extracted. The same gemologist-level filtering, at a different price.",
+        "products_per_page": 24,
+        "navy_mode": true
+      }
+    }
+  },
+  "order": ["main"]
+}

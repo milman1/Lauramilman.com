@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "diamond-filter",
+      "settings": {
+        "heading": "Natural Diamonds",
+        "subheading": "Every stone GIA-certified and priced against the live market. Filter the way a gemologist would — shape, carat, colour, clarity and cut — and see exactly what we hold today.",
+        "products_per_page": 24,
+        "navy_mode": false
+      }
+    }
+  },
+  "order": ["main"]
+}
