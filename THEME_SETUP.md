@@ -123,11 +123,17 @@ unfiltered view before that, never to a 404.
 
 1. The collection **already exists**: "Peaceful Diamonds by Laura Milman
    New York", handle `peaceful-diamonds-by-laura-milman-new-york`
-   (gid://shopify/Collection/295877705799), smart rules
-   `VENDOR = "Peaceful Diamonds" OR TITLE CONTAINS "Lab Grown"`, 121 products.
-   Do **not** create another. Remaining move: swap the theme's Peaceful links
-   (header setting, footer link, homepage block) from the `lab-grown-jewelry`
-   stand-in to this handle when the user says go.
+   (gid://shopify/Collection/295877705799). Do **not** create another.
+   **Link swap executed 2026-07-24**: header default, footer link and the
+   homepage Peaceful block now point at this handle (stand-in was
+   `lab-grown-jewelry`, which remains live but unlinked from the theme).
+   Note: at discovery the smart rules were
+   `VENDOR = "Peaceful Diamonds" OR TITLE CONTAINS "Lab Grown"` (121
+   products); later the same day they were narrowed **in the admin, not by
+   this workstream** to `VENDOR EQUALS "Peaceful Diamonds"` (96 products,
+   94 active) — LMNY-vendor lab-grown pieces now sit outside the sub-brand
+   collection, consistent with the hierarchy rule. Confirm intent with the
+   owner before ever re-widening.
 2. Tag stragglers `Lab Grown Diamond` (existing vocabulary — applied
    2026-07-24: 4 added; the other 7 already carried the hyphenated
    `Lab-Grown Diamond` variant, deferred to cleanup) so filters and

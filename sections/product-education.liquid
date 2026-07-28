@@ -10,8 +10,11 @@
 
 {%- liquid
   assign tag_str = product.tags | join: '||' | downcase
+  # Title included because a handful of PD pieces carry only the hyphenated
+  # "Lab-Grown Diamond" tag variant, and every lab piece states it in the title.
+  assign hay = product.title | downcase | append: '||' | append: tag_str
   assign edu_mode = 'heritage'
-  if tag_str contains 'lab grown'
+  if hay contains 'lab grown' or hay contains 'lab-grown' or hay contains 'lab created'
     assign edu_mode = 'lab'
   elsif tag_str contains 'estate' or tag_str contains 'pre-owned' or tag_str contains 'vintage'
     assign edu_mode = 'estate'

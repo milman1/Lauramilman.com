@@ -19,7 +19,7 @@
   for tag in product.tags
     assign t = tag | downcase
     if status_pill == ''
-      if t contains 'lab grown'
+      if t contains 'lab grown' or t contains 'lab-grown' or t contains 'lab created'
         assign status_pill = 'Lab-Grown Diamond'
       elsif t contains 'estate'
         assign status_pill = 'Estate'
