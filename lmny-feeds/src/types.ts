@@ -15,6 +15,9 @@ export interface StoneItem {
   certNumber?: string;
   certUrl?: string;
   measurements?: string;
+  /** Table and depth as percentages. Belgium Dia often omits both. */
+  tablePct?: number;
+  depthPct?: number;
   costUsd: number;
   /** Rapaport list total (USD) — required to price naturals. */
   rapPriceUsd?: number;

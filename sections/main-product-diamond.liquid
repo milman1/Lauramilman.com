@@ -1,0 +1,591 @@
+{%- comment -%}
+  Laura Milman New York — Diamond product page
+
+  The Peaceful Diamonds stone detail view, rebuilt as a real Shopify product
+  page: media tabs (360° / image / certificate), headline stats, the full
+  gemological spec table, and an Add to Cart that genuinely adds to cart —
+  PD's button had no handler behind it, because those stones were never
+  Shopify products.
+
+  Reads the lmny_feed.* metafields the sync writes, so nothing is parsed back
+  out of the description. Any spec the feed omits renders as an em dash rather
+  than vanishing, which keeps the table honest about what's known.
+
+  Assigned automatically: the sync sets templateSuffix "diamond" on every
+  stone, so no manual template picking per product.
+{%- endcomment -%}
+
+{%- liquid
+  assign v = product.selected_or_first_available_variant
+  assign form_id = 'diamond-form-' | append: section.id
+  assign m = product.metafields.lmny_feed
+  assign c = product.metafields.custom
+
+  assign shape = c.diamond_shape.value
+  assign carat = c.carat_weight.value
+  assign is_lab = false
+  if product.type == 'Lab-Grown Diamond'
+    assign is_lab = true
+  endif
+
+  assign per_carat = 0
+  if carat > 0
+    assign per_carat = v.price | divided_by: carat
+  endif
+-%}
+
+<section class="dpdp{% if is_lab %} dpdp--navy{% endif %}">
+  <div class="dpdp__container">
+
+    <nav class="dpdp__crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      {%- if is_lab -%}
+        <a href="/collections/lab-grown-diamonds">Lab-Grown Diamonds</a>
+      {%- else -%}
+        <a href="/collections/natural-diamonds">Natural Diamonds</a>
+      {%- endif -%}
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ product.title }}</span>
+    </nav>
+
+    <div class="dpdp__layout">
+
+      <!-- ── Media ── -->
+      <div class="dpdp__media">
+        <div class="dpdp__tabs" role="tablist">
+          {%- if m.video_url -%}
+            <button type="button" class="dpdp__tab" role="tab" aria-selected="false" data-pane="video">360° Video</button>
+          {%- endif -%}
+          <button type="button" class="dpdp__tab is-active" role="tab" aria-selected="true" data-pane="image">Image</button>
+          {%- if m.cert_url -%}
+            <a class="dpdp__tab" href="{{ m.cert_url }}" target="_blank" rel="noopener">Certificate ↗</a>
+          {%- endif -%}
+        </div>
+
+        <div class="dpdp__stage" data-pane-body="image">
+          {%- if product.featured_media -%}
+            <img
+              src="{{ product.featured_media | image_url: width: 1200 }}"
+              srcset="{{ product.featured_media | image_url: width: 600 }} 600w, {{ product.featured_media | image_url: width: 1200 }} 1200w"
+              sizes="(max-width: 900px) 100vw, 560px"
+              alt="{{ product.featured_media.alt | default: product.title | escape }}"
+              width="1200" height="1200" loading="eager">
+          {%- else -%}
+            <div class="dpdp__nomedia">Photography for this stone is being prepared.</div>
+          {%- endif -%}
+        </div>
+
+        {%- if m.video_url -%}
+          {%- comment -%}
+            Loaded on demand: the supplier's 360° viewer is heavy and most
+            visitors never open the tab.
+          {%- endcomment -%}
+          <div class="dpdp__stage" data-pane-body="video" hidden>
+            <iframe title="360° view of {{ product.title | escape }}" data-src="{{ m.video_url }}"
+                    loading="lazy" allowfullscreen></iframe>
+          </div>
+        {%- endif -%}
+
+        {%- if product.media.size > 1 -%}
+          <div class="dpdp__thumbs">
+            {%- for media in product.media -%}
+              <button type="button" class="dpdp__thumb{% if forloop.first %} is-active{% endif %}"
+                      data-full="{{ media | image_url: width: 1200 }}" aria-label="View {{ forloop.index }}">
+                <img src="{{ media | image_url: width: 160 }}" alt="" width="80" height="80" loading="lazy">
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- ── Detail ── -->
+      <div class="dpdp__detail">
+        <h1 class="dpdp__title">{{ product.title }}</h1>
+        <p class="dpdp__stock">Stock #{{ m.stock_ref | default: v.sku }}</p>
+
+        <div class="dpdp__pricing">
+          <span class="dpdp__price">{{ v.price | money_without_trailing_zeros }}</span>
+          {%- if per_carat > 0 -%}
+            <span class="dpdp__per-carat">{{ per_carat | money_without_trailing_zeros }}/ct</span>
+          {%- endif -%}
+        </div>
+
+        <!-- Headline stats -->
+        <div class="dpdp__stats">
+          {%- if carat -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ carat }}</span><span class="dpdp__stat-label">Carat</span></div>{%- endif -%}
+          {%- if c.color -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ c.color }}</span><span class="dpdp__stat-label">Colour</span></div>{%- endif -%}
+          {%- if c.clarity -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ c.clarity }}</span><span class="dpdp__stat-label">Clarity</span></div>{%- endif -%}
+          {%- if c.cut -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ c.cut }}</span><span class="dpdp__stat-label">Cut</span></div>{%- endif -%}
+        </div>
+
+        <!-- Buy -->
+        {%- form 'product', product, id: form_id, data-product-form: '' -%}
+          <input type="hidden" name="id" value="{{ v.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="dpdp__atc atc-btn" {% unless v.available %}disabled{% endunless %}>
+            {%- if v.available -%}Add to Cart{%- else -%}Sold{%- endif -%}
+          </button>
+        {%- endform -%}
+
+        {%- if m.cert_url -%}
+          <a class="dpdp__cert-btn" href="{{ m.cert_url }}" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            View Certificate
+          </a>
+        {%- endif -%}
+
+        <p class="dpdp__assurance">
+          One stone, one owner — each is unique, so once it's gone it's gone.
+          Every purchase ships insured and fully certified.
+        </p>
+
+        <!-- Full spec table -->
+        <h2 class="dpdp__specs-title">Specification</h2>
+        <dl class="dpdp__specs">
+          {%- assign origin = 'Natural diamond' -%}
+          {%- if is_lab -%}{%- assign origin = 'Lab-grown diamond' -%}{%- endif -%}
+          {%- render 'diamond-spec-row', label: 'Origin', value: origin -%}
+          {%- render 'diamond-spec-row', label: 'Shape', value: shape -%}
+          {%- if carat -%}
+            {%- assign carat_display = carat | append: ' ct' -%}
+            {%- render 'diamond-spec-row', label: 'Carat Weight', value: carat_display -%}
+          {%- else -%}
+            {%- render 'diamond-spec-row', label: 'Carat Weight', value: blank -%}
+          {%- endif -%}
+          {%- render 'diamond-spec-row', label: 'Colour Grade', value: c.color -%}
+          {%- render 'diamond-spec-row', label: 'Clarity Grade', value: c.clarity -%}
+          {%- render 'diamond-spec-row', label: 'Cut Grade', value: c.cut -%}
+          {%- render 'diamond-spec-row', label: 'Polish', value: m.polish -%}
+          {%- render 'diamond-spec-row', label: 'Symmetry', value: m.symmetry -%}
+          {%- render 'diamond-spec-row', label: 'Fluorescence', value: m.fluorescence -%}
+          {%- if m.table_pct -%}
+            {%- assign table_display = m.table_pct | append: '%' -%}
+            {%- render 'diamond-spec-row', label: 'Table %', value: table_display -%}
+          {%- else -%}
+            {%- render 'diamond-spec-row', label: 'Table %', value: blank -%}
+          {%- endif -%}
+          {%- if m.depth_pct -%}
+            {%- assign depth_display = m.depth_pct | append: '%' -%}
+            {%- render 'diamond-spec-row', label: 'Depth %', value: depth_display -%}
+          {%- else -%}
+            {%- render 'diamond-spec-row', label: 'Depth %', value: blank -%}
+          {%- endif -%}
+          {%- render 'diamond-spec-row', label: 'Measurements', value: m.measurements -%}
+          {%- if m.cert_number -%}
+            {%- assign cert_display = m.lab | default: 'Lab' | append: ' #' | append: m.cert_number -%}
+            {%- render 'diamond-spec-row', label: 'Certificate', value: cert_display -%}
+          {%- else -%}
+            {%- render 'diamond-spec-row', label: 'Certificate', value: m.lab -%}
+          {%- endif -%}
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dpdp {
+    background: var(--warm-white, #FDFAF6);
+    padding: 1.5rem 0 4rem;
+  }
+
+  .dpdp__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .dpdp__crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    color: var(--text-muted, #8A8070);
+    padding: 1rem 0 1.75rem;
+  }
+
+  .dpdp__crumbs a {
+    color: var(--text-muted, #8A8070);
+    text-decoration: none;
+  }
+
+  .dpdp__crumbs a:hover {
+    color: var(--gold-dark, #A88340);
+  }
+
+  .dpdp__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  /* ── Media ── */
+  .dpdp__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .dpdp__tab {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .dpdp__tab:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+
+  .dpdp__tab.is-active {
+    border-color: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+    background: rgba(201, 160, 80, 0.12);
+  }
+
+  .dpdp__stage {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    overflow: hidden;
+  }
+
+  .dpdp__stage img,
+  .dpdp__stage iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 0;
+    display: block;
+  }
+
+  .dpdp__nomedia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .dpdp__thumbs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .dpdp__thumb {
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .dpdp__thumb.is-active {
+    border-color: var(--gold, #C9A050);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+
+  .dpdp__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Detail ── */
+  .dpdp__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.75rem, 3.2vw, 2.6rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.4rem;
+  }
+
+  .dpdp__stock {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.5rem;
+  }
+
+  .dpdp__pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .dpdp__price {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 2.2rem;
+    color: var(--gold-dark, #A88340);
+  }
+
+  .dpdp__per-carat {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .dpdp__stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin: 1.75rem 0;
+  }
+
+  .dpdp__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0.4rem;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--cream, #FAF6F0);
+  }
+
+  .dpdp__stat-value {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.5rem;
+    color: var(--text-dark, #2C1810);
+    line-height: 1;
+  }
+
+  .dpdp__stat-label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .dpdp__atc {
+    width: 100%;
+    padding: 1.05rem 1.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--espresso, #1E1109);
+    background: var(--gold, #C9A050);
+    border: none;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .dpdp__atc:hover:not(:disabled) {
+    background: var(--gold-dark, #A88340);
+    color: var(--cream, #FAF6F0);
+    box-shadow: var(--shadow-md);
+  }
+
+  .dpdp__atc:disabled {
+    background: var(--rule-light, #DDD5C5);
+    color: var(--text-muted, #8A8070);
+    cursor: not-allowed;
+  }
+
+  .dpdp__cert-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.95rem 1.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.2s ease;
+  }
+
+  .dpdp__cert-btn:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+
+  .dpdp__assurance {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 1.25rem 0 0;
+  }
+
+  .dpdp__specs-title {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    margin: 2.5rem 0 0.75rem;
+  }
+
+  .dpdp__specs {
+    margin: 0;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .dpdp__spec {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .dpdp__spec dt {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .dpdp__spec dd {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark, #2C1810);
+    margin: 0;
+    text-align: right;
+  }
+
+  .dpdp__spec dd.is-unknown {
+    font-weight: 400;
+    color: var(--text-muted, #8A8070);
+  }
+
+  /* ── Navy: lab-grown tier ── */
+  .dpdp--navy .dpdp__title { color: var(--navy, #1A1F3A); }
+  .dpdp--navy .dpdp__price { color: var(--pd-blue, #5B7FBD); }
+  .dpdp--navy .dpdp__tab.is-active {
+    border-color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.12);
+    color: var(--navy, #1A1F3A);
+  }
+  .dpdp--navy .dpdp__tab:hover,
+  .dpdp--navy .dpdp__cert-btn:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
+  }
+  .dpdp--navy .dpdp__thumb.is-active {
+    border-color: var(--pd-blue, #5B7FBD);
+    box-shadow: inset 0 0 0 1px var(--pd-blue, #5B7FBD);
+  }
+  .dpdp--navy .dpdp__atc {
+    background: var(--navy, #1A1F3A);
+    color: var(--cream, #FAF6F0);
+  }
+  .dpdp--navy .dpdp__atc:hover:not(:disabled) {
+    background: var(--navy-deep, #12162B);
+  }
+
+  @media (max-width: 900px) {
+    .dpdp__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .dpdp__stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .dpdp__price {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.querySelector('.dpdp');
+    if (!root) return;
+
+    /* Media tabs. The 360° iframe only gets its src on first open — the
+       supplier's viewer is heavy and most visitors never look at it. */
+    var tabs = root.querySelectorAll('.dpdp__tab[data-pane]');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) {
+          t.classList.remove('is-active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('is-active');
+        tab.setAttribute('aria-selected', 'true');
+
+        root.querySelectorAll('[data-pane-body]').forEach(function (pane) {
+          var show = pane.dataset.paneBody === tab.dataset.pane;
+          pane.hidden = !show;
+          if (!show) return;
+          var frame = pane.querySelector('iframe[data-src]');
+          if (frame) {
+            frame.src = frame.dataset.src;
+            frame.removeAttribute('data-src');
+          }
+        });
+      });
+    });
+
+    /* Thumbnails swap the main image. */
+    var thumbs = root.querySelectorAll('.dpdp__thumb');
+    var stage = root.querySelector('[data-pane-body="image"] img');
+    thumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        if (!stage) return;
+        stage.removeAttribute('srcset');
+        stage.src = thumb.dataset.full;
+        thumbs.forEach(function (t) { t.classList.remove('is-active'); });
+        thumb.classList.add('is-active');
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Diamond Product",
+  "tag": "section",
+  "class": "section-diamond-product",
+  "settings": [],
+  "presets": [{ "name": "Diamond Product" }]
+}
+{% endschema %}

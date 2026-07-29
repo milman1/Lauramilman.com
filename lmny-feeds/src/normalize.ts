@@ -248,6 +248,8 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']),
       certUrl: normalizeUrl(str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink'])),
       measurements: str(raw, ['measurements', 'measurement', 'dimensions']),
+      tablePct: num(raw, ['table_per', 'table_pct', 'table_percent', 'table']),
+      depthPct: num(raw, ['depth_per', 'depth_pct', 'depth_percent', 'depth']),
       costUsd,
       rapPriceUsd,
       imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'diamond_image']),

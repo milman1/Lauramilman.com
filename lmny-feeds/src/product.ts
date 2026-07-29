@@ -19,7 +19,10 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 2;
+export const PRODUCT_SCHEMA_VERSION = 3;
+
+/** Theme template for stones — the gemological PDP, not the jewelry one. */
+export const STONE_TEMPLATE_SUFFIX = 'diamond';
 
 export const PRODUCT_TYPES = {
   natural: 'Natural Diamond',
@@ -104,6 +107,18 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
   if (item.kind !== 'watch') {
     if (item.certNumber) fields.push({ namespace: ns, key: 'cert_number', type: 'single_line_text_field', value: item.certNumber });
     if (item.certUrl) fields.push({ namespace: ns, key: 'cert_url', type: 'url', value: item.certUrl });
+    // The gemological PDP renders these as its own spec table rather than
+    // parsing them back out of descriptionHtml.
+    if (item.lab) fields.push({ namespace: ns, key: 'lab', type: 'single_line_text_field', value: item.lab });
+    if (item.polish) fields.push({ namespace: ns, key: 'polish', type: 'single_line_text_field', value: item.polish });
+    if (item.symmetry) fields.push({ namespace: ns, key: 'symmetry', type: 'single_line_text_field', value: item.symmetry });
+    if (item.fluorescence) fields.push({ namespace: ns, key: 'fluorescence', type: 'single_line_text_field', value: item.fluorescence });
+    if (item.measurements) fields.push({ namespace: ns, key: 'measurements', type: 'single_line_text_field', value: item.measurements });
+    if (item.tablePct) fields.push({ namespace: ns, key: 'table_pct', type: 'number_decimal', value: String(item.tablePct) });
+    if (item.depthPct) fields.push({ namespace: ns, key: 'depth_pct', type: 'number_decimal', value: String(item.depthPct) });
+    // Feed videos are 360° viewers we can't attach as Shopify media (that needs
+    // a staged upload), so the URL is kept for the PDP to embed directly.
+    if (item.videoUrls[0]) fields.push({ namespace: ns, key: 'video_url', type: 'url', value: item.videoUrls[0] });
     // Storefront-readable copies that drive the collection filters. carat_weight
     // is numeric so the carat control can be a true range, not a band.
     const c = CUSTOM_NAMESPACE;
@@ -185,8 +200,11 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     costCents: Math.round(item.costUsd * 100),
     compMidUsd: priced.compMidUsd ?? null,
     images: item.imageUrls,
+    video: item.videoUrls[0] ?? null,
     certNumber: item.kind !== 'watch' ? (item.certNumber ?? null) : null,
     certUrl: item.kind !== 'watch' ? (item.certUrl ?? null) : null,
+    tablePct: item.kind !== 'watch' ? (item.tablePct ?? null) : null,
+    depthPct: item.kind !== 'watch' ? (item.depthPct ?? null) : null,
     isNaked: item.kind === 'watch' ? item.isNaked : null,
   });
 }
@@ -228,6 +246,8 @@ export function buildProductSetInput(
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
     status: hasImages ? 'ACTIVE' : 'DRAFT',
+    // Stones get the gemological PDP; watches keep the default product page.
+    templateSuffix: item.kind === 'watch' ? '' : STONE_TEMPLATE_SUFFIX,
     tags,
     metafields: metafieldsFor(item, priced, hash, syncedAt),
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
