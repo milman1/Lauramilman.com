@@ -5,6 +5,13 @@ name: LMNY lab feed analysis
 
 on:
   workflow_dispatch:
+  # The session's GitHub integration can't call the dispatch API, so pushes
+  # touching the analysis itself also run it. Read-only either way.
+  push:
+    branches: [main]
+    paths:
+      - 'lmny-feeds/src/lab-analysis.ts'
+      - '.github/workflows/lmny-lab-analysis.yml'
 
 permissions:
   contents: read
