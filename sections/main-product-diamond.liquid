@@ -151,7 +151,7 @@
             {%- assign carat_display = carat | append: ' ct' -%}
             {%- render 'diamond-spec-row', label: 'Carat Weight', value: carat_display -%}
           {%- else -%}
-            {%- render 'diamond-spec-row', label: 'Carat Weight', value: blank -%}
+            {%- render 'diamond-spec-row', label: 'Carat Weight', value: '' -%}
           {%- endif -%}
           {%- render 'diamond-spec-row', label: 'Colour Grade', value: c.color -%}
           {%- render 'diamond-spec-row', label: 'Clarity Grade', value: c.clarity -%}
@@ -163,13 +163,13 @@
             {%- assign table_display = m.table_pct | append: '%' -%}
             {%- render 'diamond-spec-row', label: 'Table %', value: table_display -%}
           {%- else -%}
-            {%- render 'diamond-spec-row', label: 'Table %', value: blank -%}
+            {%- render 'diamond-spec-row', label: 'Table %', value: '' -%}
           {%- endif -%}
           {%- if m.depth_pct -%}
             {%- assign depth_display = m.depth_pct | append: '%' -%}
             {%- render 'diamond-spec-row', label: 'Depth %', value: depth_display -%}
           {%- else -%}
-            {%- render 'diamond-spec-row', label: 'Depth %', value: blank -%}
+            {%- render 'diamond-spec-row', label: 'Depth %', value: '' -%}
           {%- endif -%}
           {%- render 'diamond-spec-row', label: 'Measurements', value: m.measurements -%}
           {%- if m.cert_number -%}
