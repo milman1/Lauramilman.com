@@ -157,3 +157,48 @@ describe('grade normalization', () => {
     expect(gradesOf({ cut: '  ' }).cut).toBeUndefined();
   });
 });
+
+describe('certificate number recovery from URL', () => {
+  it('reads the number out of a hosted-PDF filename — the live catalogue shape', async () => {
+    const { certNumberFromUrl } = await import('../src/normalize.js');
+    expect(certNumberFromUrl('https://dnalinks.in/certificate_images/6455949159.pdf')).toBe('6455949159');
+    expect(certNumberFromUrl('https://dnalinks.in/certificate_images/2544514964.pdf')).toBe('2544514964');
+  });
+
+  it('reads report-check query params', async () => {
+    const { certNumberFromUrl } = await import('../src/normalize.js');
+    expect(certNumberFromUrl('https://www.gia.edu/report-check?reportno=2205551234')).toBe('2205551234');
+  });
+
+  it('refuses non-numeric filenames rather than inventing a number', async () => {
+    const { certNumberFromUrl } = await import('../src/normalize.js');
+    expect(certNumberFromUrl('https://dnalinks.in/certs/certificate.pdf')).toBeUndefined();
+    expect(certNumberFromUrl('https://dnalinks.in/certs/')).toBeUndefined();
+    expect(certNumberFromUrl(undefined)).toBeUndefined();
+    expect(certNumberFromUrl('not a url')).toBeUndefined();
+  });
+
+  it('normalizeStones falls back to the URL when the Certificate field is empty', async () => {
+    const { normalizeStones } = await import('../src/normalize.js');
+    const { items } = normalizeStones([{
+      stock_ref: 'BD-9', shape: 'ROUND', carat: '1.5', color: 'F', clarity: 'VS1', lab: 'GIA',
+      cost: '5000', rap_price: '10000',
+      certificatelink: 'https://dnalinks.in/certificate_images/1234567890.pdf',
+      image: 'https://dnalinks.in/img/a.jpg',
+    }], 'natural');
+    const item = items[0]!;
+    expect(item.kind !== 'watch' && item.certNumber).toBe('1234567890');
+  });
+
+  it('a feed-supplied Certificate field still wins over the URL', async () => {
+    const { normalizeStones } = await import('../src/normalize.js');
+    const { items } = normalizeStones([{
+      stock_ref: 'BD-10', shape: 'ROUND', carat: '1.5', color: 'F', clarity: 'VS1', lab: 'GIA',
+      cost: '5000', rap_price: '10000', certificate: 'GIA-777',
+      certificatelink: 'https://dnalinks.in/certificate_images/1234567890.pdf',
+      image: 'https://dnalinks.in/img/a.jpg',
+    }], 'natural');
+    const item = items[0]!;
+    expect(item.kind !== 'watch' && item.certNumber).toBe('GIA-777');
+  });
+});

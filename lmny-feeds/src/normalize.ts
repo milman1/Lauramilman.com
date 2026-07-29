@@ -153,6 +153,33 @@ function titleCase(s: string): string {
     .replace(/\b[a-z]/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Recover a certificate number from the certificate URL when the feed's
+ * Certificate field is empty — which it usually is: the live rows carry only
+ * CertificateLink, so cert_number never populated and the PDP's certificate
+ * row showed the lab with no number.
+ *
+ * Two shapes observed: report-check URLs (?reportno=2205551234) and hosted
+ * PDFs whose filename IS the number (…/certificate_images/6455949159.pdf).
+ * The filename path insists on digits only, so a URL like …/certificate.pdf
+ * yields nothing rather than the word "certificate".
+ */
+export function certNumberFromUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const u = new URL(url);
+    for (const key of ['reportno', 'reportNo', 'report_no', 'report']) {
+      const v = u.searchParams.get(key);
+      if (v && /^[A-Za-z0-9-]{5,}$/.test(v)) return v;
+    }
+    const base = u.pathname.split('/').filter(Boolean).pop() ?? '';
+    const stem = base.replace(/\.(pdf|jpe?g|png|html?)$/i, '');
+    return /^\d{5,}$/.test(stem) ? stem : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function normalizeColorGrade(s: string): string {
   return s.trim().toUpperCase();
 }
@@ -233,6 +260,8 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       holds.push({ kind, stockRef, reason: 'clarity_below_floor', detail: clarity });
       continue;
     }
+    const certNumber = str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']);
+    const certUrl = normalizeUrl(str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink']));
     const item: StoneItem = {
       kind,
       stockRef,
@@ -245,8 +274,8 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       symmetry: normalizeCutGrade(str(raw, ['symmetry', 'sym'])),
       fluorescence: normalizeFluorescence(str(raw, ['fluorescence_intensity', 'fluorescence', 'fluor', 'fl'])),
       lab: lab.toUpperCase(),
-      certNumber: str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']),
-      certUrl: normalizeUrl(str(raw, ['cert_url', 'certificate_url', 'report_url', 'cert_link', 'certificatelink'])),
+      certNumber: certNumber ?? certNumberFromUrl(certUrl),
+      certUrl,
       measurements: str(raw, ['measurements', 'measurement', 'dimensions']),
       tablePct: num(raw, ['table_per', 'table_pct', 'table_percent', 'table']),
       depthPct: num(raw, ['depth_per', 'depth_pct', 'depth_percent', 'depth']),
