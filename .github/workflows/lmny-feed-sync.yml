@@ -16,9 +16,13 @@ name: LMNY feed sync
 
 on:
   schedule:
-    # 05:17 ET daily. Deliberately off the top of the hour: GitHub's scheduler
-    # is best-effort and drops/delays runs most often at :00, the busiest slot.
-    - cron: '17 9 * * *'
+    # Hourly. Stones turn over fast enough that a daily pass leaves sold ones
+    # on the site for most of a day; hourly closes that to under an hour.
+    # A run only writes what changed — unchanged stones are skipped — so the
+    # cost is roughly the feed fetch plus a catalogue read, ~4 minutes.
+    # Deliberately off the top of the hour: GitHub's scheduler is best-effort
+    # and drops/delays runs most often at :00, the busiest slot.
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
