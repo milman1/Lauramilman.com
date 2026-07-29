@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
 import { ALL_KINDS, parseEnabledFeeds } from './feeds-config.js';
-import { diffCatalog } from './diff.js';
+import { diffCatalog, kindForHandle } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, titleFor } from './product.js';
@@ -33,6 +33,12 @@ const OUT_DIR = 'out';
 const WRITE_ERROR_FAIL_RATE = 0.01;
 /** Required Shopify scopes for a live write (write_* implies read_*). */
 const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications'];
+/** Where a sold stone's URL points once its product is archived and 404s. */
+const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
+  natural: '/collections/natural-diamonds',
+  lab: '/collections/lab-grown-diamonds',
+  watch: '/collections/timepieces',
+};
 /** Known-good reference for the Hours single-reference diagnostic. */
 const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
 
@@ -245,6 +251,7 @@ async function main() {
   // 4. Execute (live only).
   const writeErrors: string[] = [];
   let mediaQuarantined: string[] = [];
+  let redirectsCreated = 0;
   let collectionsCreated: string[] = [];
 
   if (!flags.dryRun) {
@@ -312,7 +319,17 @@ async function main() {
       if (!d.productId) continue;
       const errors = await shopify.archiveProduct(d.productId);
       writeErrors.push(...errors.map((e) => `archive ${d.handle}: ${e}`));
+      if (errors.length > 0) continue;
+      // An archived product 404s. Send the dead URL to its collection so an
+      // old link lands on the stones we do have rather than nothing.
+      const target = ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
+      const redirectErrors = await shopify.redirectProductUrl(d.handle, target);
+      // A missing redirect is cosmetic next to a stone still being listed as
+      // available — report it, don't fail the run over it.
+      for (const e of redirectErrors) notes.push(`redirect ${d.handle}: ${e}`);
+      if (redirectErrors.length === 0) redirectsCreated += 1;
     }
+    if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
   }
 
   // 5. Report — run summary plus JSON artifact as the audit trail.

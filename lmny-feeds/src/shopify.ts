@@ -441,6 +441,32 @@ export class ShopifyClient {
     return keyParam.value;
   }
 
+  /**
+   * Point a sold stone's URL at its collection instead of leaving a 404.
+   *
+   * An archived product 404s on the storefront, so every stone that sells
+   * turns a live, indexed page into a dead link — bad for anyone following an
+   * old link, and bad for the search ranking those pages earn. A redirect
+   * lands the visitor on the collection, where the stones we do have are.
+   *
+   * Idempotent: an existing redirect for the path comes back as TAKEN and is
+   * treated as success.
+   */
+  async redirectProductUrl(handle: string, target: string): Promise<string[]> {
+    const data = await this.gql<{
+      urlRedirectCreate: { userErrors: Array<{ code: string | null; message: string }> };
+    }>(
+      `mutation($redirect: UrlRedirectInput!) {
+        urlRedirectCreate(urlRedirect: $redirect) {
+          urlRedirect { id }
+          userErrors { code message }
+        }
+      }`,
+      { redirect: { path: `/products/${handle}`, target } },
+    );
+    return data.urlRedirectCreate.userErrors.filter((e) => e.code !== 'TAKEN').map((e) => e.message);
+  }
+
   async archiveProduct(id: string): Promise<string[]> {
     const data = await this.gql<{
       productUpdate: { userErrors: Array<{ message: string }> };
