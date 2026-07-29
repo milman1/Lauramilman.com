@@ -1,0 +1,45 @@
+# One-shot, read-only analysis of the Belgium Dia lab feed for the lab
+# go-live decision. Deliberately given no Shopify credentials — it cannot
+# write to the store, only fetch and report.
+name: LMNY lab feed analysis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - name: Analyze lab feed
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+        run: npx tsx src/lab-analysis.ts
+
+      - name: Publish report
+        if: always()
+        run: cat out/lab-analysis.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lmny-lab-analysis-${{ github.run_id }}
+          path: lmny-feeds/out/lab-analysis.md
+          if-no-files-found: ignore
