@@ -68,7 +68,21 @@ function topTable(m: Map<string, number>, limit: number): string {
 async function main() {
   if (!process.env.BELGIUMDIA_API_KEY) throw new Error('BELGIUMDIA_API_KEY is not set');
 
-  const rows = await fetchBelgiumDiaFeed('lab');
+  // Belgium Dia answers a rate-limited key with 200 and an empty array — the
+  // first attempt collided with the hourly sync's own feed pull (both run
+  // near :17). Space retries out rather than reporting an empty feed as fact.
+  let rows: Awaited<ReturnType<typeof fetchBelgiumDiaFeed>> = [];
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    rows = await fetchBelgiumDiaFeed('lab');
+    if (rows.length > 0) break;
+    if (attempt < 4) {
+      console.error(`Lab feed returned 0 rows (attempt ${attempt}) — likely rate-limited; retrying in 2 minutes`);
+      await new Promise((r) => setTimeout(r, 120_000));
+    }
+  }
+  if (rows.length === 0) {
+    throw new Error('Lab feed returned 0 rows on 4 attempts over 6 minutes — rate-limited or down. Re-run later; do not read this as an empty feed.');
+  }
   const { items: allItems, holds } = normalizeStones(rows, 'lab');
   const items = allItems.filter((i): i is StoneItem => i.kind === 'lab');
   const lines: string[] = [];
