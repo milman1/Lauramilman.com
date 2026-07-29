@@ -10,9 +10,11 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 1rem 0;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   background: rgba(30, 17, 9, 0.98);
+  /* theme.css section 5 still sets a light 1px rule, which shows as a pale
+     hairline under the dark bar and makes the header 1px taller than the token. */
+  border-bottom: none;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -20,24 +22,30 @@
 .header--scrolled {
   background: rgba(30, 17, 9, 0.98);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-  padding: 0.75rem 0;
 }
 
 .header .container {
-  max-width: 1400px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 2rem;
+  /* Was a hardcoded 2rem at every width, so the logo sat 16px further in than
+     page content on phones. */
+  padding: 0 var(--container-padding);
 }
 
+/* --header-height is the single source of truth: body reserves exactly this
+   much, so the bar must be exactly this tall. Do not add vertical padding. */
 .header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: var(--header-height);
 }
 
 .header .logo {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
@@ -56,6 +64,7 @@
 
 .header .logo img {
   height: 70px;
+  max-height: calc(var(--header-height) - 16px);
   width: auto;
   object-fit: contain;
 }
@@ -100,6 +109,54 @@
 
 .header .nav__link--active {
   color: var(--gold-light, #E2C27A);
+}
+
+/* Peaceful Diamonds nav entry — cool navy signal dot marks the sub-brand tier */
+.header .nav__link--peaceful {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header .nav__link--peaceful::after {
+  background: var(--pd-blue, #5B7FBD);
+}
+
+.header .nav__link--peaceful:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+/* As a dropdown parent it keeps the tier colour rather than the gold. */
+.header .nav__item--peaceful .nav__item-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header .nav__item--peaceful .nav__item-link::after {
+  background: var(--pd-blue, #5B7FBD);
+}
+
+.header .nav__item--peaceful:hover .nav__item-link,
+.header .nav__item--peaceful .nav__item-link:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+.header .nav__item--peaceful .nav__dropdown-link:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+.header .nav__item--peaceful .nav__dropdown-link:hover::before {
+  background: var(--pd-blue, #5B7FBD);
+}
+
+.header .nav__peaceful-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pd-blue, #5B7FBD);
+  box-shadow: 0 0 6px rgba(91, 127, 189, 0.8);
+  flex-shrink: 0;
 }
 
 .header .nav__icons {
@@ -469,6 +526,38 @@
   .header .nav__icons {
     position: relative;
     z-index: 1003;
+    gap: 0.5rem;
+  }
+
+  /* At 1.75rem the wordmark needs ~166px, but the icon row plus the burger
+     left only 68-138px on a phone, so it broke onto two lines. */
+  .header .logo {
+    font-size: 1.3rem;
+  }
+
+  .header .nav__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .header .nav__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header .mobile-toggle {
+    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* The icon row and burger sit above the drawer (z-index 1003 vs 1002), so
+     with the menu open they landed on top of its "Menu" heading and stacked a
+     second X next to the drawer's own close button. */
+  .header--nav-open .nav__icons,
+  .header--nav-open .mobile-toggle {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .header .nav__mobile-header {
@@ -507,8 +596,18 @@
   }
 }
 
+@media (max-width: 380px) {
+  .header .nav__icon--account {
+    display: none;
+  }
+}
+
 @media (min-width: 993px) {
   .header .nav__mobile-header {
+    display: none;
+  }
+
+  .header .nav__link--account {
     display: none;
   }
 }
@@ -548,12 +647,29 @@
             <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
             <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
             <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
             <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
             <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/brooches-pins" class="nav__dropdown-link">Brooches & Pins</a>
-            <a href="/collections/charms" class="nav__dropdown-link">Charms</a>
-            <a href="/collections/new-arrivals" class="nav__dropdown-link">New Arrivals</a>
+            <a href="/collections/time-pieces" class="nav__dropdown-link">Timepieces</a>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Loose stones, separate from finished jewelry. Natural sits here;
+          lab-grown lives under Peaceful Diamonds, which is the sub-brand it
+          belongs to.
+        {%- endcomment -%}
+        <div class="nav__item">
+          <span class="nav__item-link">
+            Diamonds
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
           </div>
         </div>
 
@@ -567,30 +683,53 @@
           <div class="nav__dropdown">
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
             <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-            <a href="/collections/bridal-sets" class="nav__dropdown-link">Bridal Sets</a>
-            <a href="/collections/bridal-gifts" class="nav__dropdown-link">Bridal Gifts</a>
+            <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">Men's Wedding Bands</a>
+            <a href="/collections/stackable-bands" class="nav__dropdown-link">Stackable Bands</a>
+            <a href="/pages/ring-builder" class="nav__dropdown-link">Ring Builder</a>
           </div>
         </div>
 
         <div class="nav__item">
           <span class="nav__item-link">
-            {{ section.settings.estate_label | default: 'Antique & Estate' }}
+            {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
           <div class="nav__dropdown">
-            <a href="/collections/antique-estate" class="nav__dropdown-link">All Estate Pieces</a>
-            <a href="/collections/estate-cartier" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/estate-tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
-            <a href="/collections/estate-van-cleef" class="nav__dropdown-link">Van Cleef & Arpels</a>
-            <a href="/collections/estate-bvlgari" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/estate-david-webb" class="nav__dropdown-link">David Webb</a>
-            <a href="/collections/estate-hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
+            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
+            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
+            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
+            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Peaceful Diamonds carries its own tier styling — the navy signal dot
+          — and now opens rather than jumping straight to the collection, so
+          lab-grown can sit under it as a sub-category.
+        {%- endcomment -%}
+        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
+        <div class="nav__item nav__item--peaceful">
+          <span class="nav__item-link nav__link--peaceful">
+            <span class="nav__peaceful-dot" aria-hidden="true"></span>
+            {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
           </div>
         </div>
 
         <a href="/pages/about" class="nav__link">About</a>
+        <a href="{{ routes.account_url }}" class="nav__link nav__link--account">Account</a>
       </nav>
 
       <div class="nav__icons">
@@ -600,7 +739,7 @@
             <path d="m21 21-4.3-4.3"></path>
           </svg>
         </button>
-        <a href="{{ routes.account_url }}" class="nav__icon" aria-label="Account">
+        <a href="{{ routes.account_url }}" class="nav__icon nav__icon--account" aria-label="Account">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
@@ -664,8 +803,8 @@
         <a href="{{ routes.search_url }}?q=necklace&type=product" class="search-overlay__tag">Necklaces</a>
         <a href="{{ routes.search_url }}?q=earring&type=product" class="search-overlay__tag">Earrings</a>
         <a href="{{ routes.search_url }}?q=bracelet&type=product" class="search-overlay__tag">Bracelets</a>
-        <a href="/collections/antique-estate" class="search-overlay__tag">Estate Jewelry</a>
-        <a href="/collections/new-arrivals" class="search-overlay__tag">New Arrivals</a>
+        <a href="/collections/vintage-jewelry" class="search-overlay__tag">Estate Jewelry</a>
+        <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
       </div>
     </div>
   </div>
@@ -909,6 +1048,7 @@
 
     function openMobileMenu() {
       nav.classList.add('nav--open');
+      header.classList.add('header--nav-open');
       mobileToggle.classList.add('active');
       navOverlay.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -916,6 +1056,7 @@
 
     function closeMobileMenu() {
       nav.classList.remove('nav--open');
+      header.classList.remove('header--nav-open');
       mobileToggle.classList.remove('active');
       navOverlay.classList.remove('active');
       document.body.style.overflow = '';
@@ -1104,7 +1245,19 @@
       "type": "text",
       "id": "estate_label",
       "label": "Estate menu label",
-      "default": "Antique & Estate"
+      "default": "Pre-Owned Maison"
+    },
+    {
+      "type": "text",
+      "id": "peaceful_label",
+      "label": "Peaceful Diamonds label",
+      "default": "Peaceful Diamonds"
+    },
+    {
+      "type": "url",
+      "id": "peaceful_url",
+      "label": "Peaceful Diamonds link",
+      "info": "Point at the Peaceful Diamonds collection. Defaults to /collections/peaceful-diamonds-by-laura-milman-new-york."
     },
     {
       "type": "checkbox",
