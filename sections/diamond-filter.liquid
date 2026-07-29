@@ -160,15 +160,53 @@
                 <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
               </div>
             {%- else -%}
-              {%- comment -%} Carat published as a list of values rather than a range. {%- endcomment -%}
-              <div class="lm-chips">
-                {%- for value in carat_filter.values -%}
-                  <label class="lm-chip{% if value.active %} is-active{% endif %}">
-                    <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
-                    {{ value.label }} <span class="lm-chip__count">{{ value.count }}</span>
-                  </label>
+              {%- comment -%}
+                Carat published as a list rather than a range. Every distinct
+                weight in the catalogue becomes its own value — 0.9, 0.91,
+                0.92 … — which is hundreds of chips and useless to shop from.
+                Group them into half-carat bands; each band ticks the real
+                per-value checkboxes underneath it, so the submitted filter is
+                still exactly what Shopify published.
+              {%- endcomment -%}
+              <div class="lm-bands" data-bands>
+                {%- assign band_edges = '0,0.5,1,1.5,2,3,4,5,100' | split: ',' -%}
+                {%- for edge in band_edges -%}
+                  {%- unless forloop.last -%}
+                    {%- assign lo = edge | times: 1.0 -%}
+                    {%- assign hi = band_edges[forloop.index] | times: 1.0 -%}
+                    {%- assign band_count = 0 -%}
+                    {%- assign band_active = false -%}
+                    {%- capture band_inputs -%}
+                      {%- for value in carat_filter.values -%}
+                        {%- assign w = value.label | times: 1.0 -%}
+                        {%- if w >= lo and w < hi -%}
+                          {%- assign band_count = band_count | plus: value.count -%}
+                          {%- if value.active -%}{%- assign band_active = true -%}{%- endif -%}
+                          <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %}>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    {%- endcapture -%}
+                    {%- if band_count > 0 -%}
+                      {%- if hi >= 100 -%}
+                        {%- assign band_label = lo | round: 1 | append: 'ct+' -%}
+                      {%- else -%}
+                        {%- assign band_label = lo | round: 1 | append: '–' | append: hi | round: 1 | append: 'ct' -%}
+                      {%- endif -%}
+                      <button type="button" class="lm-band{% if band_active %} is-active{% endif %}" data-band>
+                        <span class="lm-band__label">{{ band_label }}</span>
+                        <span class="lm-band__count">{{ band_count }}</span>
+                        <span class="lm-band__inputs" hidden>{{ band_inputs }}</span>
+                      </button>
+                    {%- endif -%}
+                  {%- endunless -%}
                 {%- endfor -%}
               </div>
+              {%- if request.design_mode -%}
+                <p class="lm-scale__hint">
+                  Carat is published as a list. Switch it to a <strong>range</strong> in
+                  Search &amp; Discovery for a true slider; these bands are the fallback.
+                </p>
+              {%- endif -%}
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -565,93 +603,155 @@
     border-radius: 3px;
   }
 
-  /* ── Grade scales ── */
-  .lm-scale__row {
-    display: flex;
-    gap: 0.3rem;
+  /* ── Grade scales: a threshold slider, not a tile grid ── */
+  .lm-scale {
+    position: relative;
+    padding-top: 0.35rem;
   }
 
-  .lm-grade {
+  .lm-scale__track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0.85rem;
+    height: 3px;
+    background: var(--rule-light, #DDD5C5);
+    border-radius: 3px;
+  }
+
+  .lm-scale__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--gold, #C9A050);
+    border-radius: 3px;
+    transition: left 0.18s ease, right 0.18s ease;
+  }
+
+  .lm-scale__stops {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.15rem;
+  }
+
+  .lm-scale__stop {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 0.15rem;
-    border: 1px solid var(--border-medium, #CFC7B8);
-    border-radius: var(--radius-sm, 4px);
+    gap: 0.3rem;
     cursor: pointer;
-    transition: all 0.18s ease;
+    background: none;
+    border: none;
+    padding: 0;
   }
 
-  .lm-grade input {
+  .lm-scale__stop input {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
   }
 
-  .lm-grade__label {
+  .lm-scale__dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--warm-white, #FDFAF6);
+    border: 2px solid var(--rule-light, #DDD5C5);
+    transition: all 0.18s ease;
+  }
+
+  .lm-scale__stop:hover .lm-scale__dot {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-scale__stop.is-in-range .lm-scale__dot {
+    background: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+  }
+
+  /* The floor carries the handle — it's the value the shopper actually set. */
+  .lm-scale__stop.is-floor .lm-scale__dot {
+    width: 17px;
+    height: 17px;
+    box-shadow: 0 0 0 4px rgba(201, 160, 80, 0.22);
+  }
+
+  .lm-scale__name {
     font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.7rem;
+    font-size: 0.66rem;
     font-weight: 500;
-    color: var(--text-dark, #2C1810);
-    white-space: nowrap;
-  }
-
-  .lm-grade__count {
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.58rem;
     color: var(--text-muted, #8A8070);
+    white-space: nowrap;
+    transition: color 0.18s ease;
   }
 
-  .lm-grade:hover {
-    border-color: var(--gold, #C9A050);
+  .lm-scale__stop.is-in-range .lm-scale__name {
+    color: var(--text-dark, #2C1810);
+    font-weight: 600;
   }
 
-  .lm-grade.is-in-range {
-    border-color: var(--gold, #C9A050);
-    background: rgba(201, 160, 80, 0.14);
+  .lm-scale__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.56rem;
+    color: var(--text-muted, #8A8070);
+    font-variant-numeric: tabular-nums;
   }
 
   .lm-scale__hint {
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.68rem;
     color: var(--text-muted, #8A8070);
-    margin: 0.6rem 0 0;
+    margin: 0.75rem 0 0;
   }
 
-  /* ── Chips fallback ── */
-  .lm-chips {
-    display: flex;
-    flex-wrap: wrap;
+  /* ── Carat bands: the fallback when carat is published as a list ── */
+  .lm-bands {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.4rem;
   }
 
-  .lm-chip {
+  .lm-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
     font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.75rem;
-    padding: 0.4rem 0.9rem;
+    padding: 0.55rem 0.4rem;
     border: 1px solid var(--border-medium, #CFC7B8);
-    border-radius: 100px;
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--text-dark, #2C1810);
     cursor: pointer;
+    transition: all 0.18s ease;
   }
 
-  .lm-chip input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+  .lm-band:hover {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.06);
   }
 
-  .lm-chip.is-active {
+  .lm-band.is-active {
     border-color: var(--gold, #C9A050);
     background: rgba(201, 160, 80, 0.14);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
   }
 
-  .lm-chip__count {
+  .lm-band__label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .lm-band__count {
+    font-size: 0.58rem;
     color: var(--text-muted, #8A8070);
-    font-size: 0.65rem;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── Actions ── */
@@ -966,45 +1066,53 @@
     var form = document.getElementById('DiamondFilterForm');
     if (!form) return;
 
-    /* Grade scales are "this grade and better": clicking G selects G and
-       everything above it, which is how people actually shop a grade scale. */
+    /* Grade scales set a floor: picking VS1 means "VS1 and better". The track
+       fills from the chosen stop rightwards so the result is visible — the
+       earlier tile grid made selecting the lowest grade look like everything
+       had been ticked by mistake. */
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
-      var grades = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
+      var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
+      if (!stops.length) return;
+      var fill = scale.querySelector('[data-scale-fill]');
+      var hint = scale.parentNode.querySelector('[data-scale-hint]');
+      var noun = hint ? hint.textContent : '';
 
       function paint() {
-        grades.forEach(function (grade) {
-          var checked = grade.querySelector('input').checked;
-          grade.classList.toggle('is-in-range', checked);
+        var floor = -1;
+        stops.forEach(function (stop, i) {
+          var on = stop.querySelector('input').checked;
+          stop.classList.toggle('is-in-range', on);
+          stop.classList.remove('is-floor');
+          if (on && floor === -1) floor = i;
         });
-        var chosen = grades.filter(function (g) { return g.querySelector('input').checked; });
-        var hint = scale.parentNode.querySelector('[data-scale-hint]');
-        if (!hint) return;
-        if (chosen.length === 0 || chosen.length === grades.length) {
-          hint.textContent = 'All grades';
-        } else {
-          hint.textContent = chosen[0].dataset.grade + ' and better';
+
+        if (fill) {
+          if (floor === -1) {
+            fill.style.left = '0%';
+            fill.style.right = '100%';
+          } else {
+            stops[floor].classList.add('is-floor');
+            /* Stops are evenly spaced, so the centre of stop i sits at
+               (i + 0.5) / n across the track. */
+            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
+            fill.style.right = (100 / stops.length) * 0.5 + '%';
+          }
+        }
+
+        if (hint) {
+          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
         }
       }
 
-      function selectFrom(index) {
-        grades.forEach(function (grade, i) {
-          grade.querySelector('input').checked = i >= index;
-        });
-        paint();
-      }
-
-      grades.forEach(function (grade, index) {
-        grade.addEventListener('click', function (event) {
+      stops.forEach(function (stop, index) {
+        stop.addEventListener('click', function (event) {
           event.preventDefault();
-          var alreadyTheFloor = grade.querySelector('input').checked &&
-            (index === 0 || !grades[index - 1].querySelector('input').checked);
-          /* Clicking the current floor again clears the scale entirely. */
-          if (alreadyTheFloor) {
-            grades.forEach(function (g) { g.querySelector('input').checked = false; });
-            paint();
-          } else {
-            selectFrom(index);
-          }
+          var isFloor = stop.classList.contains('is-floor');
+          stops.forEach(function (s, i) {
+            /* Clicking the current floor again clears the scale. */
+            s.querySelector('input').checked = !isFloor && i >= index;
+          });
+          paint();
         });
       });
 
@@ -1012,9 +1120,20 @@
     });
 
     /* Shape tiles are plain checkboxes; keep the active class in step. */
-    form.querySelectorAll('.lm-shape input, .lm-chip input').forEach(function (input) {
+    form.querySelectorAll('.lm-shape input').forEach(function (input) {
       input.addEventListener('change', function () {
-        input.closest('.lm-shape, .lm-chip').classList.toggle('is-active', input.checked);
+        input.closest('.lm-shape').classList.toggle('is-active', input.checked);
+      });
+    });
+
+    /* A carat band toggles every per-weight checkbox it covers. */
+    form.querySelectorAll('[data-band]').forEach(function (band) {
+      band.addEventListener('click', function () {
+        var on = !band.classList.contains('is-active');
+        band.classList.toggle('is-active', on);
+        band.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+          input.checked = on;
+        });
       });
     });
 

@@ -78,12 +78,17 @@
 
         {%- if m.video_url -%}
           {%- comment -%}
-            Loaded on demand: the supplier's 360° viewer is heavy and most
-            visitors never open the tab.
+            The feed's video links are plain .mp4 files, so this is a <video>,
+            not an iframe — framing an mp4 rendered the supplier's directory
+            page instead of the stone. Loaded on demand: most visitors never
+            open the tab, and these files are large.
+
+            The supplier's links aren't always live. onerror hides the whole
+            tab rather than leaving a broken player sitting there.
           {%- endcomment -%}
           <div class="dpdp__stage" data-pane-body="video" hidden>
-            <iframe title="360° view of {{ product.title | escape }}" data-src="{{ m.video_url }}"
-                    loading="lazy" allowfullscreen></iframe>
+            <video data-src="{{ m.video_url }}" controls playsinline preload="none"
+                   aria-label="360° view of {{ product.title | escape }}"></video>
           </div>
         {%- endif -%}
 
@@ -556,11 +561,18 @@
           var show = pane.dataset.paneBody === tab.dataset.pane;
           pane.hidden = !show;
           if (!show) return;
-          var frame = pane.querySelector('iframe[data-src]');
-          if (frame) {
-            frame.src = frame.dataset.src;
-            frame.removeAttribute('data-src');
-          }
+          var video = pane.querySelector('video[data-src]');
+          if (!video) return;
+          video.src = video.dataset.src;
+          video.removeAttribute('data-src');
+          /* A dead supplier link should drop the tab, not leave a broken
+             player on a $14,000 product page. */
+          video.addEventListener('error', function () {
+            tab.remove();
+            pane.remove();
+            var img = root.querySelector('.dpdp__tab[data-pane="image"]');
+            if (img) img.click();
+          });
         });
       });
     });
