@@ -87,3 +87,12 @@ export interface Decision {
   reason: string;
   productId?: string;
 }
+
+/** A product whose images all failed to process (or that has none at all). */
+export interface BrokenMedia {
+  id: string;
+  handle: string;
+  status: string;
+  tags: string[];
+  failedMediaIds: string[];
+}

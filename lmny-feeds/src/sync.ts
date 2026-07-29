@@ -15,7 +15,7 @@ import { ALL_KINDS, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog, kindForHandle } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, titleFor } from './product.js';
+import { buildProductSetInput, contentHashFor, handleFor, MEDIA_MISSING_TAG, titleFor } from './product.js';
 import {
   holdHistogram,
   naturalMarginStats,
@@ -37,7 +37,8 @@ const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications'];
 const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
   natural: '/collections/natural-diamonds',
   lab: '/collections/lab-grown-diamonds',
-  watch: '/collections/timepieces',
+  // The merchant's own collection, not the duplicate the sync used to create.
+  watch: '/collections/time-pieces',
 };
 /** Known-good reference for the Hours single-reference diagnostic. */
 const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
@@ -250,7 +251,8 @@ async function main() {
 
   // 4. Execute (live only).
   const writeErrors: string[] = [];
-  let mediaQuarantined: string[] = [];
+  const mediaQuarantined: string[] = [];
+  const mediaRehosted: string[] = [];
   let redirectsCreated = 0;
   let collectionsCreated: string[] = [];
 
@@ -269,14 +271,43 @@ async function main() {
     await shopify.ensureMetafieldDefinitions();
     collectionsCreated = await shopify.ensureCollections();
 
+    const syncedAt = new Date().toISOString();
+    const byHandle = new Map(publishable.map((p) => [handleFor(p.item), p]));
+
+    // Media processing is asynchronous, so this always judges the *previous*
+    // run's uploads — which is why it runs before this run's writes.
     try {
-      mediaQuarantined = (await shopify.auditMedia()).quarantined;
+      const broken = await shopify.auditMedia();
+      if (broken.length > 0) console.log(`Media: ${broken.length} products with no usable image — attempting rescue`);
+      for (const p of broken) {
+        const item = byHandle.get(p.handle)?.item;
+        const source = item?.imageUrls[0];
+        // Shopify refuses some supplier images over their Content-Type alone.
+        // Fetching the bytes and re-uploading with a sniffed type rescues the
+        // ones that are really images; the rest are genuinely missing.
+        const staged = source ? await shopify.rehostImage(source) : null;
+        if (staged) {
+          await shopify.deleteMedia(p.id, p.failedMediaIds);
+          const errors = await shopify.attachMedia(p.id, staged, titleFor(item!));
+          if (errors.length === 0) {
+            mediaRehosted.push(p.handle);
+            // Bring back anything a previous run had quarantined for this.
+            if (p.status !== 'ACTIVE' || p.tags.includes(MEDIA_MISSING_TAG)) {
+              await shopify.unquarantineProduct(p.id, p.tags);
+            }
+            continue;
+          }
+          notes.push(`rehost ${p.handle}: ${errors.join('; ')}`);
+        }
+        if (p.status === 'ACTIVE' && !p.tags.includes(MEDIA_MISSING_TAG)) {
+          const errors = await shopify.quarantineProduct(p.id, p.tags);
+          if (errors.length === 0) mediaQuarantined.push(p.handle);
+        }
+      }
+      if (mediaRehosted.length > 0) console.log(`Media: rescued ${mediaRehosted.length} images Shopify had rejected`);
     } catch (err) {
       writeErrors.push(`media audit: ${err instanceof Error ? err.message : String(err)}`);
     }
-
-    const syncedAt = new Date().toISOString();
-    const byHandle = new Map(publishable.map((p) => [handleFor(p.item), p]));
     // productSet keys on id. An update sent without one is treated as a create
     // and rejected as a duplicate handle, so every write carries the catalogue
     // id when the handle is already known.

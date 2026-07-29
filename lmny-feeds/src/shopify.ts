@@ -1,8 +1,27 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, PRODUCT_TYPES } from './product.js';
-import type { CatalogEntry } from './types.js';
+import type { BrokenMedia, CatalogEntry } from './types.js';
 
 const API_VERSION = '2026-01';
+/** Matches the feed client's identity — some supplier hosts refuse bare clients. */
+const BROWSER_UA = 'Mozilla/5.0 (compatible; LMNY-FeedSync/1.0; +https://lauramilman.com)';
+
+/**
+ * Identify an image by its magic number rather than trusting the server's
+ * Content-Type, which is exactly the header that's wrong on the feed images
+ * Shopify rejects. Returns null for anything that isn't a recognisable image
+ * — usually an HTML error page served with a .jpg URL.
+ */
+export function sniffImageMime(bytes: Uint8Array): string | null {
+  const at = (i: number) => bytes[i] ?? -1;
+  if (at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff) return 'image/jpeg';
+  if (at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47) return 'image/png';
+  if (at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46) return 'image/gif';
+  // RIFF....WEBP
+  if (at(0) === 0x52 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x46 &&
+      at(8) === 0x57 && at(9) === 0x45 && at(10) === 0x42 && at(11) === 0x50) return 'image/webp';
+  return null;
+}
 
 interface GqlError {
   message: string;
@@ -538,7 +557,7 @@ export class ShopifyClient {
    * media-missing tag and DRAFT status. Runs at the start of each live sync,
    * auditing the previous run's async media processing.
    */
-  async auditMedia(): Promise<{ quarantined: string[] }> {
+  async auditMedia(): Promise<BrokenMedia[]> {
     const query = `{
       products(query: "tag:'${FEED_TAG}'") {
         edges {
@@ -548,18 +567,18 @@ export class ShopifyClient {
             status
             tags
             media {
-              edges { node { id mediaContentType status } }
+              edges { node { id status } }
             }
           }
         }
       }
     }`;
     const url = await this.runBulkQuery(query);
-    if (!url) return { quarantined: [] };
+    if (!url) return [];
     const rows = await downloadJsonl(url);
     // Bulk queries flatten nested connections: media rows follow their parent
     // product row and carry __parentId.
-    const products = new Map<string, { id: string; handle: string; status: string; tags: string[]; media: string[] }>();
+    const products = new Map<string, { id: string; handle: string; status: string; tags: string[]; media: Array<{ id: string; status: string }> }>();
     for (const row of rows) {
       const r = row as Record<string, unknown>;
       if (typeof r.handle === 'string') {
@@ -571,23 +590,121 @@ export class ShopifyClient {
           media: [],
         });
       } else if (typeof r.__parentId === 'string' && typeof r.status === 'string') {
-        products.get(r.__parentId)?.media.push(r.status);
+        products.get(r.__parentId)?.media.push({ id: r.id as string, status: r.status });
       }
     }
-    const quarantined: string[] = [];
+    const broken: BrokenMedia[] = [];
     for (const p of products.values()) {
-      if (p.status !== 'ACTIVE' || p.tags.includes(MEDIA_MISSING_TAG)) continue;
-      const failed = p.media.length === 0 || p.media.every((s) => s === 'FAILED');
-      const settled = p.media.every((s) => s !== 'PROCESSING' && s !== 'UPLOADED');
-      if (failed && settled) {
-        const errors = await this.quarantineProduct(p.id, p.tags);
-        if (errors.length === 0) quarantined.push(p.handle);
-      }
+      if (p.status === 'ARCHIVED') continue;
+      const usable = p.media.some((m) => m.status === 'READY');
+      // Media still uploading isn't broken — it just hasn't finished.
+      const settled = p.media.every((m) => m.status !== 'PROCESSING' && m.status !== 'UPLOADED');
+      if (usable || !settled) continue;
+      broken.push({
+        id: p.id,
+        handle: p.handle,
+        status: p.status,
+        tags: p.tags,
+        failedMediaIds: p.media.filter((m) => m.status === 'FAILED').map((m) => m.id),
+      });
     }
-    return { quarantined };
+    return broken;
   }
 
-  private async quarantineProduct(id: string, tags: string[]): Promise<string[]> {
+  /**
+   * Re-host an image Shopify refused to fetch for itself.
+   *
+   * Attaching by URL is the cheap path and works for most of the feed, but
+   * some supplier images are served as application/octet-stream and Shopify
+   * rejects them with UNSUPPORTED_IMAGE_FILE_TYPE — the file is a perfectly
+   * good JPEG, the Content-Type header just doesn't say so. Fetching the
+   * bytes here and uploading them with a type sniffed from the file's own
+   * magic number sidesteps the supplier's header entirely.
+   *
+   * Returns the staged resource URL, or null if the image can't be fetched or
+   * isn't actually an image.
+   */
+  async rehostImage(sourceUrl: string): Promise<string | null> {
+    let bytes: Uint8Array;
+    try {
+      const res = await fetch(sourceUrl, {
+        headers: { 'User-Agent': BROWSER_UA, Accept: 'image/*,*/*' },
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) return null;
+      bytes = new Uint8Array(await res.arrayBuffer());
+    } catch {
+      return null;
+    }
+    const mime = sniffImageMime(bytes);
+    if (!mime) return null; // not an image at all — nothing to rescue
+
+    const filename = `${sourceUrl.split('/').filter(Boolean).slice(-2).join('-').replace(/[^\w.-]/g, '-')}`;
+    const data = await this.gql<{
+      stagedUploadsCreate: {
+        stagedTargets: Array<{ url: string; resourceUrl: string; parameters: Array<{ name: string; value: string }> }>;
+        userErrors: Array<{ message: string }>;
+      };
+    }>(
+      `mutation($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets { url resourceUrl parameters { name value } }
+          userErrors { message }
+        }
+      }`,
+      { input: [{ resource: 'IMAGE', filename, mimeType: mime, httpMethod: 'POST', fileSize: String(bytes.byteLength) }] },
+    );
+    if (data.stagedUploadsCreate.userErrors.length) return null;
+    const target = data.stagedUploadsCreate.stagedTargets[0];
+    if (!target) return null;
+
+    const form = new FormData();
+    for (const p of target.parameters) form.append(p.name, p.value);
+    form.append('file', new Blob([bytes as BlobPart], { type: mime }), filename);
+    const upload = await fetch(target.url, { method: 'POST', body: form });
+    if (!upload.ok) return null;
+    return target.resourceUrl;
+  }
+
+  /** Drop media that failed to process, so a rescued image isn't stacked behind it. */
+  async deleteMedia(productId: string, mediaIds: string[]): Promise<string[]> {
+    if (mediaIds.length === 0) return [];
+    const data = await this.gql<{ productDeleteMedia: { mediaUserErrors: Array<{ message: string }> } }>(
+      `mutation($productId: ID!, $mediaIds: [ID!]!) {
+        productDeleteMedia(productId: $productId, mediaIds: $mediaIds) {
+          mediaUserErrors { message }
+        }
+      }`,
+      { productId, mediaIds },
+    );
+    return data.productDeleteMedia.mediaUserErrors.map((e) => e.message);
+  }
+
+  /** Attach an already-staged image to a product. */
+  async attachMedia(productId: string, resourceUrl: string, alt: string): Promise<string[]> {
+    const data = await this.gql<{ productCreateMedia: { mediaUserErrors: Array<{ message: string }> } }>(
+      `mutation($productId: ID!, $media: [CreateMediaInput!]!) {
+        productCreateMedia(productId: $productId, media: $media) {
+          mediaUserErrors { message }
+        }
+      }`,
+      { productId, media: [{ originalSource: resourceUrl, mediaContentType: 'IMAGE', alt }] },
+    );
+    return data.productCreateMedia.mediaUserErrors.map((e) => e.message);
+  }
+
+  /** Put a rescued product back on the storefront. */
+  async unquarantineProduct(id: string, tags: string[]): Promise<string[]> {
+    const data = await this.gql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(
+      `mutation($product: ProductUpdateInput!) {
+        productUpdate(product: $product) { userErrors { message } }
+      }`,
+      { product: { id, status: 'ACTIVE', tags: tags.filter((t) => t !== MEDIA_MISSING_TAG) } },
+    );
+    return data.productUpdate.userErrors.map((e) => e.message);
+  }
+
+  async quarantineProduct(id: string, tags: string[]): Promise<string[]> {
     const data = await this.gql<{
       productUpdate: { userErrors: Array<{ message: string }> };
     }>(
