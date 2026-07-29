@@ -279,13 +279,20 @@ async function main() {
     try {
       const broken = await shopify.auditMedia();
       if (broken.length > 0) console.log(`Media: ${broken.length} products with no usable image — attempting rescue`);
+      // Cause-level accounting: run 21 rescued 1 of 83 and the log couldn't
+      // say why. Distinguish "stone left the feed" (nothing to rescue, stays
+      // quarantined) from "fetch/sniff failed" (worth investigating).
+      let noSource = 0;
+      let rehostFailed = 0;
       for (const p of broken) {
         const item = byHandle.get(p.handle)?.item;
         const source = item?.imageUrls[0];
+        if (!source) noSource += 1;
         // Shopify refuses some supplier images over their Content-Type alone.
         // Fetching the bytes and re-uploading with a sniffed type rescues the
         // ones that are really images; the rest are genuinely missing.
         const staged = source ? await shopify.rehostImage(source) : null;
+        if (source && !staged) rehostFailed += 1;
         if (staged) {
           await shopify.deleteMedia(p.id, p.failedMediaIds);
           const errors = await shopify.attachMedia(p.id, staged, titleFor(item!));
@@ -304,7 +311,12 @@ async function main() {
           if (errors.length === 0) mediaQuarantined.push(p.handle);
         }
       }
-      if (mediaRehosted.length > 0) console.log(`Media: rescued ${mediaRehosted.length} images Shopify had rejected`);
+      if (broken.length > 0) {
+        console.log(
+          `Media: rescued ${mediaRehosted.length} of ${broken.length} ` +
+            `(no feed source: ${noSource}, fetch/sniff failed: ${rehostFailed})`,
+        );
+      }
     } catch (err) {
       writeErrors.push(`media audit: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -346,19 +358,31 @@ async function main() {
     }
 
     const toArchive = decisions.filter((d) => d.action === 'archive');
+    // urlRedirectCreate needs write_online_store_navigation, which the app
+    // doesn't currently have. Access-denied surfaces as a thrown GraphQL
+    // error, not a userError — it killed runs 20 and 21 — and a missing
+    // redirect is cosmetic next to a sold stone still listed as available,
+    // so the whole redirect step is best-effort. One note, not one per stone.
+    let redirectsDenied = false;
     for (const d of toArchive) {
       if (!d.productId) continue;
       const errors = await shopify.archiveProduct(d.productId);
       writeErrors.push(...errors.map((e) => `archive ${d.handle}: ${e}`));
-      if (errors.length > 0) continue;
+      if (errors.length > 0 || redirectsDenied) continue;
       // An archived product 404s. Send the dead URL to its collection so an
       // old link lands on the stones we do have rather than nothing.
       const target = ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
-      const redirectErrors = await shopify.redirectProductUrl(d.handle, target);
-      // A missing redirect is cosmetic next to a stone still being listed as
-      // available — report it, don't fail the run over it.
-      for (const e of redirectErrors) notes.push(`redirect ${d.handle}: ${e}`);
-      if (redirectErrors.length === 0) redirectsCreated += 1;
+      try {
+        const redirectErrors = await shopify.redirectProductUrl(d.handle, target);
+        for (const e of redirectErrors) notes.push(`redirect ${d.handle}: ${e}`);
+        if (redirectErrors.length === 0) redirectsCreated += 1;
+      } catch (err) {
+        redirectsDenied = true;
+        notes.push(
+          `redirects skipped: ${err instanceof Error ? err.message : String(err)} — ` +
+            'grant the app write_online_store_navigation to enable them',
+        );
+      }
     }
     if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
   }
