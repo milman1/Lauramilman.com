@@ -1,0 +1,19 @@
+{%- comment -%}
+  One row of the diamond spec table.
+
+  A spec the feed didn't supply renders as an em dash rather than being
+  dropped, so the table says "we don't know this" instead of quietly
+  implying the stone has fewer attributes than it does. PD's page did the
+  same thing with its "-" rows.
+
+  Accepts: label, value
+{%- endcomment -%}
+
+<div class="dpdp__spec">
+  <dt>{{ label }}</dt>
+  {%- if value != blank -%}
+    <dd>{{ value }}</dd>
+  {%- else -%}
+    <dd class="is-unknown">&mdash;</dd>
+  {%- endif -%}
+</div>
