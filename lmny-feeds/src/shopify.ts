@@ -234,9 +234,13 @@ export class ShopifyClient {
         }`,
         { q: `title:'${want.title}'` },
       );
-      const match = existing.collections.nodes.find(
-        (c) => c.title === want.title && JSON.stringify(c.ruleSet ?? '').includes(FEED_TAG),
-      );
+      // Match on title alone. Matching on the rule set instead meant an
+      // existing collection with the right name but different rules went
+      // unrecognised and a second one was created beside it — which is how
+      // the store ended up with two "Timepieces". The merchant's own
+      // collection of that name is the one to use; broadening its rules to
+      // cover feed products is their call, not the sync's.
+      const match = existing.collections.nodes.find((c) => c.title === want.title);
       if (match) {
         // Report, don't silently change: publishing an existing collection is
         // a storefront-visibility decision for the merchant to make.
