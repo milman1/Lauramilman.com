@@ -116,7 +116,9 @@ export function normalizeShape(s: string): string {
  * a Good cut becomes the tag "G" — indistinguishable from colour G.
  */
 const GRADE_CODES: Record<string, string> = {
-  ID: 'Ideal', IDEAL: 'Ideal',
+  // Bare "I" is IGI's Ideal — 4,677 lab rounds carry it. Without the mapping
+  // it passed through as "I", indistinguishable from colour I.
+  I: 'Ideal', ID: 'Ideal', IDEAL: 'Ideal',
   EX: 'Excellent', EXC: 'Excellent', XX: 'Excellent', EXCELLENT: 'Excellent',
   VG: 'Very Good', VGD: 'Very Good', VERYGOOD: 'Very Good',
   G: 'Good', GD: 'Good', GOOD: 'Good',

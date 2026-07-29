@@ -202,3 +202,11 @@ describe('certificate number recovery from URL', () => {
     expect(item.kind !== 'watch' && item.certNumber).toBe('GIA-777');
   });
 });
+
+describe('IGI ideal-cut code', () => {
+  it('maps bare I to Ideal — 4,677 lab rounds carry it', async () => {
+    const { normalizeCutGrade } = await import('../src/normalize.js');
+    expect(normalizeCutGrade('I')).toBe('Ideal');
+    expect(normalizeCutGrade('ID')).toBe('Ideal');
+  });
+});
