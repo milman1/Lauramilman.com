@@ -17,7 +17,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { LAB_TIERS } from '../config/pricing.js';
-import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
+import { fetchBelgiumDiaFeed, probeFeed } from './feeds/belgiumdia.js';
 import { priceLab } from './markup.js';
 import { normalizeStones, pick } from './normalize.js';
 import type { StoneItem } from './types.js';
@@ -75,10 +75,9 @@ async function main() {
   for (let attempt = 1; attempt <= 4; attempt++) {
     rows = await fetchBelgiumDiaFeed('lab');
     if (rows.length > 0) break;
-    if (attempt < 4) {
-      console.error(`Lab feed returned 0 rows (attempt ${attempt}) — likely rate-limited; retrying in 2 minutes`);
-      await new Promise((r) => setTimeout(r, 120_000));
-    }
+    const probe = await probeFeed('lab').catch((e) => ({ status: -1, snippet: e instanceof Error ? e.message : String(e) }));
+    console.error(`Lab feed returned 0 rows (attempt ${attempt}) — probe: HTTP ${probe.status}, body: ${probe.snippet}`);
+    if (attempt < 4) await new Promise((r) => setTimeout(r, 120_000));
   }
   if (rows.length === 0) {
     throw new Error('Lab feed returned 0 rows on 4 attempts over 6 minutes — rate-limited or down. Re-run later; do not read this as an empty feed.');

@@ -284,15 +284,23 @@ async function main() {
       // quarantined) from "fetch/sniff failed" (worth investigating).
       let noSource = 0;
       let rehostFailed = 0;
+      // A slow supplier host must not stall the hourly cadence: 83 rescue
+      // fetches × a 30s timeout each is ~40 minutes, which is what dragged
+      // run 22 out. Budget the attempts; the backlog drains across runs.
+      let rescueBudget = 15;
       for (const p of broken) {
         const item = byHandle.get(p.handle)?.item;
         const source = item?.imageUrls[0];
         if (!source) noSource += 1;
+        if (source && rescueBudget <= 0) continue; // leave for the next run
         // Shopify refuses some supplier images over their Content-Type alone.
         // Fetching the bytes and re-uploading with a sniffed type rescues the
         // ones that are really images; the rest are genuinely missing.
         const staged = source ? await shopify.rehostImage(source) : null;
-        if (source && !staged) rehostFailed += 1;
+        if (source && !staged) {
+          rehostFailed += 1;
+          rescueBudget -= 1;
+        }
         if (staged) {
           await shopify.deleteMedia(p.id, p.failedMediaIds);
           const errors = await shopify.attachMedia(p.id, staged, titleFor(item!));

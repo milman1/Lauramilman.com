@@ -135,3 +135,15 @@ export async function fetchBelgiumDiaFeed(kind: BelgiumDiaKind): Promise<Raw[]> 
   }
   return all;
 }
+
+/**
+ * One raw page-1 request, for diagnostics when a feed answers empty: the
+ * HTTP status and a body snippet tell apart "rate-limited", "genuinely
+ * empty", and "response shape changed" — which all look identical through
+ * fetchBelgiumDiaFeed. The key is redacted from the snippet defensively.
+ */
+export async function probeFeed(kind: BelgiumDiaKind): Promise<{ status: number; snippet: string }> {
+  const res = await fetch(buildUrl(kind, 1), { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(30_000) });
+  const body = (await res.text()).slice(0, 400).replaceAll(requireKey(), '[key]');
+  return { status: res.status, snippet: body };
+}
