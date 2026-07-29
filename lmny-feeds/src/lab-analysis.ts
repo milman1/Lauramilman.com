@@ -68,19 +68,19 @@ function topTable(m: Map<string, number>, limit: number): string {
 async function main() {
   if (!process.env.BELGIUMDIA_API_KEY) throw new Error('BELGIUMDIA_API_KEY is not set');
 
-  // Belgium Dia answers a rate-limited key with 200 and an empty array — the
-  // first attempt collided with the hourly sync's own feed pull (both run
-  // near :17). Space retries out rather than reporting an empty feed as fact.
-  let rows: Awaited<ReturnType<typeof fetchBelgiumDiaFeed>> = [];
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    rows = await fetchBelgiumDiaFeed('lab');
-    if (rows.length > 0) break;
-    const probe = await probeFeed('lab').catch((e) => ({ status: -1, snippet: e instanceof Error ? e.message : String(e) }));
-    console.error(`Lab feed returned 0 rows (attempt ${attempt}) — probe: HTTP ${probe.status}, body: ${probe.snippet}`);
-    if (attempt < 4) await new Promise((r) => setTimeout(r, 120_000));
-  }
+  // The key allows ONE request per 15 minutes (confirmed by probe: the API
+  // answers 200 with {"data":[],"message":"1 Request per 15 minutes, limit
+  // reached!"}). Retrying re-arms the limiter, so the only correct strategy
+  // is the opposite: wait the window out first, then fetch exactly once.
+  console.log('Waiting 16 minutes for the 1-request-per-15-minutes key limit to clear…');
+  await new Promise((r) => setTimeout(r, 16 * 60_000));
+  const rows = await fetchBelgiumDiaFeed('lab');
   if (rows.length === 0) {
-    throw new Error('Lab feed returned 0 rows on 4 attempts over 6 minutes — rate-limited or down. Re-run later; do not read this as an empty feed.');
+    const probe = await probeFeed('lab').catch((e) => ({ status: -1, snippet: e instanceof Error ? e.message : String(e) }));
+    throw new Error(
+      `Lab feed returned 0 rows after waiting out the rate window — probe: HTTP ${probe.status}, body: ${probe.snippet}. ` +
+        'Do not read this as an empty feed.',
+    );
   }
   const { items: allItems, holds } = normalizeStones(rows, 'lab');
   const items = allItems.filter((i): i is StoneItem => i.kind === 'lab');
