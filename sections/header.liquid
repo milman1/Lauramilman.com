@@ -126,6 +126,30 @@
   color: var(--pd-ice, #A9BEE3);
 }
 
+/* As a dropdown parent it keeps the tier colour rather than the gold. */
+.header .nav__item--peaceful .nav__item-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header .nav__item--peaceful .nav__item-link::after {
+  background: var(--pd-blue, #5B7FBD);
+}
+
+.header .nav__item--peaceful:hover .nav__item-link,
+.header .nav__item--peaceful .nav__item-link:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+.header .nav__item--peaceful .nav__dropdown-link:hover {
+  color: var(--pd-ice, #A9BEE3);
+}
+
+.header .nav__item--peaceful .nav__dropdown-link:hover::before {
+  background: var(--pd-blue, #5B7FBD);
+}
+
 .header .nav__peaceful-dot {
   width: 7px;
   height: 7px;
@@ -626,7 +650,26 @@
             <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
             <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
             <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/designer-watches" class="nav__dropdown-link">Watches</a>
+            <a href="/collections/time-pieces" class="nav__dropdown-link">Timepieces</a>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Loose stones, separate from finished jewelry. Natural sits here;
+          lab-grown lives under Peaceful Diamonds, which is the sub-brand it
+          belongs to.
+        {%- endcomment -%}
+        <div class="nav__item">
+          <span class="nav__item-link">
+            Diamonds
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
           </div>
         </div>
 
@@ -665,10 +708,25 @@
           </div>
         </div>
 
-        <a href="{{ section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' }}" class="nav__link nav__link--peaceful">
-          <span class="nav__peaceful-dot" aria-hidden="true"></span>
-          {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
-        </a>
+        {%- comment -%}
+          Peaceful Diamonds carries its own tier styling — the navy signal dot
+          — and now opens rather than jumping straight to the collection, so
+          lab-grown can sit under it as a sub-category.
+        {%- endcomment -%}
+        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
+        <div class="nav__item nav__item--peaceful">
+          <span class="nav__item-link nav__link--peaceful">
+            <span class="nav__peaceful-dot" aria-hidden="true"></span>
+            {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+          </div>
+        </div>
 
         <a href="/pages/about" class="nav__link">About</a>
         <a href="{{ routes.account_url }}" class="nav__link nav__link--account">Account</a>
