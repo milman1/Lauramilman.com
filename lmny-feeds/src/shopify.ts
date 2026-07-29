@@ -287,7 +287,19 @@ export class ShopifyClient {
 
   // -------------------------------------------------------------- catalog read
 
-  /** Full read of feed-managed products via a bulk query (no pagination throttling). */
+  /**
+   * Full read of feed-managed products via a bulk query (no pagination throttling).
+   *
+   * mediaCount deliberately counts only READY media. Shopify's own mediaCount
+   * includes FAILED images, and a failed image is worse than none — the
+   * product reports that it has a picture while the storefront shows the
+   * default placeholder. The supplier serves some images as
+   * application/octet-stream, which Shopify refuses with
+   * UNSUPPORTED_IMAGE_FILE_TYPE, so this is a live condition, not a theoretical
+   * one. Counting only usable media means those products look imageless to the
+   * sync, which is the truth: files get re-sent, and if that fails again the
+   * media audit quarantines them.
+   */
   async fetchCatalog(): Promise<CatalogEntry[]> {
     const query = `{
       products(query: "tag:'${FEED_TAG}'") {
@@ -297,8 +309,8 @@ export class ShopifyClient {
             handle
             status
             tags
-            mediaCount { count }
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
+            media { edges { node { status } } }
           }
         }
       }
@@ -306,24 +318,29 @@ export class ShopifyClient {
     const url = await this.runBulkQuery(query);
     if (!url) return []; // zero results → Shopify provides no file
     const lines = await downloadJsonl(url);
-    return lines.map((row) => {
-      const r = row as {
-        id: string;
-        handle: string;
-        status: string;
-        tags: string[];
-        mediaCount: { count: number } | null;
-        metafield: { value: string } | null;
-      };
-      return {
-        id: r.id,
-        handle: r.handle,
-        status: r.status,
-        tags: r.tags ?? [],
-        mediaCount: r.mediaCount?.count ?? 0,
-        contentHash: r.metafield?.value ?? null,
-      };
-    });
+    // Bulk queries flatten nested connections: each media row follows its
+    // parent product row and carries __parentId.
+    const byId = new Map<string, CatalogEntry>();
+    const order: string[] = [];
+    for (const row of lines) {
+      const r = row as Record<string, unknown>;
+      if (typeof r.handle === 'string') {
+        const id = r.id as string;
+        byId.set(id, {
+          id,
+          handle: r.handle,
+          status: r.status as string,
+          tags: (r.tags as string[]) ?? [],
+          mediaCount: 0,
+          contentHash: (r.metafield as { value: string } | null)?.value ?? null,
+        });
+        order.push(id);
+      } else if (typeof r.__parentId === 'string' && r.status === 'READY') {
+        const parent = byId.get(r.__parentId);
+        if (parent) parent.mediaCount += 1;
+      }
+    }
+    return order.map((id) => byId.get(id)!);
   }
 
   private async runBulkQuery(query: string): Promise<string | null> {

@@ -1,14 +1,18 @@
 {%- comment -%}
   One grade scale (clarity / colour / cut) for the diamond filter.
 
-  Shopify returns facet values ordered by count, which is meaningless on a
-  grade scale, so `order` supplies the gemological sequence worst → best and
-  values are rendered against it. Anything the feed produced that isn't in the
-  sequence is appended, so an unexpected grade is still selectable.
+  Rendered as a threshold slider, not a grid of tiles. Grade scales are
+  ordered, and shoppers pick a floor — "VS1 and better" — not a set. A grid of
+  equal-weight tiles says "tick the ones you want", so selecting the lowest
+  grade lights up every tile and reads as a bug. A track with a filled run to
+  the right of the handle shows what actually happened.
 
-  Every grade is a real checkbox bound to the published facet param; the
-  "and better" behaviour is layered on top in JS, so the filter still works
-  with JS off — it just selects one grade at a time.
+  Shopify returns facet values ordered by count, which is meaningless here, so
+  `order` supplies the gemological sequence worst → best. Grades the feed
+  produced that aren't in the sequence are appended so they stay selectable.
+
+  Each grade is still a real checkbox bound to its published facet param, so
+  with JS off the scale degrades to plain multi-select rather than breaking.
 
   Accepts: filter, order (array, worst → best), title, tip
 {%- endcomment -%}
@@ -19,29 +23,35 @@
     <button type="button" class="lm-dfilter__info" aria-label="About {{ title | downcase }}" data-tip="{{ tip | escape }}">i</button>
   </span>
 
-  <div class="lm-scale__row" data-scale>
-    {%- for grade in order -%}
-      {%- for value in filter.values -%}
-        {%- if value.label == grade -%}
-          <label class="lm-grade{% if value.active %} is-in-range{% endif %}" data-grade="{{ value.label | escape }}">
-            <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %}>
-            <span class="lm-grade__label">{{ value.label }}</span>
-            <span class="lm-grade__count">{{ value.count }}</span>
-          </label>
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endfor -%}
+  <div class="lm-scale" data-scale>
+    <div class="lm-scale__track" aria-hidden="true"><div class="lm-scale__fill" data-scale-fill></div></div>
 
-    {%- for value in filter.values -%}
-      {%- unless order contains value.label -%}
-        <label class="lm-grade{% if value.active %} is-in-range{% endif %}" data-grade="{{ value.label | escape }}">
-          <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %}>
-          <span class="lm-grade__label">{{ value.label }}</span>
-          <span class="lm-grade__count">{{ value.count }}</span>
-        </label>
-      {%- endunless -%}
-    {%- endfor -%}
+    <div class="lm-scale__stops" role="group" aria-label="{{ title }} minimum">
+      {%- for grade in order -%}
+        {%- for value in filter.values -%}
+          {%- if value.label == grade -%}
+            <label class="lm-scale__stop{% if value.active %} is-in-range{% endif %}" data-grade="{{ value.label | escape }}">
+              <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %}>
+              <span class="lm-scale__dot" aria-hidden="true"></span>
+              <span class="lm-scale__name">{{ value.label }}</span>
+              <span class="lm-scale__count">{{ value.count }}</span>
+            </label>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+
+      {%- for value in filter.values -%}
+        {%- unless order contains value.label -%}
+          <label class="lm-scale__stop{% if value.active %} is-in-range{% endif %}" data-grade="{{ value.label | escape }}">
+            <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %}>
+            <span class="lm-scale__dot" aria-hidden="true"></span>
+            <span class="lm-scale__name">{{ value.label }}</span>
+            <span class="lm-scale__count">{{ value.count }}</span>
+          </label>
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
   </div>
 
-  <p class="lm-scale__hint" data-scale-hint>All grades</p>
+  <p class="lm-scale__hint" data-scale-hint>Any {{ title | downcase }}</p>
 </div>
