@@ -47,39 +47,35 @@ function upstreamUrl(kind, key) {
   return url.toString();
 }
 
-/** Rows out of the API's {"data":[...]} envelope (or a bare array). */
-function rowCount(payload) {
-  const rows = Array.isArray(payload) ? payload : payload && payload.data;
-  return Array.isArray(rows) ? rows.length : 0;
-}
-
-async function gzipBytes(text) {
-  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-
 /**
  * One upstream fetch. Returns true if the cache was refreshed; false when
  * the API answered empty (rate-limited or down) — the old cache is kept,
  * which is the whole point: stale beats empty.
+ *
+ * Deliberately never JSON.parses a large body: the lab feed is ~30 MB and
+ * parsing it busts the free plan's CPU budget (that was the HTTP 500 the
+ * sync saw). The limiter's empty answer is ~90 bytes, so size tells real
+ * data from a refusal; only tiny bodies get parsed to confirm. Compression
+ * runs through the native gzip codec as a stream.
  */
 async function refreshFeed(kind, env) {
   const res = await fetch(upstreamUrl(kind, env.API_KEY), {
     headers: { Accept: 'application/json' },
   });
   if (!res.ok) return false;
-  const text = await res.text();
-  let payload;
-  try {
-    payload = JSON.parse(text);
-  } catch {
-    return false;
+  const buf = await res.arrayBuffer();
+  if (buf.byteLength < 4096) {
+    try {
+      const payload = JSON.parse(new TextDecoder().decode(buf));
+      const rows = Array.isArray(payload) ? payload : payload && payload.data;
+      if (!Array.isArray(rows) || rows.length === 0) return false; // limiter's answer
+    } catch {
+      return false;
+    }
   }
-  const rows = rowCount(payload);
-  if (rows === 0) return false; // limiter's empty answer — keep what we have
-  const bytes = await gzipBytes(text);
-  await env.FEED_CACHE.put(`feed:${kind}`, bytes, {
-    metadata: { fetchedAt: new Date().toISOString(), rows },
+  const gz = new Blob([buf]).stream().pipeThrough(new CompressionStream('gzip'));
+  await env.FEED_CACHE.put(`feed:${kind}`, gz, {
+    metadata: { fetchedAt: new Date().toISOString(), bytes: buf.byteLength },
   });
   return true;
 }
@@ -157,7 +153,7 @@ function gzipResponse(bytes, metadata) {
       'Content-Type': 'application/json',
       'Content-Encoding': 'gzip',
       'X-Feed-Fetched-At': (metadata && metadata.fetchedAt) || 'unknown',
-      'X-Feed-Rows': String((metadata && metadata.rows) || 0),
+      'X-Feed-Bytes': String((metadata && metadata.bytes) || 0),
     },
   });
 }

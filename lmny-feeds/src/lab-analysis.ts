@@ -71,8 +71,17 @@ async function main() {
   // With BELGIUMDIA_API_URL pointed at the Cloudflare cache this is instant
   // and unlimited. A cold cache means the :27 lab cron hasn't ticked yet —
   // wait for it rather than hammering the upstream limiter with cold-start
-  // fetches that would steal the cron's request slot.
-  let rows = await fetchBelgiumDiaFeed('lab');
+  // fetches that would steal the cron's request slot. A worker-side error
+  // (HTTP 5xx) is treated like a cold cache: log, wait, retry once.
+  const tryFetch = async () => {
+    try {
+      return await fetchBelgiumDiaFeed('lab');
+    } catch (e) {
+      console.error(`Lab fetch failed: ${e instanceof Error ? e.message : String(e)}`);
+      return [];
+    }
+  };
+  let rows = await tryFetch();
   if (rows.length === 0) {
     const now = new Date();
     const next = new Date(now);
@@ -80,7 +89,7 @@ async function main() {
     if (next <= now) next.setUTCHours(next.getUTCHours() + 1);
     console.error(`Lab feed empty (cache cold?) — waiting ${Math.round((next.getTime() - now.getTime()) / 60000)} min for the :27 refresh`);
     await new Promise((r) => setTimeout(r, next.getTime() - now.getTime()));
-    rows = await fetchBelgiumDiaFeed('lab');
+    rows = await tryFetch();
   }
   if (rows.length === 0) {
     const probe = await probeFeed('lab').catch((e) => ({ status: -1, snippet: e instanceof Error ? e.message : String(e) }));
