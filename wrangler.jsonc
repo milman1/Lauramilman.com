@@ -1,0 +1,21 @@
+// Cloudflare Workers config for the Belgium Dia feed cache.
+// Deployed by the git-connected Workers Build (deploy command: npx wrangler deploy).
+// The API_KEY secret is set once in the dashboard and survives deploys.
+{
+  // Must match the git-connected Workers project name.
+  "name": "lauramilman-com",
+  "main": "lmny-feeds/cloudflare-worker/feed-cache.js",
+  "compatibility_date": "2026-07-01",
+  "kv_namespaces": [
+    {
+      "binding": "FEED_CACHE",
+      // The LMNY_FEEDS namespace.
+      "id": "f0530397b7834de49c09d2916fbd14b9"
+    }
+  ],
+  "triggers": {
+    // :07 natural, :27 lab, :47 watch — 20 minutes apart; the key's
+    // upstream limit is 1 request per 15 minutes.
+    "crons": ["7,27,47 * * * *"]
+  }
+}
