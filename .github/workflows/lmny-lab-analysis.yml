@@ -33,6 +33,26 @@ jobs:
 
       - run: npm ci
 
+      # Prints SHA-256 fingerprints (never the keys) of GitHub's copy and the
+      # worker's copy, so a mismatch names its side. Retries while a fresh
+      # worker deploy propagates.
+      - name: Key diagnostics
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+        run: |
+          echo "github-key-sha=$(printf %s "$BELGIUMDIA_API_KEY" | sha256sum | cut -c1-12)"
+          if [ -n "$BELGIUMDIA_API_URL" ]; then
+            for i in $(seq 1 6); do
+              h=$(curl -s --max-time 15 "$BELGIUMDIA_API_URL/__keyhash" || true)
+              case "$h" in
+                [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
+                  echo "worker-key-sha=$h"; break;;
+                *) echo "worker keyhash not ready (attempt $i): $h"; sleep 20;;
+              esac
+            done
+          fi
+
       - name: Analyze lab feed
         env:
           BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}

@@ -94,6 +94,15 @@ export default {
 
     const url = new URL(request.url);
 
+    // Unauthenticated fingerprint of the configured key: 12 hex chars of its
+    // SHA-256. Safe to expose, and it makes "the two copies of the key
+    // disagree" diagnosable without printing any secret anywhere.
+    if (url.pathname === '/__keyhash') {
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(env.API_KEY || ''));
+      const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+      return new Response(hex.slice(0, 12) + '\n');
+    }
+
     // The sync sends the real key as ?key= — require it, so the cached feed
     // isn't publicly readable.
     if (url.searchParams.get('key') !== env.API_KEY) {
