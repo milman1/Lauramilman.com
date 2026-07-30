@@ -68,17 +68,24 @@ function topTable(m: Map<string, number>, limit: number): string {
 async function main() {
   if (!process.env.BELGIUMDIA_API_KEY) throw new Error('BELGIUMDIA_API_KEY is not set');
 
-  // The key allows ONE request per 15 minutes (confirmed by probe: the API
-  // answers 200 with {"data":[],"message":"1 Request per 15 minutes, limit
-  // reached!"}). Retrying re-arms the limiter, so the only correct strategy
-  // is the opposite: wait the window out first, then fetch exactly once.
-  console.log('Waiting 16 minutes for the 1-request-per-15-minutes key limit to clear…');
-  await new Promise((r) => setTimeout(r, 16 * 60_000));
-  const rows = await fetchBelgiumDiaFeed('lab');
+  // With BELGIUMDIA_API_URL pointed at the Cloudflare cache this is instant
+  // and unlimited. A cold cache means the :27 lab cron hasn't ticked yet —
+  // wait for it rather than hammering the upstream limiter with cold-start
+  // fetches that would steal the cron's request slot.
+  let rows = await fetchBelgiumDiaFeed('lab');
+  if (rows.length === 0) {
+    const now = new Date();
+    const next = new Date(now);
+    next.setUTCMinutes(30, 0, 0); // just after the :27 lab refresh
+    if (next <= now) next.setUTCHours(next.getUTCHours() + 1);
+    console.error(`Lab feed empty (cache cold?) — waiting ${Math.round((next.getTime() - now.getTime()) / 60000)} min for the :27 refresh`);
+    await new Promise((r) => setTimeout(r, next.getTime() - now.getTime()));
+    rows = await fetchBelgiumDiaFeed('lab');
+  }
   if (rows.length === 0) {
     const probe = await probeFeed('lab').catch((e) => ({ status: -1, snippet: e instanceof Error ? e.message : String(e) }));
     throw new Error(
-      `Lab feed returned 0 rows after waiting out the rate window — probe: HTTP ${probe.status}, body: ${probe.snippet}. ` +
+      `Lab feed still empty after the cache's refresh slot — probe: HTTP ${probe.status}, body: ${probe.snippet}. ` +
         'Do not read this as an empty feed.',
     );
   }
@@ -175,14 +182,76 @@ async function main() {
   }
   out('');
 
-  // Pricing samples: Tier A at 1ct+, nearest to each target weight.
+  // Cost-per-carat distribution — the trustworthy basis for the multiple
+  // decision. The first sample set surfaced a 3ct at $94 total; whether
+  // that's an outlier row or the market is a percentile question.
+  out('## Cost per carat by band (all normalized lab stones)');
+  out('');
+  out('| Carat band | Stones | p10 $/ct | Median $/ct | p90 $/ct | Median total | Under $40/ct |');
+  out('|---|---|---|---|---|---|---|');
+  const pct = (sorted: number[], p: number) => sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))] ?? 0;
+  const bandOf = (carat: number) => CARAT_BANDS.find((b) => carat >= b.lo && carat < b.hi);
+  const perCaratByBand = new Map<string, number[]>();
+  for (const band of CARAT_BANDS) {
+    const inBand = items.filter((i) => i.carat >= band.lo && i.carat < band.hi);
+    const cpc = inBand.map((i) => i.costUsd / i.carat).sort((a, b) => a - b);
+    perCaratByBand.set(band.label, cpc);
+    if (cpc.length === 0) continue;
+    const medianCpc = pct(cpc, 0.5);
+    const medianTotal = pct(inBand.map((i) => i.costUsd).sort((a, b) => a - b), 0.5);
+    const cheap = cpc.filter((v) => v < 40).length;
+    out(
+      `| ${band.label} | ${inBand.length} | $${Math.round(pct(cpc, 0.1))} | $${Math.round(medianCpc)} | ` +
+        `$${Math.round(pct(cpc, 0.9))} | $${Math.round(medianTotal)} | ${cheap} |`,
+    );
+  }
+  out('');
+
+  // Settle total-vs-per-carat empirically: if the rows carry a per-carat
+  // field alongside the cost, the ratio answers it without asking anyone.
+  out('## Cost field semantics check');
+  out('');
+  const first = rows[0] as Record<string, unknown>;
+  out(`Raw row fields: ${Object.keys(first).map((k) => `\`${k}\``).join(', ')}`);
+  out('');
+  const perCaratKey = Object.keys(first).find((k) => /per.?carat|price_?ct|\brate\b/i.test(k));
+  if (perCaratKey) {
+    let total = 0;
+    let perCt = 0;
+    let n = 0;
+    for (const r of rows.slice(0, 500)) {
+      const row = r as Record<string, unknown>;
+      const buy = Number(String(pick(row, ['buy_price', 'cost', 'price']) ?? '').replace(/[$,\s]/g, ''));
+      const pc = Number(String(row[perCaratKey] ?? '').replace(/[$,\s]/g, ''));
+      const carat = Number(String(pick(row, ['carat', 'weight']) ?? ''));
+      if (!buy || !pc || !carat) continue;
+      n += 1;
+      if (Math.abs(buy - pc * carat) / (pc * carat) < 0.05) total += 1;
+      else if (Math.abs(buy - pc) / pc < 0.05) perCt += 1;
+    }
+    out(`Comparing Buy_Price against \`${perCaratKey}\` × carat on ${n} rows: ` +
+      `**${total}** match "total", **${perCt}** match "per-carat".`);
+  } else {
+    out('No per-carat field found in the rows — cannot cross-check from data alone.');
+  }
+  out('');
+
+  // Pricing samples: Tier A at 1ct+, nearest to each target weight, but only
+  // from the middle of each band's cost distribution (p25–p90) so a $94
+  // outlier 3ct can't masquerade as the market.
   out('## Pricing samples — Tier A, current config/pricing.ts multiples');
   out('');
   out('For checking against major lab retailers before locking the multiple.');
   out('');
   out('| Stock ref | Shape | Carat | Colour | Clarity | Cut | Cost | Multiplier | Retail | Retail $/ct |');
   out('|---|---|---|---|---|---|---|---|---|---|');
-  const tierA = items.filter((i) => i.carat >= 1 && passes(i, TIERS[0]!));
+  const inCostMainstream = (i: StoneItem): boolean => {
+    const cpc = perCaratByBand.get(bandOf(i.carat)?.label ?? '');
+    if (!cpc || cpc.length === 0) return true;
+    const v = i.costUsd / i.carat;
+    return v >= pct(cpc, 0.25) && v <= pct(cpc, 0.9);
+  };
+  const tierA = items.filter((i) => i.carat >= 1 && passes(i, TIERS[0]!) && inCostMainstream(i));
   const used = new Set<string>();
   for (const target of [1.0, 1.5, 2.0, 2.5, 3.0]) {
     // Prefer Rounds for retailer comparability; fall back to any shape.
