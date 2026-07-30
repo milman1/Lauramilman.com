@@ -1,7 +1,8 @@
 /**
  * Lab feed curation analysis — Step 1 of the lab go-live decision.
  *
- * Read-only: fetches the Belgium Dia lab feed and reports; no Shopify access,
+ * Read-only: fetches the Belgium Dia lab feed (via the Cloudflare cache) and
+ * reports; no Shopify access,
  * no gate changes. Run via the lmny-lab-analysis workflow (needs only
  * BELGIUMDIA_API_KEY).
  *
