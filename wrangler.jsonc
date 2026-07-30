@@ -6,6 +6,10 @@
   "name": "lauramilman-com",
   "main": "lmny-feeds/cloudflare-worker/feed-cache.js",
   "compatibility_date": "2026-07-01",
+  // Deploys wipe dashboard-set plain-text variables by default — that's how
+  // the API_KEY vanished after the first redeploy. Secrets always survive;
+  // this protects against the value being re-added as text again.
+  "keep_vars": true,
   "kv_namespaces": [
     {
       "binding": "FEED_CACHE",
