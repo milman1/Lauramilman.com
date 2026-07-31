@@ -33,10 +33,10 @@ function requireKey(): string {
 }
 
 /** Build a request URL. Path is env-overridable; the key stays out of logs. */
-function buildUrl(kind: BelgiumDiaKind, page: number): string {
+function buildUrl(kind: BelgiumDiaKind, page: number, base = baseUrl()): string {
   const key = requireKey();
   const override = process.env[`BELGIUMDIA_${kind.toUpperCase()}_PATH`];
-  const url = new URL(baseUrl() + (override ?? defaultPath(kind)));
+  const url = new URL(base + (override ?? defaultPath(kind)));
   if (kind !== 'watch') {
     url.searchParams.set('type', kind === 'natural' ? 'natural' : 'lab');
     url.searchParams.set('page', String(page));
@@ -73,8 +73,28 @@ const REQUEST_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (compatible; LMNY-FeedSync/1.0; +https://lauramilman.com)',
 } as const;
 
+/**
+ * The cache (BELGIUMDIA_API_URL) is an optimization, not a dependency. When
+ * it answers with an error — stale deploy, missing secret, mismatched key —
+ * fall through to the supplier directly rather than failing the run. Costs
+ * one wasted request against the 1-per-15-minutes limit, which beats a dead
+ * sync, and the whole cache layer becomes optional infrastructure.
+ */
 async function fetchPage(kind: BelgiumDiaKind, page: number): Promise<Raw[]> {
-  const url = buildUrl(kind, page);
+  const usingCache = baseUrl() !== DEFAULT_BASE_URL;
+  try {
+    return await fetchPageFrom(kind, page, baseUrl());
+  } catch (err) {
+    if (!usingCache) throw err;
+    console.error(
+      `Feed cache failed for ${kind} (${err instanceof Error ? err.message : String(err)}) — falling back to the supplier directly`,
+    );
+    return fetchPageFrom(kind, page, DEFAULT_BASE_URL);
+  }
+}
+
+async function fetchPageFrom(kind: BelgiumDiaKind, page: number, base: string): Promise<Raw[]> {
+  const url = buildUrl(kind, page, base);
   let res: Response | undefined;
   let lastNetErr = '';
   for (let attempt = 0; attempt < 3; attempt++) {

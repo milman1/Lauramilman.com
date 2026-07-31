@@ -84,11 +84,15 @@ async function main() {
   };
   let rows = await tryFetch();
   if (rows.length === 0) {
+    // An empty answer means the supplier's limiter, not an empty feed. The
+    // hourly sync fetches at :17, so a direct request is only outside the
+    // 15-minute window from :33 onward — wait for :35 and try once.
     const now = new Date();
     const next = new Date(now);
-    next.setUTCMinutes(30, 0, 0); // just after the :27 lab refresh
+    next.setUTCMinutes(35, 0, 0);
     if (next <= now) next.setUTCHours(next.getUTCHours() + 1);
-    console.error(`Lab feed empty (cache cold?) — waiting ${Math.round((next.getTime() - now.getTime()) / 60000)} min for the :27 refresh`);
+    const waitMin = Math.round((next.getTime() - now.getTime()) / 60000);
+    console.error(`Lab feed empty (rate limited) — waiting ${waitMin} min for a clear window`);
     await new Promise((r) => setTimeout(r, next.getTime() - now.getTime()));
     rows = await tryFetch();
   }
