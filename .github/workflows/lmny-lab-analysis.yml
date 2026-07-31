@@ -67,12 +67,20 @@ jobs:
             wk_sha=$(curl -s --max-time 10 --connect-timeout 5 "$BELGIUMDIA_API_URL/__keyhash" | tr -d '\r\n' || true)
             echo "attempt $attempt: worker-key-sha=${wk_sha:-<no answer>}"
             if [ "$gh_sha" = "$wk_sha" ]; then
-              echo "VERDICT: keys MATCH — the worker adopted the key; the cache is serving"
+              echo "VERDICT: keys MATCH — the cache is authorized to serve"
+              # Matching keys only prove the gate opens. Freshness per feed is
+              # what says the cache actually holds data the sync can read.
+              echo "--- cache contents (fetchedAt / bytes per feed) ---"
+              curl -s --max-time 15 --connect-timeout 5 \
+                "$BELGIUMDIA_API_URL/__status?key=$BELGIUMDIA_API_KEY" || true
               exit 0
             fi
             [ "$attempt" = 3 ] || sleep 15
           done
-          echo "VERDICT: keys still DIFFER — worker deploy may not have landed yet."
+          echo "VERDICT: keys still DIFFER."
+          echo "Either the Cloudflare API_KEY still holds a different value, or"
+          echo "the supplier key was rotated on one side only — if Cloudflare now"
+          echo "has a NEW key, the GitHub BELGIUMDIA_API_KEY secret needs it too."
           echo "Not fatal: the sync falls back to the supplier directly."
 
       - name: Analyze lab feed
