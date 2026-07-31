@@ -41,16 +41,15 @@ jobs:
           BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
           BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
         run: |
-          echo "github-key-sha=$(printf %s "$BELGIUMDIA_API_KEY" | sha256sum | cut -c1-12)"
-          if [ -n "$BELGIUMDIA_API_URL" ]; then
-            for i in $(seq 1 6); do
-              h=$(curl -s --max-time 15 "$BELGIUMDIA_API_URL/__keyhash" || true)
-              case "$h" in
-                [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
-                  echo "worker-key-sha=$h"; break;;
-                *) echo "worker keyhash not ready (attempt $i): $h"; sleep 20;;
-              esac
-            done
+          gh_sha=$(printf %s "$BELGIUMDIA_API_KEY" | sha256sum | cut -c1-12)
+          echo "github-key-sha=$gh_sha"
+          [ -z "$BELGIUMDIA_API_URL" ] && exit 0
+          wk_sha=$(curl -s --max-time 20 "$BELGIUMDIA_API_URL/__keyhash" | tr -d '\r\n' || true)
+          echo "worker-key-sha=$wk_sha"
+          if [ "$gh_sha" = "$wk_sha" ]; then
+            echo "VERDICT: keys MATCH — the cache should be serving"
+          else
+            echo "VERDICT: keys DIFFER — re-add the Cloudflare API_KEY secret (type Secret)"
           fi
 
       - name: Analyze lab feed
