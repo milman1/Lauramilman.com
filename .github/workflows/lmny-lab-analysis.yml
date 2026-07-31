@@ -20,6 +20,8 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    # A wedged runner shouldn't sit burning minutes for hours.
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: lmny-feeds
@@ -39,8 +41,11 @@ jobs:
       # handed once that key proves out upstream, so this both triggers the
       # adoption and confirms it. Page 2 is the cheap trigger: it passes the
       # auth gate but the worker answers it from itself, spending nothing.
-      # Retries while a fresh worker deploy propagates.
+      # Retries briefly while a fresh worker deploy propagates, but never
+      # holds up the analysis: this is a diagnostic, not a gate.
       - name: Verify feed cache key
+        continue-on-error: true
+        timeout-minutes: 3
         env:
           BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
           BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
@@ -51,18 +56,19 @@ jobs:
             echo "No BELGIUMDIA_API_URL set — sync reads the supplier directly."
             exit 0
           fi
-          for attempt in $(seq 1 10); do
-            curl -s -o /dev/null --max-time 20 \
+          for attempt in 1 2 3; do
+            curl -s -o /dev/null --max-time 10 --connect-timeout 5 \
               "$BELGIUMDIA_API_URL/api/developer-api/diamond?type=natural&page=2&key=$BELGIUMDIA_API_KEY" || true
-            wk_sha=$(curl -s --max-time 20 "$BELGIUMDIA_API_URL/__keyhash" | tr -d '\r\n' || true)
-            echo "attempt $attempt: worker-key-sha=$wk_sha"
+            wk_sha=$(curl -s --max-time 10 --connect-timeout 5 "$BELGIUMDIA_API_URL/__keyhash" | tr -d '\r\n' || true)
+            echo "attempt $attempt: worker-key-sha=${wk_sha:-<no answer>}"
             if [ "$gh_sha" = "$wk_sha" ]; then
               echo "VERDICT: keys MATCH — the worker adopted the key; the cache is serving"
               exit 0
             fi
-            sleep 20
+            [ "$attempt" = 3 ] || sleep 15
           done
-          echo "VERDICT: keys still DIFFER after 10 attempts — worker deploy may not have landed"
+          echo "VERDICT: keys still DIFFER — worker deploy may not have landed yet."
+          echo "Not fatal: the sync falls back to the supplier directly."
 
       - name: Analyze lab feed
         env:
