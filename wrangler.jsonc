@@ -1,6 +1,8 @@
 // Cloudflare Workers config for the Belgium Dia feed cache.
 // Deployed by the git-connected Workers Build (deploy command: npx wrangler deploy).
-// The API_KEY secret is set once in the dashboard and survives deploys.
+// No API_KEY secret is required: the worker adopts the key the sync already
+// sends, after proving it against the supplier. A dashboard secret is still
+// honored if one is set, but a proven key wins over it.
 {
   // Must match the git-connected Workers project name.
   "name": "lauramilman-com",
