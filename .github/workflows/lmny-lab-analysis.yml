@@ -43,6 +43,11 @@ jobs:
       # auth gate but the worker answers it from itself, spending nothing.
       # Retries briefly while a fresh worker deploy propagates, but never
       # holds up the analysis: this is a diagnostic, not a gate.
+      #
+      # CAVEAT: on the very push that changes the worker, this will report
+      # DIFFER — Cloudflare's git build takes minutes and this run starts in
+      # seconds, so it reads the OLD worker. A worker change is confirmed by
+      # the NEXT run, not its own.
       - name: Verify feed cache key
         continue-on-error: true
         timeout-minutes: 3
