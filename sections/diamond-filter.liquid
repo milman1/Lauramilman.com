@@ -1,28 +1,169 @@
 {%- comment -%}
   Laura Milman New York — Diamond Filter
 
-  The Peaceful Diamonds filter, rebuilt on Shopify's native storefront facets
-  instead of a live supplier API. Everything here is driven by
-  `collection.filters`, so the param names always match what Search &
-  Discovery has actually published — nothing is hard-coded and guessed.
+  Two data modes:
+    1. api   — reads stones from the Supabase Edge Function / App Proxy
+               (required for lab-grown: Shopify hides facets above 5,000 products)
+    2. facets — original Peaceful Diamonds port on collection.filters
 
-  Expects these product metafield filters to be enabled in Search &
-  Discovery (the feed sync writes them, storefront-readable):
-    custom.diamond_shape   custom.carat_weight   custom.color
-    custom.clarity         custom.cut
-  Plus the built-in Price filter.
-
-  Controls not backed by a published filter are skipped rather than rendered
-  dead; in the theme editor a setup notice lists what's missing.
-
-  Filter and results live in one section, as they did on PD — it owns the
-  whole page, so use it instead of main-collection, not above it. See
-  templates/collection.diamonds.json.
+  API mode is used when `api_base_url` is set. Visual design and navy_mode
+  are shared.
 {%- endcomment -%}
 
 {%- liquid
   assign navy_mode = section.settings.navy_mode
+  assign api_mode = false
+  if section.settings.api_base_url != blank
+    assign api_mode = true
+  endif
 
+  assign clarity_order = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ','
+  assign color_order = 'M,L,K,J,I,H,G,F,E,D' | split: ','
+  assign cut_order = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ','
+  assign shape_order = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
+  assign stone_kind = section.settings.stone_kind | default: 'lab'
+-%}
+
+{%- if api_mode -%}
+
+<section
+  class="lm-dfilter{% if navy_mode %} lm-dfilter--navy{% endif %}"
+  id="lm-diamond-api"
+  aria-label="{{ collection.title | escape }}"
+  data-api-base="{{ section.settings.api_base_url | escape }}"
+  data-anon-key="{{ section.settings.api_anon_key | escape }}"
+  data-reserve-url="{{ section.settings.reserve_url | escape }}"
+  data-kind="{{ stone_kind | escape }}"
+  data-per-page="{{ section.settings.products_per_page }}"
+  data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
+>
+  <div class="lm-dfilter__container">
+    <header class="lm-dfilter__header">
+      <h1 class="lm-dfilter__title">{{ section.settings.heading | default: collection.title }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p class="lm-dfilter__subtitle">{{ section.settings.subheading }}</p>
+      {%- elsif collection.description != blank -%}
+        <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+      {%- endif -%}
+    </header>
+
+    <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ collection.url }}" method="get">
+      <div class="lm-dfilter__grid">
+        <div class="lm-dfilter__group lm-dfilter__group--wide">
+          <span class="lm-dfilter__label">
+            Shape
+            <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
+          </span>
+          <div class="lm-dfilter__shapes">
+            {%- for name in shape_order -%}
+              {%- assign icon_key = name | downcase -%}
+              <label class="lm-shape">
+                <input type="checkbox" name="shape" value="{{ name | escape }}">
+                {%- render 'diamond-shape-icon', shape: icon_key -%}
+                <span class="lm-shape__name">{{ name }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            Carat
+            <button type="button" class="lm-dfilter__info" aria-label="About carat" data-tip="Carat is weight, not size: one carat is 200 milligrams.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="carat" data-floor="0.3" data-ceil="10" data-step="0.01">
+            <div class="lm-range__inputs">
+              <label class="lm-range__field">
+                <span>Min</span>
+                <input type="number" inputmode="decimal" step="0.01" min="0.3" max="10" value="0.3" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>Max</span>
+                <input type="number" inputmode="decimal" step="0.01" min="0.3" max="10" value="10" data-range-max>
+              </label>
+            </div>
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            Price
+            <button type="button" class="lm-dfilter__info" aria-label="About price" data-tip="Every stone is priced individually against the current market.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="price" data-floor="0" data-ceil="50000" data-step="50">
+            <div class="lm-range__inputs">
+              <label class="lm-range__field">
+                <span>Min {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="0" max="50000" value="0" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>Max {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="0" max="50000" value="50000" data-range-max>
+              </label>
+            </div>
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        {%- render 'diamond-api-scale', name: 'clarity', order: clarity_order, title: 'Clarity', tip: 'Clarity grades the inclusions inside the stone. From SI2 up, most are invisible without magnification; FL is flawless under 10x.' -%}
+        {%- render 'diamond-api-scale', name: 'color', order: color_order, title: 'Colour', tip: 'Colour runs D (completely colourless) down through the alphabet. Warmth becomes noticeable around J and below.' -%}
+        {%- render 'diamond-api-scale', name: 'cut', order: cut_order, title: 'Cut', tip: 'Cut is craftsmanship rather than nature — it governs how much light the stone returns.' -%}
+      </div>
+
+      <div class="lm-dfilter__actions">
+        <button type="submit" class="lm-dfilter__apply">
+          View Diamonds
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <a href="{{ collection.url }}" class="lm-dfilter__reset">Reset all</a>
+      </div>
+    </form>
+
+    <div class="lm-dfilter__toolbar">
+      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">Loading…</span>
+      <div class="lm-dfilter__sort">
+        <label for="lm-diamond-sort">Sort by</label>
+        <select id="lm-diamond-sort">
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="carat_asc">Carat: Low to High</option>
+          <option value="carat_desc">Carat: High to Low</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite"></div>
+    <div id="lm-diamond-pager"></div>
+  </div>
+</section>
+
+<div class="lm-reserve-modal" id="lm-reserve-modal" hidden>
+  <div class="lm-reserve-modal__backdrop" data-reserve-close></div>
+  <div class="lm-reserve-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="lm-reserve-heading">
+    <button type="button" class="lm-reserve-modal__close" data-reserve-close aria-label="Close">&times;</button>
+    <h2 id="lm-reserve-heading">Reserve this diamond</h2>
+    <p class="lm-reserve-modal__stone" data-reserve-title></p>
+    <p class="lm-reserve-modal__copy">We will confirm the stone is still available and send a private invoice. No charge until you accept.</p>
+    <form>
+      <input type="hidden" name="stock_ref" value="">
+      <label>Name<input type="text" name="name" required autocomplete="name"></label>
+      <label>Email<input type="email" name="email" required autocomplete="email"></label>
+      <label>Phone <span>(optional)</span><input type="tel" name="phone" autocomplete="tel"></label>
+      <label>Note <span>(optional)</span><textarea name="message" rows="3" placeholder="Ring setting, timeline, questions…"></textarea></label>
+      <p class="lm-reserve-modal__status" data-reserve-status hidden></p>
+      <button type="submit" class="lm-dfilter__apply">Request reservation</button>
+    </form>
+  </div>
+</div>
+
+<script src="{{ 'diamond-storefront.js' | asset_url }}" defer></script>
+
+{%- else -%}
+
+{%- liquid
   assign shape_filter = nil
   assign carat_filter = nil
   assign color_filter = nil
@@ -54,15 +195,6 @@
   if shape_filter or carat_filter or clarity_filter or color_filter or cut_filter or price_filter
     assign has_any = true
   endif
-
-  comment
-    Gemological order, worst → best. Shopify returns facet values by count or
-    alphabetically, neither of which is meaningful for a grade scale.
-  endcomment
-  assign clarity_order = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ','
-  assign color_order = 'M,L,K,J,I,H,G,F,E,D' | split: ','
-  assign cut_order = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ','
-  assign shape_order = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
 -%}
 
 {%- paginate collection.products by section.settings.products_per_page -%}
@@ -131,6 +263,7 @@
             </div>
           </div>
         {%- endif -%}
+
 
         {%- if carat_filter -%}
           <div class="lm-dfilter__group">
@@ -361,6 +494,8 @@
 </section>
 
 {%- endpaginate -%}
+
+{%- endif -%}
 
 <style>
   .lm-dfilter {
@@ -1047,10 +1182,171 @@
       justify-content: center;
     }
   }
+
+  /* API mode: stone cards + reserve modal */
+  .lm-dfilter__results-host.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .lm-stone-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .lm-stone-card__media {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    background: rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .lm-stone-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .lm-stone-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f3eee6, #e8e0d4);
+  }
+  .lm-stone-card__title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin: 0;
+    color: var(--espresso, #1E1109);
+  }
+  .lm-stone-card__meta {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+  .lm-stone-card__price {
+    margin: 0.35rem 0 0;
+    font-size: 1rem;
+    color: var(--espresso, #1E1109);
+  }
+  .lm-stone-card__price span {
+    color: var(--text-muted, #8A8070);
+    font-size: 0.85rem;
+    margin-left: 0.35rem;
+  }
+  .lm-stone-card__reserve {
+    margin-top: 0.5rem;
+    align-self: flex-start;
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-dark, #A88340);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .lm-dfilter--navy .lm-stone-card__reserve {
+    color: var(--pd-blue, #5B7FBD);
+  }
+  .lm-dfilter--navy .lm-stone-card__title {
+    color: var(--navy, #1A1F3A);
+  }
+
+  .lm-reserve-modal[hidden] { display: none !important; }
+  .lm-reserve-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+  }
+  .lm-reserve-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 17, 9, 0.55);
+  }
+  .lm-reserve-modal__dialog {
+    position: relative;
+    width: min(440px, 100%);
+    background: #FDFAF6;
+    padding: 2rem 1.75rem 1.75rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  }
+  .lm-reserve-modal__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.9rem;
+    border: 0;
+    background: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #8A8070;
+  }
+  .lm-reserve-modal h2 {
+    margin: 0 0 0.35rem;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    font-size: 1.75rem;
+  }
+  .lm-reserve-modal__stone {
+    margin: 0 0 0.75rem;
+    color: #A88340;
+    font-size: 0.95rem;
+  }
+  .lm-reserve-modal__copy {
+    margin: 0 0 1.25rem;
+    color: #8A8070;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .lm-reserve-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .lm-reserve-modal label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8A8070;
+  }
+  .lm-reserve-modal label span { text-transform: none; letter-spacing: 0; }
+  .lm-reserve-modal input,
+  .lm-reserve-modal textarea {
+    font: inherit;
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #1E1109;
+    border: 1px solid rgba(30, 17, 9, 0.15);
+    background: #fff;
+    padding: 0.65rem 0.75rem;
+  }
+  .lm-reserve-modal__status {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #476154;
+  }
+  body.lm-reserve-open { overflow: hidden; }
 </style>
 
 <script>
   (function () {
+    /* Facet-mode helpers only. API mode uses diamond-storefront.js. */
+    if (document.getElementById('lm-diamond-api')) return;
+
     /* Sort has to preserve the active facets, so rebuild the query rather
        than navigating to a bare ?sort_by. */
     var sortSelect = document.getElementById('lm-diamond-sort');
@@ -1204,6 +1500,42 @@
       "label": "Navy mode (Peaceful Diamonds tier)",
       "info": "Match the collection section below it: navy for lab-grown, off for LMNY naturals.",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "API data source"
+    },
+    {
+      "type": "paragraph",
+      "content": "When API base URL is set, the filter reads stones from Supabase (or the App Proxy) instead of Shopify collection.filters. Required for lab-grown (over the 5,000-product facet limit)."
+    },
+    {
+      "type": "text",
+      "id": "api_base_url",
+      "label": "API base URL",
+      "info": "Edge function or App Proxy, e.g. https://….supabase.co/functions/v1/diamonds or /apps/diamonds"
+    },
+    {
+      "type": "text",
+      "id": "api_anon_key",
+      "label": "Supabase anon key",
+      "info": "Required when calling the Edge Function directly. Leave blank for App Proxy."
+    },
+    {
+      "type": "text",
+      "id": "reserve_url",
+      "label": "Reserve endpoint URL",
+      "info": "POST endpoint for inquiry/reserve, e.g. https://….supabase.co/functions/v1/reserve-diamond"
+    },
+    {
+      "type": "select",
+      "id": "stone_kind",
+      "label": "Stone kind (API mode)",
+      "options": [
+        { "value": "lab", "label": "Lab-grown" },
+        { "value": "natural", "label": "Natural" }
+      ],
+      "default": "lab"
     }
   ],
   "presets": [

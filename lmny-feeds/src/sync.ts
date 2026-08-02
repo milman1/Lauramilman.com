@@ -1,10 +1,14 @@
 /**
- * LMNY feed sync — Shopify is the database.
+ * LMNY feed sync — Shopify is currently the live database.
  *
  * Full pass per run: fetch feeds → normalize → price → diff against the
  * Shopify catalog by handle + content_hash → create / update / archive.
  * Unchanged hashes are skipped entirely. --dry-run does everything except
  * writes and produces the full report.
+ *
+ * When SUPABASE_URL + SUPABASE_SERVICE_KEY are set, priced stones are also
+ * upserted into public.stones (dual-write). Do not delete feed products until
+ * that table is verified populated and the App Proxy filter reads from it.
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
