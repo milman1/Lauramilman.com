@@ -1,0 +1,23 @@
+{%- comment -%}
+  Static grade scale for the API-backed diamond filter (no collection.filters).
+  Accepts: name (color|clarity|cut), order (array worst→best), title, tip
+{%- endcomment -%}
+<div class="lm-dfilter__group">
+  <span class="lm-dfilter__label">
+    {{ title }}
+    <button type="button" class="lm-dfilter__info" aria-label="About {{ title | downcase }}" data-tip="{{ tip | escape }}">i</button>
+  </span>
+  <div class="lm-scale" data-scale="{{ name }}">
+    <div class="lm-scale__track" aria-hidden="true"><div class="lm-scale__fill" data-scale-fill></div></div>
+    <div class="lm-scale__stops" role="group" aria-label="{{ title }} minimum">
+      {%- for grade in order -%}
+        <label class="lm-scale__stop" data-grade="{{ grade | escape }}">
+          <input type="checkbox" name="{{ name }}" value="{{ grade | escape }}">
+          <span class="lm-scale__dot" aria-hidden="true"></span>
+          <span class="lm-scale__name">{{ grade }}</span>
+        </label>
+      {%- endfor -%}
+    </div>
+  </div>
+  <p class="lm-scale__hint" data-scale-hint>Any {{ title | downcase }}</p>
+</div>
