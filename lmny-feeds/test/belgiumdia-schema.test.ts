@@ -62,6 +62,44 @@ describe('Belgium Dia real-schema diamond record', () => {
   });
 });
 
+/** Lab feed uses the same PascalCase schema; colour/clarity/cut must all land. */
+const labRecord = {
+  Stock_No: 'L919753',
+  Shape: 'ROUND',
+  Weight: '1.22',
+  Color: 'F',
+  Clarity: 'VVS2',
+  Cut_Grade: 'I', // IGI Ideal
+  Polish: 'EX',
+  Symmetry: 'EX',
+  Fluorescence_Intensity: 'NON',
+  Measurements: '6.79 - 6.84 x 4.21',
+  Lab: 'IGI',
+  Certificate: '6455949159',
+  CertificateLink: 'https://www.igi.org/verify-your-report/?r=6455949159',
+  Buy_Price: '480',
+  ImageLink: 'https://dnalinks.in/L919753/still.jpg',
+  VideoLink: '',
+};
+
+describe('Belgium Dia real-schema lab record', () => {
+  it('maps colour, clarity and cut the same way as naturals', () => {
+    const { items, holds } = normalizeStones([labRecord], 'lab');
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({
+      kind: 'lab',
+      stockRef: 'L919753',
+      shape: 'Round',
+      carat: 1.22,
+      color: 'F',
+      clarity: 'VVS2',
+      cut: 'Ideal',
+      lab: 'IGI',
+      costUsd: 480,
+    });
+  });
+});
+
 describe('Belgium Dia real-schema watch record', () => {
   it('maps brand/model/reference, price, and Paper (singular)', () => {
     const { items, holds } = normalizeWatches([watchRecord]);

@@ -37,10 +37,25 @@ export const LAB_TIERS: LabTier[] = [
   { maxCarat: Number.POSITIVE_INFINITY, multiplier: 1.45 },
 ];
 
-/** Watches: retail = Hours comp mid × compDiscount, floored at cost × minCostMultiple. */
+/**
+ * Watches: retail = marketAnchor × accessoryHaircut × compDiscount,
+ * floored at cost × minCostMultiple.
+ *
+ * Hours `midUsd` is a listing midpoint and sits above modeled market
+ * (WatchCharts). When `lowUsd` is present we blend toward it so published
+ * prices land aggressively below market rather than at the top of the
+ * listing range. Accessory haircuts assume the Hours comp is a full-set
+ * reference: naked −10%, box-or-papers-only −5%.
+ */
 export const WATCH = {
+  /** Fraction of the way from lowUsd → midUsd used as the market anchor. */
+  midBlend: 0.45,
   compDiscount: 0.97,
+  nakedHaircut: 0.9,
+  partialHaircut: 0.95,
   minCostMultiple: 1.05,
+  /** Hold when Hours backed the mid by fewer than this many listings. */
+  minSourceCount: 3,
 } as const;
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
