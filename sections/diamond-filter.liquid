@@ -1183,62 +1183,13 @@
     }
   }
 
-  /* API mode: stone cards + reserve modal */
+  /* API mode: reserve CTA only — cards reuse .product-card image markup */
   .lm-dfilter__results-host.is-loading {
     opacity: 0.55;
     pointer-events: none;
   }
-  .lm-stone-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .lm-stone-card__media {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    padding: 0;
-    border: 0;
-    background: rgba(0, 0, 0, 0.03);
-    cursor: pointer;
-    overflow: hidden;
-  }
-  .lm-stone-card__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .lm-stone-card__placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #f3eee6, #e8e0d4);
-  }
-  .lm-stone-card__title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.15rem;
-    font-weight: 500;
-    margin: 0;
-    color: var(--espresso, #1E1109);
-  }
-  .lm-stone-card__meta {
-    margin: 0.15rem 0 0;
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--text-muted, #8A8070);
-  }
-  .lm-stone-card__price {
-    margin: 0.35rem 0 0;
-    font-size: 1rem;
-    color: var(--espresso, #1E1109);
-  }
-  .lm-stone-card__price span {
-    color: var(--text-muted, #8A8070);
-    font-size: 0.85rem;
-    margin-left: 0.35rem;
-  }
-  .lm-stone-card__reserve {
-    margin-top: 0.5rem;
+  .lm-dfilter__results-host .lm-stone-card__reserve {
+    margin-top: 0.65rem;
     align-self: flex-start;
     background: none;
     border: 0;
@@ -1251,11 +1202,8 @@
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .lm-dfilter--navy .lm-stone-card__reserve {
+  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__reserve {
     color: var(--pd-blue, #5B7FBD);
-  }
-  .lm-dfilter--navy .lm-stone-card__title {
-    color: var(--navy, #1A1F3A);
   }
 
   .lm-reserve-modal[hidden] { display: none !important; }

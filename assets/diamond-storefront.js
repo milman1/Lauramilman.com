@@ -111,8 +111,18 @@
     return params;
   }
 
+  function productHandle(stone) {
+    var prefix = stone.kind === 'natural' ? 'nd' : 'lg';
+    var ref = String(stone.stock_ref || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return prefix + '-' + ref;
+  }
+
   function cardHtml(stone) {
     var img = (stone.image_urls && stone.image_urls[0]) || '';
+    var img2 = (stone.image_urls && stone.image_urls[1]) || '';
     var title =
       stone.carat +
       'ct ' +
@@ -122,37 +132,50 @@
       ' ' +
       stone.clarity +
       (stone.lab ? ' — ' + stone.lab : '');
-    var perCt = stone.carat > 0 ? money(stone.retail_usd / stone.carat) + '/ct' : '';
-    return (
-      '<article class="product-card lm-stone-card" data-stock="' +
-      escapeAttr(stone.stock_ref) +
-      '">' +
-      '<button type="button" class="lm-stone-card__media" data-open-stone="' +
-      escapeAttr(stone.stock_ref) +
-      '">' +
+    var href = '/products/' + productHandle(stone);
+    var images =
       (img
-        ? '<img src="' +
+        ? '<img class="product-card__image product-card__image--primary" src="' +
           escapeAttr(img) +
           '" alt="' +
           escapeAttr(title) +
-          '" loading="lazy" width="400" height="400">'
-        : '<div class="lm-stone-card__placeholder" aria-hidden="true"></div>') +
-      '</button>' +
-      '<div class="lm-stone-card__body">' +
-      '<h3 class="lm-stone-card__title">' +
+          '" width="600" height="600" loading="lazy">'
+        : '<div class="product-card__image product-card__image--placeholder" aria-hidden="true"></div>') +
+      (img2
+        ? '<img class="product-card__image product-card__image--hover" src="' +
+          escapeAttr(img2) +
+          '" alt="" width="600" height="600" loading="lazy">'
+        : '');
+
+    return (
+      '<div class="product-card" data-stock="' +
+      escapeAttr(stone.stock_ref) +
+      '">' +
+      '<a href="' +
+      escapeAttr(href) +
+      '" class="product-card__image-wrapper" aria-label="' +
+      escapeAttr(title) +
+      '">' +
+      images +
+      '</a>' +
+      '<div class="product-card__content">' +
+      '<h3 class="product-card__title"><a href="' +
+      escapeAttr(href) +
+      '">' +
       escapeHtml(title) +
-      '</h3>' +
-      '<p class="lm-stone-card__meta">' +
-      escapeHtml([stone.shape, stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · ')) +
-      '</p>' +
-      '<p class="lm-stone-card__price">' +
+      '</a></h3>' +
+      '<div class="product-card__price"><span>' +
       money(stone.retail_usd) +
-      (perCt ? ' <span>' + perCt + '</span>' : '') +
-      '</p>' +
+      '</span></div>' +
+      '<div class="product-card__meta"><span class="product-card__type">' +
+      escapeHtml(
+        [stone.shape, stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · '),
+      ) +
+      '</span></div>' +
       '<button type="button" class="lm-stone-card__reserve" data-reserve="' +
       escapeAttr(stone.stock_ref) +
       '">Reserve this diamond</button>' +
-      '</div></article>'
+      '</div></div>'
     );
   }
 
@@ -437,17 +460,13 @@
     resultsEl.addEventListener('click', function (e) {
       var reserveBtn = e.target.closest('[data-reserve]');
       if (reserveBtn) {
-        var card = reserveBtn.closest('.lm-stone-card');
-        var title = card ? card.querySelector('.lm-stone-card__title') : null;
-        openReserve(reserveBtn.getAttribute('data-reserve'), title ? title.textContent : '');
-        return;
-      }
-      var openBtn = e.target.closest('[data-open-stone]');
-      if (openBtn) {
-        var stock = openBtn.getAttribute('data-open-stone');
-        var card2 = openBtn.closest('.lm-stone-card');
-        var title2 = card2 ? card2.querySelector('.lm-stone-card__title') : null;
-        openReserve(stock, title2 ? title2.textContent : '');
+        e.preventDefault();
+        var card = reserveBtn.closest('.product-card');
+        var title = card ? card.querySelector('.product-card__title') : null;
+        openReserve(
+          reserveBtn.getAttribute('data-reserve'),
+          title ? title.textContent.trim() : '',
+        );
       }
     });
   }
