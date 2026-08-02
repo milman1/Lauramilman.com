@@ -1,0 +1,90 @@
+<div id="sp-{{ block.id }}-feature-icons"
+     class="sp-text sp-feature-icons sp-column-wrapper"
+     data-column="{{ setting.item_per_row }}"
+     data-column-tablet="{{ setting.item_per_row_tablet }}"
+     data-column-mobile="{{ setting.item_per_row_mobile }}"
+     data-column-size=""
+     data-auto-width="{{ setting.auto_width }}"
+     data-content-alignment="{{ settings.content_alignment }}"
+        {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons {
+            --sp-column-desktop-padding: {{ setting.item_gap }}px;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item {
+            --sp-item-padding: {{ setting.item_padding }}px;
+            --sp-item-gap: {{ setting.icon_gap }}px;
+            --sp-border-radius: {{ setting.item_border_radius }}px;
+            --sp-background-color: {{ setting.background_item_color }};
+            --sp-item-border-size: {{ setting.item_border_size }}px;
+            --sp-item-border-color: {{ setting.item_border_color }};
+            border: var(--sp-item-border-size) solid var(--sp-item-border-color)
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item[data-alignment="left"] {
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item[data-alignment="center"] {
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item[data-alignment="right"] {
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item .sp-feature-item-title {
+            --sp-font-size: {{ setting.text_size_desktop }}px;
+            --sp-text-letter-spacing: {{ sertting.text_spacing }}px;
+            --sp-text-color: {{ setting.text_color }};
+            margin: 0;
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item .sp-feature-item-icon {
+            --sp-icon-width: {{ setting.icon_width }}px;
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons {
+                --sp-item-gap: {{ setting.item_gap_mobile }}px;
+                --sp-column-mobile-padding: {{ setting.item_gap_mobile }}px;
+            }
+
+            #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item {
+                --sp-item-padding: {{ setting.item_padding_mobile }}px;
+                --sp-item-gap: {{ setting.icon_gap_mobile }}px;
+            }
+
+            #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item .sp-feature-item-title {
+                --sp-font-size: {{ setting.text_size_mobile }}px;
+            }
+
+            #sp-{{ section.id }} #sp-{{ block.id }}-feature-icons .sp-feature-icon-item .sp-feature-item-icon {
+                --sp-icon-width: {{ setting.icon_width_mobile }}px;
+            }
+        }
+    </style>
+    {% for i in (1..6) %}
+        {% assign keyIcon = 'icon_' | append: i %}
+        {% assign keyTitle = 'text_' | append: i %}
+        {% if setting[keyIcon] != null or setting[keyTitle] != empty %}
+            <div class="sp-column">
+                <div class="sp-feature-icon-item" data-alignment="{{ setting.content_alignment }}"
+                     data-content-inline="{{ setting.content_inline }}">
+                    {% if setting[keyIcon] != null %}
+                        <div class="sp-feature-item-icon">
+                            {{ setting[keyIcon] | image_url: width: 120 | image_tag }}
+                        </div>
+                    {% endif %}
+                    {% if setting[keyTitle] != empty %}
+                        <h4 class="sp-feature-item-title body-font sp-text-{{ setting.text_style }} sp-text-{{ setting.content_alignment }}">{{ setting[keyTitle] }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>

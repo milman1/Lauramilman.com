@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "chip-cartier": { "type": "chip", "settings": { "label": "Cartier", "link": "/collections/cartier" } },
+        "chip-vca": { "type": "chip", "settings": { "label": "Van Cleef & Arpels", "link": "/collections/van-cleef-arpels" } },
+        "chip-bvlgari": { "type": "chip", "settings": { "label": "Bvlgari", "link": "/collections/bvlgari" } },
+        "chip-tiffany": { "type": "chip", "settings": { "label": "Tiffany & Co.", "link": "/collections/tiffany" } },
+        "chip-vintage": { "type": "chip", "settings": { "label": "All Vintage", "link": "/collections/vintage-jewelry" } }
+      },
+      "block_order": ["chip-cartier", "chip-vca", "chip-bvlgari", "chip-tiffany", "chip-vintage"],
+      "settings": {
+        "products_per_page": 24,
+        "chips_label": "Shop by maison",
+        "navy_mode": false
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,6 +1,6 @@
 /* =============================================
    LAURA MILMAN NEW YORK - Design System
-   Summer 2026 Collection
+   Summer 2026 Collection · r2
    ============================================= */
 
 /* =============================================
@@ -19,6 +19,14 @@
   --gold-light: #E2C27A;
   --gold-pale: #F0DFB0;
   --gold-dark: #A88340;
+
+  /* Peaceful Diamonds sub-brand — cool navy signature.
+     Reserved for the Peaceful Diamonds tier only; never mix into LMNY-proper sections. */
+  --navy: #1A1F3A;
+  --navy-deep: #12162B;
+  --navy-soft: #252C4F;
+  --pd-blue: #5B7FBD;
+  --pd-ice: #A9BEE3;
 
   /* Text */
   --text-dark: #2C1810;
@@ -42,7 +50,7 @@
 
   /* Typography */
   --font-heading: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -73,9 +81,14 @@
   --transition-base: 300ms ease;
   --transition-slow: 500ms ease;
 
-  /* Container */
-  --container-max: 1400px;
+  /* Container — one width for every page-level container. Was seven
+     different values (1100-1400px), so the left edge shifted between
+     sections as you scrolled. */
+  --container-max: 1320px;
   --container-padding: 2rem;
+
+  /* Fixed header offset — body padding keeps content clear of the glass header */
+  --header-height: 84px;
 }
 
 /* =============================================
@@ -92,6 +105,9 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* iOS Safari inflates text on rotation/first paint, widening min-content
+     and pushing 1fr grid tracks past the viewport. */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -100,6 +116,7 @@ body {
   line-height: 1.6;
   color: var(--text-dark);
   background-color: var(--off-white);
+  padding-top: var(--header-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -247,7 +264,6 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
 }
 
 .logo {
@@ -502,7 +518,7 @@ p {
 
 .categories__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-lg);
 }
 
@@ -574,7 +590,7 @@ p {
 
 .values-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-xl);
 }
 
@@ -625,8 +641,17 @@ p {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-lg);
+}
+
+/* iOS Safari keeps a min-content floor on grid items even in minmax(0,1fr)
+   tracks; without this the second card in a 2-up mobile grid overflows the
+   viewport edge. */
+.products-grid > *,
+.product-recs__grid > *,
+.collections-grid > * {
+  min-width: 0;
 }
 
 .product-card {
@@ -642,6 +667,11 @@ p {
 }
 
 .product-card__image-wrapper {
+  /* The wrapper is an <a>: without display:block, aspect-ratio and overflow
+     are ignored on the inline box, the image resolves height:100% against the
+     grid-stretched card, and the content below gets clipped by the card's
+     overflow:hidden — image-only cards, no title/price. */
+  display: block;
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
@@ -751,6 +781,9 @@ p {
   font-size: 1.125rem;
   margin-bottom: var(--space-sm);
   color: var(--text-dark);
+  /* Raw-SKU titles are single unbreakable tokens; without a break opportunity
+     they set the card's min-content width wider than a mobile grid track. */
+  overflow-wrap: anywhere;
 }
 
 .product-card__price {
@@ -768,6 +801,128 @@ p {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: var(--space-xs);
+}
+
+/* Collection cards (homepage Collections Grid) — anchor must be a block box */
+.collections-section {
+  background: var(--warm-white);
+  padding: 5rem 2rem;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.collections-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.collections-header .section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin: 0.5rem 0 0;
+}
+
+.view-all-link {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  white-space: nowrap;
+}
+
+.view-all-link:hover {
+  color: var(--text-dark);
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.collection-card {
+  display: block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--rule-light);
+  background: var(--cream);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.collection-card__image-box {
+  display: block;
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--off-white);
+}
+
+.collection-card__image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.collection-card:hover .collection-card__image-box img {
+  transform: scale(1.06);
+}
+
+.collection-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(30, 17, 9, 0.35) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.collection-card__info {
+  padding: 0.9rem 1rem 1rem;
+  text-align: center;
+}
+
+.collection-card__name {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin: 0 0 0.15rem;
+}
+
+.collection-card__count {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+@media (max-width: 1024px) {
+  .collections-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .collections-section {
+    padding: 3.5rem 1rem;
+  }
+  .collections-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
 }
 
 /* =============================================
@@ -837,7 +992,7 @@ p {
 
 .footer__grid {
   display: grid;
-  grid-template-columns: 2fr repeat(3, 1fr);
+  grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
   gap: var(--space-2xl);
   margin-bottom: var(--space-3xl);
 }
@@ -1075,7 +1230,7 @@ p {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 var(--container-padding);
-  padding-top: calc(var(--header-height, 80px) + var(--space-lg));
+  padding-top: var(--space-lg);
 }
 
 /* Breadcrumb */
@@ -1102,7 +1257,7 @@ p {
 /* Two-column layout */
 .product-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-3xl);
   align-items: start;
   margin-bottom: var(--space-4xl);
@@ -1263,7 +1418,7 @@ p {
 /* Specs grid */
 .product-specs {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin: var(--space-lg) 0;
   border: 1px solid var(--border-light);
@@ -1620,7 +1775,7 @@ p {
 }
 
 @media (max-width: 768px) {
-  .product-page { padding-top: calc(var(--header-height, 60px) + var(--space-md)); }
+  .product-page { padding-top: var(--space-md); }
 
   .product-gallery__main { aspect-ratio: 4/5; }
 
@@ -1656,7 +1811,6 @@ p {
    ============================================= */
 .breadcrumbs {
   padding: 0.75rem 2rem;
-  padding-top: calc(var(--header-height, 80px) + 0.75rem);
   background: transparent;
 }
 
@@ -1668,7 +1822,7 @@ p {
   margin: 0;
   padding: 0;
   font-size: 0.75rem;
-  max-width: 1400px;
+  max-width: var(--container-max);
   margin: 0 auto;
 }
 
@@ -1733,11 +1887,11 @@ p {
    ============================================= */
 @media (max-width: 1200px) {
   .products-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .categories__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1767,7 +1921,7 @@ p {
   }
 
   .footer__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .listing-layout {
@@ -1782,14 +1936,11 @@ p {
 @media (max-width: 768px) {
   :root {
     --container-padding: 1rem;
-  }
-
-  .header__inner {
-    height: 60px;
+    --header-height: 64px;
   }
 
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -1810,7 +1961,6 @@ p {
 
   .breadcrumbs {
     padding: 0.5rem 1rem;
-    padding-top: calc(var(--header-height, 70px) + 0.5rem);
   }
 
   .product-card {
@@ -1851,7 +2001,7 @@ p {
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -2015,5 +2165,454 @@ html, body {
   .btn--primary:hover,
   .btn--gold:hover {
     transform: none;
+  }
+}
+
+/* =============================================
+   13. CART PAGE
+   ============================================= */
+.cart-page {
+  padding: var(--space-2xl) 0 var(--space-4xl);
+  min-height: 60vh;
+}
+
+.cart-page__inner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.cart-page__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: var(--space-2xl);
+}
+
+/* Empty state */
+.cart-empty {
+  text-align: center;
+  padding: var(--space-4xl) 0;
+}
+
+.cart-empty__message {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Layout: items + summary */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-3xl);
+  align-items: start;
+}
+
+/* Line items */
+.cart-items__header,
+.cart-item {
+  display: grid;
+  grid-template-columns: 1fr 120px 140px 120px;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.cart-items__header {
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--rule-light);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cart-items__header span:not(:first-child) {
+  text-align: center;
+}
+
+.cart-items__header span:last-child {
+  text-align: right;
+}
+
+.cart-item {
+  padding: var(--space-lg) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cart-item__image-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.cart-item__image-wrap img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  flex-shrink: 0;
+}
+
+.cart-item__meta {
+  min-width: 0;
+}
+
+.cart-item__title {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  margin-bottom: var(--space-xs);
+  transition: color var(--transition-fast);
+}
+
+.cart-item__title:hover {
+  color: var(--gold-dark);
+}
+
+.cart-item__variant {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.cart-item__remove {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.cart-item__remove:hover {
+  color: var(--wine);
+}
+
+.cart-item__price,
+.cart-item__line-total {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+.cart-item__line-total {
+  text-align: right;
+  font-weight: 600;
+}
+
+.cart-item__compare-price {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Quantity stepper */
+.cart-item__qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.cart-qty__btn {
+  width: 38px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--text-dark);
+  transition: background var(--transition-fast);
+}
+
+.cart-qty__btn:hover {
+  background: var(--cream);
+}
+
+.cart-qty__input {
+  width: 44px;
+  height: 42px;
+  text-align: center;
+  border: none;
+  border-left: 1px solid var(--border-medium);
+  border-right: 1px solid var(--border-medium);
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  -moz-appearance: textfield;
+}
+
+.cart-qty__input::-webkit-outer-spin-button,
+.cart-qty__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Order summary */
+.cart-summary {
+  background: var(--warm-white);
+  border: 1px solid var(--rule-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-lg));
+}
+
+.cart-summary__title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--rule-light);
+}
+
+.cart-summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.cart-summary__row--discount {
+  color: var(--wine);
+}
+
+.cart-summary__row--total {
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+  border-top: 1px solid var(--rule-light);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.cart-summary__tax-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: var(--space-md) 0 var(--space-lg);
+}
+
+.cart-summary__checkout-btn {
+  width: 100%;
+}
+
+.cart-summary__continue-link {
+  display: block;
+  text-align: center;
+  margin-top: var(--space-md);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+
+.cart-summary__continue-link:hover {
+  color: var(--gold-dark);
+}
+
+@media (max-width: 992px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .cart-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack each line item into a two-column card; the desktop header row
+     no longer maps to anything, so hide it. */
+  .cart-items__header {
+    display: none;
+  }
+
+  .cart-item {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'product product'
+      'qty     total';
+    row-gap: var(--space-md);
+  }
+
+  .cart-item__image-wrap {
+    grid-area: product;
+    gap: var(--space-md);
+  }
+
+  .cart-item__image-wrap img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cart-item__price {
+    display: none;
+  }
+
+  .cart-item__qty {
+    grid-area: qty;
+    margin: 0;
+  }
+
+  .cart-item__line-total {
+    grid-area: total;
+    align-self: center;
+  }
+}
+
+/* =============================================
+   21. DAWN-SECTION BRIDGE
+   The contact + main-page sections come from Dawn and expect base.css,
+   which this theme never loads: .field has no layout and .field__input no
+   width, so the form rendered as bare boxes with labels beside them.
+   Dawn's section-contact-form.css also loads AFTER theme.css, so these
+   rules are anchored on #ContactForm to win outright.
+   ============================================= */
+.page-width {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.page-width--narrow {
+  max-width: 780px;
+}
+
+.main-page-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin: var(--space-xl) 0 var(--space-lg);
+}
+
+.contact {
+  padding-bottom: var(--space-4xl);
+}
+
+.contact .title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: var(--space-lg);
+}
+
+/* Name + email side by side, everything else full width. */
+#ContactForm .contact__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+#ContactForm .field {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+/* Dawn renders <input> then <label>; the label floats over the input. */
+#ContactForm .field__input,
+#ContactForm .text-area {
+  width: 100%;
+  padding: 26px 16px 10px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background: var(--warm-white);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+#ContactForm .field__input:focus,
+#ContactForm .text-area:focus {
+  border-color: var(--gold);
+}
+
+#ContactForm .field__label {
+  position: absolute;
+  top: 9px;
+  left: 17px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* The placeholder duplicates the label text. */
+#ContactForm .field__input::placeholder,
+#ContactForm .text-area::placeholder {
+  color: transparent;
+}
+
+#ContactForm .text-area {
+  min-height: 150px;
+  resize: vertical;
+  display: block;
+}
+
+#ContactForm .contact__button {
+  margin-top: var(--space-lg);
+}
+
+#ContactForm .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 44px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--espresso);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+#ContactForm .button:hover {
+  background: var(--text-dark);
+}
+
+#ContactForm .form__message {
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 640px) {
+  #ContactForm .contact__fields {
+    grid-template-columns: 1fr;
   }
 }

@@ -81,6 +81,35 @@
         "id": "color_rule",
         "label": "Rule / Divider",
         "default": "#DDD5C5"
+      },
+      {
+        "type": "header",
+        "content": "Peaceful Diamonds sub-brand",
+        "info": "Cool navy signature reserved for the Peaceful Diamonds (lab-grown) tier. Never used in LMNY-proper sections."
+      },
+      {
+        "type": "color",
+        "id": "color_navy",
+        "label": "Peaceful Navy",
+        "default": "#1A1F3A"
+      },
+      {
+        "type": "color",
+        "id": "color_navy_deep",
+        "label": "Peaceful Navy Deep",
+        "default": "#12162B"
+      },
+      {
+        "type": "color",
+        "id": "color_pd_blue",
+        "label": "Peaceful Blue Accent",
+        "default": "#5B7FBD"
+      },
+      {
+        "type": "color",
+        "id": "color_pd_ice",
+        "label": "Peaceful Ice",
+        "default": "#A9BEE3"
       }
     ]
   },

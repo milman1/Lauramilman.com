@@ -1,0 +1,99 @@
+<sp-product-share id="sp-{{ block.id }}-share-button"
+                  class="sp-share-button-wrapper" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} #sp-{{ block.id }}-share-button .sp-share-button {
+            --sp-border-radius: {{ setting.button_border_radius }}px;
+            --sp-text-size: {{ setting.text_size_desktop }}px;
+            --sp-text-letter-spacing: {{ setting.text_spacing }}px;
+            --sp-text-color: {{ setting.text_color }};
+
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-share-button .sp-share-button[data-type="button"] {
+            --sp-background-color: {{ setting.background_item_color }};
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-share-button .sp-share-button:hover {
+            --sp-text-color: {{ setting.text_hover_color }};
+        }
+
+        #sp-{{ section.id }} #sp-{{ block.id }}-share-button .sp-share-button[data-type="button"]:hover {
+            --sp-background-color: {{ setting.background_item_hover_color }};
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} #sp-{{ block.id }}-share-button .sp-share-button {
+                --sp-text-size: {{ setting.text_size_mobile }}px;
+            }
+
+        }
+
+    </style>
+    {%- assign share_link = product.selected_variant.url | default: product.url | prepend: request.origin -%}
+    {%- assign share_image = product.featured_image | image_url: width: 1024, height: 1024 -%}
+    {%- assign share_title = product.title | url_param_escape -%}
+    <button class="sp-share-button body-font sp-text-{{ setting.text_style }}" data-type="{{ setting.button_type }}">
+        {% if setting.icon != null %}
+            {{ setting.icon | image_url: width: 120 | image_tag }}
+        {% endif %}
+        {% if setting.button_text != empty %}
+            <span>{{ setting.button_text }}</span>
+        {% endif %}
+    </button>
+    <div class="sp-share-button-popover" data-open="false">
+        {% if setting.popup_heading_text != empty %}
+            <h4 class="sp-share-button-title body-text">{{ setting.popup_heading_text }}</h4>
+        {% endif %}
+        <div class="sp-share-links">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_link }}" target="_blank"
+               class="sp-share-link" data-type="facebook" data-plugin="sp-tooltip">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.4583 11.2501H13.5417L14.375 7.91675H11.4583V6.25008C11.4583 5.39175 11.4583 4.58341 13.125 4.58341H14.375V1.78341C14.1033 1.74758 13.0775 1.66675 11.9942 1.66675C9.73167 1.66675 8.125 3.04758 8.125 5.58341V7.91675H5.625V11.2501H8.125V18.3334H11.4583V11.2501Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-tooltip">{{ "shinepages.social.facebook" | t }}</span>
+            </a>
+            <a href="http://twitter.com/share?text={{ share_title }}&amp;url={{ share_link }}" target="_blank"
+               class="sp-share-link" data-type="twitter" data-plugin="sp-tooltip">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.96286 11.679C8.57134 12.1344 8.18537 12.5815 7.7994 13.0313C6.53043 14.5057 5.26145 15.983 3.9897 17.4574C3.97304 17.4769 3.9425 17.4963 3.91751 17.4963C3.50932 17.4991 3.10392 17.4991 2.69574 17.4963C2.69018 17.4963 2.68463 17.4935 2.66797 17.488C2.7596 17.3797 2.84846 17.2742 2.94009 17.1714C3.64261 16.3551 4.34513 15.5387 5.04764 14.7223C6.01673 13.595 6.98581 12.4704 7.9549 11.343C8.08541 11.1903 8.21591 11.0376 8.3492 10.8876C8.38252 10.8515 8.37974 10.8266 8.35197 10.7877C7.45231 9.47983 6.55264 8.16921 5.65297 6.86136C4.88104 5.734 4.10632 4.60386 3.33161 3.4765C3.1178 3.16828 2.90677 2.86006 2.69296 2.55184C2.68741 2.54074 2.67908 2.52685 2.66797 2.51019C2.69296 2.50741 2.7124 2.50464 2.73183 2.50464C4.1452 2.50464 5.55856 2.50464 6.97193 2.50464C7.01636 2.50464 7.04135 2.51852 7.06634 2.55462C7.72165 3.5126 8.37974 4.4678 9.03783 5.42578C9.6154 6.26713 10.1957 7.11126 10.7733 7.95262C10.7872 7.97206 10.8038 7.99149 10.8205 8.01649C11.0149 7.78879 11.2093 7.56387 11.4008 7.34173C12.742 5.78398 14.0832 4.22622 15.4188 2.66569C15.5188 2.54907 15.616 2.49631 15.7742 2.50186C16.1074 2.51574 16.4406 2.50741 16.7739 2.50741C16.7961 2.50741 16.8183 2.50741 16.8572 2.50741C15.0301 4.63163 13.2141 6.74196 11.3953 8.85784C13.3723 11.7318 15.3494 14.6085 17.332 17.4935C17.3014 17.4963 17.282 17.4963 17.2626 17.4963C15.852 17.4963 14.4386 17.4963 13.028 17.4963C12.9808 17.4963 12.953 17.4796 12.9281 17.4435C12.1145 16.2551 11.2981 15.0694 10.4817 13.881C9.98748 13.1618 9.49322 12.4454 9.00173 11.7262C8.99063 11.7123 8.97952 11.7012 8.96286 11.679Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-tooltip">{{ "shinepages.social.twitter" | t }}</span>
+            </a>
+            <a href="http://pinterest.com/pin/create/button/?url={{ share_link }}&amp;media=http:{{ preview_image }}&amp;description={{ share_title }}"
+               target="_blank" class="sp-share-link" data-type="pinterest" data-plugin="sp-tooltip">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.2267 1.66675C5.65877 1.66675 3.22949 4.59396 3.22949 7.78578C3.22949 9.26605 4.05661 11.112 5.38063 11.6974C5.58168 11.788 5.69106 11.7495 5.73586 11.563C5.77544 11.4214 5.94941 10.739 6.03379 10.4171C6.05983 10.314 6.04629 10.2244 5.96295 10.1275C5.52335 9.61919 5.17437 8.69311 5.17437 7.82432C5.17437 5.59818 6.94424 3.43662 9.95584 3.43662C12.5601 3.43662 14.3821 5.12836 14.3821 7.54826C14.3821 10.2828 12.9351 12.1745 11.0548 12.1745C10.0142 12.1745 9.23914 11.3578 9.48498 10.3474C9.78187 9.14417 10.3642 7.85036 10.3642 6.98261C10.3642 6.20445 9.92459 5.56067 9.02663 5.56067C7.96721 5.56067 7.10779 6.60968 7.10779 8.01808C7.10779 8.91291 7.42447 9.5171 7.42447 9.5171C7.42447 9.5171 6.37651 13.7506 6.18171 14.5413C5.85253 15.8799 6.2265 18.0477 6.2588 18.2342C6.27859 18.3373 6.39422 18.3696 6.45881 18.2852C6.56193 18.1498 7.82866 16.3424 8.18388 15.0361C8.31306 14.56 8.84329 12.6297 8.84329 12.6297C9.19226 13.26 10.1996 13.7881 11.2726 13.7881C14.4644 13.7881 16.7707 10.9828 16.7707 7.50139C16.7593 4.16374 13.9029 1.66675 10.2267 1.66675Z"
+                          fill="currentcolor"/>
+                </svg>
+                <span class="sp-tooltip">{{ "shinepages.social.pinterest" | t }}</span>
+            </a>
+            <a data-content="http:{{ preview_image }}"
+               href="//tumblr.com/widgets/share/tool?canonicalUrl={{ share_link }}" target="_blank"
+               class="sp-share-link" data-type="tumblr" data-plugin="sp-tooltip">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.9884 14.9787C13.5605 15.1529 13.1052 15.2505 12.6434 15.267C12.4236 15.2903 12.2014 15.2634 11.9935 15.1884C11.7856 15.1135 11.5974 14.9924 11.443 14.8342C11.2886 14.6761 11.172 14.485 11.1021 14.2753C11.0322 14.0656 11.0107 13.8428 11.0393 13.6237V8.43533H14.3868V5.91283H11.0509V1.66699H8.60927C8.57762 1.6698 8.54806 1.68403 8.52613 1.70704C8.5042 1.73004 8.4914 1.76024 8.49011 1.79199C8.43671 2.77758 8.09847 3.72649 7.5164 4.52363C6.93434 5.32077 6.13347 5.93188 5.21094 6.28283V8.43533H6.8976V13.882C6.8976 15.7453 8.2726 18.3945 11.9034 18.332C12.9502 18.3568 13.9721 18.0115 14.7893 17.357L13.9884 14.9787Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-tooltip">{{ "shinepages.social.tumblr" | t }}</span>
+            </a>
+            <input title="" id="input-{{ block.id }}" type="text"
+                   value="{{ share_link }}" readonly>
+
+            <a href="{{ share_link }}" target="_blank"
+               class="sp-share-link" data-type="link" data-plugin="sp-tooltip">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.79297 14.6323C1.81518 13.6437 2.14843 12.7939 2.8399 12.0997C3.95348 10.9805 5.07261 9.86972 6.18341 8.75059C6.26673 8.66728 6.31116 8.65339 6.39447 8.74781C6.52499 8.89777 6.66939 9.03662 6.81657 9.16992C6.89711 9.24212 6.88322 9.281 6.8138 9.35042C5.8224 10.3363 4.83379 11.3249 3.84795 12.3135C3.5647 12.5967 3.26478 12.8661 3.05095 13.216C2.05123 14.8544 3.05095 17.0233 4.94487 17.3065C5.87239 17.4454 6.67217 17.1705 7.3331 16.5123C8.43834 15.4126 9.54082 14.3102 10.6405 13.2021C10.7294 13.1133 10.771 13.1188 10.8488 13.2049C10.9793 13.3493 11.1182 13.4854 11.2598 13.6159C11.3403 13.6881 11.3403 13.7298 11.2598 13.8075C10.4711 14.5906 9.688 15.3793 8.9021 16.1596C8.49388 16.5651 8.11066 16.99 7.67189 17.3649C5.63079 19.1227 2.36781 17.973 1.86795 15.321C1.82352 15.0877 1.80408 14.8545 1.79297 14.6323Z"
+                          fill="currentColor"/>
+                    <path d="M14.5533 1.79419C16.4278 1.79974 17.9524 3.13548 18.1745 4.90166C18.3217 6.07356 17.9718 7.08716 17.1443 7.92304C16.0557 9.02551 14.9532 10.1169 13.8591 11.2166C13.773 11.3027 13.7341 11.2943 13.6591 11.211C13.5258 11.0638 13.3842 10.9222 13.237 10.7889C13.1593 10.7167 13.1648 10.6806 13.237 10.6056C14.3284 9.51982 15.4197 8.42846 16.5083 7.33709C17.5941 6.25128 17.6302 4.62396 16.5916 3.49372C15.603 2.41624 13.7869 2.37458 12.7483 3.40763C11.6347 4.51843 10.5211 5.63201 9.4103 6.74559C9.32976 6.82612 9.28255 6.84834 9.19924 6.75115C9.06873 6.60119 8.92432 6.46234 8.77714 6.32904C8.69661 6.25684 8.70771 6.22074 8.77992 6.14853C9.69355 5.24045 10.5989 4.3296 11.5125 3.42151C11.7902 3.14381 12.0512 2.84945 12.3595 2.59952C13.0232 2.06634 13.7841 1.79974 14.5533 1.79419Z"
+                          fill="currentColor"/>
+                    <path d="M7.08872 13.5409C7.05817 13.5132 7.03596 13.4965 7.01652 13.4771C6.85267 13.3132 6.69161 13.1494 6.52499 12.9883C6.47778 12.9411 6.46945 12.9105 6.52499 12.8689C6.54443 12.855 6.55831 12.8356 6.57497 12.8189C8.67439 10.7195 10.7766 8.62007 12.8732 6.5151C12.9593 6.42901 12.9982 6.43734 13.0732 6.51788C13.2065 6.66506 13.3481 6.80669 13.4953 6.93998C13.573 7.01218 13.5703 7.04829 13.4953 7.12326C12.6872 7.92582 11.8846 8.73115 11.0793 9.53648C9.77686 10.8361 8.47445 12.1385 7.17203 13.441C7.14426 13.4715 7.11927 13.5048 7.08872 13.5409Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-tooltip" data-text="{{ "shinepages.general.link" | t }}"
+                      data-text-second="{{ "shinepages.general.link_copied" | t }}">{{ "shinepages.general.link" | t }}</span>
+            </a>
+        </div>
+    </div>
+</sp-product-share>

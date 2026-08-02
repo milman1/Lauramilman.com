@@ -1,0 +1,374 @@
+{%- comment -%}
+  Laura Milman New York — Ring Builder
+  Clones PD's two-path entry (Start with a Diamond / Start with a Setting)
+  WITHOUT cloning PD's dead "Loose Diamonds → /collections/diamonds" 404.
+
+  Diamond-path wiring (Belgium supplier feed):
+  PD's diamond search runs on a custom Belgium diamond-supplier API integration,
+  not an App Store app. Porting it to LMNY needs (1) the PD theme/app-proxy code
+  that calls the API, (2) API credentials for this store, (3) markup rules.
+  Until that's ported, the diamond path routes to the private-client channel —
+  a real, staffed diamond-sourcing service — so nothing dead ships.
+  When the feed is live, point "Diamond path CTA link" at the mounted route
+  (app proxy or page) in the customizer. See THEME_SETUP.md → Ring Builder.
+{%- endcomment -%}
+
+<section class="lm-builder" aria-label="Ring builder">
+  <div class="lm-builder__container">
+
+    <header class="lm-builder__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="lm-builder__title">{{ section.settings.title }}</h1>
+      {%- if section.settings.description != blank -%}
+        <p class="lm-builder__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="lm-builder__paths">
+
+      <article class="lm-builder__path">
+        <div class="lm-builder__path-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+        </div>
+        <h2 class="lm-builder__path-title">{{ section.settings.diamond_title }}</h2>
+        <p class="lm-builder__path-text">{{ section.settings.diamond_text }}</p>
+        <a href="{{ section.settings.diamond_cta_url | default: '/pages/private-clients' }}" class="btn btn--gold">
+          {{ section.settings.diamond_cta_text }}
+        </a>
+        {%- if section.settings.diamond_note != blank -%}
+          <p class="lm-builder__path-note">{{ section.settings.diamond_note }}</p>
+        {%- endif -%}
+      </article>
+
+      <div class="lm-builder__or" aria-hidden="true"><span>or</span></div>
+
+      <article class="lm-builder__path">
+        <div class="lm-builder__path-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><path d="m9 7 1.5-4h3L15 7"/><path d="M9 7h6"/></svg>
+        </div>
+        <h2 class="lm-builder__path-title">{{ section.settings.setting_title }}</h2>
+        <p class="lm-builder__path-text">{{ section.settings.setting_text }}</p>
+        <a href="{{ section.settings.setting_cta_url | default: '/collections/engagement-rings' }}" class="btn btn--outline">
+          {{ section.settings.setting_cta_text }}
+        </a>
+        {%- if section.settings.setting_note != blank -%}
+          <p class="lm-builder__path-note">{{ section.settings.setting_note }}</p>
+        {%- endif -%}
+      </article>
+
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="lm-builder__steps">
+        {%- for block in section.blocks -%}
+          <div class="lm-builder__step" {{ block.shopify_attributes }}>
+            <span class="lm-builder__step-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+            <h3 class="lm-builder__step-title">{{ block.settings.title }}</h3>
+            <p class="lm-builder__step-text">{{ block.settings.text }}</p>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .lm-builder {
+    background: var(--warm-white, #FDFAF6);
+    padding: 3rem 2rem 5rem;
+  }
+
+  .lm-builder__container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .lm-builder__header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 3.5rem;
+  }
+
+  .lm-builder__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .lm-builder__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .lm-builder__paths {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: stretch;
+    margin-bottom: 4rem;
+  }
+
+  .lm-builder__path {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-lg, 12px);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .lm-builder__path:hover {
+    border-color: rgba(201, 160, 80, 0.5);
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+  }
+
+  .lm-builder__path-icon {
+    color: var(--gold, #C9A050);
+    margin-bottom: 1.5rem;
+  }
+
+  .lm-builder__path-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.85rem;
+  }
+
+  .lm-builder__path-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.75rem;
+    flex: 1;
+  }
+
+  .lm-builder__path-note {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-style: italic;
+    color: var(--text-muted, #8A8070);
+    margin: 1rem 0 0;
+  }
+
+  .lm-builder__or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lm-builder__or span {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold, #C9A050);
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .lm-builder__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-builder__step {
+    text-align: center;
+  }
+
+  .lm-builder__step-num {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.1rem;
+    color: var(--gold, #C9A050);
+    letter-spacing: 0.1em;
+  }
+
+  .lm-builder__step-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0;
+  }
+
+  .lm-builder__step-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.83rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .lm-builder__paths {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    .lm-builder__or span {
+      width: 44px;
+      height: 44px;
+    }
+    .lm-builder__steps {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-builder {
+      padding: 2rem 1.25rem 3.5rem;
+    }
+    .lm-builder__path {
+      padding: 2.25rem 1.5rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Ring Builder",
+  "tag": "section",
+  "class": "section-ring-builder",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Ring Builder"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Build Your Ring"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Two ways to begin. Start with the stone that speaks to you, or start with the setting you love — we'll bring the two together in Italy."
+    },
+    {
+      "type": "header",
+      "content": "Path 1 — Start with a Diamond"
+    },
+    {
+      "type": "text",
+      "id": "diamond_title",
+      "label": "Title",
+      "default": "Start with a Diamond"
+    },
+    {
+      "type": "textarea",
+      "id": "diamond_text",
+      "label": "Text",
+      "default": "Work with our specialists to source your natural diamond — cut, color, clarity and carat matched to your brief through our Diamond District network."
+    },
+    {
+      "type": "text",
+      "id": "diamond_cta_text",
+      "label": "CTA text",
+      "default": "Source Your Diamond"
+    },
+    {
+      "type": "url",
+      "id": "diamond_cta_url",
+      "label": "CTA link",
+      "info": "Defaults to /pages/private-clients. Once the loose-diamond search feed is live on this store, point this at that route instead."
+    },
+    {
+      "type": "text",
+      "id": "diamond_note",
+      "label": "Note",
+      "default": "Guided one-on-one by a diamond specialist"
+    },
+    {
+      "type": "header",
+      "content": "Path 2 — Start with a Setting"
+    },
+    {
+      "type": "text",
+      "id": "setting_title",
+      "label": "Title",
+      "default": "Start with a Setting"
+    },
+    {
+      "type": "textarea",
+      "id": "setting_text",
+      "label": "Text",
+      "default": "Browse solitaires, hidden halos, three-stone and bespoke settings — then pair yours with the perfect center stone."
+    },
+    {
+      "type": "text",
+      "id": "setting_cta_text",
+      "label": "CTA text",
+      "default": "Browse Settings"
+    },
+    {
+      "type": "url",
+      "id": "setting_cta_url",
+      "label": "CTA link",
+      "info": "Defaults to /collections/engagement-rings. Switch to /collections/ring-settings once setting-only products are migrated."
+    },
+    {
+      "type": "text",
+      "id": "setting_note",
+      "label": "Note",
+      "default": "Priced without center stone"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "How-it-works step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Choose Your Path"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ring Builder",
+      "blocks": [
+        { "type": "step", "settings": { "title": "Choose Your Path", "text": "Begin with a diamond or a setting — whichever inspires you first." } },
+        { "type": "step", "settings": { "title": "Pair & Perfect", "text": "We match stone and setting, and confirm every detail with you before a single thing is made." } },
+        { "type": "step", "settings": { "title": "Crafted in Italy", "text": "Your ring is finished by master goldsmiths and delivered fully insured, with papers." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

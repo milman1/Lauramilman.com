@@ -1,0 +1,339 @@
+{%- comment -%}
+  Laura Milman New York — Shop the Look / Stack & Style
+  Mirrors PD's curated-collection module: editorial image on one side,
+  curated pieces from a chosen collection on the other.
+{%- endcomment -%}
+
+{%- liquid
+  assign look_collection = section.settings.collection
+  assign has_picked_products = false
+  for block in section.blocks
+    if block.type == 'product' and block.settings.product != blank
+      assign has_picked_products = true
+      break
+    endif
+  endfor
+-%}
+
+<section class="lm-look" aria-label="{{ section.settings.title | default: 'Shop the Look' | escape }}">
+  <div class="lm-look__container">
+
+    <div class="lm-look__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      {%- if section.settings.title != blank -%}
+        <h2 class="lm-look__title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-look__layout">
+
+      <div class="lm-look__editorial">
+        {%- if section.settings.editorial_image != blank -%}
+          <img
+            src="{{ section.settings.editorial_image | image_url: width: 1000 }}"
+            srcset="{{ section.settings.editorial_image | image_url: width: 600 }} 600w,
+                    {{ section.settings.editorial_image | image_url: width: 1000 }} 1000w"
+            sizes="(max-width: 992px) 100vw, 50vw"
+            alt="{{ section.settings.title | default: 'Shop the look' | escape }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- elsif look_collection != blank and look_collection.image -%}
+          <img
+            src="{{ look_collection.image | image_url: width: 1000 }}"
+            alt="{{ look_collection.title | escape }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- elsif look_collection != blank and look_collection.products.first.featured_image -%}
+          <img
+            src="{{ look_collection.products.first.featured_image | image_url: width: 1000 }}"
+            alt="{{ look_collection.title | escape }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- endif -%}
+        <div class="lm-look__editorial-overlay" aria-hidden="true"></div>
+        {%- if look_collection != blank -%}
+          <div class="lm-look__editorial-caption">
+            <span class="lm-look__editorial-name">{{ section.settings.caption_title | default: look_collection.title }}</span>
+            <span class="lm-look__editorial-count">{{ look_collection.products_count }} {{ look_collection.products_count | pluralize: 'piece', 'pieces' }} · Curated for you</span>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="lm-look__products">
+        {%- if has_picked_products -%}
+          {%- for block in section.blocks limit: 4 -%}
+            {%- assign p = block.settings.product -%}
+            {%- if block.type == 'product' and p != blank -%}
+              <a href="{{ p.url }}" class="lm-look__item" {{ block.shopify_attributes }}>
+                {%- if p.featured_image -%}
+                  <img src="{{ p.featured_image | image_url: width: 400 }}" alt="{{ p.featured_image.alt | default: p.title | escape }}" loading="lazy">
+                {%- endif -%}
+                <div class="lm-look__item-info">
+                  <span class="lm-look__item-title">{{ p.title }}</span>
+                  <span class="lm-look__item-price">{{ p.price | money }}</span>
+                  <span class="lm-look__item-cta">Shop Now</span>
+                </div>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- elsif look_collection != blank -%}
+          {%- for p in look_collection.products limit: 4 -%}
+            <a href="{{ p.url }}" class="lm-look__item">
+              {%- if p.featured_image -%}
+                <img src="{{ p.featured_image | image_url: width: 400 }}" alt="{{ p.featured_image.alt | default: p.title | escape }}" loading="lazy">
+              {%- endif -%}
+              <div class="lm-look__item-info">
+                <span class="lm-look__item-title">{{ p.title }}</span>
+                <span class="lm-look__item-price">{{ p.price | money }}</span>
+                <span class="lm-look__item-cta">Shop Now</span>
+              </div>
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if look_collection != blank -%}
+          <div class="lm-look__footer">
+            <a href="{{ look_collection.url }}" class="btn btn--outline">
+              {{ section.settings.cta_text | default: 'View Full Collection' }}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .lm-look {
+    background: var(--warm-white, #FDFAF6);
+    padding: 5rem 0;
+  }
+
+  .lm-look__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-look__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .lm-look__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 0;
+  }
+
+  .lm-look__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: stretch;
+  }
+
+  .lm-look__editorial {
+    position: relative;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    min-height: 480px;
+    background: var(--cream, #FAF6F0);
+  }
+
+  .lm-look__editorial img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lm-look__editorial-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(30, 17, 9, 0.75) 0%, transparent 45%);
+  }
+
+  .lm-look__editorial-caption {
+    position: absolute;
+    left: 2rem;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lm-look__editorial-name {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.75rem;
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-look__editorial-count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-light, #E2C27A);
+  }
+
+  .lm-look__products {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-auto-rows: min-content;
+    gap: 1.25rem;
+  }
+
+  .lm-look__item {
+    display: flex;
+    flex-direction: column;
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    overflow: hidden;
+    text-decoration: none;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .lm-look__item:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+
+  .lm-look__item img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--off-white, #F5F0E8);
+  }
+
+  .lm-look__item-info {
+    padding: 0.9rem 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .lm-look__item-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 0.98rem;
+    line-height: 1.3;
+    color: var(--text-dark, #2C1810);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lm-look__item-price {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-look__item-cta {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dark, #A88340);
+    margin-top: 0.2rem;
+  }
+
+  .lm-look__footer {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 992px) {
+    .lm-look__layout {
+      grid-template-columns: 1fr;
+    }
+    .lm-look__editorial {
+      min-height: 340px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-look {
+      padding: 3.5rem 0;
+    }
+    .lm-look__products {
+      gap: 0.75rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Shop the Look",
+  "tag": "section",
+  "class": "section-shop-the-look",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Shop the Look"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Stack & Style"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "text",
+      "id": "caption_title",
+      "label": "Editorial caption override"
+    },
+    {
+      "type": "image_picker",
+      "id": "editorial_image",
+      "label": "Editorial image",
+      "info": "Lifestyle photography for the left panel. Falls back to the collection image."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "View Full Collection"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Curated product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the Look"
+    }
+  ]
+}
+{% endschema %}

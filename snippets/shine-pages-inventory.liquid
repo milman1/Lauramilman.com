@@ -1,0 +1,113 @@
+<div id="sp-{{ section.id }}-inventory"
+     class="body-font sp-text-{{ setting.inventory_text_style }} {% if product.selected_or_first_available_variant.inventory_management != 'shopify' %}visually-hidden{% endif %}"
+        {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }}-inventory {
+            --sp-text-color: {{ setting.inventory_text_color }};
+            --sp-font-size: {{ setting.inventory_font_size }}px;
+            --sp-letter-spacing: {{ setting.inventory_text_spacing }}px;
+
+            display: flex;
+            width: 100%;
+            align-items: center;
+            column-gap: 5px;
+
+            color: var(--sp-text-color);
+            font-size: var(--sp-font-size);
+            letter-spacing: var(--sp-text-letter-spacing);
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }}-inventory {
+                --sp-font-size: {{ setting.inventory_font_size_mobile }}px;
+            }
+        }
+
+        #sp-{{ section.id }}-inventory .icon-low-stock rect {
+            stroke: {{ setting.inventory_low_stock_color }};
+            opacity: 0.4;
+        }
+
+        #sp-{{ section.id }}-inventory .icon-low-stock circle {
+            fill: {{ setting.inventory_low_stock_color }};
+        }
+
+        #sp-{{ section.id }}-inventory .icon-in-stock rect {
+            stroke: {{ setting.inventory_in_stock_color }};
+            opacity: 0.4;
+        }
+
+        #sp-{{ section.id }}-inventory .icon-in-stock circle {
+            fill: {{ setting.inventory_in_stock_color }};
+        }
+
+        #sp-{{ section.id }}-inventory .icon-out-stock rect {
+            stroke: {{ setting.inventory_out_stock_color }};
+            opacity: 0.4;
+        }
+
+        #sp-{{ section.id }}-inventory .icon-out-stock circle {
+            fill: {{ setting.inventory_out_stock_color }};
+        }
+
+        #sp-{{ section.id }}-inventory .icon-continue-stock rect {
+            stroke: {{ setting.inventory_out_stock_continue_color }};
+            opacity: 0.4;
+        }
+
+        #sp-{{ section.id }}-inventory .icon-continue-stock circle {
+            fill: {{ setting.inventory_out_stock_continue_color }};
+        }
+    </style>
+    {%- if product.selected_or_first_available_variant.inventory_management == 'shopify' -%}
+        {%- if product.selected_or_first_available_variant.inventory_quantity > 0 -%}
+            {%- if product.selected_or_first_available_variant.inventory_quantity <= block.settings.inventory_threshold -%}
+                <svg class="icon-low-stock" width="15" height="16"
+                     viewBox="0 0 13 14" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="1.11328" width="11.7739" height="11.7739"
+                          rx="5.88696" stroke="#FFF"/>
+                    <circle cx="6.38696" cy="7.00024" r="4.38696" fill="#FFF"/>
+                </svg>
+                {%- if block.settings.show_inventory_quantity -%}
+                    {{- 'shinepages.product.inventory_low_stock_show_count' | t: quantity: product.selected_or_first_available_variant.inventory_quantity -}}
+                {%- else -%}
+                    {{- 'shinepages.product.inventory_low_stock' | t -}}
+                {%- endif -%}
+            {%- else -%}
+                <svg class="icon-in-stock" width="15" height="16"
+                     viewBox="0 0 13 14" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="1.11328" width="11.7739" height="11.7739"
+                          rx="5.88696" stroke="#FFF"/>
+                    <circle cx="6.38696" cy="7.00024" r="4.38696" fill="#FFF"/>
+                </svg>
+                {%- if block.settings.show_inventory_quantity -%}
+                    {{- 'shinepages.product.inventory_in_stock_show_count' | t: quantity: product.selected_or_first_available_variant.inventory_quantity -}}
+                {%- else -%}
+                    {{- 'shinepages.product.inventory_in_stock' | t -}}
+                {%- endif -%}
+            {%- endif -%}
+        {%- else -%}
+            {%- if product.selected_or_first_available_variant.inventory_policy == 'continue' -%}
+                <svg class="icon-continue-stock" width="15" height="16"
+                     viewBox="0 0 13 14" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="1.11328" width="11.7739" height="11.7739"
+                          rx="5.88696" stroke="#FFF"/>
+                    <circle cx="6.38696" cy="7.00024" r="4.38696" fill="#FFF"/>
+                </svg>
+                {{- 'shinepages.product.inventory_out_of_stock_continue_selling' | t -}}
+            {%- else -%}
+                <svg class="icon-out-stock" width="15" height="16"
+                     viewBox="0 0 13 14" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="1.11328" width="11.7739" height="11.7739"
+                          rx="5.88696" stroke="#FFF"/>
+                    <circle cx="6.38696" cy="7.00024" r="4.38696" fill="#FFF"/>
+                </svg>
+                {{- 'shinepages.product.inventory_out_of_stock' | t -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endif -%}
+</div>

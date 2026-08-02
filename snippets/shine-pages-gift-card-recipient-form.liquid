@@ -1,0 +1,196 @@
+{%- assign gift_card_recipient_control_flag = 'properties[__shopify_send_gift_card_to_recipient]' -%}
+<sp-recipient-form
+        class="sp-recipient-form"
+        data-section-id="{{ section.id }}"
+        data-product-variant-id="{{ product.selected_or_first_available_variant.id }}"
+>
+    <div class="sp-field sp-checkbox-field">
+        <label class="sp-label-checkbox sp-recipient-checkbox">
+            <input id="sp-recipient-checkbox-{{ section.id }}"
+                   type="checkbox"
+                   name="{{ gift_card_recipient_control_flag }}"
+                   disabled
+            >
+            <span class="label-box"></span>
+            <svg class="sp-icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M14.0303 7.21967C14.3232 7.51256 14.3232 7.98744 14.0303 8.28033L9.53033 12.7803C9.23744 13.0732 8.76256 13.0732 8.46967 12.7803L6.21967 10.5303C5.92678 10.2374 5.92678 9.76256 6.21967 9.46967C6.51256 9.17678 6.98744 9.17678 7.28033 9.46967L9 11.1893L12.9697 7.21967C13.2626 6.92678 13.7374 6.92678 14.0303 7.21967Z"
+                      fill="currentColor"/>
+            </svg>
+            <span>{{ 'shinepages.recipient.form.checkbox' | t }}</span>
+        </label>
+    </div>
+    <div class="sp-product-form-recipient-error-message-wrapper" role="alert"
+         {% unless form.errors %}hidden{% endunless %}>
+        <div class="sp-form-message-heading" tabindex="-1" autofocus>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                      fill="currentColor"/>
+            </svg>
+            <span class="sp-error-message">{{ 'shinepages.contact.form.error_heading' | t }}</span>
+        </div>
+        <ul>
+            {%- if form.errors -%}
+                {%- for field in form.errors -%}
+                    <li class="sp-error-message">
+                        {%- if field == 'form' -%}
+                            {{ form.errors.messages[field] }}
+                        {%- else -%}
+                            <a href="#sp-recipient-{{ field }}-{{ section.id }}">
+                                {{ form.errors.messages[field] }}
+                            </a>
+                        {%- endif -%}
+                    </li>
+                {%- endfor -%}
+            {%- endif -%}
+        </ul>
+    </div>
+    <p id="sp-recipient-fields-live-region-{{ section.id }}" class="visually-hidden" role="status"></p>
+    <div class="sp-recipient-fields sp-fields">
+        <div class="sp-recipient-fields-field sp-field">
+            <div class="sp-field-input">
+                <label class="sp-form-label" for="sp-recipient-email-{{ section.id }}">
+                    <span class="recipient-email-label required">{{ 'shinepages.recipient.form.email_label' | t }}</span>
+                    <span class="recipient-email-label optional">
+                          {{- 'shinepages.recipient.form.email_label_optional_for_no_js_behavior' | t -}}
+                        </span>
+                </label>
+                <input
+                        class="sp-form-input"
+                        id="sp-recipient-email-{{ section.id }}"
+                        type="email"
+                        name="properties[Recipient email]"
+                        placeholder=""
+                        value="{{ form.email }}"
+                        {% if form.errors contains 'email' %}
+                            aria-invalid="true"
+                            aria-describedby="sp-recipient-form-email-error-{{ section.id }}"
+                        {% endif %}
+                >
+            </div>
+            <div id="sp-recipient-form-email-error-{{ section.id }}"
+                 class="sp-field-error {% unless form.errors contains 'email' %} hidden{% endunless %}"
+            >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-error-message">
+                        {%- if form.errors contains 'email' -%}
+                            {{ form.errors.messages.email }}.
+                        {%- endif -%}
+                      </span>
+            </div>
+        </div>
+
+        <div class="sp-recipient-fields-field sp-field">
+            <div class="sp-field-input">
+                <label class="sp-form-label" for="sp-recipient-name-{{ section.id }}">
+                    {{- 'shinepages.recipient.form.name_label' | t -}}
+                </label>
+                <input
+                        class="sp-form-input"
+                        autocomplete="name"
+                        type="text"
+                        id="sp-recipient-name-{{ section.id }}"
+                        name="properties[Recipient name]"
+                        value="{{ form.name }}"
+                        placeholder=""
+                        {% if form.errors contains 'name' %}
+                            aria-invalid="true"
+                            aria-describedby="sp-recipient-form-name-error-{{ section.id }}"
+                        {% endif %}
+                >
+            </div>
+            <div id="sp-recipient-form-name-error-{{ section.id }}"
+                 class="sp-field-error{% unless form.errors contains 'name' %} hidden{% endunless %}"
+            >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-error-message">
+                        {%- if form.errors contains 'name' -%}
+                            {{ form.errors.messages.name }}.
+                        {%- endif -%}
+                      </span>
+            </div>
+        </div>
+        <div class="sp-recipient-fields-field sp-field">
+            {%- assign max_chars_message = 200 -%}
+            {%- assign max_chars_message_rendered = 'shinepages.recipient.form.max_characters' | t: max_chars: max_chars_message -%}
+            {%- assign message_label_rendered = 'shinepages.recipient.form.message_label' | t -%}
+            <div class="sp-field-input">
+                <label class="sp-form-label" for="sp-recipient-message-{{ section.id }}">
+                    {{ message_label_rendered }}
+                </label>
+                <textarea
+                        rows="10"
+                        id="sp-recipient-message-{{ section.id }}"
+                        class="sp-form-input"
+                        name="properties[Message]"
+                        placeholder=""
+                        maxlength="{{ max_chars_message }}"
+                        aria-label="{{ message_label_rendered }} {{ max_chars_message_rendered }}"
+                        {% if form.errors contains 'message' %}
+                            aria-invalid="true"
+                            aria-describedby="sp-recipient-form-message-error-{{ section.id }}"
+                        {% endif %}
+                      >{{ form.message }}</textarea>
+                <div class="sp-form-description">
+                    <span>{{ max_chars_message_rendered }}</span>
+                </div>
+            </div>
+            <div id="sp-recipient-form-message-error-{{ section.id }}"
+                 class="sp-field-error{% unless form.errors contains 'message' %} hidden{% endunless %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-error-message">
+                        {%- if form.errors contains 'message' -%}
+                            {{ form.errors.messages.message }}.
+                        {%- endif -%}
+                      </span>
+            </div>
+        </div>
+        <div class="sp-recipient-fields-field sp-field">
+            <div class="sp-field-input">
+                <label class="sp-form-label" for="sp-recipient-send-on-{{ section.id }}">
+                    {{ 'shinepages.recipient.form.send_on_label' | t }}
+                </label>
+                <input
+                        class="sp-form-input"
+                        autocomplete="send_on"
+                        type="date"
+                        id="sp-recipient-send-on-{{ section.id }}"
+                        name="properties[Send on]"
+                        placeholder=""
+                        pattern="\d{4}-\d{2}-\d{2}"
+                        value="{{ form.send_on }}"
+                        {% if form.errors contains 'send_on' %}
+                            aria-invalid="true"
+                            aria-describedby="sp-recipient-form-send_on-error-{{ section.id }}"
+                        {% endif %}
+                >
+            </div>
+            <div id="sp-recipient-form-send_on-error-{{ section.id }}"
+                 class="sp-field-error{% unless form.errors contains 'send_on' %} hidden{% endunless %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 0C3.58198 0 0 3.58198 0 8C0 12.4185 3.58198 16 8 16C12.4185 16 16 12.419 16 8C16 3.58198 12.4185 0 8 0ZM8 14.5C4.41002 14.5 1.50002 11.59 1.50002 8C1.50002 4.41002 4.41002 1.50002 8 1.50002C11.59 1.50002 14.5 4.41002 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM8.0005 3.50848C7.42752 3.50848 6.99398 3.80751 6.99398 4.29049V8.72048C6.99398 9.20397 7.42746 9.50198 8.0005 9.50198C8.5595 9.50198 9.00703 9.1915 9.00703 8.72048V4.29049C9.00697 3.81897 8.5595 3.50848 8.0005 3.50848ZM8.0005 10.5C7.45001 10.5 7.00198 10.948 7.00198 11.499C7.00198 12.049 7.45001 12.497 8.0005 12.497C8.551 12.497 8.99852 12.049 8.99852 11.499C8.99847 10.948 8.551 10.5 8.0005 10.5Z"
+                          fill="currentColor"/>
+                </svg>
+                <span class="sp-error-message">
+                        {%- if form.errors contains 'send_on' -%}
+                            {{ form.errors.messages.send_on }}.
+                        {%- endif -%}
+                      </span>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="{{ gift_card_recipient_control_flag }}" value="if_present"
+           id="sp-recipient-control-{{ section.id }}">
+    <input type="hidden" name="properties[__shopify_offset]" value=""
+           id="sp-recipient-timezone-offset-{{ section.id }}" disabled>
+</sp-recipient-form>

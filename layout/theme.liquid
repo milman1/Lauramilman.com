@@ -24,7 +24,7 @@
     </title>
 
     {% if request.page_type == 'index' %}
-      <meta name="description" content="Exceptional lab-grown diamond fine jewelry. Ethically grown, exquisitely crafted in New York. 10+ carat collections, free shipping, 30-day returns.">
+      <meta name="description" content="Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison pieces from Cartier, Van Cleef & Arpels, and Bvlgari. Free shipping, 30-day returns.">
     {% elsif page_description %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
@@ -33,9 +33,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 
     {{ 'theme.css' | asset_url | stylesheet_tag }}
 
@@ -55,6 +55,10 @@
         --text-wine: {{ settings.color_text_wine | default: '#4A2018' }};
         --text-muted: {{ settings.color_text_muted | default: '#8A8070' }};
         --rule-light: {{ settings.color_rule | default: '#DDD5C5' }};
+        --navy: {{ settings.color_navy | default: '#1A1F3A' }};
+        --navy-deep: {{ settings.color_navy_deep | default: '#12162B' }};
+        --pd-blue: {{ settings.color_pd_blue | default: '#5B7FBD' }};
+        --pd-ice: {{ settings.color_pd_ice | default: '#A9BEE3' }};
       }
     {% endstyle %}
 
@@ -67,7 +71,7 @@
       "name": "Laura Milman New York",
       "url": "{{ shop.url }}",
       "logo": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}",
-      "description": "Exceptional lab-grown diamond fine jewelry. Ethically grown, exquisitely crafted in New York. 10+ carat collections.",
+      "description": "Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison estate pieces.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "New York",
@@ -86,6 +90,7 @@
 
   <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
     {% section 'header' %}
+    {% section 'popular-searches' %}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {{ content_for_layout }}

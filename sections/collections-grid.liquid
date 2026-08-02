@@ -1,6 +1,4 @@
-{%- assign variant = settings.hero_variant -%}
-
-<div class="collections-section{% if variant == 'editorial' %} collections-section--editorial{% endif %}">
+<div class="collections-section">
   <div class="collections-header">
     <div>
       {%- if section.settings.eyebrow != blank -%}
@@ -15,7 +13,7 @@
     {%- endif -%}
   </div>
 
-  <div class="collections-grid{% if variant == 'minimal' %} collections-grid--minimal{% endif %}">
+  <div class="collections-grid">
     {%- for block in section.blocks -%}
       {%- assign collection = collections[block.settings.collection] -%}
       {%- if collection != blank -%}
@@ -40,7 +38,7 @@
           </div>
           <div class="collection-card__info">
             <h3 class="collection-card__name">{{ collection.title }}</h3>
-            <div class="collection-card__count">{{ collection.products_count }} Pieces</div>
+            <div class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'Piece', 'Pieces' }}</div>
           </div>
         </a>
       {%- else -%}
@@ -106,6 +104,7 @@
     {
       "name": "Collections Grid",
       "blocks": [
+        { "type": "collection" },
         { "type": "collection" },
         { "type": "collection" },
         { "type": "collection" },
