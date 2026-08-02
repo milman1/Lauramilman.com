@@ -1,0 +1,23 @@
+{
+  "sections": {
+    "main": {
+      "type": "size-guide",
+      "blocks": {
+        "tip-paper": { "type": "tip", "settings": { "text": "Wrap a thin strip of paper snugly around the base of your finger and mark where it overlaps. Measure the length in millimeters — that's your circumference." } },
+        "tip-evening": { "type": "tip", "settings": { "text": "Measure at the end of the day, when your fingers are at their largest. Avoid measuring when your hands are cold." } },
+        "tip-existing": { "type": "tip", "settings": { "text": "If a ring that fits is already in hand, measure its inside diameter and match it to the table above." } },
+        "tip-wide": { "type": "tip", "settings": { "text": "Wider bands wear more snugly — for bands over 6mm, consider going up half a size." } }
+      },
+      "block_order": ["tip-paper", "tip-evening", "tip-existing", "tip-wide"],
+      "settings": {
+        "eyebrow": "Fit & Sizing",
+        "title": "Ring Size Guide",
+        "intro": "Find your size with confidence — and if you're between sizes or buying as a surprise, we'll help you get it right.",
+        "footer_text": "Unsure between two sizes? Complimentary resizing is included on most rings.",
+        "cta_text": "Ask a Specialist",
+        "cta_url": "/pages/private-clients"
+      }
+    }
+  },
+  "order": ["main"]
+}

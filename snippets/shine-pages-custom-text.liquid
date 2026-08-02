@@ -1,0 +1,20 @@
+<div id="sp-{{ block.id }}-custom-text"
+     class="sp-custom-text body-font" {{ block.shopify_attributes }}>
+    <style>
+        #sp-{{ section.id }} #sp-{{ block.id }}-custom-text * {
+            --sp-font-size: {{ setting.heading_size_desktop }}px;
+            --sp-text-color: {{ setting.text_color | default: "transparent" }};
+            --sp-letter-spacing: {{ setting.text_heading_spacing }}px;
+        }
+        #sp-{{ section.id }} #sp-{{ block.id }}-custom-text ul {
+            margin: 0;
+        }
+
+        @media (max-width: 767px) {
+            #sp-{{ section.id }} #sp-{{ block.id }}-custom-text {
+                --sp-font-size: {{ setting.heading_size_mobile }}px;
+            }
+        }
+    </style>
+    {{- setting.custom_text -}}
+</div>

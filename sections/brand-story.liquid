@@ -43,6 +43,25 @@
       {%- if section.settings.signature != blank -%}
         <p class="lm-story__signature">{{ section.settings.signature }}</p>
       {%- endif -%}
+
+      {%- if section.settings.cta_text != blank -%}
+        <div class="lm-story__cta">
+          <a href="{{ section.settings.cta_url | default: '/pages/lauras-story' }}" class="btn btn--outline">
+            {{ section.settings.cta_text }}
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="lm-story__stats">
+          {%- for block in section.blocks -%}
+            <div class="lm-story__stat" {{ block.shopify_attributes }}>
+              <span class="lm-story__stat-num">{{ block.settings.value }}</span>
+              <span class="lm-story__stat-label">{{ block.settings.label }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
     </div>
 
   </div>
@@ -51,16 +70,17 @@
 <style>
   .lm-story {
     background: var(--off-white, #F5F0E8);
-    padding: 6rem 2rem;
+    padding: 6rem 0;
   }
 
   .lm-story__container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 4rem;
     align-items: center;
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
+    padding: 0 var(--container-padding);
   }
 
   .lm-story__portrait img {
@@ -123,14 +143,49 @@
     font-family: var(--font-heading, 'Cormorant Garamond', serif);
     font-size: 1.1rem;
     font-style: italic;
-    color: var(--gold, #C1A784);
+    color: var(--gold, #C9A050);
     margin-top: 2rem;
+  }
+
+  .lm-story__cta {
+    margin-top: 1.75rem;
+  }
+
+  .lm-story__stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-story__stat-num {
+    display: block;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold, #C9A050);
+    line-height: 1.1;
+  }
+
+  .lm-story__stat-label {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+    margin-top: 0.35rem;
   }
 
   @media (max-width: 992px) {
     .lm-story__container {
       grid-template-columns: 1fr;
       gap: 2.5rem;
+    }
+    .lm-story__stats {
+      justify-content: center;
     }
     .lm-story__portrait img {
       max-width: 480px;
@@ -149,7 +204,7 @@
 
   @media (max-width: 768px) {
     .lm-story {
-      padding: 3.5rem 1rem;
+      padding: 3.5rem 0;
     }
     .lm-story__portrait img {
       max-width: 100%;
@@ -188,14 +243,51 @@
       "default": "— Laura Milman"
     },
     {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "Read Laura's Story"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link",
+      "info": "Defaults to /pages/lauras-story"
+    },
+    {
       "type": "image_picker",
       "id": "portrait_image",
       "label": "Portrait image"
     }
   ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "30+"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Years in the Diamond District"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Brand Story"
+      "name": "Brand Story",
+      "blocks": [
+        { "type": "stat", "settings": { "value": "30+", "label": "Years in the Diamond District" } },
+        { "type": "stat", "settings": { "value": "NYC", "label": "Designed in New York" } },
+        { "type": "stat", "settings": { "value": "Italy", "label": "Crafted by Master Goldsmiths" } }
+      ]
     }
   ]
 }

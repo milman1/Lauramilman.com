@@ -1,0 +1,447 @@
+{%- comment -%}
+  Laura Milman New York — Private Client / Book a Consultation page
+  The high-touch channel: consultation request form + what to expect.
+  Kept free of Peaceful Diamonds cross-sell by design.
+{%- endcomment -%}
+
+<section class="lm-consult" aria-label="Book a consultation">
+  <div class="lm-consult__container">
+
+    <div class="lm-consult__info">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="lm-consult__title">{{ section.settings.title | default: page.title }}</h1>
+      {%- if section.settings.intro != blank -%}
+        <p class="lm-consult__intro">{{ section.settings.intro }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="lm-consult__expect">
+          <h2 class="lm-consult__expect-title">{{ section.settings.expect_title }}</h2>
+          {%- for block in section.blocks -%}
+            <div class="lm-consult__step" {{ block.shopify_attributes }}>
+              <span class="lm-consult__step-num">{{ forloop.index }}</span>
+              <div>
+                <span class="lm-consult__step-title">{{ block.settings.title }}</span>
+                {%- if block.settings.text != blank -%}
+                  <span class="lm-consult__step-text">{{ block.settings.text }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="lm-consult__contact">
+        {%- if section.settings.contact_email != blank -%}
+          <a href="mailto:{{ section.settings.contact_email }}" class="lm-consult__contact-line">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            {{ section.settings.contact_email }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.contact_phone != blank -%}
+          <a href="tel:{{ section.settings.contact_phone | remove: ' ' | remove: '.' | remove: '-' }}" class="lm-consult__contact-line">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            {{ section.settings.contact_phone }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.contact_location != blank -%}
+          <span class="lm-consult__contact-line">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.99-5.53 10.19-7.35 11.76a1 1 0 0 1-1.3 0C9.53 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ section.settings.contact_location }}
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="lm-consult__form-wrap">
+      <h2 class="lm-consult__form-title">{{ section.settings.form_title }}</h2>
+
+      {%- form 'contact', class: 'lm-consult__form' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="lm-consult__success" role="status">
+            Thank you — your request has been received. We'll be in touch within one business day.
+          </p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <p class="lm-consult__error" role="alert">
+            Please check your details — {{ form.errors.messages.email | default: 'something went wrong' }}.
+          </p>
+        {%- endif -%}
+
+        <div class="lm-consult__row">
+          <div class="lm-consult__field">
+            <label for="ConsultName">Name</label>
+            <input type="text" id="ConsultName" name="contact[name]" autocomplete="name" required>
+          </div>
+          <div class="lm-consult__field">
+            <label for="ConsultEmail">Email</label>
+            <input type="email" id="ConsultEmail" name="contact[email]" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="lm-consult__row">
+          <div class="lm-consult__field">
+            <label for="ConsultPhone">Phone <span>(optional)</span></label>
+            <input type="tel" id="ConsultPhone" name="contact[phone]" autocomplete="tel">
+          </div>
+          <div class="lm-consult__field">
+            <label for="ConsultInterest">I'm interested in</label>
+            <select id="ConsultInterest" name="contact[interest]">
+              <option>A private consultation</option>
+              <option>Diamond or gemstone sourcing</option>
+              <option>A bespoke commission</option>
+              <option>An estate / pre-owned piece</option>
+              <option>Ring sizing or service</option>
+              <option>Something else</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lm-consult__field">
+          <label for="ConsultMessage">Tell us about the piece you have in mind</label>
+          <textarea id="ConsultMessage" name="contact[body]" rows="5" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn--wine btn--lg lm-consult__submit">
+          {{ section.settings.submit_label }}
+        </button>
+        <p class="lm-consult__privacy">{{ section.settings.privacy_note }}</p>
+      {%- endform -%}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .lm-consult {
+    background: var(--warm-white, #FDFAF6);
+    padding: 3rem 2rem 5rem;
+  }
+
+  .lm-consult__container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .lm-consult__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .lm-consult__intro {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    margin-bottom: 2rem;
+  }
+
+  .lm-consult__expect-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-consult__step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .lm-consult__step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(74, 20, 40, 0.08);
+    color: var(--wine, #4A1428);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .lm-consult__step-title {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-consult__step-text {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--text-muted, #8A8070);
+    margin-top: 0.15rem;
+  }
+
+  .lm-consult__contact {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lm-consult__contact-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+  }
+
+  .lm-consult__contact-line svg {
+    color: var(--gold, #C9A050);
+    flex-shrink: 0;
+  }
+
+  a.lm-consult__contact-line:hover {
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-consult__form-wrap {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-lg, 12px);
+    padding: 2.5rem;
+  }
+
+  .lm-consult__form-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.5rem;
+  }
+
+  .lm-consult__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .lm-consult__field {
+    margin-bottom: 1.1rem;
+  }
+
+  .lm-consult__field label {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    margin-bottom: 0.4rem;
+  }
+
+  .lm-consult__field label span {
+    color: var(--text-muted, #8A8070);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .lm-consult__field input,
+  .lm-consult__field select,
+  .lm-consult__field textarea {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    color: var(--text-dark, #2C1810);
+    background: var(--warm-white, #FDFAF6);
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    transition: border-color 0.2s ease;
+  }
+
+  .lm-consult__field input:focus,
+  .lm-consult__field select:focus,
+  .lm-consult__field textarea:focus {
+    outline: none;
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-consult__field textarea {
+    resize: vertical;
+  }
+
+  .lm-consult__submit {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+  }
+
+  .lm-consult__privacy {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    color: var(--text-muted, #8A8070);
+    text-align: center;
+    margin: 1rem 0 0;
+  }
+
+  .lm-consult__success {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: #2F5D3A;
+    background: rgba(47, 93, 58, 0.08);
+    border: 1px solid rgba(47, 93, 58, 0.25);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-consult__error {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.07);
+    border: 1px solid rgba(74, 20, 40, 0.25);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 900px) {
+    .lm-consult__container {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-consult {
+      padding: 2rem 1.25rem 3.5rem;
+    }
+    .lm-consult__form-wrap {
+      padding: 1.5rem;
+    }
+    .lm-consult__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Private Client",
+  "tag": "section",
+  "class": "section-private-client",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Private Clients"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Book a Consultation"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "Whether you're marking a milestone, commissioning something entirely your own, or searching for a specific stone — begin with a conversation. In person in New York, or by video from anywhere."
+    },
+    {
+      "type": "text",
+      "id": "expect_title",
+      "label": "Expectations heading",
+      "default": "What to Expect"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email",
+      "default": "hello@lauramilman.com"
+    },
+    {
+      "type": "text",
+      "id": "contact_phone",
+      "label": "Phone"
+    },
+    {
+      "type": "text",
+      "id": "contact_location",
+      "label": "Location",
+      "default": "New York, NY — by appointment"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form heading",
+      "default": "Request an Appointment"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit label",
+      "default": "Request Consultation"
+    },
+    {
+      "type": "text",
+      "id": "privacy_note",
+      "label": "Privacy note",
+      "default": "Your details are used only to arrange your consultation. Never shared, never sold."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Expectation step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "A conversation, not a pitch"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Private Client",
+      "blocks": [
+        { "type": "step", "settings": { "title": "A conversation, not a pitch", "text": "Tell us the occasion, the budget, and the taste you're designing for. No pressure, ever." } },
+        { "type": "step", "settings": { "title": "See real stones and pieces", "text": "We bring options to the table — natural stones, estate finds, or sketches for a commission." } },
+        { "type": "step", "settings": { "title": "Made and delivered with care", "text": "Commissions are crafted in Italy and delivered fully insured, with documentation." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

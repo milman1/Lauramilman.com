@@ -3,26 +3,29 @@
     "main": {
       "type": "page-about",
       "settings": {
-        "hero_eyebrow": "Our Story",
-        "hero_title": "Fine Jewelry, Authentically Sourced",
-        "hero_subtitle": "Founded in New York. Built on transparency, craftsmanship, and an unwavering commitment to excellence.",
-        "story_title": "A Different Kind of Jewelry Store",
-        "story_subtitle": "Who We Are",
-        "story_p1": "Laura Milman New York was founded on the belief that exceptional jewelry shouldn't require compromise. Whether you're drawn to a newly crafted lab-grown diamond piece or a rare authenticated estate jewel from houses like Cartier, Van Cleef & Arpels, or Tiffany & Co., every item in our collection meets the same uncompromising standard.",
-        "story_p2": "With decades of experience in New York's Diamond District, we bring a curator's eye and a jeweler's expertise to every piece we offer. Our lab-grown diamonds are ethically sourced and GIA certified, while our estate pieces are individually authenticated and restored to their original splendor.",
-        "story_p3": "We believe the right piece of jewelry is transformative—not just beautiful, but meaningful. That's why we take the time to understand what our clients seek, offering guidance rooted in genuine expertise rather than a sales agenda.",
-        "story_signature": "— Laura Milman",
+        "eyebrow": "Our Story",
+        "title": "Fine Jewelry, Authentically Sourced",
+        "subtitle": "Thirty years in New York's Diamond District — designed here, crafted in Italy, and chosen the way I'd choose something for myself.",
+        "story_eyebrow": "In My Own Words",
+        "story_heading": "I Came Here With Almost Nothing",
+        "story_p1": "I came to America in my twenties and did what immigrants do — I worked. I trained as a nurse, and my husband and I raised our family. But what I had always wanted to be was an artist. So after the long shifts, when the house was finally quiet, I would sit down at the kitchen table and draw. The drawings kept turning into jewelry.",
+        "story_p2": "My first years in the trade were spent working alongside my brother Jacob at Diamond Quasar — the house the world now knows as Jacob & Co. I learned the Diamond District the only way you really can: from the inside, stone by stone, bench by bench. And then I did the thing that women like me were not expected to do in that industry, in those years. I opened my own company.",
+        "story_p3": "That was more than thirty years ago, and I still believe what I believed at that kitchen table: exceptional jewelry shouldn't require compromise. Whether it's newly made — designed here in New York and brought to life by master goldsmiths in Italy — or a rare estate piece from Cartier, Van Cleef & Arpels or Tiffany & Co. that we've authenticated ourselves, everything carrying my name meets the same standard. The right piece is transformative: not only beautiful, but meaningful. Which is why I would rather understand what you're looking for than sell you something.",
+        "signature": "— Laura Milman",
+        "values_eyebrow": "What We Stand For",
         "values_title": "Our Commitments to You",
-        "values_subtitle": "What We Stand For",
-        "cta_title": "Ready to Begin?",
-        "cta_subtitle": "Find Your Perfect Piece",
+        "cta_eyebrow": "Ready to Begin?",
+        "cta_title": "Find Your Perfect Piece",
         "cta_body": "Whether you're celebrating a milestone, beginning a new chapter, or simply treating yourself to something extraordinary—we're here to help you find the piece that speaks to you.",
-        "cta_primary_text": "Shop All Jewelry",
-        "cta_primary_url": "/collections/all",
-        "cta_secondary_text": "Contact Us",
-        "cta_secondary_url": "/pages/contact"
+        "cta_shop_label": "Shop All Jewelry",
+        "cta_shop_link": "/collections/all",
+        "cta_contact_label": "Book a Consultation",
+        "cta_contact_link": "/pages/private-clients",
+        "portrait": "shopify://shop_images/laura-milman-portrait.jpg"
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

@@ -1,0 +1,279 @@
+{%- comment -%}
+  Laura Milman New York — Search results
+  Branded results page for the Popular Searches bar and header search.
+{%- endcomment -%}
+
+{%- paginate search.results by 24 -%}
+
+<section class="lm-search" aria-label="Search results">
+  <div class="lm-search__container">
+
+    <header class="lm-search__header">
+      <p class="eyebrow">Search</p>
+      {%- if search.performed -%}
+        <h1 class="lm-search__title">&ldquo;{{ search.terms | escape }}&rdquo;</h1>
+        <p class="lm-search__count">
+          {%- if search.results_count > 0 -%}
+            Showing {{ search.results_count }} {{ search.results_count | pluralize: 'result', 'results' }}
+          {%- else -%}
+            No results found
+          {%- endif -%}
+        </p>
+      {%- else -%}
+        <h1 class="lm-search__title">Search</h1>
+      {%- endif -%}
+
+      <form action="{{ routes.search_url }}" method="get" role="search" class="lm-search__form">
+        <input type="hidden" name="type" value="product">
+        <input
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="Search rings, necklaces, earrings..."
+          class="lm-search__input"
+          aria-label="Search"
+        >
+        <button type="submit" class="lm-search__submit" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      </form>
+    </header>
+
+    {%- if search.performed and search.results_count > 0 -%}
+      <div class="products-grid lm-search__grid">
+        {%- for item in search.results -%}
+          {%- if item.object_type == 'product' -%}
+            {%- render 'product-card', product: item -%}
+          {%- else -%}
+            <a href="{{ item.url }}" class="lm-search__page-result">
+              <span class="lm-search__page-type">{{ item.object_type | capitalize }}</span>
+              <span class="lm-search__page-title">{{ item.title }}</span>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="lm-search__pagination" aria-label="Pagination">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="lm-search__page-btn">&larr; Previous</a>
+          {%- endif -%}
+          <span class="lm-search__page-info">Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="lm-search__page-btn">Next &rarr;</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+
+    {%- elsif search.performed -%}
+      <div class="lm-search__empty">
+        <p class="lm-search__empty-title">Nothing matched &ldquo;{{ search.terms | escape }}&rdquo;</p>
+        <p class="lm-search__empty-text">Try a different term, or browse the full collection.</p>
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Jewelry</a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{%- endpaginate -%}
+
+<style>
+  .lm-search {
+    background: var(--warm-white, #FDFAF6);
+    padding: 2rem 0 4rem;
+    min-height: 60vh;
+  }
+
+  .lm-search__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-search__header {
+    text-align: center;
+    padding: 1.5rem 0 2rem;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .lm-search__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0;
+  }
+
+  .lm-search__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.5rem;
+  }
+
+  .lm-search__form {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    padding: 0.25rem 0.35rem 0.25rem 1.25rem;
+    background: var(--cream, #FAF6F0);
+    transition: border-color 0.2s ease;
+    margin-top: 1rem;
+  }
+
+  .lm-search__form:focus-within {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-search__input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    color: var(--text-dark, #2C1810);
+    padding: 0.5rem 0;
+  }
+
+  .lm-search__submit {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--espresso, #1E1109);
+    color: var(--gold-light, #E2C27A);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .lm-search__submit:hover {
+    background: var(--text-dark, #2C1810);
+  }
+
+  .lm-search__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .lm-search__page-result {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.5rem;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    text-decoration: none;
+    background: var(--cream, #FAF6F0);
+    transition: box-shadow 0.25s ease;
+  }
+
+  .lm-search__page-result:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .lm-search__page-type {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-search__page-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.1rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-search__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-search__page-btn {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-dark, #2C1810);
+    padding: 10px 22px;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.25s ease;
+  }
+
+  .lm-search__page-btn:hover {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    border-color: var(--espresso, #1E1109);
+  }
+
+  .lm-search__page-info {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-search__empty {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .lm-search__empty-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+
+  .lm-search__empty-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.75rem;
+  }
+
+  @media (max-width: 1024px) {
+    .lm-search__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-search {
+      padding: 1rem 0 3rem;
+    }
+    .lm-search__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Search Results",
+  "tag": "section",
+  "class": "section-main-search",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,303 @@
+{%- comment -%}
+  Laura Milman New York — Pre-Owned Maison
+  Curated, authenticated estate pieces from the great houses.
+  One clean named section — credibility + traffic asset. Warm espresso treatment.
+{%- endcomment -%}
+
+<section class="lm-maison" aria-label="{{ section.settings.title | escape }}">
+  <div class="lm-maison__container">
+
+    <div class="lm-maison__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lm-maison__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="lm-maison__title">{{ section.settings.title }}</h2>
+      {%- if section.settings.description != blank -%}
+        <p class="lm-maison__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-maison__grid">
+      {%- for block in section.blocks -%}
+        {%- assign maison_collection = block.settings.collection -%}
+        {%- if maison_collection != blank -%}
+          <a href="{{ maison_collection.url }}" class="lm-maison__card" {{ block.shopify_attributes }}>
+            <div class="lm-maison__card-image">
+              {%- assign card_image = block.settings.image | default: maison_collection.image -%}
+              {%- if card_image != blank -%}
+                <img
+                  src="{{ card_image | image_url: width: 700 }}"
+                  alt="{{ block.settings.title | default: maison_collection.title | escape }}"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {%- elsif maison_collection.products.first.featured_image -%}
+                <img
+                  src="{{ maison_collection.products.first.featured_image | image_url: width: 700 }}"
+                  alt="{{ block.settings.title | default: maison_collection.title | escape }}"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {%- endif -%}
+              <div class="lm-maison__card-overlay" aria-hidden="true"></div>
+            </div>
+            <div class="lm-maison__card-info">
+              <span class="lm-maison__card-name">{{ block.settings.title | default: maison_collection.title }}</span>
+              <span class="lm-maison__card-count">{{ maison_collection.products_count }} {{ maison_collection.products_count | pluralize: 'piece', 'pieces' }}</span>
+            </div>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.trust_line != blank -%}
+      <p class="lm-maison__trust">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        {{ section.settings.trust_line }}
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.cta_text != blank -%}
+      <div class="lm-maison__footer">
+        <a href="{{ section.settings.cta_url | default: '/collections/vintage-jewelry' }}" class="btn btn--gold">
+          {{ section.settings.cta_text }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .lm-maison {
+    background: linear-gradient(170deg, var(--espresso, #1E1109) 0%, #251409 55%, var(--espresso, #1E1109) 100%);
+    padding: 6rem 0;
+  }
+
+  .lm-maison__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .lm-maison__header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 3.5rem;
+  }
+
+  .lm-maison__eyebrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+    margin-bottom: 1rem;
+  }
+
+  .lm-maison__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--cream, #FAF6F0);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-maison__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(250, 246, 240, 0.65);
+    margin: 0;
+  }
+
+  .lm-maison__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .lm-maison__card {
+    display: block;
+    text-decoration: none;
+    border-radius: var(--radius-md, 8px);
+    overflow: hidden;
+    border: 1px solid rgba(201, 160, 80, 0.2);
+    background: rgba(250, 246, 240, 0.03);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .lm-maison__card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201, 160, 80, 0.5);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .lm-maison__card-image {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #17100a;
+  }
+
+  .lm-maison__card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .lm-maison__card:hover .lm-maison__card-image img {
+    transform: scale(1.06);
+  }
+
+  .lm-maison__card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(30, 17, 9, 0.55) 0%, transparent 45%);
+  }
+
+  .lm-maison__card-info {
+    padding: 1.1rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .lm-maison__card-name {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.35rem;
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-maison__card-count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+
+  .lm-maison__trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: rgba(250, 246, 240, 0.6);
+    margin: 2.5rem 0 0;
+  }
+
+  .lm-maison__trust svg {
+    color: var(--gold, #C9A050);
+    flex-shrink: 0;
+  }
+
+  .lm-maison__footer {
+    text-align: center;
+    margin-top: 1.75rem;
+  }
+
+  @media (max-width: 1024px) {
+    .lm-maison__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-maison {
+      padding: 4rem 0;
+    }
+    .lm-maison__grid {
+      gap: 0.75rem;
+    }
+    .lm-maison__card-name {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Pre-Owned Maison",
+  "tag": "section",
+  "class": "section-preowned-maison",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Authenticated Estate"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "The Pre-Owned Maison"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust."
+    },
+    {
+      "type": "text",
+      "id": "trust_line",
+      "label": "Trust line",
+      "default": "Every estate piece is individually authenticated and documented"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "Explore the Maison Vault"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "maison",
+      "name": "Maison",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Display name (optional)"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Card image (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pre-Owned Maison",
+      "blocks": [
+        { "type": "maison" },
+        { "type": "maison" },
+        { "type": "maison" },
+        { "type": "maison" }
+      ]
+    }
+  ]
+}
+{% endschema %}

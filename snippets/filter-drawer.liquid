@@ -1,0 +1,669 @@
+{%- comment -%}
+  Laura Milman New York — "Refine By" filter & sort drawer
+  One reusable component for every collection, espresso-skinned (PD's blue → LMNY gold).
+
+  Renders whatever filter groups the Search & Discovery app exposes for the
+  current collection, choosing the control style by group label:
+    · Metal  → rounded pill toggles with a literal metal swatch dot
+    · Carat  → preset band buttons
+    · Shape  → checkbox list
+    · Price  → min/max inputs (native price filter)
+    · everything else (Maison, Stone Type, Style…) → checkbox list
+  Until products are tagged and filter groups are configured in Search &
+  Discovery, only the groups that exist will appear — the drawer degrades to
+  Sort-only. See THEME_SETUP.md for the per-collection filter matrix.
+
+  Usage: {% render 'filter-drawer', results: collection %}
+{%- endcomment -%}
+
+<div class="refine-overlay" id="RefineOverlay" hidden></div>
+
+<aside class="refine" id="RefineDrawer" role="dialog" aria-modal="true" aria-label="Filter and sort">
+  <div class="refine__top">
+    <span class="refine__top-title">Filters</span>
+    <button type="button" class="refine__close" id="RefineClose" aria-label="Close filters">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="refine__brandline">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    <span>Refine By</span>
+  </div>
+
+  <form id="RefineForm" method="get" action="{{ results.url }}">
+
+    <div class="refine__group" data-refine-group>
+      <button type="button" class="refine__group-head" aria-expanded="true">
+        <span class="refine__group-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="m3 17 3 3 3-3"/><path d="M6 4v16"/></svg>
+          Sort By
+        </span>
+        <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="refine__group-body">
+        {%- assign current_sort = results.sort_by | default: results.default_sort_by -%}
+        {%- assign sort_pairs = 'manual::Featured||best-selling::Best Selling||price-ascending::Price: Low to High||price-descending::Price: High to Low||created-descending::Date: New to Old||title-ascending::Alphabetically, A–Z' | split: '||' -%}
+        <div class="refine__radios">
+          {%- for pair in sort_pairs -%}
+            {%- assign sort_parts = pair | split: '::' -%}
+            <label class="refine-radio">
+              <input type="radio" name="sort_by" value="{{ sort_parts[0] }}" {% if current_sort == sort_parts[0] %}checked{% endif %}>
+              <span class="refine-radio__ring" aria-hidden="true"></span>
+              <span class="refine-radio__label">{{ sort_parts[1] }}</span>
+            </label>
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+
+    {%- for filter in results.filters -%}
+      {%- assign flabel = filter.label | downcase -%}
+      <div class="refine__group" data-refine-group>
+        <button type="button" class="refine__group-head" aria-expanded="true">
+          <span class="refine__group-label">
+            {%- if flabel contains 'metal' -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>
+            {%- elsif flabel contains 'carat' or flabel contains 'weight' -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="m5 7-2 5c0 1.7 1.3 3 3 3s3-1.3 3-3L7 7"/><path d="m19 7-2 5c0 1.7 1.3 3 3 3s3-1.3 3-3l-2-5"/></svg>
+            {%- elsif flabel contains 'price' -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            {%- elsif flabel contains 'maison' or flabel contains 'brand' or flabel contains 'designer' -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+            {%- else -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
+            {%- endif -%}
+            {{ filter.label }}
+          </span>
+          <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <div class="refine__group-body">
+          {%- case filter.type -%}
+
+            {%- when 'boolean' -%}
+              <ul class="refine__checks">
+                <li>
+                  <label class="refine-check{% if filter.true_value.count == 0 and filter.true_value.active == false %} is-disabled{% endif %}">
+                    <input type="checkbox" name="{{ filter.true_value.param_name }}" value="{{ filter.true_value.value }}" {% if filter.true_value.active %}checked{% endif %} {% if filter.true_value.count == 0 and filter.true_value.active == false %}disabled{% endif %}>
+                    <span class="refine-check__box" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                    <span class="refine-check__label">{{ filter.true_value.label }}</span>
+                    <span class="refine-check__count">({{ filter.true_value.count }})</span>
+                  </label>
+                </li>
+                <li>
+                  <label class="refine-check{% if filter.false_value.count == 0 and filter.false_value.active == false %} is-disabled{% endif %}">
+                    <input type="checkbox" name="{{ filter.false_value.param_name }}" value="{{ filter.false_value.value }}" {% if filter.false_value.active %}checked{% endif %} {% if filter.false_value.count == 0 and filter.false_value.active == false %}disabled{% endif %}>
+                    <span class="refine-check__box" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                    <span class="refine-check__label">{{ filter.false_value.label }}</span>
+                    <span class="refine-check__count">({{ filter.false_value.count }})</span>
+                  </label>
+                </li>
+              </ul>
+
+            {%- when 'price_range' -%}
+              <div class="refine__price">
+                <div class="refine__price-field">
+                  <span class="refine__price-currency">{{ cart.currency.symbol }}</span>
+                  <input
+                    type="number"
+                    name="{{ filter.min_value.param_name }}"
+                    id="RefinePriceMin"
+                    {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | remove: ',' }}"{% endif %}
+                    placeholder="0"
+                    min="0"
+                    max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    inputmode="numeric"
+                    aria-label="Minimum price"
+                  >
+                </div>
+                <span class="refine__price-sep">to</span>
+                <div class="refine__price-field">
+                  <span class="refine__price-currency">{{ cart.currency.symbol }}</span>
+                  <input
+                    type="number"
+                    name="{{ filter.max_value.param_name }}"
+                    id="RefinePriceMax"
+                    {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | remove: ',' }}"{% endif %}
+                    placeholder="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    min="0"
+                    max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    inputmode="numeric"
+                    aria-label="Maximum price"
+                  >
+                </div>
+              </div>
+
+            {%- else -%}
+
+              {%- if flabel contains 'metal' -%}
+                {%- comment -%} Metal pills — swatch dots stay literal (they signal real metals) {%- endcomment -%}
+                <div class="refine__pills">
+                  {%- for value in filter.values -%}
+                    {%- assign vlabel = value.label | downcase -%}
+                    <label class="refine-pill{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                      <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                      <span class="refine-pill__chip">
+                        {%- if vlabel contains 'two' -%}
+                          <span class="refine-pill__dot refine-pill__dot--two-tone" aria-hidden="true"></span>
+                        {%- elsif vlabel contains 'rose' -%}
+                          <span class="refine-pill__dot" style="background:#B76E79" aria-hidden="true"></span>
+                        {%- elsif vlabel contains 'white' -%}
+                          <span class="refine-pill__dot" style="background:#D6D6D6" aria-hidden="true"></span>
+                        {%- elsif vlabel contains 'platinum' -%}
+                          <span class="refine-pill__dot" style="background:#A8A9AD" aria-hidden="true"></span>
+                        {%- elsif vlabel contains 'silver' -%}
+                          <span class="refine-pill__dot" style="background:#C4C4C4" aria-hidden="true"></span>
+                        {%- else -%}
+                          <span class="refine-pill__dot" style="background:#E7C15E" aria-hidden="true"></span>
+                        {%- endif -%}
+                        <span class="refine-pill__label">{{ value.label }}</span>
+                      </span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+
+              {%- elsif flabel contains 'carat' or flabel contains 'weight' -%}
+                {%- comment -%} Carat bands — Under 1ct · 1–2ct · 2–3ct · 3–5ct · 5+ct as tagged {%- endcomment -%}
+                <div class="refine__bands">
+                  {%- for value in filter.values -%}
+                    <label class="refine-band{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                      <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                      <span class="refine-band__chip">{{ value.label }}</span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+
+              {%- else -%}
+                <ul class="refine__checks">
+                  {%- for value in filter.values -%}
+                    <li>
+                      <label class="refine-check{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                        <span class="refine-check__box" aria-hidden="true">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        <span class="refine-check__label">{{ value.label }}</span>
+                        <span class="refine-check__count">({{ value.count }})</span>
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+          {%- endcase -%}
+        </div>
+      </div>
+    {%- endfor -%}
+
+    <div class="refine__footer">
+      <a href="{{ results.url }}" class="refine__clear">Clear All</a>
+      <button type="submit" class="refine__apply">Apply</button>
+    </div>
+  </form>
+</aside>
+
+<style>
+  .refine-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 17, 9, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 1500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .refine-overlay.active {
+    opacity: 1;
+  }
+
+  .refine {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(400px, 92vw);
+    background: var(--warm-white, #FDFAF6);
+    z-index: 1501;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: -20px 0 60px rgba(30, 17, 9, 0.25);
+  }
+
+  .refine.active {
+    transform: translateX(0);
+  }
+
+  .refine__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .refine__top-title {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .refine__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted, #8A8070);
+    padding: 0.4rem;
+    display: flex;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .refine__close:hover {
+    color: var(--text-dark, #2C1810);
+    transform: rotate(90deg);
+  }
+
+  .refine__brandline {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.25rem 1.5rem 0.75rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.5rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .refine__brandline svg {
+    color: var(--gold, #C9A050);
+  }
+
+  .refine form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .refine__group {
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+    padding: 0 1.5rem;
+  }
+
+  .refine__group-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .refine__group-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .refine__group-label svg {
+    color: var(--gold, #C9A050);
+    flex-shrink: 0;
+  }
+
+  .refine__chevron {
+    color: var(--text-muted, #8A8070);
+    transition: transform 0.25s ease;
+  }
+
+  .refine__group.collapsed .refine__chevron {
+    transform: rotate(-90deg);
+  }
+
+  .refine__group-body {
+    padding: 0 0 1.25rem;
+  }
+
+  .refine__group.collapsed .refine__group-body {
+    display: none;
+  }
+
+  /* Sort radios */
+  .refine__radios {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .refine-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+  }
+
+  .refine-radio input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .refine-radio__ring {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-medium, #CFC7B8);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .refine-radio input:checked + .refine-radio__ring {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .refine-radio input:checked + .refine-radio__ring::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold, #C9A050);
+  }
+
+  .refine-radio__label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  /* Metal pills */
+  .refine__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .refine-pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .refine-pill__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    color: var(--text-dark, #2C1810);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .refine-pill:hover .refine-pill__chip {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .refine-pill input:checked + .refine-pill__chip {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.1);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+
+  .refine-pill__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(30, 17, 9, 0.15);
+    flex-shrink: 0;
+  }
+
+  .refine-pill__dot--two-tone {
+    background: linear-gradient(90deg, #E7C15E 50%, #D6D6D6 50%);
+  }
+
+  .refine-pill.is-disabled .refine-pill__chip {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Carat bands */
+  .refine__bands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .refine-band input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .refine-band__chip {
+    display: inline-block;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    color: var(--text-dark, #2C1810);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .refine-band:hover .refine-band__chip {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .refine-band input:checked + .refine-band__chip {
+    background: var(--espresso, #1E1109);
+    border-color: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .refine-band.is-disabled .refine-band__chip {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Checkbox lists */
+  .refine__checks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .refine-check {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+  }
+
+  .refine-check input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .refine-check__box {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border-medium, #CFC7B8);
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--espresso, #1E1109);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .refine-check__box svg {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .refine-check input:checked + .refine-check__box {
+    background: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+  }
+
+  .refine-check input:checked + .refine-check__box svg {
+    opacity: 1;
+  }
+
+  .refine-check__label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .refine-check__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .refine-check.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Price */
+  .refine__price {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .refine__price-field {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.5rem 0.75rem;
+    flex: 1;
+    background: var(--warm-white, #FDFAF6);
+    transition: border-color 0.2s ease;
+  }
+
+  .refine__price-field:focus-within {
+    border-color: var(--gold, #C9A050);
+  }
+
+  .refine__price-currency {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .refine__price-field input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    color: var(--text-dark, #2C1810);
+    -moz-appearance: textfield;
+  }
+
+  .refine__price-field input::-webkit-outer-spin-button,
+  .refine__price-field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .refine__price-sep {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    color: var(--text-muted, #8A8070);
+  }
+
+  /* Footer */
+  .refine__footer {
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--warm-white, #FDFAF6);
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .refine__clear {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-dark, #2C1810);
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.2s ease;
+  }
+
+  .refine__clear:hover {
+    border-color: var(--text-dark, #2C1810);
+  }
+
+  .refine__apply {
+    flex: 2;
+    padding: 0.85rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: none;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .refine__apply:hover {
+    background: var(--text-dark, #2C1810);
+    box-shadow: var(--shadow-md);
+  }
+</style>
