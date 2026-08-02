@@ -48,6 +48,7 @@ describe('stoneRowFor', () => {
       retail_usd: 744,
       available: true,
       content_hash: 'hash',
+      price_per_carat_usd: item.pricePerCaratUsd ?? null,
     });
   });
 

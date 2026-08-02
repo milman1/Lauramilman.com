@@ -212,18 +212,112 @@ export interface NormalizeResult {
 }
 
 /**
- * LMNY's cost for a stone. Belgium Dia reports the supplier Buy_Price and,
- * commonly, a Buy_Price_Discount_PER (a negative % off Rapaport). When
- * Buy_Price is 0 but a Rap price and discount exist, cost = Rap × (1 + disc/100).
+ * LMNY's cost for a stone.
+ *
+ * Belgium Dia fields (confirmed from live lab feed raw keys):
+ *   Buy_Price, Buy_Price_Discount_PER, COD_Buy_Price, Memo_Price, Rap_Price, …
+ *
+ * **Lab:** Buy_Price is USD **per carat**, not total. Live fingerprint: median
+ * Buy_Price stays ~$100 across 1–10ct while true $/ct declines with size —
+ * treating it as total inverted the retail curve (~1/20th prices). Total cost
+ * = Buy_Price × Weight. Prefer an explicit total when present and it agrees
+ * with per-carat × carat within 5%; otherwise multiply.
+ *
+ * **Natural:** Buy_Price (when non-zero) is a total; otherwise
+ * Rap × (1 + Buy_Price_Discount_PER/100).
  */
-function stoneCost(raw: Raw, rapPriceUsd: number | undefined): number | undefined {
-  const buy = num(raw, ['buy_price', 'cost', 'cost_usd', 'net_price', 'price', 'price_usd', 'total_price', 'amount', 'memo_price']);
-  if (buy) return buy;
+export interface StoneCostResolution {
+  costUsd: number;
+  pricePerCaratUsd?: number;
+  /** Set when both a total and a per-carat signal disagree beyond tolerance. */
+  mismatchDetail?: string;
+}
+
+const BUY_PRICE_KEYS = [
+  'buy_price',
+  'cod_buy_price',
+  'memo_price',
+  'cost',
+  'cost_usd',
+  'net_price',
+  'price',
+  'price_usd',
+  'amount',
+];
+const TOTAL_PRICE_KEYS = ['total_price', 'total_cost', 'total_cost_usd', 'stone_price', 'stone_total'];
+const PER_CARAT_KEYS = [
+  'price_per_carat',
+  'price_per_ct',
+  'price_ct',
+  'per_carat',
+  'per_ct',
+  'buy_price_per_carat',
+];
+
+function withinPct(a: number, b: number, pct: number): boolean {
+  if (a <= 0 || b <= 0) return false;
+  return Math.abs(a - b) / Math.max(a, b) <= pct;
+}
+
+export function resolveStoneCost(
+  raw: Raw,
+  kind: 'natural' | 'lab',
+  carat: number,
+  rapPriceUsd: number | undefined,
+): StoneCostResolution | undefined {
+  const buy = num(raw, BUY_PRICE_KEYS);
+  const explicitTotal = num(raw, TOTAL_PRICE_KEYS);
+  const explicitPpc = num(raw, PER_CARAT_KEYS);
+
+  if (kind === 'lab') {
+    // Prefer an explicit per-carat field when present.
+    const ppc = explicitPpc ?? buy;
+    if (!ppc || !carat) {
+      // Last resort: an explicit total alone.
+      if (explicitTotal) {
+        return { costUsd: Math.round(explicitTotal * 100) / 100, pricePerCaratUsd: Math.round((explicitTotal / carat) * 100) / 100 };
+      }
+      return undefined;
+    }
+    const multiplied = Math.round(ppc * carat * 100) / 100;
+    if (explicitTotal && !withinPct(explicitTotal, multiplied, 0.05)) {
+      // Prefer the explicit total but flag the disagreement for the report.
+      return {
+        costUsd: Math.round(explicitTotal * 100) / 100,
+        pricePerCaratUsd: Math.round((explicitTotal / carat) * 100) / 100,
+        mismatchDetail: `total ${explicitTotal} vs ppc×carat ${multiplied} (ppc=${ppc})`,
+      };
+    }
+    // If "buy" already looks like a total (≈ explicitPpc × carat), use it.
+    if (explicitPpc && buy && withinPct(buy, explicitPpc * carat, 0.05)) {
+      return {
+        costUsd: Math.round(buy * 100) / 100,
+        pricePerCaratUsd: Math.round(explicitPpc * 100) / 100,
+      };
+    }
+    return {
+      costUsd: multiplied,
+      pricePerCaratUsd: Math.round(ppc * 100) / 100,
+    };
+  }
+
+  // Natural: Buy_Price is total when present; else Rap × (1 + disc/100).
+  if (buy) {
+    const costUsd = Math.round(buy * 100) / 100;
+    return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
+  }
+  if (explicitTotal) {
+    const costUsd = Math.round(explicitTotal * 100) / 100;
+    return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
+  }
   const discRaw = pick(raw, ['buy_price_discount_per', 'buy_discount', 'buy_price_discount', 'memo_discount_per']);
   const disc = discRaw === undefined ? Number.NaN : Number(String(discRaw).replace(/[%\s]/g, ''));
   if (rapPriceUsd && Number.isFinite(disc)) {
     const c = rapPriceUsd * (1 + disc / 100);
-    if (c > 0) return Math.round(c);
+    if (c > 0) {
+      const costUsd = Math.round(c);
+      return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
+    }
   }
   return undefined;
 }
@@ -245,12 +339,12 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
     const clarity = str(raw, ['clarity', 'clarity_grade']);
     const lab = str(raw, ['lab', 'cert_lab', 'certificate_lab', 'grading_lab', 'cert']);
     const rapPriceUsd = num(raw, ['rap_price', 'rap', 'rapaport', 'rap_total', 'rap_price_total', 'list_price']);
-    const costUsd = stoneCost(raw, rapPriceUsd);
     if (!carat || !shape || !color || !clarity || !lab) {
       holds.push({ kind, stockRef, reason: 'missing_grading_fields' });
       continue;
     }
-    if (!costUsd) {
+    const resolved = resolveStoneCost(raw, kind, carat, rapPriceUsd);
+    if (!resolved) {
       holds.push({ kind, stockRef, reason: 'missing_cost' });
       continue;
     }
@@ -281,11 +375,15 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       measurements: str(raw, ['measurements', 'measurement', 'dimensions']),
       tablePct: num(raw, ['table_per', 'table_pct', 'table_percent', 'table']),
       depthPct: num(raw, ['depth_per', 'depth_pct', 'depth_percent', 'depth']),
-      costUsd,
+      costUsd: resolved.costUsd,
+      pricePerCaratUsd: resolved.pricePerCaratUsd,
       rapPriceUsd,
       imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'diamond_image']),
       videoUrls: urls(raw, ['videolink', 'video_html', 'video', 'video_url', 'videos', 'v360', 'video_link', 'diamond_video']),
     };
+    if (resolved.mismatchDetail) {
+      console.warn(`cost mismatch ${kind} ${stockRef}: ${resolved.mismatchDetail}`);
+    }
     items.push(item);
   }
   return { items, holds };

@@ -22,6 +22,7 @@ import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, MEDIA_MISSING_TAG, titleFor } from './product.js';
 import {
   holdHistogram,
+  labPricingStats,
   naturalMarginStats,
   renderMarkdown,
   summarizeDecisions,
@@ -448,6 +449,23 @@ async function main() {
     hoursProbe,
     holdHistogram: holdHistogram(holds),
     naturalMargins: naturalMarginStats(publishable, holds),
+    labPricing: (() => {
+      const stats = labPricingStats(publishable, holds);
+      // Fill sample titles properly (report helper only has carat stub).
+      stats.sample = publishable
+        .filter((p) => p.item.kind === 'lab')
+        .slice(0, 8)
+        .map((p) => ({
+          stockRef: p.item.stockRef,
+          title: titleFor(p.item),
+          carat: p.item.kind === 'lab' ? p.item.carat : 0,
+          pricePerCaratUsd: p.item.kind === 'lab' ? (p.item.pricePerCaratUsd ?? null) : null,
+          costUsd: p.item.costUsd,
+          retailUsd: p.priced.retailUsd,
+          marginPct: p.priced.marginPct,
+        }));
+      return stats;
+    })(),
     sampleNaturals: publishable
       .filter((p) => p.item.kind === 'natural')
       .slice(0, 5)

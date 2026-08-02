@@ -182,12 +182,13 @@ describe('updates target the existing product by id', () => {
     expect(input.files as unknown[]).toHaveLength(1);
   });
 
-  it('everything else is still sent on an update', () => {
-    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 1 });
-    expect(input.title).toBe('2.01ct Round Brilliant, F VS1 — GIA');
-    expect(input.status).toBe('ACTIVE');
-    expect((input.variants as Array<{ price: string }>)[0]!.price).toBe('15000.00');
-    expect(input.metafields as unknown[]).not.toHaveLength(0);
+  it('an update writes inventoryItem.cost so Shopify margin is auditable', () => {
+    const input = buildProductSetInput(labStone({ costUsd: 585.6 }), priced({ retailUsd: 996 }), at, {
+      id: 'gid://shopify/Product/1',
+      mediaCount: 1,
+    });
+    const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
+    expect(variant.inventoryItem.cost).toBe('585.60');
   });
 });
 
