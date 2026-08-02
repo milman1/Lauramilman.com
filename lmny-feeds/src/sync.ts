@@ -1,10 +1,14 @@
 /**
- * LMNY feed sync — Shopify is the database.
+ * LMNY feed sync — Shopify is currently the live database.
  *
  * Full pass per run: fetch feeds → normalize → price → diff against the
  * Shopify catalog by handle + content_hash → create / update / archive.
  * Unchanged hashes are skipped entirely. --dry-run does everything except
  * writes and produces the full report.
+ *
+ * When SUPABASE_URL + SUPABASE_SERVICE_KEY are set, priced stones are also
+ * upserted into public.stones (dual-write). Do not delete feed products until
+ * that table is verified populated and the App Proxy filter reads from it.
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -25,6 +29,11 @@ import {
   type WatchLine,
 } from './report.js';
 import { ShopifyClient, exchangeClientCredentials } from './shopify.js';
+import {
+  dualWriteStones,
+  markMissingStonesUnavailable,
+  supabaseConfigured,
+} from './supabase-stones.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchItem } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -393,6 +402,40 @@ async function main() {
       }
     }
     if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
+  }
+
+  // 4b. Optional Supabase dual-write. Shopify remains the live storefront
+  //     source until stones is populated and the App Proxy filter ships.
+  //     Gated on SUPABASE_URL + SUPABASE_SERVICE_KEY; no-op when unset.
+  const sb = supabaseConfigured();
+  if (!flags.dryRun && sb) {
+    try {
+      const syncedAt = new Date().toISOString();
+      const hashByRef = new Map(
+        publishable.map((p) => [p.item.stockRef, contentHashFor(p.item, p.priced)]),
+      );
+      const { upserted } = await dualWriteStones(publishable, hashByRef, syncedAt, sb);
+      notes.push(`supabase stones upserted: ${upserted}`);
+      console.log(`Supabase: upserted ${upserted} stones`);
+      if (fetchedKinds.has('natural') && fetchedKinds.has('lab')) {
+        const live = new Set(
+          publishable.filter((p) => p.item.kind !== 'watch').map((p) => p.item.stockRef),
+        );
+        const gone = await markMissingStonesUnavailable(live, sb);
+        if (gone > 0) {
+          notes.push(`supabase stones marked unavailable: ${gone}`);
+          console.log(`Supabase: marked ${gone} stones unavailable`);
+        }
+      }
+    } catch (err) {
+      // Dual-write must never fail the Shopify sync — the products are still
+      // the live copy. Surface the error in the report.
+      const msg = `supabase dual-write: ${err instanceof Error ? err.message : String(err)}`;
+      writeErrors.push(msg);
+      console.error(msg);
+    }
+  } else if (!sb) {
+    notes.push('supabase dual-write skipped (SUPABASE_URL / SERVICE_KEY unset) — Shopify is still the only stone store');
   }
 
   // 5. Report — run summary plus JSON artifact as the audit trail.

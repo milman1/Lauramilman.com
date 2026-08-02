@@ -118,6 +118,9 @@ describe('storefront-readable facet metafields', () => {
     const fields = metafieldsFor(labStone(), priced(), 'hash', at);
     expect(find(fields, 'custom', 'diamond_shape')?.value).toBe('Round Brilliant');
     expect(find(fields, 'custom', 'carat_weight')?.value).toBe('2.01');
+    expect(find(fields, 'custom', 'color')?.value).toBe('F');
+    expect(find(fields, 'custom', 'clarity')?.value).toBe('VS1');
+    expect(find(fields, 'custom', 'cut')?.value).toBe('Excellent');
   });
 
   it('watches get no diamond facets', () => {

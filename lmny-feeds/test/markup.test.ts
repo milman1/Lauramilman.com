@@ -49,10 +49,41 @@ describe('lab pricing', () => {
 });
 
 describe('watch pricing', () => {
-  it('prices at comp × 0.97 when above the cost floor', () => {
-    const r = priceWatch(watch({ costUsd: 9000 }), { midUsd: 12000, asOf: '2026-07-20' });
-    expect(r.ok && r.priced.retailUsd).toBe(11640);
+  it('prices a full-set at blended anchor × 0.97 when above the cost floor', () => {
+    // low 10000, mid 12000 → anchor 10900; full-set haircut 1; ×0.97 = 10573
+    const r = priceWatch(
+      watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 12, asOf: '2026-07-20' },
+    );
+    expect(r.ok && r.priced.retailUsd).toBe(10573);
     expect(r.ok && r.priced.compMidUsd).toBe(12000);
+  });
+
+  it('applies the naked haircut (−10%) on incomplete sets', () => {
+    // anchor 10900 × 0.90 × 0.97 = 9516
+    const r = priceWatch(
+      watch({ costUsd: 8000, box: false, papers: false, isNaked: true }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
+    );
+    expect(r.ok && r.priced.retailUsd).toBe(9516);
+  });
+
+  it('applies the partial haircut (−5%) for box-or-papers-only', () => {
+    // anchor 10900 × 0.95 × 0.97 = 10044
+    const r = priceWatch(
+      watch({ costUsd: 8000, box: true, papers: false, isNaked: false }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
+    );
+    expect(r.ok && r.priced.retailUsd).toBe(10044);
+  });
+
+  it('falls back to mid when low is missing', () => {
+    // mid 12000 × 0.97 = 11640 (full set)
+    const r = priceWatch(
+      watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
+      { midUsd: 12000, sourceCount: 12 },
+    );
+    expect(r.ok && r.priced.retailUsd).toBe(11640);
   });
 
   it('holds with no market comp (provider 404)', () => {
@@ -60,9 +91,20 @@ describe('watch pricing', () => {
     expect(!r.ok && r.hold.reason).toBe('watch_no_market_comp');
   });
 
+  it('holds when sourceCount is below the gate', () => {
+    const r = priceWatch(
+      watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 2 },
+    );
+    expect(!r.ok && r.hold.reason).toBe('watch_weak_comp');
+  });
+
   it('holds when the feed price is already at market', () => {
-    // comp×0.97 = 9700 < cost×1.05 = 9975 → grey-market priced, hold
-    const r = priceWatch(watch({ costUsd: 9500 }), { midUsd: 10000 });
+    // anchor 10900 × 0.97 = 10573 < cost×1.05 = 11550 → hold
+    const r = priceWatch(
+      watch({ costUsd: 11000, box: true, papers: true, isNaked: false }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
+    );
     expect(!r.ok && r.hold.reason).toBe('watch_feed_price_at_market');
   });
 });

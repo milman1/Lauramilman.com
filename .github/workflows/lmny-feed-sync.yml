@@ -72,6 +72,10 @@ jobs:
           BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
           HOURS_API_URL: ${{ secrets.HOURS_API_URL }}
           HOURS_API_KEY: ${{ secrets.HOURS_API_KEY }}
+          # Optional dual-write into public.stones (dedicated LMNY project).
+          # Leave unset until the project exists — Shopify remains the live store.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           # Which feeds to process. Defaults to natural-only in code when unset.
           # Live writes require BOTH LMNY_SYNC_LIVE=true AND the feed listed here.
           SYNC_FEEDS: ${{ vars.SYNC_FEEDS }}

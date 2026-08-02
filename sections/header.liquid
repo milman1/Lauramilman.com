@@ -38,6 +38,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1.5rem;
   height: var(--header-height);
 }
 
@@ -72,7 +73,10 @@
 .header .nav {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
+  gap: 1.5rem;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
 }
 
 .header .nav__link {
@@ -222,6 +226,7 @@
   align-items: center;
   gap: 0.35rem;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .header .nav__item-link::after {
@@ -650,7 +655,6 @@
             <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
             <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
             <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/time-pieces" class="nav__dropdown-link">Timepieces</a>
           </div>
         </div>
 
@@ -670,6 +674,31 @@
             <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
             <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Timepieces promoted to top level. Brand links are watch-only smart
+          collections (TYPE = Watch AND VENDOR = x) — do not use the plain
+          vendor collections under Jewelry / Pre-Owned Maison, which mix in
+          jewelry.
+        {%- endcomment -%}
+        <div class="nav__item">
+          <span class="nav__item-link">
+            Timepieces
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/time-pieces" class="nav__dropdown-link">All Timepieces</a>
+            <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
+            <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
+            <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
+            <a href="/collections/audemars-piguet-watches" class="nav__dropdown-link">Audemars Piguet</a>
+            <a href="/collections/hermes-watches" class="nav__dropdown-link">Hermès</a>
           </div>
         </div>
 

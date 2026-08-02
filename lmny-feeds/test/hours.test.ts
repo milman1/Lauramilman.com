@@ -43,7 +43,7 @@ describe('Hours comp parsing (real camelCase response)', () => {
       }),
     );
     const comp = await new HoursClient().compFor('Rolex', '126710BLRO');
-    expect(comp).toEqual({ midUsd: 26374, asOf: '2026-07-27' });
+    expect(comp).toEqual({ midUsd: 26374, lowUsd: 21721, sourceCount: 44, asOf: '2026-07-27' });
   });
 
   it('returns null (hold) on a 404', async () => {

@@ -11,6 +11,8 @@ import type { WatchComp } from '../markup.js';
 // Hours response fields (camelCase, e.g. { asOf, lowUsd, midUsd, sourceCount }),
 // with snake_case fallbacks for resilience.
 const MID_KEYS = ['midUsd', 'comp_mid_usd', 'comp_mid', 'mid', 'median', 'mid_usd', 'price_mid', 'market_mid'];
+const LOW_KEYS = ['lowUsd', 'comp_low_usd', 'comp_low', 'low', 'low_usd', 'price_low', 'market_low'];
+const SOURCE_COUNT_KEYS = ['sourceCount', 'source_count', 'listingCount', 'listing_count', 'n', 'count'];
 const ASOF_KEYS = ['asOf', 'comp_as_of', 'as_of', 'updated_at', 'date'];
 
 export function resolveUrl(raw: string | undefined = process.env.HOURS_API_URL): string {
@@ -116,8 +118,15 @@ export class HoursClient {
     const body = (payload.data && typeof payload.data === 'object' ? payload.data : payload) as Record<string, unknown>;
     const midUsd = pickNumber(body, MID_KEYS);
     if (midUsd === undefined) return null;
+    const lowUsd = pickNumber(body, LOW_KEYS);
+    const sourceCount = pickNumber(body, SOURCE_COUNT_KEYS);
     const asOf = pickString(body, ASOF_KEYS);
-    return { midUsd, asOf: asOf?.slice(0, 10) };
+    return {
+      midUsd,
+      lowUsd,
+      sourceCount: sourceCount !== undefined ? Math.round(sourceCount) : undefined,
+      asOf: asOf?.slice(0, 10),
+    };
   }
 }
 

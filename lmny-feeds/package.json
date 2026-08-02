@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Belgium Dia feed → Shopify catalog sync for Laura Milman New York. Shopify is the database; all state lives in product metafields.",
+  "description": "Belgium Dia feed → Shopify catalog sync for Laura Milman New York. Optional Supabase stones dual-write prepares moving diamonds off Shopify products.",
   "scripts": {
     "sync": "tsx src/sync.ts",
     "sync:dry": "tsx src/sync.ts --dry-run",
+    "seed:stones": "tsx scripts/seed-stones-from-shopify.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
