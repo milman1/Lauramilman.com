@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "chip-all": { "type": "chip", "settings": { "label": "All Peaceful Diamonds", "link": "/collections/peaceful-diamonds-by-laura-milman-new-york" } },
+        "chip-bracelets": { "type": "chip", "settings": { "label": "Bracelets", "link": "/collections/lab-grown-bracelets" } },
+        "chip-necklaces": { "type": "chip", "settings": { "label": "Necklaces", "link": "/collections/lab-grown-necklaces" } },
+        "chip-pendants": { "type": "chip", "settings": { "label": "Pendants", "link": "/collections/lab-grown-pendants" } },
+        "chip-rings": { "type": "chip", "settings": { "label": "Rings", "link": "/collections/lab-grown-rings" } },
+        "chip-earrings": { "type": "chip", "settings": { "label": "Earrings", "link": "/collections/lab-grown-earrings" } },
+        "chip-engagement": { "type": "chip", "settings": { "label": "Engagement Rings", "link": "/collections/lab-grown-engagement-rings" } },
+        "chip-loose": { "type": "chip", "settings": { "label": "Loose Diamonds", "link": "/collections/lab-grown-diamonds" } }
+      },
+      "block_order": [
+        "chip-all",
+        "chip-bracelets",
+        "chip-necklaces",
+        "chip-pendants",
+        "chip-rings",
+        "chip-earrings",
+        "chip-engagement",
+        "chip-loose"
+      ],
+      "settings": {
+        "products_per_page": 24,
+        "chips_label": "Shop lab-grown by category",
+        "navy_mode": true
+      }
+    }
+  },
+  "order": ["main"]
+}

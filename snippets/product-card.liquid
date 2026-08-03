@@ -40,6 +40,8 @@
   </a>
 
   <div class="product-card__content">
+    {%- render 'lab-grown-tag', product: product -%}
+
     <h3 class="product-card__title">
       <a href="{{ product.url }}">{{ product.title }}</a>
     </h3>
