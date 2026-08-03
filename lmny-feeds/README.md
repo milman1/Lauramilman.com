@@ -82,6 +82,17 @@ Optional (dual-write):
 | `SUPABASE_URL` | Dedicated LMNY project URL (not Hours) |
 | `SUPABASE_SERVICE_KEY` | Service-role key for `stones` upserts |
 
+### Lab pricing backfill
+
+After unpublishing Lab-Grown Diamond `lmny-feed` products:
+
+```sh
+npm run confirm:lab-unpublished   # must exit 0
+npm run backfill:lab-pricing      # SYNC_FEEDS=lab; resumable via content_hash
+```
+
+Spot-check `out/report.md` lab bands before republishing.
+
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
 `BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.

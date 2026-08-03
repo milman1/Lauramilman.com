@@ -196,9 +196,8 @@ async function main() {
   }
   out('');
 
-  // Cost-per-carat distribution — the trustworthy basis for the multiple
-  // decision. The first sample set surfaced a 3ct at $94 total; whether
-  // that's an outlier row or the market is a percentile question.
+  // Cost-per-carat distribution. After the Buy_Price×carat fix, costUsd is
+  // total and costUsd/carat is the true $/ct (≈ Buy_Price).
   out('## Cost per carat by band (all normalized lab stones)');
   out('');
   out('| Carat band | Stones | p10 $/ct | Median $/ct | p90 $/ct | Median total | Under $40/ct |');
@@ -208,7 +207,9 @@ async function main() {
   const perCaratByBand = new Map<string, number[]>();
   for (const band of CARAT_BANDS) {
     const inBand = items.filter((i) => i.carat >= band.lo && i.carat < band.hi);
-    const cpc = inBand.map((i) => i.costUsd / i.carat).sort((a, b) => a - b);
+    const cpc = inBand
+      .map((i) => i.pricePerCaratUsd ?? i.costUsd / i.carat)
+      .sort((a, b) => a - b);
     perCaratByBand.set(band.label, cpc);
     if (cpc.length === 0) continue;
     const medianCpc = pct(cpc, 0.5);
@@ -228,7 +229,12 @@ async function main() {
   const first = rows[0] as Record<string, unknown>;
   out(`Raw row fields: ${Object.keys(first).map((k) => `\`${k}\``).join(', ')}`);
   out('');
-  const perCaratKey = Object.keys(first).find((k) => /per.?carat|price_?ct|\brate\b/i.test(k));
+  out(
+    'Lab mapping: `Buy_Price` is treated as **USD per carat**; ' +
+      '`costUsd = Buy_Price × Weight`. Naturals keep Buy_Price/Rap as total.',
+  );
+  out('');
+  const perCaratKey = Object.keys(first).find((k) => /per.?carat|price_?ct/i.test(k));
   if (perCaratKey) {
     let total = 0;
     let perCt = 0;
@@ -246,7 +252,7 @@ async function main() {
     out(`Comparing Buy_Price against \`${perCaratKey}\` × carat on ${n} rows: ` +
       `**${total}** match "total", **${perCt}** match "per-carat".`);
   } else {
-    out('No per-carat field found in the rows — cannot cross-check from data alone.');
+    out('No explicit per-carat field in the payload — lab uses Buy_Price × Weight by policy.');
   }
   out('');
 
@@ -277,7 +283,7 @@ async function main() {
     const pick_ = pool.reduce((best, i) => (Math.abs(i.carat - target) < Math.abs(best.carat - target) ? i : best));
     used.add(pick_.stockRef);
     const priced = priceLab(pick_);
-    const tier = LAB_TIERS.find((t) => pick_.carat <= t.maxCarat);
+    const tier = LAB_TIERS.find((t) => pick_.costUsd <= t.maxCostUsd);
     if (!priced.ok) {
       out(`| ${pick_.stockRef} | ${pick_.shape} | ${pick_.carat} | ${pick_.color} | ${pick_.clarity} | ${pick_.cut ?? '—'} | $${pick_.costUsd.toLocaleString()} | — | HELD: ${priced.hold.reason} | — |`);
       continue;

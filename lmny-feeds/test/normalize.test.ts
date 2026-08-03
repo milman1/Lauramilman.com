@@ -40,6 +40,17 @@ describe('stone normalization', () => {
     expect(normalizeStones([{ ...stoneRow, cost: '' }], 'lab').holds[0]?.reason).toBe('missing_cost');
     expect(normalizeStones([{ shape: 'Round' }], 'lab').holds[0]?.reason).toBe('missing_stock_ref');
   });
+
+  it('lab treats Buy_Price / cost as per-carat and multiplies by weight', () => {
+    const { items, holds } = normalizeStones([{ ...stoneRow, cost: '100' }], 'lab');
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({ costUsd: 201, pricePerCaratUsd: 100, carat: 2.01 });
+  });
+
+  it('natural still treats cost as a total', () => {
+    const { items } = normalizeStones([stoneRow], 'natural');
+    expect(items[0]).toMatchObject({ costUsd: 10000, carat: 2.01 });
+  });
 });
 
 const watchRow = {

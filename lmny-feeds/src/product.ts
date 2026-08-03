@@ -19,7 +19,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 3;
+export const PRODUCT_SCHEMA_VERSION = 4;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -258,7 +258,13 @@ export function buildProductSetInput(
         sku: item.stockRef,
         taxable: true,
         inventoryPolicy: 'DENY',
-        inventoryItem: { tracked: false, requiresShipping: true },
+        inventoryItem: {
+          tracked: false,
+          requiresShipping: true,
+          // Shopify InventoryItem.cost — required so margin is auditable in admin
+          // independently of Supabase / $app.cost_cents.
+          cost: item.costUsd.toFixed(2),
+        },
       },
     ],
   };

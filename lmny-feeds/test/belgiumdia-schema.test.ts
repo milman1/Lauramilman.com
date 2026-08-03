@@ -95,8 +95,25 @@ describe('Belgium Dia real-schema lab record', () => {
       clarity: 'VVS2',
       cut: 'Ideal',
       lab: 'IGI',
-      costUsd: 480,
+      // Buy_Price is per-carat → total = 480 × 1.22
+      pricePerCaratUsd: 480,
+      costUsd: 585.6,
     });
+  });
+
+  it('multiplies Buy_Price by carat across size bands (the live bug)', () => {
+    const rows = [
+      { ...labRecord, Stock_No: 'A', Weight: '0.50', Buy_Price: '120' },
+      { ...labRecord, Stock_No: 'B', Weight: '1.00', Buy_Price: '120' },
+      { ...labRecord, Stock_No: 'C', Weight: '2.00', Buy_Price: '120' },
+      { ...labRecord, Stock_No: 'D', Weight: '3.00', Buy_Price: '120' },
+      { ...labRecord, Stock_No: 'E', Weight: '6.00', Buy_Price: '120' },
+      { ...labRecord, Stock_No: 'F', Weight: '10.00', Buy_Price: '120' },
+    ];
+    const { items, holds } = normalizeStones(rows, 'lab');
+    expect(holds).toEqual([]);
+    const costs = items.map((i) => (i.kind === 'lab' ? i.costUsd : 0));
+    expect(costs).toEqual([60, 120, 240, 360, 720, 1200]);
   });
 });
 

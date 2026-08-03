@@ -5,10 +5,9 @@
  * happen via pull request against this file — never via database pokes or
  * ad-hoc edits in Shopify admin.
  *
- * ⚠️ RECONSTRUCTION NOTICE: the original `markup_rules` seed from the
- * pre-Shopify prototype was lost (the lmny-feeds folder was never pushed).
- * The lab tiers below are a reconstruction that averages ~1.55x per the
- * confirmed business rules. Review and correct before the first live sync.
+ * Lab tiers key off **total cost** (not carat). Inventory is virtual (memo),
+ * so multiples stay aggressive below market. Guards in markup.ts fail closed
+ * if the Belgium Dia cost mapping regresses (e.g. treating $/ct as total).
  */
 
 /** Natural diamonds: retail = Rapaport list × rapDiscount, held if margin < minMarginPct. */
@@ -19,23 +18,50 @@ export const NATURAL = {
 } as const;
 
 export interface LabTier {
-  /** Tier applies to carat weights ≤ maxCarat. First matching tier wins. */
-  maxCarat: number;
-  /** retail = feed cost × multiplier */
+  /** Tier applies when total costUsd ≤ maxCostUsd. First matching tier wins. */
+  maxCostUsd: number;
+  /** retail = total cost × multiplier */
   multiplier: number;
 }
 
 /**
- * Lab-grown markup tiers, applied to feed cost by carat weight.
+ * Lab-grown markup tiers on **total** feed cost (Buy_Price × carat).
  * Imported by markup.ts as its FALLBACK_RULES.
  */
 export const LAB_TIERS: LabTier[] = [
-  { maxCarat: 0.5, multiplier: 1.7 },
-  { maxCarat: 1.0, multiplier: 1.62 },
-  { maxCarat: 2.0, multiplier: 1.55 },
-  { maxCarat: 3.0, multiplier: 1.5 },
-  { maxCarat: Number.POSITIVE_INFINITY, multiplier: 1.45 },
+  { maxCostUsd: 500, multiplier: 1.7 },
+  { maxCostUsd: 1500, multiplier: 1.62 },
+  { maxCostUsd: 4000, multiplier: 1.55 },
+  { maxCostUsd: 10000, multiplier: 1.5 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.45 },
 ];
+
+/**
+ * Fail-closed floors for lab stones. A mapping bug that treats $/ct as total
+ * lands every size in ~$50–$200 cost and trips these immediately.
+ */
+export const LAB_GUARDS = {
+  /**
+   * Absolute retail floor for stones ≥ minCaratForRetailFloor.
+   * Catches the live bug ($96–$170 retails) without blocking aggressive
+   * 1ct memo pricing (~$200 after 1.7× on ~$120/ct).
+   */
+  minRetailUsd: 180,
+  minCaratForRetailFloor: 1.0,
+  /**
+   * Minimum acceptable Buy_Price ($/ct) by carat band. First match wins.
+   * Tuned below live wholesale p10 so real cheap large stones pass, but a
+   * double-divided or zeroed cost cannot.
+   */
+  minCostPerCarat: [
+    { maxCarat: 1.0, minUsd: 35 },
+    { maxCarat: 2.0, minUsd: 25 },
+    { maxCarat: 3.0, minUsd: 18 },
+    { maxCarat: 5.0, minUsd: 12 },
+    { maxCarat: 10.0, minUsd: 8 },
+    { maxCarat: Number.POSITIVE_INFINITY, minUsd: 5 },
+  ],
+} as const;
 
 /**
  * Watches: retail = marketAnchor × accessoryHaircut × compDiscount,

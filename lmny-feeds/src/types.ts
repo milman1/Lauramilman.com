@@ -18,7 +18,13 @@ export interface StoneItem {
   /** Table and depth as percentages. Belgium Dia often omits both. */
   tablePct?: number;
   depthPct?: number;
+  /**
+   * Total supplier cost in USD. For lab, this is Buy_Price × carat (Belgium Dia
+   * Buy_Price is per-carat). For natural, Buy_Price/Rap-derived total.
+   */
   costUsd: number;
+  /** Lab only: raw Buy_Price interpreted as USD per carat. */
+  pricePerCaratUsd?: number;
   /** Rapaport list total (USD) — required to price naturals. */
   rapPriceUsd?: number;
   imageUrls: string[];

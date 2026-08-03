@@ -19,6 +19,16 @@ export interface WatchLine {
   holdReason: string | null;
 }
 
+export interface LabBandStat {
+  label: string;
+  count: number;
+  minRetail: number | null;
+  maxRetail: number | null;
+  medianRetail: number | null;
+  medianCost: number | null;
+  medianPpc: number | null;
+}
+
 export interface SyncReport {
   dryRun: boolean;
   startedAt: string;
@@ -27,6 +37,20 @@ export interface SyncReport {
   feeds: Record<Kind, FeedStats>;
   holdHistogram: Record<string, number>;
   naturalMargins: { p25: number | null; median: number | null; p75: number | null; rejectedByFloor: number };
+  labPricing: {
+    published: number;
+    held: number;
+    bands: LabBandStat[];
+    sample: Array<{
+      stockRef: string;
+      title: string;
+      carat: number;
+      pricePerCaratUsd: number | null;
+      costUsd: number;
+      retailUsd: number;
+      marginPct: number;
+    }>;
+  };
   watchComps: { checked: number; hits: number; hitRate: number | null; lines: WatchLine[] };
   sampleNaturals: Array<{ stockRef: string; title: string; costUsd: number; retailUsd: number; marginPct: number }>;
   decisions: { create: string[]; update: string[]; archive: string[]; skipped: number };
@@ -68,6 +92,56 @@ export function naturalMarginStats(publishable: Publishable[], holds: Hold[]) {
   };
 }
 
+const LAB_REPORT_BANDS: Array<{ label: string; lo: number; hi: number }> = [
+  { label: '0.5–0.99ct', lo: 0.5, hi: 1 },
+  { label: '1.0–1.99ct', lo: 1, hi: 2 },
+  { label: '2.0–2.99ct', lo: 2, hi: 3 },
+  { label: '3.0–4.99ct', lo: 3, hi: 5 },
+  { label: '5.0–9.99ct', lo: 5, hi: 10 },
+  { label: '10ct+', lo: 10, hi: Number.POSITIVE_INFINITY },
+];
+
+/** Per-band lab retail summary — a silent sync is how the $/ct-as-total bug shipped. */
+export function labPricingStats(publishable: Publishable[], holds: Hold[]): SyncReport['labPricing'] {
+  const labs = publishable.filter((p) => p.item.kind === 'lab');
+  const bands: LabBandStat[] = LAB_REPORT_BANDS.map((band) => {
+    const inBand = labs.filter((p) => {
+      const c = p.item.kind === 'lab' ? p.item.carat : 0;
+      return c >= band.lo && c < band.hi;
+    });
+    const retails = inBand.map((p) => p.priced.retailUsd).sort((a, b) => a - b);
+    const costs = inBand.map((p) => p.item.costUsd).sort((a, b) => a - b);
+    const ppcs = inBand
+      .map((p) => (p.item.kind === 'lab' ? p.item.pricePerCaratUsd : undefined))
+      .filter((v): v is number => typeof v === 'number')
+      .sort((a, b) => a - b);
+    return {
+      label: band.label,
+      count: inBand.length,
+      minRetail: retails[0] ?? null,
+      maxRetail: retails.at(-1) ?? null,
+      medianRetail: percentile(retails, 0.5),
+      medianCost: percentile(costs, 0.5),
+      medianPpc: percentile(ppcs, 0.5),
+    };
+  });
+  const sample = labs.slice(0, 8).map((p) => ({
+    stockRef: p.item.stockRef,
+    title: `${p.item.kind === 'lab' ? p.item.carat : ''}ct`,
+    carat: p.item.kind === 'lab' ? p.item.carat : 0,
+    pricePerCaratUsd: p.item.kind === 'lab' ? (p.item.pricePerCaratUsd ?? null) : null,
+    costUsd: p.item.costUsd,
+    retailUsd: p.priced.retailUsd,
+    marginPct: p.priced.marginPct,
+  }));
+  return {
+    published: labs.length,
+    held: holds.filter((h) => h.kind === 'lab').length,
+    bands,
+    sample,
+  };
+}
+
 export function summarizeDecisions(decisions: Decision[]) {
   return {
     create: decisions.filter((d) => d.action === 'create').map((d) => d.handle),
@@ -106,6 +180,29 @@ export function renderMarkdown(r: SyncReport): string {
   lines.push('## Natural margins');
   lines.push('');
   lines.push(`p25 ${pct(r.naturalMargins.p25)} · median ${pct(r.naturalMargins.median)} · p75 ${pct(r.naturalMargins.p75)} · rejected by 20% floor: ${r.naturalMargins.rejectedByFloor}`);
+  lines.push('');
+  lines.push('## Lab pricing (must never be silent)');
+  lines.push('');
+  lines.push(`Published **${r.labPricing.published}** · held **${r.labPricing.held}**`);
+  lines.push('');
+  lines.push('| Carat band | Count | Median $/ct | Median cost | Median retail | Min retail | Max retail |');
+  lines.push('|---|---|---|---|---|---|---|');
+  for (const b of r.labPricing.bands) {
+    if (b.count === 0) continue;
+    lines.push(
+      `| ${b.label} | ${b.count} | ${usd(b.medianPpc)} | ${usd(b.medianCost)} | ${usd(b.medianRetail)} | ${usd(b.minRetail)} | ${usd(b.maxRetail)} |`,
+    );
+  }
+  if (r.labPricing.sample.length) {
+    lines.push('');
+    lines.push('| Stock | Carat | $/ct | Cost | Retail | Margin |');
+    lines.push('|---|---|---|---|---|---|');
+    for (const s of r.labPricing.sample) {
+      lines.push(
+        `| ${s.stockRef} | ${s.carat} | ${usd(s.pricePerCaratUsd)} | ${usd(s.costUsd)} | ${usd(s.retailUsd)} | ${pct(s.marginPct)} |`,
+      );
+    }
+  }
   lines.push('');
   if (r.hoursProbe) {
     const p = r.hoursProbe;

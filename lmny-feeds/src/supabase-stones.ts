@@ -26,6 +26,7 @@ export interface StoneRow {
   table_pct: number | null;
   depth_pct: number | null;
   cost_usd: number;
+  price_per_carat_usd: number | null;
   rap_price_usd: number | null;
   retail_usd: number;
   image_urls: string[];
@@ -68,6 +69,7 @@ export function stoneRowFor(
     table_pct: item.tablePct ?? null,
     depth_pct: item.depthPct ?? null,
     cost_usd: item.costUsd,
+    price_per_carat_usd: item.pricePerCaratUsd ?? null,
     rap_price_usd: item.rapPriceUsd ?? null,
     retail_usd: retailUsd,
     image_urls: item.imageUrls,

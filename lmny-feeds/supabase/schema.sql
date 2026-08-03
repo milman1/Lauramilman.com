@@ -26,6 +26,8 @@ create table if not exists public.stones (
   table_pct numeric(6, 2),
   depth_pct numeric(6, 2),
   cost_usd numeric(12, 2) not null,
+  /** Lab: Belgium Dia Buy_Price interpreted as USD/ct. Natural: cost/carat. */
+  price_per_carat_usd numeric(12, 2),
   rap_price_usd numeric(12, 2),
   retail_usd numeric(12, 2) not null,
   image_urls text[] not null default '{}',

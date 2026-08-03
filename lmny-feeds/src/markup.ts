@@ -1,4 +1,4 @@
-import { LAB_TIERS as FALLBACK_RULES, NATURAL, WATCH } from '../config/pricing.js';
+import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL, WATCH } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 
 export { FALLBACK_RULES };
@@ -15,12 +15,28 @@ function margin(retail: number, cost: number): number {
   return (retail - cost) / retail;
 }
 
+function minCostPerCaratFloor(carat: number): number {
+  const band = LAB_GUARDS.minCostPerCarat.find((b) => carat <= b.maxCarat);
+  return band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
+}
+
 /** Naturals: Rapaport list × 0.75, held below the 20% margin floor. */
 export function priceNatural(item: StoneItem): PriceResult {
   if (!item.rapPriceUsd) {
     return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_rap_price' } };
   }
   const retailUsd = round(item.rapPriceUsd * NATURAL.rapDiscount);
+  if (retailUsd < item.costUsd) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'retail_below_cost',
+        detail: `retail ${retailUsd} < cost ${item.costUsd}`,
+      },
+    };
+  }
   const marginPct = margin(retailUsd, item.costUsd);
   if (marginPct < NATURAL.minMarginPct) {
     return {
@@ -36,13 +52,75 @@ export function priceNatural(item: StoneItem): PriceResult {
   return { ok: true, priced: { retailUsd, marginPct } };
 }
 
-/** Lab-grown: tiered multiplier on feed cost, by carat. */
+/**
+ * Lab-grown: tiered multiplier on **total** feed cost (Buy_Price × carat).
+ * Fail-closed guards catch a regress to treating $/ct as total.
+ */
 export function priceLab(item: StoneItem): PriceResult {
-  const tier = FALLBACK_RULES.find((t) => item.carat <= t.maxCarat);
+  const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
+  const floor = minCostPerCaratFloor(item.carat);
+  if (!(ppc >= floor)) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'lab_cost_per_carat_floor',
+        detail: `$${ppc.toFixed(2)}/ct < floor $${floor}/ct at ${item.carat}ct — likely $/ct used as total`,
+      },
+    };
+  }
+
+  // The live bug: costUsd was set to Buy_Price (per-carat) without × carat.
+  // For ≥1.5ct, total must be within 15% of ppc × carat.
+  if (item.carat >= 1.5 && ppc > 0) {
+    const expected = ppc * item.carat;
+    if (item.costUsd < expected * 0.85) {
+      return {
+        ok: false,
+        hold: {
+          kind: item.kind,
+          stockRef: item.stockRef,
+          reason: 'lab_cost_not_multiplied',
+          detail: `cost ${item.costUsd} << ppc×carat ${expected.toFixed(2)} — Buy_Price used as total`,
+        },
+      };
+    }
+  }
+
+  const tier = FALLBACK_RULES.find((t) => item.costUsd <= t.maxCostUsd);
   if (!tier) {
     return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'lab_no_markup_tier' } };
   }
   const retailUsd = round(item.costUsd * tier.multiplier);
+
+  if (retailUsd < item.costUsd) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'retail_below_cost',
+        detail: `retail ${retailUsd} < cost ${item.costUsd}`,
+      },
+    };
+  }
+
+  if (
+    item.carat >= LAB_GUARDS.minCaratForRetailFloor &&
+    retailUsd < LAB_GUARDS.minRetailUsd
+  ) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'lab_retail_floor',
+        detail: `retail ${retailUsd} < $${LAB_GUARDS.minRetailUsd} at ${item.carat}ct`,
+      },
+    };
+  }
+
   return { ok: true, priced: { retailUsd, marginPct: margin(retailUsd, item.costUsd) } };
 }
 
