@@ -777,7 +777,25 @@
           </div>
         </div>
 
-        <a href="/pages/about" class="nav__link">About</a>
+        {%- comment -%}
+          Journal replaces About in the top-level row. Parent goes to the blog
+          index; caret / hover opens tagged topic links (existing tags).
+        {%- endcomment -%}
+        <div class="nav__item">
+          <a href="/blogs/journal" class="nav__item-link">
+            Journal
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </a>
+          <div class="nav__dropdown">
+            <a href="/blogs/journal/tagged/diamond-education" class="nav__dropdown-link">Diamond Education</a>
+            <a href="/blogs/journal/tagged/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <a href="/blogs/journal/tagged/buying-guide" class="nav__dropdown-link">Buying Guides</a>
+            <a href="/blogs/journal/tagged/style" class="nav__dropdown-link">Style</a>
+          </div>
+        </div>
+
         <a href="{{ routes.account_url }}" class="nav__link nav__link--account">Account</a>
       </nav>
 
@@ -1149,22 +1167,30 @@
           }
 
           parentLink.addEventListener('touchstart', function(e) {
-            if (isMobile()) {
-              e.preventDefault();
-              touchedDropdown = true;
-              toggleDropdown();
-            }
+            if (!isMobile()) return;
+            // Journal (and any linked parent): caret toggles; label navigates.
+            var isLinked = parentLink.tagName === 'A' && parentLink.getAttribute('href');
+            var onCaret = e.target.closest('.dropdown-arrow');
+            if (isLinked && !onCaret) return;
+            e.preventDefault();
+            touchedDropdown = true;
+            toggleDropdown();
           }, { passive: false });
 
           parentLink.addEventListener('click', function(e) {
-            if (isMobile()) {
-              e.preventDefault();
-              if (touchedDropdown) {
-                touchedDropdown = false;
-                return;
-              }
-              toggleDropdown();
+            if (!isMobile()) return;
+            var isLinked = parentLink.tagName === 'A' && parentLink.getAttribute('href');
+            var onCaret = e.target.closest('.dropdown-arrow');
+            if (isLinked && !onCaret) {
+              closeMobileMenu();
+              return;
             }
+            e.preventDefault();
+            if (touchedDropdown) {
+              touchedDropdown = false;
+              return;
+            }
+            toggleDropdown();
           });
         }
       });
