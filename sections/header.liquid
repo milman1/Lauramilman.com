@@ -291,6 +291,20 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* The lab-grown category list is both longer and wider than the two links the
+   tier used to carry. Centred under a nav item this close to the right edge it
+   ran off a 1280px viewport, so this panel anchors to its right edge instead. */
+.header .nav__item--peaceful .nav__dropdown {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(10px);
+  white-space: nowrap;
+}
+
+.header .nav__item--peaceful:hover .nav__dropdown {
+  transform: translateX(0) translateY(0);
+}
+
 .header .nav__dropdown-link {
   display: block;
   padding: 0.75rem 1.5rem;
@@ -479,6 +493,17 @@
     position: static;
     transform: none;
     left: auto;
+  }
+
+  /* Undo the desktop right-anchoring for the Peaceful Diamonds panel — in the
+     drawer it is a static full-width list, and nowrap would scroll it sideways. */
+  .header .nav__item--peaceful .nav__dropdown,
+  .header .nav__item--peaceful:hover .nav__dropdown {
+    position: static;
+    right: auto;
+    left: auto;
+    transform: none;
+    white-space: normal;
   }
 
   .header .nav__item.open .nav__dropdown {
@@ -774,6 +799,19 @@
           <div class="nav__dropdown">
             <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
             <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            {%- comment -%}
+              Category links mirror the peacefuldiamonds.com taxonomy so the
+              sub-brand shops the same way on both sites. Ring Settings,
+              Eternity Bands and Wedding Bands are deliberately absent — LMNY
+              holds no lab-grown stock in those three, and an empty collection
+              in the nav reads as a broken link.
+            {%- endcomment -%}
+            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Lab-Grown Bracelets</a>
+            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Lab-Grown Necklaces</a>
+            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Lab-Grown Pendants</a>
+            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-Grown Rings</a>
+            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Lab-Grown Earrings</a>
+            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-Grown Engagement Rings</a>
           </div>
         </div>
 

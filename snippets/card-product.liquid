@@ -140,6 +140,8 @@
       </div>
       <div class="card__content">
         <div class="card__information">
+          {%- render 'lab-grown-tag', product: card_product -%}
+
           <h3
             class="card__heading{% if card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
             {% if card_product.featured_media or settings.card_style == 'card' %}

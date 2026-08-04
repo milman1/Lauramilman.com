@@ -1,0 +1,28 @@
+{%- comment -%}
+  Renders the lab-grown marker that sits under a product thumbnail.
+
+  A piece can be identified as lab-grown three different ways in this catalog,
+  and all three have to be honoured or the marker misses stock:
+    - the canonical "Lab Grown Diamond" product tag (all finished jewelry),
+    - the "Peaceful Diamonds" vendor (the sub-brand is lab-grown by definition),
+    - the "Lab-Grown Diamond" product type (the loose-stone feed).
+
+  The hyphenated tag variant is still checked because older imports carry it.
+
+  Usage: {% render 'lab-grown-tag', product: product %}
+{%- endcomment -%}
+
+{%- liquid
+  assign is_lab_grown = false
+  if product.tags contains 'Lab Grown Diamond' or product.tags contains 'Lab-Grown Diamond'
+    assign is_lab_grown = true
+  elsif product.vendor == 'Peaceful Diamonds'
+    assign is_lab_grown = true
+  elsif product.type == 'Lab-Grown Diamond'
+    assign is_lab_grown = true
+  endif
+-%}
+
+{%- if is_lab_grown -%}
+  <span class="lab-grown-tag">Lab Grown Diamond</span>
+{%- endif -%}

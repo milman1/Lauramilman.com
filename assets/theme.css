@@ -737,6 +737,32 @@ p {
   color: var(--espresso);
 }
 
+/* Lab-grown marker under a product thumbnail. It sits in the card content
+   rather than over the image so it never covers the piece, and it carries the
+   Peaceful Diamonds navy tier colour instead of the LMNY gold — gold here would
+   read as a promotion badge alongside Sale/New. */
+.lab-grown-tag {
+  display: inline-block;
+  margin: 0 0 var(--space-sm);
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--navy);
+  background: rgba(169, 190, 227, 0.22);
+  border: 1px solid rgba(91, 127, 189, 0.35);
+  border-radius: var(--radius-full);
+}
+
+/* Dawn-derived cards left-align their text; the LMNY card centres it. */
+.card__information .lab-grown-tag {
+  margin-bottom: var(--space-xs);
+}
+
 .product-card__actions {
   position: absolute;
   bottom: var(--space-md);
