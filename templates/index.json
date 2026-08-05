@@ -10,6 +10,7 @@
         "primary_cta_url": "/collections/all",
         "secondary_cta_text": "Explore Our World",
         "secondary_cta_url": "/pages/lauras-story",
+        "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
     },
