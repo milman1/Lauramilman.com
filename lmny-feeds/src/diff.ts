@@ -19,11 +19,22 @@ export function kindForHandle(handle: string): Kind | null {
  * - in catalog, not in feed            → archive (never delete; URLs persist),
  *   but only for kinds whose feed fetch succeeded — a dead feed must not
  *   archive its whole catalog segment
+ *
+ * Archiving carries two very different causes, and `present` splits them.
+ * A stock ref absent from this run's feed is gone — sold, most likely
+ * (`left_feed`). One the feed still lists but that this run refused to price
+ * is not gone at all (`held_in_feed`): it is off the storefront until the
+ * numbers work, and may be back next hour. Both archive — an unpriceable item
+ * must not stay buyable — but only `left_feed` earns the permanent URL
+ * redirect that would otherwise strand the product page when it returns.
+ * Without the split, "131 watches archived" reads as sold-out inventory when
+ * it can equally be a pricing rule that moved.
  */
 export function diffCatalog(
   desired: DesiredEntry[],
   catalog: CatalogEntry[],
   fetchedKinds: Set<Kind>,
+  present: Set<string> = new Set(),
 ): Decision[] {
   const decisions: Decision[] = [];
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
@@ -57,7 +68,12 @@ export function diffCatalog(
     if (have.status === 'ARCHIVED') {
       decisions.push({ handle: have.handle, action: 'skip', reason: 'already_archived', productId: have.id });
     } else {
-      decisions.push({ handle: have.handle, action: 'archive', reason: 'left_feed_or_failed_gates', productId: have.id });
+      decisions.push({
+        handle: have.handle,
+        action: 'archive',
+        reason: present.has(have.handle) ? 'held_in_feed' : 'left_feed',
+        productId: have.id,
+      });
     }
   }
 

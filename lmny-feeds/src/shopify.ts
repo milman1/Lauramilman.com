@@ -23,6 +23,26 @@ export function sniffImageMime(bytes: Uint8Array): string | null {
   return null;
 }
 
+/**
+ * Identify a video container by its magic number, same reasoning as
+ * `sniffImageMime`: the supplier serves some .mp4 files as
+ * application/octet-stream, and Shopify's staged upload wants a real type.
+ * Returns null for anything that isn't a recognisable video — usually an HTML
+ * 360° viewer page served behind a .mp4-looking URL, which must not be
+ * uploaded as media.
+ */
+export function sniffVideoMime(bytes: Uint8Array): string | null {
+  const at = (i: number) => bytes[i] ?? -1;
+  // ISO base media (MP4/MOV/M4V): a `ftyp` box at offset 4, brand at 8.
+  if (at(4) === 0x66 && at(5) === 0x74 && at(6) === 0x79 && at(7) === 0x70) {
+    const brand = String.fromCharCode(at(8), at(9), at(10), at(11));
+    return brand === 'qt  ' ? 'video/quicktime' : 'video/mp4';
+  }
+  // EBML header — WebM / Matroska.
+  if (at(0) === 0x1a && at(1) === 0x45 && at(2) === 0xdf && at(3) === 0xa3) return 'video/webm';
+  return null;
+}
+
 interface GqlError {
   message: string;
   extensions?: { code?: string };
@@ -168,6 +188,9 @@ export class ShopifyClient {
       { namespace: METAFIELD_NAMESPACE, key: 'synced_at', name: 'Synced at', type: 'date_time' },
       { namespace: METAFIELD_NAMESPACE, key: 'is_naked', name: 'Watch is naked', type: 'boolean' },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_mid_usd', name: 'Comp mid (USD)', type: 'number_decimal' },
+      { namespace: METAFIELD_NAMESPACE, key: 'comp_low_usd', name: 'Comp low (USD)', type: 'number_decimal' },
+      { namespace: METAFIELD_NAMESPACE, key: 'comp_anchor_usd', name: 'Comp anchor (USD)', type: 'number_decimal' },
+      { namespace: METAFIELD_NAMESPACE, key: 'accessory_haircut', name: 'Accessory haircut', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_as_of', name: 'Comp as of', type: 'date' },
       { namespace: METAFIELD_NAMESPACE, key: 'lab', name: 'Grading lab', type: 'single_line_text_field' },
       { namespace: METAFIELD_NAMESPACE, key: 'polish', name: 'Polish', type: 'single_line_text_field' },
@@ -177,6 +200,7 @@ export class ShopifyClient {
       { namespace: METAFIELD_NAMESPACE, key: 'table_pct', name: 'Table %', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'depth_pct', name: 'Depth %', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'video_url', name: '360° video URL', type: 'url' },
+      { namespace: METAFIELD_NAMESPACE, key: 'video_urls', name: '360° video URLs', type: 'list.url' },
       { namespace: APP_NAMESPACE, key: 'cost_cents', name: 'Cost (cents)', type: 'number_integer' },
       { namespace: CUSTOM_NAMESPACE, key: 'diamond_shape', name: 'Diamond shape', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'carat_weight', name: 'Carat weight', type: 'number_decimal', storefront: 'PUBLIC_READ' },
@@ -329,7 +353,7 @@ export class ShopifyClient {
             status
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
-            media { edges { node { status } } }
+            media { edges { node { status mediaContentType } } }
           }
         }
       }
@@ -351,12 +375,22 @@ export class ShopifyClient {
           status: r.status as string,
           tags: (r.tags as string[]) ?? [],
           mediaCount: 0,
+          imageCount: 0,
+          videoCount: 0,
           contentHash: (r.metafield as { value: string } | null)?.value ?? null,
         });
         order.push(id);
-      } else if (typeof r.__parentId === 'string' && r.status === 'READY') {
+      } else if (typeof r.__parentId === 'string' && typeof r.status === 'string') {
         const parent = byId.get(r.__parentId);
-        if (parent) parent.mediaCount += 1;
+        if (!parent) continue;
+        if (r.status === 'READY') parent.mediaCount += 1;
+        if (r.mediaContentType === 'VIDEO') {
+          // Count PROCESSING/UPLOADED too: a transcoding video already exists,
+          // and re-staging it would attach a second copy.
+          if (r.status !== 'FAILED') parent.videoCount += 1;
+        } else if (r.status === 'READY') {
+          parent.imageCount += 1;
+        }
       }
     }
     return order.map((id) => byId.get(id)!);
@@ -680,15 +714,86 @@ export class ShopifyClient {
     return data.productDeleteMedia.mediaUserErrors.map((e) => e.message);
   }
 
-  /** Attach an already-staged image to a product. */
-  async attachMedia(productId: string, resourceUrl: string, alt: string): Promise<string[]> {
+  /**
+   * Re-host a feed video so it can be attached as Shopify media.
+   *
+   * Images attach straight from a supplier URL; video does not — Shopify only
+   * accepts VIDEO media from a staged upload, which is why the feed's .mp4s
+   * were never attached at all and every watch showed zero videos. This is the
+   * image rescue path with a video resource: fetch the bytes, confirm from the
+   * magic number that it really is a video, stage, upload.
+   *
+   * Skips anything over `maxBytes` on the Content-Length rather than buffering
+   * it — a runner holds these in memory.
+   */
+  async rehostVideo(sourceUrl: string, maxBytes = 200 * 1024 * 1024): Promise<string | null> {
+    let bytes: Uint8Array;
+    try {
+      const res = await fetch(sourceUrl, {
+        headers: { 'User-Agent': BROWSER_UA, Accept: 'video/*,*/*' },
+        signal: AbortSignal.timeout(120_000),
+      });
+      if (!res.ok) return null;
+      const declared = Number(res.headers.get('content-length') ?? '0');
+      if (declared > maxBytes) {
+        await res.body?.cancel();
+        return null;
+      }
+      bytes = new Uint8Array(await res.arrayBuffer());
+    } catch {
+      return null;
+    }
+    if (bytes.byteLength === 0 || bytes.byteLength > maxBytes) return null;
+    const mime = sniffVideoMime(bytes);
+    if (!mime) return null; // a 360° viewer page or a dead link, not a video
+
+    const ext = mime === 'video/webm' ? 'webm' : mime === 'video/quicktime' ? 'mov' : 'mp4';
+    const stem = sourceUrl.split('/').filter(Boolean).slice(-2).join('-').replace(/[^\w.-]/g, '-');
+    const filename = /\.(mp4|mov|webm)$/i.test(stem) ? stem : `${stem}.${ext}`;
+    const data = await this.gql<{
+      stagedUploadsCreate: {
+        stagedTargets: Array<{ url: string; resourceUrl: string; parameters: Array<{ name: string; value: string }> }>;
+        userErrors: Array<{ message: string }>;
+      };
+    }>(
+      `mutation($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets { url resourceUrl parameters { name value } }
+          userErrors { message }
+        }
+      }`,
+      { input: [{ resource: 'VIDEO', filename, mimeType: mime, httpMethod: 'POST', fileSize: String(bytes.byteLength) }] },
+    );
+    if (data.stagedUploadsCreate.userErrors.length) return null;
+    const target = data.stagedUploadsCreate.stagedTargets[0];
+    if (!target) return null;
+
+    const form = new FormData();
+    for (const p of target.parameters) form.append(p.name, p.value);
+    form.append('file', new Blob([bytes as BlobPart], { type: mime }), filename);
+    const upload = await fetch(target.url, { method: 'POST', body: form });
+    if (!upload.ok) return null;
+    return target.resourceUrl;
+  }
+
+  /**
+   * Attach already-staged media to a product. Video processing is async, so
+   * this returning cleanly means Shopify accepted the upload, not that the
+   * video is playable yet — the next run's catalog read confirms that.
+   */
+  async attachMedia(
+    productId: string,
+    resourceUrl: string,
+    alt: string,
+    mediaContentType: 'IMAGE' | 'VIDEO' = 'IMAGE',
+  ): Promise<string[]> {
     const data = await this.gql<{ productCreateMedia: { mediaUserErrors: Array<{ message: string }> } }>(
       `mutation($productId: ID!, $media: [CreateMediaInput!]!) {
         productCreateMedia(productId: $productId, media: $media) {
           mediaUserErrors { message }
         }
       }`,
-      { productId, media: [{ originalSource: resourceUrl, mediaContentType: 'IMAGE', alt }] },
+      { productId, media: [{ originalSource: resourceUrl, mediaContentType, alt }] },
     );
     return data.productCreateMedia.mediaUserErrors.map((e) => e.message);
   }

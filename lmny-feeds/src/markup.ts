@@ -200,6 +200,9 @@ export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult
       retailUsd,
       marginPct: margin(retailUsd, item.costUsd),
       compMidUsd: comp.midUsd,
+      compLowUsd: comp.lowUsd,
+      anchorUsd: anchor,
+      haircut,
       compAsOf: comp.asOf,
     },
   };

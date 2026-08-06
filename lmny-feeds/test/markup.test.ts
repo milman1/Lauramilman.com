@@ -141,6 +141,18 @@ describe('watch pricing', () => {
     expect(r.ok && r.priced.compMidUsd).toBe(12000);
   });
 
+  it('records the anchor it priced from, not just the mid', () => {
+    // Auditing live data off comp_mid_usd alone found no multiple of the mid
+    // that reproduced the price — because the price comes off the blended
+    // anchor. Everything needed to recompute retail is stored.
+    const r = priceWatch(
+      watch({ costUsd: 8000, box: false, papers: false, isNaked: true }),
+      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
+    );
+    expect(r.ok && r.priced).toMatchObject({ compMidUsd: 12000, compLowUsd: 10000, anchorUsd: 10900, haircut: 0.9 });
+    expect(r.ok && Math.round(r.priced.anchorUsd! * r.priced.haircut! * 0.97)).toBe(r.ok && r.priced.retailUsd);
+  });
+
   it('applies the naked haircut (−10%) on incomplete sets', () => {
     // anchor 10900 × 0.90 × 0.97 = 9516
     const r = priceWatch(

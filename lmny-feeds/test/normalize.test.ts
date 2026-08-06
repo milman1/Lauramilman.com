@@ -82,6 +82,80 @@ describe('watch normalization', () => {
   });
 });
 
+describe('media collection across numbered feed fields', () => {
+  // The live bug: `pick()` returned the first matching key and stopped, so a
+  // row spreading photos over ImageLink/ImageLink2/ImageLink3 produced exactly
+  // one image — the reason no Shopify product held more than one photo and no
+  // stones row more than one image and one video.
+  const multi = {
+    ...stoneRow,
+    image: undefined,
+    ImageLink: 'https://dnalinks.in/1.jpg',
+    ImageLink2: 'https://dnalinks.in/2.jpg',
+    ImageLink3: 'https://dnalinks.in/3.jpg',
+    VideoLink: 'https://dnalinks.in/1.mp4',
+    VideoLink2: 'https://dnalinks.in/2.mp4',
+  };
+
+  it('takes every numbered image and video field, in order', () => {
+    const { items } = normalizeStones([multi], 'natural');
+    const item = items[0]!;
+    expect(item.imageUrls).toEqual([
+      'https://dnalinks.in/1.jpg',
+      'https://dnalinks.in/2.jpg',
+      'https://dnalinks.in/3.jpg',
+    ]);
+    expect(item.videoUrls).toEqual(['https://dnalinks.in/1.mp4', 'https://dnalinks.in/2.mp4']);
+  });
+
+  it('applies to watches too — the feed sends several photos and a video', () => {
+    const { items } = normalizeWatches([
+      {
+        ...watchRow,
+        ImageLink: 'https://dnalinks.in/w1.jpg',
+        ImageLink2: 'https://dnalinks.in/w2.jpg',
+        VideoLink: 'https://dnalinks.in/w.mp4',
+      },
+    ]);
+    expect(items[0]?.imageUrls).toHaveLength(2);
+    expect(items[0]?.videoUrls).toEqual(['https://dnalinks.in/w.mp4']);
+  });
+
+  it('still splits a delimiter-joined field, and merges it with the numbered ones', () => {
+    const { items } = normalizeStones(
+      [{ ...multi, ImageLink: 'https://dnalinks.in/1.jpg, https://dnalinks.in/1b.jpg' }],
+      'natural',
+    );
+    expect(items[0]?.imageUrls).toEqual([
+      'https://dnalinks.in/1.jpg',
+      'https://dnalinks.in/1b.jpg',
+      'https://dnalinks.in/2.jpg',
+      'https://dnalinks.in/3.jpg',
+    ]);
+  });
+
+  it('attaches a URL repeated across fields once', () => {
+    const { items } = normalizeStones(
+      [{ ...multi, ImageLink2: 'https://dnalinks.in/1.jpg', ImageLink3: undefined }],
+      'natural',
+    );
+    expect(items[0]?.imageUrls).toEqual(['https://dnalinks.in/1.jpg']);
+  });
+
+  it('does not swallow a neighbouring field that merely shares a prefix', () => {
+    const { items } = normalizeStones(
+      [{ ...multi, Image_Link_Type: 'still', Video_Caption: 'https://example.com/not-media' }],
+      'natural',
+    );
+    expect(items[0]?.imageUrls).toEqual([
+      'https://dnalinks.in/1.jpg',
+      'https://dnalinks.in/2.jpg',
+      'https://dnalinks.in/3.jpg',
+    ]);
+    expect(items[0]?.videoUrls).not.toContain('https://example.com/not-media');
+  });
+});
+
 describe('cert URL coercion', () => {
   it('adds https:// to a scheme-less feed URL (the record that failed the live run)', () => {
     const { items } = normalizeStones(

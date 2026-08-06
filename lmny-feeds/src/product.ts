@@ -19,7 +19,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 4;
+export const PRODUCT_SCHEMA_VERSION = 5;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -41,7 +41,15 @@ export function sanitizeRef(ref: string): string {
 
 /** Deterministic idempotency key. Never look products up by title. */
 export function handleFor(item: FeedItem): string {
-  return `${HANDLE_PREFIX[item.kind]}-${sanitizeRef(item.stockRef)}`;
+  return handleForRef(item.kind, item.stockRef);
+}
+
+/**
+ * The same key from a kind + stock ref alone — held rows never become items,
+ * but the diff still needs to know their handles were in the feed.
+ */
+export function handleForRef(kind: FeedItem['kind'], stockRef: string): string {
+  return `${HANDLE_PREFIX[kind]}-${sanitizeRef(stockRef)}`;
 }
 
 export function titleFor(item: FeedItem): string {
@@ -116,9 +124,15 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     if (item.measurements) fields.push({ namespace: ns, key: 'measurements', type: 'single_line_text_field', value: item.measurements });
     if (item.tablePct) fields.push({ namespace: ns, key: 'table_pct', type: 'number_decimal', value: String(item.tablePct) });
     if (item.depthPct) fields.push({ namespace: ns, key: 'depth_pct', type: 'number_decimal', value: String(item.depthPct) });
-    // Feed videos are 360° viewers we can't attach as Shopify media (that needs
-    // a staged upload), so the URL is kept for the PDP to embed directly.
+    // Stone videos are 360° viewers embedded straight from the supplier rather
+    // than attached as Shopify media — re-hosting 24k of them per run isn't
+    // affordable. `video_url` stays the first one for the existing PDP tab;
+    // `video_urls` carries the rest, which the single-key media parse used to
+    // throw away before anything could read them.
     if (item.videoUrls[0]) fields.push({ namespace: ns, key: 'video_url', type: 'url', value: item.videoUrls[0] });
+    if (item.videoUrls.length > 0) {
+      fields.push({ namespace: ns, key: 'video_urls', type: 'list.url', value: JSON.stringify(item.videoUrls) });
+    }
     // Storefront-readable copies that drive the collection filters. carat_weight
     // is numeric so the carat control can be a true range, not a band.
     const c = CUSTOM_NAMESPACE;
@@ -133,6 +147,18 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     fields.push({ namespace: ns, key: 'is_naked', type: 'boolean', value: String(item.isNaked) });
     if (priced.compMidUsd !== undefined) {
       fields.push({ namespace: ns, key: 'comp_mid_usd', type: 'number_decimal', value: priced.compMidUsd.toFixed(2) });
+    }
+    // The mid alone does not explain the price — it is only one end of the
+    // blend the anchor is taken from. Store the low and the anchor so a live
+    // price reconciles from stored data: retail = round(anchor × haircut × 0.97).
+    if (priced.compLowUsd !== undefined) {
+      fields.push({ namespace: ns, key: 'comp_low_usd', type: 'number_decimal', value: priced.compLowUsd.toFixed(2) });
+    }
+    if (priced.anchorUsd !== undefined) {
+      fields.push({ namespace: ns, key: 'comp_anchor_usd', type: 'number_decimal', value: priced.anchorUsd.toFixed(2) });
+    }
+    if (priced.haircut !== undefined) {
+      fields.push({ namespace: ns, key: 'accessory_haircut', type: 'number_decimal', value: priced.haircut.toFixed(2) });
     }
     if (priced.compAsOf) {
       fields.push({ namespace: ns, key: 'comp_as_of', type: 'date', value: priced.compAsOf });
@@ -199,8 +225,9 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
     compMidUsd: priced.compMidUsd ?? null,
+    compAnchorUsd: priced.anchorUsd ?? null,
     images: item.imageUrls,
-    video: item.videoUrls[0] ?? null,
+    videos: item.videoUrls,
     certNumber: item.kind !== 'watch' ? (item.certNumber ?? null) : null,
     certUrl: item.kind !== 'watch' ? (item.certUrl ?? null) : null,
     tablePct: item.kind !== 'watch' ? (item.tablePct ?? null) : null,
@@ -212,7 +239,8 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
 /** What the Shopify catalogue already holds for this handle, if anything. */
 export interface ExistingProduct {
   id: string;
-  mediaCount: number;
+  /** READY images. Fewer than the feed supplies → re-send the whole set. */
+  imageCount: number;
 }
 
 /**
@@ -270,13 +298,17 @@ export function buildProductSetInput(
   };
   if (existing) input.id = existing.id;
   // productSet fully replaces any field it's given, so re-sending `files` on a
-  // product that already has media makes Shopify detach and re-download every
-  // image — thousands of pointless fetches, and a window with no photo. Send
-  // files only when there's nothing to preserve: a new product, or one whose
-  // media is missing and worth retrying. Feed image URLs are stable per stock
-  // ref, so a swapped-out image on an existing product won't be picked up
-  // until it's archived and recreated.
-  if (!existing || existing.mediaCount === 0) {
+  // product that already holds every photo makes Shopify detach and re-download
+  // all of them — thousands of pointless fetches, and a window with no picture.
+  // Send files when the product is short of what the feed supplies: a new
+  // product, one whose media failed entirely, or — the case the old
+  // `mediaCount === 0` test missed — one carrying the single image the
+  // single-key media parse produced while the feed offers several.
+  //
+  // This only runs on a create/update decision, so a product whose extra
+  // images permanently fail to process is not re-sent every hour: its hash is
+  // unchanged, and the diff skips it before reaching here.
+  if (!existing || existing.imageCount < item.imageUrls.length) {
     input.files = item.imageUrls.map((url, i) => ({
       originalSource: url,
       contentType: 'IMAGE',

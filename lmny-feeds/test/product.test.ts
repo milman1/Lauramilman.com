@@ -128,6 +128,20 @@ describe('storefront-readable facet metafields', () => {
     expect(fields.filter((f) => f.namespace === 'custom')).toHaveLength(0);
   });
 
+  it('carries every feed video, not just the first', () => {
+    const videos = ['https://dnalinks.in/a.mp4', 'https://dnalinks.in/b.mp4'];
+    const fields = metafieldsFor(naturalStone({ videoUrls: videos }), priced(), 'hash', at);
+    // video_url stays the first one — the diamond PDP's 360° tab reads it.
+    expect(find(fields, 'lmny_feed', 'video_url')?.value).toBe(videos[0]);
+    expect(find(fields, 'lmny_feed', 'video_urls')?.value).toBe(JSON.stringify(videos));
+  });
+
+  it('omits both video fields when the feed sent none', () => {
+    const fields = metafieldsFor(naturalStone({ videoUrls: [] }), priced(), 'hash', at);
+    expect(find(fields, 'lmny_feed', 'video_url')).toBeUndefined();
+    expect(find(fields, 'lmny_feed', 'video_urls')).toBeUndefined();
+  });
+
   it('cost_cents stays in the app-reserved namespace, never in custom', () => {
     const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
     expect(find(fields, '$app', 'cost_cents')?.value).toBe('1000000');
@@ -165,27 +179,41 @@ describe('updates target the existing product by id', () => {
   it('an update carries the catalogue id — without it productSet creates and collides', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, {
       id: 'gid://shopify/Product/7615054741575',
-      mediaCount: 1,
+      imageCount: 1,
     });
     expect(input.id).toBe('gid://shopify/Product/7615054741575');
     expect(input.handle).toBe('nd-bd-1234');
   });
 
   it('an update leaves existing media alone rather than re-downloading it', () => {
-    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 1 });
+    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', imageCount: 1 });
     // `files` absent, not empty — an empty list would detach every image.
     expect('files' in input).toBe(false);
   });
 
   it('an update retries media when the product has none', () => {
-    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', mediaCount: 0 });
+    const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', imageCount: 0 });
     expect(input.files as unknown[]).toHaveLength(1);
+  });
+
+  it('an update backfills a product left holding one photo when the feed has several', () => {
+    // The live shape of the media bug: every product carries exactly one image
+    // because the parse only ever read one field. Matching on media *presence*
+    // meant they could never pick up the rest.
+    const stone = naturalStone({
+      imageUrls: ['https://dnalinks.in/a.jpg', 'https://dnalinks.in/b.jpg', 'https://dnalinks.in/c.jpg'],
+    });
+    const input = buildProductSetInput(stone, priced(), at, { id: 'gid://shopify/Product/1', imageCount: 1 });
+    expect(input.files as unknown[]).toHaveLength(3);
+    // Once all three are attached, it stops re-sending them.
+    const settled = buildProductSetInput(stone, priced(), at, { id: 'gid://shopify/Product/1', imageCount: 3 });
+    expect('files' in settled).toBe(false);
   });
 
   it('an update writes inventoryItem.cost so Shopify margin is auditable', () => {
     const input = buildProductSetInput(labStone({ costUsd: 585.6 }), priced({ retailUsd: 996 }), at, {
       id: 'gid://shopify/Product/1',
-      mediaCount: 1,
+      imageCount: 1,
     });
     const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');

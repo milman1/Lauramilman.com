@@ -20,19 +20,38 @@ holds a stones table — Shopify products are the only live copy.
    stones, curated brand list for watches. Failing rows are *held* (never
    created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
-   - naturals: Rapaport × 0.75, held under a 20% margin floor
+   - naturals: Rapaport × 0.75, held under a 20% margin floor. The floor is a
+     **filter, not a floor price** — a thin stone is held out, never marked up
+     to clear it. 20% margin-on-retail is why no published natural sits below
+     cost × 1.25.
    - lab: tiered multiplier on cost by carat (~1.55× average)
    - watches: Hours market anchor (low→mid blend) × accessory haircut
      (naked −10% / partial −5%) × 0.97, floored at cost × 1.05; no comp or
      `sourceCount < 3` → hold. Most watches hold
      (`watch_no_market_comp` / `watch_feed_price_at_market`) — that is
-     correct when the feed is already at grey-market.
+     correct when the feed is already at grey-market, and it is why the
+     archived watch count is high. A held watch is archived, not deleted, and
+     comes back the run its numbers work. Prices written before 2026-08-03 are
+     `mid × 0.97`; anything rewritten since is 9–30% lower off the blended
+     anchor (see `config/pricing.ts`).
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    archive / skip. Unchanged hashes are skipped entirely. Items that leave the
    feed are archived, never deleted (URLs persist). A feed that fails to fetch
    never archives its catalog segment.
+   Archives carry a cause: `left_feed` (the stock ref is gone — sold or
+   withdrawn) or `held_in_feed` (still listed, but a gate or a pricing rule
+   refused it this run). Both archive, since an unpriceable item must not stay
+   buyable, but only `left_feed` gets the permanent URL redirect — redirecting
+   a held item would strand its page when pricing lets it back. The run summary
+   reports the split, so "N watches archived" can't be misread as sold-out
+   inventory when a pricing rule moved.
 5. **Write** (`src/shopify.ts`): `bulkOperationRunMutation(productSet)` with a
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
+   Media: every feed photo attaches by URL. `files` is re-sent only when the
+   product holds fewer READY images than the feed supplies, so a settled
+   product is never made to re-download its gallery. Watch videos are fetched,
+   type-sniffed and staged-uploaded as real `VIDEO` media, capped per run
+   (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -44,6 +63,10 @@ holds a stones table — Shopify products are the only live copy.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
   namespace so it is never exposed to the theme or Storefront API).
+- Stone 360° videos stay embedded from the supplier rather than attached as
+  Shopify media — re-hosting ~24k per run isn't affordable. `lmny_feed.video_url`
+  is the first (what the diamond PDP's 360° tab reads today);
+  `lmny_feed.video_urls` is the full list.
 - Storefront filter facets: `custom.diamond_shape` / `carat_weight` / `color` /
   `clarity` / `cut` (PUBLIC_READ) — written for **both** natural and lab.
 - No compare-at prices are ever derived from Rap or comp values.
@@ -111,8 +134,14 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 
 ## Known gaps (deliberate)
 
-- Feed `.mp4` videos are not attached — Shopify requires staged uploads for
-  video files (external URLs work for images only). Future work.
+- Stone `.mp4` / 360° viewers are still embedded from the supplier rather than
+  attached as Shopify media (see above). Watch videos *are* attached.
+- The diamond PDP renders one 360° tab from `lmny_feed.video_url`; the extra
+  entries in `video_urls` are written but not yet shown.
+- Archived products keep any URL redirect created for them before the
+  `held_in_feed` split existed. Reactivating one of those needs the redirect
+  deleted by hand (the app has no `write_online_store_navigation` scope, so
+  most runs never created any).
 - App Proxy / theme filter that reads `stones` instead of `collection.filters`
   is not shipped yet — schema + dual-write land first.
 - Checkout for non-product stones (inquiry / draft order / JIT product) is an

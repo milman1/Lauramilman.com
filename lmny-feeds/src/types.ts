@@ -55,6 +55,17 @@ export interface Priced {
   /** (retail − cost) / retail */
   marginPct: number;
   compMidUsd?: number;
+  /** Listing low, when the comp provider returned a range. */
+  compLowUsd?: number;
+  /**
+   * The blended low→mid market anchor the price was actually taken from.
+   * Stored because `compMidUsd` alone does not explain the price: since the
+   * low→mid blend landed, retail is 9–30% under mid × compDiscount and no
+   * multiple of the stored mid reproduces it.
+   */
+  anchorUsd?: number;
+  /** Accessory haircut applied to the anchor (1 / 0.95 / 0.9). */
+  haircut?: number;
   compAsOf?: string;
 }
 
@@ -76,8 +87,19 @@ export interface CatalogEntry {
   status: string;
   contentHash: string | null;
   tags: string[];
-  /** Drives whether an update re-attaches media or leaves what's already there. */
+  /** READY media of any type. Zero means the product shows no picture at all. */
   mediaCount: number;
+  /**
+   * READY images only. An update re-sends `files` when the product holds
+   * fewer images than the feed supplies, which is how products stuck at the
+   * one image the old single-key media parse produced get the rest.
+   */
+  imageCount: number;
+  /**
+   * Attached videos, counting ones still processing — Shopify takes minutes
+   * to transcode, and re-uploading a video mid-transcode duplicates it.
+   */
+  videoCount: number;
 }
 
 export interface DesiredEntry {

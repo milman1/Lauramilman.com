@@ -42,14 +42,60 @@ function bool(raw: Raw, keys: string[]): boolean {
   return /^(1|true|yes|y)$/i.test(String(v).trim());
 }
 
-function urls(raw: Raw, keys: string[]): string[] {
-  const v = pick(raw, keys);
-  if (v === undefined) return [];
-  const list = Array.isArray(v) ? v : String(v).split(/[,|\n]/);
-  return list
-    .map((u) => String(u).trim())
-    .filter((u) => /^https?:\/\//i.test(u));
+/** Key matching ignores case, separators and a trailing index: ImageLink2 → imagelink/2. */
+function normalizeKey(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
+
+/**
+ * Every media URL a row carries — not just the first field that matches.
+ *
+ * `pick()` returns one key's value and stops, so a feed that spreads photos
+ * across `ImageLink` / `ImageLink2` / `ImageLink3` yielded exactly one image.
+ * That is why every watch in Shopify had a single photo and no `stones` row
+ * ever held more than one image or one video, despite both columns being
+ * arrays and the feed supplying several of each.
+ *
+ * Matches a candidate key exactly **or** the same key with a numeric suffix
+ * (`ImageLink2`, `image_3`, `Photo 4`), and still splits delimiter-joined
+ * values inside a single field. Ordered by candidate, then by index; deduped
+ * so a URL repeated across fields attaches once.
+ */
+export function collectUrls(raw: Raw, keys: string[]): string[] {
+  const wanted = keys.map(normalizeKey);
+  const matches: Array<{ rank: number; index: number; value: unknown }> = [];
+  for (const actual of Object.keys(raw)) {
+    const key = normalizeKey(actual);
+    for (let rank = 0; rank < wanted.length; rank++) {
+      const base = wanted[rank]!;
+      if (!key.startsWith(base)) continue;
+      const suffix = key.slice(base.length);
+      // Anything but a bare index (…Type, …Alt, "videos" vs "video") is a
+      // different field, so keep looking rather than claiming it here.
+      if (suffix !== '' && !/^\d+$/.test(suffix)) continue;
+      matches.push({ rank, index: suffix === '' ? 0 : Number(suffix), value: raw[actual] });
+      break;
+    }
+  }
+  matches.sort((a, b) => a.rank - b.rank || a.index - b.index);
+  const out: string[] = [];
+  for (const match of matches) {
+    if (match.value === null || match.value === undefined) continue;
+    const list = Array.isArray(match.value) ? match.value : String(match.value).split(/[,|\n]/);
+    for (const entry of list) {
+      const url = String(entry).trim();
+      if (/^https?:\/\//i.test(url) && !out.includes(url)) out.push(url);
+    }
+  }
+  return out;
+}
+
+/**
+ * Media field candidates. Numbered siblings (ImageLink1, ImageLink2, …) are
+ * matched by `collectUrls` itself, so only base names belong here.
+ */
+const IMAGE_KEYS = ['imagelink', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'pictures', 'diamond_image'];
+const VIDEO_KEYS = ['videolink', 'video_html', 'video', 'video_url', 'videos', 'v360', 'video_link', 'diamond_video'];
 
 /**
  * Coerce a feed URL to something Shopify's `url` metafield type accepts.
@@ -378,8 +424,8 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       costUsd: resolved.costUsd,
       pricePerCaratUsd: resolved.pricePerCaratUsd,
       rapPriceUsd,
-      imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture', 'diamond_image']),
-      videoUrls: urls(raw, ['videolink', 'video_html', 'video', 'video_url', 'videos', 'v360', 'video_link', 'diamond_video']),
+      imageUrls: collectUrls(raw, IMAGE_KEYS),
+      videoUrls: collectUrls(raw, VIDEO_KEYS),
     };
     if (resolved.mismatchDetail) {
       console.warn(`cost mismatch ${kind} ${stockRef}: ${resolved.mismatchDetail}`);
@@ -429,8 +475,8 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       papers,
       isNaked: !box && !papers,
       costUsd,
-      imageUrls: urls(raw, ['imagelink', 'imagelink1', 'imagelink2', 'image', 'image_url', 'images', 'img', 'photo', 'photos', 'picture']),
-      videoUrls: urls(raw, ['videolink', 'video', 'video_url', 'videos', 'video_link']),
+      imageUrls: collectUrls(raw, IMAGE_KEYS),
+      videoUrls: collectUrls(raw, VIDEO_KEYS),
     };
     items.push(item);
   }

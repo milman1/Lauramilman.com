@@ -10,7 +10,20 @@
  * if the Belgium Dia cost mapping regresses (e.g. treating $/ct as total).
  */
 
-/** Natural diamonds: retail = Rapaport list × rapDiscount, held if margin < minMarginPct. */
+/**
+ * Natural diamonds: retail = Rapaport list × rapDiscount, held if margin <
+ * minMarginPct.
+ *
+ * `minMarginPct` is a **filter, not a floor**: a stone under it is held out of
+ * the catalogue entirely (`natural_margin_floor`), never repriced up to reach
+ * it. Retail is always exactly Rap × 0.75 — confirmed against all 2,961 live
+ * rows on 2026-08-06.
+ *
+ * It reads as a 25% markup in the data because the 20% is margin-on-retail:
+ * retail ≥ cost / (1 − 0.20) = cost × 1.25. Nothing published sits below
+ * cost × 1.25 for that reason, and the gate runs at pricing time — a stone
+ * whose Rap-implied margin recovers is published on the next run.
+ */
 export const NATURAL = {
   rapDiscount: 0.75,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
@@ -27,6 +40,11 @@ export interface LabTier {
 /**
  * Lab-grown markup tiers on **total** feed cost (Buy_Price × carat).
  * Imported by markup.ts as its FALLBACK_RULES.
+ *
+ * Live on 2026-08-06: retail = round(cost × tier) reproduced 20,847 of 21,764
+ * rows exactly. Rounding is `Math.round`, not ceil. The remainder are rows
+ * last written before the 2026-08-02 Buy_Price × carat fix, which the schema
+ * bump sweeps up on their next update.
  */
 export const LAB_TIERS: LabTier[] = [
   { maxCostUsd: 500, multiplier: 1.7 },
@@ -72,6 +90,19 @@ export const LAB_GUARDS = {
  * prices land aggressively below market rather than at the top of the
  * listing range. Accessory haircuts assume the Hours comp is a full-set
  * reference: naked −10%, box-or-papers-only −5%.
+ *
+ * **Why live watch prices changed on 2026-08-03.** Before the low→mid blend
+ * landed, retail was exactly `mid × 0.97`. Products last synced on or before
+ * 2026-08-02 still carry those prices; everything rewritten since sits 9–30%
+ * under `mid × 0.97` with no constant multiple, because the price now comes
+ * off `anchor × haircut × 0.97` where the anchor is 45% of the way from the
+ * listing low to the mid. Both moving parts are per-watch: the low/mid spread
+ * and the accessory haircut. The comp did not go stale and pricing did not
+ * drift — this is the intended new rule reaching products as their content
+ * hash changes. `lmny_feed.comp_low_usd` / `comp_anchor_usd` /
+ * `accessory_haircut` are written alongside `comp_mid_usd` so a live price
+ * reconciles from stored data rather than only from the mid, which cannot
+ * explain it on its own.
  */
 export const WATCH = {
   /** Fraction of the way from lowUsd → midUsd used as the market anchor. */

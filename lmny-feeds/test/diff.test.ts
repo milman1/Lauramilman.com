@@ -11,6 +11,8 @@ function entry(overrides: Partial<CatalogEntry> & { handle: string }): CatalogEn
     contentHash: 'h1',
     tags: ['lmny-feed'],
     mediaCount: 1,
+    imageCount: 1,
+    videoCount: 0,
     ...overrides,
   };
 }
@@ -54,8 +56,17 @@ describe('diff decisions', () => {
   it('archives items that left the feed, never re-archives', () => {
     const catalog = [entry({ handle: 'w-gone' }), entry({ handle: 'w-long-gone', status: 'ARCHIVED' })];
     const d = diffCatalog([], catalog, ALL_KINDS);
-    expect(d.find((x) => x.handle === 'w-gone')?.action).toBe('archive');
+    expect(d.find((x) => x.handle === 'w-gone')).toMatchObject({ action: 'archive', reason: 'left_feed' });
     expect(d.find((x) => x.handle === 'w-long-gone')?.action).toBe('skip');
+  });
+
+  it('separates a held-but-still-listed item from one that left the feed', () => {
+    const catalog = [entry({ handle: 'w-held' }), entry({ handle: 'w-sold' })];
+    // w-held came back in the feed this run; pricing refused it, so it is not
+    // in `desired`. Archiving both is right; calling both "sold" is not.
+    const d = diffCatalog([], catalog, ALL_KINDS, new Set(['w-held']));
+    expect(d.find((x) => x.handle === 'w-held')).toMatchObject({ action: 'archive', reason: 'held_in_feed' });
+    expect(d.find((x) => x.handle === 'w-sold')).toMatchObject({ action: 'archive', reason: 'left_feed' });
   });
 
   it('never archives a segment whose feed fetch failed', () => {

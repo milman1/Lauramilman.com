@@ -19,7 +19,7 @@ import { ALL_KINDS, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog, kindForHandle } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, MEDIA_MISSING_TAG, titleFor } from './product.js';
+import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, titleFor } from './product.js';
 import {
   holdHistogram,
   labPricingStats,
@@ -52,6 +52,12 @@ const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
 };
 /** Known-good reference for the Hours single-reference diagnostic. */
 const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
+/**
+ * Watch videos re-hosted per run. Each is a full download plus a staged
+ * upload, so an unbounded pass would blow past the hourly cadence the way 83
+ * image rescues once did. 145 watches drain in a handful of runs.
+ */
+const VIDEO_ATTACH_BUDGET = 10;
 
 interface Flags {
   dryRun: boolean;
@@ -255,14 +261,29 @@ async function main() {
   }));
   const dupes = desired.length - new Set(desired.map((d) => d.handle)).size;
   if (dupes > 0) notes.push(`${dupes} duplicate handles in feed data — last occurrence wins`);
-  const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds);
+  // Every stock ref this run saw, whether or not it survived gates and pricing.
+  // Lets the diff say why something is being archived: gone from the feed, or
+  // still on offer and merely unpriceable.
+  const presentHandles = new Set<string>([
+    ...items.map((i) => handleFor(i)),
+    ...holds.filter((h) => h.stockRef !== '(unknown)').map((h) => handleForRef(h.kind, h.stockRef)),
+  ]);
+  const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds, presentHandles);
   const summary = summarizeDecisions(decisions);
-  console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length}, skip ${summary.skipped}`);
+  const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
+  console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);
+  if (heldInFeed > 0) {
+    notes.push(
+      `${heldInFeed} product(s) archived while STILL LISTED in the feed — held by a gate or pricing rule, not sold. ` +
+        'See the hold reasons above for the cause.',
+    );
+  }
 
   // 4. Execute (live only).
   const writeErrors: string[] = [];
   const mediaQuarantined: string[] = [];
   const mediaRehosted: string[] = [];
+  let mediaVideosAttached = 0;
   let redirectsCreated = 0;
   let collectionsCreated: string[] = [];
 
@@ -348,7 +369,7 @@ async function main() {
       .filter((p): p is Publishable => Boolean(p))
       .map((p) => {
         const existing = catalogByHandle.get(handleFor(p.item));
-        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, mediaCount: existing.mediaCount });
+        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, imageCount: existing.imageCount });
       });
 
     let createdIds: string[] = [];
@@ -387,6 +408,10 @@ async function main() {
       const errors = await shopify.archiveProduct(d.productId);
       writeErrors.push(...errors.map((e) => `archive ${d.handle}: ${e}`));
       if (errors.length > 0 || redirectsDenied) continue;
+      // A redirect is for a stone that sold: it permanently outlives the
+      // product, so pointing one at an item the feed still lists would strand
+      // its page the moment pricing lets it back on the storefront.
+      if (d.reason === 'held_in_feed') continue;
       // An archived product 404s. Send the dead URL to its collection so an
       // old link lands on the stones we do have rather than nothing.
       const target = ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
@@ -403,9 +428,68 @@ async function main() {
       }
     }
     if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
+
+    // 4b. Attach feed videos as real Shopify media (watches only).
+    //
+    // Images attach from a supplier URL inside productSet; video cannot —
+    // Shopify takes VIDEO media only from a staged upload — which is why every
+    // watch had zero videos. Each attach is a full download + re-upload, so
+    // this is budgeted like the image rescue and the backlog drains across
+    // runs. Stones are excluded on purpose: their "video" is a 360° viewer
+    // served per stone, and re-hosting 24k of them hourly is not affordable —
+    // those stay embedded from lmny_feed.video_url(s) by the PDP.
+    //
+    // Like the media audit, this works off the catalog read taken before this
+    // run's writes, so a watch created in this run gets its video next run.
+    let videoBudget = VIDEO_ATTACH_BUDGET;
+    let videosAttached = 0;
+    let videoFailures = 0;
+    const videoCandidates = publishable
+      .map((p) => ({ item: p.item, existing: catalogByHandle.get(handleFor(p.item)) }))
+      .filter((c) => c.item.kind === 'watch' && c.item.videoUrls.length > 0)
+      // Already carries a video, or was created this run and isn't in the read.
+      .filter((c) => c.existing !== undefined && c.existing.videoCount === 0);
+    // Rotate the window each hour. A video URL that can never be fetched stays
+    // a candidate forever, and a fixed order would let a handful of dead ones
+    // eat the whole budget every run while the rest never get a turn.
+    const offset = videoCandidates.length > 0 ? (new Date().getUTCHours() * VIDEO_ATTACH_BUDGET) % videoCandidates.length : 0;
+    for (let n = 0; n < videoCandidates.length; n++) {
+      if (videoBudget <= 0) break;
+      const { item, existing } = videoCandidates[(offset + n) % videoCandidates.length]!;
+      if (!existing) continue;
+      for (const url of item.videoUrls) {
+        if (videoBudget <= 0) break;
+        videoBudget -= 1;
+        try {
+          const staged = await shopify.rehostVideo(url);
+          if (!staged) {
+            videoFailures += 1;
+            continue;
+          }
+          const errors = await shopify.attachMedia(existing.id, staged, titleFor(item), 'VIDEO');
+          if (errors.length > 0) {
+            videoFailures += 1;
+            notes.push(`video ${item.stockRef}: ${errors.join('; ')}`);
+            continue;
+          }
+          videosAttached += 1;
+        } catch (err) {
+          // Never fail the sync over media — the product itself is written.
+          videoFailures += 1;
+          notes.push(`video ${item.stockRef}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+    }
+    if (videosAttached > 0 || videoFailures > 0) {
+      mediaVideosAttached = videosAttached;
+      console.log(
+        `Media: attached ${videosAttached} watch video(s), ${videoFailures} failed` +
+          (videoBudget <= 0 ? ` — budget of ${VIDEO_ATTACH_BUDGET} spent, remainder drains next run` : ''),
+      );
+    }
   }
 
-  // 4b. Optional Supabase dual-write. Shopify remains the live storefront
+  // 4c. Optional Supabase dual-write. Shopify remains the live storefront
   //     source until stones is populated and the App Proxy filter ships.
   //     Gated on SUPABASE_URL + SUPABASE_SERVICE_KEY; no-op when unset.
   const sb = supabaseConfigured();
@@ -485,6 +569,7 @@ async function main() {
     decisions: summary,
     writeErrors,
     mediaQuarantined,
+    mediaVideosAttached,
     collectionsCreated,
     notes,
   };

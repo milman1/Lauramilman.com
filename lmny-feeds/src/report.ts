@@ -53,9 +53,18 @@ export interface SyncReport {
   };
   watchComps: { checked: number; hits: number; hitRate: number | null; lines: WatchLine[] };
   sampleNaturals: Array<{ stockRef: string; title: string; costUsd: number; retailUsd: number; marginPct: number }>;
-  decisions: { create: string[]; update: string[]; archive: string[]; skipped: number };
+  decisions: {
+    create: string[];
+    update: string[];
+    archive: string[];
+    /** Archived but still listed by the feed — a hold, not a sale. */
+    archivedHeldInFeed: string[];
+    skipped: number;
+  };
   writeErrors: string[];
   mediaQuarantined: string[];
+  /** Feed videos re-hosted and attached as Shopify media this run. */
+  mediaVideosAttached: number;
   collectionsCreated: string[];
   hoursProbe?: HoursProbeResult;
   notes: string[];
@@ -147,6 +156,9 @@ export function summarizeDecisions(decisions: Decision[]) {
     create: decisions.filter((d) => d.action === 'create').map((d) => d.handle),
     update: decisions.filter((d) => d.action === 'update').map((d) => d.handle),
     archive: decisions.filter((d) => d.action === 'archive').map((d) => d.handle),
+    archivedHeldInFeed: decisions
+      .filter((d) => d.action === 'archive' && d.reason === 'held_in_feed')
+      .map((d) => d.handle),
     skipped: decisions.filter((d) => d.action === 'skip').length,
   };
 }
@@ -259,9 +271,17 @@ export function renderMarkdown(r: SyncReport): string {
   lines.push(`- create: **${r.decisions.create.length}**`);
   lines.push(`- update: **${r.decisions.update.length}**`);
   lines.push(`- archive: **${r.decisions.archive.length}**`);
+  // The number that tells a sold-out catalogue apart from a pricing rule that
+  // moved. Both look like "archived" in Shopify admin.
+  const held = r.decisions.archivedHeldInFeed?.length ?? 0;
+  lines.push(
+    `  - left the feed (sold/withdrawn): **${r.decisions.archive.length - held}**` +
+      ` · still listed but held: **${held}**`,
+  );
   lines.push(`- skip (unchanged): **${r.decisions.skipped}**`);
   if (r.collectionsCreated.length) lines.push(`- collections created: ${r.collectionsCreated.join(', ')}`);
   if (r.mediaQuarantined.length) lines.push(`- media-missing quarantined: ${r.mediaQuarantined.length}`);
+  if (r.mediaVideosAttached) lines.push(`- videos attached: ${r.mediaVideosAttached}`);
   if (r.writeErrors.length) {
     lines.push('');
     lines.push('## Write errors');
