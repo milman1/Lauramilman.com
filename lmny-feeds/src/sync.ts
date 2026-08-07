@@ -15,7 +15,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
-import { ALL_KINDS, parseEnabledFeeds } from './feeds-config.js';
+import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog, kindForHandle } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
@@ -147,6 +147,14 @@ async function main() {
 
   const enabledFeeds = parseEnabledFeeds();
   console.log(`Enabled feeds (SYNC_FEEDS): ${[...enabledFeeds].join(', ')}`);
+  if (!process.env.BELGIUMDIA_API_URL) {
+    const msg =
+      'BELGIUMDIA_API_URL is unset — hitting belgiumdia.com directly. ' +
+      'The supplier allows ~1 request / 15 minutes, so later feeds in this run often return 0 rows. ' +
+      'Set the variable to the lauramilman-com Cloudflare Worker URL to serve all three from cache.';
+    console.warn(msg);
+    notes.push(msg);
+  }
 
   // Hours single-reference diagnostic (dry-run only): tells apart a 401/404/
   // no_comp cause without needing the watch feed enabled.
@@ -174,7 +182,7 @@ async function main() {
     watch: { fetched: 0, publishable: 0, held: 0 },
   };
 
-  for (const kind of ALL_KINDS) {
+  for (const kind of FEED_FETCH_ORDER) {
     if (!enabledFeeds.has(kind)) {
       feeds[kind].skipped = true;
       console.log(`Feed ${kind}: skipped (not in SYNC_FEEDS)`);
@@ -583,6 +591,20 @@ async function main() {
   await writeFile(path.join(OUT_DIR, 'report.json'), JSON.stringify(report, null, 2));
   await writeFile(path.join(OUT_DIR, 'report.md'), renderMarkdown(report));
   console.log(renderMarkdown(report));
+
+  // A "successful" live run that fetched nothing looks like a deploy from the
+  // Actions UI but leaves the storefront unchanged — that is exactly what
+  // confused the Aug 7 reprice. Fail closed when every enabled feed came back
+  // empty (rate-limit / outage), so the run is red until data actually moves.
+  const enabledList = FEED_FETCH_ORDER.filter((k) => enabledFeeds.has(k));
+  const anyFetched = enabledList.some((k) => feeds[k].fetched > 0);
+  if (!anyFetched && enabledList.length > 0) {
+    console.error(
+      'No enabled feed returned rows — likely Belgium Dia rate-limit or cache miss. ' +
+        'Shopify was not updated. Re-run in 15+ minutes, or set BELGIUMDIA_API_URL to the feed-cache Worker.',
+    );
+    process.exitCode = 1;
+  }
 
   // Isolated per-record rejections (a malformed feed field) shouldn't fail an
   // otherwise-good run of thousands of products — they're reported either way.
