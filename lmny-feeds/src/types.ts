@@ -54,18 +54,10 @@ export interface Priced {
   retailUsd: number;
   /** (retail − cost) / retail */
   marginPct: number;
+  /** Hours listing midpoint when a market comp was found. */
   compMidUsd?: number;
-  /** Listing low, when the comp provider returned a range. */
+  /** Listing low, when the comp provider returned a range (audit only). */
   compLowUsd?: number;
-  /**
-   * The blended low→mid market anchor the price was actually taken from.
-   * Stored because `compMidUsd` alone does not explain the price: since the
-   * low→mid blend landed, retail is 9–30% under mid × compDiscount and no
-   * multiple of the stored mid reproduces it.
-   */
-  anchorUsd?: number;
-  /** Accessory haircut applied to the anchor (1 / 0.95 / 0.9). */
-  haircut?: number;
   compAsOf?: string;
 }
 

@@ -252,6 +252,17 @@ export function isCuratedWatchBrand(brand: string): boolean {
   return WATCH_BRAND_SET.has(brand.trim().toLowerCase());
 }
 
+/**
+ * Feed condition "aftermarket" (any casing / surrounding text) means the
+ * piece is excluded entirely — never imported, never priced. The label lives
+ * on the feed's condition field and does not surface in Shopify tags once
+ * the product is held out.
+ */
+export function isAftermarketCondition(condition: string | undefined): boolean {
+  if (!condition) return false;
+  return /\bafter[\s_-]?market\b/i.test(condition);
+}
+
 export interface NormalizeResult {
   items: FeedItem[];
   holds: Hold[];
@@ -457,10 +468,14 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       holds.push({ kind, stockRef, reason: 'missing_cost' });
       continue;
     }
-    if (!isCuratedWatchBrand(brand)) {
-      holds.push({ kind, stockRef, reason: 'watch_brand_not_curated', detail: brand });
+    const condition = str(raw, ['condition', 'condition_grade', 'state']);
+    if (isAftermarketCondition(condition)) {
+      holds.push({ kind, stockRef, reason: 'watch_aftermarket', detail: condition });
       continue;
     }
+    // Brands outside WATCH_BRANDS still import — they are tagged
+    // `other-watch-brand` at product-build time and land in the Other Watch
+    // Brands collection. Curation no longer holds them out of the catalogue.
     const box = bool(raw, ['box', 'has_box', 'with_box', 'original_box']);
     const papers = bool(raw, ['paper', 'papers', 'has_papers', 'with_papers', 'original_papers', 'card']);
     const item: WatchItem = {
@@ -470,7 +485,7 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       model,
       reference,
       year: str(raw, ['year', 'production_year', 'year_of_production']),
-      condition: str(raw, ['condition', 'condition_grade', 'state']),
+      condition,
       box,
       papers,
       isNaked: !box && !papers,

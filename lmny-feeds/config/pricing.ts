@@ -82,37 +82,22 @@ export const LAB_GUARDS = {
 } as const;
 
 /**
- * Watches: retail = marketAnchor × accessoryHaircut × compDiscount,
- * floored at cost × minCostMultiple.
+ * Watches: retail = round(comp_mid_usd × compDiscount).
  *
- * Hours `midUsd` is a listing midpoint and sits above modeled market
- * (WatchCharts). When `lowUsd` is present we blend toward it so published
- * prices land aggressively below market rather than at the top of the
- * listing range. Accessory haircuts assume the Hours comp is a full-set
- * reference: naked −10%, box-or-papers-only −5%.
+ * Confirmed against every feed watch last synced on or before 2026-08-02.
+ * Runs from 2026-08-03 onward briefly priced off a low→mid blend + accessory
+ * haircut, which put live prices 9–30% under mid × 0.97 with no constant
+ * multiple of either cost or mid. Policy is back to mid minus 3%.
  *
- * **Why live watch prices changed on 2026-08-03.** Before the low→mid blend
- * landed, retail was exactly `mid × 0.97`. Products last synced on or before
- * 2026-08-02 still carry those prices; everything rewritten since sits 9–30%
- * under `mid × 0.97` with no constant multiple, because the price now comes
- * off `anchor × haircut × 0.97` where the anchor is 45% of the way from the
- * listing low to the mid. Both moving parts are per-watch: the low/mid spread
- * and the accessory haircut. The comp did not go stale and pricing did not
- * drift — this is the intended new rule reaching products as their content
- * hash changes. `lmny_feed.comp_low_usd` / `comp_anchor_usd` /
- * `accessory_haircut` are written alongside `comp_mid_usd` so a live price
- * reconciles from stored data rather than only from the mid, which cannot
- * explain it on its own.
+ * When Hours returns no mid, fall back to cost × noCompMultiple rather than
+ * holding the piece out of the catalogue. Feed rows whose condition is
+ * "aftermarket" are excluded at normalize time and never reach pricing.
  */
 export const WATCH = {
-  /** Fraction of the way from lowUsd → midUsd used as the market anchor. */
-  midBlend: 0.45,
+  /** Market-comp discount: retail = round(mid × this). */
   compDiscount: 0.97,
-  nakedHaircut: 0.9,
-  partialHaircut: 0.95,
-  minCostMultiple: 1.05,
-  /** Hold when Hours backed the mid by fewer than this many listings. */
-  minSourceCount: 3,
+  /** When no market mid is available: retail = round(cost × this). */
+  noCompMultiple: 1.1,
 } as const;
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
@@ -122,8 +107,11 @@ export const STONE_GATES = {
 } as const;
 
 /**
- * Watch curation: only these brands are considered for listing.
- * ⚠️ Reconstruction — the original curated list lived in the lost normalize.ts.
+ * Watch brands that are merchandised under their own storefront collections /
+ * Timepieces nav links. Brands outside this list still import (priced the
+ * same way) but are tagged `other-watch-brand` and land in the automated
+ * "Other Watch Brands" collection.
+ *
  * Case-insensitive match.
  */
 export const WATCH_BRANDS: string[] = [

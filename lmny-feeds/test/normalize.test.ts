@@ -71,12 +71,24 @@ describe('watch normalization', () => {
     expect(naked.items[0]).toMatchObject({ isNaked: true });
   });
 
-  it('holds non-curated brands', () => {
-    const { holds } = normalizeWatches([{ ...watchRow, brand: 'Invicta' }]);
-    expect(holds[0]?.reason).toBe('watch_brand_not_curated');
+  it('imports non-curated brands (they land in Other Watch Brands)', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, brand: 'Invicta' }]);
+    expect(holds).toHaveLength(0);
+    expect(items[0]).toMatchObject({ kind: 'watch', brand: 'Invicta' });
   });
 
-  it('curation is case-insensitive', () => {
+  it('excludes aftermarket condition rows', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, condition: 'AFTERMARKET' }]);
+    expect(items).toHaveLength(0);
+    expect(holds[0]?.reason).toBe('watch_aftermarket');
+  });
+
+  it('excludes aftermarket regardless of casing or surrounding text', () => {
+    const { holds } = normalizeWatches([{ ...watchRow, Condition: 'Pre-owned aftermarket piece' }]);
+    expect(holds[0]?.reason).toBe('watch_aftermarket');
+  });
+
+  it('curation is case-insensitive for listed brands', () => {
     const { items } = normalizeWatches([{ ...watchRow, brand: 'ROLEX' }]);
     expect(items).toHaveLength(1);
   });
