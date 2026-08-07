@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, PRODUCT_TYPES } from './product.js';
+import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
 
 const API_VERSION = '2026-01';
@@ -247,10 +247,41 @@ export class ShopifyClient {
    * invisible.
    */
   async ensureCollections(): Promise<string[]> {
-    const wanted = [
-      { title: 'Natural Diamonds', type: PRODUCT_TYPES.natural },
-      { title: 'Lab-Grown Diamonds', type: PRODUCT_TYPES.lab },
-      { title: 'Timepieces', type: PRODUCT_TYPES.watch },
+    const wanted: Array<{
+      title: string;
+      rules: Array<{ column: string; relation: string; condition: string }>;
+    }> = [
+      {
+        title: 'Natural Diamonds',
+        rules: [
+          { column: 'TAG', relation: 'EQUALS', condition: FEED_TAG },
+          { column: 'TYPE', relation: 'EQUALS', condition: PRODUCT_TYPES.natural },
+        ],
+      },
+      {
+        title: 'Lab-Grown Diamonds',
+        rules: [
+          { column: 'TAG', relation: 'EQUALS', condition: FEED_TAG },
+          { column: 'TYPE', relation: 'EQUALS', condition: PRODUCT_TYPES.lab },
+        ],
+      },
+      {
+        title: 'Timepieces',
+        rules: [
+          { column: 'TAG', relation: 'EQUALS', condition: FEED_TAG },
+          { column: 'TYPE', relation: 'EQUALS', condition: PRODUCT_TYPES.watch },
+        ],
+      },
+      {
+        // Brands outside the curated WATCH_BRANDS list. Same product type as
+        // Timepieces; the extra tag keeps them filterable as a group.
+        title: OTHER_WATCH_BRANDS_COLLECTION,
+        rules: [
+          { column: 'TAG', relation: 'EQUALS', condition: FEED_TAG },
+          { column: 'TAG', relation: 'EQUALS', condition: OTHER_WATCH_BRAND_TAG },
+          { column: 'TYPE', relation: 'EQUALS', condition: PRODUCT_TYPES.watch },
+        ],
+      },
     ];
     const created: string[] = [];
     const publicationId = await this.onlineStorePublicationId();
@@ -304,10 +335,7 @@ export class ShopifyClient {
             title: want.title,
             ruleSet: {
               appliedDisjunctively: false,
-              rules: [
-                { column: 'TAG', relation: 'EQUALS', condition: FEED_TAG },
-                { column: 'TYPE', relation: 'EQUALS', condition: want.type },
-              ],
+              rules: want.rules,
             },
           },
         },

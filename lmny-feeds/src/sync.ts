@@ -57,7 +57,7 @@ const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
  * upload, so an unbounded pass would blow past the hourly cadence the way 83
  * image rescues once did. 145 watches drain in a handful of runs.
  */
-const VIDEO_ATTACH_BUDGET = 10;
+const VIDEO_ATTACH_BUDGET = 100;
 
 interface Flags {
   dryRun: boolean;
@@ -204,7 +204,8 @@ async function main() {
     }
   }
 
-  // 2. Price. Watches go through Hours per-reference; 404-no-comp is a hold.
+  // 2. Price. Watches: round(comp_mid × 0.97), or cost × 1.10 when Hours
+  //    returns no mid. Aftermarket rows are already held out at normalize.
   const publishable: Publishable[] = [];
   const hours = new HoursClient();
   const watchLines: WatchLine[] = [];
@@ -441,14 +442,16 @@ async function main() {
     //
     // Like the media audit, this works off the catalog read taken before this
     // run's writes, so a watch created in this run gets its video next run.
+    // Attach every remaining URL when the product is short of the feed's list
+    // (not just the first one) — previously videoCount === 0 stopped after a
+    // single successful attach while ImageLink2/VideoLink2 sat unused.
     let videoBudget = VIDEO_ATTACH_BUDGET;
     let videosAttached = 0;
     let videoFailures = 0;
     const videoCandidates = publishable
       .map((p) => ({ item: p.item, existing: catalogByHandle.get(handleFor(p.item)) }))
       .filter((c) => c.item.kind === 'watch' && c.item.videoUrls.length > 0)
-      // Already carries a video, or was created this run and isn't in the read.
-      .filter((c) => c.existing !== undefined && c.existing.videoCount === 0);
+      .filter((c) => c.existing !== undefined && c.existing.videoCount < c.item.videoUrls.length);
     // Rotate the window each hour. A video URL that can never be fetched stays
     // a candidate forever, and a fixed order would let a handful of dead ones
     // eat the whole budget every run while the rest never get a turn.
@@ -456,8 +459,10 @@ async function main() {
     for (let n = 0; n < videoCandidates.length; n++) {
       if (videoBudget <= 0) break;
       const { item, existing } = videoCandidates[(offset + n) % videoCandidates.length]!;
-      if (!existing) continue;
-      for (const url of item.videoUrls) {
+      if (!existing || item.kind !== 'watch') continue;
+      // Assume prior attaches followed feed order; only upload the deficit.
+      const pending = item.videoUrls.slice(existing.videoCount);
+      for (const url of pending) {
         if (videoBudget <= 0) break;
         videoBudget -= 1;
         try {

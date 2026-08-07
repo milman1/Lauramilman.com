@@ -131,74 +131,60 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
 });
 
 describe('watch pricing', () => {
-  it('prices a full-set at blended anchor × 0.97 when above the cost floor', () => {
-    // low 10000, mid 12000 → anchor 10900; full-set haircut 1; ×0.97 = 10573
+  it('prices at round(comp_mid × 0.97)', () => {
+    // PDF formula: market mid minus 3%. lowUsd and accessory state are ignored.
     const r = priceWatch(
       watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
       { midUsd: 12000, lowUsd: 10000, sourceCount: 12, asOf: '2026-07-20' },
     );
-    expect(r.ok && r.priced.retailUsd).toBe(10573);
+    expect(r.ok && r.priced.retailUsd).toBe(11640);
     expect(r.ok && r.priced.compMidUsd).toBe(12000);
   });
 
-  it('records the anchor it priced from, not just the mid', () => {
-    // Auditing live data off comp_mid_usd alone found no multiple of the mid
-    // that reproduced the price — because the price comes off the blended
-    // anchor. Everything needed to recompute retail is stored.
-    const r = priceWatch(
+  it('does not apply naked or partial accessory haircuts', () => {
+    const naked = priceWatch(
       watch({ costUsd: 8000, box: false, papers: false, isNaked: true }),
       { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
     );
-    expect(r.ok && r.priced).toMatchObject({ compMidUsd: 12000, compLowUsd: 10000, anchorUsd: 10900, haircut: 0.9 });
-    expect(r.ok && Math.round(r.priced.anchorUsd! * r.priced.haircut! * 0.97)).toBe(r.ok && r.priced.retailUsd);
-  });
-
-  it('applies the naked haircut (−10%) on incomplete sets', () => {
-    // anchor 10900 × 0.90 × 0.97 = 9516
-    const r = priceWatch(
-      watch({ costUsd: 8000, box: false, papers: false, isNaked: true }),
-      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
-    );
-    expect(r.ok && r.priced.retailUsd).toBe(9516);
-  });
-
-  it('applies the partial haircut (−5%) for box-or-papers-only', () => {
-    // anchor 10900 × 0.95 × 0.97 = 10044
-    const r = priceWatch(
+    const partial = priceWatch(
       watch({ costUsd: 8000, box: true, papers: false, isNaked: false }),
       { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
     );
-    expect(r.ok && r.priced.retailUsd).toBe(10044);
+    expect(naked.ok && naked.priced.retailUsd).toBe(11640);
+    expect(partial.ok && partial.priced.retailUsd).toBe(11640);
   });
 
-  it('falls back to mid when low is missing', () => {
-    // mid 12000 × 0.97 = 11640 (full set)
+  it('rounds to the nearest dollar', () => {
+    // 5325 × 0.97 = 5165.25 → 5165
+    const r = priceWatch(watch({ costUsd: 4000 }), { midUsd: 5325, sourceCount: 8 });
+    expect(r.ok && r.priced.retailUsd).toBe(5165);
+  });
+
+  it('falls back to cost × 1.10 when there is no market comp', () => {
+    const r = priceWatch(watch({ costUsd: 5000 }), null);
+    expect(r.ok && r.priced.retailUsd).toBe(5500);
+    expect(r.ok && r.priced.compMidUsd).toBeUndefined();
+  });
+
+  it('falls back when mid is missing or zero', () => {
+    const r = priceWatch(watch({ costUsd: 4000 }), { midUsd: 0, sourceCount: 5 });
+    expect(r.ok && r.priced.retailUsd).toBe(4400);
+  });
+
+  it('still publishes when sourceCount is thin — mid alone drives the price', () => {
     const r = priceWatch(
       watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
-      { midUsd: 12000, sourceCount: 12 },
+      { midUsd: 12000, sourceCount: 2 },
     );
     expect(r.ok && r.priced.retailUsd).toBe(11640);
   });
 
-  it('holds with no market comp (provider 404)', () => {
-    const r = priceWatch(watch(), null);
-    expect(!r.ok && r.hold.reason).toBe('watch_no_market_comp');
-  });
-
-  it('holds when sourceCount is below the gate', () => {
-    const r = priceWatch(
-      watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
-      { midUsd: 12000, lowUsd: 10000, sourceCount: 2 },
-    );
-    expect(!r.ok && r.hold.reason).toBe('watch_weak_comp');
-  });
-
-  it('holds when the feed price is already at market', () => {
-    // anchor 10900 × 0.97 = 10573 < cost×1.05 = 11550 → hold
+  it('publishes even when mid × 0.97 sits near cost (no at-market hold)', () => {
+    // 12000 × 0.97 = 11640; cost 11000 — previously held as at-market.
     const r = priceWatch(
       watch({ costUsd: 11000, box: true, papers: true, isNaked: false }),
-      { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
+      { midUsd: 12000, sourceCount: 12 },
     );
-    expect(!r.ok && r.hold.reason).toBe('watch_feed_price_at_market');
+    expect(r.ok && r.priced.retailUsd).toBe(11640);
   });
 });

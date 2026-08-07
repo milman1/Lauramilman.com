@@ -126,84 +126,38 @@ export function priceLab(item: StoneItem): PriceResult {
 
 export interface WatchComp {
   midUsd: number;
-  /** Listing low when the provider returns a range. Used to de-bias mid. */
+  /** Listing low when the provider returns a range. Stored for audit only. */
   lowUsd?: number;
-  /** Number of listings backing the mid. Below WATCH.minSourceCount → hold. */
+  /** Number of listings backing the mid. Informational; does not gate pricing. */
   sourceCount?: number;
   asOf?: string;
 }
 
-/** Hours comps are full-set references; haircut incomplete sets. */
-export function accessoryHaircut(item: WatchItem): number {
-  if (item.isNaked || (!item.box && !item.papers)) return WATCH.nakedHaircut;
-  if (item.box && item.papers) return 1;
-  return WATCH.partialHaircut;
-}
-
 /**
- * Blend Hours low→mid toward a market anchor. Falls back to mid when no low.
- * Exposed for tests / reporting.
- */
-export function marketAnchor(comp: WatchComp): number {
-  if (
-    comp.lowUsd !== undefined &&
-    comp.lowUsd > 0 &&
-    comp.lowUsd <= comp.midUsd
-  ) {
-    return comp.lowUsd + (comp.midUsd - comp.lowUsd) * WATCH.midBlend;
-  }
-  return comp.midUsd;
-}
-
-/**
- * Watches: marketAnchor × accessory haircut × 0.97, floored at cost × 1.05.
- * No comp / weak sourceCount → hold. Floor above target → feed already at
- * market → hold. Only genuinely-below-market pieces publish.
+ * Watches: round(comp_mid × 0.97). No mid → round(cost × 1.10).
+ * Comp mid is the sole market signal; accessory state and listing-low blends
+ * do not move the published price.
  */
 export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult {
-  if (!comp) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'watch_no_market_comp' } };
-  }
-  if (
-    comp.sourceCount !== undefined &&
-    comp.sourceCount < WATCH.minSourceCount
-  ) {
+  if (comp && comp.midUsd > 0) {
+    const retailUsd = round(comp.midUsd * WATCH.compDiscount);
     return {
-      ok: false,
-      hold: {
-        kind: item.kind,
-        stockRef: item.stockRef,
-        reason: 'watch_weak_comp',
-        detail: `sourceCount ${comp.sourceCount} < ${WATCH.minSourceCount}`,
+      ok: true,
+      priced: {
+        retailUsd,
+        marginPct: margin(retailUsd, item.costUsd),
+        compMidUsd: comp.midUsd,
+        compLowUsd: comp.lowUsd,
+        compAsOf: comp.asOf,
       },
     };
   }
-  const haircut = accessoryHaircut(item);
-  const anchor = marketAnchor(comp);
-  const target = anchor * haircut * WATCH.compDiscount;
-  const floor = item.costUsd * WATCH.minCostMultiple;
-  if (target < floor) {
-    return {
-      ok: false,
-      hold: {
-        kind: item.kind,
-        stockRef: item.stockRef,
-        reason: 'watch_feed_price_at_market',
-        detail: `anchor×haircut×${WATCH.compDiscount} = ${Math.round(target)} < cost×${WATCH.minCostMultiple} = ${Math.round(floor)}`,
-      },
-    };
-  }
-  const retailUsd = round(target);
+  const retailUsd = round(item.costUsd * WATCH.noCompMultiple);
   return {
     ok: true,
     priced: {
       retailUsd,
       marginPct: margin(retailUsd, item.costUsd),
-      compMidUsd: comp.midUsd,
-      compLowUsd: comp.lowUsd,
-      anchorUsd: anchor,
-      haircut,
-      compAsOf: comp.asOf,
     },
   };
 }

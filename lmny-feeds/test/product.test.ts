@@ -77,6 +77,13 @@ describe('tags', () => {
     expect(tagsFor(watch())).toContain('Rolex');
   });
 
+  it('tags non-curated brands for the Other Watch Brands collection', () => {
+    const tags = tagsFor(watch({ brand: 'Invicta' }));
+    expect(tags).toContain('other-watch-brand');
+    expect(tags).toContain('Invicta');
+    expect(tagsFor(watch({ brand: 'Rolex' }))).not.toContain('other-watch-brand');
+  });
+
   it('tags are sorted and deduped for stable hashing', () => {
     const tags = tagsFor(naturalStone());
     expect(tags).toEqual([...tags].sort());

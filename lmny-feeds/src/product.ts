@@ -1,8 +1,13 @@
 import { contentHash } from './hash.js';
+import { isCuratedWatchBrand } from './normalize.js';
 import type { FeedItem, Priced, StoneItem, WatchItem } from './types.js';
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
+/** Tag for watches whose brand is outside the curated WATCH_BRANDS list. */
+export const OTHER_WATCH_BRAND_TAG = 'other-watch-brand';
+/** Automated collection that gathers OTHER_WATCH_BRAND_TAG products. */
+export const OTHER_WATCH_BRANDS_COLLECTION = 'Other Watch Brands';
 export const STONE_VENDOR = 'Laura Milman New York';
 export const METAFIELD_NAMESPACE = 'lmny_feed';
 /** App-reserved namespace: private to the sync app, invisible to theme/Storefront API. */
@@ -19,7 +24,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 5;
+export const PRODUCT_SCHEMA_VERSION = 6;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -75,6 +80,7 @@ export function tagsFor(item: FeedItem): string[] {
   const tags: string[] = [FEED_TAG];
   if (item.kind === 'watch') {
     tags.push(item.brand);
+    if (!isCuratedWatchBrand(item.brand)) tags.push(OTHER_WATCH_BRAND_TAG);
     if (item.condition) tags.push(item.condition);
     if (item.box && item.papers) tags.push('full-set');
     else if (item.box) tags.push('box-only');
@@ -148,17 +154,9 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     if (priced.compMidUsd !== undefined) {
       fields.push({ namespace: ns, key: 'comp_mid_usd', type: 'number_decimal', value: priced.compMidUsd.toFixed(2) });
     }
-    // The mid alone does not explain the price — it is only one end of the
-    // blend the anchor is taken from. Store the low and the anchor so a live
-    // price reconciles from stored data: retail = round(anchor × haircut × 0.97).
+    // Audit trail only — retail is round(comp_mid × 0.97) when a mid exists.
     if (priced.compLowUsd !== undefined) {
       fields.push({ namespace: ns, key: 'comp_low_usd', type: 'number_decimal', value: priced.compLowUsd.toFixed(2) });
-    }
-    if (priced.anchorUsd !== undefined) {
-      fields.push({ namespace: ns, key: 'comp_anchor_usd', type: 'number_decimal', value: priced.anchorUsd.toFixed(2) });
-    }
-    if (priced.haircut !== undefined) {
-      fields.push({ namespace: ns, key: 'accessory_haircut', type: 'number_decimal', value: priced.haircut.toFixed(2) });
     }
     if (priced.compAsOf) {
       fields.push({ namespace: ns, key: 'comp_as_of', type: 'date', value: priced.compAsOf });
@@ -225,7 +223,6 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
     compMidUsd: priced.compMidUsd ?? null,
-    compAnchorUsd: priced.anchorUsd ?? null,
     images: item.imageUrls,
     videos: item.videoUrls,
     certNumber: item.kind !== 'watch' ? (item.certNumber ?? null) : null,
