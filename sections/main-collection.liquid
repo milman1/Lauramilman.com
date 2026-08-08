@@ -58,6 +58,9 @@
       </nav>
     {%- endif -%}
 
+    <!-- Per-category Style quick-filter bar (jewelry only; excludes loose diamonds) -->
+    {%- render 'category-style-bar', collection: collection -%}
+
     <!-- Toolbar -->
     <div class="lm-collection__toolbar">
       <span class="lm-collection__count" role="status">

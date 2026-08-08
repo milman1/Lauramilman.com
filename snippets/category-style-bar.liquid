@@ -1,0 +1,121 @@
+{%- comment -%}
+  Laura Milman New York — per-category "Style" quick-filter bar.
+
+  Renders a row of style chips (Tennis, Station, Riviera…) above the product
+  grid for jewelry collections, mirroring the Peaceful Diamonds layout. Each
+  chip links to Shopify's built-in collection tag URL
+  (/collections/<handle>/<tag>), so filtering happens server-side across the
+  whole collection with no app configuration.
+
+  Scope: jewelry categories only. Loose-diamond collections (lab or natural)
+  are deliberately omitted from the config, so nothing renders there.
+
+  Robustness:
+    · A chip is only rendered when its exact tag exists in the collection
+      (checked against collection.all_tags), so no dead options appear.
+    · The whole bar hides itself when a collection has no matching styles.
+    · Active state is driven by collection.current_tags.
+
+  Tags are matched exactly (Shopify tag URLs filter by exact tag). Where a
+  category's tagging is inconsistent (e.g. "Solitaire" vs "Solitaire Ring")
+  a chip targets the single most common tag; normalising those tags later
+  would let one chip capture every variant.
+
+  Usage: {% render 'category-style-bar', collection: collection %}
+{%- endcomment -%}
+
+{%- liquid
+  assign csb_label = ''
+  assign csb_options = ''
+
+  case collection.handle
+    when 'lab-grown-bracelets'
+      assign csb_label = 'Bracelet Style'
+      assign csb_options = 'Tennis|Tennis Bracelet;Station Line|Station Line Tennis Bracelet;Riviera|Riviera Bracelet;Bangle|Bangles Bracelet;Statement|Statement Bracelet'
+    when 'lab-grown-necklaces'
+      assign csb_label = 'Necklace Style'
+      assign csb_options = 'Station|Station Necklace;Tennis|Tennis Necklace;Riviera|Riviera Necklace;Statement|Statement Necklace;Lariat|Lariat Necklace;Pendant|Pendant Necklace'
+    when 'lab-grown-pendants'
+      assign csb_label = 'Pendant Style'
+      assign csb_options = 'Solitaire|Solitaire Pendant;Halo|Halo Pendant;Heart|Heart;Cross|Cross Pendant;Toi et Moi|Toi et Moi Pendant'
+    when 'lab-grown-rings'
+      assign csb_label = 'Ring Style'
+      assign csb_options = 'Solitaire|Solitaire;Hidden Halo|Hidden Halo;Halo|Halo;Three Stone|Three Stone'
+    when 'lab-grown-engagement-rings'
+      assign csb_label = 'Ring Style'
+      assign csb_options = 'Solitaire|Solitaire;Hidden Halo|Hidden Halo;Halo|Halo;Three Stone|Three Stone'
+    when 'lab-grown-earrings'
+      assign csb_label = 'Earring Style'
+      assign csb_options = 'Studs|Stud Earrings;Drop|Drop Earrings;Hoops|Hoop Earrings;Huggie|Huggie Earrings;Toi et Moi|Toi et Moi Earrings'
+  endcase
+-%}
+
+{%- if csb_options != blank -%}
+  {%- comment -%} Lowercased tag haystack for presence checks {%- endcomment -%}
+  {%- assign csb_haystack = collection.all_tags | join: '|' | downcase -%}
+
+  {%- capture csb_chips -%}
+    {%- assign csb_items = csb_options | split: ';' -%}
+    {%- for csb_item in csb_items -%}
+      {%- assign csb_pair = csb_item | split: '|' -%}
+      {%- assign csb_display = csb_pair[0] -%}
+      {%- assign csb_tag = csb_pair[1] -%}
+      {%- assign csb_needle = csb_tag | downcase -%}
+      {%- comment -%} Only render styles the collection actually carries {%- endcomment -%}
+      {%- if csb_haystack contains csb_needle -%}
+        {%- assign csb_is_active = false -%}
+        {%- if collection.current_tags contains csb_tag -%}
+          {%- assign csb_is_active = true -%}
+        {%- endif -%}
+        <a href="{{ collection.url }}/{{ csb_tag | handleize }}"
+           class="lm-collection__chip lm-style-chip{% if csb_is_active %} is-active{% endif %}"
+           {% if csb_is_active %}aria-current="true"{% endif %}>{{ csb_display }}</a>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- assign csb_chips = csb_chips | strip -%}
+
+  {%- if csb_chips != blank -%}
+    <nav class="lm-collection__chips lm-style-bar" aria-label="{{ csb_label }}">
+      <span class="lm-collection__chips-label">{{ csb_label }}</span>
+      {%- comment -%} "All" clears the tag filter by returning to the collection root {%- endcomment -%}
+      <a href="{{ collection.url }}"
+         class="lm-collection__chip lm-style-chip{% if collection.current_tags == empty %} is-active{% endif %}"
+         {% if collection.current_tags == empty %}aria-current="true"{% endif %}>All</a>
+      {{ csb_chips }}
+    </nav>
+
+    <style>
+      .lm-style-bar {
+        justify-content: flex-start;
+        gap: 0.5rem 0.6rem;
+        margin: 1.5rem 0 0.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-light, #E7E1D6);
+      }
+      .lm-style-chip.is-active {
+        border-color: var(--gold, #C9A050);
+        background: var(--gold, #C9A050);
+        color: #fff;
+      }
+      .lm-style-chip.is-active:hover {
+        color: #fff;
+        background: var(--gold-dark, #A88340);
+        border-color: var(--gold-dark, #A88340);
+      }
+      @media (max-width: 749px) {
+        .lm-style-bar {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          justify-content: flex-start;
+        }
+        .lm-style-bar::-webkit-scrollbar { display: none; }
+        .lm-style-bar .lm-collection__chips-label { flex-shrink: 0; }
+        .lm-style-chip { flex-shrink: 0; }
+      }
+    </style>
+  {%- endif -%}
+{%- endif -%}
