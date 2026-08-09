@@ -10,7 +10,7 @@
       },
       "block_order": ["chip-under-2500", "chip-2500-5000", "chip-5000-10000", "chip-over-10000"],
       "settings": {
-        "products_per_page": 24,
+        "products_per_page": 48,
         "chips_label": "Shop by budget",
         "navy_mode": false
       }

@@ -11,7 +11,7 @@
       },
       "block_order": ["chip-cartier", "chip-vca", "chip-bvlgari", "chip-tiffany", "chip-vintage"],
       "settings": {
-        "products_per_page": 24,
+        "products_per_page": 48,
         "chips_label": "Shop by maison",
         "navy_mode": false
       }

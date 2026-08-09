@@ -1,0 +1,116 @@
+{%- comment -%}
+  Quick style chip bar above the product grid — mirrors Peaceful Diamonds.
+  Built from the same style checklist as the Refine drawer so the two stay
+  in sync. Hidden automatically when the collection is not a jewelry category
+  (loose diamonds and watches are excluded).
+
+  Usage: {% render 'jewelry-style-bar', collection: collection %}
+{%- endcomment -%}
+
+{%- liquid
+  assign jsb_handle = collection.handle
+  assign jsb_label = ''
+  assign jsb_styles = ''
+
+  case jsb_handle
+    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings'
+      assign jsb_label = 'Earring Style'
+      assign jsb_styles = 'Stud::Studs||Drop::Drop||Martini::Martini||Huggie::Huggie||Hoop::Hoops||Chandelier::Chandelier||Statement::Statement||Toi et Moi::Toi et Moi'
+    when 'rings', 'lab-grown-rings'
+      assign jsb_label = 'Ring Style'
+      assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Vintage::Vintage'
+    when 'engagement-rings', 'lab-grown-engagement-rings'
+      assign jsb_label = 'Ring Style'
+      assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Split Shank::Split Shank||Designer::Designer||Vintage::Vintage'
+    when 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets'
+      assign jsb_label = 'Bracelet Style'
+      assign jsb_styles = 'Tennis::Tennis||Station Line::Station Line||Riviera::Riviera||Bangle::Bangle||Statement::Statement||Cuff::Cuff'
+    when 'necklaces', 'lab-grown-necklaces', 'chokers'
+      assign jsb_label = 'Necklace Style'
+      assign jsb_styles = 'Station::Station||Tennis::Tennis||Riviera::Riviera||Statement::Statement||Lariat::Lariat||Pendant::Pendant'
+    when 'pendants', 'pendants-1', 'lab-grown-pendants'
+      assign jsb_label = 'Pendant Style'
+      assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Double Halo::Double Halo||Cross::Cross||Heart::Heart||Toi et Moi::Toi et Moi||Pendant::Pendant'
+    when 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands'
+      assign jsb_label = 'Band Style'
+      assign jsb_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Stackable::Stackable||Wedding Band::Wedding Band||Anniversary::Anniversary'
+    when 'peaceful-diamonds-by-laura-milman-new-york'
+      assign jsb_label = 'Jewelry Style'
+      assign jsb_styles = 'Stud::Studs||Drop::Drop||Huggie::Huggie||Hoop::Hoops||Tennis::Tennis||Solitaire::Solitaire||Halo::Halo||Statement::Statement'
+  endcase
+-%}
+
+{%- if jsb_styles != blank -%}
+  <nav class="lm-style-bar" id="JewelryStyleBar" aria-label="{{ jsb_label | escape }}" data-style-bar>
+    <span class="lm-style-bar__label">{{ jsb_label }}</span>
+    <button type="button" class="lm-style-bar__chip is-active js-jf-style-chip" data-style-value="" aria-pressed="true">All</button>
+    {%- assign jsb_items = jsb_styles | split: '||' -%}
+    {%- for item in jsb_items -%}
+      {%- assign parts = item | split: '::' -%}
+      <button type="button" class="lm-style-bar__chip js-jf-style-chip" data-style-value="{{ parts[0] | escape }}" aria-pressed="false">{{ parts[1] }}</button>
+    {%- endfor -%}
+  </nav>
+
+  <style>
+    .lm-style-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.6rem;
+      margin: 0 0 1.25rem;
+      padding-bottom: 1.15rem;
+      border-bottom: 1px solid var(--rule-light, #DDD5C5);
+    }
+    .lm-style-bar__label {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted, #8A8070);
+      margin-right: 0.35rem;
+    }
+    .lm-style-bar__chip {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+      padding: 0.45rem 1.05rem;
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: 100px;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lm-style-bar__chip:hover {
+      border-color: var(--gold, #C9A050);
+      color: var(--gold-dark, #A88340);
+      background: rgba(201, 160, 80, 0.06);
+    }
+    .lm-style-bar__chip.is-active {
+      border-color: var(--gold, #C9A050);
+      background: var(--gold, #C9A050);
+      color: #fff;
+    }
+    .lm-style-bar__chip.is-active:hover {
+      background: var(--gold-dark, #A88340);
+      border-color: var(--gold-dark, #A88340);
+      color: #fff;
+    }
+    .lm-collection--navy .lm-style-bar__chip.is-active {
+      background: var(--navy, #1a2744);
+      border-color: var(--navy, #1a2744);
+    }
+    @media (max-width: 749px) {
+      .lm-style-bar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .lm-style-bar::-webkit-scrollbar { display: none; }
+      .lm-style-bar__label,
+      .lm-style-bar__chip { flex-shrink: 0; }
+    }
+  </style>
+{%- endif -%}

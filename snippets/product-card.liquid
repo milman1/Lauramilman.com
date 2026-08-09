@@ -1,9 +1,28 @@
 {% comment %}
   Renders a product card.
   Usage: {% render 'product-card', product: product %}
+
+  data-* attributes power Peaceful Diamonds–style client filters on jewelry
+  collection pages (style / metal / carat). Loose-diamond templates do not
+  render this snippet.
 {% endcomment %}
 
-<div class="product-card">
+{%- liquid
+  assign pc_tags = product.tags | join: '|||' | downcase
+  assign pc_metal = product.metafields.custom.metal_type.value | default: '' | downcase
+  assign pc_carat = product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value | default: ''
+-%}
+
+<div
+  class="product-card"
+  data-tags="{{ pc_tags | escape }}"
+  data-title="{{ product.title | escape }}"
+  data-title-lower="{{ product.title | downcase | escape }}"
+  data-type="{{ product.type | downcase | escape }}"
+  data-price-cents="{{ product.price }}"
+  data-metal="{{ pc_metal | escape }}"
+  data-carat="{{ pc_carat | escape }}"
+>
   <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ product.title | escape }}">
     {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}
       <span class="product-card__badge product-card__badge--new">New</span>
