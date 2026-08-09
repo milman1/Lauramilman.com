@@ -58,6 +58,9 @@
       </nav>
     {%- endif -%}
 
+    {%- comment -%} Style quick-filter bar (jewelry only; never on loose diamonds) {%- endcomment -%}
+    {%- render 'jewelry-style-bar', collection: collection -%}
+
     <!-- Toolbar -->
     <div class="lm-collection__toolbar">
       <span class="lm-collection__count" role="status">
@@ -117,10 +120,17 @@
 
     <!-- Product grid -->
     {%- if collection.products.size > 0 -%}
-      <div class="products-grid lm-collection__grid">
+      <div class="products-grid lm-collection__grid" id="productsGrid">
         {%- for product in collection.products -%}
           {%- render 'product-card', product: product -%}
         {%- endfor -%}
+      </div>
+
+      <div class="lm-collection__empty lm-collection__empty--filtered" id="jewelryFilterNoResults" hidden>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <p class="lm-collection__empty-title">No products match your filters</p>
+        <p class="lm-collection__empty-text">Try adjusting your selections or clear all filters.</p>
+        <button type="button" class="btn btn--gold" id="jewelryFilterClearBtn">Clear All Filters</button>
       </div>
 
       <!-- Pagination -->
@@ -554,6 +564,13 @@
     var closeBtn = document.getElementById('RefineClose');
     var form = document.getElementById('RefineForm');
     var sortSelect = document.getElementById('lm-sort-select');
+    var productsGrid = document.getElementById('productsGrid');
+    var noResultsEl = document.getElementById('jewelryFilterNoResults');
+    var clearBtn = document.getElementById('jewelryFilterClearBtn');
+    var countEl = document.querySelector('.lm-collection__count');
+    var allCards = productsGrid ? Array.from(productsGrid.querySelectorAll('.product-card')) : [];
+    var totalOnPage = allCards.length;
+    var hasJewelryFilters = !!document.querySelector('[data-jewelry-filters]');
 
     function openDrawer() {
       if (!drawer) return;
@@ -589,16 +606,259 @@
       });
     });
 
-    if (form) {
-      // Empty inputs stay out of the URL
-      form.addEventListener('submit', function () {
-        form.querySelectorAll('input[type="number"]').forEach(function (input) {
-          if (input.value === '') input.disabled = true;
+    /* ---------- Jewelry client-side filters (PD-style) ---------- */
+    function normalize(value) {
+      return String(value || '').toLowerCase().replace(/[-_]+/g, ' ');
+    }
+
+    function containsValue(haystack, needle) {
+      return normalize(haystack).indexOf(normalize(needle)) !== -1;
+    }
+
+    function extractCarat(card) {
+      var raw = card.dataset.carat || '';
+      var fromMeta = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
+      if (!isNaN(fromMeta) && fromMeta > 0) return fromMeta;
+      var title = card.dataset.title || '';
+      var match = title.match(/([\d.]+)\s*(?:carat|ct)\b/i);
+      return match ? parseFloat(match[1]) : null;
+    }
+
+    function caratInRange(carat, rangeKey) {
+      if (carat === null || isNaN(carat)) return false;
+      switch (rangeKey) {
+        case 'Under 0.5 Carats': return carat < 0.5;
+        case '0.5-1 Carats': return carat >= 0.5 && carat < 1;
+        case 'Under 1 Carat': return carat < 1;
+        case '1-2 Carats': return carat >= 1 && carat < 2;
+        case 'Under 2 Carats': return carat < 2;
+        case '2-3 Carats': return carat >= 2 && carat < 3;
+        case 'Under 3 Carats': return carat < 3;
+        case '3-4 Carats': return carat >= 3 && carat < 4;
+        case '3-5 Carats': return carat >= 3 && carat < 5;
+        case '4-5 Carats': return carat >= 4 && carat < 5;
+        case '5-7 Carats': return carat >= 5 && carat < 7;
+        case '5-10 Carats': return carat >= 5 && carat < 10;
+        case '7-10 Carats': return carat >= 7 && carat < 10;
+        case '10-20 Carats': return carat >= 10 && carat < 20;
+        case '5+ Carats': return carat >= 5;
+        case '3+ Carats': return carat >= 3;
+        case '7+ Carats': return carat >= 7;
+        case '10+ Carats': return carat >= 10;
+        case '20+ Carats': return carat >= 20;
+        default: return false;
+      }
+    }
+
+    function selectedValues(selector) {
+      return Array.prototype.map.call(
+        document.querySelectorAll(selector + ':checked'),
+        function (el) { return el.value; }
+      );
+    }
+
+    function syncStyleBar(selectedTypes) {
+      var chips = document.querySelectorAll('.js-jf-style-chip');
+      if (!chips.length) return;
+      var multi = selectedTypes.length > 1;
+      chips.forEach(function (chip) {
+        var val = chip.getAttribute('data-style-value') || '';
+        var active = val === ''
+          ? selectedTypes.length === 0
+          : (!multi && selectedTypes.length === 1 && normalize(selectedTypes[0]) === normalize(val));
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', String(active));
+      });
+    }
+
+    function syncURL(selectedTypes, selectedMetals, caratRange) {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        ['type', 'metal', 'carat'].forEach(function (k) { params.delete(k); });
+        if (selectedTypes.length) params.set('type', selectedTypes.join(','));
+        if (selectedMetals.length) params.set('metal', selectedMetals.join(','));
+        if (caratRange) params.set('carat', caratRange);
+        var qs = params.toString();
+        var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+        window.history.replaceState({}, '', next);
+      } catch (e) { /* ignore */ }
+    }
+
+    function updateFilterBadge(activeCount) {
+      if (!openBtn) return;
+      var base = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filter &amp; Sort';
+      if (activeCount > 0) {
+        openBtn.innerHTML = base + ' <span class="lm-collection__filter-count">' + activeCount + '</span>';
+      } else {
+        openBtn.innerHTML = base;
+      }
+    }
+
+    function applyJewelryFilters() {
+      if (!hasJewelryFilters || !allCards.length) return;
+
+      var selectedTypes = selectedValues('.js-jf-style');
+      var selectedMetals = selectedValues('.js-jf-metal');
+      var caratBtn = document.querySelector('.js-jf-carat-btn.is-active');
+      var caratRange = caratBtn ? caratBtn.getAttribute('data-carat') : null;
+
+      var visibleCount = 0;
+      var hasActive = selectedTypes.length > 0 || selectedMetals.length > 0 || !!caratRange;
+
+      allCards.forEach(function (card) {
+        var tags = card.dataset.tags || '';
+        var titleLower = card.dataset.titleLower || '';
+        var productType = card.dataset.type || '';
+        var metalMeta = card.dataset.metal || '';
+        var show = true;
+
+        if (show && selectedTypes.length) {
+          var typeMatch = selectedTypes.some(function (type) {
+            return containsValue(tags, type) || containsValue(titleLower, type) || containsValue(productType, type);
+          });
+          if (!typeMatch) show = false;
+        }
+
+        if (show && selectedMetals.length) {
+          var metalMatch = selectedMetals.some(function (metal) {
+            return containsValue(tags, metal) || containsValue(titleLower, metal) || containsValue(metalMeta, metal);
+          });
+          if (!metalMatch) show = false;
+        }
+
+        if (show && caratRange) {
+          if (!caratInRange(extractCarat(card), caratRange)) show = false;
+        }
+
+        card.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      if (countEl && hasActive) {
+        countEl.textContent = 'Showing ' + visibleCount + ' of ' + totalOnPage + ' products';
+      } else if (countEl && countEl.dataset.defaultCount) {
+        countEl.textContent = countEl.dataset.defaultCount;
+      }
+
+      if (noResultsEl) {
+        noResultsEl.hidden = !(visibleCount === 0 && hasActive);
+        if (productsGrid) productsGrid.style.display = (visibleCount === 0 && hasActive) ? 'none' : '';
+      }
+
+      syncStyleBar(selectedTypes);
+      syncURL(selectedTypes, selectedMetals, caratRange);
+      updateFilterBadge(selectedTypes.length + selectedMetals.length + (caratRange ? 1 : 0));
+    }
+
+    function clearJewelryFilters() {
+      document.querySelectorAll('.js-jf-style, .js-jf-metal').forEach(function (input) {
+        input.checked = false;
+      });
+      document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+      applyJewelryFilters();
+    }
+
+    function hydrateFromURL() {
+      var params = new URLSearchParams(window.location.search);
+      var applied = false;
+
+      function checkList(paramName, selector) {
+        var raw = params.get(paramName);
+        if (!raw) return;
+        var wanted = raw.split(',').map(function (v) { return normalize(v.trim()); }).filter(Boolean);
+        document.querySelectorAll(selector).forEach(function (input) {
+          if (wanted.indexOf(normalize(input.value)) !== -1) {
+            input.checked = true;
+            applied = true;
+          }
+        });
+      }
+
+      checkList('type', '.js-jf-style');
+      checkList('metal', '.js-jf-metal');
+
+      var caratParam = params.get('carat');
+      if (caratParam) {
+        var wantedCarat = normalize(caratParam);
+        document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
+          if (normalize(btn.getAttribute('data-carat')) === wantedCarat) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+            applied = true;
+          }
+        });
+      }
+
+      if (applied) applyJewelryFilters();
+      else syncStyleBar([]);
+    }
+
+    if (countEl) countEl.dataset.defaultCount = countEl.textContent.trim();
+
+    if (hasJewelryFilters) {
+      if (form) {
+        form.addEventListener('change', function (e) {
+          if (e.target && e.target.matches('[data-client-filter]')) {
+            e.stopPropagation();
+            applyJewelryFilters();
+          }
+        }, true);
+
+        // Prevent jewelry filter fields from being submitted as Shopify params
+        form.addEventListener('submit', function () {
+          form.querySelectorAll('[data-client-filter]').forEach(function (input) {
+            input.disabled = true;
+          });
+          form.querySelectorAll('input[type="number"]').forEach(function (input) {
+            if (input.value === '') input.disabled = true;
+          });
+        });
+      }
+
+      document.querySelectorAll('.js-jf-style-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var value = chip.getAttribute('data-style-value') || '';
+          document.querySelectorAll('.js-jf-style').forEach(function (input) {
+            input.checked = value !== '' && normalize(input.value) === normalize(value);
+          });
+          applyJewelryFilters();
         });
       });
 
-      // Checkboxes and sort radios apply immediately; price waits for Apply
+      document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var wasActive = btn.classList.contains('is-active');
+          document.querySelectorAll('.js-jf-carat-btn').forEach(function (b) {
+            b.classList.remove('is-active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          if (!wasActive) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+          }
+          applyJewelryFilters();
+        });
+      });
+
+      if (clearBtn) clearBtn.addEventListener('click', clearJewelryFilters);
+
+      var refineClear = form ? form.querySelector('.refine__clear') : null;
+      if (refineClear) {
+        refineClear.addEventListener('click', function () {
+          clearJewelryFilters();
+        });
+      }
+
+      hydrateFromURL();
+    }
+
+    if (form) {
+      // Native S&D checkboxes / sort radios still apply via form submit
       form.addEventListener('change', function (e) {
+        if (e.target.matches('[data-client-filter]')) return;
         if (e.target.matches('input[type="checkbox"], input[type="radio"]')) {
           if (typeof form.requestSubmit === 'function') form.requestSubmit();
           else form.submit();
@@ -618,6 +878,26 @@
   })();
 </script>
 
+<style>
+  .lm-collection__filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.35rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: var(--gold, #C9A050);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .lm-collection__empty--filtered[hidden] {
+    display: none !important;
+  }
+</style>
+
 {% schema %}
 {
   "name": "Collection Products",
@@ -631,7 +911,7 @@
       "min": 8,
       "max": 48,
       "step": 4,
-      "default": 24
+      "default": 48
     },
     {
       "type": "text",

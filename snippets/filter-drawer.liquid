@@ -2,19 +2,28 @@
   Laura Milman New York — "Refine By" filter & sort drawer
   One reusable component for every collection, espresso-skinned (PD's blue → LMNY gold).
 
-  Renders whatever filter groups the Search & Discovery app exposes for the
-  current collection, choosing the control style by group label:
+  Jewelry collections also get Peaceful Diamonds–style Style / Metal / Carat
+  band filters (client-side) via jewelry-style-filters. Loose diamond
+  collections (natural-diamonds, lab-grown-diamonds) do not use this drawer.
+
+  Search & Discovery groups still render when configured:
     · Metal  → rounded pill toggles with a literal metal swatch dot
-    · Carat  → preset band buttons
+    · Carat  → suppressed when jewelry carat bands are present (avoids raw ct list)
     · Shape  → checkbox list
     · Price  → min/max inputs (native price filter)
-    · everything else (Maison, Stone Type, Style…) → checkbox list
-  Until products are tagged and filter groups are configured in Search &
-  Discovery, only the groups that exist will appear — the drawer degrades to
-  Sort-only. See THEME_SETUP.md for the per-collection filter matrix.
+    · everything else → checkbox list
 
   Usage: {% render 'filter-drawer', results: collection %}
 {%- endcomment -%}
+
+{%- liquid
+  assign jf_drawer_handle = results.handle
+  assign jf_drawer_enabled = false
+  case jf_drawer_handle
+    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
+      assign jf_drawer_enabled = true
+  endcase
+-%}
 
 <div class="refine-overlay" id="RefineOverlay" hidden></div>
 
@@ -57,8 +66,26 @@
       </div>
     </div>
 
+    {%- comment -%} PD-style Style / Metal / Carat bands for jewelry collections {%- endcomment -%}
+    {%- render 'jewelry-style-filters', collection: results -%}
+
     {%- for filter in results.filters -%}
       {%- assign flabel = filter.label | downcase -%}
+      {%- assign jf_skip_filter = false -%}
+      {%- comment -%}
+        When jewelry carat bands are present, skip the raw metafield Carat Weight
+        list (0.03, 0.37…). Keep Price, Shape, Color, Clarity, Availability.
+        Also skip S&D Metal when our Metal Type pills are already shown.
+      {%- endcomment -%}
+      {%- if jf_drawer_enabled -%}
+        {%- if flabel contains 'carat' or flabel == 'weight' or flabel contains 'diamond weight' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+        {%- if flabel contains 'metal' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- unless jf_skip_filter -%}
       <div class="refine__group" data-refine-group>
         <button type="button" class="refine__group-head" aria-expanded="true">
           <span class="refine__group-label">
@@ -198,6 +225,7 @@
           {%- endcase -%}
         </div>
       </div>
+      {%- endunless -%}
     {%- endfor -%}
 
     <div class="refine__footer">

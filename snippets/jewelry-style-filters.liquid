@@ -1,0 +1,190 @@
+{%- comment -%}
+  Peaceful Diamonds–style jewelry filters for collection Refine drawers.
+
+  Renders Style / Metal Type / Total Carat Weight controls that are filtered
+  client-side against product-card data attributes. Loose-diamond collections
+  (natural-diamonds, lab-grown-diamonds) and watch collections are excluded —
+  those keep their existing filter UIs untouched.
+
+  Usage: {% render 'jewelry-style-filters', collection: results %}
+{%- endcomment -%}
+
+{%- liquid
+  assign jf_handle = collection.handle
+  assign jf_enabled = false
+  assign jf_style_label = ''
+  assign jf_styles = ''
+  assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
+
+  case jf_handle
+    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings'
+      assign jf_enabled = true
+      assign jf_style_label = 'Earring Style'
+      assign jf_styles = 'Stud::Studs||Drop::Drop||Martini::Martini||Huggie::Huggie||Hoop::Hoops||Chandelier::Chandelier||Statement::Statement||Toi et Moi::Toi et Moi'
+      assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
+
+    when 'rings', 'lab-grown-rings'
+      assign jf_enabled = true
+      assign jf_style_label = 'Ring Style'
+      assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Vintage::Vintage'
+
+    when 'engagement-rings', 'lab-grown-engagement-rings'
+      assign jf_enabled = true
+      assign jf_style_label = 'Ring Style'
+      assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Split Shank::Split Shank||Designer::Designer||Vintage::Vintage'
+      assign jf_carats = '1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10+ Carats::10+ ct'
+
+    when 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets'
+      assign jf_enabled = true
+      assign jf_style_label = 'Bracelet Style'
+      assign jf_styles = 'Tennis::Tennis||Station Line::Station Line||Riviera::Riviera||Bangle::Bangle||Statement::Statement||Cuff::Cuff'
+      assign jf_carats = 'Under 3 Carats::Under 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10+ Carats::10+ ct'
+
+    when 'necklaces', 'lab-grown-necklaces', 'chokers'
+      assign jf_enabled = true
+      assign jf_style_label = 'Necklace Style'
+      assign jf_styles = 'Station::Station||Tennis::Tennis||Riviera::Riviera||Statement::Statement||Lariat::Lariat||Pendant::Pendant'
+      assign jf_carats = 'Under 3 Carats::Under 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10-20 Carats::10 - 20 ct||20+ Carats::20+ ct'
+
+    when 'pendants', 'pendants-1', 'lab-grown-pendants'
+      assign jf_enabled = true
+      assign jf_style_label = 'Pendant Style'
+      assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Double Halo::Double Halo||Cross::Cross||Heart::Heart||Toi et Moi::Toi et Moi||Pendant::Pendant'
+
+    when 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands'
+      assign jf_enabled = true
+      assign jf_style_label = 'Band Style'
+      assign jf_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Stackable::Stackable||Wedding Band::Wedding Band||Anniversary::Anniversary'
+      assign jf_carats = 'Under 0.5 Carats::Under 0.5 ct||0.5-1 Carats::0.5 - 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3+ Carats::3+ ct'
+
+    when 'peaceful-diamonds-by-laura-milman-new-york'
+      assign jf_enabled = true
+      assign jf_style_label = 'Jewelry Style'
+      assign jf_styles = 'Stud::Studs||Drop::Drop||Huggie::Huggie||Hoop::Hoops||Tennis::Tennis||Solitaire::Solitaire||Halo::Halo||Statement::Statement'
+  endcase
+-%}
+
+{%- if jf_enabled -%}
+  <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
+    <button type="button" class="refine__group-head" aria-expanded="true">
+      <span class="refine__group-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.912 5.813h6.124l-4.962 3.587 1.912 5.813L12 14.626l-4.986 3.587 1.912-5.813-4.962-3.587h6.124z"/></svg>
+        {{ jf_style_label }}
+      </span>
+      <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="refine__group-body">
+      <ul class="refine__checks" data-jf-style-list>
+        {%- assign jf_style_items = jf_styles | split: '||' -%}
+        {%- for item in jf_style_items -%}
+          {%- assign parts = item | split: '::' -%}
+          <li>
+            <label class="refine-check js-client-filter">
+              <input type="checkbox" class="js-jf-style" name="jf_type" value="{{ parts[0] | escape }}" data-client-filter="type">
+              <span class="refine-check__box" aria-hidden="true">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="refine-check__label">{{ parts[1] }}</span>
+            </label>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+
+  <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
+    <button type="button" class="refine__group-head" aria-expanded="true">
+      <span class="refine__group-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>
+        Metal Type
+      </span>
+      <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="refine__group-body">
+      <div class="refine__pills">
+        <label class="refine-pill js-client-filter">
+          <input type="checkbox" class="js-jf-metal" name="jf_metal" value="Yellow Gold" data-client-filter="metal">
+          <span class="refine-pill__chip">
+            <span class="refine-pill__dot" style="background:#E7C15E" aria-hidden="true"></span>
+            <span class="refine-pill__label">Yellow Gold</span>
+          </span>
+        </label>
+        <label class="refine-pill js-client-filter">
+          <input type="checkbox" class="js-jf-metal" name="jf_metal" value="White Gold" data-client-filter="metal">
+          <span class="refine-pill__chip">
+            <span class="refine-pill__dot" style="background:#D6D6D6" aria-hidden="true"></span>
+            <span class="refine-pill__label">White Gold</span>
+          </span>
+        </label>
+        <label class="refine-pill js-client-filter">
+          <input type="checkbox" class="js-jf-metal" name="jf_metal" value="Rose Gold" data-client-filter="metal">
+          <span class="refine-pill__chip">
+            <span class="refine-pill__dot" style="background:#B76E79" aria-hidden="true"></span>
+            <span class="refine-pill__label">Rose Gold</span>
+          </span>
+        </label>
+        <label class="refine-pill js-client-filter">
+          <input type="checkbox" class="js-jf-metal" name="jf_metal" value="Platinum" data-client-filter="metal">
+          <span class="refine-pill__chip">
+            <span class="refine-pill__dot" style="background:#A8A9AD" aria-hidden="true"></span>
+            <span class="refine-pill__label">Platinum</span>
+          </span>
+        </label>
+        <label class="refine-pill js-client-filter">
+          <input type="checkbox" class="js-jf-metal" name="jf_metal" value="Silver" data-client-filter="metal">
+          <span class="refine-pill__chip">
+            <span class="refine-pill__dot" style="background:#C4C4C4" aria-hidden="true"></span>
+            <span class="refine-pill__label">Silver</span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
+    <button type="button" class="refine__group-head" aria-expanded="true">
+      <span class="refine__group-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
+        Total Carat Weight
+      </span>
+      <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="refine__group-body">
+      <div class="refine__bands" data-jf-carat-bands>
+        {%- assign jf_carat_items = jf_carats | split: '||' -%}
+        {%- for item in jf_carat_items -%}
+          {%- assign parts = item | split: '::' -%}
+          <button type="button" class="refine-band__chip js-jf-carat-btn" data-carat="{{ parts[0] | escape }}" aria-pressed="false">{{ parts[1] }}</button>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    [data-jf-carat-bands] {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    [data-jf-carat-bands] .refine-band__chip {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: var(--radius-sm, 4px);
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.8rem;
+      color: var(--text-dark, #2C1810);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--warm-white, #FDFAF6);
+    }
+    [data-jf-carat-bands] .refine-band__chip:hover {
+      border-color: var(--gold, #C9A050);
+    }
+    [data-jf-carat-bands] .refine-band__chip.is-active {
+      background: var(--espresso, #1E1109);
+      border-color: var(--espresso, #1E1109);
+      color: var(--cream, #FAF6F0);
+    }
+  </style>
+{%- endif -%}
