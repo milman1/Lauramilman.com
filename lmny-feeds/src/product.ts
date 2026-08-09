@@ -1,6 +1,11 @@
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
-import type { FeedItem, Priced, StoneItem, WatchItem } from './types.js';
+import type { FeedItem, Priced, WatchItem } from './types.js';
+import {
+  buildWatchListing,
+  type WatchFeedRecord,
+  type WatchListing,
+} from './watchListingBuilder.js';
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
@@ -24,7 +29,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 6;
+export const PRODUCT_SCHEMA_VERSION = 7;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -57,8 +62,35 @@ export function handleForRef(kind: FeedItem['kind'], stockRef: string): string {
   return `${HANDLE_PREFIX[kind]}-${sanitizeRef(stockRef)}`;
 }
 
+/** Map a normalized feed watch onto the listing-builder input shape. */
+export function watchFeedRecordFrom(item: WatchItem): WatchFeedRecord {
+  return {
+    brand: item.brand,
+    model: item.model,
+    reference: item.reference,
+    year: item.year,
+    conditionRaw: item.condition ?? '',
+    box: item.box,
+    paper: item.papers,
+    stockNumber: item.stockRef,
+  };
+}
+
+/**
+ * Schema listing when condition maps cleanly; null when the condition is
+ * unrecognized (NEEDS_REVIEW) so callers can fall back to the legacy bullet
+ * list instead of inventing a Pre-Owned/Unworn title.
+ */
+export function watchListingFor(item: WatchItem): WatchListing | null {
+  const listing = buildWatchListing(watchFeedRecordFrom(item));
+  if ('needsReview' in listing) return null;
+  return listing;
+}
+
 export function titleFor(item: FeedItem): string {
   if (item.kind === 'watch') {
+    const listing = watchListingFor(item);
+    if (listing) return listing.title;
     return `${item.brand} ${item.model} ${item.reference}`;
   }
   return `${formatCarat(item.carat)}ct ${item.shape}, ${item.color} ${item.clarity} — ${item.lab}`;
@@ -79,9 +111,16 @@ export function caratBand(carat: number): string {
 export function tagsFor(item: FeedItem): string[] {
   const tags: string[] = [FEED_TAG];
   if (item.kind === 'watch') {
-    tags.push(item.brand);
+    const listing = watchListingFor(item);
+    if (listing) {
+      // Schema marketing tags (TitleCase brand/model, "Pre-Owned Watches", …)
+      // unioned with operational feed tags — never replace lmny-feed / full-set.
+      tags.push(...listing.tags);
+    } else {
+      tags.push(item.brand);
+      if (item.condition) tags.push(item.condition);
+    }
     if (!isCuratedWatchBrand(item.brand)) tags.push(OTHER_WATCH_BRAND_TAG);
-    if (item.condition) tags.push(item.condition);
     if (item.box && item.papers) tags.push('full-set');
     else if (item.box) tags.push('box-only');
     else if (item.papers) tags.push('papers-only');
@@ -161,12 +200,25 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     if (priced.compAsOf) {
       fields.push({ namespace: ns, key: 'comp_as_of', type: 'date', value: priced.compAsOf });
     }
+    const listing = watchListingFor(item);
+    if (listing) {
+      for (const mf of listing.metafields) {
+        fields.push({
+          namespace: mf.namespace,
+          key: mf.key,
+          type: mf.type,
+          value: mf.value,
+        });
+      }
+    }
   }
   return fields;
 }
 
 export function descriptionFor(item: FeedItem): string {
   if (item.kind === 'watch') {
+    const listing = watchListingFor(item);
+    if (listing) return listing.descriptionHtml;
     const set = item.box && item.papers ? 'Full set (box and papers)' : item.box ? 'With original box' : item.papers ? 'With papers' : 'Watch only';
     const rows = [
       ['Brand', item.brand],
@@ -212,6 +264,7 @@ function escapeHtml(s: string): string {
  * synced_at and the hash itself are excluded by construction.
  */
 export function contentHashFor(item: FeedItem, priced: Priced): string {
+  const listing = item.kind === 'watch' ? watchListingFor(item) : null;
   return contentHash({
     schemaVersion: PRODUCT_SCHEMA_VERSION,
     handle: handleFor(item),
@@ -220,6 +273,8 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     productType: PRODUCT_TYPES[item.kind],
     tags: tagsFor(item),
     description: descriptionFor(item),
+    seoTitle: listing?.seoTitle ?? null,
+    seoDescription: listing?.seoDescription ?? null,
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
     compMidUsd: priced.compMidUsd ?? null,
@@ -264,6 +319,7 @@ export function buildProductSetInput(
   // there is never a window where an imageless product is ACTIVE.
   const hasImages = item.imageUrls.length > 0;
   const tags = hasImages ? tagsFor(item) : [...tagsFor(item), MEDIA_MISSING_TAG].sort();
+  const listing = item.kind === 'watch' ? watchListingFor(item) : null;
   const input: Record<string, unknown> = {
     handle: handleFor(item),
     title: titleFor(item),
@@ -293,6 +349,9 @@ export function buildProductSetInput(
       },
     ],
   };
+  if (listing) {
+    input.seo = { title: listing.seoTitle, description: listing.seoDescription };
+  }
   if (existing) input.id = existing.id;
   // productSet fully replaces any field it's given, so re-sending `files` on a
   // product that already holds every photo makes Shopify detach and re-download
