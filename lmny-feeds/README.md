@@ -101,6 +101,27 @@ Optional (dual-write):
 | `SUPABASE_URL` | Dedicated LMNY project URL (not Hours) |
 | `SUPABASE_SERVICE_KEY` | Service-role key for `stones` upserts |
 
+### Watch listing schema
+
+Watch titles, descriptions, SEO, tags, and Google Shopping metafields follow
+`docs/watch-listing-schema.md`. The pure transform lives in
+`src/watchListingBuilder.ts` and is wired through `product.ts` for every
+live feed sync. Condition values that do not map (`SLIDER`, blank, …) keep
+the legacy brand/model/reference title and bullet-list description.
+
+For the ~620 already-live watches still on the old bullet-list HTML:
+
+```sh
+pip install requests
+export SHOPIFY_TOKEN=shpat_…   # or SHOPIFY_ADMIN_TOKEN
+python scripts/lmny_watches_backfill.py --dry-run
+python scripts/lmny_watches_backfill.py --limit 5   # then full run
+```
+
+The backfill is resumable (`watch_migrate_state.json`), skips titles that
+already start with `Pre-Owned ` / `Unworn `, merges tags with existing ones,
+and writes unrecognized conditions to `needs_review.csv`.
+
 ### Lab pricing backfill
 
 After unpublishing Lab-Grown Diamond `lmny-feed` products:
@@ -130,6 +151,11 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 
 ## Known gaps (deliberate)
 
+- Watch body trust line (`CONFIG.trustLine` / `TRUST_LINE`) stays off until
+  confirmed for feed inventory; SEO still says
+  `Authenticated by Laura Milman New York.`
+- Already-live watch backfill cannot fill Case Size / Metal / Dial / etc.
+  without a master-sheet Stock# join — separate follow-up.
 - Stone `.mp4` / 360° viewers are still embedded from the supplier rather than
   attached as Shopify media (see above). Watch videos *are* attached.
 - The diamond PDP renders one 360° tab from `lmny_feed.video_url`; the extra

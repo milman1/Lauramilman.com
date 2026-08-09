@@ -43,8 +43,13 @@ describe('titles', () => {
     expect(titleFor(naturalStone())).toBe('2.01ct Round Brilliant, F VS1 — GIA');
   });
 
-  it('builds watch titles as brand model reference', () => {
-    expect(titleFor(watch())).toBe('Rolex Submariner 126610LN');
+  it('builds watch titles from the listing schema when condition maps', () => {
+    // Fixture condition is Excellent → grade → Pre-Owned title word.
+    expect(titleFor(watch())).toBe('Pre-Owned Rolex Submariner 126610LN');
+  });
+
+  it('falls back to brand model reference when condition is unrecognized', () => {
+    expect(titleFor(watch({ condition: 'SLIDER' }))).toBe('Rolex Submariner 126610LN');
   });
 });
 
@@ -69,12 +74,14 @@ describe('tags', () => {
     }
   });
 
-  it('watch tags encode box/papers status', () => {
+  it('watch tags encode box/papers status and merge schema marketing tags', () => {
     expect(tagsFor(watch({ box: true, papers: true }))).toContain('full-set');
     expect(tagsFor(watch({ box: true, papers: false }))).toContain('box-only');
     expect(tagsFor(watch({ box: false, papers: true }))).toContain('papers-only');
     expect(tagsFor(watch({ box: false, papers: false }))).toContain('naked');
     expect(tagsFor(watch())).toContain('Rolex');
+    expect(tagsFor(watch())).toContain('Pre-Owned Watches');
+    expect(tagsFor(watch())).toContain('lmny-feed');
   });
 
   it('tags non-curated brands for the Other Watch Brands collection', () => {
@@ -130,9 +137,11 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, 'custom', 'cut')?.value).toBe('Excellent');
   });
 
-  it('watches get no diamond facets', () => {
+  it('watches get no diamond facets but do get listing metafields', () => {
     const fields = metafieldsFor(watch(), priced(), 'hash', at);
     expect(fields.filter((f) => f.namespace === 'custom')).toHaveLength(0);
+    expect(find(fields, 'mm-google-shopping', 'condition')?.value).toBe('used');
+    expect(find(fields, 'global', 'MPN')?.value).toBe('126610LN');
   });
 
   it('carries every feed video, not just the first', () => {
@@ -224,6 +233,16 @@ describe('updates target the existing product by id', () => {
     });
     const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');
+  });
+
+  it('watch creates carry schema SEO and description HTML', () => {
+    const input = buildProductSetInput(watch(), priced(), at);
+    expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN');
+    expect(String(input.descriptionHtml)).toContain('<h3>Specifications</h3>');
+    expect(input.seo).toEqual({
+      title: 'Rolex Submariner 126610LN – Pre-Owned',
+      description: expect.stringContaining('Authenticated by Laura Milman New York.'),
+    });
   });
 });
 
