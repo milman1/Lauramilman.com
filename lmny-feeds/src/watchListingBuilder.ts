@@ -54,6 +54,7 @@ export interface WatchListing {
   seoTitle: string;
   seoDescription: string;
   tags: string[];
+  /** Google Shopping / MPN plus storefront `custom.*` rows for the PDP specs grid. */
   metafields: { namespace: string; key: string; value: string; type: string }[];
 }
 
@@ -209,37 +210,19 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const bpClause = boxPaperClause(record.box, record.paper);
   const openingClause = ` is offered by Laura Milman New York${bpClause ? ` ${bpClause}` : ''}`;
 
+  // Specs render in the theme's `.product-specs` grid via custom.* metafields
+  // (same PDP chrome as jewelry). Description keeps prose only — no HTML table.
   const dial = record.dial ? titleCase(record.dial) : null;
   const bezel = record.bezel ? titleCase(record.bezel) : null;
   const bracelet = record.bracelet ? titleCase(record.bracelet) : null;
-
-  const specRows: string[] = [
-    `<tr><td>Brand</td><td>${escapeHtml(brand)}</td></tr>`,
-    `<tr><td>Model</td><td>${escapeHtml(model)}</td></tr>`,
-    `<tr><td>Reference</td><td>${escapeHtml(reference)}</td></tr>`,
-  ];
-  if (year) specRows.push(`<tr><td>Year</td><td>${escapeHtml(year)}</td></tr>`);
-  if (record.caseSizeMm) {
-    specRows.push(`<tr><td>Case Size</td><td>${escapeHtml(String(record.caseSizeMm))}mm</td></tr>`);
-  }
-  if (record.metal) specRows.push(`<tr><td>Metal</td><td>${escapeHtml(record.metal)}</td></tr>`);
-  if (dial) specRows.push(`<tr><td>Dial</td><td>${escapeHtml(dial)}</td></tr>`);
-  if (bezel) specRows.push(`<tr><td>Bezel</td><td>${escapeHtml(bezel)}</td></tr>`);
-  if (bracelet) specRows.push(`<tr><td>Bracelet</td><td>${escapeHtml(bracelet)}</td></tr>`);
-  specRows.push(`<tr><td>Condition</td><td>${titleWord}</td></tr>`);
-  if (grade) specRows.push(`<tr><td>Condition Grade</td><td>${escapeHtml(grade)}</td></tr>`);
   const boxYesNo = yesNo(record.box);
-  if (boxYesNo) specRows.push(`<tr><td>Box</td><td>${boxYesNo}</td></tr>`);
   const paperYesNo = yesNo(record.paper);
-  if (paperYesNo) specRows.push(`<tr><td>Papers</td><td>${paperYesNo}</td></tr>`);
   const ogTagYesNo = yesNo(record.ogTag);
-  if (ogTagYesNo) specRows.push(`<tr><td>Original Tag</td><td>${ogTagYesNo}</td></tr>`);
-  if (record.link !== null && record.link !== undefined && record.link !== '') {
-    specRows.push(`<tr><td>Link</td><td>${escapeHtml(String(record.link))}</td></tr>`);
-  }
-  if (record.stockNumber) {
-    specRows.push(`<tr><td>Stock #</td><td>${escapeHtml(record.stockNumber)}</td></tr>`);
-  }
+  const linkValue =
+    record.link !== null && record.link !== undefined && String(record.link).trim() !== ''
+      ? String(record.link).trim()
+      : null;
+  const caseSize = record.caseSizeMm ? `${String(record.caseSizeMm).trim()}mm` : null;
 
   const trustParagraph = CONFIG.trustLine ? `<p>${escapeHtml(CONFIG.trustLine)}</p>` : '';
 
@@ -251,7 +234,6 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const descriptionHtml =
     `<p>This ${titleWord} ${escapeHtml(brand)} ${escapeHtml(model)} ${escapeHtml(reference)}` +
     `${yearClause}${openingClause}.${gradeClause}</p>` +
-    `<h3>Specifications</h3><table>${specRows.join('')}</table>` +
     notesParagraph +
     trustParagraph;
 
@@ -268,6 +250,28 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
 
   const tags = Array.from(new Set([brand, `${titleWord} Watches`, reference, model, 'Watches']));
 
+  const customSpecs: { namespace: string; key: string; value: string; type: string }[] = [];
+  const pushCustom = (key: string, value: string | null | undefined) => {
+    if (value === null || value === undefined || value === '') return;
+    customSpecs.push({ namespace: 'custom', key, value, type: 'single_line_text_field' });
+  };
+  pushCustom('brand', brand);
+  pushCustom('model', model);
+  pushCustom('reference', reference);
+  pushCustom('year', year);
+  pushCustom('case_size', caseSize);
+  pushCustom('metal', record.metal ?? null);
+  pushCustom('dial', dial);
+  pushCustom('bezel', bezel);
+  pushCustom('bracelet', bracelet);
+  pushCustom('condition', titleWord);
+  pushCustom('condition_grade', grade);
+  pushCustom('box', boxYesNo);
+  pushCustom('papers', paperYesNo);
+  pushCustom('original_tag', ogTagYesNo);
+  pushCustom('link', linkValue);
+  pushCustom('stock_number', record.stockNumber ?? null);
+
   const metafields = [
     {
       namespace: 'mm-google-shopping',
@@ -281,6 +285,7 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
       value: reference,
       type: 'single_line_text_field',
     },
+    ...customSpecs,
   ];
 
   return { title, descriptionHtml, seoTitle, seoDescription, tags, metafields };

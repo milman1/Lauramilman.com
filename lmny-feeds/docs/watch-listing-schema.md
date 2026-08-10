@@ -100,35 +100,29 @@ Examples:
 
 ```html
 <p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{ boxPaperClause}.{gradeClause}</p>
-<h3>Specifications</h3>
-<table>
-  <tr><td>Brand</td><td>{Brand}</td></tr>
-  <tr><td>Model</td><td>{Model}</td></tr>
-  <tr><td>Reference</td><td>{reference}</td></tr>
-  <tr><td>Year</td><td>{normalizedYear}</td></tr>            <!-- omit if absent -->
-  <tr><td>Case Size</td><td>{caseSizeMm}mm</td></tr>          <!-- omit if absent -->
-  <tr><td>Metal</td><td>{metal}</td></tr>                    <!-- omit if absent -->
-  <tr><td>Dial</td><td>{TitleCase(dial)}</td></tr>            <!-- omit if absent -->
-  <tr><td>Bezel</td><td>{TitleCase(bezel)}</td></tr>          <!-- omit if absent -->
-  <tr><td>Bracelet</td><td>{TitleCase(bracelet)}</td></tr>    <!-- omit if absent -->
-  <tr><td>Condition</td><td>{titleWord}</td></tr>
-  <tr><td>Condition Grade</td><td>{grade}</td></tr>          <!-- omit if absent -->
-  <tr><td>Box</td><td>Yes|No</td></tr>                       <!-- omit if box is undefined -->
-  <tr><td>Papers</td><td>Yes|No</td></tr>                    <!-- omit if paper is undefined -->
-  <tr><td>Original Tag</td><td>Yes|No</td></tr>              <!-- omit if ogTag is undefined -->
-  <tr><td>Link</td><td>{link}</td></tr>                      <!-- omit if absent -->
-  <tr><td>Stock #</td><td>{stockNumber}</td></tr>            <!-- omit if absent -->
-</table>
 <p>{comment}</p>                                              <!-- see Comment rule above -->
 ```
 
-All interpolated free-text values in the HTML must be escaped (`&`, `<`, `>`).
+Specs are **not** inlined as an HTML table. They are written to storefront-readable
+`custom.*` metafields and rendered by the theme’s jewelry-style
+`.product-specs` grid in `sections/main-product.liquid` (same chrome as
+earrings / rings). All free-text values in the prose HTML must still be
+escaped (`&`, `<`, `>`).
 
-Field order in the table follows how a buyer actually evaluates a watch:
-identity (brand/model/reference/year), physical spec (size/metal/dial/
-bezel/bracelet), then condition, then completeness (box/papers/tag/link), then
-internal stock reference last since that's for LMNY's own tracking more
-than the buyer's decision.
+### Spec metafields (PDP grid)
+
+| `custom.*` key | Value |
+|---|---|
+| `brand` / `model` / `reference` / `year` | Title-cased brand/model; reference as-given; normalized year |
+| `case_size` | `{MM}mm` |
+| `metal` | As-given (industry shorthand) |
+| `dial` / `bezel` / `bracelet` | Title-cased |
+| `condition` / `condition_grade` | Title word / grade |
+| `box` / `papers` / `original_tag` | `Yes` / `No` when stated |
+| `link` | Feed `Links` value as string |
+| `stock_number` | LMNY stock # |
+
+Empty values are omitted so the theme can hide those cells.
 
 `yearClause`: ` from {normalizedYear}` or empty.
 `boxPaperClause`: built from the `box`/`paper` booleans — when present, a

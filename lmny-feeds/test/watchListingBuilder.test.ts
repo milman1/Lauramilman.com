@@ -34,25 +34,33 @@ describe('buildWatchListing', () => {
       'Submariner Date',
       'Watches',
     ]);
-    expect(listing.metafields).toEqual([
-      {
-        namespace: 'mm-google-shopping',
-        key: 'condition',
-        value: 'used',
-        type: 'single_line_text_field',
-      },
-      { namespace: 'global', key: 'MPN', value: '126610LN', type: 'single_line_text_field' },
-    ]);
+    expect(listing.metafields.find((m) => m.namespace === 'mm-google-shopping' && m.key === 'condition')).toEqual({
+      namespace: 'mm-google-shopping',
+      key: 'condition',
+      value: 'used',
+      type: 'single_line_text_field',
+    });
+    expect(listing.metafields.find((m) => m.namespace === 'global' && m.key === 'MPN')).toEqual({
+      namespace: 'global',
+      key: 'MPN',
+      value: '126610LN',
+      type: 'single_line_text_field',
+    });
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe('Pre-Owned');
   });
 
-  it('maps grade values to Pre-Owned with a Condition Grade row', () => {
+  it('maps grade values to Pre-Owned and writes Condition Grade metafield', () => {
     const listing = buildWatchListing(base({ conditionRaw: 'EXCELLENT', box: false, paper: false }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.title).toBe('Pre-Owned Rolex Submariner Date 126610LN');
     expect(listing.descriptionHtml).toContain('It is in excellent condition.');
-    expect(listing.descriptionHtml).toContain('<td>Condition Grade</td><td>Excellent</td>');
     expect(listing.descriptionHtml).toContain('on its own, without box or papers');
+    expect(listing.descriptionHtml).not.toContain('<h3>Specifications</h3>');
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition_grade')?.value).toBe(
+      'Excellent',
+    );
     expect(listing.seoDescription).toContain(', excellent condition');
   });
 
@@ -89,26 +97,35 @@ describe('buildWatchListing', () => {
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.descriptionHtml).toContain('from February 2016');
-    expect(listing.descriptionHtml).toContain('<td>Reference</td><td>26240BA.OO.1320BA.02</td>');
+    expect(listing.metafields.find((m) => m.key === 'reference')?.value).toBe('26240BA.OO.1320BA.02');
+    expect(listing.metafields.find((m) => m.key === 'year')?.value).toBe('February 2016');
   });
 
-  it('omits box/paper clause and rows when both are unstated', () => {
+  it('omits box/paper clause and metafields when both are unstated', () => {
     const listing = buildWatchListing(base({ box: undefined, paper: undefined }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.descriptionHtml).toContain('is offered by Laura Milman New York.');
-    expect(listing.descriptionHtml).not.toContain('<td>Box</td>');
-    expect(listing.descriptionHtml).not.toContain('<td>Papers</td>');
+    expect(listing.metafields.find((m) => m.key === 'box')).toBeUndefined();
+    expect(listing.metafields.find((m) => m.key === 'papers')).toBeUndefined();
   });
 
-  it('renders Original Tag and Link labels as-is when present', () => {
-    const listing = buildWatchListing(base({ ogTag: true, link: 19, caseSizeMm: 41, metal: '18K YG & S/S' }));
+  it('writes Dial/Bezel/Metal/MM/Link as custom.* metafields for the PDP grid', () => {
+    const listing = buildWatchListing(base({ ogTag: true, link: 19, caseSizeMm: 41, metal: '18K YG & S/S', dial: 'GREY TAPISSERIE', bezel: 'OCTAGON' }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
-    expect(listing.descriptionHtml).toContain('<td>Original Tag</td><td>Yes</td>');
-    expect(listing.descriptionHtml).toContain('<td>Link</td><td>19</td>');
-    expect(listing.descriptionHtml).toContain('<td>Case Size</td><td>41mm</td>');
-    expect(listing.descriptionHtml).toContain('<td>Metal</td><td>18K YG &amp; S/S</td>');
+    const custom = Object.fromEntries(
+      listing.metafields.filter((m) => m.namespace === 'custom').map((m) => [m.key, m.value]),
+    );
+    expect(custom).toMatchObject({
+      case_size: '41mm',
+      metal: '18K YG & S/S',
+      dial: 'Grey Tapisserie',
+      bezel: 'Octagon',
+      link: '19',
+      original_tag: 'Yes',
+    });
+    expect(listing.descriptionHtml).not.toContain('<table>');
   });
 
   it('drops redundant NAKED comments when box and paper are both No', () => {
