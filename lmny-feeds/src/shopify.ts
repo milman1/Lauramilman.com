@@ -207,6 +207,24 @@ export class ShopifyClient {
       { namespace: CUSTOM_NAMESPACE, key: 'color', name: 'Color', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'clarity', name: 'Clarity', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'cut', name: 'Cut', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      // Watch PDP specs grid (sections/main-product.liquid `.product-specs`).
+      // Jewelry already uses custom.metal; watches reuse it. Blank rows hide.
+      { namespace: CUSTOM_NAMESPACE, key: 'brand', name: 'Brand', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'model', name: 'Model', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'reference', name: 'Reference', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'year', name: 'Year', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'case_size', name: 'Case size', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'metal', name: 'Metal', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'dial', name: 'Dial', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'bezel', name: 'Bezel', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'bracelet', name: 'Bracelet', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'condition', name: 'Condition', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'condition_grade', name: 'Condition grade', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'box', name: 'Box', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'papers', name: 'Papers', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'original_tag', name: 'Original tag', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'link', name: 'Link', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'stock_number', name: 'Stock #', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
     ];
     const mutation = `mutation def($definition: MetafieldDefinitionInput!) {
       metafieldDefinitionCreate(definition: $definition) {

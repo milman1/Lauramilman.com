@@ -137,11 +137,15 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, 'custom', 'cut')?.value).toBe('Excellent');
   });
 
-  it('watches get no diamond facets but do get listing metafields', () => {
+  it('watches get PDP custom.* specs plus Google Shopping metafields', () => {
     const fields = metafieldsFor(watch(), priced(), 'hash', at);
-    expect(fields.filter((f) => f.namespace === 'custom')).toHaveLength(0);
+    expect(find(fields, 'custom', 'dial')?.value).toBe('Black');
+    expect(find(fields, 'custom', 'metal')?.value).toBe('STEEL');
     expect(find(fields, 'mm-google-shopping', 'condition')?.value).toBe('used');
     expect(find(fields, 'global', 'MPN')?.value).toBe('126610LN');
+    // Diamond-only facets stay off watches.
+    expect(find(fields, 'custom', 'diamond_shape')).toBeUndefined();
+    expect(find(fields, 'custom', 'carat_weight')).toBeUndefined();
   });
 
   it('carries every feed video, not just the first', () => {
@@ -235,37 +239,37 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.cost).toBe('585.60');
   });
 
-  it('watch creates carry schema SEO and description HTML', () => {
+  it('watch creates carry schema SEO and prose description (specs are metafields)', () => {
     const input = buildProductSetInput(watch(), priced(), at);
     expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN');
-    expect(String(input.descriptionHtml)).toContain('<h3>Specifications</h3>');
+    expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
+    expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
       title: 'Rolex Submariner 126610LN – Pre-Owned',
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
   });
 
-  it('watch descriptions include Dial/Bezel/Bracelet/Metal/MM/Link from the feed', () => {
-    const html = String(
-      buildProductSetInput(
-        watch({
-          caseSizeMm: '34',
-          metal: '18K YG & S/S',
-          dial: 'SILVER',
-          bezel: 'SMOOTH',
-          bracelet: 'JUBILEE',
-          link: '-5',
-        }),
-        priced(),
-        at,
-      ).descriptionHtml,
+  it('watch metafields include Dial/Bezel/Bracelet/Metal/MM/Link for the PDP specs grid', () => {
+    const fields = metafieldsFor(
+      watch({
+        caseSizeMm: '34',
+        metal: '18K YG & S/S',
+        dial: 'SILVER',
+        bezel: 'SMOOTH',
+        bracelet: 'JUBILEE',
+        link: '-5',
+      }),
+      priced(),
+      'hash',
+      at,
     );
-    expect(html).toContain('<td>Case Size</td><td>34mm</td>');
-    expect(html).toContain('<td>Metal</td><td>18K YG &amp; S/S</td>');
-    expect(html).toContain('<td>Dial</td><td>Silver</td>');
-    expect(html).toContain('<td>Bezel</td><td>Smooth</td>');
-    expect(html).toContain('<td>Bracelet</td><td>Jubilee</td>');
-    expect(html).toContain('<td>Link</td><td>-5</td>');
+    expect(find(fields, 'custom', 'case_size')?.value).toBe('34mm');
+    expect(find(fields, 'custom', 'metal')?.value).toBe('18K YG & S/S');
+    expect(find(fields, 'custom', 'dial')?.value).toBe('Silver');
+    expect(find(fields, 'custom', 'bezel')?.value).toBe('Smooth');
+    expect(find(fields, 'custom', 'bracelet')?.value).toBe('Jubilee');
+    expect(find(fields, 'custom', 'link')?.value).toBe('-5');
   });
 });
 

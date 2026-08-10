@@ -57,7 +57,9 @@
   endif
 
   # ── Spec rows from custom.* metafields — empty rows never render ──
-  assign spec_defs = 'diamond_shape:Diamond Shape,carat_weight:Carat Weight,metal:Metal,clarity:Clarity,color:Color,setting_style:Setting Style,length:Length' | split: ','
+  # Jewelry + watch keys share this list. Blank values are skipped, so a
+  # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
+  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
