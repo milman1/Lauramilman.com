@@ -478,6 +478,9 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
     // Brands collection. Curation no longer holds them out of the catalogue.
     const box = bool(raw, ['box', 'has_box', 'with_box', 'original_box']);
     const papers = bool(raw, ['paper', 'papers', 'has_papers', 'with_papers', 'original_papers', 'card']);
+    // Spec fields confirmed on the live developer-api/watch payload (2026-08-09
+    // key dump): Dial, Bezel, Bracelet, Metal, MM, Links (plural), Comment.
+    // OG Tag is not present on the API — do not invent it.
     const item: WatchItem = {
       kind,
       stockRef,
@@ -489,6 +492,14 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       box,
       papers,
       isNaked: !box && !papers,
+      caseSizeMm: str(raw, ['mm', 'case_size', 'case_size_mm', 'size_mm']),
+      metal: str(raw, ['metal']),
+      dial: str(raw, ['dial']),
+      bezel: str(raw, ['bezel']),
+      bracelet: str(raw, ['bracelet']),
+      // API field is `Links` (plural); schema / listing table label stays "Link".
+      link: str(raw, ['links', 'link']),
+      comment: str(raw, ['comment', 'notes', 'note']),
       costUsd,
       imageUrls: collectUrls(raw, IMAGE_KEYS),
       videoUrls: collectUrls(raw, VIDEO_KEYS),

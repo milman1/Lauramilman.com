@@ -244,6 +244,29 @@ describe('updates target the existing product by id', () => {
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
   });
+
+  it('watch descriptions include Dial/Bezel/Bracelet/Metal/MM/Link from the feed', () => {
+    const html = String(
+      buildProductSetInput(
+        watch({
+          caseSizeMm: '34',
+          metal: '18K YG & S/S',
+          dial: 'SILVER',
+          bezel: 'SMOOTH',
+          bracelet: 'JUBILEE',
+          link: '-5',
+        }),
+        priced(),
+        at,
+      ).descriptionHtml,
+    );
+    expect(html).toContain('<td>Case Size</td><td>34mm</td>');
+    expect(html).toContain('<td>Metal</td><td>18K YG &amp; S/S</td>');
+    expect(html).toContain('<td>Dial</td><td>Silver</td>');
+    expect(html).toContain('<td>Bezel</td><td>Smooth</td>');
+    expect(html).toContain('<td>Bracelet</td><td>Jubilee</td>');
+    expect(html).toContain('<td>Link</td><td>-5</td>');
+  });
 });
 
 describe('imageless products are quarantined at creation', () => {
