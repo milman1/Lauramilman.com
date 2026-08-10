@@ -29,7 +29,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 7;
+export const PRODUCT_SCHEMA_VERSION = 8;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -72,6 +72,13 @@ export function watchFeedRecordFrom(item: WatchItem): WatchFeedRecord {
     conditionRaw: item.condition ?? '',
     box: item.box,
     paper: item.papers,
+    caseSizeMm: item.caseSizeMm,
+    metal: item.metal,
+    dial: item.dial,
+    bezel: item.bezel,
+    bracelet: item.bracelet,
+    link: item.link,
+    comment: item.comment,
     stockNumber: item.stockRef,
   };
 }

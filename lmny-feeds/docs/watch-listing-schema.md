@@ -23,8 +23,8 @@ text):
 | `conditionRaw` | Condition | `PRE OWNED` | See condition mapping below. |
 | `box` | Box | `true` / `false` | Optional boolean. Undefined = not stated (omit from output); stated `false` is real information a buyer wants and is shown. |
 | `paper` | Paper | `true` / `false` | Same rule as Box. |
-| `ogTag` | OG Tag | `true` / `false` | Same rule as Box. Original hang tag present. Spec-table label: **Original Tag**. |
-| `link` | Link | `19` | Optional numeric/spec value. Spec-table label: **Link**. |
+| `ogTag` | OG Tag | `true` / `false` | Same rule as Box. Original hang tag present. Spec-table label: **Original Tag**. **Not present on the Belgium Dia developer API** as of 2026-08-09 — omit until a source exists. |
+| `link` | Link / API `Links` | `19` \| `-5` | Optional. Belgium Dia developer API field is **`Links`** (plural); table label stays **Link**. Kept as a string so signed values are preserved. |
 | `caseSizeMm` | MM | `36` | Optional. Rendered as "36mm". |
 | `bracelet` | Bracelet | `AP BRACELET` \| `BLUE LEATHER STRAP` | Optional, free text, title-cased on output. |
 | `dial` | Dial | `GREY TAPISSERIE` | Optional, free text, title-cased on output. |
@@ -40,11 +40,15 @@ already-live watches only have the old combined string in Shopify today, not
 these two booleans separately, so the backfill infers `box`/`paper` from the
 old string as a bridge.
 
-**Backfill scope:** the one-time backfill only sees Brand / Model / Reference /
-Year / Condition / Accessories in existing Shopify `descriptionHtml`. It does
-not populate Case Size, Metal, Dial, Bezel, Bracelet, Original Tag, Link, or
-Comment. Enriching those ~620 via a master-sheet join by Stock# is a separate
-follow-up.
+**Live ingest:** Dial, Bezel, Bracelet, Metal, MM, Links, Comment, and Year
+are on the Belgium Dia `developer-api/watch` payload and are mapped through
+`normalizeWatches` → `buildWatchListing`. A content-hash schema bump refreshes
+already-live `w-*` products in place on the next sync.
+
+**Backfill script:** `scripts/lmny_watches_backfill.py` only sees what's in
+existing Shopify `descriptionHtml` and cannot recover those physical specs.
+Prefer the feed resync path; flag the Python backfill for retirement once the
+enriched sync has rewritten the live catalog.
 
 ## Condition mapping
 

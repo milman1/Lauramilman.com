@@ -43,6 +43,18 @@ export interface WatchItem {
   papers: boolean;
   /** No box and no papers. */
   isNaked: boolean;
+  /** Case size in mm from the feed `MM` field. */
+  caseSizeMm?: string;
+  metal?: string;
+  dial?: string;
+  bezel?: string;
+  bracelet?: string;
+  /**
+   * Extra bracelet links from the feed `Links` field (API name is plural).
+   * Kept as a string so values like "-5" are preserved, not forced numeric.
+   */
+  link?: string;
+  comment?: string;
   costUsd: number;
   imageUrls: string[];
   videoUrls: string[];

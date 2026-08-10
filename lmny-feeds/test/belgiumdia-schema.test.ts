@@ -28,9 +28,17 @@ const watchRecord = {
   Brand: 'ROLEX',
   Model: 'SUBMARINER DATE',
   Reference: '116610LV',
+  Year: '2014',
   Condition: 'MINT',
   Box: 'NO',
   Paper: 'NO',
+  MM: '40',
+  Metal: 'STEEL',
+  Bracelet: 'OYSTER',
+  Dial: 'GREEN',
+  Bezel: 'CERACHROM',
+  Links: '2',
+  Comment: 'NAKED',
   Price: '17500',
   ImageLink: 'https://dnalinks.in/2115.jpg',
   VideoLink: 'https://dnalinks.in/2115.mp4',
@@ -118,11 +126,33 @@ describe('Belgium Dia real-schema lab record', () => {
 });
 
 describe('Belgium Dia real-schema watch record', () => {
-  it('maps brand/model/reference, price, and Paper (singular)', () => {
+  it('maps brand/model/reference, price, Paper (singular), and physical specs', () => {
     const { items, holds } = normalizeWatches([watchRecord]);
     expect(holds).toEqual([]);
     const w = items[0]!;
-    expect(w).toMatchObject({ stockRef: '2115', brand: 'ROLEX', reference: '116610LV', costUsd: 17500, box: false, papers: false, isNaked: true });
+    expect(w).toMatchObject({
+      stockRef: '2115',
+      brand: 'ROLEX',
+      reference: '116610LV',
+      costUsd: 17500,
+      box: false,
+      papers: false,
+      isNaked: true,
+      year: '2014',
+      caseSizeMm: '40',
+      metal: 'STEEL',
+      dial: 'GREEN',
+      bezel: 'CERACHROM',
+      bracelet: 'OYSTER',
+      link: '2',
+      comment: 'NAKED',
+    });
     expect(w.kind === 'watch' && w.imageUrls[0]).toBe('https://dnalinks.in/2115.jpg');
+  });
+
+  it('maps the live API Links field (plural) and keeps negative link counts', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRecord, Stock: '10005', Links: '-5' }]);
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({ stockRef: '10005', link: '-5' });
   });
 });
