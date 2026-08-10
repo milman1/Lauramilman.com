@@ -2,6 +2,12 @@
 """
 Laura Milman NY - watch backfill.
 
+RETIREMENT CANDIDATE: the live Belgium Dia sync now maps Dial/Bezel/Bracelet/
+Metal/MM/Links/Comment from the feed through watchListingBuilder.ts. Prefer a
+content-hash resync (PRODUCT_SCHEMA_VERSION bump) over this script for those
+fields. Keep this only for one-off recovery of titles that still have the old
+bullet-list descriptionHtml and cannot wait for the next feed pass.
+
 Applies docs/watch-listing-schema.md to every already-live watch whose
 descriptionHtml is still the raw feed bullet list (Brand / Model / Reference /
 Year / Condition / Accessories). This is the SAME schema as
