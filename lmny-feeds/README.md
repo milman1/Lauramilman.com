@@ -21,11 +21,9 @@ holds a stones table — Shopify products are the only live copy.
    outside the curated list still import and are tagged `other-watch-brand`.
    Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
-   - naturals: Rapaport × 0.75, held under a 20% margin floor. The floor is a
-     **filter, not a floor price** — a thin stone is held out, never marked up
-     to clear it. 20% margin-on-retail is why no published natural sits below
-     cost × 1.25.
-   - lab: tiered multiplier on total cost (~1.55× average)
+   - loose diamonds (lab + natural): `round(deal-API wholesale × 5)`. Wholesale
+     is total feed cost (`Buy_Price × carat` for lab; Buy_Price / Rap-derived
+     buy for natural). A 20% margin floor remains a fail-closed filter only.
    - watches: `round(comp_mid × 0.97)`; when Hours returns no mid, fall back
      to `round(cost × 1.10)`. No accessory haircut and no low→mid blend.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
@@ -173,5 +171,5 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 - Checkout for non-product stones (inquiry / draft order / JIT product) is an
   open decision; PD originally used select-for-ring + add-to-cart against a
   live API, not Shopify products.
-- Lab markup tiers and the watch brand list in `config/pricing.ts` are
-  reconstructions pending review.
+- Loose-diamond retail is a flat 5× deal-API wholesale in `config/pricing.ts`;
+  the watch brand list there is a reconstruction pending review.
