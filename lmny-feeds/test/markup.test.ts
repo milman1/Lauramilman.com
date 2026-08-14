@@ -131,13 +131,13 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
 });
 
 describe('watch pricing', () => {
-  it('prices at round(comp_mid × 0.97)', () => {
-    // PDF formula: market mid minus 3%. lowUsd and accessory state are ignored.
+  it('prices from cost tiers (1.20× in the $5k–$15k band), not mid × 0.97', () => {
     const r = priceWatch(
       watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
       { midUsd: 12000, lowUsd: 10000, sourceCount: 12, asOf: '2026-07-20' },
     );
-    expect(r.ok && r.priced.retailUsd).toBe(11640);
+    // 9000 × 1.20 = 10800
+    expect(r.ok && r.priced.retailUsd).toBe(10800);
     expect(r.ok && r.priced.compMidUsd).toBe(12000);
   });
 
@@ -150,41 +150,46 @@ describe('watch pricing', () => {
       watch({ costUsd: 8000, box: true, papers: false, isNaked: false }),
       { midUsd: 12000, lowUsd: 10000, sourceCount: 12 },
     );
-    expect(naked.ok && naked.priced.retailUsd).toBe(11640);
-    expect(partial.ok && partial.priced.retailUsd).toBe(11640);
+    expect(naked.ok && naked.priced.retailUsd).toBe(9600);
+    expect(partial.ok && partial.priced.retailUsd).toBe(9600);
   });
 
-  it('rounds to the nearest dollar', () => {
-    // 5325 × 0.97 = 5165.25 → 5165
-    const r = priceWatch(watch({ costUsd: 4000 }), { midUsd: 5325, sourceCount: 8 });
-    expect(r.ok && r.priced.retailUsd).toBe(5165);
+  it('rounds retail up to the nearest $100', () => {
+    // 4123 × 1.30 = 5359.9 → 5400
+    const r = priceWatch(watch({ costUsd: 4123 }), { midUsd: 8000, sourceCount: 8 });
+    expect(r.ok && r.priced.retailUsd).toBe(5400);
   });
 
-  it('falls back to cost × 1.10 when there is no market comp', () => {
+  it('still prices when there is no market comp', () => {
     const r = priceWatch(watch({ costUsd: 5000 }), null);
-    expect(r.ok && r.priced.retailUsd).toBe(5500);
+    // 5000 × 1.20 = 6000, floored to previous-tier ceiling 6500
+    expect(r.ok && r.priced.retailUsd).toBe(6500);
     expect(r.ok && r.priced.compMidUsd).toBeUndefined();
   });
 
-  it('falls back when mid is missing or zero', () => {
+  it('falls back to cost tiers when mid is missing or zero', () => {
     const r = priceWatch(watch({ costUsd: 4000 }), { midUsd: 0, sourceCount: 5 });
-    expect(r.ok && r.priced.retailUsd).toBe(4400);
+    expect(r.ok && r.priced.retailUsd).toBe(5200);
   });
 
-  it('still publishes when sourceCount is thin — mid alone drives the price', () => {
+  it('still publishes when sourceCount is thin — mid is audit only', () => {
     const r = priceWatch(
       watch({ costUsd: 9000, box: true, papers: true, isNaked: false }),
       { midUsd: 12000, sourceCount: 2 },
     );
-    expect(r.ok && r.priced.retailUsd).toBe(11640);
+    expect(r.ok && r.priced.retailUsd).toBe(10800);
   });
 
-  it('publishes even when mid × 0.97 sits near cost (no at-market hold)', () => {
-    // 12000 × 0.97 = 11640; cost 11000 — previously held as at-market.
+  it('holds needs_review when cost-tier retail sits >40% under mid', () => {
     const r = priceWatch(
-      watch({ costUsd: 11000, box: true, papers: true, isNaked: false }),
+      watch({ costUsd: 3000, box: true, papers: true, isNaked: false }),
       { midUsd: 12000, sourceCount: 12 },
     );
-    expect(r.ok && r.priced.retailUsd).toBe(11640);
+    expect(!r.ok && r.hold.reason).toBe('watch_needs_review');
+  });
+
+  it('holds no_cost when supplier cost is missing', () => {
+    const r = priceWatch(watch({ costUsd: 0 }), { midUsd: 12000, sourceCount: 12 });
+    expect(!r.ok && r.hold.reason).toBe('watch_no_cost');
   });
 });

@@ -82,22 +82,20 @@ export const LAB_GUARDS = {
 } as const;
 
 /**
- * Watches: retail = round(comp_mid_usd × compDiscount).
+ * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
  *
- * Confirmed against every feed watch last synced on or before 2026-08-02.
- * Runs from 2026-08-03 onward briefly priced off a low→mid blend + accessory
- * haircut, which put live prices 9–30% under mid × 0.97 with no constant
- * multiple of either cost or mid. Policy is back to mid minus 3%.
+ * Comps are audit / review-gate only — never enter the retail calculation.
+ * Aftermarket rows are excluded at normalize (and again in the pricing
+ * function if the flag is passed). Missing cost or retail >40% under mid
+ * → hold with tag `pricing-review`; existing Shopify price is left alone.
  *
- * When Hours returns no mid, fall back to cost × noCompMultiple rather than
- * holding the piece out of the catalogue. Feed rows whose condition is
- * "aftermarket" are excluded at normalize time and never reach pricing.
+ * Historical note: through 2026-08 live prices were round(comp_mid × 0.97),
+ * which could land under cost (e.g. some Audemars Piguet rows). Replaced by
+ * cost-tier markup on 2026-08-14.
  */
 export const WATCH = {
-  /** Market-comp discount: retail = round(mid × this). */
-  compDiscount: 0.97,
-  /** When no market mid is available: retail = round(cost × this). */
-  noCompMultiple: 1.1,
+  /** Tag applied when pricing returns needs_review or no_cost. */
+  reviewTag: 'pricing-review',
 } as const;
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
