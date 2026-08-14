@@ -19,7 +19,7 @@ import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog, kindForHandle } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, titleFor } from './product.js';
+import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
 import {
   holdHistogram,
   labPricingStats,
@@ -212,8 +212,9 @@ async function main() {
     }
   }
 
-  // 2. Price. Watches: round(comp_mid × 0.97), or cost × 1.10 when Hours
-  //    returns no mid. Aftermarket rows are already held out at normalize.
+  // 2. Price. Watches: cost-tier markup (watchPricing.ts). Comp mid is
+  //    review-gate only. Aftermarket already held out at normalize. Missing
+  //    cost or retail >40% under mid → pricing review (no auto price write).
   const publishable: Publishable[] = [];
   const hours = new HoursClient();
   const watchLines: WatchLine[] = [];
@@ -278,6 +279,19 @@ async function main() {
     ...holds.filter((h) => h.stockRef !== '(unknown)').map((h) => handleForRef(h.kind, h.stockRef)),
   ]);
   const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds, presentHandles);
+  // Pricing-review holds must NOT archive live watches or overwrite price —
+  // leave the existing variant price and tag for manual vetting.
+  const pricingReviewReasons = new Set(['watch_needs_review', 'watch_no_cost']);
+  const pricingReviewHolds = holds.filter((h) => pricingReviewReasons.has(h.reason));
+  const pricingReviewHandles = new Set(
+    pricingReviewHolds.map((h) => handleForRef(h.kind, h.stockRef)),
+  );
+  for (const d of decisions) {
+    if (d.action === 'archive' && pricingReviewHandles.has(d.handle)) {
+      d.action = 'skip';
+      d.reason = 'pricing_review';
+    }
+  }
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);
@@ -438,6 +452,21 @@ async function main() {
     }
     if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
 
+    // Tag watches held for pricing review; leave their existing price alone.
+    let reviewTagged = 0;
+    for (const h of pricingReviewHolds) {
+      const existing = catalogByHandle.get(handleForRef(h.kind, h.stockRef));
+      if (!existing) continue;
+      if (existing.tags.includes(PRICING_REVIEW_TAG)) continue;
+      const errors = await shopify.setProductTags(existing.id, [...existing.tags, PRICING_REVIEW_TAG]);
+      if (errors.length === 0) reviewTagged += 1;
+      else writeErrors.push(...errors.map((e) => `pricing-review tag ${existing.handle}: ${e}`));
+    }
+    if (reviewTagged > 0) {
+      console.log(`Tagged ${reviewTagged} watch(es) with ${PRICING_REVIEW_TAG}`);
+      notes.push(`pricing-review tagged: ${reviewTagged}`);
+    }
+
     // 4b. Attach feed videos as real Shopify media (watches only).
     //
     // Images attach from a supplier URL inside productSet; video cannot —
@@ -590,6 +619,27 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(path.join(OUT_DIR, 'report.json'), JSON.stringify(report, null, 2));
   await writeFile(path.join(OUT_DIR, 'report.md'), renderMarkdown(report));
+
+  // Same shape as the earlier watch backfill's needs_review.csv — one row per
+  // watch that must not auto-publish a new price.
+  if (pricingReviewHolds.length > 0) {
+    const header = 'stock_ref,reason,detail,title,cost_usd,comp_mid_usd\n';
+    const lines = pricingReviewHolds.map((h) => {
+      const line = watchLines.find((w) => w.stockRef === h.stockRef);
+      const cells = [
+        h.stockRef,
+        h.reason,
+        h.detail ?? '',
+        line?.title ?? '',
+        line?.costUsd ?? '',
+        line?.compMidUsd ?? '',
+      ].map((c) => csvEscape(String(c)));
+      return cells.join(',');
+    });
+    await writeFile(path.join(OUT_DIR, 'needs_review.csv'), header + lines.join('\n') + '\n');
+    console.log(`Wrote ${pricingReviewHolds.length} pricing-review row(s) to ${path.join(OUT_DIR, 'needs_review.csv')}`);
+  }
+
   console.log(renderMarkdown(report));
 
   // A "successful" live run that fetched nothing looks like a deploy from the
@@ -626,3 +676,8 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+
+function csvEscape(value: string): string {
+  if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
+  return value;
+}
