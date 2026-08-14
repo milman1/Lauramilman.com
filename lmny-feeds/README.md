@@ -136,6 +136,18 @@ npm run backfill:lab-pricing      # SYNC_FEEDS=lab; resumable via content_hash
 
 Spot-check `out/report.md` lab bands before republishing.
 
+### eBay File Exchange (Seller Hub upload)
+
+If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), the `PaymentProfileName` column almost certainly has a name-plus-id like `eBay Managed Payments (24683219020)`. eBay treats the number as a policy id; that value is the seller account id, not a Business Policy id.
+
+```sh
+npx tsx scripts/fix-ebay-file-exchange.ts \
+  --in path/to/failed.csv \
+  --out out/ebay_upload_ready_to_import.csv
+```
+
+The fixer strips the parenthetical id (leaving `eBay Managed Payments`) and completes titles that were cut off at eBay's 80-character limit. If the next upload still rejects the payment policy, copy the **exact** payment-policy name from Seller Hub → Account → Business policies and pass `--payment-profile "that exact name"`.
+
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
 `BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.

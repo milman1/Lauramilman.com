@@ -10,6 +10,7 @@
     "seed:stones": "tsx scripts/seed-stones-from-shopify.ts",
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
+    "ebay:fix-file-exchange": "tsx scripts/fix-ebay-file-exchange.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
