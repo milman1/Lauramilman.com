@@ -100,19 +100,33 @@ export interface EbayFixResult {
   headers: string[];
   rows: Record<string, string>[];
   changes: EbayFixChange[];
+  /** Seller Hub templates are UTF-8 with BOM. */
+  bom: boolean;
+}
+
+export function isEbayResultsFile(text: string): boolean {
+  const first = text.replace(/^\uFEFF/, '').split(/\r?\n/, 1)[0] ?? '';
+  return /^Line Number,/i.test(first);
 }
 
 export function parseEbayFileExchange(text: string): {
   infoLine: string;
   headers: string[];
   rows: Record<string, string>[];
+  bom: boolean;
 } {
+  const bom = text.startsWith('\uFEFF');
   const raw = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const records = parseCsv(raw);
   if (records.length < 2) {
     throw new Error('File Exchange CSV needs an Info line plus a header row');
   }
   const infoLine = records[0]!.join(',');
+  if (!/^Info,/i.test(infoLine)) {
+    throw new Error(
+      `Not a File Exchange template (first line must start with Info,). Got: ${infoLine.slice(0, 80)}`,
+    );
+  }
   const headers = records[1]!;
   const rows = records.slice(2).filter((r) => r.some((c) => c.trim() !== '')).map((r) => {
     const obj: Record<string, string> = {};
@@ -121,22 +135,34 @@ export function parseEbayFileExchange(text: string): {
     }
     return obj;
   });
-  return { infoLine, headers, rows };
+  return { infoLine, headers, rows, bom };
 }
 
+/**
+ * Seller Hub identifies the template from line 1. eBay's own downloads are
+ * UTF-8 with BOM and CRLF. Rewriting as LF-only / no BOM makes upload fail
+ * with "We couldn’t identify your template."
+ */
 export function serializeEbayFileExchange(
   infoLine: string,
   headers: string[],
   rows: Record<string, string>[],
+  options: { bom?: boolean } = {},
 ): string {
   const lines = [infoLine, serializeCsvRow(headers)];
   for (const row of rows) {
     lines.push(serializeCsvRow(headers.map((h) => row[h] ?? '')));
   }
-  return lines.join('\n') + '\n';
+  const body = `${lines.join('\r\n')}\r\n`;
+  return (options.bom === false ? '' : '\uFEFF') + body;
 }
 
 export function fixEbayFileExchange(text: string, options: EbayFixOptions = {}): EbayFixResult {
+  if (isEbayResultsFile(text)) {
+    throw new Error(
+      'This is an eBay results/error file (starts with Line Number), not a listing template. Upload the original File Exchange template, not the results CSV.',
+    );
+  }
   const parsed = parseEbayFileExchange(text);
   const changes: EbayFixChange[] = [];
 

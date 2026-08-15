@@ -146,7 +146,11 @@ npx tsx scripts/fix-ebay-file-exchange.ts \
   --out out/ebay_upload_ready_to_import.csv
 ```
 
-The fixer strips the parenthetical id (leaving `eBay Managed Payments`) and completes titles that were cut off at eBay's 80-character limit. If the next upload still rejects the payment policy, copy the **exact** payment-policy name from Seller Hub → Account → Business policies and pass `--payment-profile "that exact name"`.
+The fixer strips the parenthetical id (leaving `eBay Managed Payments`), completes titles that were cut off at eBay's 80-character limit, and writes the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
+
+Do **not** re-upload the results CSV (the one whose first line is `Line Number,Action,Status,ErrorCode,…`). That is the error report, not a listing template.
+
+If the next upload still rejects the payment policy, copy the **exact** payment-policy name from Seller Hub → Account → Business policies and pass `--payment-profile "that exact name"`.
 
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /

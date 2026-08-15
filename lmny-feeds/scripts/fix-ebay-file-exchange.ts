@@ -32,7 +32,7 @@ function main() {
   const paymentProfileName = arg('--payment-profile');
   const input = readFileSync(resolve(inPath), 'utf8');
   const result = fixEbayFileExchange(input, paymentProfileName ? { paymentProfileName } : {});
-  const csv = serializeEbayFileExchange(result.infoLine, result.headers, result.rows);
+  const csv = serializeEbayFileExchange(result.infoLine, result.headers, result.rows, { bom: true });
 
   const dest = resolve(outPath);
   mkdirSync(dirname(dest), { recursive: true });

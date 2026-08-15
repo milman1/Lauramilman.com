@@ -3,6 +3,7 @@ import {
   EBAY_TITLE_MAX,
   fitEbayTitle,
   fixEbayFileExchange,
+  isEbayResultsFile,
   looksLikePolicyIdSuffix,
   looksTruncatedEbayTitle,
   parseEbayFileExchange,
@@ -98,5 +99,18 @@ describe('fixEbayFileExchange', () => {
     expect(again.infoLine).toBe('Info,Version=1.0.0,Template=fx_category_template_EBAY_US');
     expect(again.rows[0]?.['*Description']).toContain('without box or papers');
     expect(again.rows[0]?.PaymentProfileName).toBe('eBay Managed Payments');
+  });
+
+  it('writes UTF-8 BOM and CRLF so Seller Hub can identify the template', () => {
+    const result = fixEbayFileExchange(SAMPLE);
+    const csv = serializeEbayFileExchange(result.infoLine, result.headers, result.rows);
+    expect(csv.startsWith('\uFEFFInfo,Version=1.0.0,Template=fx_category_template_EBAY_US\r\n')).toBe(true);
+    expect(csv.includes('\n') && !csv.replace(/\r\n/g, '').includes('\n')).toBe(true);
+  });
+
+  it('rejects an eBay results file instead of treating it as a template', () => {
+    const results = '\uFEFFLine Number,Action,Status,ErrorCode\n2,Add,Failure,21917328\n';
+    expect(isEbayResultsFile(results)).toBe(true);
+    expect(() => fixEbayFileExchange(results)).toThrow(/results\/error file/);
   });
 });
