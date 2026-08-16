@@ -1,3 +1,4 @@
+import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
@@ -10,7 +11,7 @@ import {
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
 /** Tag for watches held out of auto-pricing (needs_review / no_cost). */
-export const PRICING_REVIEW_TAG = 'pricing-review';
+export const PRICING_REVIEW_TAG = WATCH.reviewTag;
 /** Tag for watches whose brand is outside the curated WATCH_BRANDS list. */
 export const OTHER_WATCH_BRAND_TAG = 'other-watch-brand';
 /** Automated collection that gathers OTHER_WATCH_BRAND_TAG products. */

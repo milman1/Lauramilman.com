@@ -26,8 +26,14 @@ holds a stones table — Shopify products are the only live copy.
      to clear it. 20% margin-on-retail is why no published natural sits below
      cost × 1.25.
    - lab: tiered multiplier on total cost (~1.55× average)
-   - watches: `round(comp_mid × 0.97)`; when Hours returns no mid, fall back
-     to `round(cost × 1.10)`. No accessory haircut and no low→mid blend.
+   - watches: supplier cost × tier (`src/watchPricing.ts`): `<$5k = 1.30×`,
+     `$5k–$15k = 1.20×`, `$15k–$40k = 1.12×`, `>$40k = 1.08×`, then round up
+     to the nearest $100 and floor at the previous tier’s ceiling so retail
+     never drops across a boundary. Hours `comp_mid` is audit only — if retail
+     sits more than 40% under mid, or cost is missing, the watch is tagged
+     `pricing-review` and the existing Shopify price is left alone. Aftermarket
+     is excluded at normalize. The old `round(comp_mid × 0.97)` rule (with
+     `cost × 1.10` fallback) is gone; it could publish under cost.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    archive / skip. Unchanged hashes are skipped entirely. Items that leave the
    feed are archived, never deleted (URLs persist). A feed that fails to fetch

@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
-import { diffCatalog, kindForHandle } from './diff.js';
+import { diffCatalog, kindForHandle, PRICING_REVIEW_HOLD_REASONS, skipPricingReviewArchives } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
@@ -281,17 +281,11 @@ async function main() {
   const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds, presentHandles);
   // Pricing-review holds must NOT archive live watches or overwrite price —
   // leave the existing variant price and tag for manual vetting.
-  const pricingReviewReasons = new Set(['watch_needs_review', 'watch_no_cost']);
-  const pricingReviewHolds = holds.filter((h) => pricingReviewReasons.has(h.reason));
+  const pricingReviewHolds = holds.filter((h) => PRICING_REVIEW_HOLD_REASONS.has(h.reason));
   const pricingReviewHandles = new Set(
     pricingReviewHolds.map((h) => handleForRef(h.kind, h.stockRef)),
   );
-  for (const d of decisions) {
-    if (d.action === 'archive' && pricingReviewHandles.has(d.handle)) {
-      d.action = 'skip';
-      d.reason = 'pricing_review';
-    }
-  }
+  skipPricingReviewArchives(decisions, pricingReviewHandles);
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);
