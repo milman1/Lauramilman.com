@@ -1,5 +1,16 @@
 {
   "sections": {
+    "hero": {
+      "type": "peaceful-hero",
+      "settings": {
+        "eyebrow": "New York · 30+ Years Experience",
+        "heading": "The Standard for Lab-Grown Diamonds",
+        "subheading": "Ethically created. Modern luxury, redefined.",
+        "primary_label": "Shop Lab-Grown Diamonds",
+        "secondary_label": "Explore Our Collections",
+        "secondary_url": "/collections/lab-grown-rings"
+      }
+    },
     "main": {
       "type": "main-collection",
       "blocks": {
@@ -16,5 +27,5 @@
       }
     }
   },
-  "order": ["main"]
+  "order": ["hero", "main"]
 }
