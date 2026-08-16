@@ -353,7 +353,39 @@
               <span class="accordion-icon" aria-hidden="true">+</span>
             </button>
             <div class="accordion-body">
-              <div class="accordion-content rte">{{ product.description }}</div>
+              <div
+                class="accordion-content rte"
+                id="PdpDescription"
+                {% if spec_rows != blank %}data-strip-duplicate-specs{% endif %}
+              >{{ product.description }}</div>
+              {%- if spec_rows != blank -%}
+              <script>
+                (function () {
+                  var desc = document.getElementById('PdpDescription');
+                  if (!desc) return;
+                  Array.prototype.slice.call(desc.querySelectorAll('h2, h3, h4')).forEach(function (heading) {
+                    var title = (heading.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (!/specification/i.test(title) && !/^stone details$/i.test(title)) return;
+                    var node = heading.nextElementSibling;
+                    heading.parentNode.removeChild(heading);
+                    while (node && !/^H[2-4]$/.test(node.tagName)) {
+                      var next = node.nextElementSibling;
+                      node.parentNode.removeChild(node);
+                      node = next;
+                    }
+                  });
+                  var leftover = (desc.textContent || '')
+                    .replace(/360°\s*View/gi, '')
+                    .replace(/Your browser does not support the video tag\./gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                  if (leftover.length < 40) {
+                    var wrap = desc.closest('.pdp-desc');
+                    if (wrap) wrap.hidden = true;
+                  }
+                })();
+              </script>
+              {%- endif -%}
             </div>
           </div>
         </div>
