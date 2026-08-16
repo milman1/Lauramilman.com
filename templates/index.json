@@ -18,7 +18,7 @@
       "type": "trust-strip",
       "blocks": {
         "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
-        "trust-2": { "type": "item", "settings": { "text": "30-Day Returns" } },
+        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
         "trust-3": { "type": "item", "settings": { "text": "Authenticity Guaranteed" } },
         "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
       },
@@ -149,6 +149,61 @@
         "secondary_cta_url": "/pages/private-clients",
         "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
       }
+    },
+    "reviews": {
+      "type": "google-reviews-strip",
+      "settings": {
+        "eyebrow": "Client Words",
+        "title": "Loved in New York",
+        "intro": "Real appointments, real pieces — read what clients say after working with Laura.",
+        "embed_id": "25387276",
+        "cta_label": "See all reviews",
+        "cta_url": "/pages/google-reviews"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
+            "author": "Alexandra K.",
+            "product_name": "Private consultation"
+          }
+        },
+        "t2": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
+            "author": "Catherine M.",
+            "product_name": "Tennis bracelet"
+          }
+        },
+        "t3": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
+            "author": "Victoria S.",
+            "product_name": "Peaceful Diamonds"
+          }
+        }
+      },
+      "block_order": ["t1", "t2", "t3"],
+      "settings": {
+        "eyebrow": "What Our Clients Say",
+        "title": "Testimonials"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "title": "Join the Inner Circle",
+        "description": "Sign up for 10% off your first jewelry purchase — code LMNYWELCOME, watches excluded — plus new arrivals and private viewings.",
+        "placeholder": "Your email address",
+        "button_text": "Unlock 10% off",
+        "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
+      }
     }
   },
   "order": [
@@ -162,6 +217,9 @@
     "preowned-maison",
     "peaceful-diamonds",
     "private-clients",
+    "reviews",
+    "testimonials",
+    "newsletter",
     "closing-cta"
   ]
 }

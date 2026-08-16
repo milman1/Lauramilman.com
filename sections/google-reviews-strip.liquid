@@ -1,0 +1,73 @@
+{%- comment -%}
+  Compact Google reviews strip for homepage / shop landing.
+{%- endcomment -%}
+
+<section class="lm-reviews-strip" aria-label="Google reviews">
+  <div class="lm-reviews-strip__inner">
+    <header class="lm-reviews-strip__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="lm-reviews-strip__title">{{ section.settings.title }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="lm-reviews-strip__intro">{{ section.settings.intro }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="sk-ww-google-reviews" data-embed-id="{{ section.settings.embed_id | default: '25387276' }}"></div>
+    <script src="https://widgets.sociablekit.com/google-reviews/widget.js" async defer></script>
+
+    {%- if section.settings.cta_label != blank -%}
+      <a class="btn btn--gold" href="{{ section.settings.cta_url | default: '/pages/google-reviews' }}">
+        {{ section.settings.cta_label }}
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .lm-reviews-strip {
+    background: var(--warm-white, #FDFAF6);
+    padding: 4.5rem 0;
+  }
+  .lm-reviews-strip__inner {
+    max-width: var(--container-max, 1200px);
+    margin: 0 auto;
+    padding: 0 var(--container-padding, 1.5rem);
+    text-align: center;
+  }
+  .lm-reviews-strip__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 400;
+    margin: 0.35rem 0 0.75rem;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-reviews-strip__intro {
+    max-width: 560px;
+    margin: 0 auto 2rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    color: var(--text-muted, #8A8070);
+  }
+  .lm-reviews-strip .btn { margin-top: 1.5rem; }
+</style>
+
+{% schema %}
+{
+  "name": "Google reviews strip",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Client Words" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Loved in New York" },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "Real clients, real appointments — read what women say after working with Laura."
+    },
+    { "type": "text", "id": "embed_id", "label": "SociableKit embed ID", "default": "25387276" },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "See all reviews" },
+    { "type": "url", "id": "cta_url", "label": "CTA link" }
+  ],
+  "presets": [{ "name": "Google reviews strip" }]
+}
+{% endschema %}
