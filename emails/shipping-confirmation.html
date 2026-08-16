@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your piece is on the way</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F0E8;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F0E8;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+          <tr>
+            <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></div>
+              <div style="margin-top:8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 36px 28px;text-align:center;">
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#C9A050;">Shipped &amp; insured</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#2C1810;">Your piece is on the way</h1>
+              <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">{{ first_name | default: "Hello" }} — it left our workshop fully insured, tracked, and signature-required. Keep the packaging until you are sure; jewelry returns are 14 days, watches are exchange only.</p>
+              <a href="{{ tracking_url | default: 'https://www.lauramilman.com/account' }}" style="display:inline-block;padding:14px 28px;background:#1E1109;color:#FAF6F0;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;">Track shipment</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
