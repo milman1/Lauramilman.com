@@ -1,0 +1,27 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "h-open": { "type": "heading", "settings": { "text": "Power dressing is a jewelry problem" } },
+        "t-open": { "type": "text", "settings": { "text": "<p>The suit is easy. The jewelry is where New York women give themselves away — too little and you look unfinished in a boardroom; too much and you look like you dressed for a gala at noon. Corporate women here need a weekday uniform that survives a 12pm lunch in Midtown, a 4pm deck, and a 7pm drink without a costume change.</p>" } },
+        "h-ears": { "type": "heading", "settings": { "text": "1. Studs that read on camera" } },
+        "t-ears": { "type": "text", "settings": { "text": "<p>Zoom still exists. Tiny specks disappear; chandelier drops look like you are presenting from a party. A round or emerald-cut stud with presence — lab-grown is how you get the size without the budget fight — is the one piece partners notice without commenting on.</p>" } },
+        "h-neck": { "type": "heading", "settings": { "text": "2. One line at the collarbone" } },
+        "t-neck": { "type": "text", "settings": { "text": "<p>A tennis or station necklace under an open collar is the corporate equivalent of good stationery. It finishes a white shirt. It does not compete with a statement lapel. If you only buy one piece this quarter, make it this — natural or Peaceful Diamonds, so long as the set is tight and the metal matches your other daily gold.</p>" } },
+        "h-hands": { "type": "heading", "settings": { "text": "3. Rings you can type in" } },
+        "t-hands": { "type": "text", "settings": { "text": "<p>A stack of slim bands, or one stone that sits low. High-profile cocktail rings belong at Bemelmans, not on a trackpad. If you are signing anything, the jewelry should still look like you when your hands are on the table.</p>" } },
+        "h-lunch": { "type": "heading", "settings": { "text": "The Midtown lunch test" } },
+        "t-lunch": { "type": "text", "settings": { "text": "<p>Before you buy, picture The Grill, a corner table at The Modern, or a hotel dining room off Park. If the piece would embarrass you across from a client — too loud, too bridal, too much branding — skip it. Laura's rule in the Diamond District was always the same: buy once, wear constantly, hand it down.</p>" } },
+        "cta": { "type": "cta", "settings": { "label": "Shop the weekday edit", "link": "/collections/earrings" } }
+      },
+      "block_order": ["h-open", "t-open", "h-ears", "t-ears", "h-neck", "t-neck", "h-hands", "t-hands", "h-lunch", "t-lunch", "cta"],
+      "settings": {
+        "eyebrow": "The NYC Edit · For Corporate Women",
+        "title": "Power Dressing Jewelry for New York",
+        "intro": "What to wear from the boardroom to a Midtown lunch — a uniform that does not come off when the jacket does."
+      }
+    }
+  },
+  "order": ["main"]
+}

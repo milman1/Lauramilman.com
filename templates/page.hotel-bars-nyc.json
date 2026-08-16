@@ -1,0 +1,29 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "h-open": { "type": "heading", "settings": { "text": "Close the week somewhere with a ceiling" } },
+        "t-open": { "type": "text", "settings": { "text": "<p>Hotel bars are where New York corporate women actually meet: a client in from Chicago, a friend who will not do another noisy cocktail den, a date that needs a reservation and an exit. The room does half the work. Your jewelry should not try to do the other half too loudly.</p>" } },
+        "h-king": { "type": "heading", "settings": { "text": "The King Cole Bar — St. Regis" } },
+        "t-king": { "type": "text", "settings": { "text": "<p>The Maxfield Parrish mural, the Bloody Mary origin story, Midtown at its most composed. This is estate jewelry territory — a signed clip, old gold, a watch you would actually get serviced. If you are wearing lab-grown, keep the design classic so it sits in the room instead of announcing a category.</p>" } },
+        "h-bem": { "type": "heading", "settings": { "text": "Bemelmans — Carlyle" } },
+        "t-bem": { "type": "text", "settings": { "text": "<p>Covered in the after-work guide for a reason. It is still the UES hotel bar that makes a Thursday feel like an occasion. Bring the piece you would wear to a black-tie that starts at 8 and a car that has to make it downtown after.</p>" } },
+        "h-nomad": { "type": "heading", "settings": { "text": "The Nomad Bar — when downtown is the point" } },
+        "t-nomad": { "type": "text", "settings": { "text": "<p>If your office has drifted south, this is the grown hotel bar that still feels current. Hoops, a lariat, a tennis line — jewelry with a little more swing than Midtown requires. Still not a festival.</p>" } },
+        "h-mark": { "type": "heading", "settings": { "text": "The Mark — when the dinner is on the Upper East Side" } },
+        "t-mark": { "type": "text", "settings": { "text": "<p>Fashion-adjacent without being costume. A single important stone — pendant or ring — and clean metal. This is where you wear the piece you bought because you closed something, not because a trend cycle told you to.</p>" } },
+        "h-close": { "type": "heading", "settings": { "text": "How to leave" } },
+        "t-close": { "type": "text", "settings": { "text": "<p>Hotel bars are designed so you can go upstairs, go home, or go on. Jewelry should survive all three: insured, comfortable, and still yours in the morning. If you want a second opinion before you buy the piece for that room, book a call — that is what the private desk is for.</p>" } },
+        "cta": { "type": "cta", "settings": { "label": "Book a consultation", "link": "/pages/private-clients" } }
+      },
+      "block_order": ["h-open", "t-open", "h-king", "t-king", "h-bem", "t-bem", "h-nomad", "t-nomad", "h-mark", "t-mark", "h-close", "t-close", "cta"],
+      "settings": {
+        "eyebrow": "The NYC Edit · For Corporate Women",
+        "title": "The Hotel Bar Edit",
+        "intro": "Where to take a client, a friend, or yourself on a Thursday — and the jewelry that belongs under those ceilings."
+      }
+    }
+  },
+  "order": ["main"]
+}
