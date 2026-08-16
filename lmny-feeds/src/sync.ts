@@ -14,7 +14,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
-import { HoursClient, mapConcurrent } from './feeds/hours.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { diffCatalog, kindForHandle, PRICING_REVIEW_HOLD_REASONS, skipPricingReviewArchives } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
@@ -35,7 +34,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable, WatchItem } from './types.js';
+import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
 const OUT_DIR = 'out';
@@ -50,8 +49,6 @@ const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
   // The merchant's own collection, not the duplicate the sync used to create.
   watch: '/collections/time-pieces',
 };
-/** Known-good reference for the Hours single-reference diagnostic. */
-const HOURS_PROBE = { brand: 'Rolex', reference: '126710BLRO' };
 /**
  * Watch videos re-hosted per run. Each is a full download plus a staged
  * upload, so an unbounded pass would blow past the hourly cadence the way 83
@@ -83,7 +80,7 @@ function requireEnv(name: string): string {
  * fresh 24h token at runtime. Stores migrated to the new dev platform have
  * no static token, so the client-credentials pair is the supported path.
  */
-const BASE_REQUIRED_ENV = ['SHOPIFY_STORE_DOMAIN', 'BELGIUMDIA_API_KEY', 'HOURS_API_URL', 'HOURS_API_KEY'];
+const BASE_REQUIRED_ENV = ['SHOPIFY_STORE_DOMAIN', 'BELGIUMDIA_API_KEY'];
 
 function hasShopifyAuth(): boolean {
   return Boolean(
@@ -156,20 +153,6 @@ async function main() {
     notes.push(msg);
   }
 
-  // Hours single-reference diagnostic (dry-run only): tells apart a 401/404/
-  // no_comp cause without needing the watch feed enabled.
-  let hoursProbe: SyncReport['hoursProbe'];
-  if (flags.dryRun) {
-    try {
-      hoursProbe = await new HoursClient().probe(HOURS_PROBE.brand, HOURS_PROBE.reference);
-      console.log(
-        `Hours probe [${HOURS_PROBE.reference}]: ${hoursProbe.networkError ? `network error ${hoursProbe.networkError}` : `HTTP ${hoursProbe.status}, mid ${hoursProbe.parsedMid ?? 'none'}`} @ ${hoursProbe.url}`,
-      );
-    } catch (err) {
-      console.error(`Hours probe threw: ${err instanceof Error ? err.message : String(err)}`);
-    }
-  }
-
   // 1. Fetch + normalize the enabled feeds. A feed that fails to fetch is
   //    excluded from archive decisions so an outage can't archive its segment.
   //    A feed not in SYNC_FEEDS is skipped entirely (never fetched).
@@ -212,39 +195,22 @@ async function main() {
     }
   }
 
-  // 2. Price. Watches: cost-tier markup (watchPricing.ts). Comp mid is
-  //    review-gate only. Aftermarket already held out at normalize. Missing
-  //    cost or retail >40% under mid → pricing review (no auto price write).
+  // 2. Price. Watches: cost-tier markup (watchPricing.ts). No Hours mid.
+  //    Aftermarket already held out at normalize. Missing cost → pricing
+  //    review (no auto price write).
   const publishable: Publishable[] = [];
-  const hours = new HoursClient();
   const watchLines: WatchLine[] = [];
-  let compsChecked = 0;
-  let compHits = 0;
-
-  const watches = items.filter((i): i is WatchItem => i.kind === 'watch');
-  const compByRef = new Map(
-    (
-      await mapConcurrent(watches, 4, async (w) => {
-        const comp = await hours.compFor(w.brand, w.reference);
-        return [w.stockRef, comp] as const;
-      })
-    ),
-  );
 
   for (const item of items) {
     let result;
     if (item.kind !== 'watch') {
       result = item.kind === 'natural' ? priceNatural(item) : priceLab(item);
     } else {
-      const comp = compByRef.get(item.stockRef) ?? null;
-      compsChecked++;
-      if (comp) compHits++;
-      result = priceWatch(item, comp);
+      result = priceWatch(item);
       watchLines.push({
         stockRef: item.stockRef,
         title: titleFor(item),
         costUsd: item.costUsd,
-        compMidUsd: comp?.midUsd ?? null,
         retailUsd: result.ok ? result.priced.retailUsd : null,
         holdReason: result.ok ? null : result.hold.reason,
       });
@@ -566,7 +532,6 @@ async function main() {
     finishedAt: new Date().toISOString(),
     enabledFeeds: [...enabledFeeds],
     feeds,
-    hoursProbe,
     holdHistogram: holdHistogram(holds),
     naturalMargins: naturalMarginStats(publishable, holds),
     labPricing: (() => {
@@ -596,12 +561,7 @@ async function main() {
         retailUsd: p.priced.retailUsd,
         marginPct: p.priced.marginPct,
       })),
-    watchComps: {
-      checked: compsChecked,
-      hits: compHits,
-      hitRate: compsChecked > 0 ? compHits / compsChecked : null,
-      lines: watchLines,
-    },
+    watchPricing: { lines: watchLines },
     decisions: summary,
     writeErrors,
     mediaQuarantined,
@@ -617,7 +577,7 @@ async function main() {
   // Same shape as the earlier watch backfill's needs_review.csv — one row per
   // watch that must not auto-publish a new price.
   if (pricingReviewHolds.length > 0) {
-    const header = 'stock_ref,reason,detail,title,cost_usd,comp_mid_usd\n';
+    const header = 'stock_ref,reason,detail,title,cost_usd\n';
     const lines = pricingReviewHolds.map((h) => {
       const line = watchLines.find((w) => w.stockRef === h.stockRef);
       const cells = [
@@ -626,7 +586,6 @@ async function main() {
         h.detail ?? '',
         line?.title ?? '',
         line?.costUsd ?? '',
-        line?.compMidUsd ?? '',
       ].map((c) => csvEscape(String(c)));
       return cells.join(',');
     });

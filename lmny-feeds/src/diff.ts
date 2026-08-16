@@ -81,10 +81,10 @@ export function diffCatalog(
 }
 
 /** Holds that must not archive or overwrite an existing Shopify price. */
-export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_needs_review', 'watch_no_cost']);
+export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost']);
 
 /**
- * `needs_review` / `no_cost` watches stay buyable at their current price.
+ * `no_cost` watches stay buyable at their current price.
  * Convert a would-be `held_in_feed` archive into a skip so sync can tag
  * `pricing-review` without touching the variant.
  */

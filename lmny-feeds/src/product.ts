@@ -10,7 +10,7 @@ import {
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
-/** Tag for watches held out of auto-pricing (needs_review / no_cost). */
+/** Tag for watches held out of auto-pricing (missing supplier cost). */
 export const PRICING_REVIEW_TAG = WATCH.reviewTag;
 /** Tag for watches whose brand is outside the curated WATCH_BRANDS list. */
 export const OTHER_WATCH_BRAND_TAG = 'other-watch-brand';
@@ -32,7 +32,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 10;
+export const PRODUCT_SCHEMA_VERSION = 11;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -200,16 +200,6 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     if (item.cut) fields.push({ namespace: c, key: 'cut', type: 'single_line_text_field', value: item.cut });
   } else {
     fields.push({ namespace: ns, key: 'is_naked', type: 'boolean', value: String(item.isNaked) });
-    if (priced.compMidUsd !== undefined) {
-      fields.push({ namespace: ns, key: 'comp_mid_usd', type: 'number_decimal', value: priced.compMidUsd.toFixed(2) });
-    }
-    // Audit trail only — retail is cost-tier markup; mid never sets price.
-    if (priced.compLowUsd !== undefined) {
-      fields.push({ namespace: ns, key: 'comp_low_usd', type: 'number_decimal', value: priced.compLowUsd.toFixed(2) });
-    }
-    if (priced.compAsOf) {
-      fields.push({ namespace: ns, key: 'comp_as_of', type: 'date', value: priced.compAsOf });
-    }
     const listing = watchListingFor(item);
     if (listing) {
       for (const mf of listing.metafields) {
@@ -287,7 +277,6 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     seoDescription: listing?.seoDescription ?? null,
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
-    compMidUsd: priced.compMidUsd ?? null,
     images: item.imageUrls,
     videos: item.videoUrls,
     certNumber: item.kind !== 'watch' ? (item.certNumber ?? null) : null,

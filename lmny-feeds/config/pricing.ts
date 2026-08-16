@@ -83,18 +83,17 @@ export const LAB_GUARDS = {
 
 /**
  * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
+ * Hours comps are not used. Aftermarket rows are excluded at normalize.
+ * Missing cost → hold with tag `pricing-review`; existing Shopify price
+ * is left alone.
  *
- * Comps are audit / review-gate only — never enter the retail calculation.
- * Aftermarket rows are excluded at normalize (and again in the pricing
- * function if the flag is passed). Missing cost or retail >40% under mid
- * → hold with tag `pricing-review`; existing Shopify price is left alone.
- *
- * Historical note: through 2026-08 live prices were round(comp_mid × 0.97),
- * which could land under cost (e.g. some Audemars Piguet rows). Replaced by
- * cost-tier markup on 2026-08-14.
+ *   Under $5,000          1.30×  round up to $100
+ *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
+ *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
+ *   Above $40,000         1.08×  round up to $100, min $44,800
  */
 export const WATCH = {
-  /** Tag applied when pricing returns needs_review or no_cost. */
+  /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
 } as const;
 
