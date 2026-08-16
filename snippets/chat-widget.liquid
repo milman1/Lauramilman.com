@@ -3,13 +3,21 @@
   Include in theme.liquid before </body>: {% render 'chat-widget' %}
 {% endcomment %}
 
-<div class="chat-panel" id="chat-panel" aria-label="Live chat" role="dialog" aria-hidden="true">
+<div
+  class="chat-panel"
+  id="chat-panel"
+  aria-label="Live chat"
+  role="dialog"
+  aria-hidden="true"
+  data-customer-email="{{ customer.email | escape }}"
+  data-shop-name="{{ shop.name | escape }}"
+>
   <div class="chat-panel__header">
-    <span class="chat-panel__header-title">{{ shop.name }}</span>
+    <span class="chat-panel__header-title">Private Client Desk</span>
     <button class="chat-panel__close" aria-label="Close chat">&times;</button>
   </div>
   <div class="chat-panel__body" id="chat-body">
-    <div class="chat-msg chat-msg--bot">Welcome to {{ shop.name }}. How can I assist you today?</div>
+    <div class="chat-msg chat-msg--bot">Welcome to {{ shop.name }}. Ask about a piece, availability, or an appointment — we reply here.</div>
   </div>
   <div class="chat-panel__input-row">
     <label for="chat-input" class="visually-hidden">Message</label>
@@ -26,6 +34,15 @@
       </svg>
     </button>
   </div>
+
+  {%- form 'contact', id: 'ChatContactForm', class: 'chat-contact-form' -%}
+    <input type="hidden" name="contact[product]" id="ChatProduct" value="">
+    <input type="hidden" name="contact[product_url]" id="ChatProductUrl" value="">
+    <label class="visually-hidden" for="ChatEmail">Email</label>
+    <input id="ChatEmail" type="email" name="contact[email]" value="{{ customer.email }}" autocomplete="email">
+    <label class="visually-hidden" for="ChatBody">Message</label>
+    <textarea id="ChatBody" name="contact[body]"></textarea>
+  {%- endform -%}
 </div>
 
 <button class="chat-trigger" id="chat-trigger" aria-label="Open chat" aria-controls="chat-panel" aria-expanded="false">
@@ -70,6 +87,7 @@
     display: flex;
     flex-direction: column;
     z-index: 9999;
+    overflow: hidden;
     opacity: 0;
     visibility: hidden;
     transform: translateY(16px);
@@ -171,6 +189,14 @@
   }
   .chat-send-btn:hover {
     background: var(--color-gold-light, #E2C27A);
+  }
+
+  .chat-contact-form {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
   }
 
   @media (max-width: 480px) {

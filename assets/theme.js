@@ -270,30 +270,37 @@ function formatMoney(cents) {
   var input = panel.querySelector('.chat-input');
   var sendBtn = panel.querySelector('.chat-send-btn');
   var body = panel.querySelector('.chat-panel__body');
+  var form = document.getElementById('ChatContactForm');
+  var emailField = document.getElementById('ChatEmail');
+  var bodyField = document.getElementById('ChatBody');
+  var productField = document.getElementById('ChatProduct');
+  var productUrlField = document.getElementById('ChatProductUrl');
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var productTitle = '';
+  var productUrl = '';
+  var question = '';
+  var step = 'question';
+  var submitting = false;
 
-  trigger.addEventListener('click', function () {
-    var isOpen = panel.classList.toggle('open');
-    panel.setAttribute('aria-hidden', !isOpen);
-    trigger.setAttribute('aria-expanded', isOpen);
-    if (isOpen && input) input.focus();
-  });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function () {
-      panel.classList.remove('open');
-      panel.setAttribute('aria-hidden', 'true');
-      trigger.setAttribute('aria-expanded', 'false');
-    });
+  function knownEmail() {
+    var fromField = emailField && emailField.value ? emailField.value.trim() : '';
+    if (fromField && emailRe.test(fromField)) return fromField;
+    var fromPanel = (panel.getAttribute('data-customer-email') || '').trim();
+    if (fromPanel && emailRe.test(fromPanel)) return fromPanel;
+    return '';
   }
 
-  function sendMessage() {
-    if (!input || !input.value.trim()) return;
-    appendMessage(input.value.trim(), true);
-    input.value = '';
+  function openPanel() {
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    trigger.setAttribute('aria-expanded', 'true');
+    if (input) input.focus();
+  }
 
-    setTimeout(function () {
-      appendMessage('Thank you for your message. A member of our team will be with you shortly.', false);
-    }, 1000);
+  function closePanel() {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    trigger.setAttribute('aria-expanded', 'false');
   }
 
   function appendMessage(text, isUser) {
@@ -305,12 +312,98 @@ function formatMoney(cents) {
     body.scrollTop = body.scrollHeight;
   }
 
+  function openWithProduct(opts) {
+    opts = opts || {};
+    productTitle = opts.productTitle || '';
+    productUrl = opts.productUrl || '';
+    question = '';
+    step = 'question';
+    if (productField) productField.value = productTitle;
+    if (productUrlField) productUrlField.value = productUrl;
+    openPanel();
+    if (productTitle) {
+      appendMessage('You\'re asking about ' + productTitle + '. What would you like to know?', false);
+      if (input) input.placeholder = 'Ask about this piece...';
+    }
+  }
+
+  function submitInquiry(email, message) {
+    if (!form || submitting) return;
+    submitting = true;
+    if (emailField) emailField.value = email;
+    var lines = [];
+    if (productTitle) lines.push('Product: ' + productTitle);
+    if (productUrl) lines.push('URL: ' + productUrl);
+    lines.push('');
+    lines.push(message);
+    if (bodyField) bodyField.value = lines.join('\n');
+
+    var action = form.getAttribute('action') || '/contact';
+    fetch(action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'text/html' }
+    }).then(function () {
+      appendMessage('Thank you — the desk has this, including the piece you asked about. We\'ll reply within one business day.', false);
+      step = 'done';
+      if (input) input.placeholder = 'Type a message...';
+    }).catch(function () {
+      appendMessage('We couldn\'t send that just now. Email hello@lauramilman.com and we\'ll pick it up.', false);
+      step = 'question';
+    }).finally(function () {
+      submitting = false;
+    });
+  }
+
+  function sendMessage() {
+    if (!input || submitting) return;
+    var text = input.value.trim();
+    if (!text) return;
+    appendMessage(text, true);
+    input.value = '';
+
+    if (step === 'done') {
+      appendMessage('We have your note. For anything else, keep typing — or book a call from the product page.', false);
+      return;
+    }
+
+    if (step === 'email') {
+      if (!emailRe.test(text)) {
+        appendMessage('Please share an email address so we can reply.', false);
+        return;
+      }
+      submitInquiry(text, question);
+      return;
+    }
+
+    question = text;
+    var email = knownEmail();
+    if (email) {
+      submitInquiry(email, question);
+      return;
+    }
+    step = 'email';
+    appendMessage('What\'s the best email to reach you?', false);
+    if (input) input.placeholder = 'you@email.com';
+  }
+
+  trigger.addEventListener('click', function () {
+    if (panel.classList.contains('open')) closePanel();
+    else openPanel();
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
   if (sendBtn) sendBtn.addEventListener('click', sendMessage);
   if (input) {
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') sendMessage();
     });
   }
+
+  window.lmChat = {
+    open: openWithProduct
+  };
 })();
 
 /* === Newsletter Form === */
