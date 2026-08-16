@@ -11,6 +11,9 @@
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'product-form-' | append: section.id
   assign crumb_collection = collection | default: product.collections.first
+-%}
+{%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- liquid
 
   # ── Badge pills from tags ──
   assign status_pill = ''
@@ -243,7 +246,15 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     {%- endcase -%}
                   </span>
-                  <span class="pdp-trust__label">{{ block.settings.label }}</span>
+                  <span class="pdp-trust__label">
+                    {%- if block.settings.icon == 'returns' and is_watch == 'true' -%}
+                      Exchanges Only
+                    {%- elsif block.settings.icon == 'returns' -%}
+                      14-Day Returns
+                    {%- else -%}
+                      {{ block.settings.label }}
+                    {%- endif -%}
+                  </span>
                 </div>
               {%- endif -%}
             {%- endfor -%}
@@ -320,6 +331,8 @@
         </div>
 
       {%- endform -%}
+
+      {% render 'product-inquiry', product: product %}
 
       <!-- 8. Specifications — only rows with values; whole block hides when empty -->
       {%- if spec_rows != blank -%}
@@ -728,7 +741,7 @@
       "blocks": [
         { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
         { "type": "trust_item", "settings": { "icon": "warranty", "label": "Lifetime Warranty" } },
-        { "type": "trust_item", "settings": { "icon": "returns", "label": "30-Day Returns" } }
+        { "type": "trust_item", "settings": { "icon": "returns", "label": "14-Day Returns" } }
       ]
     }
   ]

@@ -1,0 +1,31 @@
+{
+  "sections": {
+    "main": {
+      "type": "page-editorial",
+      "blocks": {
+        "h-why": { "type": "heading", "settings": { "text": "The 6:30pm Problem" } },
+        "t-why": { "type": "text", "settings": { "text": "<p>You did not leave the office to start over. You left to close the week — a client drink, a friend from another floor, maybe a date that has to look accidental. The bar has to take a blazer seriously and still feel like New York after dark. The jewelry has to do the same: already on you from 9am, still right at 8pm.</p><p>This is the Laura Milman edit of after-work rooms for corporate women in Manhattan — and the pieces that belong in them.</p>" } },
+        "h-bem": { "type": "heading", "settings": { "text": "The Bar Room at The Modern — Midtown" } },
+        "t-bem": { "type": "text", "settings": { "text": "<p>Directly behind MoMA, this is the civilised alternative to a tourist hotel lobby. Partners take clients here because the lighting is kind and nobody is shouting. Wear a slim tennis bracelet or quiet huggies — anything that reads as considered, not costume. If you are meeting someone new, skip the statement necklace; let the room stay the statement.</p>" } },
+        "h-bemelmans": { "type": "heading", "settings": { "text": "Bemelmans Bar — Upper East Side" } },
+        "t-bemelmans": { "type": "text", "settings": { "text": "<p>Piano, murals, a martini that still means something. This is the bar you book when the week was brutal and you want to remember you live in New York on purpose. Estate gold, a signed clip, or lab-grown studs with real presence all work. You are dressing for the room, not for Instagram.</p>" } },
+        "h-porters": { "type": "heading", "settings": { "text": "The Campbell — Grand Central" } },
+        "t-porters": { "type": "text", "settings": { "text": "<p>The commute is the appointment. If your office is in Midtown, this is the honest after-work choice: one drink under the ceiling, then the train. Keep jewelry close to the body — a pendant you already wore to the office, a stack of slim rings. Nothing that snags a laptop bag.</p>" } },
+        "h-swill": { "type": "heading", "settings": { "text": "The Polo Bar — Midtown East" } },
+        "t-swill": { "type": "text", "settings": { "text": "<p>Ralph Lauren's clubhouse for people who still dress for dinner. Jackets stay on. Jewelry should look inherited even if it is new — that is the Peaceful Diamonds trick: certified stones, quiet metal, no apology for buying lab-grown when the cut is excellent.</p>" } },
+        "h-soho": { "type": "heading", "settings": { "text": "Dante West Village — When the meeting was downtown" } },
+        "t-soho": { "type": "text", "settings": { "text": "<p>If your last call was in Hudson Square or the Meatpacking District, do not drag everyone back to Midtown. Dante is bright enough to still look like yourself. Hoops, a station necklace, a single cocktail ring — jewelry that photographs well in daylight because you might still be outside at 7.</p>" } },
+        "h-rules": { "type": "heading", "settings": { "text": "The jewelry rule for after-work" } },
+        "t-rules": { "type": "text", "settings": { "text": "<p>If you would take it off to type, it does not belong at the office, and it will not magically work at 6:30. Choose pieces you can wear through a full day: studs, a tennis line, a pendant at the collarbone, a watch only if it is actually your watch. Then book the bar that matches the piece, not the other way around.</p>" } },
+        "cta": { "type": "cta", "settings": { "label": "Shop jewelry for the week", "link": "/collections/all" } }
+      },
+      "block_order": ["h-why", "t-why", "h-bem", "t-bem", "h-bemelmans", "t-bemelmans", "h-porters", "t-porters", "h-swill", "t-swill", "h-soho", "t-soho", "h-rules", "t-rules", "cta"],
+      "settings": {
+        "eyebrow": "The NYC Edit · For Corporate Women",
+        "title": "Best After-Work Bars in New York",
+        "intro": "Where to go when the office lets out — and what to wear so you never look like you changed for him, the client, or the room."
+      }
+    }
+  },
+  "order": ["main"]
+}

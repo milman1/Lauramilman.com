@@ -5,17 +5,19 @@
       "blocks": {
         "h-shipping": { "type": "heading", "settings": { "text": "Shipping" } },
         "t-shipping": { "type": "text", "settings": { "text": "<p>Every order ships free within the United States — fully insured, tracked, and signature-required. In-stock pieces leave our workshop within 2–3 business days. Bespoke commissions and specially sourced stones are quoted with their own timeline before you commit.</p><p>International shipping is available on request; duties and taxes are the recipient's responsibility.</p>" } },
-        "h-returns": { "type": "heading", "settings": { "text": "Returns & Exchanges" } },
-        "t-returns": { "type": "text", "settings": { "text": "<p>Unworn pieces in their original condition and packaging may be returned within 30 days of delivery for a full refund, or exchanged at any time within that window. Contact us for a prepaid, insured return label — never ship jewelry back uninsured.</p><p>Bespoke commissions, engraved pieces, and specially sourced stones are final sale, which we will always state clearly before purchase.</p>" } },
+        "h-returns": { "type": "heading", "settings": { "text": "Jewelry Returns & Exchanges" } },
+        "t-returns": { "type": "text", "settings": { "text": "<p>Unworn jewelry in original condition and packaging may be returned or exchanged within <strong>14 days of delivery</strong>. Contact us for a prepaid, insured return label — never ship jewelry back uninsured.</p><p>Bespoke commissions, engraved pieces, and specially sourced stones are final sale, which we will always state clearly before purchase.</p>" } },
+        "h-watches": { "type": "heading", "settings": { "text": "Watches & Timepieces" } },
+        "t-watches": { "type": "text", "settings": { "text": "<p>Watches and timepieces may be <strong>exchanged only</strong> — they are not eligible for refunds. The exchange window is 14 days from delivery. The piece must be unworn, with all original papers, box, links, and tags. Contact us before shipping anything back so we can send a prepaid, insured label.</p>" } },
         "h-service": { "type": "heading", "settings": { "text": "Repairs & Lifetime Service" } },
         "t-service": { "type": "text", "settings": { "text": "<p>Every piece carries a lifetime warranty against manufacturing defects, with complimentary annual cleaning and inspection. Resizing is included once on most rings.</p>" } },
         "cta-help": { "type": "cta", "settings": { "label": "Start a Return or Ask a Question", "link": "/pages/private-clients" } }
       },
-      "block_order": ["h-shipping", "t-shipping", "h-returns", "t-returns", "h-service", "t-service", "cta-help"],
+      "block_order": ["h-shipping", "t-shipping", "h-returns", "t-returns", "h-watches", "t-watches", "h-service", "t-service", "cta-help"],
       "settings": {
         "eyebrow": "The Practical Details",
         "title": "Shipping & Returns",
-        "intro": "Insured shipping, honest returns, and service for the life of the piece."
+        "intro": "Insured shipping, a 14-day jewelry return window, and exchanges only on watches."
       }
     }
   },

@@ -1,0 +1,24 @@
+{%- comment -%}
+  Prints `true` or `false` for whether a product is a watch/timepiece.
+  Usage:
+    {% capture is_watch %}{% render 'product-is-watch', product: product %}{% endcapture %}
+    {% if is_watch == 'true' %}
+{%- endcomment -%}
+{%- liquid
+  assign type_l = product.type | downcase
+  assign title_l = product.title | downcase
+  assign vendor_l = product.vendor | downcase
+  assign tags_l = product.tags | join: ' ' | downcase
+  assign watch = false
+
+  if type_l contains 'watch' or type_l contains 'timepiece' or type_l contains 'clock'
+    assign watch = true
+  elsif tags_l contains 'watch' or tags_l contains 'timepiece' or tags_l contains 'time-piece'
+    assign watch = true
+  elsif title_l contains 'rolex' or title_l contains 'submariner' or title_l contains 'datejust' or title_l contains 'daytona' or title_l contains 'gmt master' or title_l contains 'day-date' or title_l contains 'sea dweller' or title_l contains 'yacht-master' or title_l contains 'yachtmaster' or title_l contains 'explorer' or title_l contains 'sky-dweller' or title_l contains 'skydweller' or title_l contains 'oyster perpetual' or title_l contains 'royal oak' or title_l contains 'nautilus' or title_l contains 'aquanaut'
+    assign watch = true
+  elsif vendor_l == 'rolex' or vendor_l == 'patek philippe' or vendor_l == 'audemars piguet' or vendor_l == 'richard mille' or vendor_l == 'omega' or vendor_l == 'franck muller'
+    assign watch = true
+  endif
+-%}
+{%- if watch -%}true{%- else -%}false{%- endif -%}

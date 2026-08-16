@@ -1,0 +1,80 @@
+{%- comment -%}
+  Product reviews: native Shopify Product Reviews (spr) when present,
+  plus a Google reviews CTA so the page is never empty.
+{%- endcomment -%}
+
+<section class="pdp-reviews" aria-label="Client reviews">
+  <div class="pdp-reviews__inner">
+    <header class="pdp-reviews__header">
+      <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      <h2 class="pdp-reviews__title">{{ section.settings.title }}</h2>
+    </header>
+
+    {%- if product.metafields.reviews.rating.value != blank -%}
+      <p class="pdp-reviews__summary">
+        {{ product.metafields.reviews.rating.value.rating | round: 1 }} / {{ product.metafields.reviews.rating.value.scale_max }}
+        · {{ product.metafields.reviews.rating_count }} {{ product.metafields.reviews.rating_count | pluralize: 'review', 'reviews' }}
+      </p>
+    {%- endif -%}
+
+    <div id="shopify-product-reviews" data-id="{{ product.id }}">
+      {{ product.metafields.spr.reviews }}
+    </div>
+
+    {%- if product.metafields.spr.reviews == blank and product.metafields.reviews.rating_count == blank -%}
+      <p class="pdp-reviews__empty">{{ section.settings.empty_text }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank -%}
+      <a class="btn btn--gold" href="{{ section.settings.cta_url | default: '/pages/google-reviews' }}">
+        {{ section.settings.cta_label }}
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .pdp-reviews {
+    background: var(--cream, #FAF6F0);
+    padding: 4rem 0;
+  }
+  .pdp-reviews__inner {
+    max-width: var(--container-max, 1200px);
+    margin: 0 auto;
+    padding: 0 var(--container-padding, 1.5rem);
+    text-align: center;
+  }
+  .pdp-reviews__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 400;
+    margin: 0.4rem 0 1.25rem;
+    color: var(--text-dark, #2C1810);
+  }
+  .pdp-reviews__summary,
+  .pdp-reviews__empty {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    color: var(--text-muted, #8A8070);
+    margin-bottom: 1.5rem;
+  }
+  .pdp-reviews .btn { margin-top: 1.25rem; }
+</style>
+
+{% schema %}
+{
+  "name": "Product reviews",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Client Words" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Reviews" },
+    {
+      "type": "textarea",
+      "id": "empty_text",
+      "label": "Empty state",
+      "default": "Be the first to review this piece, or read what clients say on Google."
+    },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Read Google Reviews" },
+    { "type": "url", "id": "cta_url", "label": "CTA link" }
+  ],
+  "presets": [{ "name": "Product reviews" }]
+}
+{% endschema %}

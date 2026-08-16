@@ -13,7 +13,7 @@
 
     <div class="lm-newsletter__form-wrap">
       {%- form 'customer', id: 'lm-newsletter-form', class: 'lm-newsletter__form' -%}
-        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input type="hidden" name="contact[tags]" value="newsletter,welcome10">
         <div class="lm-newsletter__field">
           <input
             type="email"
@@ -174,7 +174,7 @@
       "type": "textarea",
       "id": "description",
       "label": "Description",
-      "default": "Be the first to see new arrivals, receive exclusive offers, and discover rare estate pieces."
+      "default": "Sign up for 10% off your first jewelry purchase (watches excluded), new arrivals, and private viewings."
     },
     {
       "type": "text",
@@ -192,7 +192,7 @@
       "type": "text",
       "id": "success_message",
       "label": "Success message",
-      "default": "Welcome to the inner circle."
+      "default": "Welcome. Your code is LMNYWELCOME — jewelry only."
     }
   ],
   "presets": [

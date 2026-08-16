@@ -18,7 +18,7 @@
       "type": "trust-strip",
       "blocks": {
         "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
-        "trust-2": { "type": "item", "settings": { "text": "30-Day Returns" } },
+        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
         "trust-3": { "type": "item", "settings": { "text": "Authenticity Guaranteed" } },
         "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
       },

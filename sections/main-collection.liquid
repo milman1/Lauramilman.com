@@ -10,6 +10,11 @@
 
 {%- liquid
   assign navy_mode = section.settings.navy_mode
+  assign jewelry_only = false
+  if collection.handle == 'all' or collection.handle == 'all-jewelry'
+    assign jewelry_only = true
+  endif
+  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
   assign has_active_filters = false
   for filter in collection.filters
@@ -30,14 +35,34 @@
 
     <!-- SEO-loaded collection intro -->
     <header class="lm-collection__header">
-      <h1 class="lm-collection__title">{{ collection.title }}</h1>
-      {%- if collection.description != blank -%}
+      <h1 class="lm-collection__title">
+        {%- if jewelry_only -%}All Jewelry{%- else -%}{{ collection.title }}{%- endif -%}
+      </h1>
+      {%- if jewelry_only -%}
+        <div class="lm-collection__desc">
+          <p>Rings, necklaces, earrings, bracelets, and estate jewels — not watches. Timepieces are listed separately.</p>
+        </div>
+      {%- elsif collection.description != blank -%}
         <div class="lm-collection__desc">{{ collection.description }}</div>
       {%- endif -%}
     </header>
 
+    {%- if jewelry_only -%}
+      <nav class="lm-collection__chips" aria-label="Jewelry categories">
+        <span class="lm-collection__chips-label">Shop jewelry</span>
+        <a href="/collections/rings" class="lm-collection__chip">Rings</a>
+        <a href="/collections/necklaces" class="lm-collection__chip">Necklaces</a>
+        <a href="/collections/earrings" class="lm-collection__chip">Earrings</a>
+        <a href="/collections/bracelets" class="lm-collection__chip">Bracelets</a>
+        <a href="/collections/pendants-1" class="lm-collection__chip">Pendants</a>
+        <a href="/collections/engagement-rings" class="lm-collection__chip">Engagement</a>
+        <a href="/collections/vintage-jewelry" class="lm-collection__chip">Estate</a>
+        <a href="/collections/time-pieces" class="lm-collection__chip">Timepieces</a>
+      </nav>
+    {%- endif -%}
+
     <!-- Shop-by chips -->
-    {%- if section.blocks.size > 0 -%}
+    {%- if jewelry_only == false and section.blocks.size > 0 -%}
       <nav class="lm-collection__chips" aria-label="Shop by">
         {%- if section.settings.chips_label != blank -%}
           <span class="lm-collection__chips-label">{{ section.settings.chips_label }}</span>
@@ -64,7 +89,9 @@
     <!-- Toolbar -->
     <div class="lm-collection__toolbar">
       <span class="lm-collection__count" role="status">
-        {%- if paginate.pages > 1 -%}
+        {%- if jewelry_only -%}
+          Jewelry only — watches are listed under Timepieces
+        {%- elsif paginate.pages > 1 -%}
           Showing {{ paginate.current_offset | plus: 1 }}&ndash;{{ paginate.current_offset | plus: collection.products.size }} of {{ collection.products_count }} products
         {%- else -%}
           Showing {{ collection.products_count }} {{ collection.products_count | pluralize: 'product', 'products' }}
@@ -72,6 +99,7 @@
       </span>
 
       <div class="lm-collection__controls">
+        {%- unless jewelry_only -%}
         <button type="button" class="lm-collection__filter-btn" id="RefineOpen" aria-haspopup="dialog">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter &amp; Sort
@@ -88,11 +116,12 @@
             {%- endfor -%}
           </select>
         </div>
+        {%- endunless -%}
       </div>
     </div>
 
     <!-- Active filter pills -->
-    {%- if has_active_filters -%}
+    {%- if has_active_filters and jewelry_only == false -%}
       <div class="lm-collection__active" aria-label="Active filters">
         {%- for filter in collection.filters -%}
           {%- if filter.type == 'price_range' -%}
@@ -119,11 +148,34 @@
     {%- endif -%}
 
     <!-- Product grid -->
-    {%- if collection.products.size > 0 -%}
+    {%- if jewelry_only or collection.products.size > 0 -%}
       <div class="products-grid lm-collection__grid" id="productsGrid">
-        {%- for product in collection.products -%}
-          {%- render 'product-card', product: product -%}
-        {%- endfor -%}
+        {%- if jewelry_only -%}
+          {%- assign seen_ids = ',' -%}
+          {%- assign shown_count = 0 -%}
+          {%- for handle in jewelry_handles -%}
+            {%- if shown_count >= 48 -%}{% break %}{%- endif -%}
+            {%- assign src_col = collections[handle] -%}
+            {%- if src_col != blank -%}
+              {%- for product in src_col.products limit: 50 -%}
+                {%- if shown_count >= 48 -%}{% break %}{%- endif -%}
+                {%- capture watch_flag -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+                {%- assign pid = ',' | append: product.id | append: ',' -%}
+                {%- if watch_flag != 'true' -%}
+                  {%- unless seen_ids contains pid -%}
+                    {%- render 'product-card', product: product -%}
+                    {%- assign seen_ids = seen_ids | append: product.id | append: ',' -%}
+                    {%- assign shown_count = shown_count | plus: 1 -%}
+                  {%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- for product in collection.products -%}
+            {%- render 'product-card', product: product -%}
+          {%- endfor -%}
+        {%- endif -%}
       </div>
 
       <div class="lm-collection__empty lm-collection__empty--filtered" id="jewelryFilterNoResults" hidden>
@@ -134,7 +186,7 @@
       </div>
 
       <!-- Pagination -->
-      {%- if paginate.pages > 1 -%}
+      {%- if paginate.pages > 1 and jewelry_only == false -%}
         <nav class="lm-pagination" aria-label="Pagination">
           {%- if paginate.previous -%}
             <a href="{{ paginate.previous.url }}" class="lm-pagination__arrow" aria-label="Previous page">&larr;</a>
@@ -174,7 +226,9 @@
   </div>
 </section>
 
+{%- unless jewelry_only -%}
 {%- render 'filter-drawer', results: collection -%}
+{%- endunless -%}
 
 {%- endpaginate -%}
 
