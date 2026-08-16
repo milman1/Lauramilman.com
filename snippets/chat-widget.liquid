@@ -202,18 +202,23 @@
   @media (max-width: 480px) {
     .chat-panel {
       width: calc(100vw - 32px);
-      right: 16px;
-      bottom: 88px;
     }
   }
 
-  /* Sit above the mobile sticky ATC so the launcher does not cover Add to Cart */
   @media (max-width: 768px) {
+    .chat-trigger {
+      right: 16px;
+      bottom: 16px;
+    }
+    .chat-panel {
+      right: 16px;
+    }
+    /* Sit fully above the mobile sticky ATC — bar is ~72px plus safe area */
     body.has-pdp-sticky .chat-trigger {
-      bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(110px + env(safe-area-inset-bottom, 0px));
     }
     body.has-pdp-sticky .chat-panel {
-      bottom: calc(152px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(174px + env(safe-area-inset-bottom, 0px));
     }
   }
 </style>
