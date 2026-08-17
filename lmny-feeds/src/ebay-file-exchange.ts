@@ -1,9 +1,10 @@
 /**
  * eBay File Exchange helpers — LMNY
  *
- * PaymentProfileName must match Seller Hub → Business policies exactly.
- * The live US payment policy is `eBay Managed Payments (246832199020)`.
- * An earlier feed used `24683219020` (one digit short); that is error 21917328.
+ * Seller Hub File Exchange rejects `Name (id)` in PaymentProfileName
+ * (error 21917328) even when that string is the policy's display name.
+ * Use the numeric policy id only. LMNY has two payment policies; the one
+ * already on 18 listings is 246832199020 (246870148020 has zero listings).
  */
 
 export const EBAY_TITLE_MAX = 80;
@@ -12,8 +13,8 @@ export const TITLE_COL = '*Title';
 export const DESCRIPTION_COL = '*Description';
 export const CUSTOM_LABEL_COL = 'CustomLabel';
 
-/** Exact Seller Hub payment-policy name for the LMNY US account. */
-export const LMNY_EBAY_PAYMENT_PROFILE = 'eBay Managed Payments (246832199020)';
+/** Numeric Seller Hub payment-policy id (the policy attached to 18 live listings). */
+export const LMNY_EBAY_PAYMENT_PROFILE = '246832199020';
 
 const POLICY_ID_SUFFIX = /\s*\(\d+\)\s*$/;
 const TRUNCATED_TITLE = /(?:Box\s*&|Watch\s*w\/|w\/|&)$/;

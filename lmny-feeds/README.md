@@ -138,11 +138,12 @@ Spot-check `out/report.md` lab bands before republishing.
 
 ### eBay File Exchange (Seller Hub upload)
 
-If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), `PaymentProfileName` does not match a payment policy on the seller account. The live LMNY US policy name is:
+If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), `PaymentProfileName` is not a valid policy id. Seller Hub shows two payment policies named `eBay Managed Payments (…)`:
 
-`eBay Managed Payments (246832199020)`
+- `246832199020` — already on 18 listings (this is what the fixer writes)
+- `246870148020` — 0 listings
 
-An earlier file used `24683219020` (one digit short). That id is invalid.
+File Exchange rejects the display name `eBay Managed Payments (246832199020)` even though that string appears in Seller Hub. Put **digits only** in `PaymentProfileName`.
 
 ```sh
 npx tsx scripts/fix-ebay-file-exchange.ts \
@@ -150,11 +151,11 @@ npx tsx scripts/fix-ebay-file-exchange.ts \
   --out out/ebay_upload_ready_to_import.csv
 ```
 
-The fixer writes that payment-policy name, completes titles cut off at eBay's 80-character limit, and saves the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
+The fixer writes that payment-policy id, completes titles cut off at eBay's 80-character limit, and saves the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
 
 Do **not** re-upload the results CSV (the one whose first line is `Line Number,Action,Status,ErrorCode,…`). That is the error report, not a listing template.
 
-Override with `--payment-profile "exact Seller Hub name"` if the account's payment policy is renamed.
+Override with `--payment-profile "246870148020"` to use the unused policy, or `--payment-profile "Exact Name"` if you create a new policy without parentheses.
 
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
