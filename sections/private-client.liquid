@@ -58,10 +58,10 @@
     <div class="lm-consult__form-wrap">
       <h2 class="lm-consult__form-title">{{ section.settings.form_title }}</h2>
 
-      {%- form 'contact', class: 'lm-consult__form' -%}
+      {%- form 'contact', class: 'lm-consult__form', id: 'LmConsultContact' -%}
         {%- if form.posted_successfully? -%}
           <p class="lm-consult__success" role="status">
-            Thank you — your request has been received. We'll be in touch within one business day.
+            Thank you — your request has been received. We'll call you to set the viewing.
           </p>
         {%- endif -%}
         {%- if form.errors -%}
@@ -69,6 +69,8 @@
             Please check your details — {{ form.errors.messages.email | default: 'something went wrong' }}.
           </p>
         {%- endif -%}
+
+        <input type="hidden" name="contact[request_type]" value="Private viewing">
 
         <div class="lm-consult__row">
           <div class="lm-consult__field">
@@ -83,20 +85,29 @@
 
         <div class="lm-consult__row">
           <div class="lm-consult__field">
-            <label for="ConsultPhone">Phone <span>(optional)</span></label>
-            <input type="tel" id="ConsultPhone" name="contact[phone]" autocomplete="tel">
+            <label for="ConsultPhone">Phone</label>
+            <input type="tel" id="ConsultPhone" name="contact[phone]" autocomplete="tel" required>
           </div>
           <div class="lm-consult__field">
-            <label for="ConsultInterest">I'm interested in</label>
-            <select id="ConsultInterest" name="contact[interest]">
-              <option>A private consultation</option>
-              <option>Diamond or gemstone sourcing</option>
-              <option>A bespoke commission</option>
-              <option>An estate / pre-owned piece</option>
-              <option>Ring sizing or service</option>
-              <option>Something else</option>
+            <label for="ConsultMeet">How should we meet</label>
+            <select id="ConsultMeet" name="contact[viewing]">
+              <option value="In person in New York">In person in New York</option>
+              <option value="Video call">Video call</option>
             </select>
           </div>
+        </div>
+
+        <div class="lm-consult__field">
+          <label for="ConsultInterest">I'm interested in</label>
+          <select id="ConsultInterest" name="contact[interest]">
+            <option value="A timepiece">A timepiece</option>
+            <option value="An estate / vintage piece">An estate / vintage piece</option>
+            <option value="A private consultation">A private consultation</option>
+            <option value="Diamond or gemstone sourcing">Diamond or gemstone sourcing</option>
+            <option value="A bespoke commission">A bespoke commission</option>
+            <option value="Ring sizing or service">Ring sizing or service</option>
+            <option value="Something else">Something else</option>
+          </select>
         </div>
 
         <div class="lm-consult__field">
@@ -108,6 +119,12 @@
           {{ section.settings.submit_label }}
         </button>
         <p class="lm-consult__privacy">{{ section.settings.privacy_note }}</p>
+      {%- endform -%}
+
+      {%- form 'customer', id: 'LmConsultCustomer', class: 'lm-consult__customer' -%}
+        <input type="hidden" name="contact[tags]" id="LmConsultTags" value="private-viewing">
+        <input type="email" name="contact[email]" id="LmConsultCustomerEmail" autocomplete="email">
+        <input type="tel" name="contact[phone]" id="LmConsultCustomerPhone" autocomplete="tel">
       {%- endform -%}
     </div>
 
@@ -305,6 +322,14 @@
     margin: 1rem 0 0;
   }
 
+  .lm-consult__customer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
   .lm-consult__success {
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.88rem;
@@ -347,6 +372,52 @@
     }
   }
 </style>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var interest = (params.get('interest') || '').toLowerCase();
+    var piece = params.get('piece') || '';
+    var interestSelect = document.getElementById('ConsultInterest');
+    var message = document.getElementById('ConsultMessage');
+    if (interestSelect) {
+      if (interest === 'watch') interestSelect.value = 'A timepiece';
+      if (interest === 'estate' || interest === 'vintage') interestSelect.value = 'An estate / vintage piece';
+    }
+    if (message && piece && !message.value) {
+      message.value = 'I would like a private viewing of: ' + piece;
+    }
+
+    var contact = document.getElementById('LmConsultContact');
+    var customer = document.getElementById('LmConsultCustomer');
+    if (!contact) return;
+
+    function tagsForInterest(value) {
+      var tags = ['private-viewing'];
+      if (value === 'A timepiece') tags.push('watch-interest');
+      if (value === 'An estate / vintage piece') tags.push('vintage-interest');
+      return tags.join(',');
+    }
+
+    contact.addEventListener('submit', function () {
+      var email = (document.getElementById('ConsultEmail') || {}).value || '';
+      var phone = (document.getElementById('ConsultPhone') || {}).value || '';
+      var tagField = document.getElementById('LmConsultTags');
+      var custEmail = document.getElementById('LmConsultCustomerEmail');
+      var custPhone = document.getElementById('LmConsultCustomerPhone');
+      if (tagField && interestSelect) tagField.value = tagsForInterest(interestSelect.value);
+      if (custEmail) custEmail.value = email;
+      if (custPhone) custPhone.value = phone;
+      if (customer && email && phone) {
+        fetch(customer.getAttribute('action') || '/contact#contact_form', {
+          method: 'POST',
+          body: new FormData(customer),
+          headers: { 'Accept': 'text/html' }
+        }).catch(function () {});
+      }
+    });
+  })();
+</script>
 
 {% schema %}
 {
@@ -399,19 +470,19 @@
       "type": "text",
       "id": "form_title",
       "label": "Form heading",
-      "default": "Request an Appointment"
+      "default": "Request a private viewing"
     },
     {
       "type": "text",
       "id": "submit_label",
       "label": "Submit label",
-      "default": "Request Consultation"
+      "default": "Request viewing"
     },
     {
       "type": "text",
       "id": "privacy_note",
       "label": "Privacy note",
-      "default": "Your details are used only to arrange your consultation. Never shared, never sold."
+      "default": "Phone is required so we can set the viewing. We use it only for this appointment — never a blast list."
     }
   ],
   "blocks": [

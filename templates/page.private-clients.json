@@ -10,8 +10,11 @@
       "block_order": ["step-1", "step-2", "step-3"],
       "settings": {
         "eyebrow": "Private Clients",
-        "title": "Book a Consultation",
-        "intro": "Whether you're marking a milestone, commissioning something entirely your own, or searching for a specific stone — begin with a conversation. In person in New York, or by video from anywhere.",
+        "title": "Private viewing",
+        "intro": "Watches and estate jewels are often decided in a conversation, not a checkout. In person in New York, or by video — leave a number and we will set the viewing.",
+        "form_title": "Request a private viewing",
+        "submit_label": "Request viewing",
+        "privacy_note": "Phone is required so we can set the viewing. We use it only for this appointment — never a blast list.",
         "contact_email": "hello@lauramilman.com",
         "contact_location": "New York, NY — by appointment"
       }

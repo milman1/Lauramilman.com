@@ -261,3 +261,23 @@ app is installed. To collect on-site reviews: Shopify Admin → Apps →
 Product Reviews (or Judge.me) → enable. The product template already
 renders `#shopify-product-reviews`.
 
+---
+
+## 10. Watch & vintage holds (phone)
+
+Product pages for timepieces and estate/vintage show **Hold this piece** and
+**Private viewing**. Both require a phone number and land in **Admin → Inbox**.
+
+Shopify customer tags applied when the hidden customer form succeeds:
+
+- `hold-request` — asked to hold a specific piece
+- `watch-interest`
+- `vintage-interest`
+- `private-viewing` — booked from `/pages/private-clients`
+
+If a tag is missing on the customer record, add it from the Inbox thread.
+Optional: Shopify Flow → “Customer created” / form submit → add the same tags.
+
+Do **not** print a different website price vs viewing price on the storefront.
+Talk numbers on the call.
+
