@@ -25,7 +25,7 @@ export interface StoneItem {
   costUsd: number;
   /** Lab only: raw Buy_Price interpreted as USD per carat. */
   pricePerCaratUsd?: number;
-  /** Rapaport list total (USD) — required to price naturals. */
+  /** Rapaport list total (USD) — audit / metafields; retail uses wholesale × 5. */
   rapPriceUsd?: number;
   imageUrls: string[];
   videoUrls: string[];

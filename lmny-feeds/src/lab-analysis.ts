@@ -17,7 +17,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { LAB_TIERS } from '../config/pricing.js';
+import { LAB_TIERS, LOOSE_DIAMOND } from '../config/pricing.js';
 import { fetchBelgiumDiaFeed, probeFeed } from './feeds/belgiumdia.js';
 import { priceLab } from './markup.js';
 import { normalizeStones, pick } from './normalize.js';
@@ -284,13 +284,14 @@ async function main() {
     used.add(pick_.stockRef);
     const priced = priceLab(pick_);
     const tier = LAB_TIERS.find((t) => pick_.costUsd <= t.maxCostUsd);
+    const multiple = tier?.multiplier ?? LOOSE_DIAMOND.wholesaleMultiple;
     if (!priced.ok) {
       out(`| ${pick_.stockRef} | ${pick_.shape} | ${pick_.carat} | ${pick_.color} | ${pick_.clarity} | ${pick_.cut ?? '—'} | $${pick_.costUsd.toLocaleString()} | — | HELD: ${priced.hold.reason} | — |`);
       continue;
     }
     out(
       `| ${pick_.stockRef} | ${pick_.shape} | ${pick_.carat} | ${pick_.color} | ${pick_.clarity} | ${pick_.cut ?? '—'} | ` +
-        `$${pick_.costUsd.toLocaleString()} | ×${tier?.multiplier ?? '?'} | $${priced.priced.retailUsd.toLocaleString()} | ` +
+        `$${pick_.costUsd.toLocaleString()} | ×${multiple} | $${priced.priced.retailUsd.toLocaleString()} | ` +
         `$${Math.round(priced.priced.retailUsd / pick_.carat).toLocaleString()} |`,
     );
   }

@@ -1,4 +1,10 @@
-import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL, WATCH } from '../config/pricing.js';
+import {
+  LAB_GUARDS,
+  LAB_TIERS as FALLBACK_RULES,
+  LOOSE_DIAMOND,
+  NATURAL,
+  WATCH,
+} from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 
 export { FALLBACK_RULES };
@@ -20,12 +26,12 @@ function minCostPerCaratFloor(carat: number): number {
   return band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
 }
 
-/** Naturals: Rapaport list × 0.75, held below the 20% margin floor. */
+/** Loose natural: retail = round(deal-API wholesale × 5). */
 export function priceNatural(item: StoneItem): PriceResult {
-  if (!item.rapPriceUsd) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_rap_price' } };
+  if (!(item.costUsd > 0)) {
+    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_cost' } };
   }
-  const retailUsd = round(item.rapPriceUsd * NATURAL.rapDiscount);
+  const retailUsd = round(item.costUsd * LOOSE_DIAMOND.wholesaleMultiple);
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -53,7 +59,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: tiered multiplier on **total** feed cost (Buy_Price × carat).
+ * Lab-grown: flat 5× on **total** feed cost (Buy_Price × carat).
  * Fail-closed guards catch a regress to treating $/ct as total.
  */
 export function priceLab(item: StoneItem): PriceResult {

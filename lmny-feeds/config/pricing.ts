@@ -5,27 +5,31 @@
  * happen via pull request against this file — never via database pokes or
  * ad-hoc edits in Shopify admin.
  *
- * Lab tiers key off **total cost** (not carat). Inventory is virtual (memo),
- * so multiples stay aggressive below market. Guards in markup.ts fail closed
- * if the Belgium Dia cost mapping regresses (e.g. treating $/ct as total).
+ * Loose diamonds (lab + natural) key off **total wholesale cost** from the
+ * Belgium Dia / deal API. Inventory is virtual (memo). Guards in markup.ts
+ * fail closed if the Belgium Dia cost mapping regresses (e.g. treating $/ct
+ * as total).
  */
 
 /**
- * Natural diamonds: retail = Rapaport list × rapDiscount, held if margin <
- * minMarginPct.
+ * Loose diamonds (lab-grown and natural): retail = round(wholesale × multiple).
  *
- * `minMarginPct` is a **filter, not a floor**: a stone under it is held out of
- * the catalogue entirely (`natural_margin_floor`), never repriced up to reach
- * it. Retail is always exactly Rap × 0.75 — confirmed against all 2,961 live
- * rows on 2026-08-06.
+ * Wholesale is the deal-API total cost (`costUsd`): for lab, Buy_Price × carat;
+ * for natural, Buy_Price (or Rap-derived buy) as total. Watches and jewelry
+ * are out of scope — only loose diamond product types use this.
+ */
+export const LOOSE_DIAMOND = {
+  wholesaleMultiple: 5,
+} as const;
+
+/**
+ * Natural diamonds: same 5× wholesale as lab. Rapaport is retained on the
+ * feed item for audit / metafields but no longer drives retail.
  *
- * It reads as a 25% markup in the data because the 20% is margin-on-retail:
- * retail ≥ cost / (1 − 0.20) = cost × 1.25. Nothing published sits below
- * cost × 1.25 for that reason, and the gate runs at pricing time — a stone
- * whose Rap-implied margin recovers is published on the next run.
+ * `minMarginPct` remains a fail-closed sanity filter (at 5×, published margin
+ * is 80%). A stone under it is held out of the catalogue, never repriced up.
  */
 export const NATURAL = {
-  rapDiscount: 0.75,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
 } as const;
@@ -38,20 +42,12 @@ export interface LabTier {
 }
 
 /**
- * Lab-grown markup tiers on **total** feed cost (Buy_Price × carat).
- * Imported by markup.ts as its FALLBACK_RULES.
- *
- * Live on 2026-08-06: retail = round(cost × tier) reproduced 20,847 of 21,764
- * rows exactly. Rounding is `Math.round`, not ceil. The remainder are rows
- * last written before the 2026-08-02 Buy_Price × carat fix, which the schema
- * bump sweeps up on their next update.
+ * Lab-grown markup on **total** feed cost (Buy_Price × carat).
+ * Flat 5× wholesale — kept as a single unbounded tier so existing
+ * FALLBACK_RULES / lab-analysis consumers still resolve a multiplier.
  */
 export const LAB_TIERS: LabTier[] = [
-  { maxCostUsd: 500, multiplier: 1.7 },
-  { maxCostUsd: 1500, multiplier: 1.62 },
-  { maxCostUsd: 4000, multiplier: 1.55 },
-  { maxCostUsd: 10000, multiplier: 1.5 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.45 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: LOOSE_DIAMOND.wholesaleMultiple },
 ];
 
 /**
@@ -62,7 +58,7 @@ export const LAB_GUARDS = {
   /**
    * Absolute retail floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 retails) without blocking aggressive
-   * 1ct memo pricing (~$200 after 1.7× on ~$120/ct).
+   * 1ct memo pricing (~$600 after 5× on ~$120/ct).
    */
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,

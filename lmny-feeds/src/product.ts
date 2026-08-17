@@ -29,7 +29,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 9;
+export const PRODUCT_SCHEMA_VERSION = 10;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
