@@ -136,6 +136,25 @@ npm run backfill:lab-pricing      # SYNC_FEEDS=lab; resumable via content_hash
 
 Spot-check `out/report.md` lab bands before republishing.
 
+### eBay File Exchange (Seller Hub upload)
+
+If a bulk upload fails with **error 21917328**, the payment profile is not in the form Seller Hub’s listings template expects:
+
+`eBay Managed Payments (246832199020) - (ID: 246832199020)`
+
+Shipping: `Daily Deals - 1Handling Day - (ID: 258461530020)`  
+Returns (watches): `No returns accepted - (ID: 24363507020)`
+
+After a prefill pass, fill price / condition / those three policy names and re-upload `ebay/ebay_listings_ready_to_publish.csv` (`Template=eBay-listings-template_EBAY_US`). Calculated shipping also needs `PostalCode` `10036` (1145 6th Avenue) and a 2 lb `PackageThickEnvelope` weight. Do not change `TrackingId`. Do not open the CSV in Excel.
+
+Live watches already listed with 14-day returns must be **Revise**d, not Add. Upload `ebay/ebay_listings_revise_no_returns.csv` (or the smaller `ebay/ebay_file_exchange_revise_no_returns.csv`). Do not re-upload the 52 live SKUs as Add or eBay will duplicate them.
+
+```sh
+npx tsx scripts/fix-ebay-file-exchange.ts \
+  --in path/to/failed.csv \
+  --out out/ebay_upload_ready_to_import.csv
+```
+
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
 `BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.
