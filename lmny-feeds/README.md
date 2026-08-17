@@ -138,26 +138,20 @@ Spot-check `out/report.md` lab bands before republishing.
 
 ### eBay File Exchange (Seller Hub upload)
 
-If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), `PaymentProfileName` is not a valid policy id. Seller Hub shows two payment policies named `eBay Managed Payments (…)`:
+If a bulk upload fails with **error 21917328**, the payment profile is not in the form Seller Hub’s listings template expects:
 
-- `246832199020` — already on 18 listings (this is what the fixer writes)
-- `246870148020` — 0 listings
+`eBay Managed Payments (246832199020) - (ID: 246832199020)`
 
-File Exchange rejects the display name `eBay Managed Payments (246832199020)` even though that string appears in Seller Hub. Put **digits only** in `PaymentProfileName`.
+Shipping: `Daily Deals - 1Handling Day - (ID: 258461530020)`  
+Returns: `14 Day Returns Accepted - (ID: 258172155020)`
+
+After a prefill pass, fill price / condition / those three policy names and re-upload `ebay/ebay_listings_ready_to_publish.csv` (`Template=eBay-listings-template_EBAY_US`). Do not change `TrackingId`. Do not open the CSV in Excel.
 
 ```sh
 npx tsx scripts/fix-ebay-file-exchange.ts \
   --in path/to/failed.csv \
   --out out/ebay_upload_ready_to_import.csv
 ```
-
-The fixer writes that payment-policy id, completes titles cut off at eBay's 80-character limit, and saves the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
-
-Do **not** re-upload the results CSV (the one whose first line is `Line Number,Action,Status,ErrorCode,…`). That is the error report, not a listing template.
-
-Override with `--payment-profile "246870148020"` to use the unused policy, or `--payment-profile "Exact Name"` if you create a new policy without parentheses.
-
-There is a second path that does **not** send a payment policy: Seller Hub’s prefill template (`Template=eBay-taxonomy-mapping-template_US`). Reports file upload only accepts comma/semicolon/tab files, not `.xlsx`. Use `ebay/ebay_prefill_listings.csv` (or the zip). First lines are `#INFO` + `Template=eBay-taxonomy-mapping-template_US`. Wait for eBay’s suggested details, then re-upload to create drafts. Prices and business policies are applied from the account in that second step.
 
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /

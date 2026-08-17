@@ -1,10 +1,9 @@
 /**
  * eBay File Exchange helpers — LMNY
  *
- * Seller Hub File Exchange rejects `Name (id)` in PaymentProfileName
- * (error 21917328) even when that string is the policy's display name.
- * Use the numeric policy id only. LMNY has two payment policies; the one
- * already on 18 listings is 246832199020 (246870148020 has zero listings).
+ * Seller Hub's listings template (BusinessPolicy sheet) wants
+ * `Policy Name - (ID: 123456)`. Display name alone or digits alone
+ * both fail with error 21917328.
  */
 
 export const EBAY_TITLE_MAX = 80;
@@ -13,8 +12,13 @@ export const TITLE_COL = '*Title';
 export const DESCRIPTION_COL = '*Description';
 export const CUSTOM_LABEL_COL = 'CustomLabel';
 
-/** Numeric Seller Hub payment-policy id (the policy attached to 18 live listings). */
-export const LMNY_EBAY_PAYMENT_PROFILE = '246832199020';
+/** Exact Payment profile name from Seller Hub listings-template BusinessPolicy sheet. */
+export const LMNY_EBAY_PAYMENT_PROFILE =
+  'eBay Managed Payments (246832199020) - (ID: 246832199020)';
+export const LMNY_EBAY_SHIPPING_PROFILE =
+  'Daily Deals - 1Handling Day - (ID: 258461530020)';
+export const LMNY_EBAY_RETURN_PROFILE =
+  '14 Day Returns Accepted - (ID: 258172155020)';
 
 const POLICY_ID_SUFFIX = /\s*\(\d+\)\s*$/;
 const TRUNCATED_TITLE = /(?:Box\s*&|Watch\s*w\/|w\/|&)$/;

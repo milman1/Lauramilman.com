@@ -79,7 +79,7 @@ describe('fixEbayFileExchange', () => {
     const payChanges = result.changes.filter((c) => c.field === 'PaymentProfileName');
     expect(payChanges).toHaveLength(3);
     expect(payChanges[0]?.from).toBe('eBay Managed Payments (24683219020)');
-    expect(payChanges[0]?.to).toBe('246832199020');
+    expect(payChanges[0]?.to).toBe('eBay Managed Payments (246832199020) - (ID: 246832199020)');
 
     const titles = Object.fromEntries(result.rows.map((r) => [r.CustomLabel, r['*Title']]));
     expect(titles['w-10026']).toBe('Rolex Oyster Perpetual Date 6827 Womens Pre-Owned Watch No Box/Papers');
