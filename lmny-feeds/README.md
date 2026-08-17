@@ -157,7 +157,7 @@ Do **not** re-upload the results CSV (the one whose first line is `Line Number,A
 
 Override with `--payment-profile "246870148020"` to use the unused policy, or `--payment-profile "Exact Name"` if you create a new policy without parentheses.
 
-There is a second path that does **not** send a payment policy: Seller Hub’s prefill template (`Template=eBay-taxonomy-mapping-template_US`). Filled workbook: `ebay/ebay_prefill_listings.xlsx` (100 watches: SKU, photo, title, Wristwatches, aspects). Upload that `.xlsx` on the Reports tab, wait for eBay’s suggested details, then re-upload to create drafts. Prices and business policies are applied from the account in that second step.
+There is a second path that does **not** send a payment policy: Seller Hub’s prefill template (`Template=eBay-taxonomy-mapping-template_US`). Reports file upload only accepts comma/semicolon/tab files, not `.xlsx`. Use `ebay/ebay_prefill_listings.csv` (or the zip). First lines are `#INFO` + `Template=eBay-taxonomy-mapping-template_US`. Wait for eBay’s suggested details, then re-upload to create drafts. Prices and business policies are applied from the account in that second step.
 
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
