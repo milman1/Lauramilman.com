@@ -140,7 +140,75 @@ Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
 `BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.
 
-## CI / schedule
+## The Back Vault weekly sync (`src/backvault/`)
+
+A second, independent pipeline scraped from thebackvault.com's public
+Shopify `products.json` feed — no API key required.
+
+```sh
+npm run sync:backvault:dry   # fetch + normalize + diff, zero writes
+npm run sync:backvault       # live (needs Shopify env vars)
+```
+
+**What it does:**
+
+1. **Fetch** the `/collections/new-arrivals/products.json` feed
+   (`src/backvault/feed.ts`), paginated at 250 rows/page.
+2. **Normalize + gate** (`src/backvault/normalize.ts`): keep only items
+   whose `vendor` fuzzy-matches one of the 40 curated top-designer brands
+   (`src/backvault/designers.ts`), and whose variants have at least one
+   available. Out-of-stock and non-designer items are silently dropped.
+3. **Scrub** (`src/backvault/scrub.ts`): remove every trace of
+   "The Back Vault" / "Back Vault" / "back-vault" / "thebackvault" from
+   title, description, tags, SEO, and alt text per SHOPIFY_SETUP.md §3.
+   A hard `assertScrubbed()` gate inside the product builder throws rather
+   than publishing a surviving reference to the live store.
+4. **Extract specs** (`src/backvault/specs.ts`): pattern-match the
+   free-text description for metal type/weight, diamond weight,
+   measurements, era, condition, gemstones — written to `custom.*`
+   metafields (the same keys the estate-jewelry PDP reads from §1 of
+   SHOPIFY_SETUP.md).
+5. **Price**: listed price from The Back Vault is passed through unchanged
+   (no markup). Cost is not known, so `inventoryItem.cost` is omitted.
+6. **Diff** (`src/backvault/diff.ts`): create / update / archive / skip
+   against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
+   prefix `bv-`. Archived products get a redirect to `/collections/all`.
+7. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
+   sync uses — direct (non-bulk) since weekly volume is at most a few
+   hundred products.
+
+**Vendor / collection mapping:** every item's Shopify Vendor is set to the
+canonical designer name from `designers.ts`. Shopify's automated
+collections (SHOPIFY_SETUP.md §2) then sort them automatically by Vendor
+condition — no manual collection assignment needed.
+
+**⚠️ Live validation needed:** `src/backvault/feed.ts` was written against
+Shopify's documented `products.json` contract but was not validated against
+the actual live site — the development environment had no network path to
+`thebackvault.com`. Run `npm run sync:backvault:dry` as the first real
+test and check `out/backvault-report.md` for malformed/skipped counts
+before going live.
+
+### Environment
+
+Inherits the same Shopify secrets as the Belgium Dia sync
+(`SHOPIFY_STORE_DOMAIN` + `SHOPIFY_ADMIN_TOKEN` or client-credentials
+pair). Additional optional variables:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `BACKVAULT_BASE_URL` | `https://thebackvault.com` | Override for testing against a mirror/fixture server |
+| `BACKVAULT_COLLECTION_HANDLE` | `new-arrivals` | Collection slug to scrape |
+
+### Schedule
+
+`.github/workflows/backvault-feed-sync.yml` — weekly, Sunday 00:17 UTC.
+Always live on the schedule (user chose no dry-run gate). Use
+`workflow_dispatch` with `dry_run=true` to inspect a run without writes.
+
+---
+
+## CI / schedule (Belgium Dia)
 
 `.github/workflows/lmny-feed-sync.yml`:
 
@@ -153,6 +221,30 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 `out/report.md` into the Actions run summary.
 
 ## Known gaps (deliberate)
+
+### The Back Vault sync
+
+- The feed client (`src/backvault/feed.ts`) was written against Shopify's
+  documented `products.json` contract but has never been executed against
+  the live `thebackvault.com` — the development environment's egress proxy
+  denied that host. Treat the first `npm run sync:backvault:dry` as the
+  real validation: check `out/backvault-report.md` for malformed/skip
+  counts and inspect a few `create` decisions before unticking `dry_run`.
+- Spec extraction (`src/backvault/specs.ts`) uses regex patterns written
+  against documented supplier formats, not a real sample of product copy.
+  False-negative (missed spec) is the failure mode — not a wrong spec.
+  Improve the patterns iteratively after a few live runs once the `report.md`
+  surfaces what real titles and descriptions look like.
+- Archived products redirect to `/collections/all` rather than a
+  per-designer collection because the vendor is not stored on `CatalogEntry`
+  at archive time. A future pass could enrich the catalog query to include
+  the vendor tag and redirect to `/collections/<designer-handle>` instead.
+- The `backvault_feed` metafield namespace (`src/backvault/product.ts`) is
+  not yet defined in SHOPIFY_SETUP.md §1 — add those three definitions
+  (source_handle, content_hash, synced_at) the first time the sync runs or
+  they will be auto-created by Shopify with no storefront access setting.
+
+### Belgium Dia / watch / stone
 
 - Watch body trust line (`CONFIG.trustLine` / `TRUST_LINE`) stays off until
   confirmed for feed inventory; SEO still says
