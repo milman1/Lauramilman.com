@@ -1,4 +1,5 @@
 import { matchDesigner } from './designers.js';
+import { canonicalProductType } from './listing.js';
 import { extractSpecs } from './specs.js';
 import { scrubText } from './scrub.js';
 import type { BackVaultItem, RawBackVaultProduct } from './types.js';
@@ -85,7 +86,7 @@ export function normalizeBackVaultFeed(rawRows: unknown[]): NormalizeResult {
       title,
       vendorRaw: product.vendor,
       vendor: designer.name,
-      productType: scrubText(product.product_type || 'Jewelry'),
+      productType: canonicalProductType(product.product_type || 'Jewelry'),
       descriptionHtml,
       priceUsd: price,
       available: true,

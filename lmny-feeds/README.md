@@ -163,17 +163,26 @@ npm run sync:backvault       # live (needs Shopify env vars)
    title, description, tags, SEO, and alt text per SHOPIFY_SETUP.md §3.
    A hard `assertScrubbed()` gate inside the product builder throws rather
    than publishing a surviving reference to the live store.
-4. **Extract specs** (`src/backvault/specs.ts`): pattern-match the
-   free-text description for metal type/weight, diamond weight,
-   measurements, era, condition, gemstones — written to `custom.*`
-   metafields (the same keys the estate-jewelry PDP reads from §1 of
-   SHOPIFY_SETUP.md).
-5. **Price**: listed price from The Back Vault is passed through unchanged
+4. **Extract specs** (`src/backvault/specs.ts`): prefer the labeled
+   `<strong>Metal Type:</strong>` block on the supplier PDP, then regex
+   for metal type/weight, diamond weight, measurements, era, condition,
+   gemstones — written to `custom.*` metafields (the same keys the
+   estate-jewelry PDP reads from §1 of SHOPIFY_SETUP.md).
+5. **Rewrite listing copy** (`src/backvault/listing.ts`) to the same
+   estate / watch SEO schema already used on the store:
+   - Title: `{Brand} {normalized remainder}`; watches get a `Pre-Owned` prefix
+   - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
+     plus `Authenticated and hand-inspected by Laura Milman New York.`
+     Specs stay in metafields, not an HTML table.
+   - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
+   - SEO description ≤ 160 chars, always ending
+     `Authenticated by Laura Milman New York.`
+6. **Price**: listed price from The Back Vault is passed through unchanged
    (no markup). Cost is not known, so `inventoryItem.cost` is omitted.
-6. **Diff** (`src/backvault/diff.ts`): create / update / archive / skip
+7. **Diff** (`src/backvault/diff.ts`): create / update / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
-7. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
+8. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
    sync uses — direct (non-bulk) since weekly volume is at most a few
    hundred products.
 
@@ -181,13 +190,6 @@ npm run sync:backvault       # live (needs Shopify env vars)
 canonical designer name from `designers.ts`. Shopify's automated
 collections (SHOPIFY_SETUP.md §2) then sort them automatically by Vendor
 condition — no manual collection assignment needed.
-
-**⚠️ Live validation needed:** `src/backvault/feed.ts` was written against
-Shopify's documented `products.json` contract but was not validated against
-the actual live site — the development environment had no network path to
-`thebackvault.com`. Run `npm run sync:backvault:dry` as the first real
-test and check `out/backvault-report.md` for malformed/skipped counts
-before going live.
 
 ### Environment
 
@@ -224,17 +226,10 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 
 ### The Back Vault sync
 
-- The feed client (`src/backvault/feed.ts`) was written against Shopify's
-  documented `products.json` contract but has never been executed against
-  the live `thebackvault.com` — the development environment's egress proxy
-  denied that host. Treat the first `npm run sync:backvault:dry` as the
-  real validation: check `out/backvault-report.md` for malformed/skip
-  counts and inspect a few `create` decisions before unticking `dry_run`.
-- Spec extraction (`src/backvault/specs.ts`) uses regex patterns written
-  against documented supplier formats, not a real sample of product copy.
-  False-negative (missed spec) is the failure mode — not a wrong spec.
-  Improve the patterns iteratively after a few live runs once the `report.md`
-  surfaces what real titles and descriptions look like.
+- Spec extraction (`src/backvault/specs.ts`) prefers labeled PDP fields and
+  falls back to regex. False-negative (missed spec) is the failure mode —
+  not a wrong spec. Unsigned / `vendor: The Back Vault` rows stay out of
+  the sync on purpose (not a curated top designer).
 - Archived products redirect to `/collections/all` rather than a
   per-designer collection because the vendor is not stored on `CatalogEntry`
   at archive time. A future pass could enrich the catalog query to include

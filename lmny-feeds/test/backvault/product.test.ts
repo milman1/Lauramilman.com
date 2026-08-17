@@ -31,6 +31,8 @@ describe('tagsFor', () => {
     const tags = tagsFor(item());
     expect(tags).toContain('backvault-feed');
     expect(tags).toContain('Cartier');
+    expect(tags).toContain('antique-estate');
+    expect(tags).toContain('Bracelets');
   });
 });
 
@@ -54,6 +56,21 @@ describe('buildProductSetInput', () => {
     expect(input.id).toBeUndefined();
   });
 
+  it('rewrites title, description, and SEO to the LMNY estate schema', () => {
+    const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z');
+    expect(input.title).toBe('Cartier Love Bracelet');
+    expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
+    expect(String(input.descriptionHtml)).toContain('Authenticated and hand-inspected by Laura Milman New York.');
+    expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
+    expect(input.seo).toEqual({
+      title: 'Cartier Love Bracelet | Laura Milman',
+      description: expect.stringContaining('Authenticated by Laura Milman New York.'),
+    });
+    expect((input.seo as { title: string }).title.length).toBeLessThanOrEqual(60);
+    expect((input.seo as { description: string }).description.length).toBeLessThanOrEqual(160);
+    expect(input.productType).toBe('Bracelets');
+  });
+
   it('sets id and conditionally re-sends files when updating an existing product', () => {
     const withEnoughImages = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z', { id: 'gid://shopify/Product/1', imageCount: 1 });
     expect(withEnoughImages.id).toBe('gid://shopify/Product/1');
@@ -75,18 +92,17 @@ describe('buildProductSetInput', () => {
     ).toThrow(/Back Vault reference survived/);
   });
 
-  it('throws if an image URL still names the supplier', () => {
-    // The URL check runs after assertScrubbed, so we need a clean item
-    // (no other scrub violations) with only the URL being problematic.
-    expect(() =>
-      buildProductSetInput(
-        item({
-          imageUrls: ['https://thebackvault.com/cdn/cartier.jpg'],
-          title: 'Cartier Ring',
-          descriptionHtml: '<p>18K Yellow Gold.</p>',
-        }),
-        '2026-08-17T00:00:00.000Z',
-      ),
-    ).toThrow(/still names the supplier/);
+  it('allows supplier CDN image URLs so Shopify can copy them', () => {
+    const input = buildProductSetInput(
+      item({
+        imageUrls: ['https://thebackvault.com/cdn/shop/cartier.jpg'],
+        title: 'Cartier Ring',
+        productType: 'RING',
+        descriptionHtml: '<p>18K Yellow Gold.</p>',
+      }),
+      '2026-08-17T00:00:00.000Z',
+    );
+    expect(input.status).toBe('ACTIVE');
+    expect((input.files as Array<{ originalSource: string }>)[0]!.originalSource).toContain('thebackvault.com');
   });
 });

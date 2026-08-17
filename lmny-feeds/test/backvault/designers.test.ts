@@ -22,6 +22,12 @@ describe('matchDesigner', () => {
     expect(matchDesigner('Tiffany and Co.')?.name).toBe('Tiffany & Co.');
   });
 
+  it('tolerates short aliases used on the supplier feed', () => {
+    expect(matchDesigner('Lalaounis')?.name).toBe('Ilias Lalaounis');
+    expect(matchDesigner('Aspery')?.name).toBe('Asprey');
+    expect(matchDesigner('Bulgari')?.name).toBe('Bvlgari');
+  });
+
   it('returns null for brands outside the curated list', () => {
     expect(matchDesigner('Rolex')).toBeNull();
     expect(matchDesigner('Some Random Estate Brand')).toBeNull();

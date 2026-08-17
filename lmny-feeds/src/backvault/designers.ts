@@ -77,6 +77,17 @@ function foldName(s: string): string {
 
 const FOLDED_INDEX = new Map(TOP_DESIGNERS.map((d) => [foldName(d.name), d]));
 
+/** Short / misspelled vendor strings seen on The Back Vault that still map to a curated house. */
+const VENDOR_ALIASES: Array<[alias: string, canonicalName: string]> = [
+  ['Lalaounis', 'Ilias Lalaounis'],
+  ['Aspery', 'Asprey'],
+  ['Bulgari', 'Bvlgari'],
+];
+for (const [alias, canonicalName] of VENDOR_ALIASES) {
+  const designer = TOP_DESIGNERS.find((d) => d.name === canonicalName);
+  if (designer) FOLDED_INDEX.set(foldName(alias), designer);
+}
+
 /**
  * Match a raw vendor string from The Back Vault's feed against the curated
  * list, tolerant of accent/punctuation/ampersand differences (e.g.
