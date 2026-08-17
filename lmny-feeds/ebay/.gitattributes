@@ -1,2 +1,3 @@
 # Seller Hub requires UTF-8 BOM + CRLF. Do not let git convert this file to LF.
 *.csv binary
+*.xlsx binary
