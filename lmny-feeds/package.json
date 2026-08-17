@@ -11,6 +11,7 @@
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "ebay:fix-file-exchange": "tsx scripts/fix-ebay-file-exchange.ts",
+    "ebay:revise-no-returns": "tsx scripts/build-ebay-revise-returns.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

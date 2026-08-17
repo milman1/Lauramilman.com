@@ -6,7 +6,9 @@
  *     --in failed.csv \
  *     --out ebay_upload_ready_to_import.csv
  *
- * Optional: --payment-profile "Exact name from Seller Hub → Business policies"
+ * Optional:
+ *   --payment-profile "Exact name from Seller Hub → Business policies"
+ *   --return-profile  "Exact name from Seller Hub → Business policies"
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -24,14 +26,18 @@ function main() {
   const outPath = arg('--out');
   if (!inPath || !outPath) {
     console.error(
-      'Usage: npx tsx scripts/fix-ebay-file-exchange.ts --in <file.csv> --out <file.csv> [--payment-profile "Name"]',
+      'Usage: npx tsx scripts/fix-ebay-file-exchange.ts --in <file.csv> --out <file.csv> [--payment-profile "Name"] [--return-profile "Name"]',
     );
     process.exit(2);
   }
 
   const paymentProfileName = arg('--payment-profile');
+  const returnProfileName = arg('--return-profile');
   const input = readFileSync(resolve(inPath), 'utf8');
-  const result = fixEbayFileExchange(input, paymentProfileName ? { paymentProfileName } : {});
+  const result = fixEbayFileExchange(input, {
+    ...(paymentProfileName ? { paymentProfileName } : {}),
+    ...(returnProfileName ? { returnProfileName } : {}),
+  });
   const csv = serializeEbayFileExchange(result.infoLine, result.headers, result.rows, { bom: true });
 
   const dest = resolve(outPath);
