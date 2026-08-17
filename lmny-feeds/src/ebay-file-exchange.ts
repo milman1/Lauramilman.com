@@ -1,13 +1,9 @@
 /**
  * eBay File Exchange helpers — LMNY
  *
- * Seller Hub bulk upload rejects a PaymentProfileName that looks like
- * "eBay Managed Payments (24683219020)". Error 21917328: eBay treats the
- * parenthetical number as a payment-policy ID, and that number is the
- * seller account id, not a Business Policy id.
- *
- * PaymentProfileName must be the exact policy *name* from
- * Seller Hub → Account → Business policies (or a real policy id, digits only).
+ * PaymentProfileName must match Seller Hub → Business policies exactly.
+ * The live US payment policy is `eBay Managed Payments (246832199020)`.
+ * An earlier feed used `24683219020` (one digit short); that is error 21917328.
  */
 
 export const EBAY_TITLE_MAX = 80;
@@ -15,6 +11,9 @@ export const PAYMENT_PROFILE_COL = 'PaymentProfileName';
 export const TITLE_COL = '*Title';
 export const DESCRIPTION_COL = '*Description';
 export const CUSTOM_LABEL_COL = 'CustomLabel';
+
+/** Exact Seller Hub payment-policy name for the LMNY US account. */
+export const LMNY_EBAY_PAYMENT_PROFILE = 'eBay Managed Payments (246832199020)';
 
 const POLICY_ID_SUFFIX = /\s*\(\d+\)\s*$/;
 const TRUNCATED_TITLE = /(?:Box\s*&|Watch\s*w\/|w\/|&)$/;
@@ -170,18 +169,14 @@ export function fixEbayFileExchange(text: string, options: EbayFixOptions = {}):
     const label = row[CUSTOM_LABEL_COL] ?? '';
 
     const currentPay = row[PAYMENT_PROFILE_COL] ?? '';
-    const nextPay = options.paymentProfileName
-      ? options.paymentProfileName
-      : stripPolicyIdSuffix(currentPay);
+    const nextPay = options.paymentProfileName ?? LMNY_EBAY_PAYMENT_PROFILE;
     if (nextPay !== currentPay) {
       changes.push({
         customLabel: label,
         field: PAYMENT_PROFILE_COL,
         from: currentPay,
         to: nextPay,
-        reason: options.paymentProfileName
-          ? 'payment profile overridden'
-          : 'stripped parenthetical account/policy id (error 21917328)',
+        reason: 'set to Seller Hub payment policy name',
       });
       row[PAYMENT_PROFILE_COL] = nextPay;
     }

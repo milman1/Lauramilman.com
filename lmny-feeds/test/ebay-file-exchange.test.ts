@@ -4,6 +4,7 @@ import {
   fitEbayTitle,
   fixEbayFileExchange,
   isEbayResultsFile,
+  LMNY_EBAY_PAYMENT_PROFILE,
   looksLikePolicyIdSuffix,
   looksTruncatedEbayTitle,
   parseEbayFileExchange,
@@ -69,15 +70,16 @@ describe('repairEbayTitle', () => {
 });
 
 describe('fixEbayFileExchange', () => {
-  it('strips the invalid payment-policy id on every row and repairs truncated titles', () => {
+  it('sets the Seller Hub payment-policy name on every row and repairs truncated titles', () => {
     const result = fixEbayFileExchange(SAMPLE);
     expect(result.rows).toHaveLength(3);
-    expect(result.rows.every((r) => r.PaymentProfileName === 'eBay Managed Payments')).toBe(true);
+    expect(result.rows.every((r) => r.PaymentProfileName === LMNY_EBAY_PAYMENT_PROFILE)).toBe(true);
     expect(result.rows.every((r) => r.ShippingProfileName === 'Daily Deals - 1Handling Day')).toBe(true);
 
     const payChanges = result.changes.filter((c) => c.field === 'PaymentProfileName');
     expect(payChanges).toHaveLength(3);
     expect(payChanges[0]?.from).toBe('eBay Managed Payments (24683219020)');
+    expect(payChanges[0]?.to).toBe('eBay Managed Payments (246832199020)');
 
     const titles = Object.fromEntries(result.rows.map((r) => [r.CustomLabel, r['*Title']]));
     expect(titles['w-10026']).toBe('Rolex Oyster Perpetual Date 6827 Womens Pre-Owned Watch No Box/Papers');
@@ -98,7 +100,7 @@ describe('fixEbayFileExchange', () => {
     const again = parseEbayFileExchange(csv);
     expect(again.infoLine).toBe('Info,Version=1.0.0,Template=fx_category_template_EBAY_US');
     expect(again.rows[0]?.['*Description']).toContain('without box or papers');
-    expect(again.rows[0]?.PaymentProfileName).toBe('eBay Managed Payments');
+    expect(again.rows[0]?.PaymentProfileName).toBe(LMNY_EBAY_PAYMENT_PROFILE);
   });
 
   it('writes UTF-8 BOM and CRLF so Seller Hub can identify the template', () => {

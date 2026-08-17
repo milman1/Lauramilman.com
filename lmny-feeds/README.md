@@ -138,7 +138,11 @@ Spot-check `out/report.md` lab bands before republishing.
 
 ### eBay File Exchange (Seller Hub upload)
 
-If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), the `PaymentProfileName` column almost certainly has a name-plus-id like `eBay Managed Payments (24683219020)`. eBay treats the number as a policy id; that value is the seller account id, not a Business Policy id.
+If a bulk upload fails with **error 21917328** ("payment business policy identifier is invalid"), `PaymentProfileName` does not match a payment policy on the seller account. The live LMNY US policy name is:
+
+`eBay Managed Payments (246832199020)`
+
+An earlier file used `24683219020` (one digit short). That id is invalid.
 
 ```sh
 npx tsx scripts/fix-ebay-file-exchange.ts \
@@ -146,11 +150,11 @@ npx tsx scripts/fix-ebay-file-exchange.ts \
   --out out/ebay_upload_ready_to_import.csv
 ```
 
-The fixer strips the parenthetical id (leaving `eBay Managed Payments`), completes titles that were cut off at eBay's 80-character limit, and writes the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
+The fixer writes that payment-policy name, completes titles cut off at eBay's 80-character limit, and saves the file the way Seller Hub's own templates are saved: **UTF-8 with BOM and CRLF**. A LF-only / no-BOM rewrite makes eBay say it cannot identify the template.
 
 Do **not** re-upload the results CSV (the one whose first line is `Line Number,Action,Status,ErrorCode,…`). That is the error report, not a listing template.
 
-If the next upload still rejects the payment policy, copy the **exact** payment-policy name from Seller Hub → Account → Business policies and pass `--payment-profile "that exact name"`.
+Override with `--payment-profile "exact Seller Hub name"` if the account's payment policy is renamed.
 
 Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
