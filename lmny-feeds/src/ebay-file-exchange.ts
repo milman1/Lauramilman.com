@@ -19,6 +19,13 @@ export const LMNY_EBAY_SHIPPING_PROFILE =
   'Daily Deals - 1Handling Day - (ID: 258461530020)';
 export const LMNY_EBAY_RETURN_PROFILE =
   '14 Day Returns Accepted - (ID: 258172155020)';
+/** From lauramilman.com privacy policy: 1145 6th Avenue, Fl 3, New York, NY 10036. */
+export const LMNY_EBAY_POSTAL_CODE = '10036';
+/** Calculated-shipping package weight for a boxed watch (pounds). */
+export const LMNY_EBAY_WEIGHT_MAJOR = '2';
+export const LMNY_EBAY_WEIGHT_MINOR = '0';
+export const LMNY_EBAY_WEIGHT_UNIT = 'lb';
+export const LMNY_EBAY_PACKAGE_TYPE = 'PackageThickEnvelope';
 
 const POLICY_ID_SUFFIX = /\s*\(\d+\)\s*$/;
 const TRUNCATED_TITLE = /(?:Box\s*&|Watch\s*w\/|w\/|&)$/;

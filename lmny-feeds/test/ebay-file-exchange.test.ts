@@ -4,7 +4,11 @@ import {
   fitEbayTitle,
   fixEbayFileExchange,
   isEbayResultsFile,
+  LMNY_EBAY_PACKAGE_TYPE,
   LMNY_EBAY_PAYMENT_PROFILE,
+  LMNY_EBAY_POSTAL_CODE,
+  LMNY_EBAY_WEIGHT_MAJOR,
+  LMNY_EBAY_WEIGHT_UNIT,
   looksLikePolicyIdSuffix,
   looksTruncatedEbayTitle,
   parseEbayFileExchange,
@@ -19,6 +23,15 @@ w-10026,Rolex Oyster Perpetual Date 6827 Womens Pre-Owned Watch No Box/Papers,"P
 w-3286,Audemars Piguet Royal Oak Selfwinding 15510ST Mens Mint Watch Full Set Box &,Pre-Owned Audemars Piguet Royal Oak Selfwinding 15510ST. Full set with box and papers. Mint condition.,eBay Managed Payments (24683219020),Daily Deals - 1Handling Day
 w-6197,Audemars Piguet Royal Oak Selfwinding 26240BA.OO.1320BA.02 Mens Unworn Watch w/,"Unworn Audemars Piguet Royal Oak Selfwinding 26240BA.OO.1320BA.02 from April 2026. Offered with papers, but without the original box.",eBay Managed Payments (24683219020),Daily Deals - 1Handling Day
 `;
+
+describe('LMNY eBay ship-from defaults', () => {
+  it('uses the NYC privacy-policy ZIP and a numeric boxed-watch weight', () => {
+    expect(LMNY_EBAY_POSTAL_CODE).toBe('10036');
+    expect(Number(LMNY_EBAY_WEIGHT_MAJOR)).toBeGreaterThan(0);
+    expect(LMNY_EBAY_WEIGHT_UNIT).toBe('lb');
+    expect(LMNY_EBAY_PACKAGE_TYPE).toBe('PackageThickEnvelope');
+  });
+});
 
 describe('stripPolicyIdSuffix', () => {
   it('removes a trailing parenthetical number from a payment policy name', () => {

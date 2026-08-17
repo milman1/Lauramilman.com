@@ -145,7 +145,7 @@ If a bulk upload fails with **error 21917328**, the payment profile is not in th
 Shipping: `Daily Deals - 1Handling Day - (ID: 258461530020)`  
 Returns: `14 Day Returns Accepted - (ID: 258172155020)`
 
-After a prefill pass, fill price / condition / those three policy names and re-upload `ebay/ebay_listings_ready_to_publish.csv` (`Template=eBay-listings-template_EBAY_US`). Do not change `TrackingId`. Do not open the CSV in Excel.
+After a prefill pass, fill price / condition / those three policy names and re-upload `ebay/ebay_listings_ready_to_publish.csv` (`Template=eBay-listings-template_EBAY_US`). Calculated shipping also needs `PostalCode` `10036` (1145 6th Avenue) and a 2 lb `PackageThickEnvelope` weight. Do not change `TrackingId`. Do not open the CSV in Excel.
 
 ```sh
 npx tsx scripts/fix-ebay-file-exchange.ts \
