@@ -1,5 +1,6 @@
-import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL, WATCH } from '../config/pricing.js';
+import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
+import { priceWatchFromCost } from './watchPricing.js';
 
 export { FALLBACK_RULES };
 
@@ -134,30 +135,55 @@ export interface WatchComp {
 }
 
 /**
- * Watches: round(comp_mid × 0.97). No mid → round(cost × 1.10).
- * Comp mid is the sole market signal; accessory state and listing-low blends
- * do not move the published price.
+ * Watches: supplier-cost tiers via watchPricing.ts. Comp mid is stored for
+ * audit and gates needs_review when retail sits >40% under mid — it never
+ * sets the published price.
  */
 export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult {
-  if (comp && comp.midUsd > 0) {
-    const retailUsd = round(comp.midUsd * WATCH.compDiscount);
+  const outcome = priceWatchFromCost({
+    costUsd: item.costUsd,
+    compMidUsd: comp?.midUsd,
+    aftermarket: false, // normalize already excludes aftermarket
+  });
+
+  if (outcome.status === 'no_cost') {
     return {
-      ok: true,
-      priced: {
-        retailUsd,
-        marginPct: margin(retailUsd, item.costUsd),
-        compMidUsd: comp.midUsd,
-        compLowUsd: comp.lowUsd,
-        compAsOf: comp.asOf,
+      ok: false,
+      hold: { kind: item.kind, stockRef: item.stockRef, reason: 'watch_no_cost' },
+    };
+  }
+  if (outcome.status === 'excluded') {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'watch_aftermarket',
+        detail: outcome.reason,
       },
     };
   }
-  const retailUsd = round(item.costUsd * WATCH.noCompMultiple);
+  if (outcome.status === 'needs_review') {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'watch_needs_review',
+        detail: `retail ${outcome.retailUsd} < 60% of mid ${outcome.compMidUsd} (cost ${outcome.costUsd})`,
+      },
+    };
+  }
+
+  const retailUsd = outcome.retailUsd;
   return {
     ok: true,
     priced: {
       retailUsd,
       marginPct: margin(retailUsd, item.costUsd),
+      ...(comp && comp.midUsd > 0
+        ? { compMidUsd: comp.midUsd, compLowUsd: comp.lowUsd, compAsOf: comp.asOf }
+        : {}),
     },
   };
 }

@@ -125,6 +125,17 @@ The backfill is resumable (`watch_migrate_state.json`), skips titles that
 already start with `Pre-Owned ` / `Unworn `, merges tags with existing ones,
 and writes unrecognized conditions to `needs_review.csv`.
 
+### Watch pricing backfill
+
+Replaces the old `comp_mid × 0.97` retail with cost-tier markup
+(`src/watchPricing.ts`). Dry-run prints counts only; `--apply` writes prices
+(and tags `pricing-review` / leaves price alone for needs_review + no_cost):
+
+```sh
+npm run backfill:watch-pricing            # counts only
+npm run backfill:watch-pricing -- --apply # after reviewing counts
+```
+
 ### Lab pricing backfill
 
 After unpublishing Lab-Grown Diamond `lmny-feed` products:

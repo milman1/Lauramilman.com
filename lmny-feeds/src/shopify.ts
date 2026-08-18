@@ -866,6 +866,17 @@ export class ShopifyClient {
     );
     return data.productUpdate.userErrors.map((e) => e.message);
   }
+
+  /** Replace product tags without touching status, variants, or price. */
+  async setProductTags(id: string, tags: string[]): Promise<string[]> {
+    const data = await this.gql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(
+      `mutation($product: ProductUpdateInput!) {
+        productUpdate(product: $product) { userErrors { message } }
+      }`,
+      { product: { id, tags: [...new Set(tags)] } },
+    );
+    return data.productUpdate.userErrors.map((e) => e.message);
+  }
 }
 
 export async function downloadJsonl(url: string): Promise<unknown[]> {

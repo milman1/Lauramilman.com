@@ -9,6 +9,8 @@ import {
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
+/** Tag for watches held out of auto-pricing (needs_review / no_cost). */
+export const PRICING_REVIEW_TAG = 'pricing-review';
 /** Tag for watches whose brand is outside the curated WATCH_BRANDS list. */
 export const OTHER_WATCH_BRAND_TAG = 'other-watch-brand';
 /** Automated collection that gathers OTHER_WATCH_BRAND_TAG products. */
@@ -29,7 +31,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 9;
+export const PRODUCT_SCHEMA_VERSION = 10;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -200,7 +202,7 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     if (priced.compMidUsd !== undefined) {
       fields.push({ namespace: ns, key: 'comp_mid_usd', type: 'number_decimal', value: priced.compMidUsd.toFixed(2) });
     }
-    // Audit trail only — retail is round(comp_mid × 0.97) when a mid exists.
+    // Audit trail only — retail is cost-tier markup; mid never sets price.
     if (priced.compLowUsd !== undefined) {
       fields.push({ namespace: ns, key: 'comp_low_usd', type: 'number_decimal', value: priced.compLowUsd.toFixed(2) });
     }
