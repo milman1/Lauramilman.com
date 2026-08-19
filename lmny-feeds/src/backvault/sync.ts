@@ -63,6 +63,17 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const { domain, token } = await resolveToken();
   const client = new ShopifyClient(domain, token);
   await client.verifyAuth();
+  if (!opts.dryRun) {
+    const scopes = await client.grantedScopes();
+    const missing = ['write_products', 'write_publications'].filter((s) => !scopes.includes(s));
+    if (missing.length > 0) {
+      throw new Error(
+        `Refusing to write: Shopify token is missing ${missing.join(', ')} ` +
+          `(granted: ${scopes.join(', ') || 'none'}). Online Store publish needs write_publications.`,
+      );
+    }
+    console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
+  }
 
   const catalog = await fetchBackVaultCatalog(client);
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));

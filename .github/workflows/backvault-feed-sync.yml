@@ -31,6 +31,12 @@ on:
         description: 'Dry run (no writes to Shopify)'
         type: boolean
         default: true
+  # Touch lmny-feeds/.backvault-publish-trigger on main to force a live run
+  # without waiting for the Actions UI. Dry-run is the default for dispatch.
+  push:
+    branches: [main]
+    paths:
+      - 'lmny-feeds/.backvault-publish-trigger'
 
 concurrency:
   group: backvault-feed-sync
@@ -72,8 +78,8 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; then
             echo "Mode: LIVE"
             npx tsx src/backvault/sync.ts
-          elif [ "$EVENT" = "schedule" ]; then
-            echo "Mode: LIVE (weekly schedule)"
+          elif [ "$EVENT" = "schedule" ] || [ "$EVENT" = "push" ]; then
+            echo "Mode: LIVE ($EVENT)"
             npx tsx src/backvault/sync.ts
           else
             echo "Mode: dry run"
