@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
-import { diffCatalog, kindForHandle } from './diff.js';
+import { diffCatalog, kindForHandle, promoteShortMediaUpdates } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
@@ -291,6 +291,11 @@ async function main() {
       d.action = 'skip';
       d.reason = 'pricing_review';
     }
+  }
+  const feedImageCountByHandle = new Map(publishable.map((p) => [handleFor(p.item), p.item.imageUrls.length]));
+  const mediaShort = promoteShortMediaUpdates(decisions, catalog, feedImageCountByHandle);
+  if (mediaShort > 0) {
+    notes.push(`${mediaShort} watch(es) skipped as unchanged still hold fewer photos than the feed — re-sending galleries`);
   }
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;

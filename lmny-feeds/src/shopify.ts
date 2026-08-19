@@ -379,6 +379,12 @@ export class ShopifyClient {
   /**
    * Full read of feed-managed products via a bulk query (no pagination throttling).
    *
+   * Includes every `lmny-feed` product plus every Watch product. Feed watches
+   * use `w-<stock>` handles; those that lost the tag (or never got it) still
+   * have to be visible to the diff so a successful watch fetch can archive
+   * them when they leave the API. Estate watches use non-`w-` handles and
+   * `kindForHandle` ignores them — they are never archived by this path.
+   *
    * mediaCount deliberately counts only READY media. Shopify's own mediaCount
    * includes FAILED images, and a failed image is worse than none — the
    * product reports that it has a picture while the storefront shows the
@@ -391,7 +397,7 @@ export class ShopifyClient {
    */
   async fetchCatalog(): Promise<CatalogEntry[]> {
     const query = `{
-      products(query: "tag:'${FEED_TAG}'") {
+      products(query: "tag:'${FEED_TAG}' OR product_type:'${PRODUCT_TYPES.watch}'") {
         edges {
           node {
             id

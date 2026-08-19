@@ -370,9 +370,10 @@ export function buildProductSetInput(
   // `mediaCount === 0` test missed — one carrying the single image the
   // single-key media parse produced while the feed offers several.
   //
-  // This only runs on a create/update decision, so a product whose extra
-  // images permanently fail to process is not re-sent every hour: its hash is
-  // unchanged, and the diff skips it before reaching here.
+  // This only runs on a create/update decision. A matching hash used to skip
+  // the product before we got here, which is why one-photo watches never
+  // picked up ImageLink2/3. sync promotes those skips (`media_short`) so
+  // this branch actually runs. Once imageCount catches up, files stay off.
   if (!existing || existing.imageCount < item.imageUrls.length) {
     input.files = item.imageUrls.map((url, i) => ({
       originalSource: url,
