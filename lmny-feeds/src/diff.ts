@@ -79,3 +79,34 @@ export function diffCatalog(
 
   return decisions;
 }
+
+/**
+ * Hash match skips the product even when Shopify still holds the single photo
+ * the old ImageLink-only parse attached. productSet will re-send `files` only
+ * on create/update, so promote those skips before the write loop.
+ *
+ * Watches only — a store-wide sweep would rewrite tens of thousands of stones.
+ * Does not touch media-missing quarantine (those have no usable image and
+ * go through the rescue path).
+ */
+export function promoteShortMediaUpdates(
+  decisions: Decision[],
+  catalog: CatalogEntry[],
+  feedImageCountByHandle: Map<string, number>,
+): number {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const d of decisions) {
+    if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
+    if (kindForHandle(d.handle) !== 'watch') continue;
+    const have = catalogByHandle.get(d.handle);
+    const wantCount = feedImageCountByHandle.get(d.handle);
+    if (!have || wantCount == null) continue;
+    if (have.imageCount < wantCount) {
+      d.action = 'update';
+      d.reason = 'media_short';
+      promoted += 1;
+    }
+  }
+  return promoted;
+}
