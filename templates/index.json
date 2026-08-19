@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -17,23 +26,85 @@
     "trust-strip": {
       "type": "trust-strip",
       "blocks": {
-        "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
-        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
-        "trust-3": { "type": "item", "settings": { "text": "Authenticity Guaranteed" } },
-        "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
+        "trust-1": {
+          "type": "item",
+          "settings": {
+            "text": "Free Insured Shipping"
+          }
+        },
+        "trust-2": {
+          "type": "item",
+          "settings": {
+            "text": "14-Day Returns"
+          }
+        },
+        "trust-3": {
+          "type": "item",
+          "settings": {
+            "text": "Authenticity Guaranteed"
+          }
+        },
+        "trust-4": {
+          "type": "item",
+          "settings": {
+            "text": "Lifetime Warranty"
+          }
+        }
       },
-      "block_order": ["trust-1", "trust-2", "trust-3", "trust-4"]
+      "block_order": [
+        "trust-1",
+        "trust-2",
+        "trust-3",
+        "trust-4"
+      ],
+      "settings": {}
     },
     "collections-grid": {
       "type": "collections-grid",
       "blocks": {
-        "cat-engagement": { "type": "collection", "settings": { "collection": "engagement-rings" } },
-        "cat-wedding": { "type": "collection", "settings": { "collection": "wedding-bands" } },
-        "cat-bracelets": { "type": "collection", "settings": { "collection": "bracelets" } },
-        "cat-pendants": { "type": "collection", "settings": { "collection": "pendants-1", "title": "Pendants" } },
-        "cat-earrings": { "type": "collection", "settings": { "collection": "earrings" } }
+        "cat-engagement": {
+          "type": "collection",
+          "settings": {
+            "collection": "engagement-rings",
+            "title": ""
+          }
+        },
+        "cat-wedding": {
+          "type": "collection",
+          "settings": {
+            "collection": "wedding-bands",
+            "title": ""
+          }
+        },
+        "cat-bracelets": {
+          "type": "collection",
+          "settings": {
+            "collection": "bracelets",
+            "title": ""
+          }
+        },
+        "cat-pendants": {
+          "type": "collection",
+          "settings": {
+            "collection": "pendants-1",
+            "title": "Pendants"
+          }
+        },
+        "cat-earrings": {
+          "type": "collection",
+          "settings": {
+            "collection": "earrings",
+            "title": ""
+          }
+        }
       },
-      "block_order": ["cat-engagement", "cat-wedding", "cat-bracelets", "cat-pendants", "cat-earrings"],
+      "block_order": [
+        "cat-engagement",
+        "cat-wedding",
+        "cat-bracelets",
+        "cat-pendants",
+        "cat-earrings"
+      ],
       "settings": {
         "eyebrow": "Shop Our Collection",
         "title": "Collections",
@@ -46,7 +117,7 @@
         "eyebrow": "The Signature Edit",
         "title": "Signature Pieces",
         "description": "Natural diamonds and rare gemstones, crafted with more than thirty years of New York expertise.",
-        "collection": "engagement-rings",
+        "collection": "bracelets",
         "product_count": 8,
         "cta_text": "View All",
         "cta_url": "/collections/all"
@@ -58,6 +129,7 @@
         "eyebrow": "Shop the Look",
         "title": "Stack & Style",
         "collection": "bracelets",
+        "caption_title": "",
         "cta_text": "View Full Collection"
       }
     },
@@ -72,11 +144,33 @@
     "brand-story": {
       "type": "brand-story",
       "blocks": {
-        "stat-years": { "type": "stat", "settings": { "value": "30+", "label": "Years in the Diamond District" } },
-        "stat-nyc": { "type": "stat", "settings": { "value": "NYC", "label": "Designed in New York" } },
-        "stat-italy": { "type": "stat", "settings": { "value": "Italy", "label": "Crafted by Master Goldsmiths" } }
+        "stat-years": {
+          "type": "stat",
+          "settings": {
+            "value": "30+",
+            "label": "Years in the Diamond District"
+          }
+        },
+        "stat-nyc": {
+          "type": "stat",
+          "settings": {
+            "value": "NYC",
+            "label": "Designed in New York"
+          }
+        },
+        "stat-italy": {
+          "type": "stat",
+          "settings": {
+            "value": "Italy",
+            "label": "Crafted by Master Goldsmiths"
+          }
+        }
       },
-      "block_order": ["stat-years", "stat-nyc", "stat-italy"],
+      "block_order": [
+        "stat-years",
+        "stat-nyc",
+        "stat-italy"
+      ],
       "settings": {
         "eyebrow": "The Beginning",
         "title": "Three Decades\nin the Making",
@@ -89,12 +183,41 @@
     "preowned-maison": {
       "type": "preowned-maison",
       "blocks": {
-        "maison-cartier": { "type": "maison", "settings": { "collection": "cartier", "title": "Cartier" } },
-        "maison-vca": { "type": "maison", "settings": { "collection": "van-cleef-arpels", "title": "Van Cleef & Arpels" } },
-        "maison-bvlgari": { "type": "maison", "settings": { "collection": "bvlgari", "title": "Bvlgari" } },
-        "maison-tiffany": { "type": "maison", "settings": { "collection": "tiffany", "title": "Tiffany & Co." } }
+        "maison-cartier": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier",
+            "title": "Cartier"
+          }
+        },
+        "maison-vca": {
+          "type": "maison",
+          "settings": {
+            "collection": "van-cleef-arpels",
+            "title": "Van Cleef & Arpels"
+          }
+        },
+        "maison-bvlgari": {
+          "type": "maison",
+          "settings": {
+            "collection": "bvlgari",
+            "title": "Bvlgari"
+          }
+        },
+        "maison-tiffany": {
+          "type": "maison",
+          "settings": {
+            "collection": "tiffany",
+            "title": "Tiffany & Co."
+          }
+        }
       },
-      "block_order": ["maison-cartier", "maison-vca", "maison-bvlgari", "maison-tiffany"],
+      "block_order": [
+        "maison-cartier",
+        "maison-vca",
+        "maison-bvlgari",
+        "maison-tiffany"
+      ],
       "settings": {
         "eyebrow": "Authenticated Estate",
         "title": "The Pre-Owned Maison",
@@ -107,28 +230,71 @@
     "peaceful-diamonds": {
       "type": "peaceful-diamonds",
       "blocks": {
-        "pd-point-1": { "type": "point", "settings": { "text": "Certified lab-grown diamonds" } },
-        "pd-point-2": { "type": "point", "settings": { "text": "Crafted to the same LMNY standard" } },
-        "pd-point-3": { "type": "point", "settings": { "text": "Exceptional carat weight, accessible price" } }
+        "pd-point-1": {
+          "type": "point",
+          "settings": {
+            "text": "Certified lab-grown diamonds"
+          }
+        },
+        "pd-point-2": {
+          "type": "point",
+          "settings": {
+            "text": "Crafted to the same LMNY standard"
+          }
+        },
+        "pd-point-3": {
+          "type": "point",
+          "settings": {
+            "text": "Exceptional carat weight, accessible price"
+          }
+        }
       },
-      "block_order": ["pd-point-1", "pd-point-2", "pd-point-3"],
+      "block_order": [
+        "pd-point-1",
+        "pd-point-2",
+        "pd-point-3"
+      ],
       "settings": {
         "chip_text": "The Lab-Grown Collection",
         "title": "Peaceful Diamonds",
         "byline": "by Laura Milman New York",
         "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
         "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Peaceful Diamonds"
+        "cta_text": "Shop Peaceful Diamonds",
+        "secondary_cta_text": "",
+        "secondary_cta_url": ""
       }
     },
     "private-clients": {
       "type": "private-clients",
       "blocks": {
-        "svc-consult": { "type": "service", "settings": { "title": "Private Consultations", "text": "One-on-one appointments, in person in New York or by video." } },
-        "svc-sourcing": { "type": "service", "settings": { "title": "Diamond & Gemstone Sourcing", "text": "Rare natural stones sourced to your brief through our Diamond District network." } },
-        "svc-bespoke": { "type": "service", "settings": { "title": "Bespoke Commissions", "text": "One-of-a-kind pieces designed in New York and crafted in Italy." } }
+        "svc-consult": {
+          "type": "service",
+          "settings": {
+            "title": "Private Consultations",
+            "text": "One-on-one appointments, in person in New York or by video."
+          }
+        },
+        "svc-sourcing": {
+          "type": "service",
+          "settings": {
+            "title": "Diamond & Gemstone Sourcing",
+            "text": "Rare natural stones sourced to your brief through our Diamond District network."
+          }
+        },
+        "svc-bespoke": {
+          "type": "service",
+          "settings": {
+            "title": "Bespoke Commissions",
+            "text": "One-of-a-kind pieces designed in New York and crafted in Italy."
+          }
+        }
       },
-      "block_order": ["svc-consult", "svc-sourcing", "svc-bespoke"],
+      "block_order": [
+        "svc-consult",
+        "svc-sourcing",
+        "svc-bespoke"
+      ],
       "settings": {
         "eyebrow": "Private Clients",
         "title": "Bespoke, By Appointment",
@@ -136,18 +302,6 @@
         "cta_text": "Book a Consultation",
         "cta_url": "/pages/private-clients",
         "note": "Complimentary · No obligation"
-      }
-    },
-    "closing-cta": {
-      "type": "closing-cta",
-      "settings": {
-        "title": "Begin Your Story",
-        "description": "Exceptional natural stones, storied estate pieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
-        "primary_cta_text": "Shop the Collection",
-        "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Book a Consultation",
-        "secondary_cta_url": "/pages/private-clients",
-        "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
       }
     },
     "reviews": {
@@ -189,7 +343,11 @@
           }
         }
       },
-      "block_order": ["t1", "t2", "t3"],
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ],
       "settings": {
         "eyebrow": "What Our Clients Say",
         "title": "Testimonials"
@@ -203,6 +361,18 @@
         "placeholder": "Your email address",
         "button_text": "Unlock 10% off",
         "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
+      }
+    },
+    "closing-cta": {
+      "type": "closing-cta",
+      "settings": {
+        "title": "Begin Your Story",
+        "description": "Exceptional natural stones, storied estate pieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
+        "primary_cta_text": "Shop the Collection",
+        "primary_cta_url": "/collections/all",
+        "secondary_cta_text": "Book a Consultation",
+        "secondary_cta_url": "/pages/private-clients",
+        "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
       }
     }
   },
