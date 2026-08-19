@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { diffBackVaultCatalog } from '../../src/backvault/diff.js';
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
 
-function entry(handle: string, hash: string | null, status = 'ACTIVE'): BackVaultCatalogEntry {
-  return { id: `gid://shopify/Product/${handle}`, handle, status, contentHash: hash, imageCount: 1 };
+function entry(handle: string, hash: string | null, status = 'ACTIVE', published = true): BackVaultCatalogEntry {
+  return { id: `gid://shopify/Product/${handle}`, handle, status, contentHash: hash, imageCount: 1, published };
 }
 
 describe('diffBackVaultCatalog', () => {
@@ -25,6 +25,19 @@ describe('diffBackVaultCatalog', () => {
     const decisions = diffBackVaultCatalog([{ handle: 'bv-cartier', contentHash: 'abc' }], [entry('bv-cartier', 'abc')]);
     expect(decisions[0]!.action).toBe('skip');
     expect(decisions[0]!.reason).toBe('unchanged');
+  });
+
+  it('publishes active items that exist but are not on Online Store', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'abc' }],
+      [entry('bv-cartier', 'abc', 'ACTIVE', false)],
+    );
+    expect(decisions[0]).toEqual({
+      handle: 'bv-cartier',
+      action: 'publish',
+      reason: 'unpublished',
+      productId: 'gid://shopify/Product/bv-cartier',
+    });
   });
 
   it('reactivates an inactive item with a matching hash', () => {

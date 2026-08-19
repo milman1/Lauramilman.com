@@ -39,6 +39,7 @@ interface RunSummary {
   dryRun: boolean;
   feedStats: ReturnType<typeof normalizeBackVaultFeed>['stats'];
   decisions: Decision[];
+  published: number;
   errors: string[];
 }
 
@@ -75,6 +76,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
 
   const decisions = diffBackVaultCatalog(desired, catalog);
   const syncedAt = new Date().toISOString();
+  const publicationId = opts.dryRun ? null : await client.onlineStorePublicationId();
+  let published = 0;
 
   for (const decision of decisions) {
     if (decision.action === 'skip') continue;
@@ -91,6 +94,16 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
         }
         continue;
       }
+      if (decision.action === 'publish') {
+        if (!opts.dryRun && decision.productId && publicationId) {
+          const pubErrors = await client.publishResource(decision.productId, publicationId);
+          if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
+          else published += 1;
+        } else if (opts.dryRun) {
+          published += 1;
+        }
+        continue;
+      }
       const item = itemByHandle.get(decision.handle);
       if (!item) continue; // shouldn't happen: archive is the only decision without a feed item
       const existingEntry = catalogByHandle.get(decision.handle);
@@ -102,6 +115,12 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       if (!opts.dryRun) {
         const result = await client.productSet(input);
         if (result.errors.length) errors.push(`${decision.handle}: ${result.errors.join('; ')}`);
+        const productId = result.id ?? decision.productId;
+        if (productId && publicationId && result.errors.length === 0) {
+          const pubErrors = await client.publishResource(productId, publicationId);
+          if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
+          else published += 1;
+        }
       }
     } catch (err) {
       errors.push(`${decision.handle}: ${err instanceof Error ? err.message : String(err)}`);
@@ -114,6 +133,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     dryRun: opts.dryRun,
     feedStats: stats,
     decisions,
+    published,
     errors,
   };
 
@@ -124,7 +144,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     return acc;
   }, {});
   console.log(
-    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} errors=${errors.length}`,
+    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} published=${published} errors=${errors.length}`,
   );
   if (errors.length > 0) {
     console.error('Errors:');
@@ -156,8 +176,10 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `## Catalog changes`,
     `- Create: ${counts.create ?? 0}`,
     `- Update: ${counts.update ?? 0}`,
+    `- Publish to Online Store: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
     `- Unchanged: ${counts.skip ?? 0}`,
+    `- Published this run: ${summary.published}`,
     '',
   ];
   if (summary.errors.length > 0) {
