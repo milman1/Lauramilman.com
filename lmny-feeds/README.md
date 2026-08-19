@@ -198,6 +198,12 @@ npm run sync:backvault       # live (needs Shopify env vars)
 8. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
    sync uses, then `publishablePublish` to the Online Store channel.
    `productSet` alone leaves products in Admin but 404ing on the storefront.
+9. **Replace older vintage CSV rows** (`src/backvault/legacy.ts`): the
+   May–July import used The Back Vault source handle as the Shopify handle.
+   When `bv-<sourceHandle>` is live, that older listing is archived and its
+   URL redirects to the new product. Unique vintage SKUs with no `bv-` twin
+   are left alone. Diamond/watch feed handles (`nd-` / `lg-` / `w-`) are
+   never archived this way.
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated

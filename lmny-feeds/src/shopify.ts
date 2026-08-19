@@ -595,6 +595,76 @@ export class ShopifyClient {
     return data.urlRedirectCreate.userErrors.filter((e) => e.code !== 'TAKEN').map((e) => e.message);
   }
 
+  /**
+   * Look up a product by exact handle. Used to find the pre-`bv-` CSV
+   * import that shares The Back Vault source handle with a synced listing.
+   */
+  async findProductByHandle(handle: string): Promise<{
+    id: string;
+    handle: string;
+    status: string;
+    tags: string[];
+  } | null> {
+    const data = await this.gql<{
+      products: { nodes: Array<{ id: string; handle: string; status: string; tags: string[] }> };
+    }>(
+      `query($q: String!) {
+        products(first: 5, query: $q) {
+          nodes { id handle status tags }
+        }
+      }`,
+      { q: `handle:${handle}` },
+    );
+    return data.products.nodes.find((n) => n.handle === handle) ?? null;
+  }
+
+  /**
+   * Create a URL redirect, or update the existing one when the path is taken.
+   * The Back Vault CSV duplicates already have storefront URLs; those must
+   * follow the new `bv-` handle (and later `/collections/all` if that SKU
+   * leaves the feed). Treating TAKEN as success would leave a stale target.
+   */
+  async upsertUrlRedirect(path: string, target: string): Promise<string[]> {
+    const created = await this.gql<{
+      urlRedirectCreate: { userErrors: Array<{ code: string | null; message: string }> };
+    }>(
+      `mutation($redirect: UrlRedirectInput!) {
+        urlRedirectCreate(urlRedirect: $redirect) {
+          urlRedirect { id }
+          userErrors { code message }
+        }
+      }`,
+      { redirect: { path, target } },
+    );
+    const errors = created.urlRedirectCreate.userErrors;
+    const other = errors.filter((e) => e.code !== 'TAKEN').map((e) => e.message);
+    if (!errors.some((e) => e.code === 'TAKEN')) return other;
+
+    const found = await this.gql<{
+      urlRedirects: { nodes: Array<{ id: string; path: string; target: string }> };
+    }>(
+      `query($q: String!) {
+        urlRedirects(first: 10, query: $q) { nodes { id path target } }
+      }`,
+      { q: `path:${path}` },
+    );
+    const existing = found.urlRedirects.nodes.find((n) => n.path === path);
+    if (!existing) return other.length ? other : [`redirect TAKEN but no existing row for ${path}`];
+    if (existing.target === target) return other;
+
+    const updated = await this.gql<{
+      urlRedirectUpdate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($id: ID!, $urlRedirect: UrlRedirectInput!) {
+        urlRedirectUpdate(id: $id, urlRedirect: $urlRedirect) {
+          userErrors { message }
+        }
+      }`,
+      { id: existing.id, urlRedirect: { path, target } },
+    );
+    return [...other, ...updated.urlRedirectUpdate.userErrors.map((e) => e.message)];
+  }
+
   async archiveProduct(id: string): Promise<string[]> {
     const data = await this.gql<{
       productUpdate: { userErrors: Array<{ message: string }> };
