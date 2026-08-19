@@ -190,12 +190,14 @@ npm run sync:backvault       # live (needs Shopify env vars)
      `Authenticated by Laura Milman New York.`
 6. **Price**: listed price from The Back Vault is passed through unchanged
    (no markup). Cost is not known, so `inventoryItem.cost` is omitted.
-7. **Diff** (`src/backvault/diff.ts`): create / update / archive / skip
+7. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
+   ACTIVE products that exist but are not on the Online Store channel
+   get a `publish` decision (no rewrite) so a re-run can put them live.
 8. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
-   sync uses — direct (non-bulk) since weekly volume is at most a few
-   hundred products.
+   sync uses, then `publishablePublish` to the Online Store channel.
+   `productSet` alone leaves products in Admin but 404ing on the storefront.
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated

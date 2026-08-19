@@ -7,6 +7,8 @@ export interface BackVaultCatalogEntry {
   status: string;
   contentHash: string | null;
   imageCount: number;
+  /** True when the product is published to the Online Store sales channel. */
+  published: boolean;
 }
 
 /**
@@ -28,6 +30,7 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
           status: string;
           metafield: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
+          resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
         }>;
       };
     } = await client.gql(
@@ -40,6 +43,7 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
             status
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
+            resourcePublications(first: 10) { nodes { isPublished publication { name } } }
           }
         }
       }`,
@@ -49,12 +53,16 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
       const imageCount = node.media.edges.filter(
         (e) => e.node.status === 'READY' && e.node.mediaContentType === 'IMAGE',
       ).length;
+      const published = node.resourcePublications.nodes.some(
+        (p) => p.isPublished && (p.publication.name === 'Online Store' || p.publication.name === 'Online Store 2.0'),
+      );
       entries.push({
         id: node.id,
         handle: node.handle,
         status: node.status,
         contentHash: node.metafield?.value ?? null,
         imageCount,
+        published,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;
