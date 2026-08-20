@@ -8,14 +8,14 @@
  *   npx tsx scripts/backfill-watch-pricing.ts --apply
  *   npx tsx scripts/backfill-watch-pricing.ts --limit=25
  *
- * Selects product_type:Watch + tag:lmny-feed (~620). Reads InventoryItem.cost
- * and optional lmny_feed.comp_mid_usd. Comp mid never sets price — review gate
- * only. needs_review / no_cost → tag pricing-review, leave existing price.
+ * Selects product_type:Watch + tag:lmny-feed (~620). Reads InventoryItem.cost.
+ * Retail is cost × chart multiplier — Hours mid is not used. no_cost → tag
+ * pricing-review, leave existing price.
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { FEED_TAG, METAFIELD_NAMESPACE, PRICING_REVIEW_TAG, PRODUCT_TYPES } from '../src/product.js';
+import { FEED_TAG, PRICING_REVIEW_TAG, PRODUCT_TYPES } from '../src/product.js';
 import { ShopifyClient, downloadJsonl, exchangeClientCredentials } from '../src/shopify.js';
 import { priceWatchFromCost } from '../src/watchPricing.js';
 
@@ -35,7 +35,6 @@ interface WatchRow {
   variantId: string | null;
   price: number | null;
   costUsd: number | null;
-  compMidUsd: number | null;
 }
 
 function parseFlags(argv: string[]): Flags {
@@ -77,8 +76,7 @@ function csvEscape(value: string): string {
 
 async function fetchWatchRows(shopify: ShopifyClient): Promise<WatchRow[]> {
   // Bulk query flattens nested connections; variants follow their product.
-  // Cost comes from InventoryItem.unitCost (written by sync). Comp mid is
-  // audit/review only and never enters the retail math.
+  // Cost comes from InventoryItem.unitCost (written by sync).
   const query = `{
     products(query: "product_type:'${PRODUCT_TYPES.watch}' AND tag:'${FEED_TAG}'") {
       edges {
@@ -87,7 +85,6 @@ async function fetchWatchRows(shopify: ShopifyClient): Promise<WatchRow[]> {
           handle
           title
           tags
-          metafield(namespace: "${METAFIELD_NAMESPACE}", key: "comp_mid_usd") { value }
           variants(first: 1) {
             edges {
               node {
@@ -131,7 +128,6 @@ async function fetchWatchRows(shopify: ShopifyClient): Promise<WatchRow[]> {
         variantId: null,
         price: null,
         costUsd: null,
-        compMidUsd: numOrNull((r.metafield as { value?: string } | null)?.value),
       });
       order.push(r.id);
     } else if (typeof r.__parentId === 'string' && typeof r.id === 'string' && r.price != null) {
@@ -178,7 +174,7 @@ async function main() {
   console.log(`Fetched ${rows.length} Watch + ${FEED_TAG} products`);
   if (flags.limit) rows = rows.slice(0, flags.limit);
 
-  const counts = { priced: 0, needs_review: 0, no_cost: 0, excluded: 0, unchanged: 0 };
+  const counts = { priced: 0, no_cost: 0, excluded: 0, unchanged: 0 };
   const reviewRows: string[] = [];
   const pricedUpdates: Array<{ row: WatchRow; retailUsd: number }> = [];
   const tagOnly: WatchRow[] = [];
@@ -186,7 +182,6 @@ async function main() {
   for (const row of rows) {
     const outcome = priceWatchFromCost({
       costUsd: row.costUsd,
-      compMidUsd: row.compMidUsd,
     });
     if (outcome.status === 'priced') {
       counts.priced += 1;
@@ -195,28 +190,11 @@ async function main() {
       } else {
         pricedUpdates.push({ row, retailUsd: outcome.retailUsd });
       }
-    } else if (outcome.status === 'needs_review') {
-      counts.needs_review += 1;
-      tagOnly.push(row);
-      reviewRows.push(
-        [
-          row.handle,
-          row.title,
-          outcome.status,
-          outcome.reason,
-          row.costUsd ?? '',
-          row.compMidUsd ?? '',
-          outcome.retailUsd,
-          row.price ?? '',
-        ]
-          .map((c) => csvEscape(String(c)))
-          .join(','),
-      );
     } else if (outcome.status === 'no_cost') {
       counts.no_cost += 1;
       tagOnly.push(row);
       reviewRows.push(
-        [row.handle, row.title, outcome.status, '', row.costUsd ?? '', row.compMidUsd ?? '', '', row.price ?? '']
+        [row.handle, row.title, outcome.status, '', row.costUsd ?? '', '', row.price ?? '']
           .map((c) => csvEscape(String(c)))
           .join(','),
       );
@@ -228,13 +206,12 @@ async function main() {
   console.log('=== Watch pricing dry-run counts ===');
   console.log(`total          ${rows.length}`);
   console.log(`priced         ${counts.priced}  (${pricedUpdates.length} would change; ${counts.unchanged} already match)`);
-  console.log(`needs_review   ${counts.needs_review}`);
   console.log(`no_cost        ${counts.no_cost}`);
   console.log(`excluded       ${counts.excluded}`);
 
   await mkdir(OUT_DIR, { recursive: true });
   if (reviewRows.length > 0) {
-    const header = 'handle,title,status,reason,cost_usd,comp_mid_usd,computed_retail,current_price\n';
+    const header = 'handle,title,status,reason,cost_usd,computed_retail,current_price\n';
     await writeFile(path.join(OUT_DIR, REVIEW_CSV), header + reviewRows.join('\n') + '\n');
     console.log(`Wrote ${reviewRows.length} review row(s) → ${path.join(OUT_DIR, REVIEW_CSV)}`);
   }

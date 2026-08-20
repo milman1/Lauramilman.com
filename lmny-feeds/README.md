@@ -26,8 +26,16 @@ holds a stones table — Shopify products are the only live copy.
      to clear it. 20% margin-on-retail is why no published natural sits below
      cost × 1.25.
    - lab: tiered multiplier on total cost (~1.55× average)
-   - watches: `round(comp_mid × 0.97)`; when Hours returns no mid, fall back
-     to `round(cost × 1.10)`. No accessory haircut and no low→mid blend.
+   - watches: supplier cost × chart (`src/watchPricing.ts`). **No Hours mid.**
+     Aftermarket is excluded at normalize. Missing cost is tagged
+     `pricing-review` and the existing Shopify price is left alone.
+
+     | Supplier cost | Multiplier | Retail |
+     |---|---|---|
+     | Under $5,000 | 1.30× | Cost × 1.30, rounded up to nearest $100 |
+     | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
+     | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
+     | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    archive / skip. Unchanged hashes are skipped entirely. Items that leave the
    feed are archived, never deleted (URLs persist). A feed that fails to fetch
@@ -83,7 +91,7 @@ Flags: `--dry-run`, `--limit=N` (truncate each feed for testing).
 
 ### Environment
 
-Five Actions secrets (required):
+Required Actions secrets:
 
 | Secret | Notes |
 |---|---|
@@ -91,8 +99,8 @@ Five Actions secrets (required):
 | `SHOPIFY_ADMIN_TOKEN` | Admin API token (`shpat_…`). **Or** use the client-credentials pair below |
 | `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` | Dev Dashboard app Client ID + Secret; exchanged for a 24h token at runtime |
 | `BELGIUMDIA_API_KEY` | Secret only — never logged, sent via header |
-| `HOURS_API_URL` | Direct Supabase function URL used as-is; a site root gets `/api/comps` appended |
-| `HOURS_API_KEY` | Hours auth |
+
+Watch retail does not use Hours. `HOURS_API_URL` / `HOURS_API_KEY` are unused by sync.
 
 Optional (dual-write):
 
@@ -127,9 +135,9 @@ and writes unrecognized conditions to `needs_review.csv`.
 
 ### Watch pricing backfill
 
-Replaces the old `comp_mid × 0.97` retail with cost-tier markup
+Replaces live Shopify watch prices with cost-tier markup
 (`src/watchPricing.ts`). Dry-run prints counts only; `--apply` writes prices
-(and tags `pricing-review` / leaves price alone for needs_review + no_cost):
+(and tags `pricing-review` / leaves price alone when cost is missing):
 
 ```sh
 npm run backfill:watch-pricing            # counts only

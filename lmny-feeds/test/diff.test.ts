@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diffCatalog, kindForHandle, promoteShortMediaUpdates } from '../src/diff.js';
+import { diffCatalog, kindForHandle, promoteShortMediaUpdates, skipPricingReviewArchives } from '../src/diff.js';
 import type { CatalogEntry, DesiredEntry, Kind } from '../src/types.js';
 
 const ALL_KINDS = new Set<Kind>(['natural', 'lab', 'watch']);
@@ -80,6 +80,14 @@ describe('diff decisions', () => {
   it('ignores non-feed handles', () => {
     const catalog = [entry({ handle: 'halo-black-and-white-diamond-ring' })];
     expect(diffCatalog([], catalog, ALL_KINDS)).toEqual([]);
+  });
+
+  it('does not archive watches held for pricing review', () => {
+    const catalog = [entry({ handle: 'w-3613' }), entry({ handle: 'w-sold' })];
+    const d = diffCatalog([], catalog, ALL_KINDS, new Set(['w-3613']));
+    skipPricingReviewArchives(d, new Set(['w-3613']));
+    expect(d.find((x) => x.handle === 'w-3613')).toMatchObject({ action: 'skip', reason: 'pricing_review' });
+    expect(d.find((x) => x.handle === 'w-sold')).toMatchObject({ action: 'archive', reason: 'left_feed' });
   });
 
   it('archives a w- handle watch that left the API even without the feed tag', () => {

@@ -1,42 +1,33 @@
 /**
- * Watch retail pricing from supplier unit cost.
+ * Watch retail from supplier unit cost only. No Hours / market mid.
  *
- * Comps (Hours mid) are NEVER used to set price — only to flag suspicious
- * supplier cost data for manual review when the computed retail sits more
- * than 40% below mid.
+ * Chart (first matching band wins):
+ *   Under $5,000          1.30×  round up to $100
+ *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
+ *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
+ *   Above $40,000         1.08×  round up to $100, min $44,800
  *
- * Tiers (cost → multiplier), then round UP to nearest $100, then floor each
- * tier at the previous tier's rounded ceiling so a higher cost never retail
- * for less than a lower one (boundary inversion).
+ * Band mins are the previous band's ceiling so retail never drops as cost
+ * crosses a boundary.
  */
 
 export const WATCH_COST_TIERS = [
-  { maxExclusive: 5_000, multiplier: 1.3 },
-  { maxExclusive: 15_000, multiplier: 1.2 },
-  { maxExclusive: 40_000, multiplier: 1.12 },
-  { maxExclusive: Number.POSITIVE_INFINITY, multiplier: 1.08 },
+  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
+  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
 ] as const;
 
-/** Hold for review when retail < comp_mid × (1 − this). */
-export const COMP_REVIEW_DISCOUNT = 0.4;
+export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
 
 export type WatchPricingOutcome =
   | { status: 'priced'; retailUsd: number }
   | { status: 'excluded'; reason: 'aftermarket' }
-  | { status: 'no_cost' }
-  | {
-      status: 'needs_review';
-      reason: 'below_comp_mid';
-      retailUsd: number;
-      costUsd: number;
-      compMidUsd: number;
-    };
+  | { status: 'no_cost' };
 
 export interface WatchPricingInput {
   /** Supplier unit cost in USD. Missing / ≤0 → no_cost. */
   costUsd?: number | null;
-  /** Hours / market mid — audit + review gate only; never enters retail math. */
-  compMidUsd?: number | null;
   /** Feed condition aftermarket — excluded entirely. */
   aftermarket?: boolean;
 }
@@ -49,33 +40,24 @@ export function roundUpTo100(usd: number): number {
   return Math.ceil((usd - 1e-6) / 100) * 100;
 }
 
-function tierIndexForCost(costUsd: number): number {
-  for (let i = 0; i < WATCH_COST_TIERS.length; i++) {
-    if (costUsd < WATCH_COST_TIERS[i]!.maxExclusive) return i;
+export function tierForCost(costUsd: number): WatchCostTier {
+  for (const tier of WATCH_COST_TIERS) {
+    if (tier.maxInclusive ? costUsd <= tier.maxCostUsd : costUsd < tier.maxCostUsd) {
+      return tier;
+    }
   }
-  return WATCH_COST_TIERS.length - 1;
+  return WATCH_COST_TIERS[WATCH_COST_TIERS.length - 1]!;
 }
 
-/**
- * Floor for tier `index`: previous tier's rounded ceiling at its cost boundary.
- * Tier 0 has no floor. Using the boundary × previous multiplier (not the
- * open-ended max-cost) is what kills the $4,999→$5,000 inversion.
- */
+/** Band minimum retail (0 under $5k). */
 export function tierFloorUsd(tierIndex: number): number {
-  if (tierIndex <= 0) return 0;
-  const prev = WATCH_COST_TIERS[tierIndex - 1]!;
-  return roundUpTo100(prev.maxExclusive * prev.multiplier);
+  return WATCH_COST_TIERS[tierIndex]?.minRetailUsd ?? 0;
 }
 
-/**
- * Pure retail from cost alone — no comps. Exported for tests / backfill
- * diagnostics that want the number before the review gate.
- */
+/** Pure retail from cost alone. */
 export function retailFromCost(costUsd: number): number {
-  const idx = tierIndexForCost(costUsd);
-  const tier = WATCH_COST_TIERS[idx]!;
-  const raw = roundUpTo100(costUsd * tier.multiplier);
-  return Math.max(raw, tierFloorUsd(idx));
+  const tier = tierForCost(costUsd);
+  return Math.max(roundUpTo100(costUsd * tier.multiplier), tier.minRetailUsd);
 }
 
 /**
@@ -85,7 +67,6 @@ export function retailFromCost(costUsd: number): number {
  *  - priced        → safe to publish / update variant price
  *  - excluded      → aftermarket; do not import
  *  - no_cost       → missing cost; do not publish / do not overwrite price
- *  - needs_review  → retail >40% under mid; hold, tag, leave existing price
  */
 export function priceWatchFromCost(input: WatchPricingInput): WatchPricingOutcome {
   if (input.aftermarket) {
@@ -97,17 +78,5 @@ export function priceWatchFromCost(input: WatchPricingInput): WatchPricingOutcom
     return { status: 'no_cost' };
   }
 
-  const retailUsd = retailFromCost(cost);
-  const mid = input.compMidUsd;
-  if (mid != null && mid > 0 && retailUsd < mid * (1 - COMP_REVIEW_DISCOUNT)) {
-    return {
-      status: 'needs_review',
-      reason: 'below_comp_mid',
-      retailUsd,
-      costUsd: cost,
-      compMidUsd: mid,
-    };
-  }
-
-  return { status: 'priced', retailUsd };
+  return { status: 'priced', retailUsd: retailFromCost(cost) };
 }

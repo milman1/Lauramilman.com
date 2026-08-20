@@ -135,14 +135,12 @@ export interface WatchComp {
 }
 
 /**
- * Watches: supplier-cost tiers via watchPricing.ts. Comp mid is stored for
- * audit and gates needs_review when retail sits >40% under mid — it never
- * sets the published price.
+ * Watches: supplier-cost tiers via watchPricing.ts. No Hours mid — retail is
+ * cost × chart multiplier, rounded up to $100, with the chart band floors.
  */
-export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult {
+export function priceWatch(item: WatchItem): PriceResult {
   const outcome = priceWatchFromCost({
     costUsd: item.costUsd,
-    compMidUsd: comp?.midUsd,
     aftermarket: false, // normalize already excludes aftermarket
   });
 
@@ -163,17 +161,6 @@ export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult
       },
     };
   }
-  if (outcome.status === 'needs_review') {
-    return {
-      ok: false,
-      hold: {
-        kind: item.kind,
-        stockRef: item.stockRef,
-        reason: 'watch_needs_review',
-        detail: `retail ${outcome.retailUsd} < 60% of mid ${outcome.compMidUsd} (cost ${outcome.costUsd})`,
-      },
-    };
-  }
 
   const retailUsd = outcome.retailUsd;
   return {
@@ -181,9 +168,6 @@ export function priceWatch(item: WatchItem, comp: WatchComp | null): PriceResult
     priced: {
       retailUsd,
       marginPct: margin(retailUsd, item.costUsd),
-      ...(comp && comp.midUsd > 0
-        ? { compMidUsd: comp.midUsd, compLowUsd: comp.lowUsd, compAsOf: comp.asOf }
-        : {}),
     },
   };
 }
