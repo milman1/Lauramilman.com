@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { diffCatalog, kindForHandle, promoteShortMediaUpdates, skipPricingReviewArchives } from '../src/diff.js';
+import { isUnavailableProductHandle } from '../config/unavailable.js';
+import {
+  applyUnavailableArchives,
+  diffCatalog,
+  kindForHandle,
+  promoteShortMediaUpdates,
+  skipPricingReviewArchives,
+} from '../src/diff.js';
 import type { CatalogEntry, DesiredEntry, Kind } from '../src/types.js';
 
 const ALL_KINDS = new Set<Kind>(['natural', 'lab', 'watch']);
@@ -137,5 +144,43 @@ describe('promoteShortMediaUpdates', () => {
     expect(n).toBe(0);
     expect(d.find((x) => x.handle === 'nd-a')?.action).toBe('skip');
     expect(d.find((x) => x.handle === 'w-broken')?.reason).toBe('media_missing_quarantine');
+  });
+});
+
+describe('applyUnavailableArchives', () => {
+  it('archives a denylisted estate watch the feed diff would ignore', () => {
+    const handle = 'hermes-stainless-steel-kelly-pm-double-tour-gold-tone-blue-watch-rr2954';
+    const catalog = [entry({ handle, tags: [] })];
+    const d = diffCatalog([], catalog, ALL_KINDS);
+    expect(d).toEqual([]);
+    const n = applyUnavailableArchives(d, catalog, isUnavailableProductHandle);
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'archive', reason: 'merchant_unavailable', handle });
+  });
+
+  it('archives the Back Vault duplicate of a denylisted watch', () => {
+    const handle = 'bv-hermes-stainless-steel-mother-of-pearl-dial-watch-rr2613';
+    const catalog = [entry({ handle, tags: ['backvault-feed'] })];
+    const d = diffCatalog([], catalog, ALL_KINDS);
+    const n = applyUnavailableArchives(d, catalog, isUnavailableProductHandle);
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'archive', reason: 'merchant_unavailable' });
+  });
+
+  it('does not reopen a denylisted watch for a gallery backfill', () => {
+    const handle = 'hermes-stainless-steel-kelly-pm-double-tour-gold-tone-blue-watch-rr2954';
+    const catalog = [entry({ handle, contentHash: 'h1', imageCount: 1 })];
+    const d = diffCatalog([want(handle, 'h1')], catalog, ALL_KINDS);
+    promoteShortMediaUpdates(d, catalog, new Map([[handle, 3]]));
+    applyUnavailableArchives(d, catalog, isUnavailableProductHandle);
+    expect(d[0]).toMatchObject({ action: 'archive', reason: 'merchant_unavailable' });
+  });
+
+  it('leaves other estate watches alone', () => {
+    const catalog = [entry({ handle: 'pre-owned-cartier-tank', tags: [] })];
+    const d = diffCatalog([], catalog, ALL_KINDS);
+    const n = applyUnavailableArchives(d, catalog, isUnavailableProductHandle);
+    expect(n).toBe(0);
+    expect(d).toEqual([]);
   });
 });
