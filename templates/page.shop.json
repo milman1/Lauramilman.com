@@ -1,0 +1,90 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "Laura Milman · New York",
+        "heading": "Shop Fine Jewelry",
+        "subheading": "Rings, necklaces, earrings, and estate pieces — designed in New York, crafted in Italy. Timepieces live in their own collection.",
+        "primary_cta_text": "All Jewelry",
+        "primary_cta_url": "/collections/all",
+        "secondary_cta_text": "Book a Consultation",
+        "secondary_cta_url": "/pages/private-clients",
+        "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
+        "image_opacity": 55
+      }
+    },
+    "trust-strip": {
+      "type": "trust-strip",
+      "blocks": {
+        "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
+        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
+        "trust-3": { "type": "item", "settings": { "text": "Watches: Exchanges Only" } },
+        "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
+      },
+      "block_order": ["trust-1", "trust-2", "trust-3", "trust-4"]
+    },
+    "collections-grid": {
+      "type": "collections-grid",
+      "blocks": {
+        "cat-rings": { "type": "collection", "settings": { "collection": "rings" } },
+        "cat-necklaces": { "type": "collection", "settings": { "collection": "necklaces" } },
+        "cat-earrings": { "type": "collection", "settings": { "collection": "earrings" } },
+        "cat-bracelets": { "type": "collection", "settings": { "collection": "bracelets" } },
+        "cat-engagement": { "type": "collection", "settings": { "collection": "engagement-rings" } }
+      },
+      "block_order": ["cat-rings", "cat-necklaces", "cat-earrings", "cat-bracelets", "cat-engagement"],
+      "settings": {
+        "eyebrow": "Shop by Category",
+        "title": "Jewelry Collections",
+        "view_all_link": "/collections/all"
+      }
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "The Signature Edit",
+        "title": "Jewelry to Wear This Week",
+        "description": "Pieces chosen for women who go from the office to dinner without changing a thing.",
+        "collection": "rings",
+        "product_count": 8,
+        "cta_text": "View All Jewelry",
+        "cta_url": "/collections/all"
+      }
+    },
+    "reviews": {
+      "type": "google-reviews-strip",
+      "settings": {
+        "eyebrow": "Client Words",
+        "title": "Reviews",
+        "intro": "See why New York women book with Laura.",
+        "embed_id": "25387276",
+        "cta_label": "Read Google Reviews",
+        "cta_url": "/pages/google-reviews"
+      }
+    },
+    "peaceful-diamonds": {
+      "type": "peaceful-diamonds",
+      "settings": {
+        "chip_text": "The Lab-Grown Collection",
+        "title": "Peaceful Diamonds",
+        "byline": "by Laura Milman New York",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "cta_text": "Shop Lab-Grown"
+      }
+    },
+    "closing-cta": {
+      "type": "closing-cta",
+      "settings": {
+        "title": "Prefer to talk it through?",
+        "description": "Book a private consultation in New York or by video — no pressure, ever.",
+        "primary_cta_text": "Book a Call",
+        "primary_cta_url": "/pages/private-clients",
+        "secondary_cta_text": "Email Us",
+        "secondary_cta_url": "/pages/contact",
+        "trust_line": "Jewelry: 14-day returns · Watches: exchanges only"
+      }
+    }
+  },
+  "order": ["hero", "trust-strip", "collections-grid", "featured-products", "reviews", "peaceful-diamonds", "closing-cta"]
+}

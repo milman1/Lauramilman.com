@@ -1,0 +1,101 @@
+# The Back Vault → Shopify weekly sync.
+#
+# Fetches new-arrivals from thebackvault.com/collections/new-arrivals,
+# filters to the 40 curated "top designer" brands, scrubs all supplier
+# branding, and upserts/archives in the Shopify catalog (tag: backvault-feed).
+#
+# Price = listed price on The Back Vault (no markup per project config).
+#
+# Runs live weekly (Sunday midnight UTC) and on demand.
+# For a dry-run before going live: workflow_dispatch → leave dry_run=true.
+#
+# Secrets needed (Settings → Secrets and variables → Actions → Secrets):
+#   SHOPIFY_STORE_DOMAIN    e.g. laura-milman.myshopify.com
+#   SHOPIFY_ADMIN_TOKEN     shpat_… static token, OR use the client-credentials pair:
+#   SHOPIFY_CLIENT_ID       Dev Dashboard app Client ID
+#   SHOPIFY_CLIENT_SECRET   Dev Dashboard app Client Secret
+#
+# Optional environment variables (Settings → Actions → Variables):
+#   BACKVAULT_BASE_URL           override the supplier base URL for testing
+#   BACKVAULT_COLLECTION_HANDLE  override the collection slug (default: new-arrivals)
+name: The Back Vault weekly sync
+
+on:
+  schedule:
+    # Weekly: Sunday 00:17 UTC. Offset from midnight to avoid GitHub
+    # scheduler congestion at :00.
+    - cron: '17 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+  # Touch lmny-feeds/.backvault-publish-trigger on main to force a live run
+  # without waiting for the Actions UI. Dry-run is the default for dispatch.
+  push:
+    branches: [main]
+    paths:
+      - 'lmny-feeds/.backvault-publish-trigger'
+
+concurrency:
+  group: backvault-feed-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Run sync
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          BACKVAULT_BASE_URL: ${{ vars.BACKVAULT_BASE_URL }}
+          BACKVAULT_COLLECTION_HANDLE: ${{ vars.BACKVAULT_COLLECTION_HANDLE }}
+          EVENT: ${{ github.event_name }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; then
+            echo "Mode: LIVE"
+            npx tsx src/backvault/sync.ts
+          elif [ "$EVENT" = "schedule" ] || [ "$EVENT" = "push" ]; then
+            echo "Mode: LIVE ($EVENT)"
+            npx tsx src/backvault/sync.ts
+          else
+            echo "Mode: dry run"
+            npx tsx src/backvault/sync.ts --dry-run
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/backvault-report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backvault-sync-report-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/backvault-report.json
+            lmny-feeds/out/backvault-report.md
+          if-no-files-found: ignore

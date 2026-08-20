@@ -15,7 +15,13 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
-import { diffCatalog, kindForHandle, PRICING_REVIEW_HOLD_REASONS, skipPricingReviewArchives } from './diff.js';
+import {
+  diffCatalog,
+  kindForHandle,
+  PRICING_REVIEW_HOLD_REASONS,
+  promoteShortMediaUpdates,
+  skipPricingReviewArchives,
+} from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
@@ -252,6 +258,11 @@ async function main() {
     pricingReviewHolds.map((h) => handleForRef(h.kind, h.stockRef)),
   );
   skipPricingReviewArchives(decisions, pricingReviewHandles);
+  const feedImageCountByHandle = new Map(publishable.map((p) => [handleFor(p.item), p.item.imageUrls.length]));
+  const mediaShort = promoteShortMediaUpdates(decisions, catalog, feedImageCountByHandle);
+  if (mediaShort > 0) {
+    notes.push(`${mediaShort} watch(es) skipped as unchanged still hold fewer photos than the feed — re-sending galleries`);
+  }
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);

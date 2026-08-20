@@ -1,0 +1,162 @@
+{% comment %}
+  Welcome offer popup — email signup for a jewelry-only discount.
+  Rendered from layout/theme.liquid. The discount code is created in
+  Shopify Admin (see SHOPIFY_SETUP.md). Kept as a snippet so it cannot
+  fail as an invalid section type when included from the layout.
+{% endcomment %}
+
+{%- unless customer.tags contains 'welcome10' -%}
+<div class="lm-welcome" id="LmWelcome" hidden>
+  <div class="lm-welcome__backdrop" data-welcome-close></div>
+  <div class="lm-welcome__card" role="dialog" aria-modal="true" aria-labelledby="LmWelcomeTitle">
+    <button type="button" class="lm-welcome__close" data-welcome-close aria-label="Close">&times;</button>
+    <p class="lm-welcome__eyebrow">Private Offer</p>
+    <h2 class="lm-welcome__title" id="LmWelcomeTitle">10% off your first jewel</h2>
+    <p class="lm-welcome__copy">Join the inner circle for a welcome code — valid on jewelry, not watches.</p>
+
+    {%- form 'customer', id: 'LmWelcomeForm', class: 'lm-welcome__form' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter,welcome10">
+      <label class="visually-hidden" for="LmWelcomeEmail">Email</label>
+      <input
+        id="LmWelcomeEmail"
+        type="email"
+        name="contact[email]"
+        placeholder="Your email address"
+        required
+        autocomplete="email"
+      >
+      <button type="submit">Unlock my offer</button>
+
+      {%- if form.posted_successfully? -%}
+        <p class="lm-welcome__success" role="status">
+          Your code is LMNYWELCOME. Use it at checkout on jewelry.
+        </p>
+      {%- endif -%}
+      {%- if form.errors -%}
+        <p class="lm-welcome__error">{{ form.errors.messages.email }}</p>
+      {%- endif -%}
+    {%- endform -%}
+    <p class="lm-welcome__fine">One use per customer. Jewelry only — timepieces excluded. 14-day returns on jewelry.</p>
+  </div>
+</div>
+
+<style>
+  .lm-welcome[hidden] { display: none !important; }
+  .lm-welcome {
+    position: fixed;
+    inset: 0;
+    z-index: 13000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .lm-welcome__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 17, 9, 0.55);
+  }
+  .lm-welcome__card {
+    position: relative;
+    z-index: 1;
+    width: min(440px, 100%);
+    padding: 2.4rem 1.8rem 1.7rem;
+    background: var(--warm-white, #FDFAF6);
+    border: 1px solid var(--gold, #C9A050);
+    text-align: center;
+  }
+  .lm-welcome__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    border: 0;
+    background: none;
+    font-size: 1.6rem;
+    color: var(--text-muted, #8A8070);
+    cursor: pointer;
+  }
+  .lm-welcome__eyebrow {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-dark, #A88340);
+  }
+  .lm-welcome__title {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-welcome__copy,
+  .lm-welcome__fine {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    color: var(--text-wine, #4A2018);
+  }
+  .lm-welcome__copy { margin: 0 0 1.3rem; font-size: 0.92rem; line-height: 1.6; }
+  .lm-welcome__form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .lm-welcome__form input {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-welcome__form button {
+    padding: 0.9rem 1rem;
+    border: 0;
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .lm-welcome__success {
+    margin: 0.75rem 0 0;
+    padding: 0.8rem;
+    background: rgba(47, 93, 58, 0.08);
+    color: #2F5D3A;
+    font-size: 0.88rem;
+  }
+  .lm-welcome__fine { margin: 0.9rem 0 0; font-size: 0.72rem; }
+  .lm-welcome .visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById('LmWelcome');
+    if (!root) return;
+    var key = 'lmny-welcome-dismissed';
+    var success = !!root.querySelector('.lm-welcome__success');
+    function open() { root.hidden = false; }
+    function close() {
+      root.hidden = true;
+      try { localStorage.setItem(key, '1'); } catch (e) {}
+    }
+    root.querySelectorAll('[data-welcome-close]').forEach(function (el) {
+      el.addEventListener('click', close);
+    });
+    if (success) {
+      open();
+      return;
+    }
+    try {
+      if (localStorage.getItem(key)) return;
+    } catch (e) {}
+    setTimeout(open, 8000);
+  })();
+</script>
+{%- endunless -%}

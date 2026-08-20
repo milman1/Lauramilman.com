@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diffCatalog, kindForHandle, skipPricingReviewArchives } from '../src/diff.js';
+import { diffCatalog, kindForHandle, promoteShortMediaUpdates, skipPricingReviewArchives } from '../src/diff.js';
 import type { CatalogEntry, DesiredEntry, Kind } from '../src/types.js';
 
 const ALL_KINDS = new Set<Kind>(['natural', 'lab', 'watch']);
@@ -88,5 +88,54 @@ describe('diff decisions', () => {
     skipPricingReviewArchives(d, new Set(['w-3613']));
     expect(d.find((x) => x.handle === 'w-3613')).toMatchObject({ action: 'skip', reason: 'pricing_review' });
     expect(d.find((x) => x.handle === 'w-sold')).toMatchObject({ action: 'archive', reason: 'left_feed' });
+  });
+
+  it('archives a w- handle watch that left the API even without the feed tag', () => {
+    const catalog = [entry({ handle: 'w-sold', tags: [] })];
+    const d = diffCatalog([], catalog, ALL_KINDS);
+    expect(d.find((x) => x.handle === 'w-sold')).toMatchObject({ action: 'archive', reason: 'left_feed' });
+  });
+
+  it('does not archive estate watches (non-w- handles)', () => {
+    const catalog = [entry({ handle: 'pre-owned-cartier-tank', tags: [] })];
+    expect(diffCatalog([], catalog, ALL_KINDS)).toEqual([]);
+  });
+});
+
+describe('promoteShortMediaUpdates', () => {
+  it('re-opens a hash-skip watch that still has fewer photos than the feed', () => {
+    const catalog = [entry({ handle: 'w-3194', contentHash: 'h1', imageCount: 1 })];
+    const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
+    expect(d[0]?.action).toBe('skip');
+    const n = promoteShortMediaUpdates(d, catalog, new Map([['w-3194', 3]]));
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'media_short' });
+  });
+
+  it('leaves a full gallery skipped', () => {
+    const catalog = [entry({ handle: 'w-3194', contentHash: 'h1', imageCount: 3 })];
+    const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
+    const n = promoteShortMediaUpdates(d, catalog, new Map([['w-3194', 3]]));
+    expect(n).toBe(0);
+    expect(d[0]?.action).toBe('skip');
+  });
+
+  it('does not promote stones or quarantined watches', () => {
+    const catalog = [
+      entry({ handle: 'nd-a', contentHash: 'h1', imageCount: 1 }),
+      entry({ handle: 'w-broken', status: 'DRAFT', tags: ['lmny-feed', 'media-missing'], imageCount: 0 }),
+    ];
+    const d = diffCatalog([want('nd-a', 'h1'), want('w-broken', 'h1')], catalog, ALL_KINDS);
+    const n = promoteShortMediaUpdates(
+      d,
+      catalog,
+      new Map([
+        ['nd-a', 3],
+        ['w-broken', 4],
+      ]),
+    );
+    expect(n).toBe(0);
+    expect(d.find((x) => x.handle === 'nd-a')?.action).toBe('skip');
+    expect(d.find((x) => x.handle === 'w-broken')?.reason).toBe('media_missing_quarantine');
   });
 });

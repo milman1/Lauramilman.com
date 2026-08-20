@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order confirmed</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F0E8;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F0E8;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+          <tr>
+            <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></div>
+              <div style="margin-top:8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 36px 28px;text-align:center;">
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#C9A050;">Thank you</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#2C1810;">Your order is confirmed</h1>
+              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">Order {{ order_number | default: order.name }} is in our workshop. In-stock jewelry ships insured within 2–3 business days. We will send tracking as soon as it leaves.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 36px 36px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#8A8070;">
+              <p><strong style="color:#2C1810;">Returns.</strong> Jewelry: 14 days from delivery, unworn, original packaging. Watches: exchanges only, 14 days, with box, papers, and tags. Bespoke and engraved pieces are final sale.</p>
+              <p>Questions about this order? Write hello@lauramilman.com or <a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">book a call</a>.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

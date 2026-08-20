@@ -1,0 +1,31 @@
+{%- comment -%}
+  Prints `true` or `false` for estate / vintage / pre-owned jewelry.
+  Usage:
+    {% capture is_vintage %}{% render 'product-is-vintage', product: product %}{% endcapture %}
+    {% if is_vintage == 'true' %}
+{%- endcomment -%}
+{%- liquid
+  assign type_l = product.type | downcase
+  assign title_l = product.title | downcase
+  assign tags_l = product.tags | join: ' ' | downcase
+  assign vintage = false
+
+  if tags_l contains 'vintage' or tags_l contains 'estate' or tags_l contains 'pre-owned' or tags_l contains 'preowned' or tags_l contains 'antique'
+    assign vintage = true
+  elsif type_l contains 'vintage' or type_l contains 'estate' or type_l contains 'pre-owned' or type_l contains 'preowned'
+    assign vintage = true
+  elsif title_l contains 'pre-owned' or title_l contains 'preowned' or title_l contains 'estate' or title_l contains 'vintage'
+    assign vintage = true
+  endif
+
+  unless vintage
+    for col in product.collections
+      assign handle_l = col.handle | downcase
+      if handle_l == 'vintage-jewelry' or handle_l == 'estate' or handle_l contains 'pre-owned' or handle_l contains 'preowned'
+        assign vintage = true
+        break
+      endif
+    endfor
+  endunless
+-%}
+{%- if vintage -%}true{%- else -%}false{%- endif -%}

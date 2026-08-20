@@ -177,3 +177,107 @@ Confirmed clean as of this commit — no references in any `.liquid`, `.json`,
 5. Run the post-import audit (§3c).
 6. Spot-check 3–5 products to confirm metafields populated and the
    product appears in the correct brand collection.
+
+---
+
+## 5. All Jewelry collection (exclude watches)
+
+`/collections/all` is Shopify's automatic catalog and currently mixes Rolex
+and other timepieces into "All Jewelry". The theme now hides watches on that
+URL by pulling from jewelry collections only, but you should still create a
+proper automated collection for merchandising and the Shop channel.
+
+**Where:** Shopify Admin → Products → Collections → Create collection
+
+1. Title: `All Jewelry`
+2. Handle: `all-jewelry` (optional; the theme already special-cases `all`)
+3. Type: Automated
+4. Conditions (match **all**):
+   - Product type `is not equal to` `Watch`
+   - Product type `is not equal to` `Watches`
+   - Product type `is not equal to` `Timepiece`
+5. Save. Do **not** use this collection for Timepieces.
+
+Also update **Sales channels → Shop** featured collections to jewelry
+collections (rings, necklaces, earrings) — never the mixed All catalog.
+Upload `assets/shop-channel-cover.jpg` as the Shop cover image.
+Create an Online Store page with handle `shop` and template **shop**.
+
+---
+
+## 6. Welcome discount `LMNYWELCOME`
+
+**Where:** Shopify Admin → Discounts → Create discount → Amount off order
+
+- Code: `LMNYWELCOME`
+- 10% off
+- Purchase type: Jewelry collections only (exclude Timepieces / Watch product type)
+- Customer eligibility: new customers / one use per customer
+- Combinations: off
+
+The storefront popup and newsletter reveal this code after signup.
+
+---
+
+## 7. Branded emails
+
+HTML to paste lives in `/emails`:
+
+| File | Use in |
+|------|--------|
+| `emails/abandoned-checkout.html` | Shopify Email → Abandoned checkout |
+| `emails/abandoned-cart.html` | Shopify Email → Abandoned cart (or Klaviyo) |
+| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation (replace body) |
+| `emails/shipping-confirmation.html` | Settings → Notifications → Shipping confirmation |
+| `emails/welcome.html` | Shopify Email → Customer welcome / newsletter |
+
+Replace merge tags (`{{ first_name }}`, `{{ abandoned_checkout_url }}`, etc.)
+with the tags your email app provides. Update **Settings → Policies → Refund
+policy** to match the 14-day jewelry / watches-exchange-only copy on
+`/pages/shipping-returns`.
+
+---
+
+## 8. Journal pages (corporate NYC)
+
+Create three Online Store pages and assign the matching templates:
+
+| Page title | Handle | Theme template |
+|------------|--------|----------------|
+| Best After-Work Bars in New York | `best-bars-nyc` | `best-bars-nyc` |
+| Power Dressing Jewelry for New York | `power-dressing-nyc` | `power-dressing-nyc` |
+| The Hotel Bar Edit | `hotel-bars-nyc` | `hotel-bars-nyc` |
+
+Optional: paste the same copy into Journal blog posts tagged `style` so they
+also appear at `/blogs/journal`.
+
+---
+
+## 9. Reviews
+
+The homepage and product pages embed the existing Google reviews widget
+(SociableKit id `25387276`) and Shopify Product Reviews (`spr`) when that
+app is installed. To collect on-site reviews: Shopify Admin → Apps →
+Product Reviews (or Judge.me) → enable. The product template already
+renders `#shopify-product-reviews`.
+
+---
+
+## 10. Watch & vintage holds (phone)
+
+Product pages for timepieces and estate/vintage show **Hold this piece** and
+**Private viewing**. Both require a phone number and land in **Admin → Inbox**.
+
+Shopify customer tags applied when the hidden customer form succeeds:
+
+- `hold-request` — asked to hold a specific piece
+- `watch-interest`
+- `vintage-interest`
+- `private-viewing` — booked from `/pages/private-clients`
+
+If a tag is missing on the customer record, add it from the Inbox thread.
+Optional: Shopify Flow → “Customer created” / form submit → add the same tags.
+
+Do **not** print a different website price vs viewing price on the storefront.
+Talk numbers on the call.
+

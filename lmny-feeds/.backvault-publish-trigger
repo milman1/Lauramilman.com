@@ -1,0 +1,3 @@
+live-publish 2026-08-19T04:45:00Z
+# Changing this file on main starts a LIVE Back Vault sync (see
+# .github/workflows/backvault-feed-sync.yml push trigger).

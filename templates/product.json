@@ -5,7 +5,7 @@
       "blocks": {
         "trust-shipping": { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
         "trust-warranty": { "type": "trust_item", "settings": { "icon": "warranty", "label": "Lifetime Warranty" } },
-        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "30-Day Returns" } }
+        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "14-Day Returns" } }
       },
       "block_order": ["trust-shipping", "trust-warranty", "trust-returns"],
       "settings": {
@@ -28,6 +28,15 @@
       "block_order": ["lab-1", "lab-2", "lab-3", "estate-1", "estate-2", "estate-3", "heritage-1", "heritage-2", "heritage-3"],
       "settings": {}
     },
+    "reviews": {
+      "type": "product-reviews",
+      "settings": {
+        "eyebrow": "Client Words",
+        "title": "Reviews",
+        "cta_label": "Read Google Reviews",
+        "cta_url": "/pages/google-reviews"
+      }
+    },
     "recommendations": {
       "type": "product-recommendations",
       "settings": {
@@ -38,5 +47,5 @@
       }
     }
   },
-  "order": ["main", "education", "recommendations"]
+  "order": ["main", "education", "reviews", "recommendations"]
 }

@@ -7,6 +7,8 @@
   "scripts": {
     "sync": "tsx src/sync.ts",
     "sync:dry": "tsx src/sync.ts --dry-run",
+    "sync:backvault": "tsx src/backvault/sync.ts",
+    "sync:backvault:dry": "tsx src/backvault/sync.ts --dry-run",
     "seed:stones": "tsx scripts/seed-stones-from-shopify.ts",
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",

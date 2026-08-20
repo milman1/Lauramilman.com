@@ -1,0 +1,143 @@
+{%- comment -%}
+  Product-page concierge. Ask / Direct message open the site chat with this
+  product already in context. Watches and vintage get Hold + private viewing
+  so the desk can continue by phone or in person.
+{%- endcomment -%}
+{%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
+{%- liquid
+  assign desk_piece = false
+  if is_watch == 'true' or is_vintage == 'true'
+    assign desk_piece = true
+  endif
+  assign viewing_interest = 'estate'
+  if is_watch == 'true'
+    assign viewing_interest = 'watch'
+  endif
+-%}
+
+<div class="pdp-inquire">
+  <p class="pdp-inquire__label">
+    {%- if desk_piece -%}See this piece privately{%- else -%}Questions about this piece?{%- endif -%}
+  </p>
+  <div class="pdp-inquire__actions">
+    {%- if desk_piece -%}
+      <button type="button" class="pdp-inquire__btn" data-open-hold>
+        Hold this piece
+      </button>
+      <a
+        class="pdp-inquire__btn pdp-inquire__btn--ghost"
+        href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
+      >
+        Private viewing
+      </a>
+    {%- endif -%}
+    <button
+      type="button"
+      class="pdp-inquire__btn{% if desk_piece %} pdp-inquire__btn--ghost{% endif %} js-open-product-chat"
+      data-product-title="{{ product.title | escape }}"
+      data-product-url="{{ shop.url }}{{ product.url }}"
+    >
+      Ask about this piece
+    </button>
+    {%- unless desk_piece -%}
+      <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/pages/private-clients">Book a call</a>
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+      >
+        Direct message
+      </button>
+    {%- endunless -%}
+  </div>
+</div>
+
+{% render 'piece-hold', product: product %}
+
+<style>
+  .pdp-inquire {
+    margin: 1.25rem 0 0;
+    padding-top: 1.15rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+  .pdp-inquire__label {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+  .pdp-inquire__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+  .pdp-inquire__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.05rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: 1px solid var(--espresso, #1E1109);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+  }
+  .pdp-inquire__btn--ghost {
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    border-color: var(--border-medium, #CFC7B8);
+  }
+  .pdp-inquire__btn:hover,
+  .pdp-inquire__btn--ghost:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+    background: rgba(201, 160, 80, 0.08);
+  }
+  .dpdp--navy .pdp-inquire__btn {
+    background: var(--navy, #1A1F3A);
+    border-color: var(--navy, #1A1F3A);
+    color: #fff;
+  }
+  .dpdp--navy .pdp-inquire__btn--ghost {
+    background: transparent;
+    color: var(--navy, #1A1F3A);
+    border-color: rgba(26, 31, 58, 0.35);
+  }
+  .dpdp--navy .pdp-inquire__btn:hover,
+  .dpdp--navy .pdp-inquire__btn--ghost:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.08);
+  }
+</style>
+
+<script>
+  (function () {
+    function openChat(btn) {
+      var payload = {
+        productTitle: btn.getAttribute('data-product-title') || '',
+        productUrl: btn.getAttribute('data-product-url') || window.location.href
+      };
+      if (window.lmChat && typeof window.lmChat.open === 'function') {
+        window.lmChat.open(payload);
+        return;
+      }
+      var trigger = document.getElementById('chat-trigger');
+      if (trigger) trigger.click();
+    }
+    document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
+      btn.addEventListener('click', function () { openChat(btn); });
+    });
+  })();
+</script>
