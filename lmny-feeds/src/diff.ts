@@ -110,3 +110,37 @@ export function promoteShortMediaUpdates(
   }
   return promoted;
 }
+
+/**
+ * Archive merchant-confirmed unavailable products even when they are not
+ * Belgium `w-*` handles. Call after the hash/media pass so a denylisted
+ * listing cannot be reopened as a gallery backfill.
+ */
+export function applyUnavailableArchives(
+  decisions: Decision[],
+  catalog: CatalogEntry[],
+  isUnavailable: (handle: string) => boolean,
+): number {
+  const byHandle = new Map(decisions.map((d) => [d.handle, d]));
+  let archived = 0;
+  for (const have of catalog) {
+    if (!isUnavailable(have.handle)) continue;
+    if (have.status === 'ARCHIVED') continue;
+    const existing = byHandle.get(have.handle);
+    if (existing) {
+      if (existing.action === 'archive') continue;
+      existing.action = 'archive';
+      existing.reason = 'merchant_unavailable';
+      existing.productId = have.id;
+    } else {
+      decisions.push({
+        handle: have.handle,
+        action: 'archive',
+        reason: 'merchant_unavailable',
+        productId: have.id,
+      });
+    }
+    archived += 1;
+  }
+  return archived;
+}

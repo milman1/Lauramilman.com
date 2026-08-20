@@ -16,7 +16,8 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { HoursClient, mapConcurrent } from './feeds/hours.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
-import { diffCatalog, kindForHandle, promoteShortMediaUpdates } from './diff.js';
+import { isUnavailableProductHandle } from '../config/unavailable.js';
+import { applyUnavailableArchives, diffCatalog, kindForHandle, promoteShortMediaUpdates } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
@@ -297,6 +298,10 @@ async function main() {
   if (mediaShort > 0) {
     notes.push(`${mediaShort} watch(es) skipped as unchanged still hold fewer photos than the feed — re-sending galleries`);
   }
+  const unavailableArchived = applyUnavailableArchives(decisions, catalog, isUnavailableProductHandle);
+  if (unavailableArchived > 0) {
+    notes.push(`${unavailableArchived} listing(s) archived as merchant-unavailable (Hermès Kelly PM + Mother of Pearl)`);
+  }
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);
@@ -442,7 +447,10 @@ async function main() {
       if (d.reason === 'held_in_feed') continue;
       // An archived product 404s. Send the dead URL to its collection so an
       // old link lands on the stones we do have rather than nothing.
-      const target = ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
+      const target =
+        d.reason === 'merchant_unavailable'
+          ? ARCHIVE_REDIRECT_TARGETS.watch
+          : ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
       try {
         const redirectErrors = await shopify.redirectProductUrl(d.handle, target);
         for (const e of redirectErrors) notes.push(`redirect ${d.handle}: ${e}`);

@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { fetchBackVaultCatalog } from './catalog.js';
 import { diffBackVaultCatalog, type Decision } from './diff.js';
@@ -54,10 +55,13 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
   const { items: allItems, stats } = normalizeBackVaultFeed(rawRows);
-  const items = opts.limit ? allItems.slice(0, opts.limit) : allItems;
+  const availableItems = allItems.filter((item) => !isUnavailableProductHandle(handleFor(item)));
+  const droppedUnavailable = allItems.length - availableItems.length;
+  const items = opts.limit ? availableItems.slice(0, opts.limit) : availableItems;
   console.log(
     `Normalized: ${stats.accepted} top-designer in-stock items ` +
-      `(${stats.notTopDesigner} skipped — not a top designer, ${stats.outOfStock} out of stock, ${stats.malformed} malformed)`,
+      `(${stats.notTopDesigner} skipped — not a top designer, ${stats.outOfStock} out of stock, ${stats.malformed} malformed` +
+      `${droppedUnavailable ? `, ${droppedUnavailable} merchant-unavailable` : ''})`,
   );
 
   const { domain, token } = await resolveToken();
