@@ -1,4 +1,3 @@
-import type { HoursProbeResult } from './feeds/hours.js';
 import type { Decision, Hold, Kind, Publishable } from './types.js';
 
 export interface FeedStats {
@@ -14,7 +13,6 @@ export interface WatchLine {
   stockRef: string;
   title: string;
   costUsd: number;
-  compMidUsd: number | null;
   retailUsd: number | null;
   holdReason: string | null;
 }
@@ -51,7 +49,7 @@ export interface SyncReport {
       marginPct: number;
     }>;
   };
-  watchComps: { checked: number; hits: number; hitRate: number | null; lines: WatchLine[] };
+  watchPricing: { lines: WatchLine[] };
   sampleNaturals: Array<{ stockRef: string; title: string; costUsd: number; retailUsd: number; marginPct: number }>;
   decisions: {
     create: string[];
@@ -66,7 +64,6 @@ export interface SyncReport {
   /** Feed videos re-hosted and attached as Shopify media this run. */
   mediaVideosAttached: number;
   collectionsCreated: string[];
-  hoursProbe?: HoursProbeResult;
   notes: string[];
 }
 
@@ -216,34 +213,6 @@ export function renderMarkdown(r: SyncReport): string {
     }
   }
   lines.push('');
-  if (r.hoursProbe) {
-    const p = r.hoursProbe;
-    lines.push('## Hours diagnostic (single reference)');
-    lines.push('');
-    lines.push(`Probe: brand \`${p.brandSent}\`, reference \`${p.referenceSent}\``);
-    lines.push(`URL: \`${p.url}\``);
-    if (p.networkError) {
-      lines.push(`Result: **network error** — \`${p.networkError}\` → URL unreachable (check \`HOURS_API_URL\`).`);
-    } else {
-      lines.push(`HTTP **${p.status}**${p.ok ? '' : ' (not ok)'} · parsed comp mid: ${p.parsedMid == null ? '—' : usd(p.parsedMid)}`);
-      lines.push('');
-      lines.push('```');
-      lines.push(p.bodySnippet || '(empty body)');
-      lines.push('```');
-      const hint =
-        p.status === 401 || p.status === 403
-          ? 'auth — `HOURS_API_KEY` not accepted.'
-          : p.status === 404
-            ? 'wrong URL — `HOURS_API_URL` points at nothing; use the direct Supabase function URL.'
-            : p.status === 200 && p.parsedMid == null
-              ? 'reference-format mismatch — endpoint reached but no comp for this input string.'
-              : p.status === 200 && p.parsedMid != null
-                ? 'endpoint works with a clean reference → the live 0-comp result is an input-format issue from the feed.'
-                : 'see body above.';
-      lines.push(`Diagnosis: ${hint}`);
-    }
-    lines.push('');
-  }
   if (r.sampleNaturals.length) {
     lines.push('## Sample publishable naturals (cost → retail)');
     lines.push('');
@@ -254,16 +223,16 @@ export function renderMarkdown(r: SyncReport): string {
     }
     lines.push('');
   }
-  lines.push('## Watch comps');
+  lines.push('## Watch pricing');
   lines.push('');
-  lines.push(`Comp hit rate: ${r.watchComps.hits}/${r.watchComps.checked} (${pct(r.watchComps.hitRate)})`);
-  if (r.watchComps.lines.length) {
-    lines.push('');
-    lines.push('| Ref | Watch | Cost | Comp mid | Retail | Hold |');
-    lines.push('|---|---|---|---|---|---|');
-    for (const w of r.watchComps.lines) {
-      lines.push(`| ${w.stockRef} | ${w.title} | ${usd(w.costUsd)} | ${usd(w.compMidUsd)} | ${usd(w.retailUsd)} | ${w.holdReason ?? '—'} |`);
+  if (r.watchPricing.lines.length) {
+    lines.push('| Ref | Watch | Cost | Retail | Hold |');
+    lines.push('|---|---|---|---|---|');
+    for (const w of r.watchPricing.lines) {
+      lines.push(`| ${w.stockRef} | ${w.title} | ${usd(w.costUsd)} | ${usd(w.retailUsd)} | ${w.holdReason ?? '—'} |`);
     }
+  } else {
+    lines.push('None this run.');
   }
   lines.push('');
   lines.push('## Catalog actions' + (r.dryRun ? ' (would be)' : ''));

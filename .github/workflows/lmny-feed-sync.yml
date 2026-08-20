@@ -9,8 +9,8 @@
 #   - scheduled runs are dry-run until the repo variable LMNY_SYNC_LIVE=true
 #
 # Secrets (Settings → Secrets and variables → Actions → Secrets):
-#   SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN, BELGIUMDIA_API_KEY,
-#   HOURS_API_URL, HOURS_API_KEY
+#   SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN, BELGIUMDIA_API_KEY
+# Hours secrets are unused by watch pricing (cost-tier chart only).
 # Optional variable: BELGIUMDIA_API_URL (overrides the default feed base URL)
 name: LMNY feed sync
 

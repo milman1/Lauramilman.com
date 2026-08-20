@@ -66,11 +66,6 @@ export interface Priced {
   retailUsd: number;
   /** (retail − cost) / retail */
   marginPct: number;
-  /** Hours listing midpoint when a market comp was found. */
-  compMidUsd?: number;
-  /** Listing low, when the comp provider returned a range (audit only). */
-  compLowUsd?: number;
-  compAsOf?: string;
 }
 
 export interface Hold {

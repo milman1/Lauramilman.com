@@ -80,6 +80,23 @@ export function diffCatalog(
   return decisions;
 }
 
+/** Holds that must not archive or overwrite an existing Shopify price. */
+export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost']);
+
+/**
+ * `no_cost` watches stay buyable at their current price.
+ * Convert a would-be `held_in_feed` archive into a skip so sync can tag
+ * `pricing-review` without touching the variant.
+ */
+export function skipPricingReviewArchives(decisions: Decision[], reviewHandles: Set<string>): void {
+  for (const d of decisions) {
+    if (d.action === 'archive' && reviewHandles.has(d.handle)) {
+      d.action = 'skip';
+      d.reason = 'pricing_review';
+    }
+  }
+}
+
 /**
  * Hash match skips the product even when Shopify still holds the single photo
  * the old ImageLink-only parse attached. productSet will re-send `files` only
