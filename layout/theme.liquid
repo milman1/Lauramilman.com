@@ -80,7 +80,9 @@
       "@id": "{{ shop.url }}/#organization",
       "name": "Laura Milman New York",
       "url": "{{ shop.url }}",
-      "logo": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}",
+      {%- if settings.favicon != blank -%}
+      "logo": {{ settings.favicon | image_url: width: 512 | prepend: 'https:' | json }},
+      {%- endif -%}
       "description": "Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison estate pieces.",
       "address": {
         "@type": "PostalAddress",

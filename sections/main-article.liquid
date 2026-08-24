@@ -305,11 +305,7 @@
     "publisher": {
       "@type": "Organization",
       "@id": "{{ shop.url }}/#organization",
-      "name": {{ shop.name | json }},
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}"
-      }
+      "name": {{ shop.name | json }}
     }
   }
 </script>
