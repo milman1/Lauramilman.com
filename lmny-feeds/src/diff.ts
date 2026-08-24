@@ -12,9 +12,9 @@ export function kindForHandle(handle: string): Kind | null {
  * Diff the desired feed state against the Shopify catalog by handle + content_hash.
  *
  * - in feed, not in catalog            → create
- * - in both, hash differs              → update
- * - in both, hash equal, not ACTIVE    → update (reactivate), unless the
- *   product is quarantined with the media-missing tag
+ * - in both, not ACTIVE                → skip (never reactivate archived or
+ *   draft inventory, even when the API row returns or its content changes)
+ * - in both, ACTIVE, hash differs      → update
  * - in both, hash equal, ACTIVE        → skip (API cost control)
  * - in catalog, not in feed            → archive (never delete; URLs persist),
  *   but only for kinds whose feed fetch succeeded — a dead feed must not
@@ -44,14 +44,13 @@ export function diffCatalog(
     const have = catalogByHandle.get(want.handle);
     if (!have) {
       decisions.push({ handle: want.handle, action: 'create', reason: 'new' });
+    } else if (have.status !== 'ACTIVE') {
+      const reason = have.tags.includes(MEDIA_MISSING_TAG)
+        ? 'media_missing_quarantine'
+        : 'inactive_preserved';
+      decisions.push({ handle: want.handle, action: 'skip', reason, productId: have.id });
     } else if (have.contentHash !== want.contentHash) {
       decisions.push({ handle: want.handle, action: 'update', reason: 'hash_changed', productId: have.id });
-    } else if (have.status !== 'ACTIVE') {
-      if (have.tags.includes(MEDIA_MISSING_TAG)) {
-        decisions.push({ handle: want.handle, action: 'skip', reason: 'media_missing_quarantine', productId: have.id });
-      } else {
-        decisions.push({ handle: want.handle, action: 'update', reason: 'reactivate', productId: have.id });
-      }
     } else {
       decisions.push({ handle: want.handle, action: 'skip', reason: 'unchanged', productId: have.id });
     }

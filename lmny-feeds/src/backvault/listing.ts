@@ -11,7 +11,8 @@
  * Body:       "This {Brand} estate {type}… is offered by Laura Milman New York."
  *             + "Authenticated and hand-inspected by Laura Milman New York."
  *             Specs live in custom.* metafields, not in the HTML.
- * SEO title:  ≤ 60 chars, `{Title} | Laura Milman` (drop suffix / truncate)
+ * SEO title:  ≤ 60 chars, product identity + `| Estate Jewelry` or
+ *             `| Pre-Owned Watch`; the theme supplies the store-name suffix.
  * SEO desc:   ≤ 160 chars, ends with "Authenticated by Laura Milman New York."
  */
 
@@ -99,7 +100,7 @@ export function buildJewelryListing(item: BackVaultItem): JewelryListing {
     : `${brand}${remainder ? ` ` : ''}${remainder}`.trim();
 
   const descriptionHtml = buildDescription(brand, productType, isWatch, remainder, item.specs);
-  const seoTitle = buildSeoTitle(title);
+  const seoTitle = buildSeoTitle(title, isWatch);
   const seoDescription = buildSeoDescription(brand, productType, isWatch, item.specs);
 
   const tags = [
@@ -151,11 +152,11 @@ function buildDescription(
   return `<p>${escapeHtml(opening)}</p><p>Authenticated and hand-inspected by Laura Milman New York.</p>`;
 }
 
-function buildSeoTitle(title: string): string {
-  const withBrand = `${title} | Laura Milman`;
-  if (withBrand.length <= SEO_TITLE_MAX) return withBrand;
-  if (title.length <= SEO_TITLE_MAX) return title;
-  return truncateAtWord(title, SEO_TITLE_MAX);
+function buildSeoTitle(title: string, isWatch: boolean): string {
+  const lead = isWatch ? title.replace(/^Pre-Owned\s+/i, '') : title;
+  const suffix = isWatch ? '| Pre-Owned Watch' : '| Estate Jewelry';
+  const available = SEO_TITLE_MAX - suffix.length - 1;
+  return `${truncateAtWord(lead, available)} ${suffix}`.trim();
 }
 
 function buildSeoDescription(

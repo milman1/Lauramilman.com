@@ -337,9 +337,10 @@ async function main() {
           const errors = await shopify.attachMedia(p.id, staged, titleFor(item!));
           if (errors.length === 0) {
             mediaRehosted.push(p.handle);
-            // Bring back anything a previous run had quarantined for this.
-            if (p.status !== 'ACTIVE' || p.tags.includes(MEDIA_MISSING_TAG)) {
-              await shopify.unquarantineProduct(p.id, p.tags);
+            // A successful rescue clears the operational tag, but never
+            // activates a merchant-drafted or archived product.
+            if (p.tags.includes(MEDIA_MISSING_TAG)) {
+              await shopify.clearMediaMissingTag(p.id, p.tags);
             }
             continue;
           }
@@ -369,7 +370,12 @@ async function main() {
       .filter((p): p is Publishable => Boolean(p))
       .map((p) => {
         const existing = catalogByHandle.get(handleFor(p.item));
-        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, imageCount: existing.imageCount });
+        return buildProductSetInput(
+          p.item,
+          p.priced,
+          syncedAt,
+          existing && { id: existing.id, imageCount: existing.imageCount, status: existing.status },
+        );
       });
 
     let createdIds: string[] = [];

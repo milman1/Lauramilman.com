@@ -86,6 +86,21 @@ describe('buildProductSetInput', () => {
     expect(input.tags).toContain('media-missing');
   });
 
+  it('defensively preserves existing DRAFT and ARCHIVED statuses', () => {
+    const draft = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z', {
+      id: 'gid://shopify/Product/draft',
+      imageCount: 1,
+      status: 'DRAFT',
+    });
+    const archived = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z', {
+      id: 'gid://shopify/Product/archived',
+      imageCount: 1,
+      status: 'ARCHIVED',
+    });
+    expect(draft.status).toBe('DRAFT');
+    expect(archived.status).toBe('ARCHIVED');
+  });
+
   it('throws instead of publishing if a Back Vault reference survives into any audited field', () => {
     expect(() =>
       buildProductSetInput(item({ title: 'From The Back Vault: Cartier Love Bracelet' }), '2026-08-17T00:00:00.000Z'),

@@ -50,14 +50,30 @@ describe('diff decisions', () => {
     expect(d.find((x) => x.handle === 'nd-b')?.action).toBe('update');
   });
 
-  it('reactivates archived items that reappear, unless media-quarantined', () => {
+  it('never reactivates archived or draft items that reappear', () => {
     const catalog = [
       entry({ handle: 'nd-back', status: 'ARCHIVED' }),
       entry({ handle: 'nd-broken', status: 'DRAFT', tags: ['lmny-feed', 'media-missing'] }),
     ];
     const d = diffCatalog([want('nd-back'), want('nd-broken')], catalog, ALL_KINDS);
-    expect(d.find((x) => x.handle === 'nd-back')).toMatchObject({ action: 'update', reason: 'reactivate' });
+    expect(d.find((x) => x.handle === 'nd-back')).toMatchObject({ action: 'skip', reason: 'inactive_preserved' });
     expect(d.find((x) => x.handle === 'nd-broken')).toMatchObject({ action: 'skip', reason: 'media_missing_quarantine' });
+  });
+
+  it('preserves inactive status even when the SEO content hash changed', () => {
+    const catalog = [
+      entry({ handle: 'nd-archived', status: 'ARCHIVED', contentHash: 'old' }),
+      entry({ handle: 'w-draft', status: 'DRAFT', contentHash: 'old' }),
+    ];
+    const d = diffCatalog(
+      [want('nd-archived', 'new'), want('w-draft', 'new')],
+      catalog,
+      ALL_KINDS,
+    );
+    expect(d).toEqual([
+      expect.objectContaining({ handle: 'nd-archived', action: 'skip', reason: 'inactive_preserved' }),
+      expect.objectContaining({ handle: 'w-draft', action: 'skip', reason: 'inactive_preserved' }),
+    ]);
   });
 
   it('archives items that left the feed, never re-archives', () => {

@@ -9,7 +9,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 2;
+export const PRODUCT_SCHEMA_VERSION = 3;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -88,6 +88,8 @@ export function contentHashFor(item: BackVaultItem): string {
 export interface ExistingProduct {
   id: string;
   imageCount: number;
+  /** Existing inactive products must never be activated by a content refresh. */
+  status?: string;
 }
 
 /**
@@ -118,6 +120,12 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
   const hash = contentHashFor(item);
   const hasImages = item.imageUrls.length > 0;
   const finalTags = hasImages ? tags : [...tags, 'media-missing'].sort();
+  const status =
+    existing?.status && existing.status !== 'ACTIVE'
+      ? existing.status
+      : hasImages
+        ? 'ACTIVE'
+        : 'DRAFT';
 
   const input: Record<string, unknown> = {
     handle,
@@ -125,7 +133,7 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
     descriptionHtml: listing.descriptionHtml,
     vendor: item.vendor,
     productType: listing.productType,
-    status: hasImages ? 'ACTIVE' : 'DRAFT',
+    status,
     tags: finalTags,
     metafields: metafieldsFor(item, hash, syncedAt),
     seo: { title: listing.seoTitle, description: listing.seoDescription },
