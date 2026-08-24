@@ -106,7 +106,7 @@ export interface DesiredEntry {
   contentHash: string;
 }
 
-export type Action = 'create' | 'update' | 'archive' | 'skip';
+export type Action = 'create' | 'update' | 'archive' | 'delete' | 'skip';
 
 export interface Decision {
   handle: string;

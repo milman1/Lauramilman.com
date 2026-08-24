@@ -2,13 +2,12 @@
  * LMNY feed sync — Shopify is currently the live database.
  *
  * Full pass per run: fetch feeds → normalize → price → diff against the
- * Shopify catalog by handle + content_hash → create / update / archive.
+ * Shopify catalog by handle + content_hash → create / update / delete / archive.
  * Unchanged hashes are skipped entirely. --dry-run does everything except
  * writes and produces the full report.
  *
  * When SUPABASE_URL + SUPABASE_SERVICE_KEY are set, priced stones are also
- * upserted into public.stones (dual-write). Do not delete feed products until
- * that table is verified populated and the App Proxy filter reads from it.
+ * upserted into public.stones (dual-write).
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -235,8 +234,9 @@ async function main() {
     feeds[kind].held = holds.filter((h) => h.kind === kind).length;
   }
 
-  // 3. Read the catalog and diff. Held items are never created; items that
-  //    left the feed or newly fail gates get archived (never deleted).
+  // 3. Read the catalog and diff. Held items are never created and existing
+  //    ones are archived so they can recover. Loose diamonds that left a
+  //    successfully fetched feed are deleted; unavailable watches archive.
   const catalog: CatalogEntry[] = await shopify.fetchCatalog();
   console.log(`Catalog: ${catalog.length} feed-managed products`);
   const desired = publishable.map((p) => ({
@@ -271,7 +271,11 @@ async function main() {
   }
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
-  console.log(`Diff: create ${summary.create.length}, update ${summary.update.length}, archive ${summary.archive.length} (${heldInFeed} still in feed but held), skip ${summary.skipped}`);
+  console.log(
+    `Diff: create ${summary.create.length}, update ${summary.update.length}, ` +
+      `delete ${summary.delete.length}, archive ${summary.archive.length} ` +
+      `(${heldInFeed} still in feed but held), skip ${summary.skipped}`,
+  );
   if (heldInFeed > 0) {
     notes.push(
       `${heldInFeed} product(s) archived while STILL LISTED in the feed — held by a gate or pricing rule, not sold. ` +
@@ -396,24 +400,27 @@ async function main() {
       }
     }
 
-    const toArchive = decisions.filter((d) => d.action === 'archive');
+    const toRemove = decisions.filter((d) => d.action === 'delete' || d.action === 'archive');
     // urlRedirectCreate needs write_online_store_navigation, which the app
     // doesn't currently have. Access-denied surfaces as a thrown GraphQL
     // error, not a userError — it killed runs 20 and 21 — and a missing
     // redirect is cosmetic next to a sold stone still listed as available,
     // so the whole redirect step is best-effort. One note, not one per stone.
     let redirectsDenied = false;
-    for (const d of toArchive) {
+    for (const d of toRemove) {
       if (!d.productId) continue;
-      const errors = await shopify.archiveProduct(d.productId);
-      writeErrors.push(...errors.map((e) => `archive ${d.handle}: ${e}`));
+      const errors =
+        d.action === 'delete'
+          ? await shopify.deleteProduct(d.productId)
+          : await shopify.archiveProduct(d.productId);
+      writeErrors.push(...errors.map((e) => `${d.action} ${d.handle}: ${e}`));
       if (errors.length > 0 || redirectsDenied) continue;
-      // A redirect is for a stone that sold: it permanently outlives the
-      // product, so pointing one at an item the feed still lists would strand
-      // its page the moment pricing lets it back on the storefront.
+      // A redirect is for a sold/withdrawn item: it permanently outlives an
+      // archived watch or deleted stone. Pointing one at an item the feed
+      // still lists would strand its page when pricing lets it back.
       if (d.reason === 'held_in_feed') continue;
-      // An archived product 404s. Send the dead URL to its collection so an
-      // old link lands on the stones we do have rather than nothing.
+      // A removed product URL 404s. Send it to the relevant collection so an
+      // old link lands on available inventory rather than nothing.
       const target =
         d.reason === 'merchant_unavailable'
           ? ARCHIVE_REDIRECT_TARGETS.watch
@@ -633,7 +640,11 @@ async function main() {
   // otherwise-good run of thousands of products — they're reported either way.
   // Fail only when the failure rate suggests something systemic.
   if (writeErrors.length > 0) {
-    const attempted = summary.create.length + summary.update.length;
+    const attempted =
+      summary.create.length +
+      summary.update.length +
+      summary.delete.length +
+      summary.archive.length;
     const failureRate = attempted > 0 ? writeErrors.length / attempted : 1;
     console.error(`${writeErrors.length} write error(s) across ${attempted} attempted — see report`);
     if (failureRate > WRITE_ERROR_FAIL_RATE) {

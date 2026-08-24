@@ -54,6 +54,8 @@ export interface SyncReport {
   decisions: {
     create: string[];
     update: string[];
+    /** Unavailable loose diamonds permanently removed from Shopify. */
+    delete: string[];
     archive: string[];
     /** Archived but still listed by the feed — a hold, not a sale. */
     archivedHeldInFeed: string[];
@@ -152,6 +154,7 @@ export function summarizeDecisions(decisions: Decision[]) {
   return {
     create: decisions.filter((d) => d.action === 'create').map((d) => d.handle),
     update: decisions.filter((d) => d.action === 'update').map((d) => d.handle),
+    delete: decisions.filter((d) => d.action === 'delete').map((d) => d.handle),
     archive: decisions.filter((d) => d.action === 'archive').map((d) => d.handle),
     archivedHeldInFeed: decisions
       .filter((d) => d.action === 'archive' && d.reason === 'held_in_feed')
@@ -239,6 +242,7 @@ export function renderMarkdown(r: SyncReport): string {
   lines.push('');
   lines.push(`- create: **${r.decisions.create.length}**`);
   lines.push(`- update: **${r.decisions.update.length}**`);
+  lines.push(`- delete unavailable loose diamonds: **${r.decisions.delete.length}**`);
   lines.push(`- archive: **${r.decisions.archive.length}**`);
   // The number that tells a sold-out catalogue apart from a pricing rule that
   // moved. Both look like "archived" in Shopify admin.

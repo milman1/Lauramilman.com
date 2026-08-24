@@ -16,16 +16,20 @@ export function kindForHandle(handle: string): Kind | null {
  * - in both, hash equal, not ACTIVE    → update (reactivate), unless the
  *   product is quarantined with the media-missing tag
  * - in both, hash equal, ACTIVE        → skip (API cost control)
- * - in catalog, not in feed            → archive (never delete; URLs persist),
- *   but only for kinds whose feed fetch succeeded — a dead feed must not
- *   archive its whole catalog segment
+ * - loose diamond in catalog, not in feed → delete, because unavailable
+ *   supplier products must not remain in Shopify
+ * - watch in catalog, not in feed       → archive (URLs persist)
+ * - in catalog, still in feed but held → archive, so a temporary gate can
+ *   reactivate it later
+ * - destructive actions only apply to kinds whose feed fetch succeeded — a
+ *   dead feed must not remove its whole catalog segment
  *
  * Archiving carries two very different causes, and `present` splits them.
  * A stock ref absent from this run's feed is gone — sold, most likely
  * (`left_feed`). One the feed still lists but that this run refused to price
  * is not gone at all (`held_in_feed`): it is off the storefront until the
- * numbers work, and may be back next hour. Both archive — an unpriceable item
- * must not stay buyable — but only `left_feed` earns the permanent URL
+ * numbers work, and may be back next hour. Held items archive; loose diamonds
+ * that left the feed are deleted. Only `left_feed` earns the permanent URL
  * redirect that would otherwise strand the product page when it returns.
  * Without the split, "131 watches archived" reads as sold-out inventory when
  * it can equally be a pricing rule that moved.
@@ -65,13 +69,23 @@ export function diffCatalog(
       decisions.push({ handle: have.handle, action: 'skip', reason: 'feed_unavailable', productId: have.id });
       continue;
     }
+    const reason = present.has(have.handle) ? 'held_in_feed' : 'left_feed';
+    if (reason === 'left_feed' && kind !== 'watch') {
+      decisions.push({
+        handle: have.handle,
+        action: 'delete',
+        reason,
+        productId: have.id,
+      });
+      continue;
+    }
     if (have.status === 'ARCHIVED') {
       decisions.push({ handle: have.handle, action: 'skip', reason: 'already_archived', productId: have.id });
     } else {
       decisions.push({
         handle: have.handle,
         action: 'archive',
-        reason: present.has(have.handle) ? 'held_in_feed' : 'left_feed',
+        reason,
         productId: have.id,
       });
     }
