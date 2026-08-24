@@ -24,6 +24,22 @@
         assign seo_page_title = 'Fine Jewelry, Diamonds & Estate Pieces'
         assign seo_social_title = 'Fine Jewelry, Diamonds & Estate Pieces | Laura Milman New York'
         assign seo_meta_description = 'Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison pieces from Cartier, Van Cleef & Arpels, and Bvlgari.'
+      elsif request.page_type == 'collection' and seo_meta_description == blank
+        capture seo_meta_description
+          echo 'Explore '
+          echo collection.title
+          echo ' from Laura Milman New York, selected with over 30 years of Diamond District expertise. Authenticity guaranteed and insured shipping.'
+        endcapture
+      elsif request.page_type == 'article' and seo_meta_description.size > 180
+        assign seo_meta_description = article.excerpt_or_content | strip_html | strip | truncatewords: 24, ''
+      elsif request.page_type == 'blog' and seo_meta_description == blank
+        assign seo_meta_description = 'Read expert jewelry, diamond, watch, styling, and estate-buying guidance from Laura Milman New York.'
+      elsif request.page_type == 'page' and seo_meta_description == blank
+        capture seo_meta_description
+          echo 'Learn about '
+          echo page_title
+          echo ' at Laura Milman New York, backed by over 30 years of New York Diamond District expertise.'
+        endcapture
       endif
     -%}
 

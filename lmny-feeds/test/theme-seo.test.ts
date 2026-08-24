@@ -25,6 +25,8 @@ describe('theme SEO integration', () => {
     const meta = themeFile('snippets/meta-tags.liquid');
 
     expect(layout).toContain('Fine Jewelry, Diamonds & Estate Pieces');
+    expect(layout).toContain("request.page_type == 'collection' and seo_meta_description == blank");
+    expect(layout).toContain("request.page_type == 'article' and seo_meta_description.size > 180");
     expect(layout).toContain("render 'meta-tags', meta_title: seo_social_title, meta_description: seo_meta_description");
     expect(meta).toContain('meta_description | default: page_description');
     expect(meta).toContain('twitter:description');
