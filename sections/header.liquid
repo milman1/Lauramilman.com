@@ -688,13 +688,13 @@
 
         <div class="nav__item">
           <span class="nav__item-link">
-            Jewelry
+            Fine Jewelry
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
           <div class="nav__dropdown">
-            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
+            <a href="/collections/all" class="nav__dropdown-link">All Fine Jewelry</a>
             <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
             <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
             <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
@@ -719,6 +719,58 @@
             <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
             <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Peaceful Diamonds carries its own tier styling — the navy signal dot
+          — and now opens rather than jumping straight to the collection, so
+          lab-grown can sit under it as a sub-category.
+        {%- endcomment -%}
+        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
+        <div class="nav__item nav__item--peaceful">
+          <span class="nav__item-link nav__link--peaceful">
+            <span class="nav__peaceful-dot" aria-hidden="true"></span>
+            {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            {%- comment -%}
+              Category links mirror the peacefuldiamonds.com taxonomy so the
+              sub-brand shops the same way on both sites. Ring Settings,
+              Eternity Bands and Wedding Bands are deliberately absent — LMNY
+              holds no lab-grown stock in those three, and an empty collection
+              in the nav reads as a broken link.
+            {%- endcomment -%}
+            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Lab-Grown Bracelets</a>
+            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Lab-Grown Necklaces</a>
+            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Lab-Grown Pendants</a>
+            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-Grown Rings</a>
+            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Lab-Grown Earrings</a>
+            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-Grown Engagement Rings</a>
+          </div>
+        </div>
+
+        <div class="nav__item">
+          <span class="nav__item-link">
+            {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <div class="nav__dropdown">
+            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
+            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
+            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
+            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
+            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
           </div>
         </div>
 
@@ -761,58 +813,6 @@
             <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">Men's Wedding Bands</a>
             <a href="/collections/stackable-bands" class="nav__dropdown-link">Stackable Bands</a>
             <a href="/pages/ring-builder" class="nav__dropdown-link">Ring Builder</a>
-          </div>
-        </div>
-
-        <div class="nav__item">
-          <span class="nav__item-link">
-            {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </span>
-          <div class="nav__dropdown">
-            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
-            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
-            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
-            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
-            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
-            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
-          </div>
-        </div>
-
-        {%- comment -%}
-          Peaceful Diamonds carries its own tier styling — the navy signal dot
-          — and now opens rather than jumping straight to the collection, so
-          lab-grown can sit under it as a sub-category.
-        {%- endcomment -%}
-        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
-        <div class="nav__item nav__item--peaceful">
-          <span class="nav__item-link nav__link--peaceful">
-            <span class="nav__peaceful-dot" aria-hidden="true"></span>
-            {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </span>
-          <div class="nav__dropdown">
-            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
-            {%- comment -%}
-              Category links mirror the peacefuldiamonds.com taxonomy so the
-              sub-brand shops the same way on both sites. Ring Settings,
-              Eternity Bands and Wedding Bands are deliberately absent — LMNY
-              holds no lab-grown stock in those three, and an empty collection
-              in the nav reads as a broken link.
-            {%- endcomment -%}
-            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Lab-Grown Bracelets</a>
-            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Lab-Grown Necklaces</a>
-            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Lab-Grown Pendants</a>
-            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-Grown Rings</a>
-            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Lab-Grown Earrings</a>
-            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-Grown Engagement Rings</a>
           </div>
         </div>
 
@@ -908,12 +908,13 @@
     <div class="search-overlay__links">
       <p class="search-overlay__label">Popular Searches</p>
       <div class="search-overlay__tags">
+        <a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="search-overlay__tag">Peaceful Diamonds</a>
+        <a href="/collections/natural-diamonds" class="search-overlay__tag">Loose Diamonds</a>
+        <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
+        <a href="/collections/vintage-jewelry" class="search-overlay__tag">Vintage & Estate</a>
+        <a href="/collections/time-pieces" class="search-overlay__tag">Timepieces</a>
         <a href="{{ routes.search_url }}?q=engagement+ring&type=product" class="search-overlay__tag">Engagement Rings</a>
         <a href="{{ routes.search_url }}?q=necklace&type=product" class="search-overlay__tag">Necklaces</a>
-        <a href="{{ routes.search_url }}?q=earring&type=product" class="search-overlay__tag">Earrings</a>
-        <a href="{{ routes.search_url }}?q=bracelet&type=product" class="search-overlay__tag">Bracelets</a>
-        <a href="/collections/vintage-jewelry" class="search-overlay__tag">Estate Jewelry</a>
-        <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
       </div>
     </div>
   </div>

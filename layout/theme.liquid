@@ -24,7 +24,7 @@
     </title>
 
     {% if request.page_type == 'index' %}
-      <meta name="description" content="Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison pieces from Cartier, Van Cleef & Arpels, and Bvlgari. Free shipping, 14-day jewelry returns.">
+      <meta name="description" content="Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces. Free shipping, 14-day jewelry returns.">
     {% elsif page_description %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
@@ -71,7 +71,7 @@
       "name": "Laura Milman New York",
       "url": "{{ shop.url }}",
       "logo": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}",
-      "description": "Fine jewelry designed in New York and crafted in Italy. Natural diamonds, rare gemstones, and authenticated pre-owned maison estate pieces.",
+      "description": "Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "New York",

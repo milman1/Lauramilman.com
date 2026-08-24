@@ -14,11 +14,11 @@
       "settings": {
         "eyebrow": "Laura Milman · New York",
         "heading": "Designed in New York.\nCrafted in Italy.",
-        "subheading": "Natural diamonds, rare gemstones and authenticated maison estate pieces — fine jewelry made to be worn for generations.",
-        "primary_cta_text": "Shop the Collection",
+        "subheading": "Fine jewelry, certified diamonds, authenticated maison pieces, and pre-owned timepieces — designed in New York, crafted in Italy.",
+        "primary_cta_text": "Shop Fine Jewelry",
         "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Explore Our World",
-        "secondary_cta_url": "/pages/lauras-story",
+        "secondary_cta_text": "Explore Diamonds",
+        "secondary_cta_url": "/collections/natural-diamonds",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
@@ -65,22 +65,19 @@
         "cat-engagement": {
           "type": "collection",
           "settings": {
-            "collection": "necklaces",
-            "title": ""
+            "collection": "necklaces"
           }
         },
         "cat-wedding": {
           "type": "collection",
           "settings": {
-            "collection": "rings",
-            "title": ""
+            "collection": "rings"
           }
         },
         "cat-bracelets": {
           "type": "collection",
           "settings": {
-            "collection": "bracelets",
-            "title": ""
+            "collection": "bracelets"
           }
         },
         "cat-pendants": {
@@ -93,8 +90,7 @@
         "cat-earrings": {
           "type": "collection",
           "settings": {
-            "collection": "earrings",
-            "title": ""
+            "collection": "earrings"
           }
         }
       },
@@ -106,9 +102,9 @@
         "cat-earrings"
       ],
       "settings": {
-        "eyebrow": "Shop Our Collection",
-        "title": "Collections",
-        "view_all_link": "/collections/all"
+        "eyebrow": "Shop by Jewelry Type",
+        "view_all_link": "/collections/all",
+        "title": "Necklaces, Rings & More"
       }
     },
     "preowned-maison": {
@@ -162,12 +158,12 @@
       "type": "featured-products",
       "settings": {
         "eyebrow": "The Signature Edit",
-        "title": "Signature Pieces",
-        "description": "Natural diamonds and rare gemstones, crafted with more than thirty years of New York expertise.",
+        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
         "collection": "bracelets",
         "product_count": 4,
         "cta_text": "View All",
-        "cta_url": "/collections/all"
+        "cta_url": "/collections/all",
+        "title": "Pieces to Wear Now"
       }
     },
     "shop-the-look": {
@@ -176,7 +172,6 @@
         "eyebrow": "Shop the Look",
         "title": "Stack & Style",
         "collection": "bracelets",
-        "caption_title": "",
         "cta_text": "View Full Collection"
       }
     },
@@ -260,9 +255,7 @@
         "byline": "by Laura Milman New York",
         "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
         "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Peaceful Diamonds",
-        "secondary_cta_text": "",
-        "secondary_cta_url": ""
+        "cta_text": "Shop Peaceful Diamonds"
       }
     },
     "private-clients": {
@@ -367,25 +360,175 @@
       "type": "closing-cta",
       "settings": {
         "title": "Begin Your Story",
-        "description": "Exceptional natural stones, storied estate pieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
+        "description": "Exceptional stones, storied maison pieces, pre-owned timepieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
         "primary_cta_text": "Shop the Collection",
         "primary_cta_url": "/collections/all",
         "secondary_cta_text": "Book a Consultation",
         "secondary_cta_url": "/pages/private-clients",
         "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
       }
+    },
+    "shop-worlds": {
+      "type": "shop-worlds",
+      "blocks": {
+        "world-peaceful": {
+          "type": "world",
+          "settings": {
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "title": "Peaceful Diamonds",
+            "subtitle": "Certified lab-grown jewelry",
+            "tone": "navy"
+          }
+        },
+        "world-diamonds": {
+          "type": "world",
+          "settings": {
+            "collection": "natural-diamonds",
+            "title": "Loose Diamonds",
+            "subtitle": "Natural and lab-grown stones",
+            "link": "/collections/natural-diamonds",
+            "tone": "warm"
+          }
+        },
+        "world-maison": {
+          "type": "world",
+          "settings": {
+            "collection": "vintage-jewelry",
+            "title": "Pre-Owned Maison",
+            "subtitle": "Authenticated signed estate",
+            "tone": "warm"
+          }
+        },
+        "world-timepieces": {
+          "type": "world",
+          "settings": {
+            "collection": "time-pieces",
+            "title": "Pre-Owned Timepieces",
+            "subtitle": "Rolex, Cartier, and more",
+            "tone": "warm"
+          }
+        },
+        "world-jewelry": {
+          "type": "world",
+          "settings": {
+            "collection": "all",
+            "title": "Fine Jewelry",
+            "subtitle": "Designed in New York, crafted in Italy",
+            "link": "/collections/all",
+            "tone": "warm"
+          }
+        }
+      },
+      "block_order": [
+        "world-peaceful",
+        "world-diamonds",
+        "world-maison",
+        "world-timepieces",
+        "world-jewelry"
+      ],
+      "settings": {
+        "eyebrow": "Explore Laura Milman",
+        "heading": "Shop Our Worlds",
+        "subheading": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
+      }
+    },
+    "diamond-destination": {
+      "type": "diamond-destination",
+      "blocks": {
+        "dest-natural": {
+          "type": "destination",
+          "settings": {
+            "collection": "natural-diamonds",
+            "title": "Natural Loose Diamonds",
+            "subtitle": "GIA-certified stones, priced against the live market.",
+            "cta_label": "Shop natural diamonds",
+            "tone": "warm"
+          }
+        },
+        "dest-lab": {
+          "type": "destination",
+          "settings": {
+            "collection": "lab-grown-diamonds",
+            "title": "Lab-Grown Loose Diamonds",
+            "subtitle": "Certified lab-grown stones with exceptional carat weight.",
+            "cta_label": "Shop lab-grown diamonds",
+            "tone": "navy"
+          }
+        }
+      },
+      "block_order": [
+        "dest-natural",
+        "dest-lab"
+      ],
+      "settings": {
+        "eyebrow": "Diamond Destination",
+        "heading": "Certified Loose Diamonds",
+        "description": "Search the way a gemologist would — shape, carat, color, and clarity — across natural and lab-grown stones.",
+        "consult_text": "Need help choosing? Book a diamond consultation",
+        "consult_url": "/pages/private-clients"
+      }
+    },
+    "preowned-timepieces": {
+      "type": "preowned-maison",
+      "blocks": {
+        "watch-rolex": {
+          "type": "maison",
+          "settings": {
+            "collection": "rolex-watches",
+            "title": "Rolex"
+          }
+        },
+        "watch-cartier": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier-watches",
+            "title": "Cartier"
+          }
+        },
+        "watch-ap": {
+          "type": "maison",
+          "settings": {
+            "collection": "audemars-piguet-watches",
+            "title": "Audemars Piguet"
+          }
+        },
+        "watch-bvlgari": {
+          "type": "maison",
+          "settings": {
+            "collection": "bvlgari-watches",
+            "title": "Bvlgari"
+          }
+        }
+      },
+      "block_order": [
+        "watch-rolex",
+        "watch-cartier",
+        "watch-ap",
+        "watch-bvlgari"
+      ],
+      "settings": {
+        "eyebrow": "Pre-Owned Timepieces",
+        "title": "Watches, Authenticated",
+        "description": "Rolex, Cartier, Audemars Piguet, and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
+        "trust_line": "Authenticated in New York · Watches: exchanges only",
+        "cta_text": "Shop All Timepieces",
+        "cta_url": "/collections/time-pieces"
+      }
     }
   },
   "order": [
     "hero",
     "trust-strip",
-    "collections-grid",
+    "shop-worlds",
     "preowned-maison",
+    "diamond-destination",
+    "preowned-timepieces",
+    "peaceful-diamonds",
+    "collections-grid",
     "featured-products",
     "shop-the-look",
     "philosophy-quote",
     "brand-story",
-    "peaceful-diamonds",
     "private-clients",
     "reviews",
     "testimonials",

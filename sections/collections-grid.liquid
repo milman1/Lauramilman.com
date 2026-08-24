@@ -37,7 +37,7 @@
             <div class="collection-card__overlay" aria-hidden="true"></div>
           </div>
           <div class="collection-card__info">
-            <h3 class="collection-card__name">{{ collection.title }}</h3>
+            <h3 class="collection-card__name">{{ block.settings.title | default: collection.title }}</h3>
             <div class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'Piece', 'Pieces' }}</div>
           </div>
         </a>

@@ -4,9 +4,9 @@
       "type": "hero",
       "settings": {
         "eyebrow": "Laura Milman · New York",
-        "heading": "Shop Fine Jewelry",
-        "subheading": "Rings, necklaces, earrings, and estate pieces — designed in New York, crafted in Italy. Timepieces live in their own collection.",
-        "primary_cta_text": "All Jewelry",
+        "heading": "Shop Laura Milman",
+        "subheading": "Fine jewelry, certified diamonds, authenticated maison pieces, and pre-owned timepieces — designed in New York, crafted in Italy.",
+        "primary_cta_text": "All Fine Jewelry",
         "primary_cta_url": "/collections/all",
         "secondary_cta_text": "Book a Consultation",
         "secondary_cta_url": "/pages/private-clients",
@@ -17,39 +17,206 @@
     "trust-strip": {
       "type": "trust-strip",
       "blocks": {
-        "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
-        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
-        "trust-3": { "type": "item", "settings": { "text": "Watches: Exchanges Only" } },
-        "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
+        "trust-1": {
+          "type": "item",
+          "settings": {
+            "text": "Free Insured Shipping"
+          }
+        },
+        "trust-2": {
+          "type": "item",
+          "settings": {
+            "text": "14-Day Returns"
+          }
+        },
+        "trust-3": {
+          "type": "item",
+          "settings": {
+            "text": "Watches: Exchanges Only"
+          }
+        },
+        "trust-4": {
+          "type": "item",
+          "settings": {
+            "text": "Lifetime Warranty"
+          }
+        }
       },
-      "block_order": ["trust-1", "trust-2", "trust-3", "trust-4"]
+      "block_order": [
+        "trust-1",
+        "trust-2",
+        "trust-3",
+        "trust-4"
+      ]
+    },
+    "shop-worlds": {
+      "type": "shop-worlds",
+      "blocks": {
+        "world-peaceful": {
+          "type": "world",
+          "settings": {
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "title": "Peaceful Diamonds",
+            "subtitle": "Certified lab-grown jewelry",
+            "tone": "navy"
+          }
+        },
+        "world-diamonds": {
+          "type": "world",
+          "settings": {
+            "collection": "natural-diamonds",
+            "title": "Loose Diamonds",
+            "subtitle": "Natural and lab-grown stones",
+            "link": "/collections/natural-diamonds",
+            "tone": "warm"
+          }
+        },
+        "world-maison": {
+          "type": "world",
+          "settings": {
+            "collection": "vintage-jewelry",
+            "title": "Pre-Owned Maison",
+            "subtitle": "Authenticated signed estate",
+            "tone": "warm"
+          }
+        },
+        "world-timepieces": {
+          "type": "world",
+          "settings": {
+            "collection": "time-pieces",
+            "title": "Pre-Owned Timepieces",
+            "subtitle": "Rolex, Cartier, and more",
+            "tone": "warm"
+          }
+        },
+        "world-jewelry": {
+          "type": "world",
+          "settings": {
+            "collection": "all",
+            "title": "Fine Jewelry",
+            "subtitle": "Designed in New York, crafted in Italy",
+            "link": "/collections/all",
+            "tone": "warm"
+          }
+        }
+      },
+      "block_order": [
+        "world-peaceful",
+        "world-diamonds",
+        "world-maison",
+        "world-timepieces",
+        "world-jewelry"
+      ],
+      "settings": {
+        "eyebrow": "Explore Laura Milman",
+        "heading": "Shop Our Worlds",
+        "subheading": "Start with what you came for — lab-grown jewelry, loose diamonds, maison estate, timepieces, or fine jewelry."
+      }
     },
     "collections-grid": {
       "type": "collections-grid",
       "blocks": {
-        "cat-rings": { "type": "collection", "settings": { "collection": "rings" } },
-        "cat-necklaces": { "type": "collection", "settings": { "collection": "necklaces" } },
-        "cat-earrings": { "type": "collection", "settings": { "collection": "earrings" } },
-        "cat-bracelets": { "type": "collection", "settings": { "collection": "bracelets" } },
-        "cat-engagement": { "type": "collection", "settings": { "collection": "engagement-rings" } }
+        "cat-rings": {
+          "type": "collection",
+          "settings": {
+            "collection": "rings"
+          }
+        },
+        "cat-necklaces": {
+          "type": "collection",
+          "settings": {
+            "collection": "necklaces"
+          }
+        },
+        "cat-earrings": {
+          "type": "collection",
+          "settings": {
+            "collection": "earrings"
+          }
+        },
+        "cat-bracelets": {
+          "type": "collection",
+          "settings": {
+            "collection": "bracelets"
+          }
+        },
+        "cat-engagement": {
+          "type": "collection",
+          "settings": {
+            "collection": "engagement-rings"
+          }
+        }
       },
-      "block_order": ["cat-rings", "cat-necklaces", "cat-earrings", "cat-bracelets", "cat-engagement"],
+      "block_order": [
+        "cat-rings",
+        "cat-necklaces",
+        "cat-earrings",
+        "cat-bracelets",
+        "cat-engagement"
+      ],
       "settings": {
-        "eyebrow": "Shop by Category",
-        "title": "Jewelry Collections",
-        "view_all_link": "/collections/all"
+        "eyebrow": "Shop by Jewelry Type",
+        "view_all_link": "/collections/all",
+        "title": "Rings, Necklaces & More"
+      }
+    },
+    "preowned-maison": {
+      "type": "preowned-maison",
+      "blocks": {
+        "maison-cartier": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier",
+            "title": "Cartier"
+          }
+        },
+        "maison-vca": {
+          "type": "maison",
+          "settings": {
+            "collection": "van-cleef-arpels",
+            "title": "Van Cleef & Arpels"
+          }
+        },
+        "maison-bvlgari": {
+          "type": "maison",
+          "settings": {
+            "collection": "bvlgari",
+            "title": "Bvlgari"
+          }
+        },
+        "maison-tiffany": {
+          "type": "maison",
+          "settings": {
+            "collection": "tiffany",
+            "title": "Tiffany & Co."
+          }
+        }
+      },
+      "block_order": [
+        "maison-cartier",
+        "maison-vca",
+        "maison-bvlgari",
+        "maison-tiffany"
+      ],
+      "settings": {
+        "eyebrow": "Authenticated Estate",
+        "title": "The Pre-Owned Maison",
+        "description": "Signed pieces from the great houses — sourced, examined and authenticated in New York.",
+        "trust_line": "Every estate piece is individually authenticated and documented",
+        "cta_text": "Explore the Maison Vault",
+        "cta_url": "/collections/vintage-jewelry"
       }
     },
     "featured-products": {
       "type": "featured-products",
       "settings": {
         "eyebrow": "The Signature Edit",
-        "title": "Jewelry to Wear This Week",
         "description": "Pieces chosen for women who go from the office to dinner without changing a thing.",
         "collection": "rings",
         "product_count": 8,
-        "cta_text": "View All Jewelry",
-        "cta_url": "/collections/all"
+        "cta_text": "View All Fine Jewelry",
+        "cta_url": "/collections/all",
+        "title": "Jewelry to Wear This Week"
       }
     },
     "reviews": {
@@ -86,5 +253,15 @@
       }
     }
   },
-  "order": ["hero", "trust-strip", "collections-grid", "featured-products", "reviews", "peaceful-diamonds", "closing-cta"]
+  "order": [
+    "hero",
+    "trust-strip",
+    "shop-worlds",
+    "preowned-maison",
+    "collections-grid",
+    "featured-products",
+    "reviews",
+    "peaceful-diamonds",
+    "closing-cta"
+  ]
 }
