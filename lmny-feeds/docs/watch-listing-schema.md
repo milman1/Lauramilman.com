@@ -149,9 +149,11 @@ next moves.
 
 ### SEO title (`seo.title`, ≤ 60 characters)
 
-Try `{Brand} {Model} {reference} – {titleWord}` first. If that exceeds 60
-characters, drop the condition word and truncate at the last full word under
-60 characters. Never cut mid-word or mid-reference-number.
+Use `{Brand} {Model} {reference} – {titleWord} Watch`. If that exceeds 60
+characters, reserve the `– {titleWord} Watch` suffix and truncate the identity
+at the last full word that fits. Never cut mid-word. Keeping both the condition
+and product type gives search engines and answer engines explicit intent even
+when a long model or reference must be shortened.
 
 ### SEO description (`seo.description`, ≤ 160 characters)
 
