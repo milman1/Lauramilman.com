@@ -1,0 +1,343 @@
+{%- comment -%}
+  Laura Milman New York — Diamond Destination
+  Two equal paths: natural loose diamonds and lab-grown loose diamonds.
+{%- endcomment -%}
+
+<section class="lm-diamonds" aria-label="{{ section.settings.heading | default: 'Diamonds' | escape }}">
+  <div class="lm-diamonds__container">
+    <div class="lm-diamonds__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lm-diamonds__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lm-diamonds__heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.description != blank -%}
+        <p class="lm-diamonds__desc">{{ section.settings.description | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-diamonds__grid">
+      {%- for block in section.blocks -%}
+        {%- assign dest_collection = block.settings.collection -%}
+        {%- assign dest_title = block.settings.title -%}
+        {%- assign dest_image = block.settings.image -%}
+        {%- assign dest_url = block.settings.link -%}
+
+        {%- if dest_title == blank and dest_collection != blank -%}
+          {%- assign dest_title = dest_collection.title -%}
+        {%- endif -%}
+        {%- if dest_url == blank and dest_collection != blank -%}
+          {%- assign dest_url = dest_collection.url -%}
+        {%- endif -%}
+        {%- if dest_image == blank and dest_collection != blank -%}
+          {%- if dest_collection.image != blank -%}
+            {%- assign dest_image = dest_collection.image -%}
+          {%- elsif dest_collection.products.first.featured_image -%}
+            {%- assign dest_image = dest_collection.products.first.featured_image -%}
+          {%- endif -%}
+        {%- endif -%}
+        {%- if dest_url == blank -%}
+          {%- assign dest_url = routes.root_url -%}
+        {%- endif -%}
+
+        <a href="{{ dest_url }}" class="lm-diamonds__card lm-diamonds__card--{{ block.settings.tone }}" {{ block.shopify_attributes }}>
+          <div class="lm-diamonds__media">
+            {%- if dest_image != blank -%}
+              <img
+                src="{{ dest_image | image_url: width: 1200 }}"
+                alt="{{ dest_title | escape }}"
+                loading="lazy"
+                decoding="async"
+                width="600"
+                height="400"
+              >
+            {%- endif -%}
+          </div>
+          <div class="lm-diamonds__body">
+            <h3 class="lm-diamonds__title">{{ dest_title | default: 'Diamonds' | escape }}</h3>
+            {%- if block.settings.subtitle != blank -%}
+              <p class="lm-diamonds__subtitle">{{ block.settings.subtitle | escape }}</p>
+            {%- endif -%}
+            <span class="lm-diamonds__cta">{{ block.settings.cta_label | default: 'Shop diamonds' }}</span>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.consult_text != blank and section.settings.consult_url != blank -%}
+      <p class="lm-diamonds__consult">
+        <a href="{{ section.settings.consult_url }}">{{ section.settings.consult_text | escape }}</a>
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .lm-diamonds {
+    padding: 5.5rem 0;
+    background: var(--off-white, #F5F0E8);
+  }
+
+  .lm-diamonds__container {
+    max-width: var(--container-max, 1400px);
+    margin: 0 auto;
+    padding: 0 var(--container-padding, 2rem);
+  }
+
+  .lm-diamonds__header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 2.75rem;
+  }
+
+  .lm-diamonds__eyebrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+    margin: 0 0 0.75rem;
+  }
+
+  .lm-diamonds__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.85rem;
+  }
+
+  .lm-diamonds__desc {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .lm-diamonds__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .lm-diamonds__card {
+    display: grid;
+    grid-template-rows: 220px 1fr;
+    text-decoration: none;
+    overflow: hidden;
+    border-radius: var(--radius-md, 8px);
+    min-height: 420px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .lm-diamonds__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(30, 17, 9, 0.12);
+  }
+
+  .lm-diamonds__card--warm {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule, #DDD5C5);
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-diamonds__card--navy {
+    background: var(--navy, #1A1F3A);
+    border: 1px solid rgba(169, 190, 227, 0.28);
+    color: #fff;
+  }
+
+  .lm-diamonds__media {
+    background: #1a120c;
+    overflow: hidden;
+  }
+
+  .lm-diamonds__card--navy .lm-diamonds__media {
+    background: var(--navy-deep, #12162B);
+  }
+
+  .lm-diamonds__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .lm-diamonds__card:hover .lm-diamonds__media img {
+    transform: scale(1.05);
+  }
+
+  .lm-diamonds__body {
+    padding: 1.75rem 1.6rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lm-diamonds__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.85rem;
+    font-weight: 400;
+    margin: 0 0 0.6rem;
+  }
+
+  .lm-diamonds__subtitle {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.7;
+    margin: 0 0 1.4rem;
+    flex: 1;
+  }
+
+  .lm-diamonds__card--warm .lm-diamonds__subtitle {
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-diamonds__card--navy .lm-diamonds__subtitle {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .lm-diamonds__cta {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .lm-diamonds__card--warm .lm-diamonds__cta {
+    color: var(--gold-dark, #C9A050);
+  }
+
+  .lm-diamonds__card--navy .lm-diamonds__cta {
+    color: var(--pd-ice, #A9BEE3);
+  }
+
+  .lm-diamonds__consult {
+    text-align: center;
+    margin: 2rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+  }
+
+  .lm-diamonds__consult a {
+    color: var(--text-dark, #2C1810);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .lm-diamonds {
+      padding: 3.5rem 0;
+    }
+    .lm-diamonds__grid {
+      grid-template-columns: 1fr;
+    }
+    .lm-diamonds__card {
+      grid-template-rows: 180px 1fr;
+      min-height: 0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Diamond Destination",
+  "tag": "section",
+  "class": "section-diamond-destination",
+  "max_blocks": 2,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Diamond Destination"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Certified Loose Diamonds"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Search the way a gemologist would — shape, carat, color, and clarity — across natural and lab-grown stones."
+    },
+    {
+      "type": "text",
+      "id": "consult_text",
+      "label": "Consultation link text",
+      "default": "Need help choosing? Book a diamond consultation"
+    },
+    {
+      "type": "url",
+      "id": "consult_url",
+      "label": "Consultation link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "destination",
+      "name": "Diamond path",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Card CTA",
+          "default": "Shop diamonds"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link override"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override"
+        },
+        {
+          "type": "select",
+          "id": "tone",
+          "label": "Card tone",
+          "default": "warm",
+          "options": [
+            { "value": "warm", "label": "Warm (natural)" },
+            { "value": "navy", "label": "Navy (lab-grown)" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Diamond Destination",
+      "blocks": [
+        { "type": "destination", "settings": { "title": "Natural Loose Diamonds", "subtitle": "GIA-certified stones, priced against the live market.", "tone": "warm", "cta_label": "Shop natural diamonds" } },
+        { "type": "destination", "settings": { "title": "Lab-Grown Loose Diamonds", "subtitle": "Certified lab-grown stones with exceptional carat weight.", "tone": "navy", "cta_label": "Shop lab-grown diamonds" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

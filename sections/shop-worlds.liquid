@@ -1,0 +1,322 @@
+{%- comment -%}
+  Laura Milman New York — Shop Worlds
+  First merchandising module: business lines (lab-grown jewelry, loose diamonds,
+  maison estate, timepieces, fine jewelry) rather than generic jewelry types.
+{%- endcomment -%}
+
+<section class="lm-worlds" aria-label="{{ section.settings.heading | default: 'Shop' | escape }}">
+  <div class="lm-worlds__container">
+    <div class="lm-worlds__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lm-worlds__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lm-worlds__heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="lm-worlds__subhead">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lm-worlds__rail">
+      {%- for block in section.blocks -%}
+        {%- assign world_collection = block.settings.collection -%}
+        {%- assign world_title = block.settings.title -%}
+        {%- assign world_image = block.settings.image -%}
+        {%- assign world_url = block.settings.link -%}
+
+        {%- if world_title == blank and world_collection != blank -%}
+          {%- assign world_title = world_collection.title -%}
+        {%- endif -%}
+        {%- if world_url == blank and world_collection != blank -%}
+          {%- assign world_url = world_collection.url -%}
+        {%- endif -%}
+        {%- if world_image == blank and world_collection != blank -%}
+          {%- if world_collection.image != blank -%}
+            {%- assign world_image = world_collection.image -%}
+          {%- elsif world_collection.products.first.featured_image -%}
+            {%- assign world_image = world_collection.products.first.featured_image -%}
+          {%- endif -%}
+        {%- endif -%}
+        {%- if world_url == blank -%}
+          {%- assign world_url = routes.root_url -%}
+        {%- endif -%}
+
+        <a href="{{ world_url }}" class="lm-worlds__card lm-worlds__card--{{ block.settings.tone }}" {{ block.shopify_attributes }}>
+          <div class="lm-worlds__media">
+            {%- if world_image != blank -%}
+              <img
+                src="{{ world_image | image_url: width: 800 }}"
+                srcset="{{ world_image | image_url: width: 400 }} 400w,
+                        {{ world_image | image_url: width: 600 }} 600w,
+                        {{ world_image | image_url: width: 800 }} 800w"
+                sizes="(max-width: 768px) 70vw, 20vw"
+                alt="{{ world_title | escape }}"
+                loading="lazy"
+                decoding="async"
+                width="400"
+                height="500"
+              >
+            {%- else -%}
+              <div class="lm-worlds__placeholder" aria-hidden="true"></div>
+            {%- endif -%}
+          </div>
+          <div class="lm-worlds__overlay">
+            <h3 class="lm-worlds__title">{{ world_title | default: 'Collection' | escape }}</h3>
+            {%- if block.settings.subtitle != blank -%}
+              <p class="lm-worlds__subtitle">{{ block.settings.subtitle | escape }}</p>
+            {%- endif -%}
+            <span class="lm-worlds__cta">Explore</span>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .lm-worlds {
+    padding: 5rem 0 4.5rem;
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .lm-worlds__container {
+    max-width: var(--container-max, 1400px);
+    margin: 0 auto;
+    padding: 0 var(--container-padding, 2rem);
+  }
+
+  .lm-worlds__header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 2.75rem;
+  }
+
+  .lm-worlds__eyebrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+    margin: 0 0 0.75rem;
+  }
+
+  .lm-worlds__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.75rem;
+  }
+
+  .lm-worlds__subhead {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+
+  .lm-worlds__rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+
+  .lm-worlds__card {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius-md, 8px);
+    text-decoration: none;
+    color: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule, #DDD5C5);
+  }
+
+  .lm-worlds__media,
+  .lm-worlds__placeholder {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lm-worlds__placeholder {
+    background: linear-gradient(160deg, var(--espresso, #1E1109) 0%, #3a2418 100%);
+  }
+
+  .lm-worlds__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .lm-worlds__card:hover .lm-worlds__media img {
+    transform: scale(1.05);
+  }
+
+  .lm-worlds__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem 1.15rem 1.35rem;
+    background: linear-gradient(to top, rgba(30, 17, 9, 0.82) 0%, rgba(30, 17, 9, 0.2) 48%, transparent 100%);
+  }
+
+  .lm-worlds__card--navy .lm-worlds__overlay {
+    background: linear-gradient(to top, rgba(18, 22, 43, 0.88) 0%, rgba(18, 22, 43, 0.25) 50%, transparent 100%);
+  }
+
+  .lm-worlds__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.45rem;
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0 0 0.35rem;
+  }
+
+  .lm-worlds__subtitle {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1.45;
+    color: rgba(250, 246, 240, 0.78);
+    margin: 0 0 0.7rem;
+  }
+
+  .lm-worlds__cta {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-light, #E2C27A);
+  }
+
+  .lm-worlds__card--navy .lm-worlds__cta {
+    color: var(--pd-ice, #A9BEE3);
+  }
+
+  @media (max-width: 1024px) {
+    .lm-worlds__rail {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 0.85rem;
+      padding-bottom: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .lm-worlds__rail::-webkit-scrollbar {
+      display: none;
+    }
+    .lm-worlds__card {
+      flex: 0 0 68%;
+      scroll-snap-align: start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-worlds {
+      padding: 3.5rem 0 3rem;
+    }
+    .lm-worlds__container {
+      padding: 0 1rem;
+    }
+    .lm-worlds__card {
+      flex-basis: 78%;
+    }
+    .lm-worlds__title {
+      font-size: 1.25rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Shop Worlds",
+  "tag": "section",
+  "class": "section-shop-worlds",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Explore Laura Milman"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop Our Worlds"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "world",
+      "name": "World",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link override"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override"
+        },
+        {
+          "type": "select",
+          "id": "tone",
+          "label": "Overlay tone",
+          "default": "warm",
+          "options": [
+            { "value": "warm", "label": "Warm (LMNY)" },
+            { "value": "navy", "label": "Navy (Peaceful Diamonds)" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop Worlds",
+      "blocks": [
+        { "type": "world", "settings": { "title": "Peaceful Diamonds", "subtitle": "Certified lab-grown jewelry", "tone": "navy" } },
+        { "type": "world", "settings": { "title": "Loose Diamonds", "subtitle": "Natural and lab-grown stones", "tone": "warm" } },
+        { "type": "world", "settings": { "title": "Pre-Owned Maison", "subtitle": "Authenticated signed estate", "tone": "warm" } },
+        { "type": "world", "settings": { "title": "Pre-Owned Timepieces", "subtitle": "Rolex, Cartier, and more", "tone": "warm" } },
+        { "type": "world", "settings": { "title": "Fine Jewelry", "subtitle": "Designed in New York, crafted in Italy", "tone": "warm" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

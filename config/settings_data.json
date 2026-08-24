@@ -35,6 +35,23 @@
           "show_newsletter": true,
           "copyright_text": "© Laura Milman New York"
         }
+      },
+      "popular-searches": {
+        "type": "popular-searches",
+        "blocks": {
+          "pop-peaceful": { "type": "link", "settings": { "title": "Peaceful Diamonds", "link": "/collections/peaceful-diamonds-by-laura-milman-new-york" } },
+          "pop-diamonds": { "type": "link", "settings": { "title": "Loose Diamonds", "link": "/collections/natural-diamonds" } },
+          "pop-cartier": { "type": "link", "settings": { "title": "Pre-Owned Cartier", "link": "/collections/cartier" } },
+          "pop-estate": { "type": "link", "settings": { "title": "Vintage & Estate", "link": "/collections/vintage-jewelry" } },
+          "pop-timepieces": { "type": "link", "settings": { "title": "Timepieces", "link": "/collections/time-pieces" } },
+          "pop-engagement": { "type": "link", "settings": { "title": "Engagement Rings", "link": "/search?q=engagement+ring&type=product" } },
+          "pop-necklaces": { "type": "link", "settings": { "title": "Necklaces", "link": "/search?q=necklace&type=product" } }
+        },
+        "block_order": ["pop-peaceful", "pop-diamonds", "pop-cartier", "pop-estate", "pop-timepieces", "pop-engagement", "pop-necklaces"],
+        "settings": {
+          "enabled": true,
+          "label": "Popular Searches"
+        }
       }
     }
   }
