@@ -72,7 +72,7 @@
         "cat-wedding": {
           "type": "collection",
           "settings": {
-            "collection": "wedding-bands",
+            "collection": "rings",
             "title": ""
           }
         },
