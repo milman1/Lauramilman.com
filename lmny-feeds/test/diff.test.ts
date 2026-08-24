@@ -60,20 +60,31 @@ describe('diff decisions', () => {
     expect(d.find((x) => x.handle === 'nd-broken')).toMatchObject({ action: 'skip', reason: 'media_missing_quarantine' });
   });
 
-  it('archives items that left the feed, never re-archives', () => {
+  it('archives watches that left the feed, never re-archives', () => {
     const catalog = [entry({ handle: 'w-gone' }), entry({ handle: 'w-long-gone', status: 'ARCHIVED' })];
     const d = diffCatalog([], catalog, ALL_KINDS);
     expect(d.find((x) => x.handle === 'w-gone')).toMatchObject({ action: 'archive', reason: 'left_feed' });
     expect(d.find((x) => x.handle === 'w-long-gone')?.action).toBe('skip');
   });
 
+  it('deletes unavailable loose diamonds, including previously archived ones', () => {
+    const catalog = [
+      entry({ handle: 'nd-gone' }),
+      entry({ handle: 'lg-long-gone', status: 'ARCHIVED' }),
+    ];
+    const d = diffCatalog([], catalog, ALL_KINDS);
+    expect(d.find((x) => x.handle === 'nd-gone')).toMatchObject({ action: 'delete', reason: 'left_feed' });
+    expect(d.find((x) => x.handle === 'lg-long-gone')).toMatchObject({ action: 'delete', reason: 'left_feed' });
+  });
+
   it('separates a held-but-still-listed item from one that left the feed', () => {
-    const catalog = [entry({ handle: 'w-held' }), entry({ handle: 'w-sold' })];
-    // w-held came back in the feed this run; pricing refused it, so it is not
-    // in `desired`. Archiving both is right; calling both "sold" is not.
-    const d = diffCatalog([], catalog, ALL_KINDS, new Set(['w-held']));
-    expect(d.find((x) => x.handle === 'w-held')).toMatchObject({ action: 'archive', reason: 'held_in_feed' });
-    expect(d.find((x) => x.handle === 'w-sold')).toMatchObject({ action: 'archive', reason: 'left_feed' });
+    const catalog = [entry({ handle: 'nd-held' }), entry({ handle: 'nd-sold' })];
+    // nd-held came back in the feed this run; pricing refused it, so it is not
+    // in `desired`. It remains recoverable, while the unavailable stone is
+    // permanently removed.
+    const d = diffCatalog([], catalog, ALL_KINDS, new Set(['nd-held']));
+    expect(d.find((x) => x.handle === 'nd-held')).toMatchObject({ action: 'archive', reason: 'held_in_feed' });
+    expect(d.find((x) => x.handle === 'nd-sold')).toMatchObject({ action: 'delete', reason: 'left_feed' });
   });
 
   it('never archives a segment whose feed fetch failed', () => {
@@ -81,7 +92,7 @@ describe('diff decisions', () => {
     const fetched = new Set<Kind>(['natural', 'lab']); // watch feed down
     const d = diffCatalog([], catalog, fetched);
     expect(d.find((x) => x.handle === 'w-safe')).toMatchObject({ action: 'skip', reason: 'feed_unavailable' });
-    expect(d.find((x) => x.handle === 'nd-gone')?.action).toBe('archive');
+    expect(d.find((x) => x.handle === 'nd-gone')?.action).toBe('delete');
   });
 
   it('ignores non-feed handles', () => {

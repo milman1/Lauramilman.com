@@ -613,6 +613,22 @@ export class ShopifyClient {
     return data.productUpdate.userErrors.map((e) => e.message);
   }
 
+  /** Permanently remove an unavailable supplier product from Shopify. */
+  async deleteProduct(id: string): Promise<string[]> {
+    const data = await this.gql<{
+      productDelete: { deletedProductId: string | null; userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($input: ProductDeleteInput!) {
+        productDelete(input: $input) {
+          deletedProductId
+          userErrors { message }
+        }
+      }`,
+      { input: { id } },
+    );
+    return data.productDelete.userErrors.map((e) => e.message);
+  }
+
   // ------------------------------------------------------------- publications
 
   async onlineStorePublicationId(): Promise<string> {

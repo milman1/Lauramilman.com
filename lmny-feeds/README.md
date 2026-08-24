@@ -37,16 +37,17 @@ holds a stones table — Shopify products are the only live copy.
      | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
-   archive / skip. Unchanged hashes are skipped entirely. Items that leave the
-   feed are archived, never deleted (URLs persist). A feed that fails to fetch
-   never archives its catalog segment.
+   delete / archive / skip. Unchanged hashes are skipped entirely. Loose
+   diamonds that leave a successfully fetched feed are permanently deleted
+   from Shopify; unavailable watches are archived. A feed that fails to fetch
+   never removes its catalog segment.
    Archives carry a cause: `left_feed` (the stock ref is gone — sold or
    withdrawn) or `held_in_feed` (still listed, but a gate or a pricing rule
-   refused it this run). Both archive, since an unpriceable item must not stay
-   buyable, but only `left_feed` gets the permanent URL redirect — redirecting
-   a held item would strand its page when pricing lets it back. The run summary
-   reports the split, so "N watches archived" can't be misread as sold-out
-   inventory when a pricing rule moved.
+   refused it this run). Held items archive, since an unpriceable item must not
+   stay buyable but may recover next run. A loose diamond with `left_feed` is
+   deleted and gets a permanent URL redirect; redirecting a held item would
+   strand its page when pricing lets it back. The run summary reports deletes
+   separately from archives.
 5. **Write** (`src/shopify.ts`): `bulkOperationRunMutation(productSet)` with a
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
    Media: every feed photo attaches by URL. `files` is re-sent only when the
