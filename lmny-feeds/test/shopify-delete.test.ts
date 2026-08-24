@@ -7,8 +7,10 @@ afterEach(() => {
 
 describe('ShopifyClient.deleteProduct', () => {
   it('permanently deletes the requested Shopify product', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
+    let requestInit: RequestInit | undefined;
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      requestInit = init;
+      return new Response(
         JSON.stringify({
           data: {
             productDelete: {
@@ -18,15 +20,15 @@ describe('ShopifyClient.deleteProduct', () => {
           },
         }),
         { headers: { 'Content-Type': 'application/json' } },
-      ),
-    );
+      );
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const client = new ShopifyClient('example.myshopify.com', 'test-token');
     await expect(client.deleteProduct('gid://shopify/Product/123')).resolves.toEqual([]);
 
-    const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
-    const body = JSON.parse(String(request.body)) as {
+    expect(requestInit).toBeDefined();
+    const body = JSON.parse(String(requestInit?.body)) as {
       query: string;
       variables: { input: { id: string } };
     };
