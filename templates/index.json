@@ -65,7 +65,7 @@
         "cat-engagement": {
           "type": "collection",
           "settings": {
-            "collection": "engagement-rings",
+            "collection": "necklaces",
             "title": ""
           }
         },
@@ -109,6 +109,53 @@
         "eyebrow": "Shop Our Collection",
         "title": "Collections",
         "view_all_link": "/collections/all"
+      }
+    },
+    "preowned-maison": {
+      "type": "preowned-maison",
+      "blocks": {
+        "maison-cartier": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier",
+            "title": "Cartier"
+          }
+        },
+        "maison-vca": {
+          "type": "maison",
+          "settings": {
+            "collection": "van-cleef-arpels",
+            "title": "Van Cleef & Arpels"
+          }
+        },
+        "maison-bvlgari": {
+          "type": "maison",
+          "settings": {
+            "collection": "bvlgari",
+            "title": "Bvlgari"
+          }
+        },
+        "maison-tiffany": {
+          "type": "maison",
+          "settings": {
+            "collection": "tiffany",
+            "title": "Tiffany & Co."
+          }
+        }
+      },
+      "block_order": [
+        "maison-cartier",
+        "maison-vca",
+        "maison-bvlgari",
+        "maison-tiffany"
+      ],
+      "settings": {
+        "eyebrow": "Authenticated Estate",
+        "title": "The Pre-Owned Maison",
+        "description": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust.",
+        "trust_line": "Every estate piece is individually authenticated and documented",
+        "cta_text": "Explore the Maison Vault",
+        "cta_url": "/collections/vintage-jewelry"
       }
     },
     "featured-products": {
@@ -178,53 +225,6 @@
         "signature": "— Laura Milman",
         "cta_text": "Read Laura's Story",
         "cta_url": "/pages/lauras-story"
-      }
-    },
-    "preowned-maison": {
-      "type": "preowned-maison",
-      "blocks": {
-        "maison-cartier": {
-          "type": "maison",
-          "settings": {
-            "collection": "cartier",
-            "title": "Cartier"
-          }
-        },
-        "maison-vca": {
-          "type": "maison",
-          "settings": {
-            "collection": "van-cleef-arpels",
-            "title": "Van Cleef & Arpels"
-          }
-        },
-        "maison-bvlgari": {
-          "type": "maison",
-          "settings": {
-            "collection": "bvlgari",
-            "title": "Bvlgari"
-          }
-        },
-        "maison-tiffany": {
-          "type": "maison",
-          "settings": {
-            "collection": "tiffany",
-            "title": "Tiffany & Co."
-          }
-        }
-      },
-      "block_order": [
-        "maison-cartier",
-        "maison-vca",
-        "maison-bvlgari",
-        "maison-tiffany"
-      ],
-      "settings": {
-        "eyebrow": "Authenticated Estate",
-        "title": "The Pre-Owned Maison",
-        "description": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust.",
-        "trust_line": "Every estate piece is individually authenticated and documented",
-        "cta_text": "Explore the Maison Vault",
-        "cta_url": "/collections/vintage-jewelry"
       }
     },
     "peaceful-diamonds": {
