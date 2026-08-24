@@ -11,8 +11,10 @@
 {%- liquid
   assign navy_mode = section.settings.navy_mode
   assign jewelry_only = false
+  assign schema_include_products = true
   if collection.handle == 'all' or collection.handle == 'all-jewelry'
     assign jewelry_only = true
+    assign schema_include_products = false
   endif
   assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
@@ -229,6 +231,11 @@
 {%- unless jewelry_only -%}
 {%- render 'filter-drawer', results: collection -%}
 {%- endunless -%}
+
+{% render 'structured-data-collection',
+  collection: collection,
+  include_products: schema_include_products
+%}
 
 {%- endpaginate -%}
 

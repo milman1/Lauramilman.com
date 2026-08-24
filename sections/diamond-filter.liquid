@@ -24,6 +24,8 @@
   assign stone_kind = section.settings.stone_kind | default: 'lab'
 -%}
 
+{% render 'structured-data-collection', collection: collection, include_products: false %}
+
 {%- if api_mode -%}
 
 <section

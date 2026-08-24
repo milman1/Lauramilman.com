@@ -27,6 +27,13 @@
   if product.type == 'Lab-Grown Diamond'
     assign is_lab = true
   endif
+  if is_lab
+    assign schema_collection_title = 'Lab-Grown Diamonds'
+    assign schema_collection_url = '/collections/lab-grown-diamonds'
+  else
+    assign schema_collection_title = 'Natural Diamonds'
+    assign schema_collection_url = '/collections/natural-diamonds'
+  endif
 
   assign per_carat = 0
   if carat > 0
@@ -190,6 +197,13 @@
     </div>
   </div>
 </section>
+
+{% render 'structured-data-product',
+  product: product,
+  current_variant: v,
+  collection_title: schema_collection_title,
+  collection_url: schema_collection_url
+%}
 
 <style>
   .dpdp {
