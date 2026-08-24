@@ -40,13 +40,13 @@ describe('diffBackVaultCatalog', () => {
     });
   });
 
-  it('never reactivates an inactive item, even when its hash changed', () => {
+  it('reactivates an inactive item with a matching hash', () => {
     const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new' }],
-      [entry('bv-cartier', 'old', 'DRAFT')],
+      [{ handle: 'bv-cartier', contentHash: 'abc' }],
+      [entry('bv-cartier', 'abc', 'DRAFT')],
     );
-    expect(decisions[0]!.action).toBe('skip');
-    expect(decisions[0]!.reason).toBe('inactive_preserved');
+    expect(decisions[0]!.action).toBe('update');
+    expect(decisions[0]!.reason).toBe('reactivate');
   });
 
   it('archives items no longer in the feed', () => {

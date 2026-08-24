@@ -33,10 +33,10 @@ export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVault
     const have = catalogByHandle.get(want.handle);
     if (!have) {
       decisions.push({ handle: want.handle, action: 'create', reason: 'new' });
-    } else if (have.status !== 'ACTIVE') {
-      decisions.push({ handle: want.handle, action: 'skip', reason: 'inactive_preserved', productId: have.id });
     } else if (have.contentHash !== want.contentHash) {
       decisions.push({ handle: want.handle, action: 'update', reason: 'hash_changed', productId: have.id });
+    } else if (have.status !== 'ACTIVE') {
+      decisions.push({ handle: want.handle, action: 'update', reason: 'reactivate', productId: have.id });
     } else if (!have.published) {
       // productSet does not publish to Online Store. The first live run created
       // 741 ACTIVE products that 404 on the storefront until this fires.

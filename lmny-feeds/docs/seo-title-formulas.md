@@ -43,11 +43,3 @@ Use this formula in Shopify Admin:
 Avoid generic openings such as “Beautiful,” stock numbers, promotional claims,
 price, and repeated category words. Keep the Shopify SEO title at or below 60
 characters and the description at or below 160 characters.
-
-## Publication safety
-
-The sync creates currently available, image-bearing feed items as `ACTIVE`.
-Items that leave an API feed are archived. Any existing `DRAFT` or `ARCHIVED`
-product remains inactive even if it reappears in a later feed or its content
-hash changes. Media rescue may clear the `media-missing` tag, but never changes
-the product's status.

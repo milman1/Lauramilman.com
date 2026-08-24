@@ -302,21 +302,6 @@ describe('updates target the existing product by id', () => {
     expect(String(input.descriptionHtml)).toMatch(/^<p>This 2\.01ct round brilliant natural diamond/);
   });
 
-  it('defensively preserves existing DRAFT and ARCHIVED statuses', () => {
-    const draft = buildProductSetInput(naturalStone(), priced(), at, {
-      id: 'gid://shopify/Product/draft',
-      imageCount: 1,
-      status: 'DRAFT',
-    });
-    const archived = buildProductSetInput(watch(), priced(), at, {
-      id: 'gid://shopify/Product/archived',
-      imageCount: 1,
-      status: 'ARCHIVED',
-    });
-    expect(draft.status).toBe('DRAFT');
-    expect(archived.status).toBe('ARCHIVED');
-  });
-
   it('watch metafields include Dial/Bezel/Bracelet/Metal/MM/Link for the PDP specs grid', () => {
     const fields = metafieldsFor(
       watch({

@@ -88,8 +88,6 @@ export function contentHashFor(item: BackVaultItem): string {
 export interface ExistingProduct {
   id: string;
   imageCount: number;
-  /** Existing inactive products must never be activated by a content refresh. */
-  status?: string;
 }
 
 /**
@@ -120,12 +118,6 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
   const hash = contentHashFor(item);
   const hasImages = item.imageUrls.length > 0;
   const finalTags = hasImages ? tags : [...tags, 'media-missing'].sort();
-  const status =
-    existing?.status && existing.status !== 'ACTIVE'
-      ? existing.status
-      : hasImages
-        ? 'ACTIVE'
-        : 'DRAFT';
 
   const input: Record<string, unknown> = {
     handle,
@@ -133,7 +125,7 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
     descriptionHtml: listing.descriptionHtml,
     vendor: item.vendor,
     productType: listing.productType,
-    status,
+    status: hasImages ? 'ACTIVE' : 'DRAFT',
     tags: finalTags,
     metafields: metafieldsFor(item, hash, syncedAt),
     seo: { title: listing.seoTitle, description: listing.seoDescription },

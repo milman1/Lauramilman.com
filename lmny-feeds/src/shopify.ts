@@ -850,13 +850,13 @@ export class ShopifyClient {
     return data.productCreateMedia.mediaUserErrors.map((e) => e.message);
   }
 
-  /** Clear the operational media tag without changing DRAFT/ARCHIVED status. */
-  async clearMediaMissingTag(id: string, tags: string[]): Promise<string[]> {
+  /** Put a rescued product back on the storefront. */
+  async unquarantineProduct(id: string, tags: string[]): Promise<string[]> {
     const data = await this.gql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(
       `mutation($product: ProductUpdateInput!) {
         productUpdate(product: $product) { userErrors { message } }
       }`,
-      { product: { id, tags: tags.filter((t) => t !== MEDIA_MISSING_TAG) } },
+      { product: { id, status: 'ACTIVE', tags: tags.filter((t) => t !== MEDIA_MISSING_TAG) } },
     );
     return data.productUpdate.userErrors.map((e) => e.message);
   }

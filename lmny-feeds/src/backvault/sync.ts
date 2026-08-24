@@ -125,9 +125,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       const input = buildProductSetInput(
         item,
         syncedAt,
-        existingEntry
-          ? { id: existingEntry.id, imageCount: existingEntry.imageCount, status: existingEntry.status }
-          : undefined,
+        existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
       );
       if (!opts.dryRun) {
         const result = await client.productSet(input);

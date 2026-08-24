@@ -351,8 +351,6 @@ export interface ExistingProduct {
   id: string;
   /** READY images. Fewer than the feed supplies → re-send the whole set. */
   imageCount: number;
-  /** Existing inactive products must never be activated by a content refresh. */
-  status?: string;
 }
 
 /**
@@ -379,19 +377,13 @@ export function buildProductSetInput(
   // there is never a window where an imageless product is ACTIVE.
   const hasImages = item.imageUrls.length > 0;
   const tags = hasImages ? tagsFor(item) : [...tagsFor(item), MEDIA_MISSING_TAG].sort();
-  const status =
-    existing?.status && existing.status !== 'ACTIVE'
-      ? existing.status
-      : hasImages
-        ? 'ACTIVE'
-        : 'DRAFT';
   const input: Record<string, unknown> = {
     handle: handleFor(item),
     title: titleFor(item),
     descriptionHtml: descriptionFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
-    status,
+    status: hasImages ? 'ACTIVE' : 'DRAFT',
     // Stones get the gemological PDP; watches keep the default product page.
     templateSuffix: item.kind === 'watch' ? '' : STONE_TEMPLATE_SUFFIX,
     tags,
