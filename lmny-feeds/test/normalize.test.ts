@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeStones, normalizeWatches } from '../src/normalize.js';
+import { collectUrls, normalizeStones, normalizeWatches } from '../src/normalize.js';
 
 const stoneRow = {
   stock_ref: 'BD-1',
@@ -152,6 +152,12 @@ describe('media collection across numbered feed fields', () => {
       'natural',
     );
     expect(items[0]?.imageUrls).toEqual(['https://dnalinks.in/1.jpg']);
+  });
+
+  it('coerces a scheme-less image URL the same way cert links are', () => {
+    expect(collectUrls({ ImageLink: 'dnalinks.in/T3743.jpg' }, ['imagelink'])).toEqual([
+      'https://dnalinks.in/T3743.jpg',
+    ]);
   });
 
   it('does not swallow a neighbouring field that merely shares a prefix', () => {

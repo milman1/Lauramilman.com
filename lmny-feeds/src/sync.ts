@@ -24,6 +24,7 @@ import {
   skipPricingReviewArchives,
 } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
+import { enrichWatchGalleries } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
 import {
@@ -191,6 +192,17 @@ async function main() {
         continue;
       }
       const result = kind === 'watch' ? normalizeWatches(rows) : normalizeStones(rows, kind);
+      if (kind === 'watch') {
+        const gallery = await enrichWatchGalleries(result.items);
+        if (gallery.enriched > 0) {
+          const msg =
+            `DNA gallery: ${gallery.enriched} short watch listing(s) gained ` +
+            `${gallery.extraImages} extra photo(s)` +
+            (gallery.extraVideos > 0 ? ` and ${gallery.extraVideos} video(s)` : '');
+          notes.push(msg);
+          console.log(msg);
+        }
+      }
       feeds[kind].fetched = rows.length;
       items.push(...result.items);
       holds.push(...result.holds);

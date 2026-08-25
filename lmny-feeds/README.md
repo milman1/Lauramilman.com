@@ -52,7 +52,10 @@ holds a stones table — Shopify products are the only live copy.
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
    Media: every feed photo attaches by URL. `files` is re-sent only when the
    product holds fewer READY images than the feed supplies, so a settled
-   product is never made to re-download its gallery. Watch videos are fetched,
+   product is never made to re-download its gallery. Watch galleries that the
+   API left at one still (`ImageLink` only, or ImageLink1 pointing at a 404
+   `.jpg`) are filled from the DNA viewer (`dna.dnalinks.in/w/{stock}`), which
+   is where the extra `.jpeg` angles actually live. Watch videos are fetched,
    type-sniffed and staged-uploaded as real `VIDEO` media for every URL the
    feed supplies (not just the first), capped per run (`VIDEO_ATTACH_BUDGET`)
    because each one is a download plus an upload.
