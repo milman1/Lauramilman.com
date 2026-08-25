@@ -164,6 +164,12 @@ function truncateAtWord(s: string, maxLen: number): string {
   return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
 }
 
+/** Preserve the commercial-intent suffix and shorten only model detail. */
+function fitWithSuffix(lead: string, suffix: string, maxLen: number): string {
+  const available = maxLen - suffix.length - 1;
+  return `${truncateAtWord(lead, available)} ${suffix}`.trim();
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -237,10 +243,11 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
     notesParagraph +
     trustParagraph;
 
-  let seoTitle = `${brand} ${model} ${reference} – ${titleWord}`;
-  if (seoTitle.length > 60) {
-    seoTitle = truncateAtWord(`${brand} ${model} ${reference}`, 60);
-  }
+  const seoTitle = fitWithSuffix(
+    `${brand} ${model} ${reference}`,
+    `– ${titleWord} Watch`,
+    60,
+  );
 
   const gradeSuffix = grade ? `, ${grade.toLowerCase()} condition` : '';
   let seoDescription =

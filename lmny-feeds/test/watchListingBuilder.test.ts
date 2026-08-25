@@ -25,7 +25,7 @@ describe('buildWatchListing', () => {
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.title).toBe('Pre-Owned Rolex Submariner Date 126610LN');
-    expect(listing.seoTitle).toBe('Rolex Submariner Date 126610LN – Pre-Owned');
+    expect(listing.seoTitle).toBe('Rolex Submariner Date 126610LN – Pre-Owned Watch');
     expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');
     expect(listing.tags).toEqual([
       'Rolex',
@@ -156,7 +156,7 @@ describe('buildWatchListing', () => {
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
-    expect(listing.seoTitle).not.toContain('Pre-Owned');
+    expect(listing.seoTitle).toMatch(/– Pre-Owned Watch$/);
   });
 });
 

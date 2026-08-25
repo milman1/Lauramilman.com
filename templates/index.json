@@ -59,52 +59,71 @@
       ],
       "settings": {}
     },
-    "collections-grid": {
-      "type": "collections-grid",
+    "shop-worlds": {
+      "type": "shop-worlds",
       "blocks": {
-        "cat-engagement": {
-          "type": "collection",
+        "world-peaceful": {
+          "type": "world",
           "settings": {
-            "collection": "necklaces"
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "title": "Peaceful Diamonds",
+            "subtitle": "Certified lab-grown jewelry",
+            "link": "",
+            "tone": "navy"
           }
         },
-        "cat-wedding": {
-          "type": "collection",
+        "world-diamonds": {
+          "type": "world",
           "settings": {
-            "collection": "rings"
+            "collection": "natural-diamonds",
+            "title": "Loose Diamonds",
+            "subtitle": "Natural and lab-grown stones",
+            "link": "/collections/natural-diamonds",
+            "tone": "warm"
           }
         },
-        "cat-bracelets": {
-          "type": "collection",
+        "world-maison": {
+          "type": "world",
           "settings": {
-            "collection": "bracelets"
+            "collection": "vintage-jewelry",
+            "title": "Pre-Owned Maison",
+            "subtitle": "Authenticated signed estate",
+            "link": "",
+            "tone": "warm"
           }
         },
-        "cat-pendants": {
-          "type": "collection",
+        "world-timepieces": {
+          "type": "world",
           "settings": {
-            "collection": "pendants-1",
-            "title": "Pendants"
+            "collection": "time-pieces",
+            "title": "Pre-Owned Timepieces",
+            "subtitle": "Rolex, Cartier, and more",
+            "link": "",
+            "tone": "warm"
           }
         },
-        "cat-earrings": {
-          "type": "collection",
+        "world-jewelry": {
+          "type": "world",
           "settings": {
-            "collection": "earrings"
+            "collection": "all",
+            "title": "Fine Jewelry",
+            "subtitle": "Designed in New York, crafted in Italy",
+            "link": "/collections/all",
+            "tone": "warm"
           }
         }
       },
       "block_order": [
-        "cat-engagement",
-        "cat-wedding",
-        "cat-bracelets",
-        "cat-pendants",
-        "cat-earrings"
+        "world-peaceful",
+        "world-diamonds",
+        "world-maison",
+        "world-timepieces",
+        "world-jewelry"
       ],
       "settings": {
-        "eyebrow": "Shop by Jewelry Type",
-        "view_all_link": "/collections/all",
-        "title": "Necklaces, Rings & More"
+        "eyebrow": "Explore Laura Milman",
+        "heading": "Shop Our Worlds",
+        "subheading": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
       }
     },
     "preowned-maison": {
@@ -154,284 +173,6 @@
         "cta_url": "/collections/vintage-jewelry"
       }
     },
-    "featured-products": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "The Signature Edit",
-        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
-        "collection": "bracelets",
-        "product_count": 4,
-        "cta_text": "View All",
-        "cta_url": "/collections/all",
-        "title": "Pieces to Wear Now"
-      }
-    },
-    "shop-the-look": {
-      "type": "shop-the-look",
-      "settings": {
-        "eyebrow": "Shop the Look",
-        "title": "Stack & Style",
-        "collection": "bracelets",
-        "cta_text": "View Full Collection"
-      }
-    },
-    "philosophy-quote": {
-      "type": "philosophy-quote",
-      "settings": {
-        "eyebrow": "Our Philosophy",
-        "quote": "True luxury is never disposable. A jewel should outlast the moment it was bought for — carrying its story from one generation to the next.",
-        "attribution": "Laura Milman"
-      }
-    },
-    "brand-story": {
-      "type": "brand-story",
-      "blocks": {
-        "stat-years": {
-          "type": "stat",
-          "settings": {
-            "value": "30+",
-            "label": "Years in the Diamond District"
-          }
-        },
-        "stat-nyc": {
-          "type": "stat",
-          "settings": {
-            "value": "NYC",
-            "label": "Designed in New York"
-          }
-        },
-        "stat-italy": {
-          "type": "stat",
-          "settings": {
-            "value": "Italy",
-            "label": "Crafted by Master Goldsmiths"
-          }
-        }
-      },
-      "block_order": [
-        "stat-years",
-        "stat-nyc",
-        "stat-italy"
-      ],
-      "settings": {
-        "eyebrow": "The Beginning",
-        "title": "Three Decades\nin the Making",
-        "body_text": "<p>Laura Milman's story began in the heart of New York's Diamond District, where she spent thirty years learning what makes a jewel worth keeping. Today every Laura Milman New York piece is designed in the city that trained her eye — and brought to life by master goldsmiths in Italy.</p><p>Newly made or newly rediscovered, each piece is chosen the same way: it must be beautiful enough to buy once, and made well enough to hand down.</p>",
-        "signature": "— Laura Milman",
-        "cta_text": "Read Laura's Story",
-        "cta_url": "/pages/lauras-story"
-      }
-    },
-    "peaceful-diamonds": {
-      "type": "peaceful-diamonds",
-      "blocks": {
-        "pd-point-1": {
-          "type": "point",
-          "settings": {
-            "text": "Certified lab-grown diamonds"
-          }
-        },
-        "pd-point-2": {
-          "type": "point",
-          "settings": {
-            "text": "Crafted to the same LMNY standard"
-          }
-        },
-        "pd-point-3": {
-          "type": "point",
-          "settings": {
-            "text": "Exceptional carat weight, accessible price"
-          }
-        }
-      },
-      "block_order": [
-        "pd-point-1",
-        "pd-point-2",
-        "pd-point-3"
-      ],
-      "settings": {
-        "chip_text": "The Lab-Grown Collection",
-        "title": "Peaceful Diamonds",
-        "byline": "by Laura Milman New York",
-        "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Peaceful Diamonds"
-      }
-    },
-    "private-clients": {
-      "type": "private-clients",
-      "blocks": {
-        "svc-consult": {
-          "type": "service",
-          "settings": {
-            "title": "Private Consultations",
-            "text": "One-on-one appointments, in person in New York or by video."
-          }
-        },
-        "svc-sourcing": {
-          "type": "service",
-          "settings": {
-            "title": "Diamond & Gemstone Sourcing",
-            "text": "Rare natural stones sourced to your brief through our Diamond District network."
-          }
-        },
-        "svc-bespoke": {
-          "type": "service",
-          "settings": {
-            "title": "Bespoke Commissions",
-            "text": "One-of-a-kind pieces designed in New York and crafted in Italy."
-          }
-        }
-      },
-      "block_order": [
-        "svc-consult",
-        "svc-sourcing",
-        "svc-bespoke"
-      ],
-      "settings": {
-        "eyebrow": "Private Clients",
-        "title": "Bespoke, By Appointment",
-        "description": "For the pieces that matter most, work directly with Laura. Private viewings in New York, diamond and gemstone sourcing, and one-of-a-kind commissions crafted in Italy.",
-        "cta_text": "Book a Consultation",
-        "cta_url": "/pages/private-clients",
-        "note": "Complimentary · No obligation"
-      }
-    },
-    "reviews": {
-      "type": "google-reviews-strip",
-      "settings": {
-        "eyebrow": "Client Words",
-        "title": "Loved in New York",
-        "intro": "Real appointments, real pieces — read what clients say after working with Laura.",
-        "embed_id": "25387276",
-        "cta_label": "See all reviews",
-        "cta_url": "/pages/google-reviews"
-      }
-    },
-    "testimonials": {
-      "type": "testimonials",
-      "blocks": {
-        "t1": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
-            "author": "Alexandra K.",
-            "product_name": "Private consultation"
-          }
-        },
-        "t2": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
-            "author": "Catherine M.",
-            "product_name": "Tennis bracelet"
-          }
-        },
-        "t3": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
-            "author": "Victoria S.",
-            "product_name": "Peaceful Diamonds"
-          }
-        }
-      },
-      "block_order": [
-        "t1",
-        "t2",
-        "t3"
-      ],
-      "settings": {
-        "eyebrow": "What Our Clients Say",
-        "title": "Testimonials"
-      }
-    },
-    "newsletter": {
-      "type": "newsletter",
-      "settings": {
-        "title": "Join the Inner Circle",
-        "description": "Sign up for 10% off your first jewelry purchase — code LMNYWELCOME, watches excluded — plus new arrivals and private viewings.",
-        "placeholder": "Your email address",
-        "button_text": "Unlock 10% off",
-        "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
-      }
-    },
-    "closing-cta": {
-      "type": "closing-cta",
-      "settings": {
-        "title": "Begin Your Story",
-        "description": "Exceptional stones, storied maison pieces, pre-owned timepieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
-        "primary_cta_text": "Shop the Collection",
-        "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Book a Consultation",
-        "secondary_cta_url": "/pages/private-clients",
-        "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
-      }
-    },
-    "shop-worlds": {
-      "type": "shop-worlds",
-      "blocks": {
-        "world-peaceful": {
-          "type": "world",
-          "settings": {
-            "collection": "peaceful-diamonds-by-laura-milman-new-york",
-            "title": "Peaceful Diamonds",
-            "subtitle": "Certified lab-grown jewelry",
-            "tone": "navy"
-          }
-        },
-        "world-diamonds": {
-          "type": "world",
-          "settings": {
-            "collection": "natural-diamonds",
-            "title": "Loose Diamonds",
-            "subtitle": "Natural and lab-grown stones",
-            "link": "/collections/natural-diamonds",
-            "tone": "warm"
-          }
-        },
-        "world-maison": {
-          "type": "world",
-          "settings": {
-            "collection": "vintage-jewelry",
-            "title": "Pre-Owned Maison",
-            "subtitle": "Authenticated signed estate",
-            "tone": "warm"
-          }
-        },
-        "world-timepieces": {
-          "type": "world",
-          "settings": {
-            "collection": "time-pieces",
-            "title": "Pre-Owned Timepieces",
-            "subtitle": "Rolex, Cartier, and more",
-            "tone": "warm"
-          }
-        },
-        "world-jewelry": {
-          "type": "world",
-          "settings": {
-            "collection": "all",
-            "title": "Fine Jewelry",
-            "subtitle": "Designed in New York, crafted in Italy",
-            "link": "/collections/all",
-            "tone": "warm"
-          }
-        }
-      },
-      "block_order": [
-        "world-peaceful",
-        "world-diamonds",
-        "world-maison",
-        "world-timepieces",
-        "world-jewelry"
-      ],
-      "settings": {
-        "eyebrow": "Explore Laura Milman",
-        "heading": "Shop Our Worlds",
-        "subheading": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
-      }
-    },
     "diamond-destination": {
       "type": "diamond-destination",
       "blocks": {
@@ -442,6 +183,7 @@
             "title": "Natural Loose Diamonds",
             "subtitle": "GIA-certified stones, priced against the live market.",
             "cta_label": "Shop natural diamonds",
+            "link": "",
             "tone": "warm"
           }
         },
@@ -452,6 +194,7 @@
             "title": "Lab-Grown Loose Diamonds",
             "subtitle": "Certified lab-grown stones with exceptional carat weight.",
             "cta_label": "Shop lab-grown diamonds",
+            "link": "",
             "tone": "navy"
           }
         }
@@ -514,6 +257,275 @@
         "cta_text": "Shop All Timepieces",
         "cta_url": "/collections/time-pieces"
       }
+    },
+    "peaceful-diamonds": {
+      "type": "peaceful-diamonds",
+      "blocks": {
+        "pd-point-1": {
+          "type": "point",
+          "settings": {
+            "text": "Certified lab-grown diamonds"
+          }
+        },
+        "pd-point-2": {
+          "type": "point",
+          "settings": {
+            "text": "Crafted to the same LMNY standard"
+          }
+        },
+        "pd-point-3": {
+          "type": "point",
+          "settings": {
+            "text": "Exceptional carat weight, accessible price"
+          }
+        }
+      },
+      "block_order": [
+        "pd-point-1",
+        "pd-point-2",
+        "pd-point-3"
+      ],
+      "settings": {
+        "chip_text": "The Lab-Grown Collection",
+        "title": "Peaceful Diamonds",
+        "byline": "by Laura Milman New York",
+        "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "cta_text": "Shop Peaceful Diamonds",
+        "secondary_cta_text": "",
+        "secondary_cta_url": ""
+      }
+    },
+    "collections-grid": {
+      "type": "collections-grid",
+      "blocks": {
+        "cat-engagement": {
+          "type": "collection",
+          "settings": {
+            "collection": "necklaces",
+            "title": ""
+          }
+        },
+        "cat-wedding": {
+          "type": "collection",
+          "settings": {
+            "collection": "rings",
+            "title": ""
+          }
+        },
+        "cat-bracelets": {
+          "type": "collection",
+          "settings": {
+            "collection": "bracelets",
+            "title": ""
+          }
+        },
+        "cat-pendants": {
+          "type": "collection",
+          "settings": {
+            "collection": "pendants-1",
+            "title": "Pendants"
+          }
+        },
+        "cat-earrings": {
+          "type": "collection",
+          "settings": {
+            "collection": "earrings",
+            "title": ""
+          }
+        }
+      },
+      "block_order": [
+        "cat-engagement",
+        "cat-wedding",
+        "cat-bracelets",
+        "cat-pendants",
+        "cat-earrings"
+      ],
+      "settings": {
+        "eyebrow": "Shop by Jewelry Type",
+        "title": "Necklaces, Rings & More",
+        "view_all_link": "/collections/all"
+      }
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "The Signature Edit",
+        "title": "Pieces to Wear Now",
+        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
+        "collection": "bracelets",
+        "product_count": 4,
+        "cta_text": "View All",
+        "cta_url": "/collections/all"
+      }
+    },
+    "shop-the-look": {
+      "type": "shop-the-look",
+      "settings": {
+        "eyebrow": "Shop the Look",
+        "title": "Stack & Style",
+        "collection": "bracelets",
+        "caption_title": "",
+        "cta_text": "View Full Collection"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
+            "author": "Alexandra K.",
+            "product_name": "Private consultation"
+          }
+        },
+        "t2": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
+            "author": "Catherine M.",
+            "product_name": "Tennis bracelet"
+          }
+        },
+        "t3": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
+            "author": "Victoria S.",
+            "product_name": "Peaceful Diamonds"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ],
+      "settings": {
+        "eyebrow": "What Our Clients Say",
+        "title": "Testimonials"
+      }
+    },
+    "philosophy-quote": {
+      "type": "philosophy-quote",
+      "settings": {
+        "eyebrow": "Our Philosophy",
+        "quote": "True luxury is never disposable. A jewel should outlast the moment it was bought for — carrying its story from one generation to the next.",
+        "attribution": "Laura Milman"
+      }
+    },
+    "brand-story": {
+      "type": "brand-story",
+      "blocks": {
+        "stat-years": {
+          "type": "stat",
+          "settings": {
+            "value": "30+",
+            "label": "Years in the Diamond District"
+          }
+        },
+        "stat-nyc": {
+          "type": "stat",
+          "settings": {
+            "value": "NYC",
+            "label": "Designed in New York"
+          }
+        },
+        "stat-italy": {
+          "type": "stat",
+          "settings": {
+            "value": "Italy",
+            "label": "Crafted by Master Goldsmiths"
+          }
+        }
+      },
+      "block_order": [
+        "stat-years",
+        "stat-nyc",
+        "stat-italy"
+      ],
+      "settings": {
+        "eyebrow": "The Beginning",
+        "title": "Three Decades\nin the Making",
+        "body_text": "<p>Laura Milman's story began in the heart of New York's Diamond District, where she spent thirty years learning what makes a jewel worth keeping. Today every Laura Milman New York piece is designed in the city that trained her eye — and brought to life by master goldsmiths in Italy.</p><p>Newly made or newly rediscovered, each piece is chosen the same way: it must be beautiful enough to buy once, and made well enough to hand down.</p>",
+        "signature": "— Laura Milman",
+        "cta_text": "Read Laura's Story",
+        "cta_url": "/pages/lauras-story"
+      }
+    },
+    "private-clients": {
+      "type": "private-clients",
+      "blocks": {
+        "svc-consult": {
+          "type": "service",
+          "settings": {
+            "title": "Private Consultations",
+            "text": "One-on-one appointments, in person in New York or by video."
+          }
+        },
+        "svc-sourcing": {
+          "type": "service",
+          "settings": {
+            "title": "Diamond & Gemstone Sourcing",
+            "text": "Rare natural stones sourced to your brief through our Diamond District network."
+          }
+        },
+        "svc-bespoke": {
+          "type": "service",
+          "settings": {
+            "title": "Bespoke Commissions",
+            "text": "One-of-a-kind pieces designed in New York and crafted in Italy."
+          }
+        }
+      },
+      "block_order": [
+        "svc-consult",
+        "svc-sourcing",
+        "svc-bespoke"
+      ],
+      "settings": {
+        "eyebrow": "Private Clients",
+        "title": "Bespoke, By Appointment",
+        "description": "For the pieces that matter most, work directly with Laura. Private viewings in New York, diamond and gemstone sourcing, and one-of-a-kind commissions crafted in Italy.",
+        "cta_text": "Book a Consultation",
+        "cta_url": "/pages/private-clients",
+        "note": "Complimentary · No obligation"
+      }
+    },
+    "reviews": {
+      "type": "google-reviews-strip",
+      "settings": {
+        "eyebrow": "Client Words",
+        "title": "Loved in New York",
+        "intro": "Real appointments, real pieces — read what clients say after working with Laura.",
+        "embed_id": "25387276",
+        "cta_label": "See all reviews",
+        "cta_url": "/pages/google-reviews"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "title": "Join the Inner Circle",
+        "description": "Sign up for 10% off your first jewelry purchase — code LMNYWELCOME, watches excluded — plus new arrivals and private viewings.",
+        "placeholder": "Your email address",
+        "button_text": "Unlock 10% off",
+        "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
+      }
+    },
+    "closing-cta": {
+      "type": "closing-cta",
+      "settings": {
+        "title": "Begin Your Story",
+        "description": "Exceptional stones, storied maison pieces, pre-owned timepieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
+        "primary_cta_text": "Shop the Collection",
+        "primary_cta_url": "/collections/all",
+        "secondary_cta_text": "Book a Consultation",
+        "secondary_cta_url": "/pages/private-clients",
+        "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
+      }
     }
   },
   "order": [
@@ -527,11 +539,11 @@
     "collections-grid",
     "featured-products",
     "shop-the-look",
+    "testimonials",
     "philosophy-quote",
     "brand-story",
     "private-clients",
     "reviews",
-    "testimonials",
     "newsletter",
     "closing-cta"
   ]
