@@ -16,20 +16,45 @@
       <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
     {%- endunless -%}
 
+    {%- liquid
+      assign seo_page_title = page_title
+      assign seo_meta_description = page_description
+      assign seo_social_title = page_title
+      if request.page_type == 'index'
+        assign seo_page_title = 'Fine Jewelry, Diamonds & Estate Pieces'
+        assign seo_social_title = 'Fine Jewelry, Diamonds & Estate Pieces | Laura Milman New York'
+        assign seo_meta_description = 'Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces. Free shipping, 14-day jewelry returns.'
+      elsif request.page_type == 'collection' and seo_meta_description == blank
+        capture seo_meta_description
+          echo 'Explore '
+          echo collection.title
+          echo ' from Laura Milman New York, selected with over 30 years of Diamond District expertise. Authenticity guaranteed and insured shipping.'
+        endcapture
+      elsif request.page_type == 'article' and seo_meta_description.size > 180
+        assign seo_meta_description = article.excerpt_or_content | strip_html | strip | truncatewords: 24, ''
+      elsif request.page_type == 'blog' and seo_meta_description == blank
+        assign seo_meta_description = 'Read expert jewelry, diamond, watch, styling, and estate-buying guidance from Laura Milman New York.'
+      elsif request.page_type == 'page' and seo_meta_description == blank
+        capture seo_meta_description
+          echo 'Learn about '
+          echo page_title
+          echo ' at Laura Milman New York, backed by over 30 years of New York Diamond District expertise.'
+        endcapture
+      endif
+    -%}
+
     <title>
-      {{ page_title }}
+      {{ seo_page_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      {%- unless seo_page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
     </title>
 
-    {% if request.page_type == 'index' %}
-      <meta name="description" content="Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces. Free shipping, 14-day jewelry returns.">
-    {% elsif page_description %}
-      <meta name="description" content="{{ page_description | escape }}">
+    {% if seo_meta_description %}
+      <meta name="description" content="{{ seo_meta_description | escape }}">
     {% endif %}
 
-    {% render 'meta-tags' %}
+    {% render 'meta-tags', meta_title: seo_social_title, meta_description: seo_meta_description %}
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,9 +93,12 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "{{ shop.url }}/#organization",
       "name": "Laura Milman New York",
       "url": "{{ shop.url }}",
-      "logo": "{{ 'logo.svg' | asset_url | prepend: 'https:' }}",
+      {%- if settings.favicon != blank -%}
+      "logo": {{ settings.favicon | image_url: width: 512 | prepend: 'https:' | json }},
+      {%- endif -%}
       "description": "Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces.",
       "address": {
         "@type": "PostalAddress",
@@ -83,7 +111,37 @@
         "contactType": "customer service",
         "email": "hello@lauramilman.com"
       },
-      "sameAs": []
+      "sameAs": [
+        {%- assign social_urls = settings.social_instagram | append: '|' | append: settings.social_facebook | append: '|' | append: settings.social_pinterest | split: '|' -%}
+        {%- assign social_written = false -%}
+        {%- for social_url in social_urls -%}
+          {%- if social_url != blank -%}
+            {%- if social_written -%},{%- endif -%}
+            {{ social_url | json }}
+            {%- assign social_written = true -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "{{ shop.url }}/#website",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }},
+      "publisher": {
+        "@id": "{{ shop.url }}/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ shop.url }}/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
   </head>

@@ -9,7 +9,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 2;
+export const PRODUCT_SCHEMA_VERSION = 3;
 
 export function sanitizeHandle(ref: string): string {
   return ref

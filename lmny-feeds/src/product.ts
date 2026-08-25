@@ -32,7 +32,10 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 11;
+export const PRODUCT_SCHEMA_VERSION = 12;
+
+const SEO_TITLE_MAX = 60;
+const SEO_DESCRIPTION_MAX = 160;
 
 /** Theme template for stones — the gemological PDP, not the jewelry one. */
 export const STONE_TEMPLATE_SUFFIX = 'diamond';
@@ -103,11 +106,63 @@ export function titleFor(item: FeedItem): string {
     if (listing) return listing.title;
     return `${item.brand} ${item.model} ${item.reference}`;
   }
-  return `${formatCarat(item.carat)}ct ${item.shape}, ${item.color} ${item.clarity} — ${item.lab}`;
+  const origin = item.kind === 'lab' ? 'Lab-Grown Diamond' : 'Natural Diamond';
+  return `${formatCarat(item.carat)}ct ${item.shape} ${origin} — ${item.color} ${item.clarity}, ${item.lab} Certified`;
 }
 
 function formatCarat(carat: number): string {
   return carat.toFixed(2).replace(/0$/, '').replace(/\.$/, '');
+}
+
+function truncateAtWord(value: string, maxLength: number): string {
+  if (value.length <= maxLength) return value;
+  const cut = value.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
+}
+
+/** Keep the high-intent suffix while shortening only the descriptive lead. */
+function fitWithSuffix(lead: string, suffix: string, maxLength: number): string {
+  const available = maxLength - suffix.length - 1;
+  return `${truncateAtWord(lead, available)} ${suffix}`.trim();
+}
+
+/**
+ * Search title formula for every Belgium Dia product. Shopify's theme supplies
+ * the store-name suffix, so this field spends its budget on product intent:
+ * identity/specification first, then origin/condition and certification.
+ */
+export function seoTitleFor(item: FeedItem): string {
+  if (item.kind === 'watch') {
+    const listing = watchListingFor(item);
+    if (listing) return listing.seoTitle;
+    return fitWithSuffix(
+      `${item.brand} ${item.model} ${item.reference}`.replace(/\s+/g, ' ').trim(),
+      'Watch',
+      SEO_TITLE_MAX,
+    );
+  }
+  const origin = item.kind === 'lab' ? 'Lab-Grown Diamond' : 'Natural Diamond';
+  const lead = `${formatCarat(item.carat)}ct ${item.shape} ${origin} — ${item.color} ${item.clarity}`;
+  return fitWithSuffix(lead, `| ${item.lab}`, SEO_TITLE_MAX);
+}
+
+/** Human-readable SERP copy; specifications remain available in the PDP body. */
+export function seoDescriptionFor(item: FeedItem): string {
+  if (item.kind === 'watch') {
+    const listing = watchListingFor(item);
+    if (listing) return listing.seoDescription;
+    return truncateAtWord(
+      `Explore this ${item.brand} ${item.model} ${item.reference} watch from Laura Milman New York.`,
+      SEO_DESCRIPTION_MAX,
+    );
+  }
+  const origin = item.kind === 'lab' ? 'lab-grown' : 'natural';
+  const cut = item.cut ? ` with ${item.cut.toLowerCase()} cut` : '';
+  return truncateAtWord(
+    `Shop this ${formatCarat(item.carat)}ct ${item.shape.toLowerCase()} ${origin} diamond, graded ${item.color} ${item.clarity}${cut} and certified by ${item.lab}.`,
+    SEO_DESCRIPTION_MAX,
+  );
 }
 
 /** Half-carat bands: 0.5-1.0ct, 1.0-1.5ct, …; 5ct and up collapse to 5.0ct+. */
@@ -231,6 +286,11 @@ export function descriptionFor(item: FeedItem): string {
     return renderRows(rows);
   }
   const origin = item.kind === 'lab' ? 'Lab-grown diamond' : 'Natural diamond';
+  const certification = item.certNumber ? `${item.lab} report ${item.certNumber}` : `${item.lab} certified`;
+  const lead =
+    `<p>This ${escapeHtml(formatCarat(item.carat))}ct ${escapeHtml(item.shape.toLowerCase())} ` +
+    `${escapeHtml(origin.toLowerCase())} is graded ${escapeHtml(item.color)} color and ` +
+    `${escapeHtml(item.clarity)} clarity, with ${escapeHtml(certification)}.</p>`;
   const rows = [
     ['Origin', origin],
     ['Shape', item.shape],
@@ -244,7 +304,7 @@ export function descriptionFor(item: FeedItem): string {
     ['Measurements', item.measurements],
     ['Certification', item.certNumber ? `${item.lab} ${item.certNumber}` : item.lab],
   ];
-  return renderRows(rows);
+  return `${lead}${renderRows(rows)}`;
 }
 
 function renderRows(rows: (string | undefined)[][]): string {
@@ -264,7 +324,6 @@ function escapeHtml(s: string): string {
  * synced_at and the hash itself are excluded by construction.
  */
 export function contentHashFor(item: FeedItem, priced: Priced): string {
-  const listing = item.kind === 'watch' ? watchListingFor(item) : null;
   return contentHash({
     schemaVersion: PRODUCT_SCHEMA_VERSION,
     handle: handleFor(item),
@@ -273,8 +332,8 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     productType: PRODUCT_TYPES[item.kind],
     tags: tagsFor(item),
     description: descriptionFor(item),
-    seoTitle: listing?.seoTitle ?? null,
-    seoDescription: listing?.seoDescription ?? null,
+    seoTitle: seoTitleFor(item),
+    seoDescription: seoDescriptionFor(item),
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
     images: item.imageUrls,
@@ -318,7 +377,6 @@ export function buildProductSetInput(
   // there is never a window where an imageless product is ACTIVE.
   const hasImages = item.imageUrls.length > 0;
   const tags = hasImages ? tagsFor(item) : [...tagsFor(item), MEDIA_MISSING_TAG].sort();
-  const listing = item.kind === 'watch' ? watchListingFor(item) : null;
   const input: Record<string, unknown> = {
     handle: handleFor(item),
     title: titleFor(item),
@@ -348,9 +406,7 @@ export function buildProductSetInput(
       },
     ],
   };
-  if (listing) {
-    input.seo = { title: listing.seoTitle, description: listing.seoDescription };
-  }
+  input.seo = { title: seoTitleFor(item), description: seoDescriptionFor(item) };
   if (existing) input.id = existing.id;
   // productSet fully replaces any field it's given, so re-sending `files` on a
   // product that already holds every photo makes Shopify detach and re-download

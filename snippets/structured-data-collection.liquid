@@ -1,0 +1,42 @@
+{% doc %}
+Renders CollectionPage and optional ItemList JSON-LD.
+
+@param {collection} collection - Collection represented by the current page.
+@param {boolean} [include_products] - Whether to include visible products.
+
+@example
+{% render 'structured-data-collection', collection: collection, include_products: true %}
+{% enddoc %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "@id": {{ canonical_url | append: '#collection' | json }},
+  "name": {{ collection.title | json }},
+  "description": {{ collection.description | strip_html | strip | truncate: 500 | json }},
+  "url": {{ canonical_url | json }}
+  {%- if collection.image -%}
+    ,"image": {{ collection.image | image_url: width: 1200 | prepend: "https:" | json }}
+  {%- endif -%}
+  {%- if include_products and collection.products.size > 0 -%}
+    ,"mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": {{ collection.products.size | json }},
+      "itemListElement": [
+        {%- for item_product in collection.products limit: 48 -%}
+          {
+            "@type": "ListItem",
+            "position": {{ forloop.index }},
+            "url": {{ shop.url | append: item_product.url | json }},
+            "name": {{ item_product.title | json }}
+            {%- if item_product.featured_image -%}
+              ,"image": {{ item_product.featured_image | image_url: width: 800 | prepend: "https:" | json }}
+            {%- endif -%}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  {%- endif -%}
+}
+</script>

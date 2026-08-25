@@ -3,8 +3,8 @@
   Include in theme.liquid <head>: {% render 'meta-tags' %}
 {% endcomment %}
 
-{%- assign og_title = page_title | default: shop.name -%}
-{%- assign og_description = page_description | default: shop.description -%}
+{%- assign og_title = meta_title | default: page_title | default: shop.name -%}
+{%- assign og_description = meta_description | default: page_description | default: shop.description -%}
 {%- assign og_url = canonical_url | default: request.origin -%}
 {%- assign og_site_name = shop.name -%}
 

@@ -52,7 +52,7 @@ describe('buildJewelryListing', () => {
       '<p>This Cartier estate bracelet in 18K Yellow Gold is offered by Laura Milman New York. It is in excellent condition.</p>' +
         '<p>Authenticated and hand-inspected by Laura Milman New York.</p>',
     );
-    expect(listing.seoTitle).toBe('Cartier Love Bracelet | Laura Milman');
+    expect(listing.seoTitle).toBe('Cartier Love Bracelet | Estate Jewelry');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoDescription).toContain('Shop this Cartier estate bracelet in 18K Yellow Gold, excellent condition.');
     expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');
@@ -92,6 +92,7 @@ describe('buildJewelryListing', () => {
     expect(listing.descriptionHtml).toContain('This Pre-Owned Bvlgari');
     expect(listing.descriptionHtml).toContain('is offered by Laura Milman New York.');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
+    expect(listing.seoTitle).toMatch(/\| Pre-Owned Watch$/);
     expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');
     expect(listing.tags).toContain('Pre-Owned Watches');
   });
@@ -108,7 +109,7 @@ describe('buildJewelryListing', () => {
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoTitle).not.toMatch(/\s$/);
     expect(listing.seoTitle).toContain('Cartier');
-    expect(listing.seoTitle).not.toContain('|');
+    expect(listing.seoTitle).toMatch(/\| Estate Jewelry$/);
     expect(listing.productType).toBe('Cufflinks');
     expect(listing.descriptionHtml).toContain('pair of cufflinks');
   });

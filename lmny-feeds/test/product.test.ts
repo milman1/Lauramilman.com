@@ -6,6 +6,8 @@ import {
   handleFor,
   metafieldsFor,
   sanitizeRef,
+  seoDescriptionFor,
+  seoTitleFor,
   tagsFor,
   titleFor,
   vendorFor,
@@ -40,7 +42,9 @@ describe('handle generation', () => {
 
 describe('titles', () => {
   it('builds stone titles per spec', () => {
-    expect(titleFor(naturalStone())).toBe('2.01ct Round Brilliant, F VS1 — GIA');
+    expect(titleFor(naturalStone())).toBe(
+      '2.01ct Round Brilliant Natural Diamond — F VS1, GIA Certified',
+    );
   });
 
   it('builds watch titles from the listing schema when condition maps', () => {
@@ -50,6 +54,45 @@ describe('titles', () => {
 
   it('falls back to brand model reference when condition is unrecognized', () => {
     expect(titleFor(watch({ condition: 'SLIDER' }))).toBe('Rolex Submariner 126610LN');
+  });
+});
+
+describe('SEO formulas', () => {
+  it('front-loads loose-diamond attributes, origin, and certification', () => {
+    expect(seoTitleFor(naturalStone())).toBe(
+      '2.01ct Round Brilliant Natural Diamond — F VS1 | GIA',
+    );
+    expect(seoTitleFor(labStone())).toBe(
+      '2.01ct Round Brilliant Lab-Grown Diamond — F VS1 | IGI',
+    );
+    expect(seoDescriptionFor(naturalStone())).toContain(
+      '2.01ct round brilliant natural diamond, graded F VS1',
+    );
+  });
+
+  it('uses brand, model, reference, condition, and product type for watches', () => {
+    expect(seoTitleFor(watch())).toBe(
+      'Rolex Submariner 126610LN – Pre-Owned Watch',
+    );
+    expect(seoDescriptionFor(watch())).toContain(
+      'Authenticated by Laura Milman New York.',
+    );
+  });
+
+  it('keeps every generated SEO field within search-safe limits', () => {
+    const longStone = naturalStone({
+      shape: 'Very Long Cushion Modified Brilliant',
+      lab: 'Gemological Institute of America',
+    });
+    const longWatch = watch({
+      brand: 'Audemars Piguet',
+      model: 'Royal Oak Offshore Selfwinding Chronograph',
+      reference: '26420SO.OO.A002CA.01',
+    });
+    for (const item of [longStone, longWatch]) {
+      expect(seoTitleFor(item).length).toBeLessThanOrEqual(60);
+      expect(seoDescriptionFor(item).length).toBeLessThanOrEqual(160);
+    }
   });
 });
 
@@ -245,9 +288,18 @@ describe('updates target the existing product by id', () => {
     expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
-      title: 'Rolex Submariner 126610LN – Pre-Owned',
+      title: 'Rolex Submariner 126610LN – Pre-Owned Watch',
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
+  });
+
+  it('writes custom SEO fields for loose diamonds', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at);
+    expect(input.seo).toEqual({
+      title: '2.01ct Round Brilliant Natural Diamond — F VS1 | GIA',
+      description: expect.stringContaining('round brilliant natural diamond'),
+    });
+    expect(String(input.descriptionHtml)).toMatch(/^<p>This 2\.01ct round brilliant natural diamond/);
   });
 
   it('watch metafields include Dial/Bezel/Bracelet/Metal/MM/Link for the PDP specs grid', () => {
