@@ -888,17 +888,22 @@ p {
 }
 
 .collection-card__image-box {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--off-white);
+  padding: 12%;
+  box-sizing: border-box;
 }
 
 .collection-card__image-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: transform var(--transition-slow);
 }
 
