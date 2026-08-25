@@ -147,21 +147,34 @@ def test_new_section_schemas_are_valid_json() -> None:
     assert ".lm-worlds__rail" in worlds_html
 
 
-def test_merchandising_card_photos_are_contained_not_cropped() -> None:
+def test_worlds_cards_stack_photo_above_text() -> None:
+    """Titles sit in a band below the photo so they never overlap jewelry."""
     worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
+    assert "lm-worlds__info" in worlds
+    assert "lm-worlds__overlay" not in worlds
+    assert "flex-direction: column" in worlds
+    assert "object-fit: cover" in worlds
+    assert "padding: 16%" not in worlds
+    assert "aspect-ratio: 3 / 4" not in worlds
+    info_css = worlds.split(".lm-worlds__info")[1].split("@media")[0]
+    assert "position: absolute" not in info_css
+    media_css = worlds.split(".lm-worlds__media {")[1].split("}")[0]
+    assert "position: absolute" not in media_css
+    assert "aspect-ratio: 1 / 1" in media_css
+
+
+def test_related_merchandising_photos_fill_their_frames() -> None:
     diamonds = (ROOT / "sections/diamond-destination.liquid").read_text()
     maison = (ROOT / "sections/preowned-maison.liquid").read_text()
     theme_css = (ROOT / "assets/theme.css").read_text()
-    assert "aspect-ratio: 1 / 1" in worlds
-    assert "object-fit: contain" in worlds
-    assert "aspect-ratio: 3 / 4" not in worlds
-    assert "object-fit: contain" in diamonds
-    assert "grid-template-rows: 160px 1fr" in diamonds
-    assert "aspect-ratio: 1 / 1" in maison
-    assert "object-fit: contain" in maison
-    assert "aspect-ratio: 1 / 1" in theme_css
-    assert ".collection-card__image-box img" in theme_css
-    assert "object-fit: contain" in theme_css.split(".collection-card__image-box img")[1][:200]
+    assert "object-fit: cover" in diamonds
+    assert "grid-template-rows: 220px 1fr" in diamonds
+    assert "aspect-ratio: 4 / 5" in maison
+    assert "object-fit: cover" in maison
+    image_box = theme_css.split(".collection-card__image-box {")[1].split("}")[0]
+    assert "aspect-ratio: 4 / 5" in image_box
+    image_css = theme_css.split(".collection-card__image-box img")[1][:250]
+    assert "object-fit: cover" in image_css
 
 
 def test_hero_copy_names_the_full_assortment() -> None:

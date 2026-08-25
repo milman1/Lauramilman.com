@@ -61,7 +61,7 @@
               <div class="lm-worlds__placeholder" aria-hidden="true"></div>
             {%- endif -%}
           </div>
-          <div class="lm-worlds__overlay">
+          <div class="lm-worlds__info">
             <h3 class="lm-worlds__title">{{ world_title | default: 'Collection' | escape }}</h3>
             {%- if block.settings.subtitle != blank -%}
               <p class="lm-worlds__subtitle">{{ block.settings.subtitle | escape }}</p>
@@ -126,68 +126,69 @@
   }
 
   .lm-worlds__card {
-    position: relative;
-    display: block;
-    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border-radius: var(--radius-md, 8px);
     text-decoration: none;
-    color: var(--cream, #FAF6F0);
+    color: var(--text-dark, #2C1810);
     border: 1px solid var(--rule, #DDD5C5);
-    background: var(--off-white, #F5F0E8);
+    background: var(--cream, #FAF6F0);
   }
 
   .lm-worlds__card--navy {
     background: var(--navy-deep, #12162B);
+    color: var(--cream, #FAF6F0);
+    border-color: rgba(169, 190, 227, 0.28);
   }
 
-  .lm-worlds__media,
-  .lm-worlds__placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16%;
-    box-sizing: border-box;
+  .lm-worlds__media {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .lm-worlds__card--navy .lm-worlds__media {
+    background: var(--navy, #1A1F3A);
   }
 
   .lm-worlds__placeholder {
+    width: 100%;
+    height: 100%;
     background: linear-gradient(160deg, var(--espresso, #1E1109) 0%, #3a2418 100%);
   }
 
   .lm-worlds__media img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
+    display: block;
     transition: transform 0.6s ease;
   }
 
   .lm-worlds__card:hover .lm-worlds__media img {
-    transform: scale(1.05);
+    transform: scale(1.04);
   }
 
-  .lm-worlds__overlay {
-    position: absolute;
-    inset: 0;
+  .lm-worlds__info {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 1.25rem 1.15rem 1.35rem;
-    background: linear-gradient(to top, rgba(30, 17, 9, 0.82) 0%, rgba(30, 17, 9, 0.2) 48%, transparent 100%);
-  }
-
-  .lm-worlds__card--navy .lm-worlds__overlay {
-    background: linear-gradient(to top, rgba(18, 22, 43, 0.88) 0%, rgba(18, 22, 43, 0.25) 50%, transparent 100%);
+    flex: 1;
+    padding: 1rem 1.05rem 1.15rem;
   }
 
   .lm-worlds__title {
     font-family: var(--font-heading, 'Cormorant Garamond', serif);
-    font-size: 1.45rem;
+    font-size: 1.28rem;
     font-weight: 400;
-    line-height: 1.15;
-    margin: 0 0 0.35rem;
+    line-height: 1.2;
+    margin: 0 0 0.3rem;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-worlds__card--navy .lm-worlds__title {
+    color: var(--cream, #FAF6F0);
   }
 
   .lm-worlds__subtitle {
@@ -196,17 +197,22 @@
     font-weight: 400;
     letter-spacing: 0.04em;
     line-height: 1.45;
-    color: rgba(250, 246, 240, 0.78);
+    color: var(--text-muted, #8A8070);
     margin: 0 0 0.7rem;
   }
 
+  .lm-worlds__card--navy .lm-worlds__subtitle {
+    color: rgba(250, 246, 240, 0.72);
+  }
+
   .lm-worlds__cta {
+    margin-top: auto;
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--gold-light, #E2C27A);
+    color: var(--gold-dark, #A88340);
   }
 
   .lm-worlds__card--navy .lm-worlds__cta {
@@ -307,7 +313,7 @@
         {
           "type": "select",
           "id": "tone",
-          "label": "Overlay tone",
+          "label": "Card tone",
           "default": "warm",
           "options": [
             { "value": "warm", "label": "Warm (LMNY)" },
