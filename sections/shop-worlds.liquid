@@ -50,7 +50,7 @@
                 srcset="{{ world_image | image_url: width: 400 }} 400w,
                         {{ world_image | image_url: width: 600 }} 600w,
                         {{ world_image | image_url: width: 800 }} 800w"
-                sizes="(max-width: 768px) 70vw, 20vw"
+                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 20vw"
                 alt="{{ world_title | escape }}"
                 loading="lazy"
                 decoding="async"
@@ -134,6 +134,7 @@
     color: var(--text-dark, #2C1810);
     border: 1px solid var(--rule, #DDD5C5);
     background: var(--cream, #FAF6F0);
+    min-width: 0;
   }
 
   .lm-worlds__card--navy {
@@ -143,6 +144,7 @@
   }
 
   .lm-worlds__media {
+    position: relative;
     aspect-ratio: 1 / 1;
     width: 100%;
     flex-shrink: 0;
@@ -154,19 +156,24 @@
     background: var(--navy, #1A1F3A);
   }
 
-  .lm-worlds__placeholder {
+  .lm-worlds__placeholder,
+  .lm-worlds__media img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .lm-worlds__placeholder {
     background: linear-gradient(160deg, var(--espresso, #1E1109) 0%, #3a2418 100%);
   }
 
   .lm-worlds__media img {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
     object-position: center;
     display: block;
     transform: scale(1.18);
+    transform-origin: center;
     transition: transform 0.6s ease;
   }
 
@@ -175,9 +182,11 @@
   }
 
   .lm-worlds__info {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 1 1 auto;
     padding: 1.05rem 1.1rem 1.2rem;
     background: var(--cream, #FAF6F0);
     border-top: 1px solid var(--rule, #DDD5C5);
@@ -231,35 +240,26 @@
 
   @media (max-width: 1024px) {
     .lm-worlds__rail {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      gap: 0.85rem;
-      padding-bottom: 0.5rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .lm-worlds__rail::-webkit-scrollbar {
-      display: none;
-    }
-    .lm-worlds__card {
-      flex: 0 0 42%;
-      scroll-snap-align: start;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .lm-worlds {
       padding: 3.5rem 0 3rem;
     }
     .lm-worlds__container {
-      padding: 0 1rem;
+      padding: 0 1.15rem;
     }
-    .lm-worlds__card {
-      flex-basis: 46%;
+    .lm-worlds__rail {
+      grid-template-columns: 1fr;
+      gap: 1rem;
     }
     .lm-worlds__title {
-      font-size: 1.25rem;
+      font-size: 1.45rem;
+    }
+    .lm-worlds__subtitle {
+      font-size: 0.82rem;
     }
   }
 </style>

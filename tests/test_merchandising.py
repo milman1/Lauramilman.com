@@ -160,8 +160,10 @@ def test_worlds_cards_stack_photo_above_text() -> None:
     assert "position: absolute" not in info_css
     assert "border-top" in info_css
     media_css = worlds.split(".lm-worlds__media {")[1].split("}")[0]
-    assert "position: absolute" not in media_css
+    assert "position: relative" in media_css
     assert "aspect-ratio: 1 / 1" in media_css
+    assert "flex-basis: 46%" not in worlds
+    assert "grid-template-columns: 1fr" in worlds
 
 
 def test_related_merchandising_photos_fill_their_frames() -> None:
