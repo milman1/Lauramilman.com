@@ -158,6 +158,7 @@ def test_worlds_cards_stack_photo_above_text() -> None:
     assert "aspect-ratio: 3 / 4" not in worlds
     info_css = worlds.split(".lm-worlds__info")[1].split("@media")[0]
     assert "position: absolute" not in info_css
+    assert "border-top" in info_css
     media_css = worlds.split(".lm-worlds__media {")[1].split("}")[0]
     assert "position: absolute" not in media_css
     assert "aspect-ratio: 1 / 1" in media_css

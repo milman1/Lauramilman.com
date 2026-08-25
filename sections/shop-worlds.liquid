@@ -144,6 +144,8 @@
 
   .lm-worlds__media {
     aspect-ratio: 1 / 1;
+    width: 100%;
+    flex-shrink: 0;
     overflow: hidden;
     background: #fff;
   }
@@ -164,18 +166,26 @@
     object-fit: cover;
     object-position: center;
     display: block;
+    transform: scale(1.18);
     transition: transform 0.6s ease;
   }
 
   .lm-worlds__card:hover .lm-worlds__media img {
-    transform: scale(1.04);
+    transform: scale(1.24);
   }
 
   .lm-worlds__info {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 1rem 1.05rem 1.15rem;
+    padding: 1.05rem 1.1rem 1.2rem;
+    background: var(--cream, #FAF6F0);
+    border-top: 1px solid var(--rule, #DDD5C5);
+  }
+
+  .lm-worlds__card--navy .lm-worlds__info {
+    background: var(--navy-soft, #252C4F);
+    border-top: 1px solid rgba(169, 190, 227, 0.42);
   }
 
   .lm-worlds__title {
