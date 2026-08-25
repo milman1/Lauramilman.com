@@ -147,6 +147,23 @@ def test_new_section_schemas_are_valid_json() -> None:
     assert ".lm-worlds__rail" in worlds_html
 
 
+def test_merchandising_card_photos_are_contained_not_cropped() -> None:
+    worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
+    diamonds = (ROOT / "sections/diamond-destination.liquid").read_text()
+    maison = (ROOT / "sections/preowned-maison.liquid").read_text()
+    theme_css = (ROOT / "assets/theme.css").read_text()
+    assert "aspect-ratio: 1 / 1" in worlds
+    assert "object-fit: contain" in worlds
+    assert "aspect-ratio: 3 / 4" not in worlds
+    assert "object-fit: contain" in diamonds
+    assert "grid-template-rows: 160px 1fr" in diamonds
+    assert "aspect-ratio: 1 / 1" in maison
+    assert "object-fit: contain" in maison
+    assert "aspect-ratio: 1 / 1" in theme_css
+    assert ".collection-card__image-box img" in theme_css
+    assert "object-fit: contain" in theme_css.split(".collection-card__image-box img")[1][:200]
+
+
 def test_hero_copy_names_the_full_assortment() -> None:
     data = load_json(ROOT / "templates/index.json")
     sub = data["sections"]["hero"]["settings"]["subheading"].lower()

@@ -126,11 +126,11 @@
 
   .lm-diamonds__card {
     display: grid;
-    grid-template-rows: 220px 1fr;
+    grid-template-rows: 160px 1fr;
     text-decoration: none;
     overflow: hidden;
     border-radius: var(--radius-md, 8px);
-    min-height: 420px;
+    min-height: 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
@@ -163,7 +163,10 @@
   .lm-diamonds__media img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
+    padding: 1.25rem;
+    box-sizing: border-box;
     transition: transform 0.5s ease;
   }
 
@@ -238,7 +241,7 @@
       grid-template-columns: 1fr;
     }
     .lm-diamonds__card {
-      grid-template-rows: 180px 1fr;
+      grid-template-rows: 140px 1fr;
       min-height: 0;
     }
   }
