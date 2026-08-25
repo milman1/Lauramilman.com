@@ -52,13 +52,19 @@ holds a stones table — Shopify products are the only live copy.
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
    Media: every feed photo attaches by URL. `files` is re-sent only when the
    product holds fewer READY images than the feed supplies, so a settled
-   product is never made to re-download its gallery. Watch galleries that the
-   API left at one still (`ImageLink` only, or ImageLink1 pointing at a 404
-   `.jpg`) are filled from the DNA viewer (`dna.dnalinks.in/w/{stock}`), which
-   is where the extra `.jpeg` angles actually live. Watch videos are fetched,
-   type-sniffed and staged-uploaded as real `VIDEO` media for every URL the
-   feed supplies (not just the first), capped per run (`VIDEO_ATTACH_BUDGET`)
-   because each one is a download plus an upload.
+   product is never made to re-download its gallery. Watch galleries are an
+   hourly control loop, not a one-off backfill: after the catalog is read,
+   every watch Shopify still shows with fewer than 3 READY photos is filled
+   from the DNA viewer (`dna.dnalinks.in/w/{stock}`), where the extra `.jpeg`
+   angles actually live. That catches new SKUs, late DNA uploads, and the
+   case where the API listed three 404 `{stock}_1.jpg` extras so the feed
+   looked full. If DNA is down, numbered `.jpg` extras expand to `.jpeg`
+   siblings for that hour. The run report prints a 0/1/2/3+ photo histogram
+   so a spike of one-photo PDPs is visible in Actions. Watches whose DNA
+   page only has one still stay at one photo until the supplier adds more.
+   Watch videos are fetched, type-sniffed and staged-uploaded as real `VIDEO`
+   media for every URL the feed supplies (not just the first), capped per run
+   (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).

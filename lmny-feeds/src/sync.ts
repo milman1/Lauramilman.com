@@ -24,7 +24,7 @@ import {
   skipPricingReviewArchives,
 } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
-import { enrichWatchGalleries } from './dnaGallery.js';
+import { enrichWatchGalleries, watchGalleryStats, type WatchGalleryStats } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
 import {
@@ -192,17 +192,6 @@ async function main() {
         continue;
       }
       const result = kind === 'watch' ? normalizeWatches(rows) : normalizeStones(rows, kind);
-      if (kind === 'watch') {
-        const gallery = await enrichWatchGalleries(result.items);
-        if (gallery.enriched > 0) {
-          const msg =
-            `DNA gallery: ${gallery.enriched} short watch listing(s) gained ` +
-            `${gallery.extraImages} extra photo(s)` +
-            (gallery.extraVideos > 0 ? ` and ${gallery.extraVideos} video(s)` : '');
-          notes.push(msg);
-          console.log(msg);
-        }
-      }
       feeds[kind].fetched = rows.length;
       items.push(...result.items);
       holds.push(...result.holds);
@@ -251,6 +240,36 @@ async function main() {
   //    successfully fetched feed are deleted; unavailable watches archive.
   const catalog: CatalogEntry[] = await shopify.fetchCatalog();
   console.log(`Catalog: ${catalog.length} feed-managed products`);
+
+  // DNA fill runs AFTER the catalog read so a watch Shopify still shows with
+  // one READY photo is filled even when the API listed three 404 `.jpg` extras.
+  // Hash/diff see the merged gallery, so extras land as updates this hour.
+  let watchGalleries: WatchGalleryStats = { none: 0, one: 0, two: 0, threePlus: 0, onePhotoRefs: [] };
+  if (fetchedKinds.has('watch')) {
+    const shopifyImageCountByHandle = new Map(
+      catalog.filter((c) => kindForHandle(c.handle) === 'watch').map((c) => [c.handle, c.imageCount]),
+    );
+    const gallery = await enrichWatchGalleries(items, { shopifyImageCountByHandle });
+    if (gallery.enriched > 0) {
+      const msg =
+        `DNA gallery: ${gallery.enriched} short watch listing(s) gained ` +
+        `${gallery.extraImages} extra photo(s)` +
+        (gallery.extraVideos > 0 ? ` and ${gallery.extraVideos} video(s)` : '');
+      notes.push(msg);
+      console.log(msg);
+    }
+    if (gallery.aborted) {
+      const msg =
+        'DNA gallery: host failed a full fetch wave — remaining short watches skipped this run (retry next hour)';
+      notes.push(msg);
+      console.warn(msg);
+    }
+    watchGalleries = watchGalleryStats(items);
+    console.log(
+      `Watch galleries: 0=${watchGalleries.none} 1=${watchGalleries.one} 2=${watchGalleries.two} 3+=${watchGalleries.threePlus}`,
+    );
+  }
+
   const desired = publishable.map((p) => ({
     handle: handleFor(p.item),
     contentHash: contentHashFor(p.item, p.priced),
@@ -601,6 +620,7 @@ async function main() {
         marginPct: p.priced.marginPct,
       })),
     watchPricing: { lines: watchLines },
+    watchGalleries,
     decisions: summary,
     writeErrors,
     mediaQuarantined,
