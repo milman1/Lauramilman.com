@@ -1,4 +1,5 @@
 import { WATCH } from '../config/pricing.js';
+import { appendFileSync } from 'node:fs';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
@@ -96,6 +97,9 @@ export function watchFeedRecordFrom(item: WatchItem): WatchFeedRecord {
  */
 export function watchListingFor(item: WatchItem): WatchListing | null {
   const listing = buildWatchListing(watchFeedRecordFrom(item));
+  // #region agent log
+  appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'B', location: 'product.ts:watchListingFor', message: 'listing builder outcome', data: { stockRef: item.stockRef, condition: item.condition ?? null, needsReview: 'needsReview' in listing }, timestamp: Date.now() })}\n`);
+  // #endregion
   if ('needsReview' in listing) return null;
   return listing;
 }
@@ -256,6 +260,9 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
   } else {
     fields.push({ namespace: ns, key: 'is_naked', type: 'boolean', value: String(item.isNaked) });
     const listing = watchListingFor(item);
+    // #region agent log
+    appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'C', location: 'product.ts:metafieldsFor:watch', message: 'watch storefront metafield branch', data: { stockRef: item.stockRef, hasListing: listing !== null, customSpecCount: listing?.metafields.filter((mf) => mf.namespace === 'custom').length ?? 0 }, timestamp: Date.now() })}\n`);
+    // #endregion
     if (listing) {
       for (const mf of listing.metafields) {
         fields.push({
@@ -273,6 +280,9 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
 export function descriptionFor(item: FeedItem): string {
   if (item.kind === 'watch') {
     const listing = watchListingFor(item);
+    // #region agent log
+    appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'D', location: 'product.ts:descriptionFor:watch', message: 'watch description branch', data: { stockRef: item.stockRef, branch: listing ? 'structured-prose' : 'legacy-bullets' }, timestamp: Date.now() })}\n`);
+    // #endregion
     if (listing) return listing.descriptionHtml;
     const set = item.box && item.papers ? 'Full set (box and papers)' : item.box ? 'With original box' : item.papers ? 'With papers' : 'Watch only';
     const rows = [

@@ -12,6 +12,8 @@
  * came in live or through the backfill.
  */
 
+import { appendFileSync } from 'node:fs';
+
 // ---------------------------------------------------------------------------
 // Types
 
@@ -194,8 +196,17 @@ function yesNo(v: boolean | null | undefined): string | null {
 // Main transform
 
 export function buildWatchListing(record: WatchFeedRecord): WatchListing | NeedsReview {
+  // #region agent log
+  appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'A', location: 'watchListingBuilder.ts:buildWatchListing:entry', message: 'condition mapper input', data: { conditionRaw: record.conditionRaw }, timestamp: Date.now() })}\n`);
+  // #endregion
   const mapping = mapCondition(record.conditionRaw);
+  // #region agent log
+  appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'A', location: 'watchListingBuilder.ts:buildWatchListing:mapping', message: 'condition mapper result', data: { recognized: mapping !== null, state: mapping?.state ?? null, grade: mapping?.grade ?? null }, timestamp: Date.now() })}\n`);
+  // #endregion
   if (!mapping) {
+    // #region agent log
+    appendFileSync('/opt/cursor/logs/debug.log', `${JSON.stringify({ hypothesisId: 'A,B', location: 'watchListingBuilder.ts:buildWatchListing:needsReview', message: 'unrecognized condition fallback selected', data: { conditionRaw: record.conditionRaw }, timestamp: Date.now() })}\n`);
+    // #endregion
     return {
       needsReview: true,
       reason: `Unrecognized condition value: "${record.conditionRaw}"`,
