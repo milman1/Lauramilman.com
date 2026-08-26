@@ -13,6 +13,8 @@
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
+    "create:jacob-memo": "tsx scripts/create-jacob-memo-listings.ts",
+    "preview:jacob-memo": "tsx scripts/create-jacob-memo-listings.ts --preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
