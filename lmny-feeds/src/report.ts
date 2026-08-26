@@ -1,3 +1,4 @@
+import type { WatchGalleryStats } from './dnaGallery.js';
 import type { Decision, Hold, Kind, Publishable } from './types.js';
 
 export interface FeedStats {
@@ -50,6 +51,11 @@ export interface SyncReport {
     }>;
   };
   watchPricing: { lines: WatchLine[] };
+  /**
+   * Photo-count histogram after DNA fill. A growing `one` count is the
+   * signal that new SKUs (or a dead DNA host) are landing as one-photo PDPs.
+   */
+  watchGalleries: WatchGalleryStats;
   sampleNaturals: Array<{ stockRef: string; title: string; costUsd: number; retailUsd: number; marginPct: number }>;
   decisions: {
     create: string[];
@@ -236,6 +242,22 @@ export function renderMarkdown(r: SyncReport): string {
     }
   } else {
     lines.push('None this run.');
+  }
+  lines.push('');
+  lines.push('## Watch galleries');
+  lines.push('');
+  lines.push(
+    'Hourly control loop: any watch Shopify still shows with fewer than 3 READY photos is filled from DNA (and `.jpg` extras are expanded to `.jpeg` if DNA is down). A growing **1 photo** count means new SKUs whose DNA page also has only one still — those cannot be invented.',
+  );
+  lines.push('');
+  lines.push(`- **0 photos:** ${r.watchGalleries.none}`);
+  lines.push(`- **1 photo:** ${r.watchGalleries.one}`);
+  lines.push(`- **2 photos:** ${r.watchGalleries.two}`);
+  lines.push(`- **3+ photos:** ${r.watchGalleries.threePlus}`);
+  if (r.watchGalleries.onePhotoRefs.length > 0) {
+    lines.push(
+      `- Sample 1-photo SKUs: ${r.watchGalleries.onePhotoRefs.map((ref) => `\`${ref}\``).join(', ')}`,
+    );
   }
   lines.push('');
   lines.push('## Catalog actions' + (r.dryRun ? ' (would be)' : ''));

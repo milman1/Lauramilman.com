@@ -58,8 +58,12 @@ function normalizeKey(key: string): string {
  *
  * Matches a candidate key exactly **or** the same key with a numeric suffix
  * (`ImageLink2`, `image_3`, `Photo 4`), and still splits delimiter-joined
- * values inside a single field. Ordered by candidate, then by index; deduped
- * so a URL repeated across fields attaches once.
+ * values inside a single field. Scheme-less values (`dnalinks.in/a.jpg`) are
+ * coerced the same way cert URLs are. Ordered by candidate, then by index;
+ * deduped so a URL repeated across fields attaches once.
+ *
+ * Watch extras that only exist on the DNA viewer (often `.jpeg` while the
+ * API lists `.jpg` or nothing) are merged later by `enrichWatchGalleries`.
  */
 export function collectUrls(raw: Raw, keys: string[]): string[] {
   const wanted = keys.map(normalizeKey);
@@ -83,8 +87,8 @@ export function collectUrls(raw: Raw, keys: string[]): string[] {
     if (match.value === null || match.value === undefined) continue;
     const list = Array.isArray(match.value) ? match.value : String(match.value).split(/[,|\n]/);
     for (const entry of list) {
-      const url = String(entry).trim();
-      if (/^https?:\/\//i.test(url) && !out.includes(url)) out.push(url);
+      const url = normalizeUrl(String(entry).trim());
+      if (url && !out.includes(url)) out.push(url);
     }
   }
   return out;
