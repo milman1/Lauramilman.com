@@ -4,6 +4,7 @@ import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { fetchBackVaultCatalog } from './catalog.js';
 import { diffBackVaultCatalog, type Decision } from './diff.js';
 import { fetchBackVaultFeed } from './feed.js';
+import { archiveLegacyDuplicate } from './legacy.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
@@ -41,6 +42,7 @@ interface RunSummary {
   feedStats: ReturnType<typeof normalizeBackVaultFeed>['stats'];
   decisions: Decision[];
   published: number;
+  legacyArchived: number;
   errors: string[];
 }
 
@@ -93,11 +95,17 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const syncedAt = new Date().toISOString();
   const publicationId = opts.dryRun ? null : await client.onlineStorePublicationId();
   let published = 0;
+  let legacyArchived = 0;
 
   for (const decision of decisions) {
-    if (decision.action === 'skip') continue;
     try {
-      if (decision.action === 'archive') {
+      let replacementReady = false;
+      let replacementArchived = false;
+
+      if (decision.action === 'skip') {
+        replacementReady = true;
+        replacementArchived = decision.reason === 'already_archived';
+      } else if (decision.action === 'archive') {
         if (!opts.dryRun && decision.productId) {
           await client.archiveProduct(decision.productId);
           // Sold/pulled items keep their URL alive instead of 404ing, same
@@ -107,35 +115,55 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
           // the archived product's vendor isn't available here.
           await client.redirectProductUrl(decision.handle, '/collections/all').catch(() => {});
         }
-        continue;
-      }
-      if (decision.action === 'publish') {
+        replacementReady = true;
+        replacementArchived = true;
+      } else if (decision.action === 'publish') {
         if (!opts.dryRun && decision.productId && publicationId) {
           const pubErrors = await client.publishResource(decision.productId, publicationId);
           if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
-          else published += 1;
+          else {
+            published += 1;
+            replacementReady = true;
+          }
         } else if (opts.dryRun) {
           published += 1;
+          replacementReady = true;
         }
-        continue;
+      } else {
+        const item = itemByHandle.get(decision.handle);
+        if (!item) continue; // shouldn't happen: archive is the only decision without a feed item
+        const existingEntry = catalogByHandle.get(decision.handle);
+        const input = buildProductSetInput(
+          item,
+          syncedAt,
+          existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
+        );
+        if (opts.dryRun) {
+          replacementReady = true;
+        } else {
+          const result = await client.productSet(input);
+          if (result.errors.length) errors.push(`${decision.handle}: ${result.errors.join('; ')}`);
+          const productId = result.id ?? decision.productId;
+          if (productId && publicationId && result.errors.length === 0) {
+            const pubErrors = await client.publishResource(productId, publicationId);
+            if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
+            else published += 1;
+          }
+          replacementReady = result.errors.length === 0;
+        }
       }
-      const item = itemByHandle.get(decision.handle);
-      if (!item) continue; // shouldn't happen: archive is the only decision without a feed item
-      const existingEntry = catalogByHandle.get(decision.handle);
-      const input = buildProductSetInput(
-        item,
-        syncedAt,
-        existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
-      );
-      if (!opts.dryRun) {
-        const result = await client.productSet(input);
-        if (result.errors.length) errors.push(`${decision.handle}: ${result.errors.join('; ')}`);
-        const productId = result.id ?? decision.productId;
-        if (productId && publicationId && result.errors.length === 0) {
-          const pubErrors = await client.publishResource(productId, publicationId);
-          if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
-          else published += 1;
-        }
+
+      // The May–July CSV import listed the same SKUs without the bv- prefix.
+      // Archive that older vintage row once the replacement exists (or when
+      // the replacement itself left the feed).
+      if (replacementReady) {
+        const legacy = await archiveLegacyDuplicate(client, {
+          bvHandle: decision.handle,
+          replacementArchived,
+          dryRun: opts.dryRun,
+        });
+        if (legacy.action === 'archived' || legacy.action === 'planned') legacyArchived += 1;
+        for (const e of legacy.errors) errors.push(`${legacy.handle ?? decision.handle}: legacy ${e}`);
       }
     } catch (err) {
       errors.push(`${decision.handle}: ${err instanceof Error ? err.message : String(err)}`);
@@ -149,6 +177,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     feedStats: stats,
     decisions,
     published,
+    legacyArchived,
     errors,
   };
 
@@ -159,7 +188,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     return acc;
   }, {});
   console.log(
-    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} published=${published} errors=${errors.length}`,
+    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} published=${published} legacyArchived=${legacyArchived} errors=${errors.length}`,
   );
   if (errors.length > 0) {
     console.error('Errors:');
@@ -195,6 +224,7 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Archive: ${counts.archive ?? 0}`,
     `- Unchanged: ${counts.skip ?? 0}`,
     `- Published this run: ${summary.published}`,
+    `- Legacy vintage CSV duplicates archived: ${summary.legacyArchived}`,
     '',
   ];
   if (summary.errors.length > 0) {
