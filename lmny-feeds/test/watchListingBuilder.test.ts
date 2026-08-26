@@ -137,11 +137,38 @@ describe('buildWatchListing', () => {
     expect(listing.descriptionHtml).not.toContain('NAKED');
   });
 
-  it('returns needsReview for unrecognized conditions', () => {
+  it('preserves an unrecognized condition without classifying the watch', () => {
     const listing = buildWatchListing(base({ conditionRaw: 'SLIDER' }));
-    expect(listing).toMatchObject({
-      needsReview: true,
-      reason: 'Unrecognized condition value: "SLIDER"',
+    expect('needsReview' in listing).toBe(false);
+    if ('needsReview' in listing) return;
+    expect(listing.title).toBe('Rolex Submariner Date 126610LN');
+    expect(listing.title).not.toMatch(/Pre-Owned|Unworn/);
+    expect(listing.descriptionHtml).toContain('This Rolex Submariner Date 126610LN');
+    expect(listing.descriptionHtml).not.toMatch(/Pre-Owned|Unworn/);
+    expect(listing.seoTitle).toBe('Rolex Submariner Date 126610LN Watch');
+    expect(listing.tags).toContain('SLIDER');
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe(
+      'SLIDER',
+    );
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
+    expect(
+      listing.metafields.find((m) => m.namespace === 'mm-google-shopping' && m.key === 'condition'),
+    ).toBeUndefined();
+  });
+
+  it('omits a blank unknown condition instead of inventing one', () => {
+    const listing = buildWatchListing(base({ conditionRaw: '  ' }));
+    expect('needsReview' in listing).toBe(false);
+    if ('needsReview' in listing) return;
+    expect(listing.tags).not.toContain('Pre-Owned Watches');
+    expect(listing.tags).not.toContain('Unworn Watches');
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')).toBeUndefined();
+    expect(listing.metafields.find((m) => m.namespace === 'mm-google-shopping' && m.key === 'condition')).toBeUndefined();
+    expect(listing.metafields.find((m) => m.namespace === 'global' && m.key === 'MPN')).toEqual({
+      namespace: 'global',
+      key: 'MPN',
+      value: '126610LN',
+      type: 'single_line_text_field',
     });
   });
 

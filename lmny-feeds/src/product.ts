@@ -33,7 +33,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 12;
+export const PRODUCT_SCHEMA_VERSION = 13;
 
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;
@@ -91,9 +91,8 @@ export function watchFeedRecordFrom(item: WatchItem): WatchFeedRecord {
 }
 
 /**
- * Schema listing when condition maps cleanly; null when the condition is
- * unrecognized (NEEDS_REVIEW) so callers can fall back to the legacy bullet
- * list instead of inventing a Pre-Owned/Unworn title.
+ * Schema listing when condition maps cleanly; unknown values now produce a
+ * neutral listing without inventing a Pre-Owned/Unworn classification.
  */
 export function watchListingFor(item: WatchItem): WatchListing | null {
   const listing = buildWatchListing(watchFeedRecordFrom(item));
