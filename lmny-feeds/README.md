@@ -74,6 +74,12 @@ holds a stones table — Shopify products are the only live copy.
 - Handle = idempotency key: `nd-<stockref>` / `lg-<stockref>` / `w-<stockref>`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
+- Shopify Category (taxonomy): Jewelry (`aa-6`) for loose diamonds, Watches
+  (`aa-6-11`) for API watches. Mapping: `docs/category-and-inventory.md`.
+- Inventory: unique items are tracked at **qty 1** with policy `DENY` once the
+  app has `write_inventory`. Untracked feed products currently appear as
+  infinite stock until that write. A dedicated backfill covers every ACTIVE
+  product, including manual Admin items (`scripts/backfill-category-inventory.ts`).
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
   namespace so it is never exposed to the theme or Storefront API).
 - Stone 360° videos stay embedded from the supplier rather than attached as

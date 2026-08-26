@@ -281,3 +281,13 @@ Optional: Shopify Flow → “Customer created” / form submit → add the same
 Do **not** print a different website price vs viewing price on the storefront.
 Talk numbers on the call.
 
+---
+
+## 11. Category + inventory (automated)
+
+Shopify **Category** and unique **qty 1** are filled by the feed sync and the
+`Category + qty backfill` workflow — not by hand in Admin. Mapping lives in
+`lmny-feeds/docs/category-and-inventory.md`. The Shopify app needs
+`write_inventory` in addition to `write_products` for quantity writes.
+Drafts and archived products are left alone.
+

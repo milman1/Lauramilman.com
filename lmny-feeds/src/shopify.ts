@@ -2,6 +2,20 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
 
+export interface ActiveMerchandisingRow {
+  id: string;
+  handle: string;
+  title: string;
+  productType: string;
+  categoryId: string | null;
+  variants: Array<{
+    id: string;
+    inventoryItemId: string;
+    tracked: boolean;
+    available: number | null;
+  }>;
+}
+
 const API_VERSION = '2026-01';
 /** Matches the feed client's identity — some supplier hosts refuse bare clients. */
 const BROWSER_UA = 'Mozilla/5.0 (compatible; LMNY-FeedSync/1.0; +https://lauramilman.com)';
@@ -58,6 +72,13 @@ export const PRODUCT_SET_MUTATION = `mutation call($input: ProductSetInput!) {
   productSet(input: $input) {
     product { id handle }
     userErrors { field message code }
+  }
+}`;
+
+export const PRODUCT_UPDATE_MUTATION = `mutation call($product: ProductUpdateInput!) {
+  productUpdate(product: $product) {
+    product { id }
+    userErrors { field message }
   }
 }`;
 
@@ -898,6 +919,180 @@ export class ShopifyClient {
       { product: { id, tags: [...new Set(tags)] } },
     );
     return data.productUpdate.userErrors.map((e) => e.message);
+  }
+
+  /**
+   * Location used for unique-item inventory (qty 1).
+   * Override with SHOPIFY_LOCATION_ID (numeric id or full GID).
+   */
+  async primaryLocationId(): Promise<string> {
+    const override = process.env.SHOPIFY_LOCATION_ID?.trim();
+    if (override) {
+      return override.startsWith('gid://') ? override : `gid://shopify/Location/${override}`;
+    }
+    const data = await this.gql<{
+      locations: { nodes: Array<{ id: string; name: string; isActive: boolean }> };
+    }>(`{ locations(first: 20, includeLegacy: true) { nodes { id name isActive } } }`);
+    const active = data.locations.nodes.filter((l) => l.isActive);
+    const chosen = active[0] ?? data.locations.nodes[0];
+    if (!chosen) throw new Error('No Shopify locations found');
+    return chosen.id;
+  }
+
+  /** ACTIVE products only — drafts and archived are left alone. */
+  async fetchActiveMerchandising(): Promise<ActiveMerchandisingRow[]> {
+    const query = `{
+      products(query: "status:active") {
+        edges {
+          node {
+            id
+            handle
+            title
+            productType
+            category { id }
+            variants {
+              edges {
+                node {
+                  id
+                  inventoryQuantity
+                  inventoryItem { id tracked }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+    const url = await this.runBulkQuery(query);
+    if (!url) return [];
+    const byId = new Map<string, ActiveMerchandisingRow>();
+    const order: string[] = [];
+    for (const row of await downloadJsonl(url)) {
+      const r = row as Record<string, unknown>;
+      if (typeof r.__parentId === 'string') {
+        const parent = byId.get(r.__parentId);
+        if (!parent) continue;
+        const item = r.inventoryItem as { id?: string; tracked?: boolean } | null;
+        if (!item?.id) continue;
+        parent.variants.push({
+          id: String(r.id ?? ''),
+          inventoryItemId: item.id,
+          tracked: Boolean(item.tracked),
+          available: typeof r.inventoryQuantity === 'number' ? r.inventoryQuantity : null,
+        });
+        continue;
+      }
+      if (typeof r.handle !== 'string' || typeof r.id !== 'string') continue;
+      const category = r.category as { id?: string } | null;
+      byId.set(r.id, {
+        id: r.id,
+        handle: r.handle,
+        title: typeof r.title === 'string' ? r.title : '',
+        productType: typeof r.productType === 'string' ? r.productType : '',
+        categoryId: category?.id ?? null,
+        variants: [],
+      });
+      order.push(r.id);
+    }
+    return order.map((id) => byId.get(id)!);
+  }
+
+  async bulkProductUpdate(products: Array<Record<string, unknown>>): Promise<{ ids: string[]; errors: string[] }> {
+    if (products.length === 0) return { ids: [], errors: [] };
+    const jsonl = products.map((product) => JSON.stringify({ product })).join('\n');
+    const stagedPath = await this.stageJsonlUpload(jsonl);
+    const data = await this.gql<{
+      bulkOperationRunMutation: { bulkOperation: { id: string } | null; userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($mutation: String!, $stagedUploadPath: String!) {
+        bulkOperationRunMutation(mutation: $mutation, stagedUploadPath: $stagedUploadPath) {
+          bulkOperation { id }
+          userErrors { message }
+        }
+      }`,
+      { mutation: PRODUCT_UPDATE_MUTATION, stagedUploadPath: stagedPath },
+    );
+    if (data.bulkOperationRunMutation.userErrors.length) {
+      throw new Error(
+        `bulkOperationRunMutation: ${data.bulkOperationRunMutation.userErrors.map((e) => e.message).join('; ')}`,
+      );
+    }
+    const url = await this.pollBulkOperation('MUTATION');
+    const ids: string[] = [];
+    const errors: string[] = [];
+    if (url) {
+      for (const row of await downloadJsonl(url)) {
+        const r = row as {
+          data?: { productUpdate?: { product?: { id: string } | null; userErrors?: Array<{ message: string }> } };
+        };
+        const pu = r.data?.productUpdate;
+        if (pu?.product?.id) ids.push(pu.product.id);
+        for (const e of pu?.userErrors ?? []) errors.push(e.message);
+      }
+    }
+    return { ids, errors };
+  }
+
+  async setInventoryTracked(inventoryItemId: string, tracked: boolean): Promise<string[]> {
+    const data = await this.gql<{
+      inventoryItemUpdate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($id: ID!, $input: InventoryItemInput!) {
+        inventoryItemUpdate(id: $id, input: $input) { userErrors { field message } }
+      }`,
+      { id: inventoryItemId, input: { tracked } },
+    );
+    return data.inventoryItemUpdate.userErrors.map((e) => e.message);
+  }
+
+  /**
+   * Absolute available qty. `ignoreCompareQuantity` because we are the source
+   * of truth for unique one-of-one stock, not a concurrent warehouse.
+   */
+  async setAvailableQuantities(
+    locationId: string,
+    items: Array<{ inventoryItemId: string; quantity: number }>,
+  ): Promise<string[]> {
+    const errors: string[] = [];
+    const chunkSize = 50;
+    for (let i = 0; i < items.length; i += chunkSize) {
+      const quantities = items.slice(i, i + chunkSize).map((item) => ({
+        inventoryItemId: item.inventoryItemId,
+        locationId,
+        quantity: item.quantity,
+      }));
+      const data = await this.gql<{
+        inventorySetQuantities: { userErrors: Array<{ message: string; field?: string[] | null }> };
+      }>(
+        `mutation($input: InventorySetQuantitiesInput!) {
+          inventorySetQuantities(input: $input) { userErrors { field message } }
+        }`,
+        {
+          input: {
+            name: 'available',
+            reason: 'correction',
+            ignoreCompareQuantity: true,
+            quantities,
+          },
+        },
+      );
+      errors.push(...data.inventorySetQuantities.userErrors.map((e) => e.message));
+    }
+    return errors;
+  }
+
+  async activateInventory(inventoryItemId: string, locationId: string, available: number): Promise<string[]> {
+    const data = await this.gql<{
+      inventoryActivate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($inventoryItemId: ID!, $locationId: ID!, $available: Int) {
+        inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId, available: $available) {
+          userErrors { field message }
+        }
+      }`,
+      { inventoryItemId, locationId, available },
+    );
+    return data.inventoryActivate.userErrors.map((e) => e.message);
   }
 }
 

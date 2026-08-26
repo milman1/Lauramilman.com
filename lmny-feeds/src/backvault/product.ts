@@ -1,4 +1,5 @@
 import { contentHash } from '../hash.js';
+import { categoryGidFor, uniqueVariantInventory } from '../shopifyCategory.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
 import type { BackVaultItem } from './types.js';
@@ -9,7 +10,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 3;
+export const PRODUCT_SCHEMA_VERSION = 4;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -90,6 +91,10 @@ export interface ExistingProduct {
   imageCount: number;
 }
 
+export interface ProductSetMerchandising {
+  locationId?: string;
+}
+
 /**
  * Build the ProductSetInput for one Back Vault item. Rewrites title, body,
  * and SEO to the LMNY estate listing schema (src/backvault/listing.ts), then
@@ -101,7 +106,12 @@ export interface ExistingProduct {
  * copies those files onto its own CDN, and the URL is never shown as
  * storefront copy, so it is not part of the scrub gate.
  */
-export function buildProductSetInput(item: BackVaultItem, syncedAt: string, existing?: ExistingProduct): Record<string, unknown> {
+export function buildProductSetInput(
+  item: BackVaultItem,
+  syncedAt: string,
+  existing?: ExistingProduct,
+  merchandising?: ProductSetMerchandising,
+): Record<string, unknown> {
   const handle = handleFor(item);
   const listing = buildJewelryListing(item);
   const tags = tagsFor(item);
@@ -125,6 +135,11 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
     descriptionHtml: listing.descriptionHtml,
     vendor: item.vendor,
     productType: listing.productType,
+    category: categoryGidFor({
+      productType: listing.productType,
+      handle: handle,
+      title: listing.title,
+    }),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     tags: finalTags,
     metafields: metafieldsFor(item, hash, syncedAt),
@@ -136,8 +151,7 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
         price: item.priceUsd.toFixed(2),
         sku: item.sku ?? item.sourceHandle,
         taxable: true,
-        inventoryPolicy: 'DENY',
-        inventoryItem: { tracked: false, requiresShipping: true },
+        ...uniqueVariantInventory(merchandising?.locationId),
       },
     ],
   };
