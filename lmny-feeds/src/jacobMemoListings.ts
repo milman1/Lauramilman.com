@@ -233,7 +233,7 @@ function accessoryListing(item: JacobMemoItem): {
   const descriptionHtml = `<p>This ${NEW_VINTAGE} ${escapeHtml(title)} is offered by Laura Milman New York.</p>`;
   const seoTitle = truncateAtWord(`${JACOB_VENDOR} ${item.titleModel} | Watch Accessory`, 60);
   const seoDescription = truncateAtWord(
-    `Shop this ${NEW_VINTAGE.toLowerCase()} ${JACOB_VENDOR} ${item.titleModel.toLowerCase()}. Authenticated by Laura Milman New York.`,
+    `Shop this ${NEW_VINTAGE.toLowerCase()} ${title}. Authenticated by Laura Milman New York.`,
     160,
   );
   const metafields: Array<{ namespace: string; key: string; type: string; value: string }> = [
