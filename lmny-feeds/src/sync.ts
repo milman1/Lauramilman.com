@@ -334,6 +334,21 @@ async function main() {
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
 
+    const canWriteInventory = scopes.includes('write_inventory');
+    let locationId: string | undefined;
+    if (!canWriteInventory) {
+      notes.push(
+        'write_inventory is not granted — Category still writes; qty 1 needs that scope on the Shopify app.',
+      );
+    } else {
+      try {
+        locationId = await shopify.primaryLocationId();
+        console.log(`Inventory location: ${locationId}`);
+      } catch (err) {
+        notes.push(`inventory location: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     await shopify.ensureMetafieldDefinitions();
     collectionsCreated = await shopify.ensureCollections();
 
@@ -404,7 +419,13 @@ async function main() {
       .filter((p): p is Publishable => Boolean(p))
       .map((p) => {
         const existing = catalogByHandle.get(handleFor(p.item));
-        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, imageCount: existing.imageCount });
+        return buildProductSetInput(
+          p.item,
+          p.priced,
+          syncedAt,
+          existing && { id: existing.id, imageCount: existing.imageCount },
+          locationId ? { locationId } : undefined,
+        );
       });
 
     let createdIds: string[] = [];

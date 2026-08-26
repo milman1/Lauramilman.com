@@ -13,6 +13,7 @@ import {
   titleFor,
   vendorFor,
 } from '../src/product.js';
+import { TAXONOMY_CATEGORY } from '../src/shopifyCategory.js';
 import { labStone, naturalStone, priced, watch } from './fixtures.js';
 
 interface Metafield {
@@ -223,7 +224,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for neutral watch listings', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(13);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(14);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -293,6 +294,37 @@ describe('updates target the existing product by id', () => {
     });
     const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');
+  });
+
+  it('assigns the Jewelry category and stocks qty 1 when a location is provided', () => {
+    const locationId = 'gid://shopify/Location/1';
+    const diamond = buildProductSetInput(naturalStone(), priced(), at, undefined, { locationId });
+    expect(diamond.category).toBe(TAXONOMY_CATEGORY.jewelry);
+    const diamondVariant = (
+      diamond.variants as Array<{
+        inventoryPolicy: string;
+        inventoryItem: { tracked: boolean; cost: string };
+        inventoryQuantities: Array<{ locationId: string; name: string; quantity: number }>;
+      }>
+    )[0]!;
+    expect(diamondVariant.inventoryPolicy).toBe('DENY');
+    expect(diamondVariant.inventoryItem.tracked).toBe(true);
+    expect(diamondVariant.inventoryQuantities).toEqual([
+      { locationId, name: 'available', quantity: 1 },
+    ]);
+
+    const apiWatch = buildProductSetInput(watch(), priced(), at, undefined, { locationId });
+    expect(apiWatch.category).toBe(TAXONOMY_CATEGORY.watches);
+  });
+
+  it('still writes category when inventory location is unknown, without flipping tracking on', () => {
+    const input = buildProductSetInput(labStone(), priced(), at);
+    expect(input.category).toBe(TAXONOMY_CATEGORY.jewelry);
+    const variant = (
+      input.variants as Array<{ inventoryItem: { tracked: boolean }; inventoryQuantities?: unknown }>
+    )[0]!;
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
   });
 
   it('watch creates carry schema SEO and prose description (specs are metafields)', () => {

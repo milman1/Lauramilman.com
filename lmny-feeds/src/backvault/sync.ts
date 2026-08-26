@@ -67,6 +67,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const { domain, token } = await resolveToken();
   const client = new ShopifyClient(domain, token);
   await client.verifyAuth();
+  let locationId: string | undefined;
   if (!opts.dryRun) {
     const scopes = await client.grantedScopes();
     const missing = ['write_products', 'write_publications'].filter((s) => !scopes.includes(s));
@@ -77,6 +78,18 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
+    if (!scopes.includes('write_inventory')) {
+      console.warn(
+        'write_inventory is not granted — Category still writes; qty 1 needs that scope on the Shopify app.',
+      );
+    } else {
+      try {
+        locationId = await client.primaryLocationId();
+        console.log(`Inventory location: ${locationId}`);
+      } catch (err) {
+        console.warn(`inventory location: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
   const catalog = await fetchBackVaultCatalog(client);
@@ -126,6 +139,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
         item,
         syncedAt,
         existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
+        locationId ? { locationId } : undefined,
       );
       if (!opts.dryRun) {
         const result = await client.productSet(input);

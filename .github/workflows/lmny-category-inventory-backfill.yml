@@ -1,0 +1,66 @@
+# Fill Shopify Category + qty 1 on every ACTIVE product.
+#
+# Does not activate drafts or archived products. Does not restock tracked
+# unique pieces already at qty 0.
+#
+# Secrets: SHOPIFY_STORE_DOMAIN + SHOPIFY_ADMIN_TOKEN or client-credentials pair.
+# Qty writes need write_inventory on the app. Category needs write_products.
+name: Category + qty backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: lmny-category-inventory-backfill
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Backfill category + qty 1
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            echo "Mode: LIVE"
+            npx tsx scripts/backfill-category-inventory.ts
+          else
+            echo "Mode: DRY RUN"
+            npx tsx scripts/backfill-category-inventory.ts --dry-run
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: category-inventory-backfill
+          path: lmny-feeds/out/category-inventory-backfill.json
+          if-no-files-found: ignore

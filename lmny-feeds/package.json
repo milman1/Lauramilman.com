@@ -13,6 +13,7 @@
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
+    "backfill:category-inventory": "tsx scripts/backfill-category-inventory.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

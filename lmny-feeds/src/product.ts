@@ -1,6 +1,7 @@
 import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
+import { categoryGidFor, uniqueVariantInventory } from './shopifyCategory.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
 import {
   buildWatchListing,
@@ -32,7 +33,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 13;
+export const PRODUCT_SCHEMA_VERSION = 14;
 
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;
@@ -352,6 +353,11 @@ export interface ExistingProduct {
   imageCount: number;
 }
 
+/** Location used to stock unique items at qty 1. Omit to leave inventory untracked. */
+export interface ProductSetMerchandising {
+  locationId?: string;
+}
+
 /**
  * Build the full ProductSetInput. Images attach by external URL so Shopify
  * copies them to its own CDN. Feed-hosted .mp4 videos can't attach by URL
@@ -369,6 +375,7 @@ export function buildProductSetInput(
   priced: Priced,
   syncedAt: string,
   existing?: ExistingProduct,
+  merchandising?: ProductSetMerchandising,
 ): Record<string, unknown> {
   const hash = contentHashFor(item, priced);
   // A feed row with no image would otherwise go live with no photo and only be
@@ -382,6 +389,7 @@ export function buildProductSetInput(
     descriptionHtml: descriptionFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
+    category: categoryGidFor({ kind: item.kind, productType: PRODUCT_TYPES[item.kind], handle: handleFor(item) }),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     // Stones get the gemological PDP; watches keep the default product page.
     templateSuffix: item.kind === 'watch' ? '' : STONE_TEMPLATE_SUFFIX,
@@ -394,14 +402,7 @@ export function buildProductSetInput(
         price: priced.retailUsd.toFixed(2),
         sku: item.stockRef,
         taxable: true,
-        inventoryPolicy: 'DENY',
-        inventoryItem: {
-          tracked: false,
-          requiresShipping: true,
-          // Shopify InventoryItem.cost — required so margin is auditable in admin
-          // independently of Supabase / $app.cost_cents.
-          cost: item.costUsd.toFixed(2),
-        },
+        ...uniqueVariantInventory(merchandising?.locationId, { cost: item.costUsd.toFixed(2) }),
       },
     ],
   };

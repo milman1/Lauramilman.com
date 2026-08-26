@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildProductSetInput, contentHashFor, handleFor, tagsFor } from '../../src/backvault/product.js';
+import { TAXONOMY_CATEGORY } from '../../src/shopifyCategory.js';
 import type { BackVaultItem } from '../../src/backvault/types.js';
 
 function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
@@ -69,6 +70,21 @@ describe('buildProductSetInput', () => {
     expect((input.seo as { title: string }).title.length).toBeLessThanOrEqual(60);
     expect((input.seo as { description: string }).description.length).toBeLessThanOrEqual(160);
     expect(input.productType).toBe('Bracelets');
+    expect(input.category).toBe(TAXONOMY_CATEGORY.bracelets);
+  });
+
+  it('stocks qty 1 at the given location', () => {
+    const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z', undefined, {
+      locationId: 'gid://shopify/Location/1',
+    });
+    const variant = (
+      input.variants as Array<{
+        inventoryItem: { tracked: boolean };
+        inventoryQuantities: Array<{ quantity: number }>;
+      }>
+    )[0]!;
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
   });
 
   it('sets id and conditionally re-sends files when updating an existing product', () => {
