@@ -6,12 +6,15 @@
  */
 
 import { MEDIA_MISSING_TAG } from './product.js';
-import { retailFromCost } from './watchPricing.js';
 import { buildWatchListing, type WatchFeedRecord } from './watchListingBuilder.js';
 
 export const JACOB_VENDOR = 'Jacob & Co.';
 export const JACOB_MEMO_NUMBER = '20260018395';
 export const JACOB_MEMO_TAG = `memo-${JACOB_MEMO_NUMBER}`;
+/** Merchant-stated condition for this memo. Not Pre-Owned/Unworn — those two stay reserved for the API watch map. */
+export const NEW_VINTAGE = 'New Vintage';
+/** Selling price is this fraction off Jacob retail (the highest price on the memo). */
+export const RETAIL_DISCOUNT = 0.3;
 
 const CATEGORY = {
   watches: 'gid://shopify/TaxonomyCategory/aa-6-11',
@@ -203,7 +206,7 @@ export function handleForItem(item: JacobMemoItem): string {
 }
 
 export function retailUsdForItem(item: JacobMemoItem): number {
-  return retailFromCost(item.costUsd);
+  return Math.round(item.jacobRetailUsd * (1 - RETAIL_DISCOUNT) * 100) / 100;
 }
 
 function truncateAtWord(value: string, maxLength: number): string {
@@ -211,6 +214,11 @@ function truncateAtWord(value: string, maxLength: number): string {
   const cut = value.slice(0, maxLength);
   const lastSpace = cut.lastIndexOf(' ');
   return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
+}
+
+function fitWithSuffix(lead: string, suffix: string, maxLen: number): string {
+  const available = maxLen - suffix.length - 1;
+  return `${truncateAtWord(lead, available)} ${suffix}`.trim();
 }
 
 function accessoryListing(item: JacobMemoItem): {
@@ -222,14 +230,15 @@ function accessoryListing(item: JacobMemoItem): {
   metafields: Array<{ namespace: string; key: string; type: string; value: string }>;
 } {
   const title = `${JACOB_VENDOR} ${item.titleModel}`;
-  const descriptionHtml = `<p>This ${escapeHtml(title)} is offered by Laura Milman New York.</p>`;
+  const descriptionHtml = `<p>This ${NEW_VINTAGE} ${escapeHtml(title)} is offered by Laura Milman New York.</p>`;
   const seoTitle = truncateAtWord(`${JACOB_VENDOR} ${item.titleModel} | Watch Accessory`, 60);
   const seoDescription = truncateAtWord(
-    `Shop this ${JACOB_VENDOR} ${item.titleModel.toLowerCase()}. Authenticated by Laura Milman New York.`,
+    `Shop this ${NEW_VINTAGE.toLowerCase()} ${JACOB_VENDOR} ${item.titleModel.toLowerCase()}. Authenticated by Laura Milman New York.`,
     160,
   );
   const metafields: Array<{ namespace: string; key: string; type: string; value: string }> = [
     { namespace: 'custom', key: 'brand', type: 'single_line_text_field', value: JACOB_VENDOR },
+    { namespace: 'custom', key: 'condition', type: 'single_line_text_field', value: NEW_VINTAGE },
     { namespace: 'global', key: 'MPN', type: 'single_line_text_field', value: item.itemNumber },
   ];
   if (item.metal) metafields.push({ namespace: 'custom', key: 'metal', type: 'single_line_text_field', value: item.metal });
@@ -262,7 +271,7 @@ function accessoryListing(item: JacobMemoItem): {
     descriptionHtml,
     seoTitle,
     seoDescription,
-    tags: [JACOB_VENDOR, item.productType, 'Jacob & Co'],
+    tags: [JACOB_VENDOR, item.productType, NEW_VINTAGE, 'Jacob & Co'],
     metafields,
   };
 }
@@ -276,7 +285,7 @@ function watchRecord(item: JacobMemoItem): WatchFeedRecord {
     brand: JACOB_VENDOR,
     model: item.titleModel,
     reference: item.reference,
-    conditionRaw: 'UNWORN',
+    conditionRaw: '',
     caseSizeMm: item.caseSizeMm,
     metal: item.metal,
     dial: item.dial,
@@ -285,6 +294,43 @@ function watchRecord(item: JacobMemoItem): WatchFeedRecord {
     stockNumber: item.serial,
     comment: item.comment,
   };
+}
+
+function applyNewVintageWatchListing(listing: {
+  title: string;
+  descriptionHtml: string;
+  seoTitle: string;
+  seoDescription: string;
+  tags: string[];
+  metafields: Array<{ namespace: string; key: string; type: string; value: string }>;
+}): typeof listing {
+  const identity = listing.title.replace(/^(Pre-Owned|Unworn)\s+/i, '').trim();
+  const title = `${NEW_VINTAGE} ${identity}`;
+  const descriptionHtml = listing.descriptionHtml.replace(/<p>This (Pre-Owned |Unworn )?/i, `<p>This ${NEW_VINTAGE} `);
+  const seoTitle = fitWithSuffix(identity, `– ${NEW_VINTAGE} Watch`, 60);
+  const seoDescription = truncateAtWord(
+    `Shop this ${NEW_VINTAGE.toLowerCase()} ${identity}. Authenticated by Laura Milman New York.`,
+    160,
+  );
+  const metafields = listing.metafields
+    .filter((m) => !(m.namespace === 'mm-google-shopping' && m.key === 'condition'))
+    .map((m) => (m.namespace === 'custom' && m.key === 'condition' ? { ...m, value: NEW_VINTAGE } : m));
+  if (!metafields.some((m) => m.namespace === 'custom' && m.key === 'condition')) {
+    metafields.push({
+      namespace: 'custom',
+      key: 'condition',
+      type: 'single_line_text_field',
+      value: NEW_VINTAGE,
+    });
+  }
+  const tags = [
+    ...new Set(
+      listing.tags
+        .filter((t) => !/^(Pre-Owned|Unworn)(\s+Watches)?$/i.test(t))
+        .concat([NEW_VINTAGE, `${NEW_VINTAGE} Watches`]),
+    ),
+  ];
+  return { title, descriptionHtml, seoTitle, seoDescription, tags, metafields };
 }
 
 function uniqueVariantInventory(
@@ -314,18 +360,18 @@ export function buildJacobMemoProductSetInput(
   item: JacobMemoItem,
   opts: JacobProductSetOptions = {},
 ): Record<string, unknown> {
-  const listing =
+  const builtListing =
     item.kind === 'watch'
       ? (() => {
           const built = buildWatchListing(watchRecord(item));
           if ('needsReview' in built) {
             throw new Error(`Watch listing needs review for ${item.itemNumber}: ${built.reason}`);
           }
-          return built;
+          return applyNewVintageWatchListing(built);
         })()
       : accessoryListing(item);
 
-  const extraMetafields = [...listing.metafields];
+  const extraMetafields = [...builtListing.metafields];
   if (item.kind === 'watch' && item.diamondWeight) {
     extraMetafields.push({
       namespace: 'custom',
@@ -335,21 +381,21 @@ export function buildJacobMemoProductSetInput(
     });
   }
 
-  const tags = [...new Set([...listing.tags, JACOB_MEMO_TAG, MEDIA_MISSING_TAG, 'Jacob & Co'])].sort();
+  const tags = [...new Set([...builtListing.tags, JACOB_MEMO_TAG, MEDIA_MISSING_TAG, 'Jacob & Co', NEW_VINTAGE])].sort();
   const price = retailUsdForItem(item).toFixed(2);
   const compareAt = item.jacobRetailUsd.toFixed(2);
 
   return {
     handle: handleForItem(item),
-    title: listing.title,
-    descriptionHtml: listing.descriptionHtml,
+    title: builtListing.title,
+    descriptionHtml: builtListing.descriptionHtml,
     vendor: JACOB_VENDOR,
     productType: item.productType,
     category: item.category,
     status: 'DRAFT',
     tags,
     metafields: extraMetafields,
-    seo: { title: listing.seoTitle, description: listing.seoDescription },
+    seo: { title: builtListing.seoTitle, description: builtListing.seoDescription },
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
     variants: [
       {

@@ -1,9 +1,10 @@
 /**
- * Create (or skip existing) Jacob & Co. memo listings in Shopify.
+ * Create or update Jacob & Co. memo listings in Shopify.
  *
- * No photos — products are DRAFT with media-missing. Re-running is safe:
- * existing handles are left alone.
+ * Existing handles are updated in place (price, copy, condition) so a
+ * re-run applies later memo corrections without duplicating products.
  *
+ *   npx tsx scripts/create-jacob-memo-listings.ts --preview
  *   npx tsx scripts/create-jacob-memo-listings.ts --dry-run
  *   npx tsx scripts/create-jacob-memo-listings.ts
  */
@@ -54,7 +55,61 @@ async function primaryLocationId(client: ShopifyClient): Promise<string | undefi
   }
 }
 
+type PreviewRow = {
+  handle: string;
+  title: string;
+  status: string;
+  price: string;
+  compareAtPrice: string;
+  sku: string;
+  condition: string;
+};
+
+function listingPreview(item: (typeof JACOB_MEMO_ITEMS)[number], input: Record<string, unknown>): PreviewRow {
+  const variant = (input.variants as Array<{ price: string; compareAtPrice: string; sku: string }>)[0]!;
+  const condition =
+    (input.metafields as Array<{ namespace: string; key: string; value: string }>).find(
+      (m) => m.namespace === 'custom' && m.key === 'condition',
+    )?.value ?? '';
+  return {
+    handle: handleForItem(item),
+    title: String(input.title),
+    status: String(input.status),
+    price: variant.price,
+    compareAtPrice: variant.compareAtPrice,
+    sku: variant.sku,
+    condition,
+  };
+}
+
+async function writePreviewPayloads(): Promise<PreviewRow[]> {
+  const listings = JACOB_MEMO_ITEMS.map((item) => {
+    const input = buildJacobMemoProductSetInput(item);
+    return { item: listingPreview(item, input), input };
+  });
+  await mkdir('out', { recursive: true });
+  await writeFile(
+    'out/jacob-memo-listing-preview.json',
+    JSON.stringify(
+      listings.map((row) => ({ ...row.item, seo: (row.input as { seo: unknown }).seo, tags: row.input.tags })),
+      null,
+      2,
+    ),
+  );
+  return listings.map((row) => row.item);
+}
+
 async function main() {
+  const previewOnly = process.argv.includes('--preview');
+  if (previewOnly) {
+    const preview = await writePreviewPayloads();
+    console.log(`Preview: ${preview.length} listings. See out/jacob-memo-listing-preview.json`);
+    for (const row of preview) {
+      console.log(`${row.handle}\t${row.price}\t${row.compareAtPrice}\t${row.condition}\t${row.title}`);
+    }
+    return;
+  }
+
   const dryRun = process.argv.includes('--dry-run');
   const domain = process.env.SHOPIFY_STORE_DOMAIN;
   if (!domain) throw new Error('SHOPIFY_STORE_DOMAIN is not set');
@@ -73,54 +128,48 @@ async function main() {
 
   const publicationId = dryRun ? null : await client.onlineStorePublicationId();
   const created: string[] = [];
-  const skipped: string[] = [];
+  const updated: string[] = [];
   const errors: string[] = [];
-  const preview: Array<{ handle: string; title: string; status: string; price: string; sku: string }> = [];
+  const preview: PreviewRow[] = [];
 
   for (const item of JACOB_MEMO_ITEMS) {
     const handle = handleForItem(item);
     const input = buildJacobMemoProductSetInput(item, {
       locationId: canWriteInventory ? locationId : undefined,
     });
-    const variant = (input.variants as Array<{ price: string; sku: string }>)[0]!;
-    preview.push({
-      handle,
-      title: String(input.title),
-      status: String(input.status),
-      price: variant.price,
-      sku: variant.sku,
-    });
+    preview.push(listingPreview(item, input));
 
     if (dryRun) continue;
 
     const existing = await findProductId(client, handle);
-    if (existing) {
-      skipped.push(handle);
-      console.log(`skip ${handle} (already exists)`);
-      continue;
-    }
+    if (existing) input.id = existing;
 
     const result = await client.productSet(input);
     if (result.errors.length) {
       errors.push(`${handle}: ${result.errors.join('; ')}`);
       continue;
     }
-    const id = result.id;
+    const id = result.id ?? existing;
     if (id && publicationId) {
       const pubErrors = await client.publishResource(id, publicationId);
       if (pubErrors.length) errors.push(`${handle} publish: ${pubErrors.join('; ')}`);
     }
-    created.push(handle);
-    console.log(`created ${handle} — ${input.title}`);
+    if (existing) {
+      updated.push(handle);
+      console.log(`updated ${handle} — ${input.title}`);
+    } else {
+      created.push(handle);
+      console.log(`created ${handle} — ${input.title}`);
+    }
   }
 
-  const summary = { shop, dryRun, created, skipped, errors, preview };
+  const summary = { shop, dryRun, created, updated, errors, preview };
   await mkdir('out', { recursive: true });
   await writeFile('out/jacob-memo-listings.json', JSON.stringify(summary, null, 2));
   console.log(
     dryRun
       ? `Dry run: ${preview.length} listings prepared. See out/jacob-memo-listings.json`
-      : `Done: created=${created.length} skipped=${skipped.length} errors=${errors.length}`,
+      : `Done: created=${created.length} updated=${updated.length} errors=${errors.length}`,
   );
   if (errors.length) {
     for (const e of errors) console.error(`  - ${e}`);
