@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PRODUCT_SCHEMA_VERSION,
   buildProductSetInput,
   caratBand,
   contentHashFor,
@@ -191,6 +192,14 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, 'custom', 'carat_weight')).toBeUndefined();
   });
 
+  it('unknown watch conditions keep their raw value and specs without a Google classification', () => {
+    const fields = metafieldsFor(watch({ condition: 'SLIDER' }), priced(), 'hash', at);
+    expect(find(fields, 'custom', 'condition')?.value).toBe('SLIDER');
+    expect(find(fields, 'custom', 'dial')?.value).toBe('Black');
+    expect(find(fields, 'custom', 'reference')?.value).toBe('126610LN');
+    expect(find(fields, 'mm-google-shopping', 'condition')).toBeUndefined();
+  });
+
   it('carries every feed video, not just the first', () => {
     const videos = ['https://dnalinks.in/a.mp4', 'https://dnalinks.in/b.mp4'];
     const fields = metafieldsFor(naturalStone({ videoUrls: videos }), priced(), 'hash', at);
@@ -213,6 +222,10 @@ describe('storefront-readable facet metafields', () => {
 });
 
 describe('content hash', () => {
+  it('uses the schema version that refreshes existing products for neutral watch listings', () => {
+    expect(PRODUCT_SCHEMA_VERSION).toBe(13);
+  });
+
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
     // Guards the upgrade path: without the schema version in the hash, the
     // 2,541 products already live would hash-match and be skipped as
@@ -291,6 +304,15 @@ describe('updates target the existing product by id', () => {
       title: 'Rolex Submariner 126610LN – Pre-Owned Watch',
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
+  });
+
+  it('unknown-condition watches use neutral prose and remain active when media is present', () => {
+    const input = buildProductSetInput(watch({ condition: 'SLIDER' }), priced(), at);
+    expect(input.status).toBe('ACTIVE');
+    expect(input.title).toBe('Rolex Submariner 126610LN');
+    expect(String(input.descriptionHtml)).toContain('This Rolex Submariner 126610LN');
+    expect(String(input.descriptionHtml)).not.toContain('<ul>');
+    expect(String(input.descriptionHtml)).not.toMatch(/Pre-Owned|Unworn/);
   });
 
   it('writes custom SEO fields for loose diamonds', () => {

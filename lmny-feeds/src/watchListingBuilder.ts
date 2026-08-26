@@ -76,7 +76,7 @@ const CONFIG = {
 
 // ---------------------------------------------------------------------------
 // Condition mapping — the two known STATE values, plus known GRADE values
-// (which imply state = preowned). Anything not listed here is NEEDS_REVIEW.
+// (which imply state = preowned). Anything else remains unclassified.
 
 const STATE_MAP: Record<string, ConditionMapping> = {
   'PRE OWNED': { state: 'preowned', titleWord: 'Pre-Owned', grade: null, googleShoppingCondition: 'used' },
@@ -195,21 +195,16 @@ function yesNo(v: boolean | null | undefined): string | null {
 
 export function buildWatchListing(record: WatchFeedRecord): WatchListing | NeedsReview {
   const mapping = mapCondition(record.conditionRaw);
-  if (!mapping) {
-    return {
-      needsReview: true,
-      reason: `Unrecognized condition value: "${record.conditionRaw}"`,
-      record,
-    };
-  }
 
   const brand = titleCase(record.brand);
   const model = titleCase(record.model);
   const reference = record.reference.trim(); // never re-cased
   const year = normalizeYear(record.year);
-  const { titleWord, grade, googleShoppingCondition } = mapping;
+  const titleWord = mapping?.titleWord ?? null;
+  const grade = mapping?.grade ?? null;
 
-  const title = `${titleWord} ${brand} ${model} ${reference}`;
+  const identity = `${brand} ${model} ${reference}`;
+  const title = titleWord ? `${titleWord} ${identity}` : identity;
 
   const yearClause = year ? ` from ${escapeHtml(year)}` : '';
   const gradeClause = grade ? ` It is in ${grade.toLowerCase()} condition.` : '';
@@ -237,25 +232,23 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const notesParagraph =
     record.comment && !commentIsRedundant ? `<p>${escapeHtml(record.comment)}</p>` : '';
 
+  const descriptionIdentity = titleWord ? `${titleWord} ${brand} ${model} ${reference}` : identity;
   const descriptionHtml =
-    `<p>This ${titleWord} ${escapeHtml(brand)} ${escapeHtml(model)} ${escapeHtml(reference)}` +
+    `<p>This ${escapeHtml(descriptionIdentity)}` +
     `${yearClause}${openingClause}.${gradeClause}</p>` +
     notesParagraph +
     trustParagraph;
 
-  const seoTitle = fitWithSuffix(
-    `${brand} ${model} ${reference}`,
-    `– ${titleWord} Watch`,
-    60,
-  );
+  const seoTitle = fitWithSuffix(identity, titleWord ? `– ${titleWord} Watch` : 'Watch', 60);
 
   const gradeSuffix = grade ? `, ${grade.toLowerCase()} condition` : '';
-  let seoDescription =
-    `Shop this ${titleWord.toLowerCase()} ${brand} ${model} ${reference}${gradeSuffix}. ` +
-    `Authenticated by Laura Milman New York.`;
+  let seoDescription = titleWord
+    ? `Shop this ${titleWord.toLowerCase()} ${identity}${gradeSuffix}. Authenticated by Laura Milman New York.`
+    : `Explore this ${identity} watch from Laura Milman New York.`;
   seoDescription = truncateAtWord(seoDescription, 160);
 
-  const tags = Array.from(new Set([brand, `${titleWord} Watches`, reference, model, 'Watches']));
+  const conditionTag = titleWord ? `${titleWord} Watches` : record.conditionRaw.trim();
+  const tags = Array.from(new Set([brand, conditionTag, reference, model, 'Watches'].filter(Boolean)));
 
   const customSpecs: { namespace: string; key: string; value: string; type: string }[] = [];
   const pushCustom = (key: string, value: string | null | undefined) => {
@@ -271,7 +264,7 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   pushCustom('dial', dial);
   pushCustom('bezel', bezel);
   pushCustom('bracelet', bracelet);
-  pushCustom('condition', titleWord);
+  pushCustom('condition', titleWord ?? record.conditionRaw.trim());
   pushCustom('condition_grade', grade);
   pushCustom('box', boxYesNo);
   pushCustom('papers', paperYesNo);
@@ -281,12 +274,6 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
 
   const metafields = [
     {
-      namespace: 'mm-google-shopping',
-      key: 'condition',
-      value: googleShoppingCondition,
-      type: 'single_line_text_field',
-    },
-    {
       namespace: 'global',
       key: 'MPN',
       value: reference,
@@ -294,6 +281,14 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
     },
     ...customSpecs,
   ];
+  if (mapping) {
+    metafields.unshift({
+      namespace: 'mm-google-shopping',
+      key: 'condition',
+      value: mapping.googleShoppingCondition,
+      type: 'single_line_text_field',
+    });
+  }
 
   return { title, descriptionHtml, seoTitle, seoDescription, tags, metafields };
 }

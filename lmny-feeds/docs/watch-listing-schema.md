@@ -75,12 +75,13 @@ table only, never the title:
 A grade value implies state = preowned (grading only applies to something
 that's been owned).
 
-**Anything else** (`SLIDER`, blank, unrecognized text) is **NEEDS_REVIEW**.
-Do not generate a title or description. Do not guess a condition. Leave the
-existing listing untouched and log the stock ref, current title, and the raw
-condition string for manual review. On the live ingest path, fall back to the
-legacy brand/model/reference title and bullet-list description rather than
-holding the SKU out of catalog.
+**Anything else** (`SLIDER`, blank, unrecognized text) must stay unclassified.
+Do not infer Pre-Owned/Unworn state or a Google Shopping condition. On the live
+ingest path, still build the neutral brand/model/reference title, prose, and
+physical-spec metafields so an active feed watch can use the current PDP
+layout. Preserve a nonblank raw value in `custom.condition` and as a tag; omit
+it when blank. The one-time legacy backfill still flags these rows for review
+because it cannot recover the richer physical specs from old Shopify HTML.
 
 ## Output
 
@@ -117,7 +118,7 @@ escaped (`&`, `<`, `>`).
 | `case_size` | `{MM}mm` |
 | `metal` | As-given (industry shorthand) |
 | `dial` / `bezel` / `bracelet` | Title-cased |
-| `condition` / `condition_grade` | Title word / grade |
+| `condition` / `condition_grade` | Title word / grade when mapped; otherwise the nonblank raw condition / omitted |
 | `box` / `papers` / `original_tag` | `Yes` / `No` when stated |
 | `link` | Feed `Links` value as string |
 | `stock_number` | LMNY stock # |
@@ -183,7 +184,7 @@ tags the product already has, so existing operational tags are preserved.
 
 | Namespace.Key | Value |
 |---|---|
-| `mm-google-shopping.condition` | `new` if state = unworn, else `used` |
+| `mm-google-shopping.condition` | `new` if state = unworn, `used` if pre-owned; omitted when unclassified |
 | `global.MPN` | reference |
 
 ## Idempotency
