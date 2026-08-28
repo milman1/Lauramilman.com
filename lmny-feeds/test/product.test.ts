@@ -222,8 +222,8 @@ describe('storefront-readable facet metafields', () => {
 });
 
 describe('content hash', () => {
-  it('uses the schema version that refreshes existing products for neutral watch listings', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(14);
+  it('uses the schema version that refreshes existing products for Amount × 2/3 diamond cost', () => {
+    expect(PRODUCT_SCHEMA_VERSION).toBe(15);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {

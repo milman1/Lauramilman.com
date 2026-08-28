@@ -230,8 +230,8 @@ async function main() {
   out(`Raw row fields: ${Object.keys(first).map((k) => `\`${k}\``).join(', ')}`);
   out('');
   out(
-    'Lab mapping: `Buy_Price` is treated as **USD per carat**; ' +
-      '`costUsd = Buy_Price × Weight`. Naturals keep Buy_Price/Rap as total.',
+    'Lab mapping: `Amount` is portal asking wholesale; LMNY cost is Amount × 2/3. ' +
+      'Fallback: `Buy_Price` is **USD per carat**, then `costUsd = Buy_Price × Weight × 2/3`.',
   );
   out('');
   const perCaratKey = Object.keys(first).find((k) => /per.?carat|price_?ct/i.test(k));

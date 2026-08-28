@@ -21,11 +21,13 @@ holds a stones table — Shopify products are the only live copy.
    outside the curated list still import and are tagged `other-watch-brand`.
    Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
-   - naturals: Rapaport × 0.75, held under a 20% margin floor. The floor is a
-     **filter, not a floor price** — a thin stone is held out, never marked up
-     to clear it. 20% margin-on-retail is why no published natural sits below
-     cost × 1.25.
-   - lab: tiered multiplier on total cost (~1.55× average)
+   - naturals and lab: LMNY cost is Belgium Dia **Amount × 2/3** (the invoice
+     share on stock 350393: Amount $106,463 → $70,975). Amount is portal
+     asking wholesale; Rap ($) is per carat and is not the ticket.
+   - naturals: retail = round(cost × 1.5), which lands on the Amount column
+     (33% margin-on-retail). Held under a 20% margin floor if the multiple
+     is ever lowered. The floor is a **filter, not a floor price**.
+   - lab: tiered multiplier on that same LMNY cost (~1.55× average)
    - watches: supplier cost × chart (`src/watchPricing.ts`). **No Hours mid.**
      Aftermarket is excluded at normalize. Missing cost is tagged
      `pricing-review` and the existing Shopify price is left alone.

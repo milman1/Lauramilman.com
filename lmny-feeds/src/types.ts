@@ -19,13 +19,20 @@ export interface StoneItem {
   tablePct?: number;
   depthPct?: number;
   /**
-   * Total supplier cost in USD. For lab, this is Buy_Price × carat (Belgium Dia
-   * Buy_Price is per-carat). For natural, Buy_Price/Rap-derived total.
+   * LMNY invoice cost: Belgium Dia Amount × 2/3 (see `DIAMOND.supplierAmountShare`).
+   * Amount is portal asking wholesale. Lab fallback is Buy_Price × carat,
+   * then the same 2/3 share. Natural fallback is Buy_Price or
+   * Rap/ct × (1 + Disc) × carat, then 2/3.
    */
   costUsd: number;
-  /** Lab only: raw Buy_Price interpreted as USD per carat. */
+  /**
+   * Portal Amount $ before the 2/3 LMNY share. Audit / reconstruct only;
+   * ticket price uses costUsd.
+   */
+  listAmountUsd?: number;
+  /** LMNY $/ct (costUsd / carat). Lab guards use this against scaled floors. */
   pricePerCaratUsd?: number;
-  /** Rapaport list total (USD) — required to price naturals. */
+  /** Rapaport list **per carat** when the feed sends it — audit only. */
   rapPriceUsd?: number;
   imageUrls: string[];
   videoUrls: string[];

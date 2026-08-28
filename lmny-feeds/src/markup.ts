@@ -1,4 +1,4 @@
-import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL } from '../config/pricing.js';
+import { DIAMOND, LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 import { priceWatchFromCost } from './watchPricing.js';
 
@@ -18,15 +18,17 @@ function margin(retail: number, cost: number): number {
 
 function minCostPerCaratFloor(carat: number): number {
   const band = LAB_GUARDS.minCostPerCarat.find((b) => carat <= b.maxCarat);
-  return band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
+  const listed = band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
+  // Floors were tuned to portal Amount $/ct; LMNY cost is 2/3 of that.
+  return listed * DIAMOND.supplierAmountShare;
 }
 
-/** Naturals: Rapaport list × 0.75, held below the 20% margin floor. */
+/** Naturals: ticket = round(LMNY cost × amountMultiple). Cost is already Amount × 2/3. */
 export function priceNatural(item: StoneItem): PriceResult {
-  if (!item.rapPriceUsd) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_rap_price' } };
+  if (!(item.costUsd > 0)) {
+    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_cost' } };
   }
-  const retailUsd = round(item.rapPriceUsd * NATURAL.rapDiscount);
+  const retailUsd = round(item.costUsd * NATURAL.amountMultiple);
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -54,7 +56,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: tiered multiplier on **total** feed cost (Buy_Price × carat).
+ * Lab-grown: tiered multiplier on **LMNY cost** (Amount × 2/3).
  * Fail-closed guards catch a regress to treating $/ct as total.
  */
 export function priceLab(item: StoneItem): PriceResult {
@@ -109,7 +111,7 @@ export function priceLab(item: StoneItem): PriceResult {
 
   if (
     item.carat >= LAB_GUARDS.minCaratForRetailFloor &&
-    retailUsd < LAB_GUARDS.minRetailUsd
+    retailUsd < LAB_GUARDS.minRetailUsd * DIAMOND.supplierAmountShare
   ) {
     return {
       ok: false,
