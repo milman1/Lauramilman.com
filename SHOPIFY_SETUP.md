@@ -221,20 +221,38 @@ The storefront popup and newsletter reveal this code after signup.
 
 ## 7. Branded emails
 
-HTML to paste lives in `/emails`:
+Paste-ready HTML lives in `/emails`. Shopify sends them automatically after
+the matching automation or notification template is installed.
+
+**Do this first (subscribe → welcome mail):**
+
+1. Confirm discount `LMNYWELCOME` exists (§6).
+2. Shopify Admin → **Marketing → Automations → Welcome new subscribers**.
+3. From: Laura Milman New York `<hello@lauramilman.com>`.
+4. Subject: `Your inner-circle welcome — 10% off jewelry`.
+5. Choose **Code your own** and paste `emails/welcome.html`.
+6. Send a test, then turn the automation **on**.
+
+The homepage popup and newsletter already tag `newsletter,welcome10` and
+accept marketing. The on-page success message still shows the code if mail
+is delayed.
+
+Then paste the rest:
 
 | File | Use in |
 |------|--------|
-| `emails/abandoned-checkout.html` | Shopify Email → Abandoned checkout |
-| `emails/abandoned-cart.html` | Shopify Email → Abandoned cart (or Klaviyo) |
-| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation (replace body) |
+| `emails/welcome.html` | Marketing → Automations → Welcome new subscribers |
+| `emails/abandoned-checkout.html` | Marketing → Automations → Abandoned checkout |
+| `emails/abandoned-cart.html` | Marketing → Automations → Abandoned cart |
+| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation (Edit code) |
 | `emails/shipping-confirmation.html` | Settings → Notifications → Shipping confirmation |
-| `emails/welcome.html` | Shopify Email → Customer welcome / newsletter |
+| `emails/customer-account-welcome.html` | Settings → Notifications → Customer account welcome |
+| `emails/customer-account-invite.html` | Settings → Notifications → Customer account invite |
 
-Replace merge tags (`{{ first_name }}`, `{{ abandoned_checkout_url }}`, etc.)
-with the tags your email app provides. Update **Settings → Policies → Refund
-policy** to match the 14-day jewelry / watches-exchange-only copy on
-`/pages/shipping-returns`.
+Full steps, subject lines, and what not to change: `emails/README.md`.
+Set **Settings → General → Store address** so the footer prints a real
+postal address. Update **Settings → Policies → Refund policy** to match
+the 14-day jewelry / watches-exchange-only copy on `/pages/shipping-returns`.
 
 ---
 
