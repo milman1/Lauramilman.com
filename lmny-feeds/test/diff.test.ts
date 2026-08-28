@@ -5,7 +5,7 @@ import {
   diffCatalog,
   kindForHandle,
   promoteShortMediaUpdates,
-  promoteWatchInventoryUpdates,
+  promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from '../src/diff.js';
 import type { CatalogEntry, DesiredEntry, Kind } from '../src/types.js';
@@ -159,12 +159,12 @@ describe('promoteShortMediaUpdates', () => {
   });
 });
 
-describe('promoteWatchInventoryUpdates', () => {
+describe('promoteUntrackedInventoryUpdates', () => {
   it('re-opens a hash-skip watch that is still untracked', () => {
     const catalog = [entry({ handle: 'w-3194', contentHash: 'h1', inventoryTracked: false })];
     const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
     expect(d[0]?.action).toBe('skip');
-    const n = promoteWatchInventoryUpdates(d, catalog);
+    const n = promoteUntrackedInventoryUpdates(d, catalog);
     expect(n).toBe(1);
     expect(d[0]).toMatchObject({ action: 'update', reason: 'inventory_untracked' });
   });
@@ -172,24 +172,31 @@ describe('promoteWatchInventoryUpdates', () => {
   it('treats missing inventoryTracked as untracked so the first run backfills', () => {
     const catalog = [entry({ handle: 'w-3194', contentHash: 'h1' })];
     const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
-    expect(promoteWatchInventoryUpdates(d, catalog)).toBe(1);
+    expect(promoteUntrackedInventoryUpdates(d, catalog)).toBe(1);
     expect(d[0]?.reason).toBe('inventory_untracked');
   });
 
   it('leaves a tracked watch skipped', () => {
     const catalog = [entry({ handle: 'w-3194', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 })];
     const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
-    expect(promoteWatchInventoryUpdates(d, catalog)).toBe(0);
+    expect(promoteUntrackedInventoryUpdates(d, catalog)).toBe(0);
     expect(d[0]?.action).toBe('skip');
   });
 
-  it('does not promote stones or quarantined watches', () => {
+  it('promotes untracked loose diamonds the same way', () => {
+    const catalog = [entry({ handle: 'nd-bd-1234', contentHash: 'h1', inventoryTracked: false })];
+    const d = diffCatalog([want('nd-bd-1234', 'h1')], catalog, ALL_KINDS);
+    expect(promoteUntrackedInventoryUpdates(d, catalog)).toBe(1);
+    expect(d[0]).toMatchObject({ handle: 'nd-bd-1234', action: 'update', reason: 'inventory_untracked' });
+  });
+
+  it('does not promote already-tracked stones or quarantined watches', () => {
     const catalog = [
-      entry({ handle: 'nd-a', contentHash: 'h1', inventoryTracked: false }),
+      entry({ handle: 'nd-a', contentHash: 'h1', inventoryTracked: true }),
       entry({ handle: 'w-broken', status: 'DRAFT', tags: ['lmny-feed', 'media-missing'], imageCount: 0 }),
     ];
     const d = diffCatalog([want('nd-a', 'h1'), want('w-broken', 'h1')], catalog, ALL_KINDS);
-    expect(promoteWatchInventoryUpdates(d, catalog)).toBe(0);
+    expect(promoteUntrackedInventoryUpdates(d, catalog)).toBe(0);
     expect(d.find((x) => x.handle === 'nd-a')?.action).toBe('skip');
     expect(d.find((x) => x.handle === 'w-broken')?.reason).toBe('media_missing_quarantine');
   });

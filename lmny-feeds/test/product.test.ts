@@ -223,7 +223,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for neutral watch listings', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(13);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(14);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -296,11 +296,23 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.tracked).toBe(false);
   });
 
-  it('a locationId does not turn on tracked inventory for loose diamonds', () => {
+  it('a locationId turns on tracked qty 1 for loose diamonds', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
-    const variant = (input.variants as Array<{ inventoryItem: { tracked: boolean }; inventoryQuantities?: unknown }>)[0]!;
-    expect(variant.inventoryItem.tracked).toBe(false);
-    expect(variant.inventoryQuantities).toBeUndefined();
+    const variant = (input.variants as Array<{
+      sku: string;
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ quantity: number }>;
+    }>)[0]!;
+    expect(variant.sku).toBe('BD-1234');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+  });
+
+  it('a lab stone uses the same Jewelry category as naturals', () => {
+    const input = buildProductSetInput(labStone(), priced(), at);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+    expect(input.productType).toBe('Lab-Grown Diamond');
   });
 
   it('a watch without a location stays untracked', () => {
@@ -325,6 +337,8 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryQuantities).toEqual([
       { locationId: 'gid://shopify/Location/9', name: 'available', quantity: 1 },
     ]);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6-11');
+    expect(input.productType).toBe('Watch');
   });
 
   it('an imageless watch with a location is DRAFT with tracked qty 0', () => {

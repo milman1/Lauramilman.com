@@ -34,6 +34,10 @@ Metafield: custom.era [single_line_text_field]
 Metafield: custom.condition [single_line_text_field]
 ```
 
+Also include the Shopify standard columns in §11 (Status, Variant SKU,
+inventory, Product Category). Marketplace apps will not keep a listing
+without them.
+
 ---
 
 ## 2. Brand Auto-Collections
@@ -173,9 +177,10 @@ Confirmed clean as of this commit — no references in any `.liquid`, `.json`,
 1. Create all 7 metafield definitions (§1).
 2. Create all 38 brand auto-collections (§2).
 3. Run the CSV scrub (§3b).
-4. Import the CSV (Products → Import).
-5. Run the post-import audit (§3c).
-6. Spot-check 3–5 products to confirm metafields populated and the
+4. Run the jewelry CSV marketplace check (§11).
+5. Import the CSV (Products → Import).
+6. Run the post-import audit (§3c).
+7. Spot-check 3–5 products to confirm metafields populated and the
    product appears in the correct brand collection.
 
 ---
@@ -280,4 +285,56 @@ Optional: Shopify Flow → “Customer created” / form submit → add the same
 
 Do **not** print a different website price vs viewing price on the storefront.
 Talk numbers on the call.
+
+---
+
+## 11. Jewelry CSV — marketplace import rules (Uploadify)
+
+A jewelry CSV must match the same contract as feed watches and diamonds or
+Uploadify will skip the piece / delist it on the next pull: **ACTIVE**,
+**SKU**, **qty > 0**, plus a real Shopify **Category**.
+
+Required Shopify columns (in addition to §1 metafields):
+
+| Column | Value for a piece you want listed |
+|---|---|
+| `Status` | `active` |
+| `Published` | `true` |
+| `Variant SKU` | Unique stock number, never blank |
+| `Variant Inventory Tracker` | `shopify` |
+| `Variant Inventory Qty` | `1` (one-of-one) |
+| `Variant Inventory Policy` | `deny` |
+| `Product Category` | Standard taxonomy breadcrumb or id from the table below |
+| `Type` | `Rings` / `Necklaces` / `Earrings` / `Bracelets` / `Watch` / … |
+
+When the piece sells, set qty to `0` or archive it so Uploadify delists.
+
+### Product Category values
+
+| Type | Product Category (CSV) | Id |
+|---|---|---|
+| Rings | `Apparel & Accessories > Jewelry > Rings` | `aa-6-9` |
+| Bracelets | `Apparel & Accessories > Jewelry > Bracelets` | `aa-6-3` |
+| Necklaces | `Apparel & Accessories > Jewelry > Necklaces` | `aa-6-8` |
+| Earrings | `Apparel & Accessories > Jewelry > Earrings` | `aa-6-6` |
+| Brooches | `Apparel & Accessories > Jewelry > Brooches & Lapel Pins > Brooches` | `aa-6-4-1` |
+| Pendants | `Apparel & Accessories > Jewelry > Charms & Pendants > Pendants` | `aa-6-5-1` |
+| Cufflinks | `Apparel & Accessories > Clothing Accessories > Cufflinks` | `aa-2-10` |
+| Watch | `Apparel & Accessories > Jewelry > Watches` | `aa-6-11` |
+| Jewelry (generic) | `Apparel & Accessories > Jewelry` | `aa-6` |
+
+Either the breadcrumb or the short id is accepted.
+
+### Pre-import check
+
+From the repo, with the CSV path:
+
+```sh
+cd lmny-feeds
+npx tsx scripts/validate-jewelry-csv.ts ../products.csv
+```
+
+Expect exit 0 and `Jewelry CSV OK`. Fix every listed row before Shopify
+Admin → Products → Import. This is the same idea as the Back Vault scrub
+in §3b: catch blanks before they go live.
 

@@ -1,6 +1,7 @@
 import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
+import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
 import {
   buildWatchListing,
@@ -32,18 +33,22 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 13;
+export const PRODUCT_SCHEMA_VERSION = 14;
 
 /**
- * Unique watches are one-of-one. Uploadify (and other marketplace apps)
- * keep a listing only while Shopify status is ACTIVE, SKU is set, and
- * available quantity is > 0. The feed is the availability source: in stock
- * while the watch is publishable, 0 when it has no photo (DRAFT) or when
- * we later archive it.
+ * Unique watches and loose diamonds are one-of-one. Uploadify (and other
+ * marketplace apps) keep a listing only while Shopify status is ACTIVE, SKU
+ * is set, and available quantity is > 0. The feed is the availability
+ * source: in stock while the item is publishable, 0 when it has no photo
+ * (DRAFT) or when we later archive it.
  */
-export const WATCH_IN_STOCK_QTY = 1;
+export const UNIQUE_IN_STOCK_QTY = 1;
+/** @deprecated Use UNIQUE_IN_STOCK_QTY */
+export const WATCH_IN_STOCK_QTY = UNIQUE_IN_STOCK_QTY;
 /** productSet inventoryQuantities.name — available is what Admin apps read. */
-export const WATCH_INVENTORY_QUANTITY_NAME = 'available';
+export const UNIQUE_INVENTORY_QUANTITY_NAME = 'available';
+/** @deprecated Use UNIQUE_INVENTORY_QUANTITY_NAME */
+export const WATCH_INVENTORY_QUANTITY_NAME = UNIQUE_INVENTORY_QUANTITY_NAME;
 
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;
@@ -340,6 +345,7 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     title: titleFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
+    category: taxonomyGidForFeedKind(item.kind),
     tags: tagsFor(item),
     description: descriptionFor(item),
     seoTitle: seoTitleFor(item),
@@ -384,16 +390,16 @@ function variantPayload(
     inventoryPolicy: 'DENY',
     inventoryItem,
   };
-  // Stones stay untracked until that catalog is wired for marketplaces.
-  // Watches without a location keep the old payload so unit tests and a
-  // location-less dry-run cannot invent a qty at a missing GID.
-  if (item.kind === 'watch' && locationId) {
+  // Unique one-of-one inventory. Without a location keep the old untracked
+  // payload so unit tests and a location-less dry-run cannot invent a qty
+  // at a missing GID.
+  if (locationId) {
     inventoryItem.tracked = true;
     variant.inventoryQuantities = [
       {
         locationId,
-        name: WATCH_INVENTORY_QUANTITY_NAME,
-        quantity: hasImages ? WATCH_IN_STOCK_QTY : 0,
+        name: UNIQUE_INVENTORY_QUANTITY_NAME,
+        quantity: hasImages ? UNIQUE_IN_STOCK_QTY : 0,
       },
     ];
   }
@@ -412,8 +418,8 @@ function variantPayload(
  * volume — and then failed 2,506 writes the first time a schema change made
  * every product an update.
  *
- * `locationId` turns on tracked qty for watches (Uploadify / marketplace
- * import). Stones ignore it.
+ * `locationId` turns on tracked qty 1 (Uploadify / marketplace import)
+ * for every feed kind.
  */
 export function buildProductSetInput(
   item: FeedItem,
@@ -434,6 +440,7 @@ export function buildProductSetInput(
     descriptionHtml: descriptionFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
+    category: taxonomyGidForFeedKind(item.kind),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     // Stones get the gemological PDP; watches keep the default product page.
     templateSuffix: item.kind === 'watch' ? '' : STONE_TEMPLATE_SUFFIX,

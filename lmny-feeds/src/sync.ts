@@ -21,13 +21,13 @@ import {
   kindForHandle,
   PRICING_REVIEW_HOLD_REASONS,
   promoteShortMediaUpdates,
-  promoteWatchInventoryUpdates,
+  promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { enrichWatchGalleries, watchGalleryStats, type WatchGalleryStats } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor, WATCH_IN_STOCK_QTY } from './product.js';
+import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor, UNIQUE_IN_STOCK_QTY } from './product.js';
 import {
   holdHistogram,
   labPricingStats,
@@ -302,19 +302,19 @@ async function main() {
     locationId = await shopify.primaryLocationId();
   } catch (err) {
     notes.push(
-      `Watch inventory location lookup failed: ${err instanceof Error ? err.message : String(err)} — ` +
-        'grant the app read_locations. Untracked watches will keep reporting qty 0 to Uploadify.',
+      `Inventory location lookup failed: ${err instanceof Error ? err.message : String(err)} — ` +
+        'grant the app read_locations. Untracked products will keep reporting qty 0 to Uploadify.',
     );
   }
   if (locationId) {
-    const inventoryRepaired = promoteWatchInventoryUpdates(decisions, catalog);
+    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog);
     if (inventoryRepaired > 0) {
       notes.push(
-        `${inventoryRepaired} watch(es) skipped as unchanged are still untracked (Shopify qty 0 to Admin apps) — writing tracked qty ${WATCH_IN_STOCK_QTY}`,
+        `${inventoryRepaired} product(s) skipped as unchanged are still untracked (Shopify qty 0 to Admin apps) — writing tracked qty ${UNIQUE_IN_STOCK_QTY}`,
       );
     }
-  } else if (!notes.some((n) => n.includes('Watch inventory location lookup failed'))) {
-    notes.push('Watch inventory not applied: no active Shopify location. Untracked watches will keep reporting qty 0 to Uploadify.');
+  } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {
+    notes.push('Unique inventory not applied: no active Shopify location. Untracked products will keep reporting qty 0 to Uploadify.');
   }
   const unavailableArchived = applyUnavailableArchives(decisions, catalog, isUnavailableProductHandle);
   if (unavailableArchived > 0) {
@@ -441,12 +441,12 @@ async function main() {
       writeErrors.push(...result.errors);
       if (locationId) {
         const qtyByHandle = new Map(
-          inputs.map((input) => [String(input.handle), watchStockQtyFromInput(input)]),
+          inputs.map((input) => [String(input.handle), uniqueStockQtyFromInput(input)]),
         );
         for (const product of result.products) {
           const handle = product.handle ?? '';
           writeErrors.push(
-            ...(await applyWatchStock(
+            ...(await applyTrackedStock(
               shopify,
               locationId,
               handle,
@@ -465,12 +465,12 @@ async function main() {
         writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
         if (locationId) {
           writeErrors.push(
-            ...(await applyWatchStock(
+            ...(await applyTrackedStock(
               shopify,
               locationId,
               String(input.handle),
               result.inventoryItemId,
-              watchStockQtyFromInput(input),
+              uniqueStockQtyFromInput(input),
               result.inventoryQuantity,
             )),
           );
@@ -500,7 +500,7 @@ async function main() {
         const existing = catalogByHandle.get(d.handle);
         if (existing?.inventoryItemId) {
           writeErrors.push(
-            ...(await applyWatchStock(shopify, locationId, d.handle, existing.inventoryItemId, 0, existing.inventoryQuantity ?? null)),
+            ...(await applyTrackedStock(shopify, locationId, d.handle, existing.inventoryItemId, 0, existing.inventoryQuantity ?? null)),
           );
         }
       }
@@ -763,14 +763,13 @@ function hasShopifyScope(granted: string[], needed: string): boolean {
   return false;
 }
 
-function watchStockQtyFromInput(input: Record<string, unknown>): number | null {
-  if (kindForHandle(String(input.handle ?? '')) !== 'watch') return null;
+function uniqueStockQtyFromInput(input: Record<string, unknown>): number | null {
   const variants = input.variants as Array<{ inventoryQuantities?: Array<{ quantity?: number }> }> | undefined;
   const qty = variants?.[0]?.inventoryQuantities?.[0]?.quantity;
   return typeof qty === 'number' ? qty : null;
 }
 
-async function applyWatchStock(
+async function applyTrackedStock(
   shopify: ShopifyClient,
   locationId: string,
   handle: string,
@@ -778,7 +777,6 @@ async function applyWatchStock(
   desiredQty: number | null,
   currentQty: number | null,
 ): Promise<string[]> {
-  if (kindForHandle(handle) !== 'watch') return [];
   if (!inventoryItemId || desiredQty == null) return [];
   if (currentQty === desiredQty) return [];
   const errors = await shopify.stockInventoryItem(inventoryItemId, locationId, desiredQty);

@@ -1,4 +1,5 @@
 import { contentHash } from '../hash.js';
+import { taxonomyGidForProductType } from '../taxonomy.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
 import type { BackVaultItem } from './types.js';
@@ -9,7 +10,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 3;
+export const PRODUCT_SCHEMA_VERSION = 4;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -75,6 +76,7 @@ export function contentHashFor(item: BackVaultItem): string {
     title: listing.title,
     vendor: item.vendor,
     productType: listing.productType,
+    category: taxonomyGidForProductType(listing.productType),
     tags: tagsFor(item),
     description: listing.descriptionHtml,
     seoTitle: listing.seoTitle,
@@ -101,7 +103,12 @@ export interface ExistingProduct {
  * copies those files onto its own CDN, and the URL is never shown as
  * storefront copy, so it is not part of the scrub gate.
  */
-export function buildProductSetInput(item: BackVaultItem, syncedAt: string, existing?: ExistingProduct): Record<string, unknown> {
+export function buildProductSetInput(
+  item: BackVaultItem,
+  syncedAt: string,
+  existing?: ExistingProduct,
+  locationId?: string,
+): Record<string, unknown> {
   const handle = handleFor(item);
   const listing = buildJewelryListing(item);
   const tags = tagsFor(item);
@@ -125,6 +132,7 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
     descriptionHtml: listing.descriptionHtml,
     vendor: item.vendor,
     productType: listing.productType,
+    category: taxonomyGidForProductType(listing.productType),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     tags: finalTags,
     metafields: metafieldsFor(item, hash, syncedAt),
@@ -137,7 +145,21 @@ export function buildProductSetInput(item: BackVaultItem, syncedAt: string, exis
         sku: item.sku ?? item.sourceHandle,
         taxable: true,
         inventoryPolicy: 'DENY',
-        inventoryItem: { tracked: false, requiresShipping: true },
+        inventoryItem: {
+          tracked: Boolean(locationId),
+          requiresShipping: true,
+        },
+        ...(locationId
+          ? {
+              inventoryQuantities: [
+                {
+                  locationId,
+                  name: 'available',
+                  quantity: hasImages ? 1 : 0,
+                },
+              ],
+            }
+          : {}),
       },
     ],
   };
