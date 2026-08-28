@@ -34,6 +34,17 @@ export const CUSTOM_NAMESPACE = 'custom';
  */
 export const PRODUCT_SCHEMA_VERSION = 13;
 
+/**
+ * Unique watches are one-of-one. Uploadify (and other marketplace apps)
+ * keep a listing only while Shopify status is ACTIVE, SKU is set, and
+ * available quantity is > 0. The feed is the availability source: in stock
+ * while the watch is publishable, 0 when it has no photo (DRAFT) or when
+ * we later archive it.
+ */
+export const WATCH_IN_STOCK_QTY = 1;
+/** productSet inventoryQuantities.name — available is what Admin apps read. */
+export const WATCH_INVENTORY_QUANTITY_NAME = 'available';
+
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;
 
@@ -352,6 +363,43 @@ export interface ExistingProduct {
   imageCount: number;
 }
 
+function variantPayload(
+  item: FeedItem,
+  priced: Priced,
+  hasImages: boolean,
+  locationId?: string,
+): Record<string, unknown> {
+  const inventoryItem: Record<string, unknown> = {
+    tracked: false,
+    requiresShipping: true,
+    // Shopify InventoryItem.cost — required so margin is auditable in admin
+    // independently of Supabase / $app.cost_cents.
+    cost: item.costUsd.toFixed(2),
+  };
+  const variant: Record<string, unknown> = {
+    optionValues: [{ optionName: 'Title', name: 'Default Title' }],
+    price: priced.retailUsd.toFixed(2),
+    sku: item.stockRef,
+    taxable: true,
+    inventoryPolicy: 'DENY',
+    inventoryItem,
+  };
+  // Stones stay untracked until that catalog is wired for marketplaces.
+  // Watches without a location keep the old payload so unit tests and a
+  // location-less dry-run cannot invent a qty at a missing GID.
+  if (item.kind === 'watch' && locationId) {
+    inventoryItem.tracked = true;
+    variant.inventoryQuantities = [
+      {
+        locationId,
+        name: WATCH_INVENTORY_QUANTITY_NAME,
+        quantity: hasImages ? WATCH_IN_STOCK_QTY : 0,
+      },
+    ];
+  }
+  return variant;
+}
+
 /**
  * Build the full ProductSetInput. Images attach by external URL so Shopify
  * copies them to its own CDN. Feed-hosted .mp4 videos can't attach by URL
@@ -363,12 +411,16 @@ export interface ExistingProduct {
  * as the sync only ever created — matching hashes meant updates never ran at
  * volume — and then failed 2,506 writes the first time a schema change made
  * every product an update.
+ *
+ * `locationId` turns on tracked qty for watches (Uploadify / marketplace
+ * import). Stones ignore it.
  */
 export function buildProductSetInput(
   item: FeedItem,
   priced: Priced,
   syncedAt: string,
   existing?: ExistingProduct,
+  locationId?: string,
 ): Record<string, unknown> {
   const hash = contentHashFor(item, priced);
   // A feed row with no image would otherwise go live with no photo and only be
@@ -388,22 +440,7 @@ export function buildProductSetInput(
     tags,
     metafields: metafieldsFor(item, priced, hash, syncedAt),
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
-    variants: [
-      {
-        optionValues: [{ optionName: 'Title', name: 'Default Title' }],
-        price: priced.retailUsd.toFixed(2),
-        sku: item.stockRef,
-        taxable: true,
-        inventoryPolicy: 'DENY',
-        inventoryItem: {
-          tracked: false,
-          requiresShipping: true,
-          // Shopify InventoryItem.cost — required so margin is auditable in admin
-          // independently of Supabase / $app.cost_cents.
-          cost: item.costUsd.toFixed(2),
-        },
-      },
-    ],
+    variants: [variantPayload(item, priced, hasImages, locationId)],
   };
   input.seo = { title: seoTitleFor(item), description: seoDescriptionFor(item) };
   if (existing) input.id = existing.id;

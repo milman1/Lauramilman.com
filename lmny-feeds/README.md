@@ -65,6 +65,13 @@ holds a stones table — Shopify products are the only live copy.
    Watch videos are fetched, type-sniffed and staged-uploaded as real `VIDEO`
    media for every URL the feed supplies (not just the first), capped per run
    (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
+   **Watch inventory:** unique watches are written as tracked qty `1` at the
+   primary location (SKU = stock ref, `inventoryPolicy: DENY`) so marketplace
+   apps that require `ACTIVE` + SKU + qty > 0 keep them listed. Hash-matched
+   untracked watches are promoted to an update (`inventory_untracked`) instead
+   of staying skipped. Archive sets qty `0` then status `ARCHIVED`. Loose
+   diamonds stay untracked. The live write needs `write_inventory` and
+   `read_locations` on the Shopify app.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -72,6 +79,8 @@ holds a stones table — Shopify products are the only live copy.
 ## Product model
 
 - Handle = idempotency key: `nd-<stockref>` / `lg-<stockref>` / `w-<stockref>`.
+- Variant SKU = feed stock ref.
+- Watches: tracked inventory qty 1 while publishable (one-of-one); stones untracked.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
@@ -109,6 +118,11 @@ Required Actions secrets:
 | `SHOPIFY_ADMIN_TOKEN` | Admin API token (`shpat_…`). **Or** use the client-credentials pair below |
 | `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` | Dev Dashboard app Client ID + Secret; exchanged for a 24h token at runtime |
 | `BELGIUMDIA_API_KEY` | Secret only — never logged, sent via header |
+
+The Shopify app must include `write_products`, `write_publications`,
+`write_inventory`, and `read_locations` (or `write_locations`). Live sync
+refuses to write if any of those are missing — watch quantity for Uploadify
+depends on the inventory/location pair.
 
 Watch retail does not use Hours. `HOURS_API_URL` / `HOURS_API_KEY` are unused by sync.
 

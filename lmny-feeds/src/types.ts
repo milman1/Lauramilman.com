@@ -99,6 +99,16 @@ export interface CatalogEntry {
    * to transcode, and re-uploading a video mid-transcode duplicates it.
    */
   videoCount: number;
+  /**
+   * First variant's inventory tracking flag. Missing when the catalog row
+   * predates this field or the product has no variant line in the bulk file.
+   * Uploadify treats untracked (and qty 0) watches as out of stock.
+   */
+  inventoryTracked?: boolean;
+  /** First variant's inventory item GID — used to zero stock on archive. */
+  inventoryItemId?: string;
+  /** Shopify's summed available quantity across locations (may be 0 if untracked). */
+  inventoryQuantity?: number;
 }
 
 export interface DesiredEntry {

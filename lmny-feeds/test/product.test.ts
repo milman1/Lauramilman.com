@@ -291,8 +291,47 @@ describe('updates target the existing product by id', () => {
       id: 'gid://shopify/Product/1',
       imageCount: 1,
     });
-    const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
+    const variant = (input.variants as Array<{ inventoryItem: { cost: string; tracked: boolean } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');
+    expect(variant.inventoryItem.tracked).toBe(false);
+  });
+
+  it('a locationId does not turn on tracked inventory for loose diamonds', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
+    const variant = (input.variants as Array<{ inventoryItem: { tracked: boolean }; inventoryQuantities?: unknown }>)[0]!;
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
+  });
+
+  it('a watch without a location stays untracked', () => {
+    const input = buildProductSetInput(watch(), priced(), at);
+    const variant = (input.variants as Array<{ inventoryItem: { tracked: boolean }; sku: string; inventoryQuantities?: unknown }>)[0]!;
+    expect(variant.sku).toBe('W-889');
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
+  });
+
+  it('a watch with a location is tracked qty 1 for marketplace apps', () => {
+    const input = buildProductSetInput(watch(), priced(), at, undefined, 'gid://shopify/Location/9');
+    const variant = (input.variants as Array<{
+      sku: string;
+      inventoryPolicy: string;
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ locationId: string; name: string; quantity: number }>;
+    }>)[0]!;
+    expect(variant.sku).toBe('W-889');
+    expect(variant.inventoryPolicy).toBe('DENY');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities).toEqual([
+      { locationId: 'gid://shopify/Location/9', name: 'available', quantity: 1 },
+    ]);
+  });
+
+  it('an imageless watch with a location is DRAFT with tracked qty 0', () => {
+    const input = buildProductSetInput(watch({ imageUrls: [] }), priced(), at, undefined, 'gid://shopify/Location/9');
+    expect(input.status).toBe('DRAFT');
+    const variant = (input.variants as Array<{ inventoryQuantities: Array<{ quantity: number }> }>)[0]!;
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
   });
 
   it('watch creates carry schema SEO and prose description (specs are metafields)', () => {

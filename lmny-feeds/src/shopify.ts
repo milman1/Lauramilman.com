@@ -56,7 +56,16 @@ interface GqlResponse<T> {
 
 export const PRODUCT_SET_MUTATION = `mutation call($input: ProductSetInput!) {
   productSet(input: $input) {
-    product { id handle }
+    product {
+      id
+      handle
+      variants(first: 1) {
+        nodes {
+          inventoryQuantity
+          inventoryItem { id tracked }
+        }
+      }
+    }
     userErrors { field message code }
   }
 }`;
@@ -95,6 +104,76 @@ export async function exchangeClientCredentials(
     throw new Error('Client-credentials token exchange returned no access_token');
   }
   return { token: body.access_token, scope: body.scope ?? '' };
+}
+
+/**
+ * Parse the bulk catalog JSONL. Nested connections (media, variants) arrive
+ * as follow-on rows with `__parentId` pointing at the product.
+ */
+export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
+  const byId = new Map<string, CatalogEntry>();
+  const order: string[] = [];
+  for (const row of lines) {
+    const r = row as Record<string, unknown>;
+    if (typeof r.handle === 'string') {
+      const id = r.id as string;
+      byId.set(id, {
+        id,
+        handle: r.handle,
+        status: r.status as string,
+        tags: (r.tags as string[]) ?? [],
+        mediaCount: 0,
+        imageCount: 0,
+        videoCount: 0,
+        contentHash: (r.metafield as { value: string } | null)?.value ?? null,
+      });
+      order.push(id);
+      continue;
+    }
+    if (typeof r.__parentId !== 'string') continue;
+    const parent = byId.get(r.__parentId);
+    if (!parent) continue;
+    if (typeof r.mediaContentType === 'string') {
+      if (r.status === 'READY') parent.mediaCount += 1;
+      if (r.mediaContentType === 'VIDEO') {
+        // Count PROCESSING/UPLOADED too: a transcoding video already exists,
+        // and re-staging it would attach a second copy.
+        if (r.status !== 'FAILED') parent.videoCount += 1;
+      } else if (r.status === 'READY') {
+        parent.imageCount += 1;
+      }
+      continue;
+    }
+    if (r.inventoryItem !== undefined || typeof r.inventoryQuantity === 'number' || typeof r.sku === 'string') {
+      const item = r.inventoryItem as { id?: string; tracked?: boolean } | null;
+      if (typeof item?.tracked === 'boolean') parent.inventoryTracked = item.tracked;
+      if (typeof item?.id === 'string') parent.inventoryItemId = item.id;
+      if (typeof r.inventoryQuantity === 'number') parent.inventoryQuantity = r.inventoryQuantity;
+    }
+  }
+  return order.map((id) => byId.get(id)!);
+}
+
+interface ProductSetProduct {
+  id: string;
+  handle?: string | null;
+  variants?: {
+    nodes?: Array<{
+      inventoryQuantity?: number | null;
+      inventoryItem?: { id?: string; tracked?: boolean } | null;
+    }>;
+  };
+}
+
+function productSetVariant(product: ProductSetProduct | null | undefined): {
+  inventoryItemId: string | null;
+  inventoryQuantity: number | null;
+} {
+  const variant = product?.variants?.nodes?.[0];
+  return {
+    inventoryItemId: variant?.inventoryItem?.id ?? null,
+    inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : null,
+  };
 }
 
 export class ShopifyClient {
@@ -153,6 +232,25 @@ export class ShopifyClient {
       `{ currentAppInstallation { accessScopes { handle } } }`,
     );
     return data.currentAppInstallation.accessScopes.map((s) => s.handle);
+  }
+
+  /**
+   * Location used for unique-watch on-hand qty. Prefer the primary active
+   * location, then any location that fulfills online orders.
+   */
+  async primaryLocationId(): Promise<string | null> {
+    const data = await this.gql<{
+      locations: {
+        nodes: Array<{ id: string; isActive: boolean; isPrimary: boolean; fulfillsOnlineOrders: boolean }>;
+      };
+    }>(
+      `{ locations(first: 25) { nodes { id name isActive isPrimary fulfillsOnlineOrders } } }`,
+    );
+    const active = data.locations.nodes.filter((n) => n.isActive);
+    return active.find((n) => n.isPrimary)?.id
+      ?? active.find((n) => n.fulfillsOnlineOrders)?.id
+      ?? active[0]?.id
+      ?? null;
   }
 
   // ---------------------------------------------------------------- metafields
@@ -406,6 +504,7 @@ export class ShopifyClient {
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             media { edges { node { status mediaContentType } } }
+            variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }
           }
         }
       }
@@ -413,39 +512,7 @@ export class ShopifyClient {
     const url = await this.runBulkQuery(query);
     if (!url) return []; // zero results → Shopify provides no file
     const lines = await downloadJsonl(url);
-    // Bulk queries flatten nested connections: each media row follows its
-    // parent product row and carries __parentId.
-    const byId = new Map<string, CatalogEntry>();
-    const order: string[] = [];
-    for (const row of lines) {
-      const r = row as Record<string, unknown>;
-      if (typeof r.handle === 'string') {
-        const id = r.id as string;
-        byId.set(id, {
-          id,
-          handle: r.handle,
-          status: r.status as string,
-          tags: (r.tags as string[]) ?? [],
-          mediaCount: 0,
-          imageCount: 0,
-          videoCount: 0,
-          contentHash: (r.metafield as { value: string } | null)?.value ?? null,
-        });
-        order.push(id);
-      } else if (typeof r.__parentId === 'string' && typeof r.status === 'string') {
-        const parent = byId.get(r.__parentId);
-        if (!parent) continue;
-        if (r.status === 'READY') parent.mediaCount += 1;
-        if (r.mediaContentType === 'VIDEO') {
-          // Count PROCESSING/UPLOADED too: a transcoding video already exists,
-          // and re-staging it would attach a second copy.
-          if (r.status !== 'FAILED') parent.videoCount += 1;
-        } else if (r.status === 'READY') {
-          parent.imageCount += 1;
-        }
-      }
-    }
-    return order.map((id) => byId.get(id)!);
+    return parseFeedCatalogRows(lines);
   }
 
   private async runBulkQuery(query: string): Promise<string | null> {
@@ -482,20 +549,43 @@ export class ShopifyClient {
   // ------------------------------------------------------------------- writes
 
   /** Direct (non-bulk) productSet for small daily deltas. */
-  async productSet(input: Record<string, unknown>): Promise<{ id: string | null; errors: string[] }> {
+  async productSet(input: Record<string, unknown>): Promise<{
+    id: string | null;
+    handle: string | null;
+    inventoryItemId: string | null;
+    inventoryQuantity: number | null;
+    errors: string[];
+  }> {
     const data = await this.gql<{
-      productSet: { product: { id: string } | null; userErrors: Array<{ message: string; field: string[] | null }> };
+      productSet: {
+        product: ProductSetProduct | null;
+        userErrors: Array<{ message: string; field: string[] | null }>;
+      };
     }>(
       `mutation($input: ProductSetInput!, $synchronous: Boolean!) {
         productSet(input: $input, synchronous: $synchronous) {
-          product { id }
+          product {
+            id
+            handle
+            variants(first: 1) {
+              nodes {
+                inventoryQuantity
+                inventoryItem { id tracked }
+              }
+            }
+          }
           userErrors { field message }
         }
       }`,
       { input, synchronous: true },
     );
+    const product = data.productSet.product;
+    const variant = productSetVariant(product);
     return {
-      id: data.productSet.product?.id ?? null,
+      id: product?.id ?? null,
+      handle: product?.handle ?? null,
+      inventoryItemId: variant.inventoryItemId,
+      inventoryQuantity: variant.inventoryQuantity,
       errors: data.productSet.userErrors.map((e) => `${(e.field ?? []).join('.')}: ${e.message}`),
     };
   }
@@ -505,7 +595,11 @@ export class ShopifyClient {
    * staged JSONL upload + bulkOperationRunMutation(productSet).
    * Returns per-line results parsed from the operation's result file.
    */
-  async bulkProductSet(inputs: Array<Record<string, unknown>>): Promise<{ ids: string[]; errors: string[] }> {
+  async bulkProductSet(inputs: Array<Record<string, unknown>>): Promise<{
+    ids: string[];
+    errors: string[];
+    products: Array<{ id: string; handle: string | null; inventoryItemId: string | null; inventoryQuantity: number | null }>;
+  }> {
     const jsonl = inputs.map((input) => JSON.stringify({ input })).join('\n');
     const stagedPath = await this.stageJsonlUpload(jsonl);
     const data = await this.gql<{
@@ -525,15 +619,66 @@ export class ShopifyClient {
     const url = await this.pollBulkOperation('MUTATION');
     const ids: string[] = [];
     const errors: string[] = [];
+    const products: Array<{ id: string; handle: string | null; inventoryItemId: string | null; inventoryQuantity: number | null }> = [];
     if (url) {
       for (const row of await downloadJsonl(url)) {
-        const r = row as { data?: { productSet?: { product?: { id: string } | null; userErrors?: Array<{ message: string }> } } };
+        const r = row as { data?: { productSet?: { product?: ProductSetProduct | null; userErrors?: Array<{ message: string }> } } };
         const ps = r.data?.productSet;
-        if (ps?.product?.id) ids.push(ps.product.id);
+        if (ps?.product?.id) {
+          ids.push(ps.product.id);
+          const variant = productSetVariant(ps.product);
+          products.push({
+            id: ps.product.id,
+            handle: ps.product.handle ?? null,
+            inventoryItemId: variant.inventoryItemId,
+            inventoryQuantity: variant.inventoryQuantity,
+          });
+        }
         for (const e of ps?.userErrors ?? []) errors.push(e.message);
       }
     }
-    return { ids, errors };
+    return { ids, errors, products };
+  }
+
+  /**
+   * Stock a variant at `locationId`. productSet can set tracked + quantities
+   * on create; updates of previously untracked watches often need activate
+   * first. Idempotent: already-stocked items fall through to a quantity set.
+   */
+  async stockInventoryItem(inventoryItemId: string, locationId: string, quantity: number): Promise<string[]> {
+    const activated = await this.gql<{
+      inventoryActivate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($inventoryItemId: ID!, $locationId: ID!, $available: Int) {
+        inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId, available: $available) {
+          userErrors { field message }
+        }
+      }`,
+      { inventoryItemId, locationId, available: quantity },
+    );
+    const activateErrors = activated.inventoryActivate.userErrors.map((e) => e.message);
+    if (activateErrors.length === 0) return [];
+    const alreadyStocked = activateErrors.every((m) => /already stocked|already activated/i.test(m));
+    if (!alreadyStocked) return activateErrors;
+
+    const set = await this.gql<{
+      inventorySetQuantities: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($input: InventorySetQuantitiesInput!) {
+        inventorySetQuantities(input: $input) {
+          userErrors { field message }
+        }
+      }`,
+      {
+        input: {
+          name: 'available',
+          reason: 'correction',
+          ignoreCompareQuantity: true,
+          quantities: [{ inventoryItemId, locationId, quantity }],
+        },
+      },
+    );
+    return set.inventorySetQuantities.userErrors.map((e) => e.message);
   }
 
   private async stageJsonlUpload(jsonl: string): Promise<string> {
