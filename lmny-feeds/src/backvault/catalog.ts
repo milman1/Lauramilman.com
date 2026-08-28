@@ -9,6 +9,9 @@ export interface BackVaultCatalogEntry {
   imageCount: number;
   /** True when the product is published to the Online Store sales channel. */
   published: boolean;
+  inventoryTracked?: boolean;
+  inventoryItemId?: string;
+  inventoryQuantity?: number;
 }
 
 /**
@@ -31,6 +34,7 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
           metafield: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
+          variants: { nodes: Array<{ inventoryQuantity?: number | null; inventoryItem?: { id?: string; tracked?: boolean } | null }> };
         }>;
       };
     } = await client.gql(
@@ -44,6 +48,7 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 10) { nodes { isPublished publication { name } } }
+            variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
           }
         }
       }`,
@@ -56,6 +61,7 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
       const published = node.resourcePublications.nodes.some(
         (p) => p.isPublished && (p.publication.name === 'Online Store' || p.publication.name === 'Online Store 2.0'),
       );
+      const variant = node.variants.nodes[0];
       entries.push({
         id: node.id,
         handle: node.handle,
@@ -63,6 +69,9 @@ export async function fetchBackVaultCatalog(client: ShopifyClient): Promise<Back
         contentHash: node.metafield?.value ?? null,
         imageCount,
         published,
+        inventoryTracked: variant?.inventoryItem?.tracked,
+        inventoryItemId: variant?.inventoryItem?.id,
+        inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

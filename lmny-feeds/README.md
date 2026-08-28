@@ -65,6 +65,17 @@ holds a stones table — Shopify products are the only live copy.
    Watch videos are fetched, type-sniffed and staged-uploaded as real `VIDEO`
    media for every URL the feed supplies (not just the first), capped per run
    (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
+   **Unique inventory + Category:** watches and loose diamonds are written as
+   tracked qty `1` at the primary location (SKU = stock ref, `inventoryPolicy:
+   DENY`) and get a Shopify Standard Product Taxonomy `category` (Watches
+   `aa-6-11`, loose diamonds Jewelry `aa-6`) so Admin Category is no longer
+   blank and marketplace apps that require `ACTIVE` + SKU + qty > 0 keep them
+   listed. Hash-matched untracked products are promoted to an update
+   (`inventory_untracked`). Archive sets qty `0` then `ARCHIVED`; diamonds that
+   left the feed are still deleted. The live write needs `write_inventory` and
+   `read_locations` on the Shopify app. Unpublished lab-grown products that
+   stay `ACTIVE` with qty 1 can still be imported by Uploadify — exclude that
+   product type in Uploadify if labs should not go to marketplaces yet.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -72,6 +83,9 @@ holds a stones table — Shopify products are the only live copy.
 ## Product model
 
 - Handle = idempotency key: `nd-<stockref>` / `lg-<stockref>` / `w-<stockref>`.
+- Variant SKU = feed stock ref.
+- Unique inventory: tracked qty 1 while publishable (watches and loose diamonds).
+- Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
@@ -95,6 +109,7 @@ npm ci
 npm test                 # pure-function tests, no network
 npm run sync:dry         # full fetch/normalize/price/diff, ZERO writes
 npm run sync             # live
+npx tsx scripts/validate-jewelry-csv.ts path/to/products.csv
 ```
 
 Flags: `--dry-run`, `--limit=N` (truncate each feed for testing).
@@ -109,6 +124,11 @@ Required Actions secrets:
 | `SHOPIFY_ADMIN_TOKEN` | Admin API token (`shpat_…`). **Or** use the client-credentials pair below |
 | `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` | Dev Dashboard app Client ID + Secret; exchanged for a 24h token at runtime |
 | `BELGIUMDIA_API_KEY` | Secret only — never logged, sent via header |
+
+The Shopify app must include `write_products`, `write_publications`,
+`write_inventory`, and `read_locations` (or `write_locations`). Live sync
+refuses to write if any of those are missing — unique quantity for Uploadify
+depends on the inventory/location pair.
 
 Watch retail does not use Hours. `HOURS_API_URL` / `HOURS_API_KEY` are unused by sync.
 

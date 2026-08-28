@@ -57,3 +57,21 @@ export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVault
 
   return decisions;
 }
+
+/** Re-open hash-skips that still report untracked / qty 0 to Admin apps. */
+export function promoteBackVaultInventoryUpdates(
+  decisions: Decision[],
+  catalog: BackVaultCatalogEntry[],
+): number {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const d of decisions) {
+    if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
+    const have = catalogByHandle.get(d.handle);
+    if (!have || have.inventoryTracked === true) continue;
+    d.action = 'update';
+    d.reason = 'inventory_untracked';
+    promoted += 1;
+  }
+  return promoted;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diffBackVaultCatalog } from '../../src/backvault/diff.js';
+import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates } from '../../src/backvault/diff.js';
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
 
 function entry(handle: string, hash: string | null, status = 'ACTIVE', published = true): BackVaultCatalogEntry {
@@ -59,5 +59,15 @@ describe('diffBackVaultCatalog', () => {
     const decisions = diffBackVaultCatalog([], [entry('bv-cartier', 'abc', 'ARCHIVED')]);
     expect(decisions[0]!.action).toBe('skip');
     expect(decisions[0]!.reason).toBe('already_archived');
+  });
+});
+
+describe('promoteBackVaultInventoryUpdates', () => {
+  it('re-opens a hash-skip that is still untracked', () => {
+    const catalog = [entry('bv-cartier', 'abc')];
+    const d = diffBackVaultCatalog([{ handle: 'bv-cartier', contentHash: 'abc' }], catalog);
+    expect(d[0]?.action).toBe('skip');
+    expect(promoteBackVaultInventoryUpdates(d, catalog)).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'inventory_untracked' });
   });
 });

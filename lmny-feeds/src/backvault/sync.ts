@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { fetchBackVaultCatalog } from './catalog.js';
-import { diffBackVaultCatalog, type Decision } from './diff.js';
+import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates, type Decision } from './diff.js';
 import { fetchBackVaultFeed } from './feed.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
@@ -69,7 +69,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   await client.verifyAuth();
   if (!opts.dryRun) {
     const scopes = await client.grantedScopes();
-    const missing = ['write_products', 'write_publications'].filter((s) => !scopes.includes(s));
+    const missing = ['write_products', 'write_publications', 'write_inventory', 'read_locations'].filter(
+      (s) => !scopes.includes(s) && !(s.startsWith('read_') && scopes.includes(`write_${s.slice(5)}`)),
+    );
     if (missing.length > 0) {
       throw new Error(
         `Refusing to write: Shopify token is missing ${missing.join(', ')} ` +
@@ -90,6 +92,13 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   });
 
   const decisions = diffBackVaultCatalog(desired, catalog);
+  let locationId: string | null = null;
+  try {
+    locationId = await client.primaryLocationId();
+  } catch (err) {
+    errors.push(`location lookup: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (locationId) promoteBackVaultInventoryUpdates(decisions, catalog);
   const syncedAt = new Date().toISOString();
   const publicationId = opts.dryRun ? null : await client.onlineStorePublicationId();
   let published = 0;
@@ -99,6 +108,11 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     try {
       if (decision.action === 'archive') {
         if (!opts.dryRun && decision.productId) {
+          const existing = catalogByHandle.get(decision.handle);
+          if (locationId && existing?.inventoryItemId) {
+            const stockErrors = await client.stockInventoryItem(existing.inventoryItemId, locationId, 0);
+            if (stockErrors.length) errors.push(`${decision.handle}: inventory ${stockErrors.join('; ')}`);
+          }
           await client.archiveProduct(decision.productId);
           // Sold/pulled items keep their URL alive instead of 404ing, same
           // pattern as the Belgium Dia sync (src/shopify.ts
@@ -126,10 +140,18 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
         item,
         syncedAt,
         existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
+        locationId ?? undefined,
       );
       if (!opts.dryRun) {
         const result = await client.productSet(input);
         if (result.errors.length) errors.push(`${decision.handle}: ${result.errors.join('; ')}`);
+        if (locationId && result.inventoryItemId) {
+          const qty = item.imageUrls.length > 0 ? 1 : 0;
+          if (result.inventoryQuantity !== qty) {
+            const stockErrors = await client.stockInventoryItem(result.inventoryItemId, locationId, qty);
+            if (stockErrors.length) errors.push(`${decision.handle}: inventory ${stockErrors.join('; ')}`);
+          }
+        }
         const productId = result.id ?? decision.productId;
         if (productId && publicationId && result.errors.length === 0) {
           const pubErrors = await client.publishResource(productId, publicationId);

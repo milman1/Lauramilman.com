@@ -21,12 +21,13 @@ import {
   kindForHandle,
   PRICING_REVIEW_HOLD_REASONS,
   promoteShortMediaUpdates,
+  promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from './diff.js';
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { enrichWatchGalleries, watchGalleryStats, type WatchGalleryStats } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor } from './product.js';
+import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor, UNIQUE_IN_STOCK_QTY } from './product.js';
 import {
   holdHistogram,
   labPricingStats,
@@ -48,8 +49,8 @@ const BULK_THRESHOLD = 100;
 const OUT_DIR = 'out';
 /** Fail the run only if more than this share of attempted writes error. */
 const WRITE_ERROR_FAIL_RATE = 0.01;
-/** Required Shopify scopes for a live write (write_* implies read_*). */
-const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications'];
+/** Required Shopify scopes for a live write (write_* implies read_* of the same resource). */
+const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications', 'write_inventory', 'read_locations'];
 /** Where a sold stone's URL points once its product is archived and 404s. */
 const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
   natural: '/collections/natural-diamonds',
@@ -296,6 +297,25 @@ async function main() {
   if (mediaShort > 0) {
     notes.push(`${mediaShort} watch(es) skipped as unchanged still hold fewer photos than the feed — re-sending galleries`);
   }
+  let locationId: string | null = null;
+  try {
+    locationId = await shopify.primaryLocationId();
+  } catch (err) {
+    notes.push(
+      `Inventory location lookup failed: ${err instanceof Error ? err.message : String(err)} — ` +
+        'grant the app read_locations. Untracked products will keep reporting qty 0 to Uploadify.',
+    );
+  }
+  if (locationId) {
+    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog);
+    if (inventoryRepaired > 0) {
+      notes.push(
+        `${inventoryRepaired} product(s) skipped as unchanged are still untracked (Shopify qty 0 to Admin apps) — writing tracked qty ${UNIQUE_IN_STOCK_QTY}`,
+      );
+    }
+  } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {
+    notes.push('Unique inventory not applied: no active Shopify location. Untracked products will keep reporting qty 0 to Uploadify.');
+  }
   const unavailableArchived = applyUnavailableArchives(decisions, catalog, isUnavailableProductHandle);
   if (unavailableArchived > 0) {
     notes.push(`${unavailableArchived} listing(s) archived as merchant-unavailable (Hermès Kelly PM + Mother of Pearl)`);
@@ -325,11 +345,11 @@ async function main() {
   if (!flags.dryRun) {
     // Assert write scopes before the first real write; fail loudly if missing.
     const scopes = await shopify.grantedScopes();
-    const missingScopes = REQUIRED_WRITE_SCOPES.filter((s) => !scopes.includes(s));
+    const missingScopes = REQUIRED_WRITE_SCOPES.filter((needed) => !hasShopifyScope(scopes, needed));
     if (missingScopes.length > 0) {
       throw new Error(
         `Refusing to write: Shopify token is missing required scopes ${missingScopes.join(', ')} ` +
-          `(granted: ${scopes.join(', ') || 'none'}). write_products/write_publications include read access.`,
+          `(granted: ${scopes.join(', ') || 'none'}). write_inventory + read_locations are required to set watch quantity for marketplace apps.`,
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
@@ -404,7 +424,13 @@ async function main() {
       .filter((p): p is Publishable => Boolean(p))
       .map((p) => {
         const existing = catalogByHandle.get(handleFor(p.item));
-        return buildProductSetInput(p.item, p.priced, syncedAt, existing && { id: existing.id, imageCount: existing.imageCount });
+        return buildProductSetInput(
+          p.item,
+          p.priced,
+          syncedAt,
+          existing && { id: existing.id, imageCount: existing.imageCount },
+          locationId ?? undefined,
+        );
       });
 
     let createdIds: string[] = [];
@@ -413,12 +439,42 @@ async function main() {
       const result = await shopify.bulkProductSet(inputs);
       createdIds = result.ids;
       writeErrors.push(...result.errors);
+      if (locationId) {
+        const qtyByHandle = new Map(
+          inputs.map((input) => [String(input.handle), uniqueStockQtyFromInput(input)]),
+        );
+        for (const product of result.products) {
+          const handle = product.handle ?? '';
+          writeErrors.push(
+            ...(await applyTrackedStock(
+              shopify,
+              locationId,
+              handle,
+              product.inventoryItemId,
+              qtyByHandle.get(handle) ?? null,
+              product.inventoryQuantity,
+            )),
+          );
+        }
+      }
     } else if (inputs.length > 0) {
       console.log(`Writing ${inputs.length} products via direct productSet…`);
       for (const input of inputs) {
         const result = await shopify.productSet(input);
         if (result.id) createdIds.push(result.id);
         writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
+        if (locationId) {
+          writeErrors.push(
+            ...(await applyTrackedStock(
+              shopify,
+              locationId,
+              String(input.handle),
+              result.inventoryItemId,
+              uniqueStockQtyFromInput(input),
+              result.inventoryQuantity,
+            )),
+          );
+        }
       }
     }
 
@@ -440,6 +496,14 @@ async function main() {
     let redirectsDenied = false;
     for (const d of toRemove) {
       if (!d.productId) continue;
+      if (d.action === 'archive' && locationId) {
+        const existing = catalogByHandle.get(d.handle);
+        if (existing?.inventoryItemId) {
+          writeErrors.push(
+            ...(await applyTrackedStock(shopify, locationId, d.handle, existing.inventoryItemId, 0, existing.inventoryQuantity ?? null)),
+          );
+        }
+      }
       const errors =
         d.action === 'delete'
           ? await shopify.deleteProduct(d.productId)
@@ -692,6 +756,32 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+
+function hasShopifyScope(granted: string[], needed: string): boolean {
+  if (granted.includes(needed)) return true;
+  if (needed.startsWith('read_')) return granted.includes(`write_${needed.slice(5)}`);
+  return false;
+}
+
+function uniqueStockQtyFromInput(input: Record<string, unknown>): number | null {
+  const variants = input.variants as Array<{ inventoryQuantities?: Array<{ quantity?: number }> }> | undefined;
+  const qty = variants?.[0]?.inventoryQuantities?.[0]?.quantity;
+  return typeof qty === 'number' ? qty : null;
+}
+
+async function applyTrackedStock(
+  shopify: ShopifyClient,
+  locationId: string,
+  handle: string,
+  inventoryItemId: string | null,
+  desiredQty: number | null,
+  currentQty: number | null,
+): Promise<string[]> {
+  if (!inventoryItemId || desiredQty == null) return [];
+  if (currentQty === desiredQty) return [];
+  const errors = await shopify.stockInventoryItem(inventoryItemId, locationId, desiredQty);
+  return errors.map((e) => `inventory ${handle}: ${e}`);
+}
 
 function csvEscape(value: string): string {
   if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;

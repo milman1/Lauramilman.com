@@ -52,8 +52,22 @@ describe('buildProductSetInput', () => {
     expect(input.handle).toBe('bv-cartier-love-bracelet-yg');
     expect(input.vendor).toBe('Cartier');
     expect(input.status).toBe('ACTIVE');
-    expect((input.variants as Array<{ price: string }>)[0]!.price).toBe('4500.00');
+    expect((input.variants as Array<{ price: string; sku: string }>)[0]!.price).toBe('4500.00');
+    expect((input.variants as Array<{ price: string; sku: string }>)[0]!.sku).toBe('CLV-001');
+    expect((input.variants as Array<{ inventoryItem: { tracked: boolean } }>)[0]!.inventoryItem.tracked).toBe(false);
     expect(input.id).toBeUndefined();
+  });
+
+  it('tracks qty 1 at a location so marketplace apps keep the listing', () => {
+    const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z', undefined, 'gid://shopify/Location/1');
+    const variant = (input.variants as Array<{
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ quantity: number; locationId: string }>;
+    }>)[0]!;
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities).toEqual([
+      { locationId: 'gid://shopify/Location/1', name: 'available', quantity: 1 },
+    ]);
   });
 
   it('rewrites title, description, and SEO to the LMNY estate schema', () => {
@@ -69,6 +83,7 @@ describe('buildProductSetInput', () => {
     expect((input.seo as { title: string }).title.length).toBeLessThanOrEqual(60);
     expect((input.seo as { description: string }).description.length).toBeLessThanOrEqual(160);
     expect(input.productType).toBe('Bracelets');
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6-3');
   });
 
   it('sets id and conditionally re-sends files when updating an existing product', () => {

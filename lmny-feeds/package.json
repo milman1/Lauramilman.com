@@ -13,6 +13,7 @@
     "confirm:lab-unpublished": "tsx scripts/confirm-lab-unpublished.ts",
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
+    "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

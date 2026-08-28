@@ -1,6 +1,7 @@
 import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
+import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
 import {
   buildWatchListing,
@@ -32,7 +33,22 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 13;
+export const PRODUCT_SCHEMA_VERSION = 14;
+
+/**
+ * Unique watches and loose diamonds are one-of-one. Uploadify (and other
+ * marketplace apps) keep a listing only while Shopify status is ACTIVE, SKU
+ * is set, and available quantity is > 0. The feed is the availability
+ * source: in stock while the item is publishable, 0 when it has no photo
+ * (DRAFT) or when we later archive it.
+ */
+export const UNIQUE_IN_STOCK_QTY = 1;
+/** @deprecated Use UNIQUE_IN_STOCK_QTY */
+export const WATCH_IN_STOCK_QTY = UNIQUE_IN_STOCK_QTY;
+/** productSet inventoryQuantities.name — available is what Admin apps read. */
+export const UNIQUE_INVENTORY_QUANTITY_NAME = 'available';
+/** @deprecated Use UNIQUE_INVENTORY_QUANTITY_NAME */
+export const WATCH_INVENTORY_QUANTITY_NAME = UNIQUE_INVENTORY_QUANTITY_NAME;
 
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;
@@ -329,6 +345,7 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     title: titleFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
+    category: taxonomyGidForFeedKind(item.kind),
     tags: tagsFor(item),
     description: descriptionFor(item),
     seoTitle: seoTitleFor(item),
@@ -352,6 +369,43 @@ export interface ExistingProduct {
   imageCount: number;
 }
 
+function variantPayload(
+  item: FeedItem,
+  priced: Priced,
+  hasImages: boolean,
+  locationId?: string,
+): Record<string, unknown> {
+  const inventoryItem: Record<string, unknown> = {
+    tracked: false,
+    requiresShipping: true,
+    // Shopify InventoryItem.cost — required so margin is auditable in admin
+    // independently of Supabase / $app.cost_cents.
+    cost: item.costUsd.toFixed(2),
+  };
+  const variant: Record<string, unknown> = {
+    optionValues: [{ optionName: 'Title', name: 'Default Title' }],
+    price: priced.retailUsd.toFixed(2),
+    sku: item.stockRef,
+    taxable: true,
+    inventoryPolicy: 'DENY',
+    inventoryItem,
+  };
+  // Unique one-of-one inventory. Without a location keep the old untracked
+  // payload so unit tests and a location-less dry-run cannot invent a qty
+  // at a missing GID.
+  if (locationId) {
+    inventoryItem.tracked = true;
+    variant.inventoryQuantities = [
+      {
+        locationId,
+        name: UNIQUE_INVENTORY_QUANTITY_NAME,
+        quantity: hasImages ? UNIQUE_IN_STOCK_QTY : 0,
+      },
+    ];
+  }
+  return variant;
+}
+
 /**
  * Build the full ProductSetInput. Images attach by external URL so Shopify
  * copies them to its own CDN. Feed-hosted .mp4 videos can't attach by URL
@@ -363,12 +417,16 @@ export interface ExistingProduct {
  * as the sync only ever created — matching hashes meant updates never ran at
  * volume — and then failed 2,506 writes the first time a schema change made
  * every product an update.
+ *
+ * `locationId` turns on tracked qty 1 (Uploadify / marketplace import)
+ * for every feed kind.
  */
 export function buildProductSetInput(
   item: FeedItem,
   priced: Priced,
   syncedAt: string,
   existing?: ExistingProduct,
+  locationId?: string,
 ): Record<string, unknown> {
   const hash = contentHashFor(item, priced);
   // A feed row with no image would otherwise go live with no photo and only be
@@ -382,28 +440,14 @@ export function buildProductSetInput(
     descriptionHtml: descriptionFor(item),
     vendor: vendorFor(item),
     productType: PRODUCT_TYPES[item.kind],
+    category: taxonomyGidForFeedKind(item.kind),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     // Stones get the gemological PDP; watches keep the default product page.
     templateSuffix: item.kind === 'watch' ? '' : STONE_TEMPLATE_SUFFIX,
     tags,
     metafields: metafieldsFor(item, priced, hash, syncedAt),
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
-    variants: [
-      {
-        optionValues: [{ optionName: 'Title', name: 'Default Title' }],
-        price: priced.retailUsd.toFixed(2),
-        sku: item.stockRef,
-        taxable: true,
-        inventoryPolicy: 'DENY',
-        inventoryItem: {
-          tracked: false,
-          requiresShipping: true,
-          // Shopify InventoryItem.cost — required so margin is auditable in admin
-          // independently of Supabase / $app.cost_cents.
-          cost: item.costUsd.toFixed(2),
-        },
-      },
-    ],
+    variants: [variantPayload(item, priced, hasImages, locationId)],
   };
   input.seo = { title: seoTitleFor(item), description: seoDescriptionFor(item) };
   if (existing) input.id = existing.id;

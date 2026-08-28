@@ -223,7 +223,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for neutral watch listings', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(13);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(14);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -291,8 +291,61 @@ describe('updates target the existing product by id', () => {
       id: 'gid://shopify/Product/1',
       imageCount: 1,
     });
-    const variant = (input.variants as Array<{ inventoryItem: { cost: string } }>)[0]!;
+    const variant = (input.variants as Array<{ inventoryItem: { cost: string; tracked: boolean } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');
+    expect(variant.inventoryItem.tracked).toBe(false);
+  });
+
+  it('a locationId turns on tracked qty 1 for loose diamonds', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
+    const variant = (input.variants as Array<{
+      sku: string;
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ quantity: number }>;
+    }>)[0]!;
+    expect(variant.sku).toBe('BD-1234');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+  });
+
+  it('a lab stone uses the same Jewelry category as naturals', () => {
+    const input = buildProductSetInput(labStone(), priced(), at);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+    expect(input.productType).toBe('Lab-Grown Diamond');
+  });
+
+  it('a watch without a location stays untracked', () => {
+    const input = buildProductSetInput(watch(), priced(), at);
+    const variant = (input.variants as Array<{ inventoryItem: { tracked: boolean }; sku: string; inventoryQuantities?: unknown }>)[0]!;
+    expect(variant.sku).toBe('W-889');
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
+  });
+
+  it('a watch with a location is tracked qty 1 for marketplace apps', () => {
+    const input = buildProductSetInput(watch(), priced(), at, undefined, 'gid://shopify/Location/9');
+    const variant = (input.variants as Array<{
+      sku: string;
+      inventoryPolicy: string;
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ locationId: string; name: string; quantity: number }>;
+    }>)[0]!;
+    expect(variant.sku).toBe('W-889');
+    expect(variant.inventoryPolicy).toBe('DENY');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities).toEqual([
+      { locationId: 'gid://shopify/Location/9', name: 'available', quantity: 1 },
+    ]);
+    expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6-11');
+    expect(input.productType).toBe('Watch');
+  });
+
+  it('an imageless watch with a location is DRAFT with tracked qty 0', () => {
+    const input = buildProductSetInput(watch({ imageUrls: [] }), priced(), at, undefined, 'gid://shopify/Location/9');
+    expect(input.status).toBe('DRAFT');
+    const variant = (input.variants as Array<{ inventoryQuantities: Array<{ quantity: number }> }>)[0]!;
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
   });
 
   it('watch creates carry schema SEO and prose description (specs are metafields)', () => {

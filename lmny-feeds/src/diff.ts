@@ -143,6 +143,30 @@ export function promoteShortMediaUpdates(
 }
 
 /**
+ * Hash match skips the product even when Shopify still reports untracked
+ * inventory (qty 0 to Admin apps). Promote those feed products so productSet
+ * can write tracked qty 1. Does not touch media-missing quarantine. Call
+ * only when a location GID is available this run.
+ */
+export function promoteUntrackedInventoryUpdates(decisions: Decision[], catalog: CatalogEntry[]): number {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const d of decisions) {
+    if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
+    if (kindForHandle(d.handle) === null) continue;
+    const have = catalogByHandle.get(d.handle);
+    if (!have || have.inventoryTracked === true) continue;
+    d.action = 'update';
+    d.reason = 'inventory_untracked';
+    promoted += 1;
+  }
+  return promoted;
+}
+
+/** @deprecated Use promoteUntrackedInventoryUpdates */
+export const promoteWatchInventoryUpdates = promoteUntrackedInventoryUpdates;
+
+/**
  * Archive merchant-confirmed unavailable products even when they are not
  * Belgium `w-*` handles. Call after the hash/media pass so a denylisted
  * listing cannot be reopened as a gallery backfill.
