@@ -41,7 +41,9 @@ export function priceNatural(item: StoneItem): PriceResult {
     };
   }
   const marginPct = margin(retailUsd, item.costUsd);
-  if (marginPct < NATURAL.minMarginPct) {
+  // 1.25× is exactly 20% before rounding; round(cost × 1.25) can sit a
+  // fraction of a cent under the floor (stock 350393: 19.9999%).
+  if (marginPct < NATURAL.minMarginPct - 1e-4) {
     return {
       ok: false,
       hold: {

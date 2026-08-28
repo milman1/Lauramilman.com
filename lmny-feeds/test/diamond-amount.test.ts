@@ -27,7 +27,7 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
     expect(Math.round(lmnyStoneCost(106_463) / 1000)).toBe(71);
   });
 
-  it('prices stock 350393 at Amount on the ticket and $70,975.33 cost', () => {
+  it('prices stock 350393 at $88,719 (1.25× the $70,975.33 cost)', () => {
     const { items, holds } = normalizeStones([stock350393], 'natural');
     expect(holds).toEqual([]);
     const stone = items[0]!;
@@ -40,7 +40,7 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
       costUsd: 70_975.33,
     });
     const priced = priceNatural(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(106_463);
+    expect(priced.ok && priced.priced.retailUsd).toBe(88_719);
   });
 
   it('prefers Amount over Rap × 0.75 (the live under-wholesale bug)', () => {

@@ -27,16 +27,16 @@ export function lmnyStoneCost(listAmountUsd: number): number {
 
 /**
  * Natural diamonds: ticket = round(LMNY cost × amountMultiple).
- * Cost is Amount × 2/3, so 1.5× puts retail on the Amount column
- * (33% margin-on-retail). Stock 350393: cost $70,975.33 → retail $106,463.
+ * Cost is Amount × 2/3. 1.25× is 20% margin-on-retail — the same floor
+ * that used to hold thin Rap × 0.75 stones. Stock 350393: cost
+ * $70,975.33 → retail $88,719 (not Amount $106,463).
  *
  * Rap ($) is per carat, not a total. Old retail Rap × 0.75 = $31,875 on
- * this stone was below wholesale. `minMarginPct` is a safety filter if
- * the multiple is lowered later.
+ * this stone was below wholesale.
  */
 export const NATURAL = {
-  /** retail = round(LMNY cost × this). With 2/3 cost, 1.5× ≈ Amount. */
-  amountMultiple: 1.5,
+  /** retail = round(LMNY cost × this). 1.25× = 20% margin-on-retail. */
+  amountMultiple: 1.25,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
 } as const;

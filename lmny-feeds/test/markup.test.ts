@@ -3,9 +3,9 @@ import { FALLBACK_RULES, priceLab, priceNatural, priceWatch } from '../src/marku
 import { labStone, naturalStone, watch } from './fixtures.js';
 
 describe('natural pricing', () => {
-  it('prices at 1.5× LMNY cost (Amount × 2/3 × 1.5 ≈ Amount)', () => {
+  it('prices at 1.25× LMNY cost (20% margin-on-retail)', () => {
     const r = priceNatural(naturalStone({ costUsd: 70_975.33 }));
-    expect(r.ok && r.priced.retailUsd).toBe(106_463);
+    expect(r.ok && r.priced.retailUsd).toBe(88_719);
   });
 
   it('holds when there is no cost', () => {
@@ -13,10 +13,10 @@ describe('natural pricing', () => {
     expect(!r.ok && r.hold.reason).toBe('natural_no_cost');
   });
 
-  it('1.5× always clears the 20% margin floor', () => {
+  it('publishes at the 20% margin floor (1.25×)', () => {
     const r = priceNatural(naturalStone({ costUsd: 12_000 }));
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.priced.marginPct).toBeCloseTo(1 / 3, 5);
+    if (r.ok) expect(r.priced.retailUsd).toBe(15_000);
   });
 
   it('retail stays at or above cost', () => {

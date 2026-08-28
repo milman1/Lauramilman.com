@@ -33,7 +33,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 15;
+export const PRODUCT_SCHEMA_VERSION = 16;
 
 /**
  * Unique watches and loose diamonds are one-of-one. Uploadify (and other
