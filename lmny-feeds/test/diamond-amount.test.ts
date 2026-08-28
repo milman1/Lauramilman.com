@@ -53,7 +53,7 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
     expect(priced.ok && priced.priced.retailUsd).not.toBe(31_875);
   });
 
-  it('applies the same 2/3 share to lab-grown Amount', () => {
+  it('applies the same 2/3 cost and 1.25× ticket to lab-grown Amount', () => {
     const { items, holds } = normalizeStones(
       [
         {
