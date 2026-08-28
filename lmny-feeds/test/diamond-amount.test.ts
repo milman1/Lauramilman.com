@@ -31,6 +31,7 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
     const { items, holds } = normalizeStones([stock350393], 'natural');
     expect(holds).toEqual([]);
     const stone = items[0]!;
+    if (stone.kind === 'watch') throw new Error('expected a stone');
     expect(stone).toMatchObject({
       kind: 'natural',
       stockRef: '350393',
@@ -45,8 +46,9 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
   it('prefers Amount over Rap × 0.75 (the live under-wholesale bug)', () => {
     const { items } = normalizeStones([stock350393], 'natural');
     const stone = items[0]!;
-    expect(stone.kind !== 'watch' && stone.costUsd).toBe(70_975.33);
-    expect(stone.kind !== 'watch' && stone.costUsd).not.toBe(31_875);
+    if (stone.kind === 'watch') throw new Error('expected a stone');
+    expect(stone.costUsd).toBe(70_975.33);
+    expect(stone.costUsd).not.toBe(31_875);
     const priced = priceNatural(stone);
     expect(priced.ok && priced.priced.retailUsd).not.toBe(31_875);
   });
@@ -70,6 +72,7 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
     );
     expect(holds).toEqual([]);
     const stone = items[0]!;
+    if (stone.kind !== 'lab') throw new Error('expected a lab stone');
     expect(stone).toMatchObject({
       kind: 'lab',
       listAmountUsd: 900,
