@@ -27,24 +27,25 @@ describe('natural pricing', () => {
 });
 
 describe('lab pricing', () => {
-  it('selects the tier by total cost', () => {
+  it('uses the same 1.25× as naturals, not cost-band tiers', () => {
     const cheap = priceLab(labStone({ carat: 1.0, costUsd: 400, pricePerCaratUsd: 400 }));
     const mid = priceLab(labStone({ carat: 2.0, costUsd: 1200, pricePerCaratUsd: 600 }));
     const big = priceLab(labStone({ carat: 6.0, costUsd: 5000, pricePerCaratUsd: 833 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(680); // 400 × 1.70
-    expect(mid.ok && mid.priced.retailUsd).toBe(1944); // 1200 × 1.62
-    expect(big.ok && big.priced.retailUsd).toBe(7500); // 5000 × 1.50
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(500); // 400 × 1.25
+    expect(mid.ok && mid.priced.retailUsd).toBe(1500); // 1200 × 1.25
+    expect(big.ok && big.priced.retailUsd).toBe(6250); // 5000 × 1.25
   });
 
-  it('boundary costs fall in the lower tier (≤ maxCostUsd)', () => {
+  it('1.25× is the same at every cost', () => {
     const at500 = priceLab(labStone({ carat: 1.0, costUsd: 500, pricePerCaratUsd: 500 }));
-    expect(at500.ok && at500.priced.retailUsd).toBe(850);
+    expect(at500.ok && at500.priced.retailUsd).toBe(625);
   });
 
-  it('has a tier for any cost (last tier is unbounded)', () => {
+  it('prices an unbounded high cost at 1.25×', () => {
     expect(FALLBACK_RULES.at(-1)?.maxCostUsd).toBe(Number.POSITIVE_INFINITY);
+    expect(FALLBACK_RULES.at(-1)?.multiplier).toBe(1.25);
     const r = priceLab(labStone({ carat: 12, costUsd: 50_000, pricePerCaratUsd: 4000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(72_500);
+    expect(r.ok && r.priced.retailUsd).toBe(62_500);
   });
 
   it('holds when implied $/ct is below the band floor (mapping regression)', () => {
@@ -61,7 +62,7 @@ describe('lab pricing', () => {
 
   it('holds when retail is below the absolute floor for ≥1ct', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 40, pricePerCaratUsd: 40 }));
-    // 40 × 1.70 = 68 < 120 (180 listed floor × 2/3)
+    // 40 × 1.25 = 50 < 120 (180 listed floor × 2/3)
     expect(!r.ok && (r.hold.reason === 'lab_retail_floor' || r.hold.reason === 'lab_cost_per_carat_floor')).toBe(true);
   });
 

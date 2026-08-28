@@ -79,6 +79,6 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
       costUsd: 600,
     });
     const priced = priceLab(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(972); // 600 × 1.62
+    expect(priced.ok && priced.priced.retailUsd).toBe(750); // 600 × 1.25
   });
 });

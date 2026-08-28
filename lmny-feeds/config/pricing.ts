@@ -5,9 +5,8 @@
  * happen via pull request against this file — never via database pokes or
  * ad-hoc edits in Shopify admin.
  *
- * Lab tiers key off **total cost** (not carat). Inventory is virtual (memo),
- * so multiples stay aggressive below market. Guards in markup.ts fail closed
- * if the Belgium Dia cost mapping regresses (e.g. treating $/ct as total).
+ * Guards in markup.ts fail closed if the Belgium Dia cost mapping regresses
+ * (e.g. treating $/ct as total).
  */
 
 /**
@@ -15,31 +14,24 @@
  * 350393 (5.01ct Emerald, Amount $106,463) was ~$71k — exactly Amount × 2/3
  * (one-third of Rapaport list, or 17 extra Rap points past the listed −50).
  * That share is the cost basis for every natural and lab-grown stone.
+ *
+ * Ticket for both kinds is cost × 1.25 (20% margin-on-retail).
  */
 export const DIAMOND = {
   /** LMNY pays this fraction of the Amount column (portal asking wholesale). */
   supplierAmountShare: 2 / 3,
+  /** retail = round(LMNY cost × this) for lab and natural. 1.25× = 20% margin. */
+  amountMultiple: 1.25,
+  /** (retail − cost) / retail must be ≥ this, else the stone is held. */
+  minMarginPct: 0.2,
 } as const;
 
 export function lmnyStoneCost(listAmountUsd: number): number {
   return Math.round(listAmountUsd * DIAMOND.supplierAmountShare * 100) / 100;
 }
 
-/**
- * Natural diamonds: ticket = round(LMNY cost × amountMultiple).
- * Cost is Amount × 2/3. 1.25× is 20% margin-on-retail — the same floor
- * that used to hold thin Rap × 0.75 stones. Stock 350393: cost
- * $70,975.33 → retail $88,719 (not Amount $106,463).
- *
- * Rap ($) is per carat, not a total. Old retail Rap × 0.75 = $31,875 on
- * this stone was below wholesale.
- */
-export const NATURAL = {
-  /** retail = round(LMNY cost × this). 1.25× = 20% margin-on-retail. */
-  amountMultiple: 1.25,
-  /** (retail − cost) / retail must be ≥ this, else the stone is held. */
-  minMarginPct: 0.2,
-} as const;
+/** @deprecated Use DIAMOND — lab and natural share the same markup. */
+export const NATURAL = DIAMOND;
 
 export interface LabTier {
   /** Tier applies when total costUsd ≤ maxCostUsd. First matching tier wins. */
@@ -49,20 +41,12 @@ export interface LabTier {
 }
 
 /**
- * Lab-grown markup tiers on **LMNY cost** (Amount × 2/3, else Buy_Price × carat × 2/3).
- * Imported by markup.ts as its FALLBACK_RULES.
- *
- * Live on 2026-08-06: retail = round(cost × tier) reproduced 20,847 of 21,764
- * rows exactly. Rounding is `Math.round`, not ceil. The remainder are rows
- * last written before the 2026-08-02 Buy_Price × carat fix, which the schema
- * bump sweeps up on their next update.
+ * Lab used to have cost-band multipliers (1.45×–1.70×). Lab and natural now
+ * share `DIAMOND.amountMultiple`. One unbounded row keeps FALLBACK_RULES /
+ * lab-analysis working.
  */
 export const LAB_TIERS: LabTier[] = [
-  { maxCostUsd: 500, multiplier: 1.7 },
-  { maxCostUsd: 1500, multiplier: 1.62 },
-  { maxCostUsd: 4000, multiplier: 1.55 },
-  { maxCostUsd: 10000, multiplier: 1.5 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.45 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
 ];
 
 /**
@@ -75,7 +59,7 @@ export const LAB_GUARDS = {
    * **portal Amount** dollars. markup.ts scales by `DIAMOND.supplierAmountShare`
    * because LMNY cost (and therefore retail) is 2/3 of Amount.
    * Catches the live bug ($96–$170 listed retails) without blocking
-   * aggressive 1ct memo pricing (~$200 after 1.7× on ~$120/ct listed).
+   * aggressive 1ct memo pricing (~$150 after 1.25× on ~$120/ct listed).
    */
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
