@@ -24,9 +24,9 @@ function minCostPerCaratFloor(carat: number): number {
 }
 
 /**
- * Lab and natural ticket: round(LMNY cost × 1.25). Cost is already Amount × 2/3.
+ * Natural ticket: round(LMNY cost × 1.25). Cost is already Amount × 2/3.
  */
-function priceFromLmnyCost(item: StoneItem): PriceResult {
+function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   if (!(item.costUsd > 0)) {
     return {
       ok: false,
@@ -37,7 +37,7 @@ function priceFromLmnyCost(item: StoneItem): PriceResult {
       },
     };
   }
-  const retailUsd = round(item.costUsd * DIAMOND.amountMultiple);
+  const retailUsd = round(item.costUsd * multiple);
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -67,11 +67,12 @@ function priceFromLmnyCost(item: StoneItem): PriceResult {
 }
 
 export function priceNatural(item: StoneItem): PriceResult {
-  return priceFromLmnyCost(item);
+  return priceFromLmnyCost(item, DIAMOND.amountMultiple);
 }
 
 /**
- * Lab-grown: same 1.25× ticket as naturals, after fail-closed mapping guards.
+ * Lab-grown: modest extra markup on cheap stones, 1.25× above $4k,
+ * after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -105,7 +106,12 @@ export function priceLab(item: StoneItem): PriceResult {
     }
   }
 
-  const priced = priceFromLmnyCost(item);
+  const tier = FALLBACK_RULES.find((t) => item.costUsd <= t.maxCostUsd);
+  if (!tier) {
+    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'lab_no_markup_tier' } };
+  }
+
+  const priced = priceFromLmnyCost(item, tier.multiplier);
   if (!priced.ok) return priced;
 
   if (

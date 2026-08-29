@@ -15,12 +15,13 @@
  * (one-third of Rapaport list, or 17 extra Rap points past the listed −50).
  * That share is the cost basis for every natural and lab-grown stone.
  *
- * Ticket for both kinds is cost × 1.25 (20% margin-on-retail).
+ * Ticket: naturals are cost × 1.25 (20% margin). Lab is a bit higher on
+ * cheap stones and steps down to the same 1.25× above $4,000 LMNY cost.
  */
 export const DIAMOND = {
   /** LMNY pays this fraction of the Amount column (portal asking wholesale). */
   supplierAmountShare: 2 / 3,
-  /** retail = round(LMNY cost × this) for lab and natural. 1.25× = 20% margin. */
+  /** Natural retail = round(LMNY cost × this). Also the lab floor above $4k. */
   amountMultiple: 1.25,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
@@ -30,7 +31,7 @@ export function lmnyStoneCost(listAmountUsd: number): number {
   return Math.round(listAmountUsd * DIAMOND.supplierAmountShare * 100) / 100;
 }
 
-/** @deprecated Use DIAMOND — lab and natural share the same markup. */
+/** Naturals use DIAMOND.amountMultiple (1.25×). Lab uses LAB_TIERS. */
 export const NATURAL = DIAMOND;
 
 export interface LabTier {
@@ -41,11 +42,19 @@ export interface LabTier {
 }
 
 /**
- * Lab used to have cost-band multipliers (1.45×–1.70×). Lab and natural now
- * share `DIAMOND.amountMultiple`. One unbounded row keeps FALLBACK_RULES /
- * lab-analysis working.
+ * Lab-grown markup on **LMNY cost** (Amount × 2/3). First match wins.
+ * Cheaper stones get a bit more than the 20% natural margin; above $4,000
+ * they share 1.25×.
+ *
+ *   ≤ $500     1.40×  ~29% margin
+ *   ≤ $1,500   1.35×  ~26% margin
+ *   ≤ $4,000   1.30×  ~23% margin
+ *   above      1.25×  20% margin
  */
 export const LAB_TIERS: LabTier[] = [
+  { maxCostUsd: 500, multiplier: 1.4 },
+  { maxCostUsd: 1500, multiplier: 1.35 },
+  { maxCostUsd: 4000, multiplier: 1.3 },
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
 ];
 

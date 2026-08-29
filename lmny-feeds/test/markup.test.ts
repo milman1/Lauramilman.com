@@ -27,21 +27,21 @@ describe('natural pricing', () => {
 });
 
 describe('lab pricing', () => {
-  it('uses the same 1.25× as naturals, not cost-band tiers', () => {
+  it('marks cheaper stones up more than expensive ones', () => {
     const cheap = priceLab(labStone({ carat: 1.0, costUsd: 400, pricePerCaratUsd: 400 }));
     const mid = priceLab(labStone({ carat: 2.0, costUsd: 1200, pricePerCaratUsd: 600 }));
     const big = priceLab(labStone({ carat: 6.0, costUsd: 5000, pricePerCaratUsd: 833 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(500); // 400 × 1.25
-    expect(mid.ok && mid.priced.retailUsd).toBe(1500); // 1200 × 1.25
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(560); // 400 × 1.40
+    expect(mid.ok && mid.priced.retailUsd).toBe(1620); // 1200 × 1.35
     expect(big.ok && big.priced.retailUsd).toBe(6250); // 5000 × 1.25
   });
 
-  it('1.25× is the same at every cost', () => {
+  it('boundary costs fall in the lower tier (≤ maxCostUsd)', () => {
     const at500 = priceLab(labStone({ carat: 1.0, costUsd: 500, pricePerCaratUsd: 500 }));
-    expect(at500.ok && at500.priced.retailUsd).toBe(625);
+    expect(at500.ok && at500.priced.retailUsd).toBe(700); // 500 × 1.40
   });
 
-  it('prices an unbounded high cost at 1.25×', () => {
+  it('uses 1.25× above $4,000 (same as naturals)', () => {
     expect(FALLBACK_RULES.at(-1)?.maxCostUsd).toBe(Number.POSITIVE_INFINITY);
     expect(FALLBACK_RULES.at(-1)?.multiplier).toBe(1.25);
     const r = priceLab(labStone({ carat: 12, costUsd: 50_000, pricePerCaratUsd: 4000 }));
@@ -62,7 +62,7 @@ describe('lab pricing', () => {
 
   it('holds when retail is below the absolute floor for ≥1ct', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 40, pricePerCaratUsd: 40 }));
-    // 40 × 1.25 = 50 < 120 (180 listed floor × 2/3)
+    // 40 × 1.40 = 56 < 120 (180 listed floor × 2/3)
     expect(!r.ok && (r.hold.reason === 'lab_retail_floor' || r.hold.reason === 'lab_cost_per_carat_floor')).toBe(true);
   });
 
