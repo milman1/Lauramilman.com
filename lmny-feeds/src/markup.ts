@@ -1,4 +1,4 @@
-import { LAB_GUARDS, LAB_TIERS as FALLBACK_RULES, NATURAL } from '../config/pricing.js';
+import { DIAMOND, LAB_GUARDS, LAB_TIERS as FALLBACK_RULES } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 import { priceWatchFromCost } from './watchPricing.js';
 
@@ -18,15 +18,26 @@ function margin(retail: number, cost: number): number {
 
 function minCostPerCaratFloor(carat: number): number {
   const band = LAB_GUARDS.minCostPerCarat.find((b) => carat <= b.maxCarat);
-  return band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
+  const listed = band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
+  // Floors were tuned to portal Amount $/ct; LMNY cost is 2/3 of that.
+  return listed * DIAMOND.supplierAmountShare;
 }
 
-/** Naturals: Rapaport list × 0.75, held below the 20% margin floor. */
-export function priceNatural(item: StoneItem): PriceResult {
-  if (!item.rapPriceUsd) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_rap_price' } };
+/**
+ * Natural ticket: round(LMNY cost × 1.25). Cost is already Amount × 2/3.
+ */
+function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
+  if (!(item.costUsd > 0)) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: item.kind === 'lab' ? 'lab_no_cost' : 'natural_no_cost',
+      },
+    };
   }
-  const retailUsd = round(item.rapPriceUsd * NATURAL.rapDiscount);
+  const retailUsd = round(item.costUsd * multiple);
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -39,23 +50,29 @@ export function priceNatural(item: StoneItem): PriceResult {
     };
   }
   const marginPct = margin(retailUsd, item.costUsd);
-  if (marginPct < NATURAL.minMarginPct) {
+  // 1.25× is exactly 20% before rounding; round(cost × 1.25) can sit a
+  // fraction of a cent under the floor (stock 350393: 19.9999%).
+  if (marginPct < DIAMOND.minMarginPct - 1e-4) {
     return {
       ok: false,
       hold: {
         kind: item.kind,
         stockRef: item.stockRef,
-        reason: 'natural_margin_floor',
-        detail: `margin ${(marginPct * 100).toFixed(1)}% < ${(NATURAL.minMarginPct * 100).toFixed(0)}%`,
+        reason: item.kind === 'lab' ? 'lab_margin_floor' : 'natural_margin_floor',
+        detail: `margin ${(marginPct * 100).toFixed(1)}% < ${(DIAMOND.minMarginPct * 100).toFixed(0)}%`,
       },
     };
   }
   return { ok: true, priced: { retailUsd, marginPct } };
 }
 
+export function priceNatural(item: StoneItem): PriceResult {
+  return priceFromLmnyCost(item, DIAMOND.amountMultiple);
+}
+
 /**
- * Lab-grown: tiered multiplier on **total** feed cost (Buy_Price × carat).
- * Fail-closed guards catch a regress to treating $/ct as total.
+ * Lab-grown: modest extra markup on cheap stones, 1.25× above $4k,
+ * after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -93,23 +110,13 @@ export function priceLab(item: StoneItem): PriceResult {
   if (!tier) {
     return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'lab_no_markup_tier' } };
   }
-  const retailUsd = round(item.costUsd * tier.multiplier);
 
-  if (retailUsd < item.costUsd) {
-    return {
-      ok: false,
-      hold: {
-        kind: item.kind,
-        stockRef: item.stockRef,
-        reason: 'retail_below_cost',
-        detail: `retail ${retailUsd} < cost ${item.costUsd}`,
-      },
-    };
-  }
+  const priced = priceFromLmnyCost(item, tier.multiplier);
+  if (!priced.ok) return priced;
 
   if (
     item.carat >= LAB_GUARDS.minCaratForRetailFloor &&
-    retailUsd < LAB_GUARDS.minRetailUsd
+    priced.priced.retailUsd < LAB_GUARDS.minRetailUsd * DIAMOND.supplierAmountShare
   ) {
     return {
       ok: false,
@@ -117,12 +124,12 @@ export function priceLab(item: StoneItem): PriceResult {
         kind: item.kind,
         stockRef: item.stockRef,
         reason: 'lab_retail_floor',
-        detail: `retail ${retailUsd} < $${LAB_GUARDS.minRetailUsd} at ${item.carat}ct`,
+        detail: `retail ${priced.priced.retailUsd} < $${LAB_GUARDS.minRetailUsd} at ${item.carat}ct`,
       },
     };
   }
 
-  return { ok: true, priced: { retailUsd, marginPct: margin(retailUsd, item.costUsd) } };
+  return priced;
 }
 
 export interface WatchComp {

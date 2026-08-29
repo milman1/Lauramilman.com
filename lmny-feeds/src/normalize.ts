@@ -1,4 +1,4 @@
-import { STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
+import { lmnyStoneCost, STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
 import type { FeedItem, Hold, Kind, StoneItem, WatchItem } from './types.js';
 
 /** Best → worst. Grades past the configured floor are held. */
@@ -275,25 +275,40 @@ export interface NormalizeResult {
 /**
  * LMNY's cost for a stone.
  *
- * Belgium Dia fields (confirmed from live lab feed raw keys):
- *   Buy_Price, Buy_Price_Discount_PER, COD_Buy_Price, Memo_Price, Rap_Price, …
+ * Belgium Dia inventory UI columns (and the matching API keys):
+ *   Amount $     → portal asking wholesale (authoritative list total)
+ *   Price/Carat  → Amount / carat
+ *   Rap. ($)     → Rapaport list **per carat** (not a total)
+ *   Disc %       → off Rapaport
+ *   Buy_Price    → lab: USD per carat; natural: total when Amount is absent
  *
- * **Lab:** Buy_Price is USD **per carat**, not total. Live fingerprint: median
- * Buy_Price stays ~$100 across 1–10ct while true $/ct declines with size —
- * treating it as total inverted the retail curve (~1/20th prices). Total cost
- * = Buy_Price × Weight. Prefer an explicit total when present and it agrees
- * with per-carat × carat within 5%; otherwise multiply.
+ * LMNY pays Amount × 2/3 on every natural and lab stone (stock 350393:
+ * Amount $106,463 → $70,975). `costUsd` is that invoice number.
  *
- * **Natural:** Buy_Price (when non-zero) is a total; otherwise
- * Rap × (1 + Buy_Price_Discount_PER/100).
+ * Fallbacks when Amount is missing (then the same 2/3 share):
+ *   Lab: Price/Carat or Buy_Price × Weight
+ *   Natural: Buy_Price as a total, else Rap/ct × (1 + Disc/100) × Weight
  */
 export interface StoneCostResolution {
   costUsd: number;
+  listAmountUsd: number;
   pricePerCaratUsd?: number;
   /** Set when both a total and a per-carat signal disagree beyond tolerance. */
   mismatchDetail?: string;
 }
 
+const AMOUNT_KEYS = [
+  'amount',
+  'amount_usd',
+  'amount$',
+  'amount $',
+  'total_amount',
+  'total_price',
+  'total_cost',
+  'total_cost_usd',
+  'stone_price',
+  'stone_total',
+];
 const BUY_PRICE_KEYS = [
   'buy_price',
   'cod_buy_price',
@@ -303,13 +318,12 @@ const BUY_PRICE_KEYS = [
   'net_price',
   'price',
   'price_usd',
-  'amount',
 ];
-const TOTAL_PRICE_KEYS = ['total_price', 'total_cost', 'total_cost_usd', 'stone_price', 'stone_total'];
 const PER_CARAT_KEYS = [
   'price_per_carat',
   'price_per_ct',
   'price_ct',
+  'price/carat',
   'per_carat',
   'per_ct',
   'buy_price_per_carat',
@@ -320,67 +334,83 @@ function withinPct(a: number, b: number, pct: number): boolean {
   return Math.abs(a - b) / Math.max(a, b) <= pct;
 }
 
+function roundCents(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+function fromListedTotal(listed: number, carat: number, mismatchDetail?: string): StoneCostResolution {
+  const listAmountUsd = roundCents(listed);
+  const costUsd = lmnyStoneCost(listAmountUsd);
+  return {
+    listAmountUsd,
+    costUsd,
+    pricePerCaratUsd: carat > 0 ? roundCents(costUsd / carat) : undefined,
+    mismatchDetail,
+  };
+}
+
+function discountPct(raw: Raw): number | undefined {
+  const discRaw = pick(raw, [
+    'buy_price_discount_per',
+    'buy_discount',
+    'buy_price_discount',
+    'memo_discount_per',
+    'disc',
+    'disc_per',
+    'discount',
+  ]);
+  if (discRaw === undefined) return undefined;
+  const disc = Number(String(discRaw).replace(/[%\s]/g, ''));
+  return Number.isFinite(disc) ? disc : undefined;
+}
+
 export function resolveStoneCost(
   raw: Raw,
   kind: 'natural' | 'lab',
   carat: number,
   rapPriceUsd: number | undefined,
 ): StoneCostResolution | undefined {
+  const amount = num(raw, AMOUNT_KEYS);
   const buy = num(raw, BUY_PRICE_KEYS);
-  const explicitTotal = num(raw, TOTAL_PRICE_KEYS);
   const explicitPpc = num(raw, PER_CARAT_KEYS);
 
-  if (kind === 'lab') {
-    // Prefer an explicit per-carat field when present.
-    const ppc = explicitPpc ?? buy;
-    if (!ppc || !carat) {
-      // Last resort: an explicit total alone.
-      if (explicitTotal) {
-        return { costUsd: Math.round(explicitTotal * 100) / 100, pricePerCaratUsd: Math.round((explicitTotal / carat) * 100) / 100 };
+  let listed: StoneCostResolution | undefined;
+
+  if (amount) {
+    listed = fromListedTotal(amount, carat);
+  } else if (explicitPpc && carat > 0) {
+    const multiplied = explicitPpc * carat;
+    if (buy && withinPct(buy, multiplied, 0.05)) {
+      listed = fromListedTotal(buy, carat);
+    } else {
+      listed = fromListedTotal(multiplied, carat);
+    }
+  } else if (kind === 'lab') {
+    if (!buy || !carat) return undefined;
+    listed = fromListedTotal(buy * carat, carat);
+  } else if (buy) {
+    // Natural: Buy_Price as total, unless it matches Rap as $/ct.
+    const disc = discountPct(raw);
+    if (rapPriceUsd && disc !== undefined && carat > 0) {
+      const netPpc = rapPriceUsd * (1 + disc / 100);
+      if (netPpc > 0 && withinPct(buy, netPpc, 0.08)) {
+        listed = fromListedTotal(buy * carat, carat);
       }
-      return undefined;
     }
-    const multiplied = Math.round(ppc * carat * 100) / 100;
-    if (explicitTotal && !withinPct(explicitTotal, multiplied, 0.05)) {
-      // Prefer the explicit total but flag the disagreement for the report.
-      return {
-        costUsd: Math.round(explicitTotal * 100) / 100,
-        pricePerCaratUsd: Math.round((explicitTotal / carat) * 100) / 100,
-        mismatchDetail: `total ${explicitTotal} vs ppc×carat ${multiplied} (ppc=${ppc})`,
-      };
+    listed ??= fromListedTotal(buy, carat);
+  } else {
+    const disc = discountPct(raw);
+    if (rapPriceUsd && disc !== undefined) {
+      const netPpc = rapPriceUsd * (1 + disc / 100);
+      if (netPpc > 0 && carat > 0) {
+        // Rap ($) in the Belgium Dia UI is per carat. netPpc × carat is the
+        // portal Amount; treating Rap as a total underprices the stone.
+        listed = fromListedTotal(netPpc * carat, carat);
+      }
     }
-    // If "buy" already looks like a total (≈ explicitPpc × carat), use it.
-    if (explicitPpc && buy && withinPct(buy, explicitPpc * carat, 0.05)) {
-      return {
-        costUsd: Math.round(buy * 100) / 100,
-        pricePerCaratUsd: Math.round(explicitPpc * 100) / 100,
-      };
-    }
-    return {
-      costUsd: multiplied,
-      pricePerCaratUsd: Math.round(ppc * 100) / 100,
-    };
   }
 
-  // Natural: Buy_Price is total when present; else Rap × (1 + disc/100).
-  if (buy) {
-    const costUsd = Math.round(buy * 100) / 100;
-    return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
-  }
-  if (explicitTotal) {
-    const costUsd = Math.round(explicitTotal * 100) / 100;
-    return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
-  }
-  const discRaw = pick(raw, ['buy_price_discount_per', 'buy_discount', 'buy_price_discount', 'memo_discount_per']);
-  const disc = discRaw === undefined ? Number.NaN : Number(String(discRaw).replace(/[%\s]/g, ''));
-  if (rapPriceUsd && Number.isFinite(disc)) {
-    const c = rapPriceUsd * (1 + disc / 100);
-    if (c > 0) {
-      const costUsd = Math.round(c);
-      return { costUsd, pricePerCaratUsd: carat > 0 ? Math.round((costUsd / carat) * 100) / 100 : undefined };
-    }
-  }
-  return undefined;
+  return listed;
 }
 
 export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): NormalizeResult {
@@ -437,6 +467,7 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       tablePct: num(raw, ['table_per', 'table_pct', 'table_percent', 'table']),
       depthPct: num(raw, ['depth_per', 'depth_pct', 'depth_percent', 'depth']),
       costUsd: resolved.costUsd,
+      listAmountUsd: resolved.listAmountUsd,
       pricePerCaratUsd: resolved.pricePerCaratUsd,
       rapPriceUsd,
       imageUrls: collectUrls(raw, IMAGE_KEYS),

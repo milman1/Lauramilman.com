@@ -45,7 +45,7 @@ const watchRecord = {
 };
 
 describe('Belgium Dia real-schema diamond record', () => {
-  it('maps grading fields and derives cost from Rap × (1 + buy discount)', () => {
+  it('maps grading fields and derives LMNY cost as Amount-equivalent × 2/3', () => {
     const { items, holds } = normalizeStones([naturalRecord], 'natural');
     expect(holds).toEqual([]);
     const s = items[0]!;
@@ -58,7 +58,9 @@ describe('Belgium Dia real-schema diamond record', () => {
       cut: 'Excellent', // feed says EX
       lab: 'GIA',
       rapPriceUsd: 20000,
-      costUsd: 12000, // 20000 × (1 − 0.40)
+      // Rap $20,000/ct × 60% × 1.32ct = $15,840 list → × 2/3 = $10,560
+      listAmountUsd: 15840,
+      costUsd: 10560,
     });
     expect(s.kind === 'natural' && s.certNumber).toBe('2205551234');
     expect(s.kind === 'natural' && s.imageUrls).toEqual(['https://dnalinks.in/KD320632/still.jpg']);
@@ -103,13 +105,14 @@ describe('Belgium Dia real-schema lab record', () => {
       clarity: 'VVS2',
       cut: 'Ideal',
       lab: 'IGI',
-      // Buy_Price is per-carat → total = 480 × 1.22
-      pricePerCaratUsd: 480,
-      costUsd: 585.6,
+      // Buy_Price is per-carat → list = 480 × 1.22 = 585.6 → × 2/3
+      listAmountUsd: 585.6,
+      pricePerCaratUsd: 320,
+      costUsd: 390.4,
     });
   });
 
-  it('multiplies Buy_Price by carat across size bands (the live bug)', () => {
+  it('multiplies Buy_Price by carat across size bands, then applies 2/3 (the live bug)', () => {
     const rows = [
       { ...labRecord, Stock_No: 'A', Weight: '0.50', Buy_Price: '120' },
       { ...labRecord, Stock_No: 'B', Weight: '1.00', Buy_Price: '120' },
@@ -121,7 +124,7 @@ describe('Belgium Dia real-schema lab record', () => {
     const { items, holds } = normalizeStones(rows, 'lab');
     expect(holds).toEqual([]);
     const costs = items.map((i) => (i.kind === 'lab' ? i.costUsd : 0));
-    expect(costs).toEqual([60, 120, 240, 360, 720, 1200]);
+    expect(costs).toEqual([40, 80, 160, 240, 480, 800]);
   });
 });
 
