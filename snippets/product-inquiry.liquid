@@ -1,7 +1,8 @@
 {%- comment -%}
   Product-page concierge. Ask / Direct message open the site chat with this
-  product already in context. Watches and vintage get Hold + private viewing
-  so the desk can continue by phone or in person.
+  product already in context. Watches and maison/vintage jewelry get Hold,
+  Make an offer, and private viewing so the desk can continue in chat, by
+  phone, or in person.
 {%- endcomment -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
@@ -25,6 +26,15 @@
       <button type="button" class="pdp-inquire__btn" data-open-hold>
         Hold this piece
       </button>
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="offer"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+      >
+        Make an offer
+      </button>
       <a
         class="pdp-inquire__btn pdp-inquire__btn--ghost"
         href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
@@ -35,6 +45,7 @@
     <button
       type="button"
       class="pdp-inquire__btn{% if desk_piece %} pdp-inquire__btn--ghost{% endif %} js-open-product-chat"
+      data-chat-intent="ask"
       data-product-title="{{ product.title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"
     >
@@ -45,6 +56,7 @@
       <button
         type="button"
         class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="ask"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
       >
@@ -127,7 +139,8 @@
     function openChat(btn) {
       var payload = {
         productTitle: btn.getAttribute('data-product-title') || '',
-        productUrl: btn.getAttribute('data-product-url') || window.location.href
+        productUrl: btn.getAttribute('data-product-url') || window.location.href,
+        intent: btn.getAttribute('data-chat-intent') || 'ask'
       };
       if (window.lmChat && typeof window.lmChat.open === 'function') {
         window.lmChat.open(payload);

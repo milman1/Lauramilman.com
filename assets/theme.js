@@ -278,9 +278,11 @@ function formatMoney(cents) {
   var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   var productTitle = '';
   var productUrl = '';
+  var intent = 'ask';
   var question = '';
   var step = 'question';
   var submitting = false;
+  var welcomeHtml = body ? body.innerHTML : '';
 
   function knownEmail() {
     var fromField = emailField && emailField.value ? emailField.value.trim() : '';
@@ -312,18 +314,30 @@ function formatMoney(cents) {
     body.scrollTop = body.scrollHeight;
   }
 
+  function resetConversation() {
+    if (!body) return;
+    body.innerHTML = welcomeHtml;
+  }
+
   function openWithProduct(opts) {
     opts = opts || {};
     productTitle = opts.productTitle || '';
     productUrl = opts.productUrl || '';
+    intent = opts.intent === 'offer' ? 'offer' : 'ask';
     question = '';
     step = 'question';
     if (productField) productField.value = productTitle;
     if (productUrlField) productUrlField.value = productUrl;
+    resetConversation();
     openPanel();
     if (productTitle) {
-      appendMessage('You\'re asking about ' + productTitle + '. What would you like to know?', false);
-      if (input) input.placeholder = 'Ask about this piece...';
+      if (intent === 'offer') {
+        appendMessage('You\'re looking at ' + productTitle + '. Share the offer you\'d like us to take to the desk.', false);
+        if (input) input.placeholder = 'Your offer amount...';
+      } else {
+        appendMessage('You\'re asking about ' + productTitle + '. What would you like to know?', false);
+        if (input) input.placeholder = 'Ask about this piece...';
+      }
     }
   }
 
@@ -332,6 +346,7 @@ function formatMoney(cents) {
     submitting = true;
     if (emailField) emailField.value = email;
     var lines = [];
+    if (intent === 'offer') lines.push('MAKE AN OFFER');
     if (productTitle) lines.push('Product: ' + productTitle);
     if (productUrl) lines.push('URL: ' + productUrl);
     lines.push('');
@@ -344,7 +359,12 @@ function formatMoney(cents) {
       body: new FormData(form),
       headers: { 'Accept': 'text/html' }
     }).then(function () {
-      appendMessage('Thank you — the desk has this, including the piece you asked about. We\'ll reply within one business day.', false);
+      appendMessage(
+        intent === 'offer'
+          ? 'Thank you — the desk has your offer on this piece. We\'ll reply within one business day.'
+          : 'Thank you — the desk has this, including the piece you asked about. We\'ll reply within one business day.',
+        false
+      );
       step = 'done';
       if (input) input.placeholder = 'Type a message...';
     }).catch(function () {
@@ -388,8 +408,13 @@ function formatMoney(cents) {
   }
 
   trigger.addEventListener('click', function () {
-    if (panel.classList.contains('open')) closePanel();
-    else openPanel();
+    if (panel.classList.contains('open')) {
+      closePanel();
+    } else {
+      intent = 'ask';
+      if (input && step === 'question') input.placeholder = 'Type a message...';
+      openPanel();
+    }
   });
 
   if (closeBtn) closeBtn.addEventListener('click', closePanel);
