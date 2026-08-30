@@ -1,7 +1,7 @@
 /**
- * Laura Milman — API-backed diamond filter + inquiry/reserve.
- * Keeps lm-dfilter visual classes; data from Supabase Edge Function
- * (or App Proxy /apps/diamonds once wired).
+ * Laura Milman — API-backed diamond filter + Buy now checkout.
+ * Lists available stones from Supabase; purchase goes through the matching
+ * Shopify product (handle nd-/lg-<stock_ref>) after a live availability check.
  */
 (function () {
   'use strict';
@@ -12,7 +12,6 @@
   var cfg = {
     apiBase: (root.dataset.apiBase || '').replace(/\/+$/, ''),
     anonKey: root.dataset.anonKey || '',
-    reserveUrl: (root.dataset.reserveUrl || '').replace(/\/+$/, ''),
     kind: root.dataset.kind || 'lab',
     perPage: parseInt(root.dataset.perPage || '24', 10) || 24,
     currency: root.dataset.currency || 'USD',
@@ -150,6 +149,8 @@
     return (
       '<div class="product-card" data-stock="' +
       escapeAttr(stone.stock_ref) +
+      '" data-kind="' +
+      escapeAttr(stone.kind || cfg.kind) +
       '">' +
       '<a href="' +
       escapeAttr(href) +
@@ -172,9 +173,12 @@
         [stone.shape, stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · '),
       ) +
       '</span></div>' +
-      '<button type="button" class="lm-stone-card__reserve" data-reserve="' +
+      '<button type="button" class="lm-stone-card__buy" data-buy="' +
       escapeAttr(stone.stock_ref) +
-      '">Reserve this diamond</button>' +
+      '" data-kind="' +
+      escapeAttr(stone.kind || cfg.kind) +
+      '">Buy now</button>' +
+      '<p class="lm-stone-card__buy-status" data-buy-status hidden></p>' +
       '</div></div>'
     );
   }
@@ -338,7 +342,7 @@
         if (!Number.isFinite(max)) max = ceil;
         var span = ceil - floor || 1;
         fill.style.left = ((min - floor) / span) * 100 + '%';
-        fill.style.right = (100 - ((max - floor) / span) * 100) + '%';
+        fill.style.right = 100 - ((max - floor) / span) * 100 + '%';
       }
       if (minEl) minEl.addEventListener('input', paint);
       if (maxEl) maxEl.addEventListener('input', paint);
@@ -346,70 +350,100 @@
     });
   }
 
-  /* ── Reserve modal ── */
-  var modal = document.getElementById('lm-reserve-modal');
-  var reserveStock = null;
+  /**
+   * Buy now: re-check API availability, resolve Shopify variant, add to cart,
+   * go straight to checkout. Products still exist as nd-/lg-<stock_ref>.
+   */
+  async function buyNow(btn) {
+    var stockRef = btn.getAttribute('data-buy');
+    var kind = btn.getAttribute('data-kind') || cfg.kind;
+    var card = btn.closest('.product-card');
+    var status = card ? card.querySelector('[data-buy-status]') : null;
+    var label = btn.textContent;
 
-  function openReserve(stockRef, title) {
-    reserveStock = stockRef;
-    if (!modal) return;
-    modal.hidden = false;
-    document.body.classList.add('lm-reserve-open');
-    var t = modal.querySelector('[data-reserve-title]');
-    if (t) t.textContent = title || 'Stock #' + stockRef;
-    var stockInput = modal.querySelector('[name="stock_ref"]');
-    if (stockInput) stockInput.value = stockRef;
-    var status = modal.querySelector('[data-reserve-status]');
-    if (status) {
-      status.hidden = true;
-      status.textContent = '';
+    function setStatus(msg, isError) {
+      if (!status) return;
+      status.hidden = !msg;
+      status.textContent = msg || '';
+      status.classList.toggle('is-error', !!isError);
     }
-  }
 
-  function closeReserve() {
-    if (!modal) return;
-    modal.hidden = true;
-    document.body.classList.remove('lm-reserve-open');
-    reserveStock = null;
-  }
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+    setStatus('');
 
-  async function submitReserve(event) {
-    event.preventDefault();
-    if (!cfg.reserveUrl || !reserveStock) return;
-    var fd = new FormData(event.target);
-    var payload = {
-      stock_ref: reserveStock,
-      name: String(fd.get('name') || '').trim(),
-      email: String(fd.get('email') || '').trim(),
-      phone: String(fd.get('phone') || '').trim(),
-      message: String(fd.get('message') || '').trim(),
-    };
-    var status = modal.querySelector('[data-reserve-status]');
-    var btn = modal.querySelector('[type="submit"]');
-    if (btn) btn.disabled = true;
     try {
-      var res = await fetch(cfg.reserveUrl, {
-        method: 'POST',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, headers()),
-        body: JSON.stringify(payload),
+      var availRes = await fetch(
+        cfg.apiBase + '?stock_ref=' + encodeURIComponent(stockRef),
+        { headers: headers() },
+      );
+      var availData = await availRes.json().catch(function () {
+        return {};
       });
-      var data = await res.json();
-      if (!res.ok) throw new Error(data.detail || data.error || 'Could not reserve');
-      if (status) {
-        status.hidden = false;
-        status.textContent =
-          'Reserved. We will confirm availability and send a private invoice to ' +
-          payload.email +
-          ' shortly.';
+      if (!availRes.ok || !availData.stone) {
+        throw new Error('This diamond is no longer available.');
       }
-      event.target.reset();
+
+      var stone = availData.stone;
+      var handle = productHandle({
+        kind: stone.kind || kind,
+        stock_ref: stone.stock_ref || stockRef,
+      });
+
+      btn.textContent = 'Adding…';
+      var prodRes = await fetch('/products/' + encodeURIComponent(handle) + '.js', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!prodRes.ok) {
+        throw new Error('This diamond isn’t ready to purchase yet. Please try again shortly.');
+      }
+      var product = await prodRes.json();
+      var variant =
+        (product.variants || []).find(function (v) {
+          return v.available;
+        }) || (product.variants || [])[0];
+      if (!variant || !variant.id) {
+        throw new Error('This diamond is no longer available.');
+      }
+      if (variant.available === false) {
+        throw new Error('This diamond is no longer available.');
+      }
+
+      var cartRes = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: variant.id,
+              quantity: 1,
+              properties: {
+                _stock_ref: String(stone.stock_ref || stockRef),
+                _cert: stone.lab ? String(stone.lab) : '',
+                _api_checked: 'yes',
+              },
+            },
+          ],
+        }),
+      });
+      var cartData = await cartRes.json().catch(function () {
+        return {};
+      });
+      if (!cartRes.ok) {
+        throw new Error(
+          cartData.description || cartData.message || 'Could not add this diamond to your bag.',
+        );
+      }
+
+      btn.textContent = 'Redirecting…';
+      window.location.href = '/checkout';
     } catch (err) {
-      if (status) {
-        status.hidden = false;
-        status.textContent = err.message || String(err);
-      }
-    } finally {
-      if (btn) btn.disabled = false;
+      btn.disabled = false;
+      btn.textContent = label;
+      setStatus(err.message || String(err), true);
     }
   }
 
@@ -458,25 +492,12 @@
 
   if (resultsEl) {
     resultsEl.addEventListener('click', function (e) {
-      var reserveBtn = e.target.closest('[data-reserve]');
-      if (reserveBtn) {
+      var buyBtn = e.target.closest('[data-buy]');
+      if (buyBtn && !buyBtn.disabled) {
         e.preventDefault();
-        var card = reserveBtn.closest('.product-card');
-        var title = card ? card.querySelector('.product-card__title') : null;
-        openReserve(
-          reserveBtn.getAttribute('data-reserve'),
-          title ? title.textContent.trim() : '',
-        );
+        buyNow(buyBtn);
       }
     });
-  }
-
-  if (modal) {
-    modal.querySelectorAll('[data-reserve-close]').forEach(function (el) {
-      el.addEventListener('click', closeReserve);
-    });
-    var reserveForm = modal.querySelector('form');
-    if (reserveForm) reserveForm.addEventListener('submit', submitReserve);
   }
 
   load();

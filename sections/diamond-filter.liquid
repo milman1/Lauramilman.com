@@ -34,7 +34,6 @@
   aria-label="{{ collection.title | escape }}"
   data-api-base="{{ section.settings.api_base_url | escape }}"
   data-anon-key="{{ section.settings.api_anon_key | escape }}"
-  data-reserve-url="{{ section.settings.reserve_url | escape }}"
   data-kind="{{ stone_kind | escape }}"
   data-per-page="{{ section.settings.products_per_page }}"
   data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
@@ -141,25 +140,6 @@
     <div id="lm-diamond-pager"></div>
   </div>
 </section>
-
-<div class="lm-reserve-modal" id="lm-reserve-modal" hidden>
-  <div class="lm-reserve-modal__backdrop" data-reserve-close></div>
-  <div class="lm-reserve-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="lm-reserve-heading">
-    <button type="button" class="lm-reserve-modal__close" data-reserve-close aria-label="Close">&times;</button>
-    <h2 id="lm-reserve-heading">Reserve this diamond</h2>
-    <p class="lm-reserve-modal__stone" data-reserve-title></p>
-    <p class="lm-reserve-modal__copy">We will confirm the stone is still available and send a private invoice. No charge until you accept.</p>
-    <form>
-      <input type="hidden" name="stock_ref" value="">
-      <label>Name<input type="text" name="name" required autocomplete="name"></label>
-      <label>Email<input type="email" name="email" required autocomplete="email"></label>
-      <label>Phone <span>(optional)</span><input type="tel" name="phone" autocomplete="tel"></label>
-      <label>Note <span>(optional)</span><textarea name="message" rows="3" placeholder="Ring setting, timeline, questions…"></textarea></label>
-      <p class="lm-reserve-modal__status" data-reserve-status hidden></p>
-      <button type="submit" class="lm-dfilter__apply">Request reservation</button>
-    </form>
-  </div>
-</div>
 
 <script src="{{ 'diamond-storefront.js' | asset_url }}" defer></script>
 
@@ -1185,12 +1165,12 @@
     }
   }
 
-  /* API mode: reserve CTA only — cards reuse .product-card image markup */
+  /* API mode: Buy now CTA — cards reuse .product-card image markup */
   .lm-dfilter__results-host.is-loading {
     opacity: 0.55;
     pointer-events: none;
   }
-  .lm-dfilter__results-host .lm-stone-card__reserve {
+  .lm-dfilter__results-host .lm-stone-card__buy {
     margin-top: 0.65rem;
     align-self: flex-start;
     background: none;
@@ -1204,92 +1184,23 @@
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__reserve {
+  .lm-dfilter__results-host .lm-stone-card__buy:disabled {
+    opacity: 0.55;
+    cursor: wait;
+    text-decoration: none;
+  }
+  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__buy {
     color: var(--pd-blue, #5B7FBD);
   }
-
-  .lm-reserve-modal[hidden] { display: none !important; }
-  .lm-reserve-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.25rem;
+  .lm-dfilter__results-host .lm-stone-card__buy-status {
+    margin: 0.4rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--text-muted, #8A8070);
   }
-  .lm-reserve-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(30, 17, 9, 0.55);
+  .lm-dfilter__results-host .lm-stone-card__buy-status.is-error {
+    color: #8B2E2E;
   }
-  .lm-reserve-modal__dialog {
-    position: relative;
-    width: min(440px, 100%);
-    background: #FDFAF6;
-    padding: 2rem 1.75rem 1.75rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  }
-  .lm-reserve-modal__close {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.9rem;
-    border: 0;
-    background: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    color: #8A8070;
-  }
-  .lm-reserve-modal h2 {
-    margin: 0 0 0.35rem;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-weight: 500;
-    font-size: 1.75rem;
-  }
-  .lm-reserve-modal__stone {
-    margin: 0 0 0.75rem;
-    color: #A88340;
-    font-size: 0.95rem;
-  }
-  .lm-reserve-modal__copy {
-    margin: 0 0 1.25rem;
-    color: #8A8070;
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-  .lm-reserve-modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-  .lm-reserve-modal label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #8A8070;
-  }
-  .lm-reserve-modal label span { text-transform: none; letter-spacing: 0; }
-  .lm-reserve-modal input,
-  .lm-reserve-modal textarea {
-    font: inherit;
-    font-size: 0.95rem;
-    letter-spacing: 0;
-    text-transform: none;
-    color: #1E1109;
-    border: 1px solid rgba(30, 17, 9, 0.15);
-    background: #fff;
-    padding: 0.65rem 0.75rem;
-  }
-  .lm-reserve-modal__status {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #476154;
-  }
-  body.lm-reserve-open { overflow: hidden; }
 </style>
 
 <script>
@@ -1472,10 +1383,8 @@
       "info": "Required when calling the Edge Function directly. Leave blank for App Proxy."
     },
     {
-      "type": "text",
-      "id": "reserve_url",
-      "label": "Reserve endpoint URL",
-      "info": "POST endpoint for inquiry/reserve, e.g. https://….supabase.co/functions/v1/reserve-diamond"
+      "type": "paragraph",
+      "content": "Buy now re-checks API availability, then adds the matching Shopify product (nd-/lg- handle) and sends the shopper to checkout."
     },
     {
       "type": "select",
