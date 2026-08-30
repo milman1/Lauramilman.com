@@ -1,8 +1,7 @@
 {%- comment -%}
-  Product-page concierge. Ask / Direct message open the site chat with this
-  product already in context. Watches and maison/vintage jewelry get Make an
-  offer and private viewing so the desk can continue in chat, by phone, or
-  in person.
+  Product-page concierge. Make an offer and Ask open the site chat with this
+  product already in context. Watches and maison/vintage jewelry also get
+  private viewing so the desk can continue by phone or in person.
 {%- endcomment -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
@@ -22,16 +21,16 @@
     {%- if desk_piece -%}See this piece privately{%- else -%}Questions about this piece?{%- endif -%}
   </p>
   <div class="pdp-inquire__actions">
+    <button
+      type="button"
+      class="pdp-inquire__btn js-open-product-chat"
+      data-chat-intent="offer"
+      data-product-title="{{ product.title | escape }}"
+      data-product-url="{{ shop.url }}{{ product.url }}"
+    >
+      Make an offer
+    </button>
     {%- if desk_piece -%}
-      <button
-        type="button"
-        class="pdp-inquire__btn js-open-product-chat"
-        data-chat-intent="offer"
-        data-product-title="{{ product.title | escape }}"
-        data-product-url="{{ shop.url }}{{ product.url }}"
-      >
-        Make an offer
-      </button>
       <a
         class="pdp-inquire__btn pdp-inquire__btn--ghost"
         href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
@@ -41,7 +40,7 @@
     {%- endif -%}
     <button
       type="button"
-      class="pdp-inquire__btn{% if desk_piece %} pdp-inquire__btn--ghost{% endif %} js-open-product-chat"
+      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
       data-chat-intent="ask"
       data-product-title="{{ product.title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"

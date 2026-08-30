@@ -268,11 +268,11 @@ renders `#shopify-product-reviews`.
 
 ---
 
-## 10. Watch & vintage desk (phone)
+## 10. Product desk (chat and viewing)
 
-Product pages for timepieces and estate/vintage show **Make an offer** (site
-chat) and **Private viewing**. Private viewing requires a phone number and
-lands in **Admin → Inbox**.
+Every product page shows **Make an offer** (site chat with the piece in
+context). Timepieces and estate/vintage also show **Private viewing**, which
+requires a phone number and lands in **Admin → Inbox**.
 
 Shopify customer tags applied when the hidden customer form succeeds:
 
