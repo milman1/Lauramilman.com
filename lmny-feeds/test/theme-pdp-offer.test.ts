@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 function themeFile(path: string): string {
@@ -20,16 +20,24 @@ describe('product-page Make an offer CTA', () => {
     expect(inquiry).toContain('Make an offer');
 
     const offerIdx = inquiry.indexOf('data-chat-intent="offer"');
-    const holdIdx = inquiry.indexOf('Hold this piece');
     const viewingIdx = inquiry.indexOf('Private viewing');
     const unlessIdx = inquiry.indexOf('{%- unless desk_piece -%}');
     expect(offerIdx).toBeGreaterThan(-1);
-    expect(holdIdx).toBeGreaterThan(-1);
     expect(viewingIdx).toBeGreaterThan(-1);
     expect(offerIdx).toBeLessThan(unlessIdx);
-    expect(holdIdx).toBeLessThan(unlessIdx);
     expect(viewingIdx).toBeLessThan(unlessIdx);
+    expect(inquiry).not.toContain('Hold this piece');
+    expect(inquiry).not.toContain('data-open-hold');
+    expect(inquiry).not.toContain("render 'piece-hold'");
     expect(inquiry.slice(unlessIdx)).not.toContain('data-chat-intent="offer"');
+  });
+
+  it('does not ship the hold modal or hold CTA anywhere in the theme', () => {
+    const setup = themeFile('SHOPIFY_SETUP.md');
+    expect(existsSync(new URL('../../snippets/piece-hold.liquid', import.meta.url))).toBe(false);
+    expect(inquiry).not.toMatch(/hold this piece/i);
+    expect(setup).not.toMatch(/Hold this piece/);
+    expect(setup).not.toContain('hold-request');
   });
 
   it('sits in the existing CTA row and opens site chat with offer intent', () => {

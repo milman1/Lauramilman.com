@@ -268,14 +268,14 @@ renders `#shopify-product-reviews`.
 
 ---
 
-## 10. Watch & vintage holds (phone)
+## 10. Watch & vintage desk (phone)
 
-Product pages for timepieces and estate/vintage show **Hold this piece** and
-**Private viewing**. Both require a phone number and land in **Admin → Inbox**.
+Product pages for timepieces and estate/vintage show **Make an offer** (site
+chat) and **Private viewing**. Private viewing requires a phone number and
+lands in **Admin → Inbox**.
 
 Shopify customer tags applied when the hidden customer form succeeds:
 
-- `hold-request` — asked to hold a specific piece
 - `watch-interest`
 - `vintage-interest`
 - `private-viewing` — booked from `/pages/private-clients`

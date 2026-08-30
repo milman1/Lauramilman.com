@@ -1,8 +1,8 @@
 {%- comment -%}
   Product-page concierge. Ask / Direct message open the site chat with this
-  product already in context. Watches and maison/vintage jewelry get Hold,
-  Make an offer, and private viewing so the desk can continue in chat, by
-  phone, or in person.
+  product already in context. Watches and maison/vintage jewelry get Make an
+  offer and private viewing so the desk can continue in chat, by phone, or
+  in person.
 {%- endcomment -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
@@ -23,12 +23,9 @@
   </p>
   <div class="pdp-inquire__actions">
     {%- if desk_piece -%}
-      <button type="button" class="pdp-inquire__btn" data-open-hold>
-        Hold this piece
-      </button>
       <button
         type="button"
-        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        class="pdp-inquire__btn js-open-product-chat"
         data-chat-intent="offer"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
@@ -65,8 +62,6 @@
     {%- endunless -%}
   </div>
 </div>
-
-{% render 'piece-hold', product: product %}
 
 <style>
   .pdp-inquire {
