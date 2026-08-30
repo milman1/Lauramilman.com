@@ -27,7 +27,19 @@ import {
 import { priceLab, priceNatural, priceWatch } from './markup.js';
 import { enrichWatchGalleries, watchGalleryStats, type WatchGalleryStats } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
-import { buildProductSetInput, contentHashFor, handleFor, handleForRef, MEDIA_MISSING_TAG, PRICING_REVIEW_TAG, titleFor, UNIQUE_IN_STOCK_QTY } from './product.js';
+import {
+  buildProductSetInput,
+  contentHashFor,
+  handleFor,
+  handleForRef,
+  isInvalidShopifyFileUrlError,
+  MEDIA_MISSING_TAG,
+  PRICING_REVIEW_TAG,
+  quarantineProductSetInput,
+  titleFor,
+  UNIQUE_IN_STOCK_QTY,
+  writeErrorsAreSystemic,
+} from './product.js';
 import {
   holdHistogram,
   labPricingStats,
@@ -460,7 +472,14 @@ async function main() {
     } else if (inputs.length > 0) {
       console.log(`Writing ${inputs.length} products via direct productSet…`);
       for (const input of inputs) {
-        const result = await shopify.productSet(input);
+        let result = await shopify.productSet(input);
+        if (result.errors.some((e) => isInvalidShopifyFileUrlError(e))) {
+          const quarantined = quarantineProductSetInput(input);
+          console.warn(
+            `${input.handle}: Shopify rejected file URL — retrying as DRAFT without photos`,
+          );
+          result = await shopify.productSet(quarantined);
+        }
         if (result.id) createdIds.push(result.id);
         writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
         if (locationId) {
@@ -743,7 +762,7 @@ async function main() {
       summary.archive.length;
     const failureRate = attempted > 0 ? writeErrors.length / attempted : 1;
     console.error(`${writeErrors.length} write error(s) across ${attempted} attempted — see report`);
-    if (failureRate > WRITE_ERROR_FAIL_RATE) {
+    if (writeErrorsAreSystemic(writeErrors.length, attempted, WRITE_ERROR_FAIL_RATE)) {
       console.error(`Failure rate ${(failureRate * 100).toFixed(1)}% exceeds ${(WRITE_ERROR_FAIL_RATE * 100).toFixed(0)}% — failing the run`);
       process.exitCode = 1;
     } else {

@@ -473,3 +473,40 @@ export function buildProductSetInput(
   }
   return input;
 }
+
+export function isInvalidShopifyFileUrlError(message: string): boolean {
+  return /file url is invalid/i.test(message);
+}
+
+/**
+ * Isolated per-SKU rejections (one bad ImageLink) must not fail a live run
+ * of a handful of writes. Fail only when several errors look systemic.
+ */
+export function writeErrorsAreSystemic(errorCount: number, attempted: number, failRate = 0.01): boolean {
+  if (errorCount < 3) return false;
+  const rate = attempted > 0 ? errorCount / attempted : 1;
+  return rate > failRate;
+}
+
+/**
+ * Retry payload when Shopify rejects `files.originalSource`. Create the
+ * product as a DRAFT with no photos rather than losing the write.
+ */
+export function quarantineProductSetInput(input: Record<string, unknown>): Record<string, unknown> {
+  const { files: _omit, ...rest } = input;
+  const tags = new Set(Array.isArray(rest.tags) ? (rest.tags as string[]) : []);
+  tags.add(MEDIA_MISSING_TAG);
+  const variants = Array.isArray(rest.variants)
+    ? (rest.variants as Array<Record<string, unknown>>).map((variant) => {
+        const qtys = variant.inventoryQuantities;
+        if (!Array.isArray(qtys)) return variant;
+        return {
+          ...variant,
+          inventoryQuantities: qtys.map((qty) =>
+            qty && typeof qty === 'object' ? { ...qty, quantity: 0 } : qty,
+          ),
+        };
+      })
+    : rest.variants;
+  return { ...rest, status: 'DRAFT', tags: [...tags].sort(), variants };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { collectUrls, normalizeStones, normalizeWatches } from '../src/normalize.js';
+import { collectUrls, normalizeStones, normalizeWatches, shopifyFileUrl } from '../src/normalize.js';
 
 const stoneRow = {
   stock_ref: 'BD-1',
@@ -158,6 +158,18 @@ describe('media collection across numbered feed fields', () => {
     expect(collectUrls({ ImageLink: 'dnalinks.in/T3743.jpg' }, ['imagelink'])).toEqual([
       'https://dnalinks.in/T3743.jpg',
     ]);
+  });
+
+  it('drops ImageLink values Shopify cannot fetch as files (nd-ak3808 class)', () => {
+    expect(shopifyFileUrl('https://www.gia.edu/report-check?reportno=6233583386')).toBeUndefined();
+    expect(shopifyFileUrl('https://dnalinks.in/')).toBeUndefined();
+    expect(shopifyFileUrl('https://dnalinks.in/certificate_images/123.pdf')).toBeUndefined();
+    expect(shopifyFileUrl('https://dnalinks.in/AK3808/still.jpg')).toBe('https://dnalinks.in/AK3808/still.jpg');
+    const { items } = normalizeStones(
+      [{ ...stoneRow, image: 'https://www.gia.edu/report-check?reportno=1' }],
+      'natural',
+    );
+    expect(items[0]?.imageUrls).toEqual([]);
   });
 
   it('does not swallow a neighbouring field that merely shares a prefix', () => {
