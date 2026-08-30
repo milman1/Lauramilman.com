@@ -87,7 +87,7 @@ export function collectUrls(raw: Raw, keys: string[]): string[] {
     if (match.value === null || match.value === undefined) continue;
     const list = Array.isArray(match.value) ? match.value : String(match.value).split(/[,|\n]/);
     for (const entry of list) {
-      const url = normalizeUrl(String(entry).trim());
+      const url = shopifyFileUrl(String(entry).trim());
       if (url && !out.includes(url)) out.push(url);
     }
   }
@@ -121,6 +121,32 @@ export function normalizeUrl(value: string | undefined): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Shopify productSet `files.originalSource` must be a downloadable file.
+ * A GIA report-check page, a bare host, or a cert PDF used as ImageLink
+ * returns "File URL is invalid" and rejects the whole productSet — that
+ * is why creating `nd-ak3808` failed every hourly run after it appeared.
+ */
+const SHOPIFY_FILE_EXT = /\.(jpe?g|png|gif|webp|bmp|tif|tiff|heic|mp4|webm|mov)(?:\?|#|$)/i;
+
+export function shopifyFileUrl(value: string | undefined): string | undefined {
+  const url = normalizeUrl(value);
+  if (!url) return undefined;
+  if (/\s/.test(url)) return undefined;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return undefined;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
+  if (!parsed.pathname || parsed.pathname === '/') return undefined;
+  if (!SHOPIFY_FILE_EXT.test(parsed.pathname) && !SHOPIFY_FILE_EXT.test(parsed.search)) {
+    return undefined;
+  }
+  return url;
 }
 
 /**

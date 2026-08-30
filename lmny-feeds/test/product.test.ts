@@ -5,13 +5,16 @@ import {
   caratBand,
   contentHashFor,
   handleFor,
+  isInvalidShopifyFileUrlError,
   metafieldsFor,
+  quarantineProductSetInput,
   sanitizeRef,
   seoDescriptionFor,
   seoTitleFor,
   tagsFor,
   titleFor,
   vendorFor,
+  writeErrorsAreSystemic,
 } from '../src/product.js';
 import { labStone, naturalStone, priced, watch } from './fixtures.js';
 
@@ -412,5 +415,30 @@ describe('imageless products are quarantined at creation', () => {
     expect(input.status).toBe('DRAFT');
     expect(input.tags as string[]).toContain('media-missing');
     expect(input.files as unknown[]).toHaveLength(0);
+  });
+
+  it('retries a rejected file URL as a DRAFT with no files', () => {
+    const input = buildProductSetInput(naturalStone(), priced(), '2026-07-28T00:00:00Z', undefined, 'gid://shopify/Location/1');
+    expect(input.files).toBeDefined();
+    const quarantined = quarantineProductSetInput(input);
+    expect(quarantined.files).toBeUndefined();
+    expect(quarantined.status).toBe('DRAFT');
+    expect(quarantined.tags as string[]).toContain('media-missing');
+    const qty = (quarantined.variants as Array<{ inventoryQuantities?: Array<{ quantity: number }> }>)[0]
+      ?.inventoryQuantities?.[0]?.quantity;
+    expect(qty).toBe(0);
+  });
+});
+
+describe('write-error policy', () => {
+  it('does not fail a run for one File URL rejection on a small batch', () => {
+    expect(isInvalidShopifyFileUrlError('input.files.0.originalSource: File URL is invalid')).toBe(true);
+    expect(writeErrorsAreSystemic(1, 20)).toBe(false);
+    expect(writeErrorsAreSystemic(1, 1)).toBe(false);
+  });
+
+  it('fails when several writes error at a high rate', () => {
+    expect(writeErrorsAreSystemic(5, 20)).toBe(true);
+    expect(writeErrorsAreSystemic(3, 300)).toBe(false);
   });
 });
