@@ -121,6 +121,25 @@ def test_header_nav_order_puts_differentiators_early() -> None:
     assert fine < diamonds < peaceful < maison < timepieces < wedding
 
 
+def test_timepieces_dropdown_includes_jacob_co() -> None:
+    header = (ROOT / "sections/header.liquid").read_text()
+    start = header.index("            Timepieces\n")
+    end = header.index("            Wedding\n")
+    block = header[start:end]
+    assert "/collections/jacob-co-watches" in block
+    assert "Jacob &amp; Co." in block
+    assert block.index("/collections/rolex-watches") < block.index("/collections/jacob-co-watches")
+    assert 'href="/collections/cartier"' not in block
+
+
+def test_watch_pdps_use_authentication_education() -> None:
+    edu = (ROOT / "sections/product-education.liquid").read_text()
+    assert "product-is-watch" in edu
+    assert "is_watch == 'true'" in edu
+    watch = (ROOT / "snippets/product-is-watch.liquid").read_text()
+    assert "jacob" in watch
+
+
 def test_footer_and_search_surface_the_worlds() -> None:
     footer = (ROOT / "sections/footer.liquid").read_text()
     assert 'href="/collections/natural-diamonds"' in footer

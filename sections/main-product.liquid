@@ -28,6 +28,8 @@
         assign status_pill = 'Estate'
       elsif t contains 'pre-owned'
         assign status_pill = 'Pre-Owned'
+      elsif t contains 'new vintage'
+        assign status_pill = 'New Vintage'
       elsif t == 'vintage'
         assign status_pill = 'Vintage'
       endif

@@ -1,13 +1,14 @@
 {%- comment -%}
   Laura Milman New York — PDP education block
-  Conditional on product tags:
+  Conditional on product tags / type:
     · "Lab Grown Diamond"                → lab-grown education
-    · "Estate Jewelry" / "Pre-Owned" / "Vintage" → pre-owned maison education
+    · Estate / Pre-Owned / Vintage / Unworn / watches → authentication education
     · otherwise                          → LMNY craftsmanship / heritage
   All copy is editable in the theme editor; blocks are typed per variant so
   each mode keeps its own three feature cards.
 {%- endcomment -%}
 
+{%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid
   assign tag_str = product.tags | join: '||' | downcase
   # Title included because a handful of PD pieces carry only the hyphenated
@@ -16,7 +17,7 @@
   assign edu_mode = 'heritage'
   if hay contains 'lab grown' or hay contains 'lab-grown' or hay contains 'lab created'
     assign edu_mode = 'lab'
-  elsif tag_str contains 'estate' or tag_str contains 'pre-owned' or tag_str contains 'vintage'
+  elsif tag_str contains 'estate' or tag_str contains 'pre-owned' or tag_str contains 'vintage' or tag_str contains 'unworn' or is_watch == 'true'
     assign edu_mode = 'estate'
   endif
 
