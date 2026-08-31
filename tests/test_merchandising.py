@@ -171,7 +171,14 @@ def test_related_merchandising_photos_fill_their_frames() -> None:
     maison = (ROOT / "sections/preowned-maison.liquid").read_text()
     theme_css = (ROOT / "assets/theme.css").read_text()
     assert "object-fit: cover" in diamonds
-    assert "grid-template-rows: 220px 1fr" in diamonds
+    assert "grid-template-rows: auto 1fr" in diamonds
+    assert "aspect-ratio: 16 / 9" in diamonds
+    for asset in [
+        "diamond-destination-natural.webp",
+        "diamond-destination-lab.webp",
+    ]:
+        assert asset in diamonds
+        assert (ROOT / "assets" / asset).exists()
     assert "aspect-ratio: 4 / 5" in maison
     assert "object-fit: cover" in maison
     image_box = theme_css.split(".collection-card__image-box {")[1].split("}")[0]
@@ -241,6 +248,14 @@ def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
     collection = (ROOT / "sections/main-collection.liquid").read_text()
     assert "Shop by brand" in collection
     assert "/collections/rolex-watches" in collection
+
+
+def test_only_shopify_inbox_chat_is_rendered() -> None:
+    layout = (ROOT / "layout/theme.liquid").read_text()
+    settings = load_json(ROOT / "config/settings_data.json")
+    assert "render 'chat-widget'" not in layout
+    app_blocks = settings["current"]["blocks"].values()
+    assert any("shopify://apps/inbox/blocks/chat/" in block["type"] for block in app_blocks)
 
 
 if __name__ == "__main__":

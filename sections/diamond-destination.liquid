@@ -22,6 +22,7 @@
         {%- assign dest_collection = block.settings.collection -%}
         {%- assign dest_title = block.settings.title -%}
         {%- assign dest_image = block.settings.image -%}
+        {%- assign dest_asset = blank -%}
         {%- assign dest_url = block.settings.link -%}
 
         {%- if dest_title == blank and dest_collection != blank -%}
@@ -30,7 +31,15 @@
         {%- if dest_url == blank and dest_collection != blank -%}
           {%- assign dest_url = dest_collection.url -%}
         {%- endif -%}
-        {%- if dest_image == blank and dest_collection != blank -%}
+        {%- if dest_image == blank -%}
+          {%- case dest_collection.handle -%}
+            {%- when 'natural-diamonds' -%}
+              {%- assign dest_asset = 'diamond-destination-natural.webp' -%}
+            {%- when 'lab-grown-diamonds' -%}
+              {%- assign dest_asset = 'diamond-destination-lab.webp' -%}
+          {%- endcase -%}
+        {%- endif -%}
+        {%- if dest_image == blank and dest_asset == blank and dest_collection != blank -%}
           {%- if dest_collection.image != blank -%}
             {%- assign dest_image = dest_collection.image -%}
           {%- elsif dest_collection.products.first.featured_image -%}
@@ -52,6 +61,17 @@
                 width="600"
                 height="400"
               >
+            {%- elsif dest_asset != blank -%}
+              <img
+                src="{{ dest_asset | asset_url }}"
+                alt="{{ dest_title | escape }}"
+                loading="lazy"
+                decoding="async"
+                width="1536"
+                height="864"
+              >
+            {%- else -%}
+              <div class="lm-diamonds__placeholder" aria-hidden="true"></div>
             {%- endif -%}
           </div>
           <div class="lm-diamonds__body">
@@ -126,7 +146,7 @@
 
   .lm-diamonds__card {
     display: grid;
-    grid-template-rows: 220px 1fr;
+    grid-template-rows: auto 1fr;
     text-decoration: none;
     overflow: hidden;
     border-radius: var(--radius-md, 8px);
@@ -146,18 +166,25 @@
   }
 
   .lm-diamonds__card--navy {
-    background: var(--navy, #1A1F3A);
-    border: 1px solid rgba(169, 190, 227, 0.28);
-    color: #fff;
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule, #DDD5C5);
+    color: var(--text-dark, #2C1810);
   }
 
   .lm-diamonds__media {
-    background: #1a120c;
+    aspect-ratio: 16 / 9;
+    background: var(--warm-white, #FDFAF6);
     overflow: hidden;
   }
 
   .lm-diamonds__card--navy .lm-diamonds__media {
-    background: var(--navy-deep, #12162B);
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .lm-diamonds__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, var(--cream, #FAF6F0), var(--off-white, #F5F0E8));
   }
 
   .lm-diamonds__media img {
@@ -184,6 +211,7 @@
     font-size: 1.85rem;
     font-weight: 400;
     margin: 0 0 0.6rem;
+    color: var(--text-dark, #2C1810);
   }
 
   .lm-diamonds__subtitle {
@@ -200,7 +228,7 @@
   }
 
   .lm-diamonds__card--navy .lm-diamonds__subtitle {
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--text-muted, #8A8070);
   }
 
   .lm-diamonds__cta {
