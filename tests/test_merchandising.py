@@ -121,6 +121,16 @@ def test_header_nav_order_puts_differentiators_early() -> None:
     assert fine < diamonds < peaceful < maison < timepieces < wedding
 
 
+def test_timepieces_navigation_includes_jacob_and_co() -> None:
+    header = (ROOT / "sections/header.liquid").read_text()
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    jacob_link = 'href="/collections/jacob-co"'
+    assert jacob_link in header
+    assert "Jacob &amp; Co." in header
+    assert jacob_link in collection
+    assert "Jacob &amp; Co." in collection
+
+
 def test_footer_and_search_surface_the_worlds() -> None:
     footer = (ROOT / "sections/footer.liquid").read_text()
     assert 'href="/collections/natural-diamonds"' in footer
