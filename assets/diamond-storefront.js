@@ -150,6 +150,8 @@
     return (
       '<div class="product-card" data-stock="' +
       escapeAttr(stone.stock_ref) +
+      '" data-handle="' +
+      escapeAttr(href.replace('/products/', '')) +
       '">' +
       '<a href="' +
       escapeAttr(href) +
@@ -172,9 +174,17 @@
         [stone.shape, stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · '),
       ) +
       '</span></div>' +
+      '<div class="lm-stone-card__actions">' +
+      '<button type="button" class="lm-stone-card__atc" data-add-handle="' +
+      escapeAttr(href.replace('/products/', '')) +
+      '">Add to cart</button>' +
+      '<button type="button" class="lm-stone-card__buy" data-buy-handle="' +
+      escapeAttr(href.replace('/products/', '')) +
+      '">Buy now</button>' +
+      '</div>' +
       '<button type="button" class="lm-stone-card__reserve" data-reserve="' +
       escapeAttr(stone.stock_ref) +
-      '">Reserve this diamond</button>' +
+      '">Reserve instead</button>' +
       '</div></div>'
     );
   }
@@ -337,8 +347,10 @@
         if (!Number.isFinite(min)) min = floor;
         if (!Number.isFinite(max)) max = ceil;
         var span = ceil - floor || 1;
-        fill.style.left = ((min - floor) / span) * 100 + '%';
-        fill.style.right = (100 - ((max - floor) / span) * 100) + '%';
+        var left = Math.max(0, Math.min(100, ((min - floor) / span) * 100));
+        var right = Math.max(0, Math.min(100, ((max - floor) / span) * 100));
+        fill.style.left = Math.min(left, right) + '%';
+        fill.style.right = (100 - Math.max(left, right)) + '%';
       }
       if (minEl) minEl.addEventListener('input', paint);
       if (maxEl) maxEl.addEventListener('input', paint);
@@ -467,7 +479,58 @@
           reserveBtn.getAttribute('data-reserve'),
           title ? title.textContent.trim() : '',
         );
+        return;
       }
+
+      var buyBtn = e.target.closest('[data-buy-handle], [data-add-handle]');
+      if (!buyBtn) return;
+      e.preventDefault();
+      var handle = buyBtn.getAttribute('data-buy-handle') || buyBtn.getAttribute('data-add-handle');
+      var checkout = buyBtn.hasAttribute('data-buy-handle');
+      if (!handle) return;
+      var original = buyBtn.textContent;
+      buyBtn.disabled = true;
+      buyBtn.textContent = '…';
+      fetch('/products/' + handle + '.js', { headers: { Accept: 'application/json' } })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Stone is not available to purchase yet');
+          return res.json();
+        })
+        .then(function (product) {
+          var variant = (product.variants || []).filter(function (v) {
+            return v.available !== false;
+          })[0] || (product.variants || [])[0];
+          if (!variant || !variant.id) throw new Error('This stone cannot be added to cart');
+          if (typeof window.lmAddToCart === 'function') {
+            return window.lmAddToCart(variant.id, { checkout: checkout });
+          }
+          return fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ id: variant.id, quantity: 1 }),
+          }).then(function (res) {
+            return res.json().then(function (data) {
+              if (!res.ok || data.status) throw new Error(data.description || 'Could not add to cart');
+              if (checkout) window.location.href = '/checkout';
+              return data;
+            });
+          });
+        })
+        .then(function () {
+          if (checkout) return;
+          buyBtn.textContent = '✓ Added';
+          setTimeout(function () {
+            buyBtn.textContent = original;
+            buyBtn.disabled = false;
+          }, 1800);
+        })
+        .catch(function (err) {
+          buyBtn.textContent = err.message || 'Unavailable';
+          setTimeout(function () {
+            buyBtn.textContent = original;
+            buyBtn.disabled = false;
+          }, 2200);
+        });
     });
   }
 

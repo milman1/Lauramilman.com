@@ -5,12 +5,45 @@ function showCartNotification() {
   var note = document.getElementById('cart-notification');
   if (!note) return;
   note.hidden = false;
+  note.classList.add('active');
   note.classList.add('show');
   setTimeout(function () {
+    note.classList.remove('active');
     note.classList.remove('show');
     setTimeout(function () { note.hidden = true; }, 300);
   }, 2500);
 }
+
+function addVariantToCart(variantId, quantity) {
+  var qty = parseInt(quantity, 10);
+  if (!qty || qty < 1) qty = 1;
+  return fetch('/cart/add.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ id: Number(variantId), quantity: qty })
+  }).then(function (res) {
+    return res.json().then(function (data) {
+      if (!res.ok || data.status) {
+        var err = new Error(data.description || data.message || 'Could not add to cart');
+        err.payload = data;
+        throw err;
+      }
+      return data;
+    });
+  });
+}
+
+window.lmAddToCart = function (variantId, opts) {
+  opts = opts || {};
+  return addVariantToCart(variantId, opts.quantity || 1).then(function (data) {
+    showCartNotification();
+    updateCartCount();
+    if (opts.checkout) {
+      window.location.href = '/checkout';
+    }
+    return data;
+  });
+};
 
 function updateCartCount() {
   fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
@@ -31,13 +64,17 @@ function updateCartCount() {
     if (!form) return;
     e.preventDefault();
 
-    var atcBtn = form.querySelector('.atc-btn');
+    var clicked = e.submitter || document.activeElement;
+    var atcBtn = (clicked && clicked.classList && clicked.classList.contains('atc-btn'))
+      ? clicked
+      : form.querySelector('.atc-btn');
     if (!atcBtn || atcBtn.disabled) return;
 
     var variantSelect = form.querySelector('[name="id"]');
     var quantityInput = form.querySelector('[name="quantity"]');
     var variantId = variantSelect ? variantSelect.value : null;
     var quantity = quantityInput ? parseInt(quantityInput.value, 10) : 1;
+    var goCheckout = atcBtn.hasAttribute('data-buy-now');
 
     if (!variantId) return;
 
@@ -45,16 +82,10 @@ function updateCartCount() {
     var originalText = atcBtn.textContent;
     atcBtn.textContent = '…';
 
-    fetch('/cart/add.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ id: parseInt(variantId, 10), quantity: quantity })
-    })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data.status) {
-          atcBtn.textContent = 'Error — try again';
-          atcBtn.disabled = false;
+    addVariantToCart(variantId, quantity)
+      .then(function () {
+        if (goCheckout) {
+          window.location.href = '/checkout';
           return;
         }
         atcBtn.classList.add('added');
@@ -69,8 +100,11 @@ function updateCartCount() {
         }, 2500);
       })
       .catch(function () {
-        atcBtn.textContent = originalText;
+        atcBtn.textContent = 'Error — try again';
         atcBtn.disabled = false;
+        setTimeout(function () {
+          atcBtn.textContent = originalText;
+        }, 2500);
       });
   });
 })();

@@ -283,6 +283,9 @@
   transition: all 0.3s ease;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
   z-index: 1001;
+  /* Keep every brand visible; do not cap height so Jacob & Co. is not
+     clipped below the fold on short laptops. */
+  overflow: visible;
 }
 
 .header .nav__item:hover .nav__dropdown {
@@ -507,7 +510,10 @@
   }
 
   .header .nav__item.open .nav__dropdown {
-    max-height: 500px;
+    /* Must be taller than the Timepieces brand list (10 links). The previous
+       500px cap clipped Jacob & Co. and Other Brands on tablet/mobile. */
+    max-height: 2000px;
+    overflow: visible;
     opacity: 1;
     visibility: visible;
     padding: 0.5rem 0 0.75rem 0;
@@ -522,7 +528,8 @@
   .header .nav__item.open:hover .nav__dropdown {
     opacity: 1;
     visibility: visible;
-    max-height: 500px;
+    max-height: 2000px;
+    overflow: visible;
   }
 
   .header .nav__item:hover .dropdown-arrow {
@@ -791,6 +798,7 @@
             <a href="/collections/time-pieces" class="nav__dropdown-link">All Timepieces</a>
             <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
             <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/jacob-co" class="nav__dropdown-link">Jacob &amp; Co.</a>
             <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
             <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
             <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>

@@ -85,6 +85,20 @@
       </nav>
     {%- endif -%}
 
+    {%- if jewelry_only == false and collection.handle == 'time-pieces' -%}
+      <nav class="lm-collection__chips" aria-label="Shop by brand">
+        <span class="lm-collection__chips-label">Shop by brand</span>
+        <a href="/collections/rolex-watches" class="lm-collection__chip">Rolex</a>
+        <a href="/collections/cartier-watches" class="lm-collection__chip">Cartier</a>
+        <a href="/collections/jacob-co" class="lm-collection__chip">Jacob &amp; Co.</a>
+        <a href="/collections/audemars-piguet-watches" class="lm-collection__chip">Audemars Piguet</a>
+        <a href="/collections/bvlgari-watches" class="lm-collection__chip">Bvlgari</a>
+        <a href="/collections/van-cleef-arpels-watches" class="lm-collection__chip">Van Cleef &amp; Arpels</a>
+        <a href="/collections/chopard-watches" class="lm-collection__chip">Chopard</a>
+        <a href="/collections/other-watch-brands" class="lm-collection__chip">Other brands</a>
+      </nav>
+    {%- endif -%}
+
     {%- comment -%} Style quick-filter bar (jewelry only; never on loose diamonds) {%- endcomment -%}
     {%- render 'jewelry-style-bar', collection: collection -%}
 

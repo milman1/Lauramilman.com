@@ -121,6 +121,21 @@ def test_header_nav_order_puts_differentiators_early() -> None:
     assert fine < diamonds < peaceful < maison < timepieces < wedding
 
 
+def test_timepieces_navigation_includes_jacob_and_co() -> None:
+    header = (ROOT / "sections/header.liquid").read_text()
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    jacob_link = 'href="/collections/jacob-co"'
+    assert jacob_link in header
+    assert "Jacob &amp; Co." in header
+    assert jacob_link in collection
+    assert "Jacob &amp; Co." in collection
+    # Keep Jacob with the lead brands so it is not clipped under Other Brands.
+    assert header.index('href="/collections/cartier-watches"') < header.index(jacob_link)
+    assert header.index(jacob_link) < header.index('href="/collections/other-watch-brands"')
+    assert "max-height: 500px" not in header
+    assert collection.index('href="/collections/cartier-watches"') < collection.index(jacob_link)
+
+
 def test_footer_and_search_surface_the_worlds() -> None:
     footer = (ROOT / "sections/footer.liquid").read_text()
     assert 'href="/collections/natural-diamonds"' in footer
@@ -171,7 +186,14 @@ def test_related_merchandising_photos_fill_their_frames() -> None:
     maison = (ROOT / "sections/preowned-maison.liquid").read_text()
     theme_css = (ROOT / "assets/theme.css").read_text()
     assert "object-fit: cover" in diamonds
-    assert "grid-template-rows: 220px 1fr" in diamonds
+    assert "grid-template-rows: auto 1fr" in diamonds
+    assert "aspect-ratio: 16 / 9" in diamonds
+    for asset in [
+        "diamond-destination-natural.webp",
+        "diamond-destination-lab.webp",
+    ]:
+        assert asset in diamonds
+        assert (ROOT / "assets" / asset).exists()
     assert "aspect-ratio: 4 / 5" in maison
     assert "object-fit: cover" in maison
     image_box = theme_css.split(".collection-card__image-box {")[1].split("}")[0]
@@ -188,6 +210,67 @@ def test_hero_copy_names_the_full_assortment() -> None:
     assert "timepiece" in sub
     assert data["sections"]["hero"]["settings"]["primary_cta_text"] == "Shop Fine Jewelry"
     assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/natural-diamonds"
+
+
+def test_worlds_cards_use_category_images_and_theme_tones() -> None:
+    worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
+    generated_assets = [
+        "shop-world-loose-diamonds.webp",
+        "shop-world-preowned-maison.webp",
+        "shop-world-preowned-timepieces.webp",
+        "shop-world-fine-jewelry.webp",
+    ]
+    for asset in generated_assets:
+        assert asset in worlds
+        assert (ROOT / "assets" / asset).exists()
+
+    data = load_json(ROOT / "templates/index.json")
+    tones = [
+        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
+        for block_id in data["sections"]["shop-worlds"]["block_order"]
+    ]
+    assert tones == ["navy", "warm", "warm", "warm", "warm"]
+    warm_css = worlds.split(".lm-worlds__card {")[1].split("}")[0]
+    assert "cream" in warm_css
+    assert "navy-deep" not in warm_css
+
+
+def test_diamond_filter_offers_lab_and_natural_origin() -> None:
+    liquid = (ROOT / "sections/diamond-filter.liquid").read_text()
+    assert 'aria-label="Diamond origin"' in liquid
+    assert 'href="/collections/lab-grown-diamonds"' in liquid
+    assert 'href="/collections/natural-diamonds"' in liquid
+    assert "lm-dfilter__origin" in liquid
+    assert "overflow: hidden" in liquid
+    storefront = (ROOT / "assets/diamond-storefront.js").read_text()
+    assert "Math.min(100" in storefront
+    assert "data-add-handle" in storefront
+    assert "data-buy-handle" in storefront
+    pdp = (ROOT / "sections/main-product-diamond.liquid").read_text()
+    assert "data-buy-now" in pdp
+    assert "Buy now" in pdp
+    theme_js = (ROOT / "assets/theme.js").read_text()
+    assert "window.lmAddToCart" in theme_js
+    assert "/checkout" in theme_js
+
+
+def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
+    drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
+    assert "fd_is_watch" in drawer
+    assert "fd_is_estate" in drawer
+    assert "diamond shape" in drawer
+    assert "useful_values" in drawer
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "Shop by brand" in collection
+    assert "/collections/rolex-watches" in collection
+
+
+def test_only_shopify_inbox_chat_is_rendered() -> None:
+    layout = (ROOT / "layout/theme.liquid").read_text()
+    settings = load_json(ROOT / "config/settings_data.json")
+    assert "render 'chat-widget'" not in layout
+    app_blocks = settings["current"]["blocks"].values()
+    assert any("shopify://apps/inbox/blocks/chat/" in block["type"] for block in app_blocks)
 
 
 if __name__ == "__main__":

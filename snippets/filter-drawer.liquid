@@ -6,23 +6,36 @@
   band filters (client-side) via jewelry-style-filters. Loose diamond
   collections (natural-diamonds, lab-grown-diamonds) do not use this drawer.
 
-  Search & Discovery groups still render when configured:
-    · Metal  → rounded pill toggles with a literal metal swatch dot
-    · Carat  → suppressed when jewelry carat bands are present (avoids raw ct list)
-    · Shape  → checkbox list
+  Search & Discovery groups still render when configured, but only when they
+  match the collection and offer more than one useful choice:
+    · Timepieces hide gemological filters (carat, diamond shape, clarity, cut)
+    · Estate/vintage hide diamond-grade lists that do not apply to signed jewelry
+    · Jewelry collections keep Style / Metal / Carat bands and skip the raw lists
     · Price  → min/max inputs (native price filter)
-    · everything else → checkbox list
+    · everything else with 2+ in-stock values → checkbox list
 
   Usage: {% render 'filter-drawer', results: collection %}
 {%- endcomment -%}
 
 {%- liquid
-  assign jf_drawer_handle = results.handle
+  assign jf_drawer_handle = results.handle | downcase
   assign jf_drawer_enabled = false
   case jf_drawer_handle
     when 'earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
       assign jf_drawer_enabled = true
   endcase
+
+  assign fd_is_watch = false
+  if jf_drawer_handle == 'time-pieces' or jf_drawer_handle contains 'watch' or jf_drawer_handle contains 'timepiece' or jf_drawer_handle contains 'time-piece'
+    assign fd_is_watch = true
+  endif
+
+  assign fd_is_estate = false
+  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned'
+    unless fd_is_watch
+      assign fd_is_estate = true
+    endunless
+  endif
 -%}
 
 <div class="refine-overlay" id="RefineOverlay" hidden></div>
@@ -73,9 +86,8 @@
       {%- assign flabel = filter.label | downcase -%}
       {%- assign jf_skip_filter = false -%}
       {%- comment -%}
-        When jewelry carat bands are present, skip the raw metafield Carat Weight
-        list (0.03, 0.37…). Keep Price, Shape, Color, Clarity, Availability.
-        Also skip S&D Metal when our Metal Type pills are already shown.
+        Hide filters that do not match this collection, or that only offer
+        one real choice (they add noise, not value).
       {%- endcomment -%}
       {%- if jf_drawer_enabled -%}
         {%- if flabel contains 'carat' or flabel == 'weight' or flabel contains 'diamond weight' -%}
@@ -85,6 +97,27 @@
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}
+      {%- if fd_is_watch -%}
+        {%- if flabel contains 'carat' or flabel contains 'diamond shape' or flabel contains 'clarity' or flabel contains 'cut grade' or flabel == 'cut' or flabel == 'colour' or flabel contains 'diamond weight' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- if fd_is_estate -%}
+        {%- if flabel contains 'clarity' or flabel contains 'diamond shape' or flabel contains 'cut grade' or flabel == 'cut' or flabel contains 'carat' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- unless jf_skip_filter or filter.type == 'price_range' or filter.type == 'boolean' -%}
+        {%- assign useful_values = 0 -%}
+        {%- for value in filter.values -%}
+          {%- if value.count > 0 or value.active -%}
+            {%- assign useful_values = useful_values | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if useful_values < 2 -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endunless -%}
       {%- unless jf_skip_filter -%}
       <div class="refine__group" data-refine-group>
         <button type="button" class="refine__group-head" aria-expanded="true">
@@ -263,6 +296,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     box-shadow: -20px 0 60px rgba(30, 17, 9, 0.25);
   }
@@ -593,6 +627,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-width: 0;
   }
 
   .refine__price-field {
@@ -602,7 +637,9 @@
     border: 1px solid var(--border-medium, #CFC7B8);
     border-radius: var(--radius-sm, 4px);
     padding: 0.5rem 0.75rem;
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
     background: var(--warm-white, #FDFAF6);
     transition: border-color 0.2s ease;
   }
@@ -619,6 +656,8 @@
 
   .refine__price-field input {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     border: none;
     background: none;
     outline: none;
