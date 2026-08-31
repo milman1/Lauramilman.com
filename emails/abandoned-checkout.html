@@ -1,11 +1,10 @@
 <!--
-  Shopify Email · Code your own
-  Automation: Marketing → Automations → Abandoned checkout
-  Subject: You left something behind
-  Preview: Your checkout is saved. Finish when you are ready.
-  Merge tags: Shopify Email may expose customer.first_name / first_name
-  and abandoned_checkout.url / abandoned_checkout_url. Preview a real
-  checkout and confirm the name and Return to checkout URL before turning on.
+  Shopify Admin → Settings → Notifications → Customer notifications
+  Template: Abandoned checkout (Edit code)
+  Do not paste this into Marketing → Automations / Shopify Messaging.
+  Messaging keeps locked system blocks and cannot replace the full document.
+  Recovery link is {{ url }}. Line items are subtotal_line_items, same as
+  order confirmation. Subject: You left something behind
 -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -20,6 +19,11 @@
     <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
       Your checkout is saved. Pieces like these do not sit around.
     </div>
+    {%- if url != blank -%}
+      {%- assign recovery_href = url -%}
+    {%- else -%}
+      {%- assign recovery_href = shop.url | append: '/cart' -%}
+    {%- endif -%}
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
       <tr>
         <td align="center" style="padding:32px 16px;">
@@ -34,14 +38,14 @@
               <td style="padding:40px 36px 16px;text-align:center;">
                 <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Still waiting</p>
                 <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">You left something behind</h1>
-                <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
-                  {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} — your checkout is saved. Finish when you are ready; we held the details.
+                <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+                  {% if billing_address.first_name %}{{ billing_address.first_name }}{% elsif customer.first_name %}{{ customer.first_name }}{% else %}Hello{% endif %} — your checkout is saved. Finish when you are ready; we held the details.
                 </p>
               </td>
             </tr>
-            {% if abandoned_checkout.line_items %}
+            {% if subtotal_line_items.size > 0 %}
             <tr>
-              <td style="padding:0 36px 24px;">
+              <td style="padding:8px 36px 16px;">
                 <table width="100%" cellspacing="0" cellpadding="0" border="0">
                   <caption style="text-align:left;padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#A88340;">Your selection</caption>
                   <thead>
@@ -51,26 +55,26 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for item in abandoned_checkout.line_items %}
+                    {% for line in subtotal_line_items %}
                     <tr>
                       <td style="padding:12px 0;border-bottom:1px solid #DDD5C5;vertical-align:top;">
                         <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                           <tr>
-                            {% if item.image_url %}
+                            {% if line.image %}
                             <td width="72" style="padding-right:12px;vertical-align:top;">
-                              <img src="{{ item.image_url }}" width="72" height="72" alt="{{ item.product_title | escape }}" style="display:block;border:0;width:72px;height:72px;">
+                              <img src="{{ line | img_url: 'compact_cropped' }}" width="72" height="72" alt="{{ line.title | escape }}" style="display:block;border:0;width:72px;height:72px;">
                             </td>
                             {% endif %}
                             <td style="vertical-align:top;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#2C1810;">
-                              {{ item.product_title }}
-                              {% if item.variant_title != blank %}
-                              <br><span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#5A5248;">{{ item.variant_title }}</span>
+                              {{ line.title }}
+                              {% if line.variant_title != blank and line.variant_title != 'Default Title' %}
+                              <br><span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#5A5248;">{{ line.variant_title }}</span>
                               {% endif %}
                             </td>
                           </tr>
                         </table>
                       </td>
-                      <td align="right" style="padding:12px 0;border-bottom:1px solid #DDD5C5;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;vertical-align:top;">{{ item.quantity }}</td>
+                      <td align="right" style="padding:12px 0;border-bottom:1px solid #DDD5C5;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;vertical-align:top;">{{ line.quantity }}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -78,19 +82,12 @@
               </td>
             </tr>
             {% endif %}
-            {%- if abandoned_checkout.url != blank -%}
-              {%- assign checkout_href = abandoned_checkout.url -%}
-            {%- elsif abandoned_checkout_url != blank -%}
-              {%- assign checkout_href = abandoned_checkout_url -%}
-            {%- else -%}
-              {%- assign checkout_href = shop.url | append: '/cart' -%}
-            {%- endif -%}
             <tr>
               <td align="center" style="padding:8px 36px 28px;">
                 <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="background:#1E1109;">
-                      <a href="{{ checkout_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">Return to checkout</a>
+                      <a href="{{ recovery_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">Return to checkout</a>
                     </td>
                   </tr>
                 </table>
@@ -100,18 +97,11 @@
             <tr>
               <td style="padding:20px 36px 28px;border-top:1px solid #DDD5C5;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#5A5248;">
                 <p style="margin:0 0 8px;color:#2C1810;">Laura Milman New York</p>
-                <p style="margin:0 0 12px;">
+                <p style="margin:0;">
                   {% if shop.address.address1 != blank %}{{ shop.address.address1 }}{% if shop.address.address2 != blank %}, {{ shop.address.address2 }}{% endif %}<br>{% endif %}
                   {% if shop.address.city != blank %}{{ shop.address.city }}{% if shop.address.province != blank %}, {{ shop.address.province }}{% endif %} {{ shop.address.zip }}<br>{% else %}New York, NY · By appointment<br>{% endif %}
                   <a href="mailto:hello@lauramilman.com" style="color:#4A1428;">hello@lauramilman.com</a>
                 </p>
-                <p style="margin:0;">
-                  <a href="{{ unsubscribe_url }}" style="color:#4A1428;">Unsubscribe</a>
-                  ·
-                  <a href="https://www.lauramilman.com/policies/privacy-policy" style="color:#4A1428;">Privacy policy</a>
-                </p>
-                {{ open_tracking }}
-                {{ open_tracking_block }}
               </td>
             </tr>
           </table>

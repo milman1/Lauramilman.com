@@ -221,38 +221,35 @@ The storefront popup and newsletter reveal this code after signup.
 
 ## 7. Branded emails
 
-Paste-ready HTML lives in `/emails`. Shopify sends them automatically after
-the matching automation or notification template is installed.
+Paste-ready HTML lives in `/emails`. Shopify Messaging cannot replace locked
+automation blocks, so recovery and receipts go in **Settings → Notifications**.
 
-**Do this first (subscribe → welcome mail):**
+**Welcome (subscribe):** Marketing → Automations → Welcome new subscribers →
+add **Custom Liquid** and paste `emails/welcome.messaging-block.html`. Do not
+paste the full `welcome.html` document there. From:
+`Laura Milman New York <hello@lauramilman.com>`. Subject:
+`Your inner-circle welcome — 10% off jewelry`.
 
-1. Confirm discount `LMNYWELCOME` exists (§6).
-2. Shopify Admin → **Marketing → Automations → Welcome new subscribers**.
-3. From: Laura Milman New York `<hello@lauramilman.com>`.
-4. Subject: `Your inner-circle welcome — 10% off jewelry`.
-5. Choose **Code your own** and paste `emails/welcome.html`.
-6. Send a test, then turn the automation **on**.
+**Abandoned checkout / cart:** Settings → Notifications → Abandoned checkout
+→ **Edit code** → paste `emails/abandoned-checkout.html`. Then pause the
+Messaging “You left items in your cart” automation so it does not double-send.
 
-The homepage popup and newsletter already tag `newsletter,welcome10` and
-accept marketing. The on-page success message still shows the code if mail
-is delayed.
-
-Then paste the rest:
+**Order, shipping, account:** Settings → Notifications → Edit code.
 
 | File | Use in |
 |------|--------|
-| `emails/welcome.html` | Marketing → Automations → Welcome new subscribers |
-| `emails/abandoned-checkout.html` | Marketing → Automations → Abandoned checkout |
-| `emails/abandoned-cart.html` | Marketing → Automations → Abandoned cart |
-| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation (Edit code) |
+| `emails/welcome.messaging-block.html` | Marketing → Automations → Welcome → Custom Liquid |
+| `emails/welcome.html` | Optional Klaviyo full-document welcome |
+| `emails/abandoned-checkout.html` | Settings → Notifications → Abandoned checkout |
+| `emails/abandoned-cart.html` | Settings → Notifications → Abandoned cart (if listed) |
+| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation |
 | `emails/shipping-confirmation.html` | Settings → Notifications → Shipping confirmation |
 | `emails/customer-account-welcome.html` | Settings → Notifications → Customer account welcome |
 | `emails/customer-account-invite.html` | Settings → Notifications → Customer account invite |
 
-Full steps, subject lines, and what not to change: `emails/README.md`.
-Set **Settings → General → Store address** so the footer prints a real
-postal address. Update **Settings → Policies → Refund policy** to match
-the 14-day jewelry / watches-exchange-only copy on `/pages/shipping-returns`.
+Full steps: `emails/README.md`. Set **Settings → General → Store address**.
+Verify sender `hello@lauramilman.com`. Update **Settings → Policies → Refund
+policy** to match `/pages/shipping-returns`.
 
 ---
 

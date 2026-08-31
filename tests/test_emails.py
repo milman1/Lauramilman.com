@@ -11,6 +11,8 @@ EMAILS = ROOT / "emails"
 
 MARKETING = (
     "welcome.html",
+)
+RECOVERY = (
     "abandoned-checkout.html",
     "abandoned-cart.html",
 )
@@ -19,7 +21,7 @@ TRANSACTIONAL = (
     "shipping-confirmation.html",
     "customer-account-welcome.html",
     "customer-account-invite.html",
-)
+) + RECOVERY
 PASTE_FILES = MARKETING + TRANSACTIONAL
 
 BRAND_TOKENS = (
@@ -39,6 +41,7 @@ def test_paste_files_exist() -> None:
     for name in PASTE_FILES:
         assert (EMAILS / name).is_file(), name
     assert (EMAILS / "README.md").is_file()
+    assert (EMAILS / "welcome.messaging-block.html").is_file()
 
 
 def test_accessibility_lang_dir_title_and_single_h1() -> None:
@@ -103,17 +106,30 @@ def test_shipping_confirmation_has_tracking() -> None:
     assert "order_status_url" in html
 
 
-def test_abandoned_templates_use_shopify_email_objects() -> None:
+def test_abandoned_templates_use_notification_liquid() -> None:
     checkout = read("abandoned-checkout.html")
     cart = read("abandoned-cart.html")
-    assert "abandoned_checkout.url" in checkout
-    assert "abandoned_checkout_url" in checkout
-    assert "abandoned_checkout.line_items" in checkout
-    assert "abandoned_visit.url" in cart
-    assert "cart_url" in cart
-    assert "abandoned_visit.products_added_to_cart" in cart
-    assert "first_name" in checkout
-    assert "first_name" in cart
+    for html, name in ((checkout, "abandoned-checkout.html"), (cart, "abandoned-cart.html")):
+        assert "{{ url }}" in html, name
+        assert "subtotal_line_items" in html, name
+        assert "billing_address.first_name" in html, name
+        assert "{{ unsubscribe_url }}" not in html, name
+        assert "Marketing → Automations" not in html.split("-->")[0] or "Do not paste" in html
+        assert "Settings → Notifications" in html
+    assert "Return to checkout" in checkout
+    assert "View cart" in cart
+    readme = (EMAILS / "README.md").read_text()
+    assert "Settings → Notifications" in readme
+    assert "welcome.messaging-block.html" in readme
+
+
+def test_welcome_messaging_block_is_inner_card_only() -> None:
+    block = (EMAILS / "welcome.messaging-block.html").read_text()
+    assert "<!DOCTYPE html>" not in block
+    assert "<html" not in block
+    assert "LMNYWELCOME" in block
+    assert "{{ unsubscribe_url }}" not in block
+    assert "box-sizing:border-box" in block
 
 
 def test_account_templates_use_activation_and_account_url() -> None:
