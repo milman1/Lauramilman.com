@@ -22,6 +22,7 @@
   data-price-cents="{{ product.price }}"
   data-metal="{{ pc_metal | escape }}"
   data-carat="{{ pc_carat | escape }}"
+  data-vendor="{{ product.vendor | downcase | escape }}"
 >
   <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ product.title | escape }}">
     {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}

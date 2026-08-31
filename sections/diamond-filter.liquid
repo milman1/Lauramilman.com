@@ -22,6 +22,23 @@
   assign cut_order = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ','
   assign shape_order = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
   assign stone_kind = section.settings.stone_kind | default: 'lab'
+  if collection.handle == 'lab-grown-diamonds'
+    assign stone_kind = 'lab'
+  elsif collection.handle == 'natural-diamonds'
+    assign stone_kind = 'natural'
+  endif
+  assign origin_is_lab = false
+  if stone_kind == 'lab'
+    assign origin_is_lab = true
+  endif
+  assign carat_floor = 0.3
+  assign carat_ceil = 15
+  assign price_floor = 0
+  assign price_ceil = 50000
+  if stone_kind == 'natural'
+    assign carat_ceil = 30
+    assign price_ceil = 250000
+  endif
 -%}
 
 {% render 'structured-data-collection', collection: collection, include_products: false %}
@@ -47,6 +64,10 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
+        <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
+        <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
+      </div>
     </header>
 
     <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ collection.url }}" method="get">
@@ -73,16 +94,16 @@
             Carat
             <button type="button" class="lm-dfilter__info" aria-label="About carat" data-tip="Carat is weight, not size: one carat is 200 milligrams.">i</button>
           </span>
-          <div class="lm-range" data-range data-range-key="carat" data-floor="0.3" data-ceil="10" data-step="0.01">
+          <div class="lm-range" data-range data-range-key="carat" data-floor="{{ carat_floor }}" data-ceil="{{ carat_ceil }}" data-step="0.01">
             <div class="lm-range__inputs">
               <label class="lm-range__field">
                 <span>Min</span>
-                <input type="number" inputmode="decimal" step="0.01" min="0.3" max="10" value="0.3" data-range-min>
+                <input type="number" inputmode="decimal" step="0.01" min="{{ carat_floor }}" max="{{ carat_ceil }}" value="{{ carat_floor }}" data-range-min>
               </label>
               <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
               <label class="lm-range__field">
                 <span>Max</span>
-                <input type="number" inputmode="decimal" step="0.01" min="0.3" max="10" value="10" data-range-max>
+                <input type="number" inputmode="decimal" step="0.01" min="{{ carat_floor }}" max="{{ carat_ceil }}" value="{{ carat_ceil }}" data-range-max>
               </label>
             </div>
             <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
@@ -94,16 +115,16 @@
             Price
             <button type="button" class="lm-dfilter__info" aria-label="About price" data-tip="Every stone is priced individually against the current market.">i</button>
           </span>
-          <div class="lm-range" data-range data-range-key="price" data-floor="0" data-ceil="50000" data-step="50">
+          <div class="lm-range" data-range data-range-key="price" data-floor="{{ price_floor }}" data-ceil="{{ price_ceil }}" data-step="50">
             <div class="lm-range__inputs">
               <label class="lm-range__field">
                 <span>Min {{ cart.currency.symbol }}</span>
-                <input type="number" inputmode="numeric" step="50" min="0" max="50000" value="0" data-range-min>
+                <input type="number" inputmode="numeric" step="50" min="{{ price_floor }}" max="{{ price_ceil }}" value="{{ price_floor }}" data-range-min>
               </label>
               <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
               <label class="lm-range__field">
                 <span>Max {{ cart.currency.symbol }}</span>
-                <input type="number" inputmode="numeric" step="50" min="0" max="50000" value="50000" data-range-max>
+                <input type="number" inputmode="numeric" step="50" min="{{ price_floor }}" max="{{ price_ceil }}" value="{{ price_ceil }}" data-range-max>
               </label>
             </div>
             <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
@@ -211,6 +232,10 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
+        <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
+        <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
+      </div>
     </header>
 
 {%- if has_any -%}
@@ -539,12 +564,52 @@
     border: 1px solid var(--rule-light, #DDD5C5);
     border-radius: var(--radius-md, 8px);
     padding: 2rem;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .lm-dfilter__origin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 1.25rem auto 0;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    overflow: hidden;
+    background: var(--warm-white, #FDFAF6);
+  }
+
+  .lm-dfilter__origin-btn {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted, #8A8070);
+    padding: 0.55rem 1.15rem;
+    transition: all 0.2s ease;
+  }
+
+  .lm-dfilter__origin-btn:hover {
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-dfilter__origin-btn.is-active {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-dfilter--navy .lm-dfilter__origin-btn.is-active {
+    background: var(--navy, #1A1F3A);
   }
 
   .lm-dfilter__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2rem 3rem;
+    min-width: 0;
   }
 
   .lm-dfilter__group--wide {
@@ -680,14 +745,22 @@
   }
 
   /* ── Ranges ── */
+  .lm-range {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
   .lm-range__inputs {
     display: flex;
     align-items: flex-end;
     gap: 0.75rem;
+    min-width: 0;
   }
 
   .lm-range__field {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
@@ -702,6 +775,7 @@
   }
 
   .lm-range__field input {
+    box-sizing: border-box;
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.9rem;
     color: var(--text-dark, #2C1810);
@@ -710,6 +784,15 @@
     border-radius: var(--radius-sm, 4px);
     background: var(--warm-white, #FDFAF6);
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    -moz-appearance: textfield;
+  }
+
+  .lm-range__field input::-webkit-outer-spin-button,
+  .lm-range__field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .lm-range__field input:focus {
@@ -720,6 +803,7 @@
   .lm-range__dash {
     color: var(--text-muted, #8A8070);
     padding-bottom: 0.7rem;
+    flex: 0 0 auto;
   }
 
   .lm-range__track {
@@ -728,6 +812,8 @@
     margin: 1.1rem 0 0.25rem;
     background: var(--rule-light, #DDD5C5);
     border-radius: 3px;
+    overflow: hidden;
+    max-width: 100%;
   }
 
   .lm-range__fill {
@@ -736,6 +822,7 @@
     bottom: 0;
     left: 0;
     right: 0;
+    max-width: 100%;
     background: var(--gold, #C9A050);
     border-radius: 3px;
   }
@@ -1185,24 +1272,61 @@
     }
   }
 
-  /* API mode: reserve CTA only — cards reuse .product-card image markup */
+  /* API mode: purchase + reserve CTAs — cards reuse .product-card image markup */
   .lm-dfilter__results-host.is-loading {
     opacity: 0.55;
     pointer-events: none;
   }
+  .lm-dfilter__results-host .lm-stone-card__actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+  .lm-dfilter__results-host .lm-stone-card__atc,
+  .lm-dfilter__results-host .lm-stone-card__buy {
+    flex: 1;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.55rem 0.4rem;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .lm-dfilter__results-host .lm-stone-card__atc {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    border-color: var(--espresso, #1E1109);
+  }
+  .lm-dfilter__results-host .lm-stone-card__buy {
+    background: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+    border-color: var(--gold, #C9A050);
+  }
   .lm-dfilter__results-host .lm-stone-card__reserve {
-    margin-top: 0.65rem;
+    margin-top: 0.45rem;
     align-self: flex-start;
     background: none;
     border: 0;
     padding: 0;
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--gold-dark, #A88340);
+    color: var(--text-muted, #8A8070);
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__atc {
+    background: var(--navy, #1A1F3A);
+    border-color: var(--navy, #1A1F3A);
+  }
+  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__buy {
+    background: var(--pd-blue, #5B7FBD);
+    border-color: var(--pd-blue, #5B7FBD);
+    color: #fff;
   }
   .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__reserve {
     color: var(--pd-blue, #5B7FBD);

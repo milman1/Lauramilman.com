@@ -190,6 +190,48 @@ def test_hero_copy_names_the_full_assortment() -> None:
     assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/natural-diamonds"
 
 
+def test_worlds_cards_share_navy_text_band() -> None:
+    worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
+    info_css = worlds.split(".lm-worlds__info")[1].split(".lm-worlds__title")[0]
+    assert "navy-soft" in info_css
+    data = load_json(ROOT / "templates/index.json")
+    tones = [
+        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
+        for block_id in data["sections"]["shop-worlds"]["block_order"]
+    ]
+    assert tones == ["navy", "navy", "navy", "navy", "navy"]
+
+
+def test_diamond_filter_offers_lab_and_natural_origin() -> None:
+    liquid = (ROOT / "sections/diamond-filter.liquid").read_text()
+    assert 'aria-label="Diamond origin"' in liquid
+    assert 'href="/collections/lab-grown-diamonds"' in liquid
+    assert 'href="/collections/natural-diamonds"' in liquid
+    assert "lm-dfilter__origin" in liquid
+    assert "overflow: hidden" in liquid
+    storefront = (ROOT / "assets/diamond-storefront.js").read_text()
+    assert "Math.min(100" in storefront
+    assert "data-add-handle" in storefront
+    assert "data-buy-handle" in storefront
+    pdp = (ROOT / "sections/main-product-diamond.liquid").read_text()
+    assert "data-buy-now" in pdp
+    assert "Buy now" in pdp
+    theme_js = (ROOT / "assets/theme.js").read_text()
+    assert "window.lmAddToCart" in theme_js
+    assert "/checkout" in theme_js
+
+
+def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
+    drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
+    assert "fd_is_watch" in drawer
+    assert "fd_is_estate" in drawer
+    assert "diamond shape" in drawer
+    assert "useful_values" in drawer
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "Shop by brand" in collection
+    assert "/collections/rolex-watches" in collection
+
+
 if __name__ == "__main__":
     tests = [value for name, value in globals().items() if name.startswith("test_")]
     failed = 0

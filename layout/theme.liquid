@@ -162,6 +162,8 @@
 
     <div id="cart-notification" class="cart-notification" aria-live="polite" aria-atomic="true" hidden>
       <p class="cart-notification__text">Added to cart</p>
+      <a class="cart-notification__checkout" href="{{ routes.cart_url }}">View cart</a>
+      <a class="cart-notification__checkout cart-notification__checkout--primary" href="/checkout">Checkout</a>
     </div>
 
     <ul hidden>

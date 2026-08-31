@@ -135,9 +135,16 @@
         {%- form 'product', product, id: form_id, data-product-form: '' -%}
           <input type="hidden" name="id" value="{{ v.id }}">
           <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="dpdp__atc atc-btn" {% unless v.available %}disabled{% endunless %}>
-            {%- if v.available -%}Add to Cart{%- else -%}Sold{%- endif -%}
-          </button>
+          <div class="dpdp__buy-row">
+            <button type="submit" class="dpdp__atc atc-btn" {% unless v.available %}disabled{% endunless %}>
+              {%- if v.available -%}Add to Cart{%- else -%}Sold{%- endif -%}
+            </button>
+            {%- if v.available -%}
+              <button type="submit" class="dpdp__atc dpdp__atc--checkout atc-btn" data-buy-now>
+                Buy now
+              </button>
+            {%- endif -%}
+          </div>
         {%- endform -%}
 
         {% render 'product-inquiry', product: product %}
@@ -424,6 +431,22 @@
     transition: all 0.25s ease;
   }
 
+  .dpdp__buy-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .dpdp__atc--checkout {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .dpdp__atc--checkout:hover:not(:disabled) {
+    background: var(--text-dark, #2C1810);
+    color: var(--cream, #FAF6F0);
+  }
+
   .dpdp__atc:hover:not(:disabled) {
     background: var(--gold-dark, #A88340);
     color: var(--cream, #FAF6F0);
@@ -538,6 +561,13 @@
   .dpdp--navy .dpdp__atc:hover:not(:disabled) {
     background: var(--navy-deep, #12162B);
   }
+  .dpdp--navy .dpdp__atc--checkout {
+    background: var(--pd-blue, #5B7FBD);
+    color: #fff;
+  }
+  .dpdp--navy .dpdp__atc--checkout:hover:not(:disabled) {
+    background: var(--navy, #1A1F3A);
+  }
 
   @media (max-width: 900px) {
     .dpdp__layout {
@@ -552,6 +582,9 @@
     }
     .dpdp__price {
       font-size: 1.8rem;
+    }
+    .dpdp__buy-row {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

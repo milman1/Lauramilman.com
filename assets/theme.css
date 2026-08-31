@@ -1918,11 +1918,43 @@ p {
   transform: translateY(20px);
   opacity: 0;
   transition: all 0.3s ease;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  max-width: min(420px, calc(100vw - 2rem));
 }
 
-.cart-notification.active {
+.cart-notification.active,
+.cart-notification.show {
   transform: translateY(0);
   opacity: 1;
+}
+
+.cart-notification__text {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.cart-notification__checkout {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-light, #E2C27A);
+  text-decoration: none;
+}
+
+.cart-notification__checkout--primary {
+  color: var(--espresso, #1E1109);
+  background: var(--gold, #C9A050);
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+}
+
+.cart-notification[hidden] {
+  display: none !important;
 }
 
 /* =============================================
