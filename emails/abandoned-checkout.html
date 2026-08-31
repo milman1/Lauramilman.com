@@ -20,8 +20,8 @@
             <td style="padding:40px 36px 24px;text-align:center;">
               <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#C9A050;">Still waiting</p>
               <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;line-height:1.2;color:#2C1810;">You left something behind</h1>
-              <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">{{ first_name | default: "Hello" }} — your checkout is saved. Pieces like these do not sit around. Finish when you are ready; we held the details.</p>
-              <a href="{{ abandoned_checkout_url }}" style="display:inline-block;padding:14px 28px;background:#1E1109;color:#FAF6F0;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;">Return to checkout</a>
+              <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">{{ customer.first_name | default: first_name | default: "Hello" }} — your checkout is saved. Pieces like these do not sit around. Finish when you are ready; we held the details.</p>
+              <a href="{{ abandoned_checkout.url | default: abandoned_checkout_url }}" style="display:inline-block;padding:14px 28px;background:#1E1109;color:#FAF6F0;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;">Return to checkout</a>
             </td>
           </tr>
           <tr>
