@@ -38,7 +38,8 @@
           </div>
           <div class="collection-card__info">
             <h3 class="collection-card__name">{{ block.settings.title | default: collection.title }}</h3>
-            <div class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'Piece', 'Pieces' }}</div>
+            <p class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'piece', 'pieces' }}</p>
+            <span class="collection-card__cta">Explore</span>
           </div>
         </a>
       {%- else -%}
@@ -49,7 +50,8 @@
           </div>
           <div class="collection-card__info">
             <h3 class="collection-card__name">{{ block.settings.title | default: 'Collection' }}</h3>
-            <div class="collection-card__count">— Pieces</div>
+            <p class="collection-card__count">— pieces</p>
+            <span class="collection-card__cta">Explore</span>
           </div>
         </div>
       {%- endif -%}

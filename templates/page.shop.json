@@ -6,10 +6,10 @@
         "eyebrow": "Laura Milman · New York",
         "heading": "Shop Laura Milman",
         "subheading": "Fine jewelry, certified diamonds, authenticated maison pieces, and pre-owned timepieces — designed in New York, crafted in Italy.",
-        "primary_cta_text": "All Fine Jewelry",
+        "primary_cta_text": "Shop Fine Jewelry",
         "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Book a Consultation",
-        "secondary_cta_url": "/pages/private-clients",
+        "secondary_cta_text": "Explore Diamonds",
+        "secondary_cta_url": "/collections/natural-diamonds",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
@@ -32,7 +32,7 @@
         "trust-3": {
           "type": "item",
           "settings": {
-            "text": "Watches: Exchanges Only"
+            "text": "Authenticity Guaranteed"
           }
         },
         "trust-4": {
@@ -110,54 +110,7 @@
       "settings": {
         "eyebrow": "Explore Laura Milman",
         "heading": "Shop Our Worlds",
-        "subheading": "Start with what you came for — lab-grown jewelry, loose diamonds, maison estate, timepieces, or fine jewelry."
-      }
-    },
-    "collections-grid": {
-      "type": "collections-grid",
-      "blocks": {
-        "cat-rings": {
-          "type": "collection",
-          "settings": {
-            "collection": "rings"
-          }
-        },
-        "cat-necklaces": {
-          "type": "collection",
-          "settings": {
-            "collection": "necklaces"
-          }
-        },
-        "cat-earrings": {
-          "type": "collection",
-          "settings": {
-            "collection": "earrings"
-          }
-        },
-        "cat-bracelets": {
-          "type": "collection",
-          "settings": {
-            "collection": "bracelets"
-          }
-        },
-        "cat-engagement": {
-          "type": "collection",
-          "settings": {
-            "collection": "engagement-rings"
-          }
-        }
-      },
-      "block_order": [
-        "cat-rings",
-        "cat-necklaces",
-        "cat-earrings",
-        "cat-bracelets",
-        "cat-engagement"
-      ],
-      "settings": {
-        "eyebrow": "Shop by Jewelry Type",
-        "view_all_link": "/collections/all",
-        "title": "Rings, Necklaces & More"
+        "subheading": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
       }
     },
     "preowned-maison": {
@@ -201,43 +154,208 @@
       "settings": {
         "eyebrow": "Authenticated Estate",
         "title": "The Pre-Owned Maison",
-        "description": "Signed pieces from the great houses — sourced, examined and authenticated in New York.",
+        "description": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust.",
         "trust_line": "Every estate piece is individually authenticated and documented",
         "cta_text": "Explore the Maison Vault",
         "cta_url": "/collections/vintage-jewelry"
+      }
+    },
+    "diamond-destination": {
+      "type": "diamond-destination",
+      "blocks": {
+        "dest-natural": {
+          "type": "destination",
+          "settings": {
+            "collection": "natural-diamonds",
+            "title": "Natural Loose Diamonds",
+            "subtitle": "GIA-certified stones, priced against the live market.",
+            "cta_label": "Shop natural diamonds",
+            "link": "",
+            "tone": "warm"
+          }
+        },
+        "dest-lab": {
+          "type": "destination",
+          "settings": {
+            "collection": "lab-grown-diamonds",
+            "title": "Lab-Grown Loose Diamonds",
+            "subtitle": "Certified lab-grown stones with exceptional carat weight.",
+            "cta_label": "Shop lab-grown diamonds",
+            "link": "",
+            "tone": "navy"
+          }
+        }
+      },
+      "block_order": [
+        "dest-natural",
+        "dest-lab"
+      ],
+      "settings": {
+        "eyebrow": "Diamond Destination",
+        "heading": "Certified Loose Diamonds",
+        "description": "Search the way a gemologist would — shape, carat, color, and clarity — across natural and lab-grown stones.",
+        "consult_text": "Need help choosing? Book a diamond consultation",
+        "consult_url": "/pages/private-clients"
+      }
+    },
+    "preowned-timepieces": {
+      "type": "preowned-maison",
+      "blocks": {
+        "watch-rolex": {
+          "type": "maison",
+          "settings": {
+            "collection": "rolex-watches",
+            "title": "Rolex"
+          }
+        },
+        "watch-cartier": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier-watches",
+            "title": "Cartier"
+          }
+        },
+        "watch-jacob": {
+          "type": "maison",
+          "settings": {
+            "collection": "jacob-co",
+            "title": "Jacob & Co."
+          }
+        },
+        "watch-bvlgari": {
+          "type": "maison",
+          "settings": {
+            "collection": "bvlgari-watches",
+            "title": "Bvlgari"
+          }
+        }
+      },
+      "block_order": [
+        "watch-rolex",
+        "watch-cartier",
+        "watch-jacob",
+        "watch-bvlgari"
+      ],
+      "settings": {
+        "eyebrow": "Pre-Owned Timepieces",
+        "title": "Watches, Authenticated",
+        "description": "Rolex, Cartier, Jacob & Co., and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
+        "trust_line": "Authenticated in New York · Watches: exchanges only",
+        "cta_text": "Shop All Timepieces",
+        "cta_url": "/collections/time-pieces"
+      }
+    },
+    "peaceful-diamonds": {
+      "type": "peaceful-diamonds",
+      "blocks": {
+        "pd-point-1": {
+          "type": "point",
+          "settings": {
+            "text": "Certified lab-grown diamonds"
+          }
+        },
+        "pd-point-2": {
+          "type": "point",
+          "settings": {
+            "text": "Crafted to the same LMNY standard"
+          }
+        },
+        "pd-point-3": {
+          "type": "point",
+          "settings": {
+            "text": "Exceptional carat weight, accessible price"
+          }
+        }
+      },
+      "block_order": [
+        "pd-point-1",
+        "pd-point-2",
+        "pd-point-3"
+      ],
+      "settings": {
+        "chip_text": "The Lab-Grown Collection",
+        "title": "Peaceful Diamonds",
+        "byline": "by Laura Milman New York",
+        "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "cta_text": "Shop Peaceful Diamonds",
+        "secondary_cta_text": "",
+        "secondary_cta_url": ""
+      }
+    },
+    "collections-grid": {
+      "type": "collections-grid",
+      "blocks": {
+        "cat-necklaces": {
+          "type": "collection",
+          "settings": {
+            "collection": "necklaces",
+            "title": ""
+          }
+        },
+        "cat-rings": {
+          "type": "collection",
+          "settings": {
+            "collection": "rings",
+            "title": ""
+          }
+        },
+        "cat-bracelets": {
+          "type": "collection",
+          "settings": {
+            "collection": "bracelets",
+            "title": ""
+          }
+        },
+        "cat-pendants": {
+          "type": "collection",
+          "settings": {
+            "collection": "pendants-1",
+            "title": "Pendants"
+          }
+        },
+        "cat-earrings": {
+          "type": "collection",
+          "settings": {
+            "collection": "earrings",
+            "title": ""
+          }
+        }
+      },
+      "block_order": [
+        "cat-necklaces",
+        "cat-rings",
+        "cat-bracelets",
+        "cat-pendants",
+        "cat-earrings"
+      ],
+      "settings": {
+        "eyebrow": "Shop by Jewelry Type",
+        "view_all_link": "/collections/all",
+        "title": "Necklaces, Rings & More"
       }
     },
     "featured-products": {
       "type": "featured-products",
       "settings": {
         "eyebrow": "The Signature Edit",
-        "description": "Pieces chosen for women who go from the office to dinner without changing a thing.",
-        "collection": "rings",
+        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
+        "collection": "bracelets",
         "product_count": 8,
         "cta_text": "View All Fine Jewelry",
         "cta_url": "/collections/all",
-        "title": "Jewelry to Wear This Week"
+        "title": "Pieces to Wear Now"
       }
     },
     "reviews": {
       "type": "google-reviews-strip",
       "settings": {
         "eyebrow": "Client Words",
-        "title": "Reviews",
-        "intro": "See why New York women book with Laura.",
+        "title": "Loved in New York",
+        "intro": "Real appointments, real pieces — read what clients say after working with Laura.",
         "embed_id": "25387276",
-        "cta_label": "Read Google Reviews",
+        "cta_label": "See all reviews",
         "cta_url": "/pages/google-reviews"
-      }
-    },
-    "peaceful-diamonds": {
-      "type": "peaceful-diamonds",
-      "settings": {
-        "chip_text": "The Lab-Grown Collection",
-        "title": "Peaceful Diamonds",
-        "byline": "by Laura Milman New York",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Lab-Grown"
       }
     },
     "closing-cta": {
@@ -258,10 +376,12 @@
     "trust-strip",
     "shop-worlds",
     "preowned-maison",
+    "diamond-destination",
+    "preowned-timepieces",
+    "peaceful-diamonds",
     "collections-grid",
     "featured-products",
     "reviews",
-    "peaceful-diamonds",
     "closing-cta"
   ]
 }
