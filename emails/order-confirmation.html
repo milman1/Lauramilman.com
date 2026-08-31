@@ -3,6 +3,8 @@
   Template: Order confirmation (Edit code)
   This transactional email sends automatically when an order is placed.
   Subject: keep Shopify default, or: Your order {{ name }} is confirmed
+  Order id: use {{ name }} (e.g. #1001). {{ order_number }} is the digits
+  only. Do not use order.name — that object is out of scope here.
 -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">

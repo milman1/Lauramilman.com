@@ -91,6 +91,9 @@ def test_order_confirmation_has_line_items_and_totals() -> None:
     assert "total_price" in html
     assert '<th scope="col"' in html
     assert "14 days" in html
+    assert "{{ name }}" in html
+    assert "{{ order.name }}" not in html
+    assert "order_number | default" not in html
 
 
 def test_shipping_confirmation_has_tracking() -> None:
@@ -104,9 +107,13 @@ def test_abandoned_templates_use_shopify_email_objects() -> None:
     checkout = read("abandoned-checkout.html")
     cart = read("abandoned-cart.html")
     assert "abandoned_checkout.url" in checkout
+    assert "abandoned_checkout_url" in checkout
     assert "abandoned_checkout.line_items" in checkout
     assert "abandoned_visit.url" in cart
+    assert "cart_url" in cart
     assert "abandoned_visit.products_added_to_cart" in cart
+    assert "first_name" in checkout
+    assert "first_name" in cart
 
 
 def test_account_templates_use_activation_and_account_url() -> None:

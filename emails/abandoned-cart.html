@@ -3,6 +3,9 @@
   Automation: Marketing → Automations → Abandoned cart
   Subject: Your cart is still here
   Preview: We saved the piece you were considering.
+  Merge tags: Shopify Email may expose customer.first_name / first_name
+  and abandoned_visit.url / cart_url. Preview a real cart and confirm the
+  name and View cart URL before turning on.
 -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -32,7 +35,7 @@
                 <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Your selection</p>
                 <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">Still in your cart</h1>
                 <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
-                  {% if customer.first_name != blank %}{{ customer.first_name }}{% else %}Hello{% endif %} — we saved the piece you were considering. Prefer to talk it through instead? Book a call or reply to this email.
+                  {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} — we saved the piece you were considering. Prefer to talk it through instead? Book a call or reply to this email.
                 </p>
               </td>
             </tr>
@@ -75,12 +78,19 @@
               </td>
             </tr>
             {% endif %}
+            {%- if abandoned_visit.url != blank -%}
+              {%- assign cart_href = abandoned_visit.url -%}
+            {%- elsif cart_url != blank -%}
+              {%- assign cart_href = cart_url -%}
+            {%- else -%}
+              {%- assign cart_href = 'https://www.lauramilman.com/cart' -%}
+            {%- endif -%}
             <tr>
               <td align="center" style="padding:8px 36px 28px;">
                 <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="background:#C9A050;">
-                      <a href="{{ abandoned_visit.url | default: 'https://www.lauramilman.com/cart' }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#1A140C;box-sizing:border-box;">View cart</a>
+                      <a href="{{ cart_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#1A140C;box-sizing:border-box;">View cart</a>
                     </td>
                   </tr>
                 </table>

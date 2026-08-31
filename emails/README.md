@@ -39,7 +39,7 @@ Same path: **Marketing → Automations**.
 - Abandoned checkout → paste `emails/abandoned-checkout.html`. Subject: `You left something behind`.
 - Abandoned cart → paste `emails/abandoned-cart.html`. Subject: `Your cart is still here`.
 
-Leave Shopify’s delay defaults (often 1 hour for checkout, a few hours for cart). Turn each automation on.
+Leave Shopify’s delay defaults (often 1 hour for checkout, a few hours for cart). After pasting, **preview** a real abandoned checkout/cart and confirm the first name and the button URL render before you turn the automation on. Shopify Email sometimes exposes `first_name` instead of `customer.first_name`, and `abandoned_checkout_url` / `cart_url` instead of the object URLs — the templates accept both.
 
 ## 3. Order, shipping, and account emails
 
@@ -48,7 +48,7 @@ Shopify already sends these. Replacing the body brands them.
 1. **Settings → Notifications → Customer notifications**.
 2. Open the template → **Edit code**.
 3. Replace the HTML body with the matching file. Keep Shopify’s subject line, or use the subject noted in the file’s HTML comment.
-4. **Preview** with a recent order, then save.
+4. **Preview** with a recent order, then save. The order id is `{{ name }}` (for example `#1001`). Do not use `order.name`.
 
 Do this for:
 

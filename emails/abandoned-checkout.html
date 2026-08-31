@@ -3,6 +3,9 @@
   Automation: Marketing → Automations → Abandoned checkout
   Subject: You left something behind
   Preview: Your checkout is saved. Finish when you are ready.
+  Merge tags: Shopify Email may expose customer.first_name / first_name
+  and abandoned_checkout.url / abandoned_checkout_url. Preview a real
+  checkout and confirm the name and Return to checkout URL before turning on.
 -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -32,7 +35,7 @@
                 <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Still waiting</p>
                 <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">You left something behind</h1>
                 <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
-                  {% if customer.first_name != blank %}{{ customer.first_name }}{% else %}Hello{% endif %} — your checkout is saved. Finish when you are ready; we held the details.
+                  {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} — your checkout is saved. Finish when you are ready; we held the details.
                 </p>
               </td>
             </tr>
@@ -75,12 +78,19 @@
               </td>
             </tr>
             {% endif %}
+            {%- if abandoned_checkout.url != blank -%}
+              {%- assign checkout_href = abandoned_checkout.url -%}
+            {%- elsif abandoned_checkout_url != blank -%}
+              {%- assign checkout_href = abandoned_checkout_url -%}
+            {%- else -%}
+              {%- assign checkout_href = shop.url | append: '/cart' -%}
+            {%- endif -%}
             <tr>
               <td align="center" style="padding:8px 36px 28px;">
                 <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="background:#1E1109;">
-                      <a href="{{ abandoned_checkout.url }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">Return to checkout</a>
+                      <a href="{{ checkout_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">Return to checkout</a>
                     </td>
                   </tr>
                 </table>
