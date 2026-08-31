@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 function themeFile(path: string): string {
@@ -12,24 +12,33 @@ describe('product-page Make an offer CTA', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('renders the offer tab only for watches and maison/vintage desk pieces', () => {
-    expect(inquiry).toContain("{% render 'product-is-watch', product: product %}");
-    expect(inquiry).toContain("{% render 'product-is-vintage', product: product %}");
-    expect(inquiry).toMatch(/if is_watch == 'true' or is_vintage == 'true'/);
+  it('renders Make an offer on every product page, with private viewing only on desk pieces', () => {
     expect(inquiry).toContain('data-chat-intent="offer"');
     expect(inquiry).toContain('Make an offer');
+    expect(inquiry).toMatch(/if is_watch == 'true' or is_vintage == 'true'/);
 
     const offerIdx = inquiry.indexOf('data-chat-intent="offer"');
-    const holdIdx = inquiry.indexOf('Hold this piece');
     const viewingIdx = inquiry.indexOf('Private viewing');
+    const viewingBlockStart = inquiry.lastIndexOf('{%- if desk_piece -%}', viewingIdx);
     const unlessIdx = inquiry.indexOf('{%- unless desk_piece -%}');
     expect(offerIdx).toBeGreaterThan(-1);
-    expect(holdIdx).toBeGreaterThan(-1);
-    expect(viewingIdx).toBeGreaterThan(-1);
-    expect(offerIdx).toBeLessThan(unlessIdx);
-    expect(holdIdx).toBeLessThan(unlessIdx);
+    expect(offerIdx).toBeLessThan(viewingBlockStart);
+    expect(viewingIdx).toBeGreaterThan(viewingBlockStart);
     expect(viewingIdx).toBeLessThan(unlessIdx);
+    expect(inquiry).not.toContain('Hold this piece');
+    expect(inquiry).not.toContain('data-open-hold');
+    expect(inquiry).not.toContain("render 'piece-hold'");
     expect(inquiry.slice(unlessIdx)).not.toContain('data-chat-intent="offer"');
+    expect(mainProduct).toContain("{% render 'product-inquiry', product: product %}");
+    expect(diamondProduct).toContain("{% render 'product-inquiry', product: product %}");
+  });
+
+  it('does not ship the hold modal or hold CTA anywhere in the theme', () => {
+    const setup = themeFile('SHOPIFY_SETUP.md');
+    expect(existsSync(new URL('../../snippets/piece-hold.liquid', import.meta.url))).toBe(false);
+    expect(inquiry).not.toMatch(/hold this piece/i);
+    expect(setup).not.toMatch(/Hold this piece/);
+    expect(setup).not.toContain('hold-request');
   });
 
   it('sits in the existing CTA row and opens site chat with offer intent', () => {
