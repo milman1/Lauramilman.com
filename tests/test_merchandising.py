@@ -99,15 +99,59 @@ def test_jewelry_type_grid_is_secondary_and_uses_title_override() -> None:
 
 def test_shop_page_mirrors_worlds_first() -> None:
     data = load_json(ROOT / "templates/page.shop.json")
-    assert data["order"][0:4] == ["hero", "trust-strip", "shop-worlds", "preowned-maison"]
-    assert data["order"].index("shop-worlds") < data["order"].index("collections-grid")
+    order = data["order"]
+    assert order[:8] == [
+        "hero",
+        "trust-strip",
+        "shop-worlds",
+        "preowned-maison",
+        "diamond-destination",
+        "preowned-timepieces",
+        "peaceful-diamonds",
+        "collections-grid",
+    ]
+    assert order.index("shop-worlds") < order.index("collections-grid")
     titles = [
         data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["title"]
         for block_id in data["sections"]["shop-worlds"]["block_order"]
     ]
-    assert "Peaceful Diamonds" in titles
-    assert "Pre-Owned Timepieces" in titles
-    assert "Loose Diamonds" in titles
+    assert titles == [
+        "Peaceful Diamonds",
+        "Loose Diamonds",
+        "Pre-Owned Maison",
+        "Pre-Owned Timepieces",
+        "Fine Jewelry",
+    ]
+    tones = [
+        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
+        for block_id in data["sections"]["shop-worlds"]["block_order"]
+    ]
+    assert tones == ["navy", "warm", "warm", "warm", "warm"]
+    dest = data["sections"]["diamond-destination"]
+    assert dest["blocks"]["dest-natural"]["settings"]["collection"] == "natural-diamonds"
+    assert dest["blocks"]["dest-lab"]["settings"]["collection"] == "lab-grown-diamonds"
+    watches = [
+        data["sections"]["preowned-timepieces"]["blocks"][block_id]["settings"]["collection"]
+        for block_id in data["sections"]["preowned-timepieces"]["block_order"]
+    ]
+    assert "jacob-co" in watches
+    assert "rolex-watches" in watches
+    hero = data["sections"]["hero"]["settings"]
+    assert hero["primary_cta_text"] == "Shop Fine Jewelry"
+    assert hero["secondary_cta_url"] == "/collections/natural-diamonds"
+    grid = data["sections"]["collections-grid"]
+    assert grid["settings"]["title"] == "Necklaces, Rings & More"
+    handles = [
+        grid["blocks"][block_id]["settings"]["collection"]
+        for block_id in grid["block_order"]
+    ]
+    assert handles == ["necklaces", "rings", "bracelets", "pendants-1", "earrings"]
+    pd = data["sections"]["peaceful-diamonds"]
+    assert "Certified lab-grown diamonds" in pd["settings"]["description"]
+    assert "pd-point-1" in pd["block_order"]
+    liquid = (ROOT / "sections/collections-grid.liquid").read_text()
+    assert "collection-card__cta" in liquid
+    assert ">Explore<" in liquid
 
 
 def test_header_nav_order_puts_differentiators_early() -> None:
@@ -197,7 +241,7 @@ def test_related_merchandising_photos_fill_their_frames() -> None:
     assert "aspect-ratio: 4 / 5" in maison
     assert "object-fit: cover" in maison
     image_box = theme_css.split(".collection-card__image-box {")[1].split("}")[0]
-    assert "aspect-ratio: 4 / 5" in image_box
+    assert "aspect-ratio: 1 / 1" in image_box
     image_css = theme_css.split(".collection-card__image-box img")[1][:250]
     assert "object-fit: cover" in image_css
 
