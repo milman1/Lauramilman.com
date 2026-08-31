@@ -71,7 +71,15 @@
         });
       });
 
-      document.querySelector('[data-chat-intent="offer"]').click();
+      var intent = new URLSearchParams(window.location.search).get('intent') || 'offer';
+      var target = document.querySelector('[data-chat-intent="' + intent + '"]');
+      if (target) target.click();
+      setTimeout(function () {
+        var result = document.getElementById('result');
+        result.textContent +=
+          '\nholdModal=' + Boolean(document.getElementById('LmHold')) +
+          '\nholdSnippetInPage=' + Boolean(document.querySelector('.lm-hold'));
+      }, 250);
     })();
   </script>
 </body>
