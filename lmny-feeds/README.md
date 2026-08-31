@@ -21,15 +21,15 @@ holds a stones table — Shopify products are the only live copy.
    outside the curated list still import and are tagged `other-watch-brand`.
    Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
-   - naturals and lab: LMNY cost is Belgium Dia **Amount × 2/3** (the invoice
-     share on stock 350393: Amount $106,463 → $70,975). Amount is portal
-     asking wholesale; Rap ($) is per carat and is not the ticket.
-   - naturals: retail = round(cost × 1.25), 20% margin-on-retail.
-   - lab: a bit more on cheaper stones, then the same 1.25× above $4,000
-     LMNY cost. Held under the 20% floor. Mapping guards still catch a
-     Buy_Price used as a total.
+   - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
+     confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per
+     carat and is not the ticket.
+   - both kinds: retail = round(Amount × chart). Cheaper stones get a bit
+     more than 20%; stones above $4,000 stay at 1.25× (20%). Held under
+     the 20% floor. Lab mapping guards still catch a Buy_Price used as a
+     total.
 
-     | LMNY cost | Multiplier | Margin |
+     | Amount (cost) | Multiplier | Margin |
      |---|---|---|
      | ≤ $500 | 1.40× | ~29% |
      | ≤ $1,500 | 1.35× | ~26% |

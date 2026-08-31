@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DIAMOND, lmnyStoneCost } from '../config/pricing.js';
+import { lmnyStoneCost } from '../config/pricing.js';
 import { priceLab, priceNatural } from '../src/markup.js';
 import { normalizeStones } from '../src/normalize.js';
 
-/** Live Belgium Dia inventory row for the 5.01ct emerald invoiced at ~$71k. */
+/** Live Belgium Dia inventory row. Amount $ is LMNY invoice cost. */
 const stock350393 = {
   Stock_No: '350393',
   Shape: 'Emerald',
@@ -20,14 +20,12 @@ const stock350393 = {
   ImageLink: 'https://dnalinks.in/350393/still.jpg',
 };
 
-describe('LMNY Amount × 2/3 diamond cost', () => {
-  it('is exactly two-thirds of portal Amount, matching the $71k invoice', () => {
-    expect(DIAMOND.supplierAmountShare).toBe(2 / 3);
-    expect(lmnyStoneCost(106_463)).toBe(70_975.33);
-    expect(Math.round(lmnyStoneCost(106_463) / 1000)).toBe(71);
+describe('LMNY Amount-as-cost diamond pricing', () => {
+  it('treats Amount as invoice cost with no 2/3 haircut', () => {
+    expect(lmnyStoneCost(106_463)).toBe(106_463);
   });
 
-  it('prices stock 350393 at $88,719 (1.25× the $70,975.33 cost)', () => {
+  it('prices stock 350393 at $133,079 (1.25× the $106,463 Amount)', () => {
     const { items, holds } = normalizeStones([stock350393], 'natural');
     expect(holds).toEqual([]);
     const stone = items[0]!;
@@ -37,23 +35,25 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
       stockRef: '350393',
       carat: 5.01,
       listAmountUsd: 106_463,
-      costUsd: 70_975.33,
+      costUsd: 106_463,
     });
     const priced = priceNatural(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(88_719);
+    expect(priced.ok && priced.priced.retailUsd).toBe(133_079);
+    expect(priced.ok && priced.priced.retailUsd).toBe(Math.round(lmnyStoneCost(106_463) * 1.25));
   });
 
   it('prefers Amount over Rap × 0.75 (the live under-wholesale bug)', () => {
     const { items } = normalizeStones([stock350393], 'natural');
     const stone = items[0]!;
     if (stone.kind === 'watch') throw new Error('expected a stone');
-    expect(stone.costUsd).toBe(70_975.33);
+    expect(stone.costUsd).toBe(106_463);
     expect(stone.costUsd).not.toBe(31_875);
     const priced = priceNatural(stone);
     expect(priced.ok && priced.priced.retailUsd).not.toBe(31_875);
+    expect(priced.ok && priced.priced.retailUsd).not.toBe(88_719);
   });
 
-  it('applies 2/3 cost and a 1.35× ticket to a mid-priced lab', () => {
+  it('applies the $501–$1,500 band (1.35×) to a mid-priced lab', () => {
     const { items, holds } = normalizeStones(
       [
         {
@@ -76,9 +76,9 @@ describe('LMNY Amount × 2/3 diamond cost', () => {
     expect(stone).toMatchObject({
       kind: 'lab',
       listAmountUsd: 900,
-      costUsd: 600,
+      costUsd: 900,
     });
     const priced = priceLab(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(810); // 600 × 1.35
+    expect(priced.ok && priced.priced.retailUsd).toBe(1215); // 900 × 1.35
   });
 });
