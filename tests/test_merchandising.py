@@ -129,6 +129,11 @@ def test_timepieces_navigation_includes_jacob_and_co() -> None:
     assert "Jacob &amp; Co." in header
     assert jacob_link in collection
     assert "Jacob &amp; Co." in collection
+    # Keep Jacob with the lead brands so it is not clipped under Other Brands.
+    assert header.index('href="/collections/cartier-watches"') < header.index(jacob_link)
+    assert header.index(jacob_link) < header.index('href="/collections/other-watch-brands"')
+    assert "max-height: 500px" not in header
+    assert collection.index('href="/collections/cartier-watches"') < collection.index(jacob_link)
 
 
 def test_footer_and_search_surface_the_worlds() -> None:
