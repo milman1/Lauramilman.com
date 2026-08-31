@@ -15,6 +15,7 @@
   if is_watch == 'true'
     assign viewing_interest = 'watch'
   endif
+  assign piece_price = product.selected_or_first_available_variant.price | money
 -%}
 
 <div class="pdp-inquire">
@@ -32,6 +33,7 @@
         data-chat-intent="offer"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-price="{{ piece_price | escape }}"
       >
         Make an offer
       </button>
@@ -52,11 +54,21 @@
       Ask about this piece
     </button>
     {%- unless desk_piece -%}
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="offer"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-price="{{ piece_price | escape }}"
+      >
+        Make an offer
+      </button>
       <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/pages/private-clients">Book a call</a>
       <button
         type="button"
         class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="ask"
+        data-chat-intent="message"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
       >
@@ -140,14 +152,18 @@
       var payload = {
         productTitle: btn.getAttribute('data-product-title') || '',
         productUrl: btn.getAttribute('data-product-url') || window.location.href,
+        productPrice: btn.getAttribute('data-product-price') || '',
         intent: btn.getAttribute('data-chat-intent') || 'ask'
       };
       if (window.lmChat && typeof window.lmChat.open === 'function') {
         window.lmChat.open(payload);
         return;
       }
-      var trigger = document.getElementById('chat-trigger');
-      if (trigger) trigger.click();
+      var host = document.getElementById('ShopifyChat') || document.querySelector('inbox-online-store-chat');
+      if (host && host.shadowRoot) {
+        var toggle = host.shadowRoot.querySelector('.chat-toggle, button');
+        if (toggle) toggle.click();
+      }
     }
     document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
       btn.addEventListener('click', function () { openChat(btn); });
