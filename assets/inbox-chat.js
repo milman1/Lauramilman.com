@@ -1,7 +1,7 @@
 'use strict';
 
-/* Shopify Inbox bridge. Product CTAs (Ask / Direct message / Make an offer)
-   open the Online store chat embed and prefill the composer when possible. */
+/* Shopify Inbox bridge. Product CTAs open the Online store chat embed
+   and prefill the composer when possible. */
 (function () {
   var OPEN_WAIT_MS = 4000;
   var POLL_MS = 80;
@@ -111,6 +111,22 @@
         + '.'
         + (url ? '\n' + url : '');
     }
+    if (intent === 'hold') {
+      return 'Please hold ' + title
+        + " and confirm it's still available. I'll share a callback number in this chat."
+        + (url ? '\n' + url : '');
+    }
+    if (intent === 'viewing') {
+      var kind = opts.interest === 'watch' ? 'watch' : 'piece';
+      return "I'd like a private viewing of this " + kind + ': ' + title + '.'
+        + (url ? '\n' + url : '');
+    }
+    if (intent === 'consult') {
+      return "I'd like to book a consultation"
+        + (title ? ' about ' + title : '')
+        + '.'
+        + (url ? '\n' + url : '');
+    }
     if (intent === 'message') {
       return "I'd like to message you about " + title + '.'
         + (url ? '\n' + url : '');
@@ -141,9 +157,16 @@
 
     waitFor(chatHost, function (host) {
       if (!host) {
+        if (opts.fallbackUrl) {
+          window.location.href = opts.fallbackUrl;
+          return;
+        }
         if (message) {
+          var subject = 'Inquiry';
+          if (opts.intent === 'offer') subject = 'Offer';
+          if (opts.intent === 'hold') subject = 'Hold request';
           window.location.href = 'mailto:hello@lauramilman.com?subject='
-            + encodeURIComponent(opts.intent === 'offer' ? 'Offer' : 'Inquiry')
+            + encodeURIComponent(subject)
             + '&body=' + encodeURIComponent(message);
         }
         return;

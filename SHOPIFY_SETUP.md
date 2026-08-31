@@ -268,20 +268,19 @@ renders `#shopify-product-reviews`.
 
 ---
 
-## 10. Watch & vintage holds (phone)
+## 10. Watch & vintage holds (Inbox)
 
 Product pages for timepieces and estate/vintage show **Hold this piece** and
-**Private viewing**. Both require a phone number and land in **Admin → Inbox**.
+**Private viewing**. Both open **Shopify Inbox** (Online store chat) with the
+piece already in the composer. Ask the customer for a callback number in the
+thread — there is no hold popup or phone form on the product page.
 
-Shopify customer tags applied when the hidden customer form succeeds:
+Tag the customer from the Inbox thread when useful:
 
 - `hold-request` — asked to hold a specific piece
 - `watch-interest`
 - `vintage-interest`
-- `private-viewing` — booked from `/pages/private-clients`
-
-If a tag is missing on the customer record, add it from the Inbox thread.
-Optional: Shopify Flow → “Customer created” / form submit → add the same tags.
+- `private-viewing` — booked from chat or `/pages/private-clients`
 
 Do **not** print a different website price vs viewing price on the storefront.
 Talk numbers on the call.
