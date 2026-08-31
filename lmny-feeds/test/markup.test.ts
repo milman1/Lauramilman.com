@@ -75,6 +75,16 @@ describe('lab pricing', () => {
     expect(!r.ok && (r.hold.reason === 'lab_retail_floor' || r.hold.reason === 'lab_cost_per_carat_floor')).toBe(true);
   });
 
+  it('holds a 1ct lab whose 1.40× ticket is still under $180', () => {
+    const r = priceLab(labStone({ carat: 1.0, costUsd: 120, pricePerCaratUsd: 120 }));
+    expect(!r.ok && r.hold.reason).toBe('lab_retail_floor');
+  });
+
+  it('publishes a 1ct lab once the ticket clears $180', () => {
+    const r = priceLab(labStone({ carat: 1.0, costUsd: 130, pricePerCaratUsd: 130 }));
+    expect(r.ok && r.priced.retailUsd).toBe(182);
+  });
+
   it('holds when retail < cost (structurally impossible)', () => {
     // Force by stubbing a broken path: negative multiplier isn't possible, so
     // simulate via cost above what any tier would produce by using cost with
@@ -92,7 +102,7 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
    * and grade are fixed, larger stones must retail for more — never less.
    */
   it('is monotonic across 0.5 → 10ct', () => {
-    const ppc = 120; // fixed $/ct
+    const ppc = 130; // fixed $/ct; 1ct × 1.40 = $182, above the $180 floor
     const carats = [0.5, 1, 2, 3, 6, 10];
     const retails: number[] = [];
     for (const carat of carats) {

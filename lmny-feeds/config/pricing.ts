@@ -61,9 +61,9 @@ export const LAB_TIERS = STONE_TIERS;
  */
 export const LAB_GUARDS = {
   /**
-   * Absolute retail floor for stones ≥ minCaratForRetailFloor.
-   * Catches the live bug ($96–$170 retails) without blocking aggressive
-   * 1ct memo pricing (~$168 after 1.4× on ~$120 Amount).
+   * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
+   * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
+   * total). 1ct Amount $120 → $168 is held; Amount $130 → $182 publishes.
    */
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
