@@ -14,6 +14,7 @@
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
+    "fix:jacob-h24": "tsx scripts/fix-jacob-h24-listing.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
