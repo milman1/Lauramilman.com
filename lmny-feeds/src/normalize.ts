@@ -1,4 +1,4 @@
-import { lmnyStoneCost, STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
+import { STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
 import type { FeedItem, Hold, Kind, StoneItem, WatchItem } from './types.js';
 
 /** Best → worst. Grades past the configured floor are held. */
@@ -302,16 +302,15 @@ export interface NormalizeResult {
  * LMNY's cost for a stone.
  *
  * Belgium Dia inventory UI columns (and the matching API keys):
- *   Amount $     → portal asking wholesale (authoritative list total)
+ *   Amount $     → LMNY invoice cost (authoritative total)
  *   Price/Carat  → Amount / carat
  *   Rap. ($)     → Rapaport list **per carat** (not a total)
  *   Disc %       → off Rapaport
  *   Buy_Price    → lab: USD per carat; natural: total when Amount is absent
  *
- * LMNY pays Amount × 2/3 on every natural and lab stone (stock 350393:
- * Amount $106,463 → $70,975). `costUsd` is that invoice number.
+ * Amount is the cost. Stock 350393: Amount $106,463.
  *
- * Fallbacks when Amount is missing (then the same 2/3 share):
+ * Fallbacks when Amount is missing:
  *   Lab: Price/Carat or Buy_Price × Weight
  *   Natural: Buy_Price as a total, else Rap/ct × (1 + Disc/100) × Weight
  */
@@ -366,11 +365,10 @@ function roundCents(n: number): number {
 
 function fromListedTotal(listed: number, carat: number, mismatchDetail?: string): StoneCostResolution {
   const listAmountUsd = roundCents(listed);
-  const costUsd = lmnyStoneCost(listAmountUsd);
   return {
     listAmountUsd,
-    costUsd,
-    pricePerCaratUsd: carat > 0 ? roundCents(costUsd / carat) : undefined,
+    costUsd: listAmountUsd,
+    pricePerCaratUsd: carat > 0 ? roundCents(listAmountUsd / carat) : undefined,
     mismatchDetail,
   };
 }

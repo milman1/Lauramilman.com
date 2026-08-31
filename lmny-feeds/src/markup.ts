@@ -1,4 +1,4 @@
-import { DIAMOND, LAB_GUARDS, LAB_TIERS as FALLBACK_RULES } from '../config/pricing.js';
+import { DIAMOND, LAB_GUARDS, STONE_TIERS as FALLBACK_RULES } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 import { priceWatchFromCost } from './watchPricing.js';
 
@@ -18,13 +18,11 @@ function margin(retail: number, cost: number): number {
 
 function minCostPerCaratFloor(carat: number): number {
   const band = LAB_GUARDS.minCostPerCarat.find((b) => carat <= b.maxCarat);
-  const listed = band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
-  // Floors were tuned to portal Amount $/ct; LMNY cost is 2/3 of that.
-  return listed * DIAMOND.supplierAmountShare;
+  return band?.minUsd ?? LAB_GUARDS.minCostPerCarat.at(-1)!.minUsd;
 }
 
 /**
- * Natural ticket: round(LMNY cost × 1.25). Cost is already Amount × 2/3.
+ * Ticket = round(Amount × chart multiple). Amount is invoice cost.
  */
 function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   if (!(item.costUsd > 0)) {
@@ -66,13 +64,20 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   return { ok: true, priced: { retailUsd, marginPct } };
 }
 
+function retailMultipleForCost(costUsd: number): number | undefined {
+  return FALLBACK_RULES.find((t) => costUsd <= t.maxCostUsd)?.multiplier;
+}
+
 export function priceNatural(item: StoneItem): PriceResult {
-  return priceFromLmnyCost(item, DIAMOND.amountMultiple);
+  const multiple = retailMultipleForCost(item.costUsd);
+  if (multiple === undefined) {
+    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_markup_tier' } };
+  }
+  return priceFromLmnyCost(item, multiple);
 }
 
 /**
- * Lab-grown: modest extra markup on cheap stones, 1.25× above $4k,
- * after fail-closed mapping guards.
+ * Lab-grown: same Amount chart as naturals, after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -116,7 +121,7 @@ export function priceLab(item: StoneItem): PriceResult {
 
   if (
     item.carat >= LAB_GUARDS.minCaratForRetailFloor &&
-    priced.priced.retailUsd < LAB_GUARDS.minRetailUsd * DIAMOND.supplierAmountShare
+    priced.priced.retailUsd < LAB_GUARDS.minRetailUsd
   ) {
     return {
       ok: false,

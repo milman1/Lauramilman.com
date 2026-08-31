@@ -19,18 +19,14 @@ export interface StoneItem {
   tablePct?: number;
   depthPct?: number;
   /**
-   * LMNY invoice cost: Belgium Dia Amount × 2/3 (see `DIAMOND.supplierAmountShare`).
-   * Amount is portal asking wholesale. Lab fallback is Buy_Price × carat,
-   * then the same 2/3 share. Natural fallback is Buy_Price or
-   * Rap/ct × (1 + Disc) × carat, then 2/3.
+   * LMNY invoice cost: Belgium Dia Amount $ (total). Lab fallback is
+   * Buy_Price × carat. Natural fallback is Buy_Price or
+   * Rap/ct × (1 + Disc) × carat.
    */
   costUsd: number;
-  /**
-   * Portal Amount $ before the 2/3 LMNY share. Audit / reconstruct only;
-   * ticket price uses costUsd.
-   */
+  /** Same as costUsd when Amount is present — audit / reconstruct. */
   listAmountUsd?: number;
-  /** LMNY $/ct (costUsd / carat). Lab guards use this against scaled floors. */
+  /** Amount $/ct (costUsd / carat). Lab guards use this against $/ct floors. */
   pricePerCaratUsd?: number;
   /** Rapaport list **per carat** when the feed sends it — audit only. */
   rapPriceUsd?: number;

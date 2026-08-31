@@ -10,28 +10,24 @@
  */
 
 /**
- * Belgium Dia Amount $ is portal asking wholesale. LMNY's invoice on stock
- * 350393 (5.01ct Emerald, Amount $106,463) was ~$71k — exactly Amount × 2/3
- * (one-third of Rapaport list, or 17 extra Rap points past the listed −50).
- * That share is the cost basis for every natural and lab-grown stone.
+ * Belgium Dia Amount $ is LMNY's invoice cost for every natural and
+ * lab-grown stone. Stock 350393 (5.01ct Emerald): Amount $106,463.
  *
- * Ticket: naturals are cost × 1.25 (20% margin). Lab is a bit higher on
- * cheap stones and steps down to the same 1.25× above $4,000 LMNY cost.
+ * Ticket follows the same cost chart for both kinds.
  */
 export const DIAMOND = {
-  /** LMNY pays this fraction of the Amount column (portal asking wholesale). */
-  supplierAmountShare: 2 / 3,
-  /** Natural retail = round(LMNY cost × this). Also the lab floor above $4k. */
+  /** Natural and lab retail floor above $4,000 Amount. 1.25× = 20% margin. */
   amountMultiple: 1.25,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
 } as const;
 
-export function lmnyStoneCost(listAmountUsd: number): number {
-  return Math.round(listAmountUsd * DIAMOND.supplierAmountShare * 100) / 100;
+/** @deprecated Use the Amount column as cost — no extra share. */
+export function lmnyStoneCost(amountUsd: number): number {
+  return Math.round(amountUsd * 100) / 100;
 }
 
-/** Naturals use DIAMOND.amountMultiple (1.25×). Lab uses LAB_TIERS. */
+/** Naturals use the same STONE_TIERS chart as lab. */
 export const NATURAL = DIAMOND;
 
 export interface LabTier {
@@ -42,21 +38,22 @@ export interface LabTier {
 }
 
 /**
- * Lab-grown markup on **LMNY cost** (Amount × 2/3). First match wins.
- * Cheaper stones get a bit more than the 20% natural margin; above $4,000
- * they share 1.25×.
+ * Lab and natural markup on **Amount** (invoice cost). First match wins.
  *
  *   ≤ $500     1.40×  ~29% margin
  *   ≤ $1,500   1.35×  ~26% margin
  *   ≤ $4,000   1.30×  ~23% margin
  *   above      1.25×  20% margin
  */
-export const LAB_TIERS: LabTier[] = [
+export const STONE_TIERS: LabTier[] = [
   { maxCostUsd: 500, multiplier: 1.4 },
   { maxCostUsd: 1500, multiplier: 1.35 },
   { maxCostUsd: 4000, multiplier: 1.3 },
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
 ];
+
+/** @deprecated Use STONE_TIERS — lab and natural share the chart. */
+export const LAB_TIERS = STONE_TIERS;
 
 /**
  * Fail-closed floors for lab stones. A mapping bug that treats $/ct as total
@@ -64,16 +61,14 @@ export const LAB_TIERS: LabTier[] = [
  */
 export const LAB_GUARDS = {
   /**
-   * Absolute retail floor for stones ≥ minCaratForRetailFloor, quoted on
-   * **portal Amount** dollars. markup.ts scales by `DIAMOND.supplierAmountShare`
-   * because LMNY cost (and therefore retail) is 2/3 of Amount.
-   * Catches the live bug ($96–$170 listed retails) without blocking
-   * aggressive 1ct memo pricing (~$150 after 1.25× on ~$120/ct listed).
+   * Absolute retail floor for stones ≥ minCaratForRetailFloor.
+   * Catches the live bug ($96–$170 retails) without blocking aggressive
+   * 1ct memo pricing (~$168 after 1.4× on ~$120 Amount).
    */
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
   /**
-   * Minimum acceptable Buy_Price ($/ct) by carat band. First match wins.
+   * Minimum acceptable Amount $/ct by carat band. First match wins.
    * Tuned below live wholesale p10 so real cheap large stones pass, but a
    * double-divided or zeroed cost cannot.
    */
