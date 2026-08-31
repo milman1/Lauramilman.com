@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Inbox chat bridge fixture</title>
+  <style>
+    body { font-family: Georgia, serif; background: #F5F0E8; color: #2C1810; padding: 24px; }
+    button { margin: 0 8px 12px 0; padding: 10px 14px; }
+    #result { margin-top: 16px; padding: 16px; background: #FDFAF6; border: 1px solid #DDD5C5; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Inbox bridge fixture</h1>
+  <button
+    type="button"
+    class="js-open-product-chat"
+    data-chat-intent="offer"
+    data-product-title="Cartier Love Bracelet"
+    data-product-url="https://www.lauramilman.com/products/cartier-love-bracelet"
+    data-product-price="$6,800"
+  >Make an offer</button>
+  <button
+    type="button"
+    class="js-open-product-chat"
+    data-chat-intent="hold"
+    data-product-title="Cartier Love Bracelet"
+    data-product-url="https://www.lauramilman.com/products/cartier-love-bracelet"
+  >Hold this piece</button>
+  <button
+    type="button"
+    class="js-open-product-chat"
+    data-chat-intent="ask"
+    data-product-title="Cartier Love Bracelet"
+    data-product-url="https://www.lauramilman.com/products/cartier-love-bracelet"
+  >Ask about this piece</button>
+  <p id="result">Waiting…</p>
+
+  <script src="../assets/inbox-chat.js"></script>
+  <script>
+    (function () {
+      var host = document.createElement('div');
+      host.id = 'ShopifyChat';
+      host.setAttribute('is-open', 'false');
+      var shadow = host.attachShadow({ mode: 'open' });
+      var toggle = document.createElement('button');
+      toggle.className = 'chat-toggle';
+      toggle.textContent = 'Chat';
+      var composer = document.createElement('textarea');
+      composer.setAttribute('aria-label', 'Message');
+      toggle.addEventListener('click', function () {
+        host.setAttribute('is-open', 'true');
+      });
+      shadow.appendChild(toggle);
+      shadow.appendChild(composer);
+      document.body.appendChild(host);
+
+      document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          window.lmChat.open({
+            productTitle: btn.getAttribute('data-product-title'),
+            productUrl: btn.getAttribute('data-product-url'),
+            productPrice: btn.getAttribute('data-product-price') || '',
+            intent: btn.getAttribute('data-chat-intent')
+          });
+          setTimeout(function () {
+            var result = document.getElementById('result');
+            result.textContent =
+              'open=' + host.getAttribute('is-open') +
+              '\ncomposer=' + composer.value;
+          }, 200);
+        });
+      });
+
+      var intent = new URLSearchParams(window.location.search).get('intent') || 'offer';
+      var target = document.querySelector('[data-chat-intent="' + intent + '"]');
+      if (target) target.click();
+      setTimeout(function () {
+        var result = document.getElementById('result');
+        result.textContent +=
+          '\nholdModal=' + Boolean(document.getElementById('LmHold')) +
+          '\nholdSnippetInPage=' + Boolean(document.querySelector('.lm-hold'));
+      }, 250);
+    })();
+  </script>
+</body>
+</html>

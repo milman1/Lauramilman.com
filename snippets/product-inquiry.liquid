@@ -1,8 +1,7 @@
 {%- comment -%}
-  Product-page concierge. Ask / Direct message open the site chat with this
-  product already in context. Watches and maison/vintage jewelry get Hold,
-  Make an offer, and private viewing so the desk can continue in chat, by
-  phone, or in person.
+  Product-page concierge. Every action opens Shopify Inbox with the piece
+  already in the composer. Private viewing / Book a call fall back to the
+  private-clients page only if Inbox is not on the page.
 {%- endcomment -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
@@ -15,6 +14,7 @@
   if is_watch == 'true'
     assign viewing_interest = 'watch'
   endif
+  assign piece_price = product.selected_or_first_available_variant.price | money
 -%}
 
 <div class="pdp-inquire">
@@ -23,7 +23,13 @@
   </p>
   <div class="pdp-inquire__actions">
     {%- if desk_piece -%}
-      <button type="button" class="pdp-inquire__btn" data-open-hold>
+      <button
+        type="button"
+        class="pdp-inquire__btn js-open-product-chat"
+        data-chat-intent="hold"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+      >
         Hold this piece
       </button>
       <button
@@ -32,15 +38,21 @@
         data-chat-intent="offer"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-price="{{ piece_price | escape }}"
       >
         Make an offer
       </button>
-      <a
-        class="pdp-inquire__btn pdp-inquire__btn--ghost"
-        href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="viewing"
+        data-chat-interest="{{ viewing_interest }}"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-fallback-url="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
       >
         Private viewing
-      </a>
+      </button>
     {%- endif -%}
     <button
       type="button"
@@ -52,11 +64,30 @@
       Ask about this piece
     </button>
     {%- unless desk_piece -%}
-      <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/pages/private-clients">Book a call</a>
       <button
         type="button"
         class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="ask"
+        data-chat-intent="offer"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-price="{{ piece_price | escape }}"
+      >
+        Make an offer
+      </button>
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="consult"
+        data-product-title="{{ product.title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-fallback-url="/pages/private-clients"
+      >
+        Book a call
+      </button>
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="message"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
       >
@@ -65,8 +96,6 @@
     {%- endunless -%}
   </div>
 </div>
-
-{% render 'piece-hold', product: product %}
 
 <style>
   .pdp-inquire {
@@ -140,14 +169,20 @@
       var payload = {
         productTitle: btn.getAttribute('data-product-title') || '',
         productUrl: btn.getAttribute('data-product-url') || window.location.href,
+        productPrice: btn.getAttribute('data-product-price') || '',
+        interest: btn.getAttribute('data-chat-interest') || '',
+        fallbackUrl: btn.getAttribute('data-fallback-url') || '',
         intent: btn.getAttribute('data-chat-intent') || 'ask'
       };
       if (window.lmChat && typeof window.lmChat.open === 'function') {
         window.lmChat.open(payload);
         return;
       }
-      var trigger = document.getElementById('chat-trigger');
-      if (trigger) trigger.click();
+      var host = document.getElementById('ShopifyChat') || document.querySelector('inbox-online-store-chat');
+      if (host && host.shadowRoot) {
+        var toggle = host.shadowRoot.querySelector('.chat-toggle, button');
+        if (toggle) toggle.click();
+      }
     }
     document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
       btn.addEventListener('click', function () { openChat(btn); });
