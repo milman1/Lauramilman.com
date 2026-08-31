@@ -79,7 +79,7 @@
             "title": "Loose Diamonds",
             "subtitle": "Natural and lab-grown stones",
             "link": "/collections/natural-diamonds",
-            "tone": "navy"
+            "tone": "warm"
           }
         },
         "world-maison": {
@@ -89,7 +89,7 @@
             "title": "Pre-Owned Maison",
             "subtitle": "Authenticated signed estate",
             "link": "",
-            "tone": "navy"
+            "tone": "warm"
           }
         },
         "world-timepieces": {
@@ -99,7 +99,7 @@
             "title": "Pre-Owned Timepieces",
             "subtitle": "Rolex, Cartier, and more",
             "link": "",
-            "tone": "navy"
+            "tone": "warm"
           }
         },
         "world-jewelry": {
@@ -109,7 +109,7 @@
             "title": "Fine Jewelry",
             "subtitle": "Designed in New York, crafted in Italy",
             "link": "/collections/all",
-            "tone": "navy"
+            "tone": "warm"
           }
         }
       },

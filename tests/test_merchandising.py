@@ -190,16 +190,27 @@ def test_hero_copy_names_the_full_assortment() -> None:
     assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/natural-diamonds"
 
 
-def test_worlds_cards_share_navy_text_band() -> None:
+def test_worlds_cards_use_category_images_and_theme_tones() -> None:
     worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
-    info_css = worlds.split(".lm-worlds__info")[1].split(".lm-worlds__title")[0]
-    assert "navy-soft" in info_css
+    generated_assets = [
+        "shop-world-loose-diamonds.webp",
+        "shop-world-preowned-maison.webp",
+        "shop-world-preowned-timepieces.webp",
+        "shop-world-fine-jewelry.webp",
+    ]
+    for asset in generated_assets:
+        assert asset in worlds
+        assert (ROOT / "assets" / asset).exists()
+
     data = load_json(ROOT / "templates/index.json")
     tones = [
         data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
         for block_id in data["sections"]["shop-worlds"]["block_order"]
     ]
-    assert tones == ["navy", "navy", "navy", "navy", "navy"]
+    assert tones == ["navy", "warm", "warm", "warm", "warm"]
+    warm_css = worlds.split(".lm-worlds__card {")[1].split("}")[0]
+    assert "cream" in warm_css
+    assert "navy-deep" not in warm_css
 
 
 def test_diamond_filter_offers_lab_and_natural_origin() -> None:
