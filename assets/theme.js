@@ -296,6 +296,10 @@ function formatMoney(cents) {
 
 /* === Shopify Inbox from PDP buttons (Make an offer / Ask / Direct message) === */
 (function () {
+  var MAX_ATTEMPTS = 40;
+  var RETRY_MS = 250;
+  var opening = false;
+
   function clickEl(el) {
     if (!el) return false;
     try {
@@ -317,23 +321,24 @@ function formatMoney(cents) {
 
   function inboxIsOpen(widget) {
     if (!widget) return false;
-    var openAttr = widget.getAttribute('is-open');
-    return openAttr === 'true' || openAttr === '' || widget.hasAttribute('open');
+    return widget.getAttribute('is-open') === 'true';
   }
 
-  function tryOpenInbox() {
-    var iframe = document.getElementById('dummy-chat-button-iframe');
-    if (iframe) {
-      try {
-        var frameDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
-        var bubble = frameDoc && (
-          frameDoc.getElementById('dummy-chat-button') ||
-          frameDoc.querySelector('button')
-        );
-        if (clickEl(bubble)) return true;
-      } catch (err) {}
+  /* Current Inbox embed is <shopify-chat> from storefront/web-components/chat.js.
+     It exposes show()/open. Do not treat an un-upgraded host as success. */
+  function tryOpenShopifyChat() {
+    var host = document.querySelector('shopify-chat');
+    if (!host || typeof host.show !== 'function') return false;
+    if (host.open === true || host.hasAttribute('open')) return true;
+    try {
+      host.show();
+      return true;
+    } catch (err) {
+      return false;
     }
+  }
 
+  function tryOpenLegacyInbox() {
     var widget = inboxWidget();
     if (widget) {
       if (inboxIsOpen(widget)) return true;
@@ -358,23 +363,60 @@ function formatMoney(cents) {
         } catch (err) {}
       }
     }
+
+    var iframe = document.getElementById('dummy-chat-button-iframe');
+    if (iframe) {
+      try {
+        var frameDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        var bubble = frameDoc && (
+          frameDoc.getElementById('dummy-chat-button') ||
+          frameDoc.querySelector('button')
+        );
+        if (clickEl(bubble)) return true;
+      } catch (err) {}
+    }
     return false;
+  }
+
+  function tryOpenInbox() {
+    return tryOpenShopifyChat() || tryOpenLegacyInbox();
   }
 
   function openInbox(attempt) {
     if (tryOpenInbox()) return true;
-    if ((attempt || 0) >= 24) return false;
+    if ((attempt || 0) >= MAX_ATTEMPTS) return false;
+    if (!attempt && window.customElements && customElements.whenDefined) {
+      customElements.whenDefined('shopify-chat').then(function () {
+        tryOpenInbox();
+      }).catch(function () {});
+    }
     window.setTimeout(function () {
       openInbox((attempt || 0) + 1);
-    }, 250);
+    }, RETRY_MS);
     return false;
+  }
+
+  function requestOpen() {
+    if (opening) return;
+    opening = true;
+    openInbox(0);
+    window.setTimeout(function () {
+      opening = false;
+    }, 1000);
   }
 
   window.lmChat = {
     open: function () {
-      openInbox(0);
+      requestOpen();
     }
   };
+
+  document.addEventListener('click', function (event) {
+    var btn = event.target && event.target.closest && event.target.closest('.js-open-product-chat');
+    if (!btn) return;
+    event.preventDefault();
+    requestOpen();
+  });
 })();
 
 /* === Newsletter Form === */

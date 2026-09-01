@@ -316,9 +316,12 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     app_blocks = settings["current"]["blocks"].values()
     assert any("shopify://apps/inbox/blocks/chat/" in block["type"] for block in app_blocks)
     theme_js = (ROOT / "assets/theme.js").read_text()
+    assert "querySelector('shopify-chat')" in theme_js
+    assert "host.show" in theme_js
     assert "inbox-online-store-chat" in theme_js
     assert "dummy-chat-button" in theme_js
     assert "window.lmChat" in theme_js
+    assert "js-open-product-chat" in theme_js
     assert "getElementById('chat-trigger')" not in theme_js
     inquiry = (ROOT / "snippets/product-inquiry.liquid").read_text()
     assert "js-open-product-chat" in inquiry
