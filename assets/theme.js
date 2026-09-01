@@ -294,7 +294,7 @@ function formatMoney(cents) {
   });
 })();
 
-/* === Shopify Inbox from PDP buttons (Make an offer / Ask / Direct message) === */
+/* === Shopify chat from PDP buttons (Make an offer / Ask / Private viewing) === */
 (function () {
   var MAX_ATTEMPTS = 40;
   var RETRY_MS = 250;
