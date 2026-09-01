@@ -40,13 +40,12 @@ describe('product-page Make an offer CTA', () => {
     expect(diamondProduct).toContain("{% render 'product-inquiry', product: product %}");
   });
 
-  it('opens chat next to the other CTAs with an offer-specific prompt and desk note', () => {
-    expect(chatJs).toContain("intent = opts.intent === 'offer' ? 'offer' : 'ask'");
-    expect(chatJs).toContain("Share the offer you\\'d like us to take to the desk.");
-    expect(chatJs).toContain("input.placeholder = 'Your offer amount...'");
-    expect(chatJs).toContain("lines.push('MAKE AN OFFER')");
-    expect(chatJs).toContain('the desk has your offer on this piece');
-    expect(chatJs).toContain('open: openWithProduct');
+  it('opens Shopify storefront chat from the offer and ask buttons', () => {
+    expect(chatJs).toContain("querySelector('shopify-chat')");
+    expect(chatJs).toContain('host.show');
+    expect(chatJs).toContain("closest('.js-open-product-chat')");
+    expect(chatJs).toContain('window.lmChat');
+    expect(chatJs).not.toContain("getElementById('chat-trigger')");
   });
 
   it('treats designer-jewelry tags as maison/vintage so Back Vault pieces get the tab', () => {

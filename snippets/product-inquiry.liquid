@@ -1,8 +1,8 @@
 {%- comment -%}
-  Product-page concierge. Ask / Direct message open the site chat with this
-  product already in context. Watches and maison/vintage jewelry get Hold,
-  Make an offer, and private viewing so the desk can continue in chat, by
-  phone, or in person.
+  Product-page concierge. Ask / Direct message / Make an offer open Shopify
+  Inbox with this product already in context. Watches and maison/vintage
+  jewelry also get Hold and private viewing so the desk can continue in chat,
+  by phone, or in person.
 {%- endcomment -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
@@ -142,12 +142,19 @@
         productUrl: btn.getAttribute('data-product-url') || window.location.href,
         intent: btn.getAttribute('data-chat-intent') || 'ask'
       };
-      if (window.lmChat && typeof window.lmChat.open === 'function') {
-        window.lmChat.open(payload);
-        return;
+      function go() {
+        if (window.lmChat && typeof window.lmChat.open === 'function') {
+          window.lmChat.open(payload);
+          return true;
+        }
+        return false;
       }
-      var trigger = document.getElementById('chat-trigger');
-      if (trigger) trigger.click();
+      if (go()) return;
+      var tries = 0;
+      var wait = setInterval(function () {
+        tries += 1;
+        if (go() || tries >= 40) clearInterval(wait);
+      }, 100);
     }
     document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
       btn.addEventListener('click', function () { openChat(btn); });

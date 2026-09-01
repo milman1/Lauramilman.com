@@ -294,175 +294,129 @@ function formatMoney(cents) {
   });
 })();
 
-/* === Chat Widget === */
+/* === Shopify Inbox from PDP buttons (Make an offer / Ask / Direct message) === */
 (function () {
-  var trigger = document.getElementById('chat-trigger');
-  var panel = document.getElementById('chat-panel');
-  if (!trigger || !panel) return;
+  var MAX_ATTEMPTS = 40;
+  var RETRY_MS = 250;
+  var opening = false;
 
-  var closeBtn = panel.querySelector('.chat-panel__close');
-  var input = panel.querySelector('.chat-input');
-  var sendBtn = panel.querySelector('.chat-send-btn');
-  var body = panel.querySelector('.chat-panel__body');
-  var form = document.getElementById('ChatContactForm');
-  var emailField = document.getElementById('ChatEmail');
-  var bodyField = document.getElementById('ChatBody');
-  var productField = document.getElementById('ChatProduct');
-  var productUrlField = document.getElementById('ChatProductUrl');
-  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var productTitle = '';
-  var productUrl = '';
-  var intent = 'ask';
-  var question = '';
-  var step = 'question';
-  var submitting = false;
-  var welcomeHtml = body ? body.innerHTML : '';
-
-  function knownEmail() {
-    var fromField = emailField && emailField.value ? emailField.value.trim() : '';
-    if (fromField && emailRe.test(fromField)) return fromField;
-    var fromPanel = (panel.getAttribute('data-customer-email') || '').trim();
-    if (fromPanel && emailRe.test(fromPanel)) return fromPanel;
-    return '';
-  }
-
-  function openPanel() {
-    panel.classList.add('open');
-    panel.setAttribute('aria-hidden', 'false');
-    trigger.setAttribute('aria-expanded', 'true');
-    if (input) input.focus();
-  }
-
-  function closePanel() {
-    panel.classList.remove('open');
-    panel.setAttribute('aria-hidden', 'true');
-    trigger.setAttribute('aria-expanded', 'false');
-  }
-
-  function appendMessage(text, isUser) {
-    if (!body) return;
-    var msg = document.createElement('div');
-    msg.className = 'chat-msg ' + (isUser ? 'chat-msg--user' : 'chat-msg--bot');
-    msg.textContent = text;
-    body.appendChild(msg);
-    body.scrollTop = body.scrollHeight;
-  }
-
-  function resetConversation() {
-    if (!body) return;
-    body.innerHTML = welcomeHtml;
-  }
-
-  function openWithProduct(opts) {
-    opts = opts || {};
-    productTitle = opts.productTitle || '';
-    productUrl = opts.productUrl || '';
-    intent = opts.intent === 'offer' ? 'offer' : 'ask';
-    question = '';
-    step = 'question';
-    if (productField) productField.value = productTitle;
-    if (productUrlField) productUrlField.value = productUrl;
-    resetConversation();
-    openPanel();
-    if (productTitle) {
-      if (intent === 'offer') {
-        appendMessage('You\'re looking at ' + productTitle + '. Share the offer you\'d like us to take to the desk.', false);
-        if (input) input.placeholder = 'Your offer amount...';
-      } else {
-        appendMessage('You\'re asking about ' + productTitle + '. What would you like to know?', false);
-        if (input) input.placeholder = 'Ask about this piece...';
+  function clickEl(el) {
+    if (!el) return false;
+    try {
+      el.click();
+      return true;
+    } catch (err) {
+      try {
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        return true;
+      } catch (err2) {
+        return false;
       }
     }
   }
 
-  function submitInquiry(email, message) {
-    if (!form || submitting) return;
-    submitting = true;
-    if (emailField) emailField.value = email;
-    var lines = [];
-    if (intent === 'offer') lines.push('MAKE AN OFFER');
-    if (productTitle) lines.push('Product: ' + productTitle);
-    if (productUrl) lines.push('URL: ' + productUrl);
-    lines.push('');
-    lines.push(message);
-    if (bodyField) bodyField.value = lines.join('\n');
-
-    var action = form.getAttribute('action') || '/contact';
-    fetch(action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'text/html' }
-    }).then(function () {
-      appendMessage(
-        intent === 'offer'
-          ? 'Thank you — the desk has your offer on this piece. We\'ll reply within one business day.'
-          : 'Thank you — the desk has this, including the piece you asked about. We\'ll reply within one business day.',
-        false
-      );
-      step = 'done';
-      if (input) input.placeholder = 'Type a message...';
-    }).catch(function () {
-      appendMessage('We couldn\'t send that just now. Email hello@lauramilman.com and we\'ll pick it up.', false);
-      step = 'question';
-    }).finally(function () {
-      submitting = false;
-    });
+  function inboxWidget() {
+    return document.querySelector('inbox-online-store-chat') || document.getElementById('ShopifyChat');
   }
 
-  function sendMessage() {
-    if (!input || submitting) return;
-    var text = input.value.trim();
-    if (!text) return;
-    appendMessage(text, true);
-    input.value = '';
+  function inboxIsOpen(widget) {
+    if (!widget) return false;
+    return widget.getAttribute('is-open') === 'true';
+  }
 
-    if (step === 'done') {
-      appendMessage('We have your note. For anything else, keep typing — or book a call from the product page.', false);
-      return;
+  /* Current Inbox embed is <shopify-chat> from storefront/web-components/chat.js.
+     It exposes show()/open. Do not treat an un-upgraded host as success. */
+  function tryOpenShopifyChat() {
+    var host = document.querySelector('shopify-chat');
+    if (!host || typeof host.show !== 'function') return false;
+    if (host.open === true || host.hasAttribute('open')) return true;
+    try {
+      host.show();
+      return true;
+    } catch (err) {
+      return false;
     }
+  }
 
-    if (step === 'email') {
-      if (!emailRe.test(text)) {
-        appendMessage('Please share an email address so we can reply.', false);
-        return;
+  function tryOpenLegacyInbox() {
+    var widget = inboxWidget();
+    if (widget) {
+      if (inboxIsOpen(widget)) return true;
+      var root = widget.shadowRoot;
+      if (root) {
+        var launcher = root.querySelector('[data-spec="toggle-button"]') ||
+          root.querySelector('button.chat-toggle') ||
+          root.querySelector('.chat-toggle') ||
+          root.querySelector('.chat-app > button') ||
+          root.querySelector('button');
+        if (clickEl(launcher)) return true;
       }
-      submitInquiry(text, question);
-      return;
+      if (widget.tagName === 'IFRAME') {
+        try {
+          var chatDoc = widget.contentDocument;
+          var chatBtn = chatDoc && (
+            chatDoc.querySelector('button.chat-toggle') ||
+            chatDoc.querySelector('.chat-toggle--bottom-right') ||
+            chatDoc.querySelector('button')
+          );
+          if (clickEl(chatBtn)) return true;
+        } catch (err) {}
+      }
     }
 
-    question = text;
-    var email = knownEmail();
-    if (email) {
-      submitInquiry(email, question);
-      return;
+    var iframe = document.getElementById('dummy-chat-button-iframe');
+    if (iframe) {
+      try {
+        var frameDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        var bubble = frameDoc && (
+          frameDoc.getElementById('dummy-chat-button') ||
+          frameDoc.querySelector('button')
+        );
+        if (clickEl(bubble)) return true;
+      } catch (err) {}
     }
-    step = 'email';
-    appendMessage('What\'s the best email to reach you?', false);
-    if (input) input.placeholder = 'you@email.com';
+    return false;
   }
 
-  trigger.addEventListener('click', function () {
-    if (panel.classList.contains('open')) {
-      closePanel();
-    } else {
-      intent = 'ask';
-      if (input && step === 'question') input.placeholder = 'Type a message...';
-      openPanel();
+  function tryOpenInbox() {
+    return tryOpenShopifyChat() || tryOpenLegacyInbox();
+  }
+
+  function openInbox(attempt) {
+    if (tryOpenInbox()) return true;
+    if ((attempt || 0) >= MAX_ATTEMPTS) return false;
+    if (!attempt && window.customElements && customElements.whenDefined) {
+      customElements.whenDefined('shopify-chat').then(function () {
+        tryOpenInbox();
+      }).catch(function () {});
     }
-  });
+    window.setTimeout(function () {
+      openInbox((attempt || 0) + 1);
+    }, RETRY_MS);
+    return false;
+  }
 
-  if (closeBtn) closeBtn.addEventListener('click', closePanel);
-
-  if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-  if (input) {
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') sendMessage();
-    });
+  function requestOpen() {
+    if (opening) return;
+    opening = true;
+    openInbox(0);
+    window.setTimeout(function () {
+      opening = false;
+    }, 1000);
   }
 
   window.lmChat = {
-    open: openWithProduct
+    open: function () {
+      requestOpen();
+    }
   };
+
+  document.addEventListener('click', function (event) {
+    var btn = event.target && event.target.closest && event.target.closest('.js-open-product-chat');
+    if (!btn) return;
+    event.preventDefault();
+    requestOpen();
+  });
 })();
 
 /* === Newsletter Form === */
