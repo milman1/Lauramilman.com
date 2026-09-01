@@ -1,7 +1,9 @@
 # Jacob & Co. listing formula
 
 Boutique pieces from the 24 Aug 2026 Jacob & Co. memo, rewritten to the same
-New Vintage watch listing schema used for the rest of the timepiece catalog.
+watch listing schema used for the rest of the timepiece catalog. Canonical
+rules live in `docs/watch-listing-schema.md` (Boutique / New Vintage) and
+`docs/seo-title-formulas.md`. This file is the Jacob operational checklist.
 
 ## What this does
 

@@ -23,6 +23,21 @@ word boundary; the grading lab suffix is always retained.
 If condition is not recognized, the sync does not invent one:
 `{brand} {model} {reference} Watch`.
 
+## Boutique / New Vintage watches (merchant-stated)
+
+Jacob & Co. memo pieces and any later boutique stock the merchant labels
+**New Vintage** use the same shape, with that title word. Do not invent
+Pre-Owned or Unworn. Omit Google Shopping `condition`.
+
+- Product title: `New Vintage {brand} {model} {reference}`
+- SEO title: `{brand} {model} {reference} – New Vintage Watch`
+- SEO description (≤160): `Shop this new vintage {brand} {model} {reference}. Authenticated by Laura Milman New York.`
+
+Example: `New Vintage Jacob & Co. Five Time Zone JC-4`
+
+Canonical spec: `docs/watch-listing-schema.md` (Boutique / New Vintage).
+Jacob operational notes: `docs/jacob-listing-formula.md`.
+
 ## API-managed estate jewelry
 
 - Product title: `{brand} {normalized identifying details}`
