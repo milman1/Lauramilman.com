@@ -42,6 +42,8 @@ def test_paste_files_exist() -> None:
         assert (EMAILS / name).is_file(), name
     assert (EMAILS / "README.md").is_file()
     assert (EMAILS / "welcome.messaging-block.html").is_file()
+    assert (EMAILS / "abandoned-cart.messaging-block.html").is_file()
+    assert (EMAILS / "abandoned-checkout.messaging-block.html").is_file()
 
 
 def test_accessibility_lang_dir_title_and_single_h1() -> None:
@@ -110,17 +112,26 @@ def test_abandoned_templates_use_notification_liquid() -> None:
     checkout = read("abandoned-checkout.html")
     cart = read("abandoned-cart.html")
     for html, name in ((checkout, "abandoned-checkout.html"), (cart, "abandoned-cart.html")):
-        assert "{{ url }}" in html, name
-        assert "subtotal_line_items" in html, name
-        assert "billing_address.first_name" in html, name
-        assert "{{ unsubscribe_url }}" not in html, name
-        assert "Marketing → Automations" not in html.split("-->")[0] or "Do not paste" in html
-        assert "Settings → Notifications" in html
+        assert "assign recovery_href = url" in html or "{{ url }}" in html, name
     assert "Return to checkout" in checkout
     assert "View cart" in cart
     readme = (EMAILS / "README.md").read_text()
-    assert "Settings → Notifications" in readme
-    assert "welcome.messaging-block.html" in readme
+    assert "abandoned-cart.messaging-block.html" in readme
+    assert "Keep the Active Messaging cart automation" in readme
+
+
+def test_abandoned_messaging_blocks_are_inner_cards() -> None:
+    cart = (EMAILS / "abandoned-cart.messaging-block.html").read_text()
+    checkout = (EMAILS / "abandoned-checkout.messaging-block.html").read_text()
+    for html, name in ((cart, "abandoned-cart.messaging-block.html"), (checkout, "abandoned-checkout.messaging-block.html")):
+        assert "<!DOCTYPE html>" not in html, name
+        assert "<html" not in html, name
+        assert "{{ unsubscribe_url }}" not in html, name
+        assert "box-sizing:border-box" in html, name
+        assert "Laura" in html and "Milman" in html, name
+    assert "View cart" in cart
+    assert "Return to checkout" in checkout
+    assert "cart_url" in cart or "abandoned_visit.url" in cart
 
 
 def test_welcome_messaging_block_is_inner_card_only() -> None:

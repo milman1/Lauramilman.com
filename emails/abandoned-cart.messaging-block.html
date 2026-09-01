@@ -1,0 +1,49 @@
+<!--
+  Shopify Messaging · Custom Liquid only
+  Marketing → Automations → "You left items in your cart" (keep Active on Basic)
+  Basic plan has no Settings → Notifications abandoned cart/checkout template.
+  Paste THIS inner card below the locked product block. Do not set the
+  automation to Draft — that would stop recovery mail entirely.
+-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
+  <tr>
+    <td align="center" style="padding:8px 0 24px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+        <tr>
+          <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></p>
+            <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 36px 28px;text-align:center;">
+            <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Your selection</p>
+            <p style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">Still in your cart</p>
+            <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+              {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} — we saved the piece you were considering. Prefer to talk it through instead? Book a call or reply to this email.
+            </p>
+            {%- if abandoned_visit.url != blank -%}
+              {%- assign recovery_href = abandoned_visit.url -%}
+            {%- elsif cart_url != blank -%}
+              {%- assign recovery_href = cart_url -%}
+            {%- elsif abandoned_checkout.url != blank -%}
+              {%- assign recovery_href = abandoned_checkout.url -%}
+            {%- elsif abandoned_checkout_url != blank -%}
+              {%- assign recovery_href = abandoned_checkout_url -%}
+            {%- else -%}
+              {%- assign recovery_href = 'https://www.lauramilman.com/cart' -%}
+            {%- endif -%}
+            <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
+              <tr>
+                <td style="background:#C9A050;">
+                  <a href="{{ recovery_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#1A140C;box-sizing:border-box;">View cart</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;"><a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">Book a consultation</a></p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
