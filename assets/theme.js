@@ -298,7 +298,6 @@ function formatMoney(cents) {
 (function () {
   var MAX_ATTEMPTS = 40;
   var RETRY_MS = 250;
-  var opening = false;
 
   function clickEl(el) {
     if (!el) return false;
@@ -326,16 +325,20 @@ function formatMoney(cents) {
 
   /* Current Inbox embed is <shopify-chat> from storefront/web-components/chat.js.
      It exposes show()/open. Do not treat an un-upgraded host as success. */
+  function chatIsOpen(host) {
+    return Boolean(host && (host.open === true || host.hasAttribute('open')));
+  }
+
   function tryOpenShopifyChat() {
     var host = document.querySelector('shopify-chat');
     if (!host || typeof host.show !== 'function') return false;
-    if (host.open === true || host.hasAttribute('open')) return true;
+    if (chatIsOpen(host)) return true;
     try {
       host.show();
-      return true;
     } catch (err) {
       return false;
     }
+    return chatIsOpen(host);
   }
 
   function tryOpenLegacyInbox() {
@@ -397,12 +400,9 @@ function formatMoney(cents) {
   }
 
   function requestOpen() {
-    if (opening) return;
-    opening = true;
-    openInbox(0);
     window.setTimeout(function () {
-      opening = false;
-    }, 1000);
+      openInbox(0);
+    }, 0);
   }
 
   window.lmChat = {
@@ -416,7 +416,7 @@ function formatMoney(cents) {
     if (!btn) return;
     event.preventDefault();
     requestOpen();
-  });
+  }, true);
 })();
 
 /* === Newsletter Form === */
