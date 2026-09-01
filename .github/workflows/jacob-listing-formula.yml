@@ -1,0 +1,56 @@
+# Apply the New Vintage listing formula to live Jacob & Co. watches
+# and activate remaining Jacob watches that are not yet on the storefront.
+name: Jacob listing formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: jacob-listing-formula
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Apply listing formula
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            npx tsx scripts/apply-jacob-listing-formula.ts
+          else
+            npx tsx scripts/apply-jacob-listing-formula.ts --dry-run
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacob-listing-formula
+          path: |
+            lmny-feeds/out/jacob-listing-formula.json
+            lmny-feeds/out/jacob-listing-formula-preview.json
+          if-no-files-found: ignore
