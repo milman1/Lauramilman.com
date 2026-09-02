@@ -445,7 +445,7 @@ describe('imageless products are quarantined at creation', () => {
   });
 
   it('retries a rejected file URL as a DRAFT with no files', () => {
-    const input = buildProductSetInput(naturalStone(), priced(), '2026-07-28T00:00:00Z', undefined, 'gid://shopify/Location/1');
+    const input = buildProductSetInput(watch(), priced(), '2026-07-28T00:00:00Z', undefined, 'gid://shopify/Location/1');
     expect(input.files).toBeDefined();
     const quarantined = quarantineProductSetInput(input);
     expect(quarantined.files).toBeUndefined();
@@ -454,6 +454,24 @@ describe('imageless products are quarantined at creation', () => {
     const qty = (quarantined.variants as Array<{ inventoryQuantities?: Array<{ quantity: number }> }>)[0]
       ?.inventoryQuantities?.[0]?.quantity;
     expect(qty).toBe(0);
+  });
+
+  it('an imageless diamond stays untracked when quarantined', () => {
+    const input = buildProductSetInput(
+      naturalStone(),
+      priced(),
+      '2026-07-28T00:00:00Z',
+      undefined,
+      'gid://shopify/Location/1',
+    );
+    const quarantined = quarantineProductSetInput(input);
+    const variant = (quarantined.variants as Array<{
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities?: unknown;
+    }>)[0]!;
+    expect(quarantined.status).toBe('DRAFT');
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
   });
 });
 
