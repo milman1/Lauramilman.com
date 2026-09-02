@@ -1,4 +1,4 @@
-import { WATCH } from '../config/pricing.js';
+import { LAB_GUARDS, WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
 import { taxonomyGidForFeedKind } from './taxonomy.js';
@@ -36,13 +36,18 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const PRODUCT_SCHEMA_VERSION = 19;
 
 /**
- * Unique watches and loose diamonds are one-of-one. Uploadify (and other
- * marketplace apps) keep a listing only while Shopify status is ACTIVE, SKU
- * is set, and available quantity is > 0. The feed is the availability
+ * Unique watches, naturals, and large labs are one-of-one. Uploadify (and
+ * other marketplace apps) keep a listing only while Shopify status is ACTIVE,
+ * SKU is set, and available quantity is > 0. The feed is the availability
  * source: in stock while the item is publishable, 0 when it has no photo
  * (DRAFT) or when we later archive it.
+ *
+ * Labs under {@link LAB_GUARDS.uploadifyMinCarat} stay ACTIVE on the
+ * storefront but are left untracked so Uploadify reads qty 0 and delists.
  */
 export const UNIQUE_IN_STOCK_QTY = 1;
+/** Labs at or above this carat keep tracked qty 1 for Uploadify. */
+export const LAB_UPLOADIFY_MIN_CARAT = LAB_GUARDS.uploadifyMinCarat;
 /** @deprecated Use UNIQUE_IN_STOCK_QTY */
 export const WATCH_IN_STOCK_QTY = UNIQUE_IN_STOCK_QTY;
 /** productSet inventoryQuantities.name — available is what Admin apps read. */
@@ -369,6 +374,19 @@ export interface ExistingProduct {
   imageCount: number;
 }
 
+/**
+ * Tracked qty 1 is what Uploadify imports. Labs below the marketplace carat
+ * floor are left untracked so they stay buyable on the Online Store.
+ */
+export function tracksUniqueInventory(item: FeedItem): boolean {
+  return !(item.kind === 'lab' && item.carat < LAB_UPLOADIFY_MIN_CARAT);
+}
+
+export function uniqueStockQtyFor(item: FeedItem, hasImages: boolean): number {
+  if (!tracksUniqueInventory(item) || !hasImages) return 0;
+  return UNIQUE_IN_STOCK_QTY;
+}
+
 function variantPayload(
   item: FeedItem,
   priced: Priced,
@@ -392,14 +410,15 @@ function variantPayload(
   };
   // Unique one-of-one inventory. Without a location keep the old untracked
   // payload so unit tests and a location-less dry-run cannot invent a qty
-  // at a missing GID.
-  if (locationId) {
+  // at a missing GID. Labs under the Uploadify carat floor stay untracked
+  // even when a location exists, so marketplaces delist them.
+  if (locationId && tracksUniqueInventory(item)) {
     inventoryItem.tracked = true;
     variant.inventoryQuantities = [
       {
         locationId,
         name: UNIQUE_INVENTORY_QUANTITY_NAME,
-        quantity: hasImages ? UNIQUE_IN_STOCK_QTY : 0,
+        quantity: uniqueStockQtyFor(item, hasImages),
       },
     ];
   }
@@ -419,7 +438,7 @@ function variantPayload(
  * every product an update.
  *
  * `locationId` turns on tracked qty 1 (Uploadify / marketplace import)
- * for every feed kind.
+ * for watches, naturals, and labs at/above {@link LAB_UPLOADIFY_MIN_CARAT}.
  */
 export function buildProductSetInput(
   item: FeedItem,

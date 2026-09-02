@@ -5,6 +5,7 @@ import {
   diffCatalog,
   kindForHandle,
   promoteShortMediaUpdates,
+  promoteUntrackNonMarketplaceInventory,
   promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from '../src/diff.js';
@@ -190,6 +191,13 @@ describe('promoteUntrackedInventoryUpdates', () => {
     expect(d[0]).toMatchObject({ handle: 'nd-bd-1234', action: 'update', reason: 'inventory_untracked' });
   });
 
+  it('does not backfill untracked labs below the Uploadify carat floor', () => {
+    const catalog = [entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: false })];
+    const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
+    expect(promoteUntrackedInventoryUpdates(d, catalog, (h) => h !== 'lg-small')).toBe(0);
+    expect(d[0]?.action).toBe('skip');
+  });
+
   it('does not promote already-tracked stones or quarantined watches', () => {
     const catalog = [
       entry({ handle: 'nd-a', contentHash: 'h1', inventoryTracked: true }),
@@ -199,6 +207,34 @@ describe('promoteUntrackedInventoryUpdates', () => {
     expect(promoteUntrackedInventoryUpdates(d, catalog)).toBe(0);
     expect(d.find((x) => x.handle === 'nd-a')?.action).toBe('skip');
     expect(d.find((x) => x.handle === 'w-broken')?.reason).toBe('media_missing_quarantine');
+  });
+});
+
+describe('promoteUntrackNonMarketplaceInventory', () => {
+  it('untracks a hash-skipped lab that is still qty 1', () => {
+    const catalog = [
+      entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
+    ];
+    const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
+    const n = promoteUntrackNonMarketplaceInventory(d, catalog, (h) => h !== 'lg-small');
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'uploadify_below_min_carat' });
+  });
+
+  it('leaves a 5ct lab that should stay on Uploadify skipped', () => {
+    const catalog = [
+      entry({ handle: 'lg-big', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
+    ];
+    const d = diffCatalog([want('lg-big', 'h1')], catalog, ALL_KINDS);
+    expect(promoteUntrackNonMarketplaceInventory(d, catalog, (h) => h === 'lg-big')).toBe(0);
+    expect(d[0]?.action).toBe('skip');
+  });
+
+  it('does not reopen an already-untracked small lab', () => {
+    const catalog = [entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: false, inventoryQuantity: 0 })];
+    const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
+    expect(promoteUntrackNonMarketplaceInventory(d, catalog, () => false)).toBe(0);
+    expect(d[0]?.action).toBe('skip');
   });
 });
 

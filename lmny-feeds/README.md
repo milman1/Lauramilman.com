@@ -74,17 +74,17 @@ holds a stones table — Shopify products are the only live copy.
    Watch videos are fetched, type-sniffed and staged-uploaded as real `VIDEO`
    media for every URL the feed supplies (not just the first), capped per run
    (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
-   **Unique inventory + Category:** watches and loose diamonds are written as
-   tracked qty `1` at the primary location (SKU = stock ref, `inventoryPolicy:
-   DENY`) and get a Shopify Standard Product Taxonomy `category` (Watches
-   `aa-6-11`, loose diamonds Jewelry `aa-6`) so Admin Category is no longer
-   blank and marketplace apps that require `ACTIVE` + SKU + qty > 0 keep them
-   listed. Hash-matched untracked products are promoted to an update
-   (`inventory_untracked`). Archive sets qty `0` then `ARCHIVED`; diamonds that
-   left the feed are still deleted. The live write needs `write_inventory` and
-   `read_locations` on the Shopify app. Unpublished lab-grown products that
-   stay `ACTIVE` with qty 1 can still be imported by Uploadify — exclude that
-   product type in Uploadify if labs should not go to marketplaces yet.
+   **Unique inventory + Category:** watches, natural diamonds, and lab-grown
+   diamonds **5ct and up** are written as tracked qty `1` at the primary
+   location (SKU = stock ref, `inventoryPolicy: DENY`) so Uploadify keeps
+   them listed. Labs under 5ct stay `ACTIVE` on the Online Store but are
+   **untracked** (qty 0 to Admin apps / Uploadify). Category is still written
+   (Watches `aa-6-11`, loose diamonds Jewelry `aa-6`). Hash-matched untracked
+   products that should still list are promoted to an update
+   (`inventory_untracked`); labs under 5ct that are still tracked qty 1 are
+   promoted to untrack (`uploadify_below_min_carat`). Archive sets qty `0`
+   then `ARCHIVED`; diamonds that left the feed are still deleted. The live
+   write needs `write_inventory` and `read_locations` on the Shopify app.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -93,7 +93,8 @@ holds a stones table — Shopify products are the only live copy.
 
 - Handle = idempotency key: `nd-<stockref>` / `lg-<stockref>` / `w-<stockref>`.
 - Variant SKU = feed stock ref.
-- Unique inventory: tracked qty 1 while publishable (watches and loose diamonds).
+- Unique inventory: tracked qty 1 while publishable for watches, naturals,
+  and labs ≥ 5ct. Labs under 5ct are untracked so Uploadify does not import them.
 - Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
