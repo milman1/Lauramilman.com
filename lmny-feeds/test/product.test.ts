@@ -313,28 +313,33 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.tracked).toBe(false);
   });
 
-  it('a locationId leaves loose diamonds untracked so Uploadify does not import them', () => {
+  it('a locationId writes loose diamonds as tracked qty 0 so Uploadify does not import them', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
     const variant = (input.variants as Array<{
       sku: string;
+      inventoryPolicy: string;
       inventoryItem: { tracked: boolean };
-      inventoryQuantities?: unknown;
+      inventoryQuantities: Array<{ quantity: number }>;
     }>)[0]!;
     expect(variant.sku).toBe('BD-1234');
-    expect(variant.inventoryItem.tracked).toBe(false);
-    expect(variant.inventoryQuantities).toBeUndefined();
+    expect(variant.inventoryPolicy).toBe('CONTINUE');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
     expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+    expect(input.status).toBe('ACTIVE');
   });
 
-  it('a lab of any size with a location stays untracked so Uploadify delists it', () => {
+  it('a lab of any size with a location is tracked qty 0 so Uploadify delists it', () => {
     for (const carat of [4.99, 5]) {
       const input = buildProductSetInput(labStone({ carat }), priced(), at, undefined, 'gid://shopify/Location/1');
       const variant = (input.variants as Array<{
+        inventoryPolicy: string;
         inventoryItem: { tracked: boolean };
-        inventoryQuantities?: unknown;
+        inventoryQuantities: Array<{ quantity: number }>;
       }>)[0]!;
-      expect(variant.inventoryItem.tracked).toBe(false);
-      expect(variant.inventoryQuantities).toBeUndefined();
+      expect(variant.inventoryPolicy).toBe('CONTINUE');
+      expect(variant.inventoryItem.tracked).toBe(true);
+      expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
       expect(input.status).toBe('ACTIVE');
     }
   });
@@ -456,7 +461,7 @@ describe('imageless products are quarantined at creation', () => {
     expect(qty).toBe(0);
   });
 
-  it('an imageless diamond stays untracked when quarantined', () => {
+  it('an imageless diamond is tracked qty 0 when quarantined', () => {
     const input = buildProductSetInput(
       naturalStone(),
       priced(),
@@ -467,11 +472,11 @@ describe('imageless products are quarantined at creation', () => {
     const quarantined = quarantineProductSetInput(input);
     const variant = (quarantined.variants as Array<{
       inventoryItem: { tracked: boolean };
-      inventoryQuantities?: unknown;
+      inventoryQuantities?: Array<{ quantity: number }>;
     }>)[0]!;
     expect(quarantined.status).toBe('DRAFT');
-    expect(variant.inventoryItem.tracked).toBe(false);
-    expect(variant.inventoryQuantities).toBeUndefined();
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities?.[0]?.quantity).toBe(0);
   });
 });
 

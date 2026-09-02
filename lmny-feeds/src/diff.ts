@@ -148,8 +148,8 @@ export function promoteShortMediaUpdates(
  * can write tracked qty 1. Does not touch media-missing quarantine. Call
  * only when a location GID is available this run.
  *
- * `shouldTrack` limits the backfill to SKUs Uploadify should still import
- * (watches). Loose diamonds stay untracked.
+ * `shouldTrack` limits the backfill to SKUs that should be written as
+ * tracked inventory (watches at qty 1 and loose diamonds at qty 0).
  */
 export function promoteUntrackedInventoryUpdates(
   decisions: Decision[],
@@ -172,9 +172,9 @@ export function promoteUntrackedInventoryUpdates(
 }
 
 /**
- * Untrack hash-skipped diamonds (and any other handle) that still show
- * tracked qty > 0 even though they must not go to Uploadify. productSet
- * writes `tracked: false` so the Online Store can keep selling them.
+ * Hash-skipped diamonds (and any other handle) that still show tracked
+ * qty > 0 must be rewritten to qty 0 so Uploadify delists them. productSet
+ * writes tracked qty 0; CONTINUE keeps the Online Store selling.
  */
 export function promoteUntrackNonMarketplaceInventory(
   decisions: Decision[],
@@ -191,7 +191,7 @@ export function promoteUntrackNonMarketplaceInventory(
     if (!have || have.inventoryTracked !== true) continue;
     if ((have.inventoryQuantity ?? 0) <= 0) continue;
     d.action = 'update';
-    d.reason = 'uploadify_loose_diamond';
+    d.reason = 'uploadify_qty_zero';
     promoted += 1;
   }
   return promoted;

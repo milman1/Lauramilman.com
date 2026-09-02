@@ -323,22 +323,23 @@ async function main() {
   const marketplaceQtyByHandle = new Map(
     publishable.map((p) => [handleFor(p.item), uniqueStockQtyFor(p.item, p.item.imageUrls.length > 0)]),
   );
-  const shouldTrackForUploadify = (handle: string) => (marketplaceQtyByHandle.get(handle) ?? 0) > 0;
+  const shouldWriteTracked = (handle: string) => marketplaceQtyByHandle.has(handle);
+  const shouldListOnUploadify = (handle: string) => (marketplaceQtyByHandle.get(handle) ?? 0) > 0;
   if (locationId) {
-    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog, shouldTrackForUploadify);
+    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog, shouldWriteTracked);
     if (inventoryRepaired > 0) {
       notes.push(
-        `${inventoryRepaired} product(s) skipped as unchanged are still untracked (Shopify qty 0 to Admin apps) — writing tracked qty ${UNIQUE_IN_STOCK_QTY}`,
+        `${inventoryRepaired} product(s) skipped as unchanged are still untracked — writing tracked inventory (watches qty ${UNIQUE_IN_STOCK_QTY}, diamonds qty 0)`,
       );
     }
-    const untrackedForUploadify = promoteUntrackNonMarketplaceInventory(
+    const zeroedForUploadify = promoteUntrackNonMarketplaceInventory(
       decisions,
       catalog,
-      shouldTrackForUploadify,
+      shouldListOnUploadify,
     );
-    if (untrackedForUploadify > 0) {
+    if (zeroedForUploadify > 0) {
       notes.push(
-        `${untrackedForUploadify} loose diamond(s) still tracked qty > 0 — untracking so Uploadify delists while the Online Store keeps them`,
+        `${zeroedForUploadify} loose diamond(s) still tracked qty > 0 — writing qty 0 so Uploadify delists while the Online Store keeps them`,
       );
     }
   } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {
@@ -813,7 +814,9 @@ async function applyTrackedStock(
   currentQty: number | null,
 ): Promise<string[]> {
   if (!inventoryItemId || desiredQty == null) return [];
-  if (currentQty === desiredQty) return [];
+  // Qty 0 still needs inventoryActivate when the variant was untracked —
+  // productSet often leaves those items unstocked at the location.
+  if (currentQty === desiredQty && desiredQty > 0) return [];
   const errors = await shopify.stockInventoryItem(inventoryItemId, locationId, desiredQty);
   return errors.map((e) => `inventory ${handle}: ${e}`);
 }

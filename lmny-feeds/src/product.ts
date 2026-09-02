@@ -42,8 +42,8 @@ export const PRODUCT_SCHEMA_VERSION = 19;
  * watch is publishable, 0 when it has no photo (DRAFT) or when we later
  * archive it.
  *
- * Loose diamonds stay ACTIVE on the storefront but are left untracked so
- * Uploadify reads qty 0 and does not import them.
+ * Loose diamonds are tracked qty 0 so Uploadify does not import them.
+ * `CONTINUE` keeps them buyable on the Online Store.
  */
 export const UNIQUE_IN_STOCK_QTY = 1;
 /** @deprecated Use UNIQUE_IN_STOCK_QTY */
@@ -373,15 +373,16 @@ export interface ExistingProduct {
 }
 
 /**
- * Tracked qty 1 is what Uploadify imports. Loose diamonds are left untracked
- * so they stay buyable on the Online Store without going to eBay.
+ * Tracked inventory at the primary location. Watches use qty 1 so Uploadify
+ * lists them. Loose diamonds use qty 0 so Uploadify skips them.
  */
 export function tracksUniqueInventory(item: FeedItem): boolean {
-  return item.kind === 'watch';
+  return item.kind === 'watch' || item.kind === 'natural' || item.kind === 'lab';
 }
 
 export function uniqueStockQtyFor(item: FeedItem, hasImages: boolean): number {
   if (!tracksUniqueInventory(item) || !hasImages) return 0;
+  if (item.kind !== 'watch') return 0;
   return UNIQUE_IN_STOCK_QTY;
 }
 
@@ -403,13 +404,14 @@ function variantPayload(
     price: priced.retailUsd.toFixed(2),
     sku: item.stockRef,
     taxable: true,
-    inventoryPolicy: 'DENY',
+    // Diamonds at qty 0 would be sold-out with DENY. CONTINUE lets the
+    // Online Store keep selling while Uploadify still reads qty 0.
+    inventoryPolicy: item.kind === 'watch' ? 'DENY' : 'CONTINUE',
     inventoryItem,
   };
   // Unique one-of-one inventory. Without a location keep the old untracked
   // payload so unit tests and a location-less dry-run cannot invent a qty
-  // at a missing GID. Loose diamonds stay untracked even when a location
-  // exists, so Uploadify does not import them.
+  // at a missing GID. Watches are qty 1; loose diamonds are qty 0.
   if (locationId && tracksUniqueInventory(item)) {
     inventoryItem.tracked = true;
     variant.inventoryQuantities = [
@@ -435,8 +437,8 @@ function variantPayload(
  * volume — and then failed 2,506 writes the first time a schema change made
  * every product an update.
  *
- * `locationId` turns on tracked qty 1 (Uploadify / marketplace import)
- * for watches only. Loose diamonds stay untracked.
+ * `locationId` turns on tracked inventory at the primary location:
+ * watches qty 1 (Uploadify lists them), loose diamonds qty 0 (Uploadify skips).
  */
 export function buildProductSetInput(
   item: FeedItem,
