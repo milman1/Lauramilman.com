@@ -48,13 +48,35 @@ create index if not exists stones_filter_idx
 comment on table public.stones is
   'Belgium Dia stones dual-written by lmny-feeds sync. Source of truth for the App Proxy diamond filter once Shopify products are retired.';
 
--- Storefront reads via the anon key + RLS: only available rows, no cost.
+-- Storefront reads via the anon key + RLS: only available rows with a still
+-- photo, no cost. Lab-grown loose diamonds also have to clear the fine-jewelry
+-- floor (G / VS2 / Very Good+ / certified / no sidestone shapes).
 alter table public.stones enable row level security;
 
 drop policy if exists stones_public_read on public.stones;
 create policy stones_public_read on public.stones
   for select
   to anon, authenticated
-  using (available = true);
+  using (
+    available = true
+    AND cardinality(image_urls) > 0
+    AND (
+      kind <> 'lab'
+      OR (
+        color <= 'G'
+        AND clarity IN ('FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2')
+        AND (cut IS NULL OR cut IN ('Ideal', 'Excellent', 'Very Good'))
+        AND upper(lab) IN ('IGI', 'GIA', 'GCAL', 'HRD', 'AGS')
+        AND lower(shape) NOT IN (
+          'baguette', 'trapezoid', 'bullet', 'halfmoon', 'shield', 'kite',
+          'kite step cut', 'triangle', 'trilliant', 'hexagonal', 'hexagon step',
+          'hexagonal modified brill', 'lozenge', 'lozenge step cut', 'capsule',
+          'pentagonal', 'pentagonal step', 'pentagonal modified bril',
+          'octagonal', 'octagonal step cut', 'cadillac', 'star', 'round star',
+          'horse head', 'lily', 'butterfly', 'briolette', 'lady heart'
+        )
+      )
+    )
+  );
 
 -- Service role (sync) bypasses RLS; no insert/update policy for anon.

@@ -309,6 +309,20 @@ def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
     assert "/collections/rolex-watches" in collection
 
 
+def test_lab_quality_gate_is_stricter_than_naturals() -> None:
+    """Lab loose stones: G/VS2, certified, no sidestone shapes."""
+    pricing = (ROOT / "lmny-feeds/config/pricing.ts").read_text()
+    normalize = (ROOT / "lmny-feeds/src/normalize.ts").read_text()
+    sync = (ROOT / "lmny-feeds/src/sync.ts").read_text()
+    assert "worstColor: 'G'" in pricing
+    assert "worstClarity: 'VS2'" in pricing
+    assert "'Baguette'" in pricing
+    assert "lab_sidestone_shape" in pricing
+    assert "LAB_QUALITY_HOLD_REASONS" in sync
+    assert "lab_color_below_floor" in normalize
+    assert "isLabSidestoneShape" in normalize
+
+
 def test_only_shopify_inbox_chat_is_rendered() -> None:
     layout = (ROOT / "layout/theme.liquid").read_text()
     settings = load_json(ROOT / "config/settings_data.json")

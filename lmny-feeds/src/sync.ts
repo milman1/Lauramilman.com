@@ -14,6 +14,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
+import { LAB_QUALITY_HOLD_REASONS } from '../config/pricing.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
 import {
   applyUnavailableArchives,
@@ -294,9 +295,14 @@ async function main() {
   // Every stock ref this run saw, whether or not it survived gates and pricing.
   // Lets the diff say why something is being archived: gone from the feed, or
   // still on offer and merely unpriceable.
+  // Lab quality holds are omitted so Shopify deletes those SKUs instead of
+  // archiving them as recoverable. The next lab fetch will hold them again
+  // and the storefront API never upserts them as available.
   const presentHandles = new Set<string>([
     ...items.map((i) => handleFor(i)),
-    ...holds.filter((h) => h.stockRef !== '(unknown)').map((h) => handleForRef(h.kind, h.stockRef)),
+    ...holds
+      .filter((h) => h.stockRef !== '(unknown)' && !LAB_QUALITY_HOLD_REASONS.has(h.reason))
+      .map((h) => handleForRef(h.kind, h.stockRef)),
   ]);
   const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds, presentHandles);
   // Pricing-review holds must NOT archive live watches or overwrite price —

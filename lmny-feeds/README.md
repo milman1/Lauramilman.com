@@ -17,9 +17,12 @@ holds a stones table — Shopify products are the only live copy.
 1. **Fetch** all three feeds (`src/feeds/belgiumdia.ts`), usually via the
    Cloudflare feed-cache Worker (`lmny-feeds/cloudflare-worker/feed-cache.js`).
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
-   stones; watches whose feed condition is `aftermarket` are held out. Brands
-   outside the curated list still import and are tagged `other-watch-brand`.
-   Other failing rows are *held* (never created).
+   **natural** stones. **Lab** stones use a tighter fine-jewelry floor (G /
+   VS2, Very Good+ cut when graded, IGI/GIA/GCAL/HRD/AGS, no sidestone
+   shapes) and are deleted from Shopify rather than archived. Watches whose
+   feed condition is `aftermarket` are held out. Brands outside the curated
+   list still import and are tagged `other-watch-brand`. Other failing rows
+   are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
      confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per

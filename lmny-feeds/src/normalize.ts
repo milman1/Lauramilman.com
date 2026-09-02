@@ -1,9 +1,12 @@
-import { STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
+import { LAB_GATES, LAB_SIDESTONE_SHAPES, STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
 import type { FeedItem, Hold, Kind, StoneItem, WatchItem } from './types.js';
 
 /** Best → worst. Grades past the configured floor are held. */
 const COLOR_ORDER = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 const CLARITY_ORDER = ['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'SI3', 'I1', 'I2', 'I3'];
+const CUT_ORDER = ['Ideal', 'Excellent', 'Very Good', 'Good', 'Fair', 'Poor'];
+const LAB_CERT_SET = new Set(LAB_GATES.certLabs.map((s) => s.toUpperCase()));
+const LAB_SIDESTONE_SET = new Set(LAB_SIDESTONE_SHAPES.map((s) => s.toLowerCase()));
 
 const WATCH_BRAND_SET = new Set(WATCH_BRANDS.map((b) => b.toLowerCase()));
 
@@ -266,16 +269,31 @@ export function normalizeClarityGrade(s: string): string {
   return s.trim().toUpperCase().replace(/\s+/g, '');
 }
 
-export function passesColorGate(color: string): boolean {
+export function passesColorGate(color: string, worst = STONE_GATES.worstColor): boolean {
   const idx = COLOR_ORDER.indexOf(normalizeColorGrade(color));
-  const floor = COLOR_ORDER.indexOf(STONE_GATES.worstColor);
+  const floor = COLOR_ORDER.indexOf(worst);
   return idx !== -1 && idx <= floor;
 }
 
-export function passesClarityGate(clarity: string): boolean {
+export function passesClarityGate(clarity: string, worst = STONE_GATES.worstClarity): boolean {
   const idx = CLARITY_ORDER.indexOf(normalizeClarityGrade(clarity));
-  const floor = CLARITY_ORDER.indexOf(STONE_GATES.worstClarity);
+  const floor = CLARITY_ORDER.indexOf(worst);
   return idx !== -1 && idx <= floor;
+}
+
+export function passesLabCutGate(cut: string | undefined): boolean {
+  if (!cut) return true;
+  const idx = CUT_ORDER.indexOf(cut);
+  if (idx === -1) return true;
+  return idx <= CUT_ORDER.indexOf(LAB_GATES.worstCut);
+}
+
+export function passesLabCertGate(lab: string): boolean {
+  return LAB_CERT_SET.has(lab.trim().toUpperCase());
+}
+
+export function isLabSidestoneShape(shape: string): boolean {
+  return LAB_SIDESTONE_SET.has(shape.trim().toLowerCase());
 }
 
 export function isCuratedWatchBrand(brand: string): boolean {
@@ -463,12 +481,22 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       holds.push({ kind, stockRef, reason: 'missing_cost' });
       continue;
     }
-    if (!passesColorGate(color)) {
-      holds.push({ kind, stockRef, reason: 'color_below_floor', detail: color });
+    if (!passesColorGate(color, kind === 'lab' ? LAB_GATES.worstColor : STONE_GATES.worstColor)) {
+      holds.push({
+        kind,
+        stockRef,
+        reason: kind === 'lab' ? 'lab_color_below_floor' : 'color_below_floor',
+        detail: color,
+      });
       continue;
     }
-    if (!passesClarityGate(clarity)) {
-      holds.push({ kind, stockRef, reason: 'clarity_below_floor', detail: clarity });
+    if (!passesClarityGate(clarity, kind === 'lab' ? LAB_GATES.worstClarity : STONE_GATES.worstClarity)) {
+      holds.push({
+        kind,
+        stockRef,
+        reason: kind === 'lab' ? 'lab_clarity_below_floor' : 'clarity_below_floor',
+        detail: clarity,
+      });
       continue;
     }
     const certNumber = str(raw, ['cert_number', 'certificate_number', 'cert_no', 'report_number', 'report_no', 'certificate']);
@@ -499,6 +527,20 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
     };
     if (resolved.mismatchDetail) {
       console.warn(`cost mismatch ${kind} ${stockRef}: ${resolved.mismatchDetail}`);
+    }
+    if (kind === 'lab') {
+      if (!passesLabCutGate(item.cut)) {
+        holds.push({ kind, stockRef, reason: 'lab_cut_below_floor', detail: item.cut });
+        continue;
+      }
+      if (!passesLabCertGate(item.lab)) {
+        holds.push({ kind, stockRef, reason: 'lab_uncertified', detail: item.lab });
+        continue;
+      }
+      if (isLabSidestoneShape(item.shape)) {
+        holds.push({ kind, stockRef, reason: 'lab_sidestone_shape', detail: item.shape });
+        continue;
+      }
     }
     items.push(item);
   }
