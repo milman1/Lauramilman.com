@@ -115,6 +115,8 @@ export const LAB_GATES = {
   worstClarity: 'VS2',
   /** Ungraded fancy shapes pass; known Good/Fair/Poor do not. */
   worstCut: 'Very Good',
+  /** Loose lab solitaires start at 2.00ct. Under that is held out. */
+  minCarat: 2,
   certLabs: ['IGI', 'GIA', 'GCAL', 'HRD', 'AGS'] as const,
 } as const;
 
@@ -156,6 +158,7 @@ export const LAB_QUALITY_HOLD_REASONS = new Set([
   'lab_cut_below_floor',
   'lab_uncertified',
   'lab_sidestone_shape',
+  'lab_below_min_carat',
 ]);
 
 /**

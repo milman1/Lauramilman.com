@@ -62,6 +62,12 @@ describe('stone normalization', () => {
     const keep = normalizeStones([{ ...stoneRow, color: 'G', clarity: 'VS2', lab: 'IGI' }], 'lab');
     expect(keep.holds).toEqual([]);
     expect(keep.items).toHaveLength(1);
+
+    expect(normalizeStones([{ ...stoneRow, carat: '1.99' }], 'lab').holds[0]?.reason).toBe(
+      'lab_below_min_carat',
+    );
+    expect(normalizeStones([{ ...stoneRow, carat: '2.00' }], 'lab').items).toHaveLength(1);
+    expect(normalizeStones([{ ...stoneRow, carat: '1.50' }], 'natural').items).toHaveLength(1);
   });
 
   it('holds rows missing grading fields or cost', () => {

@@ -476,6 +476,10 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
       holds.push({ kind, stockRef, reason: 'missing_grading_fields' });
       continue;
     }
+    if (kind === 'lab' && carat < LAB_GATES.minCarat) {
+      holds.push({ kind, stockRef, reason: 'lab_below_min_carat', detail: String(carat) });
+      continue;
+    }
     const resolved = resolveStoneCost(raw, kind, carat, rapPriceUsd);
     if (!resolved) {
       holds.push({ kind, stockRef, reason: 'missing_cost' });

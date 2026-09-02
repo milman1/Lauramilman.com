@@ -50,7 +50,7 @@ comment on table public.stones is
 
 -- Storefront reads via the anon key + RLS: only available rows with a still
 -- photo, no cost. Lab-grown loose diamonds also have to clear the fine-jewelry
--- floor (G / VS2 / Very Good+ / certified / no sidestone shapes).
+-- floor (G / VS2 / 2ct+ / Very Good+ / certified / no sidestone shapes).
 alter table public.stones enable row level security;
 
 drop policy if exists stones_public_read on public.stones;
@@ -75,6 +75,7 @@ create policy stones_public_read on public.stones
           'octagonal', 'octagonal step cut', 'cadillac', 'star', 'round star',
           'horse head', 'lily', 'butterfly', 'briolette', 'lady heart'
         )
+        AND carat >= 2
       )
     )
   );

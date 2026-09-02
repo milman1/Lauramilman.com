@@ -18,8 +18,8 @@ holds a stones table — Shopify products are the only live copy.
    Cloudflare feed-cache Worker (`lmny-feeds/cloudflare-worker/feed-cache.js`).
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
    **natural** stones. **Lab** stones use a tighter fine-jewelry floor (G /
-   VS2, Very Good+ cut when graded, IGI/GIA/GCAL/HRD/AGS, no sidestone
-   shapes) and are deleted from Shopify rather than archived. Watches whose
+   VS2, Very Good+ cut when graded, IGI/GIA/GCAL/HRD/AGS, 2ct minimum, no
+   sidestone shapes) and are deleted from Shopify rather than archived. Watches whose
    feed condition is `aftermarket` are held out. Brands outside the curated
    list still import and are tagged `other-watch-brand`. Other failing rows
    are *held* (never created).
