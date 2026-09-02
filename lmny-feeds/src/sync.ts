@@ -21,6 +21,7 @@ import {
   kindForHandle,
   PRICING_REVIEW_HOLD_REASONS,
   promoteShortMediaUpdates,
+  promoteUntrackNonMarketplaceInventory,
   promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from './diff.js';
@@ -38,6 +39,7 @@ import {
   quarantineProductSetInput,
   titleFor,
   UNIQUE_IN_STOCK_QTY,
+  uniqueStockQtyFor,
   writeErrorsAreSystemic,
 } from './product.js';
 import {
@@ -318,11 +320,25 @@ async function main() {
         'grant the app read_locations. Untracked products will keep reporting qty 0 to Uploadify.',
     );
   }
+  const marketplaceQtyByHandle = new Map(
+    publishable.map((p) => [handleFor(p.item), uniqueStockQtyFor(p.item, p.item.imageUrls.length > 0)]),
+  );
+  const shouldTrackForUploadify = (handle: string) => (marketplaceQtyByHandle.get(handle) ?? 0) > 0;
   if (locationId) {
-    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog);
+    const inventoryRepaired = promoteUntrackedInventoryUpdates(decisions, catalog, shouldTrackForUploadify);
     if (inventoryRepaired > 0) {
       notes.push(
         `${inventoryRepaired} product(s) skipped as unchanged are still untracked (Shopify qty 0 to Admin apps) — writing tracked qty ${UNIQUE_IN_STOCK_QTY}`,
+      );
+    }
+    const untrackedForUploadify = promoteUntrackNonMarketplaceInventory(
+      decisions,
+      catalog,
+      shouldTrackForUploadify,
+    );
+    if (untrackedForUploadify > 0) {
+      notes.push(
+        `${untrackedForUploadify} lab(s) under 5ct still tracked qty > 0 — untracking so Uploadify delists while the Online Store keeps them`,
       );
     }
   } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {

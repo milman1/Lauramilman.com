@@ -13,6 +13,7 @@ import {
   seoTitleFor,
   tagsFor,
   titleFor,
+  uniqueStockQtyFor,
   vendorFor,
   writeErrorsAreSystemic,
 } from '../src/product.js';
@@ -41,6 +42,19 @@ describe('handle generation', () => {
     expect(sanitizeRef('AB/12#34')).toBe('ab-12-34');
     expect(sanitizeRef('--weird--')).toBe('weird');
     expect(handleFor(naturalStone({ stockRef: 'AB/12#34' }))).toBe(handleFor(naturalStone({ stockRef: 'ab/12#34' })));
+  });
+});
+
+describe('uniqueStockQtyFor', () => {
+  it('is 1 for naturals, watches, and labs at 5ct+', () => {
+    expect(uniqueStockQtyFor(naturalStone(), true)).toBe(1);
+    expect(uniqueStockQtyFor(watch(), true)).toBe(1);
+    expect(uniqueStockQtyFor(labStone({ carat: 5 }), true)).toBe(1);
+  });
+
+  it('is 0 for labs under 5ct so Uploadify does not import them', () => {
+    expect(uniqueStockQtyFor(labStone({ carat: 4.99 }), true)).toBe(0);
+    expect(uniqueStockQtyFor(labStone({ carat: 2.01 }), true)).toBe(0);
   });
 });
 
@@ -310,6 +324,27 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.tracked).toBe(true);
     expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
     expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+  });
+
+  it('a lab under 5ct with a location stays untracked so Uploadify delists it', () => {
+    const input = buildProductSetInput(labStone({ carat: 4.99 }), priced(), at, undefined, 'gid://shopify/Location/1');
+    const variant = (input.variants as Array<{
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities?: unknown;
+    }>)[0]!;
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
+    expect(input.status).toBe('ACTIVE');
+  });
+
+  it('a lab at 5ct with a location is tracked qty 1 for Uploadify', () => {
+    const input = buildProductSetInput(labStone({ carat: 5 }), priced(), at, undefined, 'gid://shopify/Location/1');
+    const variant = (input.variants as Array<{
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities: Array<{ quantity: number }>;
+    }>)[0]!;
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
   });
 
   it('a lab stone uses the same Jewelry category as naturals', () => {

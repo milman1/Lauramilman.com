@@ -147,17 +147,51 @@ export function promoteShortMediaUpdates(
  * inventory (qty 0 to Admin apps). Promote those feed products so productSet
  * can write tracked qty 1. Does not touch media-missing quarantine. Call
  * only when a location GID is available this run.
+ *
+ * `shouldTrack` limits the backfill to SKUs Uploadify should still import
+ * (watches, naturals, labs ≥ 5ct). Labs below that floor stay untracked.
  */
-export function promoteUntrackedInventoryUpdates(decisions: Decision[], catalog: CatalogEntry[]): number {
+export function promoteUntrackedInventoryUpdates(
+  decisions: Decision[],
+  catalog: CatalogEntry[],
+  shouldTrack?: (handle: string) => boolean,
+): number {
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
   let promoted = 0;
   for (const d of decisions) {
     if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
     if (kindForHandle(d.handle) === null) continue;
+    if (shouldTrack && !shouldTrack(d.handle)) continue;
     const have = catalogByHandle.get(d.handle);
     if (!have || have.inventoryTracked === true) continue;
     d.action = 'update';
     d.reason = 'inventory_untracked';
+    promoted += 1;
+  }
+  return promoted;
+}
+
+/**
+ * Untrack hash-skipped labs (and any other handle) that still show tracked
+ * qty > 0 even though they must not go to Uploadify. productSet writes
+ * `tracked: false` so the Online Store can keep selling them.
+ */
+export function promoteUntrackNonMarketplaceInventory(
+  decisions: Decision[],
+  catalog: CatalogEntry[],
+  shouldTrack: (handle: string) => boolean,
+): number {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const d of decisions) {
+    if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
+    if (kindForHandle(d.handle) === null) continue;
+    if (shouldTrack(d.handle)) continue;
+    const have = catalogByHandle.get(d.handle);
+    if (!have || have.inventoryTracked !== true) continue;
+    if ((have.inventoryQuantity ?? 0) <= 0) continue;
+    d.action = 'update';
+    d.reason = 'uploadify_below_min_carat';
     promoted += 1;
   }
   return promoted;

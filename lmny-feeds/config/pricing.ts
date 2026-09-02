@@ -68,6 +68,12 @@ export const LAB_GUARDS = {
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
   /**
+   * Labs below this carat stay on the Online Store but are written untracked
+   * (qty 0 to Uploadify). 5ct+ keep tracked qty 1 so marketplaces still list
+   * them. Naturals and watches are not gated here.
+   */
+  uploadifyMinCarat: 5,
+  /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
    * Tuned below live wholesale p10 so real cheap large stones pass, but a
    * double-divided or zeroed cost cannot.
