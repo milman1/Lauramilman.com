@@ -191,11 +191,19 @@ describe('promoteUntrackedInventoryUpdates', () => {
     expect(d[0]).toMatchObject({ handle: 'nd-bd-1234', action: 'update', reason: 'inventory_untracked' });
   });
 
-  it('does not backfill untracked labs below the Uploadify carat floor', () => {
-    const catalog = [entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: false })];
-    const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
-    expect(promoteUntrackedInventoryUpdates(d, catalog, (h) => h !== 'lg-small')).toBe(0);
-    expect(d[0]?.action).toBe('skip');
+  it('does not backfill untracked loose diamonds when they are off Uploadify', () => {
+    const watchesOnly = (h: string) => h.startsWith('w-');
+    const catalog = [
+      entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: false }),
+      entry({ handle: 'nd-bd-1234', contentHash: 'h1', inventoryTracked: false }),
+    ];
+    const d = diffCatalog(
+      [want('lg-small', 'h1'), want('nd-bd-1234', 'h1')],
+      catalog,
+      ALL_KINDS,
+    );
+    expect(promoteUntrackedInventoryUpdates(d, catalog, watchesOnly)).toBe(0);
+    expect(d.every((x) => x.action === 'skip')).toBe(true);
   });
 
   it('does not promote already-tracked stones or quarantined watches', () => {
@@ -211,29 +219,41 @@ describe('promoteUntrackedInventoryUpdates', () => {
 });
 
 describe('promoteUntrackNonMarketplaceInventory', () => {
+  const watchesOnly = (h: string) => h.startsWith('w-');
+
   it('untracks a hash-skipped lab that is still qty 1', () => {
     const catalog = [
       entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
     ];
     const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
-    const n = promoteUntrackNonMarketplaceInventory(d, catalog, (h) => h !== 'lg-small');
+    const n = promoteUntrackNonMarketplaceInventory(d, catalog, watchesOnly);
     expect(n).toBe(1);
-    expect(d[0]).toMatchObject({ action: 'update', reason: 'uploadify_below_min_carat' });
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'uploadify_loose_diamond' });
   });
 
-  it('leaves a 5ct lab that should stay on Uploadify skipped', () => {
+  it('untracks a hash-skipped natural that is still qty 1', () => {
     const catalog = [
-      entry({ handle: 'lg-big', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
+      entry({ handle: 'nd-bd-1234', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
     ];
-    const d = diffCatalog([want('lg-big', 'h1')], catalog, ALL_KINDS);
-    expect(promoteUntrackNonMarketplaceInventory(d, catalog, (h) => h === 'lg-big')).toBe(0);
+    const d = diffCatalog([want('nd-bd-1234', 'h1')], catalog, ALL_KINDS);
+    const n = promoteUntrackNonMarketplaceInventory(d, catalog, watchesOnly);
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'uploadify_loose_diamond' });
+  });
+
+  it('leaves a watch that should stay on Uploadify skipped', () => {
+    const catalog = [
+      entry({ handle: 'w-3194', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
+    ];
+    const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
+    expect(promoteUntrackNonMarketplaceInventory(d, catalog, watchesOnly)).toBe(0);
     expect(d[0]?.action).toBe('skip');
   });
 
-  it('does not reopen an already-untracked small lab', () => {
+  it('does not reopen an already-untracked diamond', () => {
     const catalog = [entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: false, inventoryQuantity: 0 })];
     const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
-    expect(promoteUntrackNonMarketplaceInventory(d, catalog, () => false)).toBe(0);
+    expect(promoteUntrackNonMarketplaceInventory(d, catalog, watchesOnly)).toBe(0);
     expect(d[0]?.action).toBe('skip');
   });
 });

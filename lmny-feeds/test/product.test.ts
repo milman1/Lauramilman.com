@@ -46,13 +46,13 @@ describe('handle generation', () => {
 });
 
 describe('uniqueStockQtyFor', () => {
-  it('is 1 for naturals, watches, and labs at 5ct+', () => {
-    expect(uniqueStockQtyFor(naturalStone(), true)).toBe(1);
+  it('is 1 for watches so Uploadify keeps them listed', () => {
     expect(uniqueStockQtyFor(watch(), true)).toBe(1);
-    expect(uniqueStockQtyFor(labStone({ carat: 5 }), true)).toBe(1);
   });
 
-  it('is 0 for labs under 5ct so Uploadify does not import them', () => {
+  it('is 0 for every loose diamond so Uploadify does not import them', () => {
+    expect(uniqueStockQtyFor(naturalStone(), true)).toBe(0);
+    expect(uniqueStockQtyFor(labStone({ carat: 5 }), true)).toBe(0);
     expect(uniqueStockQtyFor(labStone({ carat: 4.99 }), true)).toBe(0);
     expect(uniqueStockQtyFor(labStone({ carat: 2.01 }), true)).toBe(0);
   });
@@ -313,38 +313,30 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.tracked).toBe(false);
   });
 
-  it('a locationId turns on tracked qty 1 for loose diamonds', () => {
+  it('a locationId leaves loose diamonds untracked so Uploadify does not import them', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
     const variant = (input.variants as Array<{
       sku: string;
       inventoryItem: { tracked: boolean };
-      inventoryQuantities: Array<{ quantity: number }>;
+      inventoryQuantities?: unknown;
     }>)[0]!;
     expect(variant.sku).toBe('BD-1234');
-    expect(variant.inventoryItem.tracked).toBe(true);
-    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
+    expect(variant.inventoryItem.tracked).toBe(false);
+    expect(variant.inventoryQuantities).toBeUndefined();
     expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
   });
 
-  it('a lab under 5ct with a location stays untracked so Uploadify delists it', () => {
-    const input = buildProductSetInput(labStone({ carat: 4.99 }), priced(), at, undefined, 'gid://shopify/Location/1');
-    const variant = (input.variants as Array<{
-      inventoryItem: { tracked: boolean };
-      inventoryQuantities?: unknown;
-    }>)[0]!;
-    expect(variant.inventoryItem.tracked).toBe(false);
-    expect(variant.inventoryQuantities).toBeUndefined();
-    expect(input.status).toBe('ACTIVE');
-  });
-
-  it('a lab at 5ct with a location is tracked qty 1 for Uploadify', () => {
-    const input = buildProductSetInput(labStone({ carat: 5 }), priced(), at, undefined, 'gid://shopify/Location/1');
-    const variant = (input.variants as Array<{
-      inventoryItem: { tracked: boolean };
-      inventoryQuantities: Array<{ quantity: number }>;
-    }>)[0]!;
-    expect(variant.inventoryItem.tracked).toBe(true);
-    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
+  it('a lab of any size with a location stays untracked so Uploadify delists it', () => {
+    for (const carat of [4.99, 5]) {
+      const input = buildProductSetInput(labStone({ carat }), priced(), at, undefined, 'gid://shopify/Location/1');
+      const variant = (input.variants as Array<{
+        inventoryItem: { tracked: boolean };
+        inventoryQuantities?: unknown;
+      }>)[0]!;
+      expect(variant.inventoryItem.tracked).toBe(false);
+      expect(variant.inventoryQuantities).toBeUndefined();
+      expect(input.status).toBe('ACTIVE');
+    }
   });
 
   it('a lab stone uses the same Jewelry category as naturals', () => {

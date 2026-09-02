@@ -338,7 +338,7 @@ async function main() {
     );
     if (untrackedForUploadify > 0) {
       notes.push(
-        `${untrackedForUploadify} lab(s) under 5ct still tracked qty > 0 — untracking so Uploadify delists while the Online Store keeps them`,
+        `${untrackedForUploadify} loose diamond(s) still tracked qty > 0 — untracking so Uploadify delists while the Online Store keeps them`,
       );
     }
   } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {

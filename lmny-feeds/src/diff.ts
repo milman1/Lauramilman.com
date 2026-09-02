@@ -149,7 +149,7 @@ export function promoteShortMediaUpdates(
  * only when a location GID is available this run.
  *
  * `shouldTrack` limits the backfill to SKUs Uploadify should still import
- * (watches, naturals, labs ≥ 5ct). Labs below that floor stay untracked.
+ * (watches). Loose diamonds stay untracked.
  */
 export function promoteUntrackedInventoryUpdates(
   decisions: Decision[],
@@ -172,9 +172,9 @@ export function promoteUntrackedInventoryUpdates(
 }
 
 /**
- * Untrack hash-skipped labs (and any other handle) that still show tracked
- * qty > 0 even though they must not go to Uploadify. productSet writes
- * `tracked: false` so the Online Store can keep selling them.
+ * Untrack hash-skipped diamonds (and any other handle) that still show
+ * tracked qty > 0 even though they must not go to Uploadify. productSet
+ * writes `tracked: false` so the Online Store can keep selling them.
  */
 export function promoteUntrackNonMarketplaceInventory(
   decisions: Decision[],
@@ -191,7 +191,7 @@ export function promoteUntrackNonMarketplaceInventory(
     if (!have || have.inventoryTracked !== true) continue;
     if ((have.inventoryQuantity ?? 0) <= 0) continue;
     d.action = 'update';
-    d.reason = 'uploadify_below_min_carat';
+    d.reason = 'uploadify_loose_diamond';
     promoted += 1;
   }
   return promoted;
