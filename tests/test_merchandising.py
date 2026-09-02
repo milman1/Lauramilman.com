@@ -359,6 +359,29 @@ def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
     assert "watch-brand-chips" in collection
 
 
+def test_gemological_filters_live_only_on_loose_diamonds() -> None:
+    """Clarity / shape / GIA color / cut are loose-diamond 4Cs, not jewelry."""
+    drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
+    diamonds = (ROOT / "sections/diamond-filter.liquid").read_text()
+    jewelry_templates = (ROOT / "templates/collection.json").read_text()
+    diamond_templates = (ROOT / "templates/collection.diamonds.json").read_text()
+    lab_templates = (ROOT / "templates/collection.diamonds-lab.json").read_text()
+
+    assert 'title: \'Clarity\'' in diamonds or "title: 'Clarity'" in diamonds
+    assert "type: diamond-filter" in diamond_templates.replace('"', "")
+    assert "diamond-filter" in lab_templates
+    assert "diamond-filter" not in jewelry_templates
+
+    skip_block = drawer.split("Shape / color / clarity / cut belong on loose diamonds only.")[1].split(
+        "fd_is_watch"
+    )[0]
+    for needle in ("clarity", "diamond shape", "cut grade", "'color'", "'colour'"):
+        assert needle in skip_block
+
+    assert "natural-diamonds or lab-grown-diamonds" in drawer
+
+
+
 def test_only_shopify_inbox_chat_is_rendered() -> None:
     layout = (ROOT / "layout/theme.liquid").read_text()
     settings = load_json(ROOT / "config/settings_data.json")
