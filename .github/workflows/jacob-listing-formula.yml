@@ -1,5 +1,6 @@
-# Apply the New Vintage listing formula to live Jacob & Co. watches
-# and activate remaining Jacob watches that are not yet on the storefront.
+# Apply the New Vintage listing formula to live Jacob & Co. watches,
+# publish Pre-Owned Maison + watches to Shop/Google when those channels
+# exist, and keep Journal pages/articles live.
 name: Jacob listing formula
 
 on:
@@ -46,6 +47,19 @@ jobs:
           else
             npx tsx scripts/apply-jacob-listing-formula.ts --dry-run
           fi
+      - name: Shop, Google, Journal, subscribers
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            npx tsx scripts/ensure-store-merchandising.ts
+          else
+            npx tsx scripts/ensure-store-merchandising.ts --dry-run
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,4 +67,6 @@ jobs:
           path: |
             lmny-feeds/out/jacob-listing-formula.json
             lmny-feeds/out/jacob-listing-formula-preview.json
+            lmny-feeds/out/store-merchandising.json
+            lmny-feeds/out/store-merchandising-preview.json
           if-no-files-found: ignore
