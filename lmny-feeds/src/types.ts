@@ -112,6 +112,8 @@ export interface CatalogEntry {
   inventoryItemId?: string;
   /** Shopify's summed available quantity across locations (may be 0 if untracked). */
   inventoryQuantity?: number;
+  /** Uploadify-owned metafields still on this product (diamonds get them deleted). */
+  uploadifyMetafields?: Array<{ id: string; namespace: string; key: string }>;
 }
 
 export interface DesiredEntry {

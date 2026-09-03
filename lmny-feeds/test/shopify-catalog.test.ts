@@ -56,4 +56,45 @@ describe('parseFeedCatalogRows', () => {
       inventoryQuantity: 1,
     });
   });
+
+  it('collects uploadify metafields and ignores other namespaces', () => {
+    const catalog = parseFeedCatalogRows([
+      {
+        id: 'gid://shopify/Product/3',
+        handle: 'nd-1',
+        status: 'ACTIVE',
+        tags: ['lmny-feed'],
+        metafield: { value: 'h' },
+        uploadifyActive: {
+          id: 'gid://shopify/Metafield/1',
+          namespace: 'uploadify_product',
+          key: 'uploadify_active',
+        },
+      },
+      {
+        __parentId: 'gid://shopify/Product/3',
+        id: 'gid://shopify/Metafield/2',
+        namespace: 'uploadify',
+        key: 'listing_id',
+      },
+      {
+        __parentId: 'gid://shopify/Product/3',
+        id: 'gid://shopify/Metafield/3',
+        namespace: 'custom',
+        key: 'color',
+      },
+    ]);
+    expect(catalog[0]?.uploadifyMetafields).toEqual([
+      {
+        id: 'gid://shopify/Metafield/1',
+        namespace: 'uploadify_product',
+        key: 'uploadify_active',
+      },
+      {
+        id: 'gid://shopify/Metafield/2',
+        namespace: 'uploadify',
+        key: 'listing_id',
+      },
+    ]);
+  });
 });

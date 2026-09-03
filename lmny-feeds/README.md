@@ -82,7 +82,10 @@ holds a stones table — Shopify products are the only live copy.
    Category is still written (Watches `aa-6-11`, loose diamonds Jewelry
    `aa-6`). Hash-matched untracked products are promoted to an update
    (`inventory_untracked`); diamonds that are still tracked qty 1 are
-   promoted to qty 0 (`uploadify_qty_zero`). Archive sets qty `0`
+   promoted to qty 0 (`uploadify_qty_zero`). Uploadify metafields
+   (`uploadify` / `uploadify_product`, including `uploadify_active`) are
+   deleted on loose diamonds only so the app cannot keep them listed; watches
+   keep theirs. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`

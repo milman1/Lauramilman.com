@@ -57,6 +57,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
+import { uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -255,6 +256,12 @@ async function main() {
   //    successfully fetched feed are deleted; unavailable watches archive.
   const catalog: CatalogEntry[] = await shopify.fetchCatalog();
   console.log(`Catalog: ${catalog.length} feed-managed products`);
+  const pendingUploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
+  if (pendingUploadifyDeletes.length > 0) {
+    const msg = `${pendingUploadifyDeletes.length} Uploadify metafield(s) on loose diamonds to delete`;
+    notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
+    console.log(msg);
+  }
 
   // DNA fill runs AFTER the catalog read so a watch Shopify still shows with
   // one READY photo is filled even when the API listed three 404 `.jpg` extras.
@@ -382,6 +389,16 @@ async function main() {
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
+
+    const uploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
+    if (uploadifyDeletes.length > 0) {
+      console.log(`Deleting ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds`);
+      const metafieldErrors = await shopify.deleteMetafields(uploadifyDeletes);
+      writeErrors.push(...metafieldErrors.map((e) => `uploadify metafield: ${e}`));
+      notes.push(
+        `deleted ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds (watches untouched)`,
+      );
+    }
 
     await shopify.ensureMetafieldDefinitions();
     collectionsCreated = await shopify.ensureCollections();

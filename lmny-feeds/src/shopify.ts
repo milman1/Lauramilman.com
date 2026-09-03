@@ -1,6 +1,11 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
+import {
+  isUploadifyNamespace,
+  UPLOADIFY_ACTIVE_KEY,
+  type MetafieldIdentifier,
+} from './uploadifyMetafields.js';
 
 const API_VERSION = '2026-01';
 /** Matches the feed client's identity — some supplier hosts refuse bare clients. */
@@ -117,6 +122,11 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
     const r = row as Record<string, unknown>;
     if (typeof r.handle === 'string') {
       const id = r.id as string;
+      const uploadifyMetafields: NonNullable<CatalogEntry['uploadifyMetafields']> = [];
+      const inline = r.uploadifyActive as { id?: string; namespace?: string; key?: string } | null | undefined;
+      if (inline?.id && inline.namespace && inline.key && isUploadifyNamespace(inline.namespace)) {
+        uploadifyMetafields.push({ id: inline.id, namespace: inline.namespace, key: inline.key });
+      }
       byId.set(id, {
         id,
         handle: r.handle,
@@ -126,6 +136,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         imageCount: 0,
         videoCount: 0,
         contentHash: (r.metafield as { value: string } | null)?.value ?? null,
+        uploadifyMetafields,
       });
       order.push(id);
       continue;
@@ -141,6 +152,13 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         if (r.status !== 'FAILED') parent.videoCount += 1;
       } else if (r.status === 'READY') {
         parent.imageCount += 1;
+      }
+      continue;
+    }
+    if (typeof r.namespace === 'string' && typeof r.key === 'string' && typeof r.id === 'string' && isUploadifyNamespace(r.namespace)) {
+      parent.uploadifyMetafields ??= [];
+      if (!parent.uploadifyMetafields.some((mf) => mf.namespace === r.namespace && mf.key === r.key)) {
+        parent.uploadifyMetafields.push({ id: r.id, namespace: r.namespace, key: r.key });
       }
       continue;
     }
@@ -483,6 +501,13 @@ export class ShopifyClient {
    * them when they leave the API. Estate watches use non-`w-` handles and
    * `kindForHandle` ignores them — they are never archived by this path.
    *
+   * Uploadify listing metafields are read through one `metafields` connection
+   * (bulk queries cap connections at five; two aliased metafields connections
+   * would blow that). Child JSONL rows are filtered to `uploadify` /
+   * `uploadify_product` in `parseFeedCatalogRows`. `uploadifyActive` is a
+   * single-field alias, not a connection, so the listing switch is still
+   * captured if the connection is slow to page.
+   *
    * mediaCount deliberately counts only READY media. Shopify's own mediaCount
    * includes FAILED images, and a failed image is worse than none — the
    * product reports that it has a picture while the storefront shows the
@@ -503,6 +528,8 @@ export class ShopifyClient {
             status
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
+            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key }
+            metafields { edges { node { id namespace key } } }
             media { edges { node { status mediaContentType } } }
             variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }
           }
@@ -772,6 +799,37 @@ export class ShopifyClient {
       { input: { id } },
     );
     return data.productDelete.userErrors.map((e) => e.message);
+  }
+
+  /**
+   * Drop Uploadify listing metafields. Batches of 25 — Shopify's max for
+   * metafieldsDelete. Missing fields come back as userErrors and are ignored
+   * so a second run is a no-op.
+   */
+  async deleteMetafields(identifiers: MetafieldIdentifier[]): Promise<string[]> {
+    const errors: string[] = [];
+    for (let i = 0; i < identifiers.length; i += 25) {
+      const batch = identifiers.slice(i, i + 25);
+      const data = await this.gql<{
+        metafieldsDelete: {
+          deletedMetafields: Array<{ key: string; namespace: string } | null> | null;
+          userErrors: Array<{ message: string }>;
+        };
+      }>(
+        `mutation($metafields: [MetafieldIdentifierInput!]!) {
+          metafieldsDelete(metafields: $metafields) {
+            deletedMetafields { key namespace ownerId }
+            userErrors { field message }
+          }
+        }`,
+        { metafields: batch },
+      );
+      for (const e of data.metafieldsDelete.userErrors) {
+        if (/does not exist|not found/i.test(e.message)) continue;
+        errors.push(e.message);
+      }
+    }
+    return errors;
   }
 
   // ------------------------------------------------------------- publications
