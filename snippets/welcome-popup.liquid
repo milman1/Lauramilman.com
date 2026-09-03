@@ -16,6 +16,11 @@
 
     {%- form 'customer', id: 'LmWelcomeForm', class: 'lm-welcome__form' -%}
       <input type="hidden" name="contact[tags]" value="newsletter,welcome10">
+      {%- comment -%}
+        Shopify only marks Email marketing = subscribed when this field is sent.
+        The popup action is subscribe, so consent is the submit itself.
+      {%- endcomment -%}
+      <input type="hidden" name="contact[accepts_marketing]" value="true">
       <label class="visually-hidden" for="LmWelcomeEmail">Email</label>
       <input
         id="LmWelcomeEmail"
@@ -156,7 +161,7 @@
     try {
       if (localStorage.getItem(key)) return;
     } catch (e) {}
-    setTimeout(open, 8000);
+    setTimeout(open, 2500);
   })();
 </script>
 {%- endunless -%}
