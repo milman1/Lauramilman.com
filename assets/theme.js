@@ -491,13 +491,17 @@ function formatMoney(cents) {
     return String(el.value || el.textContent || '').trim();
   }
 
+  function isGeneratedComposer(text) {
+    return /^Hi — I( would like to make an offer|'m looking at|'d like to message about)/.test(text);
+  }
+
   function fillComposer(payload) {
     var text = composerMessage(payload);
     if (!text) return false;
     var el = findComposer();
     if (!el) return false;
     var current = composerCurrent(el);
-    if (current && current !== text) return true;
+    if (current && current !== text && !isGeneratedComposer(current)) return true;
     setComposerValue(el, text);
     return true;
   }

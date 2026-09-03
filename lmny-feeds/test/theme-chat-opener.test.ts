@@ -142,6 +142,26 @@ describe('PDP Shopify chat opener', () => {
     expect(composer.value).toContain('Channel Set Diamond Stackable Eternity Band');
     expect(composer.value).toContain('channel-set-diamond-stackable-eternity-band');
     expect(composer.value).not.toContain('Jacob');
+
+    (windowObj as { lmChat: { open: (p: object) => void } }).lmChat.open({
+      productTitle: 'Channel Set Diamond Stackable Eternity Band',
+      productUrl: 'https://www.lauramilman.com/products/channel-set-diamond-stackable-eternity-band',
+      intent: 'message',
+    });
+    vi.runAllTimers();
+    expect(composer.value).toContain("I'd like to message about Channel Set Diamond Stackable Eternity Band");
+  });
+
+  it('does not overwrite a message the customer already typed', () => {
+    const { composer, windowObj } = installDom(false);
+    composer.value = 'Can you hold this in a size 6?';
+    (windowObj as { lmChat: { open: (p: object) => void } }).lmChat.open({
+      productTitle: 'Channel Set Diamond Stackable Eternity Band',
+      productUrl: 'https://www.lauramilman.com/products/channel-set-diamond-stackable-eternity-band',
+      intent: 'ask',
+    });
+    vi.runAllTimers();
+    expect(composer.value).toBe('Can you hold this in a size 6?');
   });
 
   it('does not treat a leftover open flag as success without show()', () => {
