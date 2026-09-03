@@ -307,6 +307,54 @@ def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
     collection = (ROOT / "sections/main-collection.liquid").read_text()
     assert "Shop by brand" in collection
     assert "/collections/rolex-watches" in collection
+    assert "estate-jewelry" in drawer
+
+
+def test_preowned_maison_points_at_the_estate_vault() -> None:
+    """Shoppers should land on the 80+ piece estate collection, not the thin vintage list."""
+    home = load_json(ROOT / "templates/index.json")
+    shop = load_json(ROOT / "templates/page.shop.json")
+    assert home["sections"]["shop-worlds"]["blocks"]["world-maison"]["settings"]["collection"] == "estate-jewelry"
+    assert home["sections"]["preowned-maison"]["settings"]["cta_url"] == "/collections/estate-jewelry"
+    assert shop["sections"]["shop-worlds"]["blocks"]["world-maison"]["settings"]["collection"] == "estate-jewelry"
+    assert shop["sections"]["preowned-maison"]["settings"]["cta_url"] == "/collections/estate-jewelry"
+    header = (ROOT / "sections/header.liquid").read_text()
+    assert 'href="/collections/estate-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>' in header
+    footer = (ROOT / "sections/footer.liquid").read_text()
+    assert footer.count("/collections/estate-jewelry") >= 2
+    worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
+    assert "'vintage-jewelry', 'estate-jewelry'" in worlds
+    vintage = (ROOT / "snippets/product-is-vintage.liquid").read_text()
+    assert "estate-jewelry" in vintage
+    auth = load_json(ROOT / "templates/page.authentication.json")
+    assert "/collections/estate-jewelry" in auth["sections"]["main"]["blocks"]["cta-vault"]["settings"]["link"]
+
+
+def test_newsletter_and_welcome_subscribe_to_email_marketing() -> None:
+    for rel in (
+        "sections/newsletter.liquid",
+        "snippets/welcome-popup.liquid",
+        "sections/email-signup-banner.liquid",
+    ):
+        text = (ROOT / rel).read_text()
+        assert text.count('name="contact[accepts_marketing]"') == 1
+        assert 'name="contact[accepts_marketing]" value="true"' in text
+        assert "type=\"checkbox\" name=\"contact[accepts_marketing]\"" not in text
+
+
+def test_journal_is_on_the_homepage_and_lists_every_article() -> None:
+    blog = (ROOT / "sections/main-blog.liquid").read_text()
+    assert "paginate blog.articles by 12" in blog
+    home = load_json(ROOT / "templates/index.json")
+    journal = home["sections"]["featured-journal"]
+    assert journal["type"] == "featured-blog"
+    assert journal["settings"]["blog"] == "journal"
+    assert "featured-journal" in home["order"]
+    assert home["order"].index("featured-journal") < home["order"].index("newsletter")
+    header = (ROOT / "sections/header.liquid").read_text()
+    assert 'href="/pages/best-bars-nyc"' in header
+    assert 'href="/pages/power-dressing-nyc"' in header
+    assert 'href="/pages/hotel-bars-nyc"' in header
 
 
 def test_only_shopify_inbox_chat_is_rendered() -> None:

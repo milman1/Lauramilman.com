@@ -16,7 +16,7 @@
     assign jewelry_only = true
     assign schema_include_products = false
   endif
-  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
+  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,estate-jewelry,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
   assign has_active_filters = false
   for filter in collection.filters
@@ -58,7 +58,7 @@
         <a href="/collections/bracelets" class="lm-collection__chip">Bracelets</a>
         <a href="/collections/pendants-1" class="lm-collection__chip">Pendants</a>
         <a href="/collections/engagement-rings" class="lm-collection__chip">Engagement</a>
-        <a href="/collections/vintage-jewelry" class="lm-collection__chip">Estate</a>
+        <a href="/collections/estate-jewelry" class="lm-collection__chip">Estate</a>
         <a href="/collections/time-pieces" class="lm-collection__chip">Timepieces</a>
       </nav>
     {%- endif -%}

@@ -74,7 +74,7 @@
         "world-maison": {
           "type": "world",
           "settings": {
-            "collection": "vintage-jewelry",
+            "collection": "estate-jewelry",
             "title": "Pre-Owned Maison",
             "subtitle": "Authenticated signed estate",
             "tone": "warm"
@@ -157,7 +157,7 @@
         "description": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust.",
         "trust_line": "Every estate piece is individually authenticated and documented",
         "cta_text": "Explore the Maison Vault",
-        "cta_url": "/collections/vintage-jewelry"
+        "cta_url": "/collections/estate-jewelry"
       }
     },
     "diamond-destination": {
