@@ -10,7 +10,7 @@
         "p-provenance": { "type": "point", "settings": { "title": "Provenance & Papers", "text": "<p>Where original boxes, certificates or service records exist, they're documented and included. Where they don't, our own authentication documentation ships with the piece.</p>" } },
         "h-why": { "type": "heading", "settings": { "text": "Why Buy Pre-Owned Maison" } },
         "t-why": { "type": "text", "settings": { "text": "<p>Signed estate pieces hold their value, carry designs the houses no longer make, and arrive with a patina no new piece can imitate. Bought well — and authenticated properly — they are among the smartest purchases in fine jewelry.</p>" } },
-        "cta-vault": { "type": "cta", "settings": { "label": "Explore the Maison Vault", "link": "/collections/vintage-jewelry" } }
+        "cta-vault": { "type": "cta", "settings": { "label": "Explore the Maison Vault", "link": "/collections/estate-jewelry" } }
       },
       "block_order": ["t-open", "h-process", "p-hallmarks", "p-construction", "p-provenance", "h-why", "t-why", "cta-vault"],
       "settings": {

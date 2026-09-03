@@ -21,7 +21,7 @@
   unless vintage
     for col in product.collections
       assign handle_l = col.handle | downcase
-      if handle_l == 'vintage-jewelry' or handle_l == 'estate' or handle_l contains 'pre-owned' or handle_l contains 'preowned'
+      if handle_l == 'vintage-jewelry' or handle_l == 'estate-jewelry' or handle_l == 'estate' or handle_l contains 'pre-owned' or handle_l contains 'preowned'
         assign vintage = true
         break
       endif

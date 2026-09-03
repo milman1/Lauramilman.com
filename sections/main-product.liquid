@@ -28,6 +28,8 @@
         assign status_pill = 'Estate'
       elsif t contains 'pre-owned'
         assign status_pill = 'Pre-Owned'
+      elsif t contains 'new vintage'
+        assign status_pill = 'New Vintage'
       elsif t == 'vintage'
         assign status_pill = 'Vintage'
       endif
@@ -62,7 +64,7 @@
   # ── Spec rows from custom.* metafields — empty rows never render ──
   # Jewelry + watch keys share this list. Blank values are skipped, so a
   # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
-  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,diamond_weight:Diamond Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'

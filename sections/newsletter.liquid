@@ -14,6 +14,12 @@
     <div class="lm-newsletter__form-wrap">
       {%- form 'customer', id: 'lm-newsletter-form', class: 'lm-newsletter__form' -%}
         <input type="hidden" name="contact[tags]" value="newsletter,welcome10">
+        {%- comment -%}
+          Required for Shopify Email marketing. Without this, signup creates a
+          customer who is not subscribed — Admin → Customers shows them, but
+          they never get campaigns.
+        {%- endcomment -%}
+        <input type="hidden" name="contact[accepts_marketing]" value="true">
         <div class="lm-newsletter__field">
           <input
             type="email"

@@ -14,6 +14,10 @@
     "backfill:lab-pricing": "tsx scripts/backfill-lab-pricing.ts",
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
+    "apply:jacob-formula": "tsx scripts/apply-jacob-listing-formula.ts",
+    "preview:jacob-formula": "tsx scripts/apply-jacob-listing-formula.ts --preview",
+    "ensure:merchandising": "tsx scripts/ensure-store-merchandising.ts",
+    "preview:merchandising": "tsx scripts/ensure-store-merchandising.ts --preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

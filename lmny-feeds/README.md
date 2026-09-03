@@ -152,13 +152,17 @@ Optional (dual-write):
 ### Watch listing schema
 
 Watch titles, descriptions, SEO, tags, and metafields follow
-`docs/watch-listing-schema.md`. The pure transform lives in
-`src/watchListingBuilder.ts` and is wired through `product.ts` for every
-live feed sync. Specs (Dial, Bezel, Metal, MM, …) write to `custom.*`
-metafields and render in the theme’s jewelry-style `.product-specs` grid on
-the default product template — not as an HTML table in the description.
-Condition values that do not map (`SLIDER`, blank, …) keep the legacy
-brand/model/reference title and bullet-list description.
+`docs/watch-listing-schema.md` (also `docs/seo-title-formulas.md`). The pure
+transform lives in `src/watchListingBuilder.ts` and is wired through
+`product.ts` for every live feed sync. Specs (Dial, Bezel, Metal, MM, …)
+write to `custom.*` metafields and render in the theme’s jewelry-style
+`.product-specs` grid on the default product template — not as an HTML table
+in the description. Condition values that do not map (`SLIDER`, blank, …)
+keep the legacy brand/model/reference title and bullet-list description.
+
+Boutique Jacob & Co. pieces use merchant **New Vintage** (not Pre-Owned /
+Unworn): `docs/jacob-listing-formula.md`, applied by
+`scripts/apply-jacob-listing-formula.ts`.
 
 For the ~620 already-live watches still on the old bullet-list HTML:
 

@@ -83,6 +83,41 @@ layout. Preserve a nonblank raw value in `custom.condition` and as a tag; omit
 it when blank. The one-time legacy backfill still flags these rows for review
 because it cannot recover the richer physical specs from old Shopify HTML.
 
+### Boutique / New Vintage (merchant-stated, not the API map)
+
+Belgium Dia only sends Pre-Owned or Unworn. Boutique inventory (Jacob & Co.
+memo pieces, and any later maison stock the merchant labels this way) uses
+**New Vintage**. That is a third title word. Do not map it to Pre-Owned or
+Unworn, and do not set Google Shopping `condition` (`new`/`used` only).
+
+| Merchant condition | title word | Google Shopping `condition` |
+|---|---|---|
+| New Vintage | New Vintage | omit |
+
+Reuse the same output shape as Pre-Owned/Unworn. Only the title word, tags,
+`custom.condition`, and the omitted Google field change:
+
+```
+Title:     New Vintage {Brand} {Model} {reference}
+SEO title: {Brand} {Model} {reference} – New Vintage Watch     (≤ 60)
+SEO desc:  Shop this new vintage {Brand} {Model} {reference}. Authenticated by Laura Milman New York.  (≤ 160)
+Tags:      Brand, "New Vintage", "New Vintage Watches", reference, Model, Watch, Watches
+```
+
+Specs still go in `custom.*` (including `box` / `papers` when the merchant
+stated a full set). No HTML spec table. No price in the body.
+
+**Jacob & Co. boutique extras** (see `docs/jacob-listing-formula.md`):
+
+- Shopify **vendor** is `Jacob & Co` (no period) so products stay in
+  `/collections/jacob-co`. Titles and SEO use `Jacob & Co.`
+- Tag `jacob-co-boutique`. Never tag `lmny-feed`. Handles for new memo SKUs
+  are `jc-<itemNumber>` so feed sync will not archive them.
+- Photographed live PDPs keep their merchant handles, photos, and prices.
+  Do not create a second `jc-*` product for a watch that is already live.
+- Combo listings (watch + diamond bezel) keep one product; put diamond weight
+  on `custom.diamond_weight` and qualify the model with `Diamond Bezel`.
+
 ## Output
 
 ### Title
@@ -96,6 +131,7 @@ search for.
 Examples:
 - `Pre-Owned Rolex Submariner Date 126610LN`
 - `Unworn Audemars Piguet Royal Oak Selfwinding 26240BA.OO.1320BA.02`
+- `New Vintage Jacob & Co. Five Time Zone H-24 SSSL`
 
 ### Description (HTML)
 
@@ -190,11 +226,12 @@ tags the product already has, so existing operational tags are preserved.
 ## Idempotency
 
 Before writing, check whether the current title already starts with
-`Pre-Owned ` or `Unworn `. If so, skip — it's already been processed by this
-schema. This lets the backfill script be re-run safely and lets the ingest
-pipeline re-process a watch (e.g. after a price resync) without re-writing an
-already-correct title. The content-hash schema version is also bumped when
-the listing payload shape changes so live feed products refresh once.
+`Pre-Owned `, `Unworn `, or `New Vintage `. If so, skip — it's already been
+processed by this schema. This lets the backfill script be re-run safely and
+lets the ingest pipeline re-process a watch (e.g. after a price resync)
+without re-writing an already-correct title. The content-hash schema version
+is also bumped when the listing payload shape changes so live feed products
+refresh once.
 
 ## Explicitly out of scope for this pass
 

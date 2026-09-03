@@ -776,11 +776,16 @@ export class ShopifyClient {
 
   // ------------------------------------------------------------- publications
 
-  async onlineStorePublicationId(): Promise<string> {
+  async listPublications(): Promise<Array<{ id: string; name: string }>> {
     const data = await this.gql<{ publications: { nodes: Array<{ id: string; name: string }> } }>(
-      `{ publications(first: 25) { nodes { id name } } }`,
+      `{ publications(first: 50) { nodes { id name } } }`,
     );
-    const online = data.publications.nodes.find((p) => p.name === 'Online Store') ?? data.publications.nodes[0];
+    return data.publications.nodes;
+  }
+
+  async onlineStorePublicationId(): Promise<string> {
+    const nodes = await this.listPublications();
+    const online = nodes.find((p) => p.name === 'Online Store') ?? nodes[0];
     if (!online) throw new Error('No publications found');
     return online.id;
   }

@@ -16,7 +16,7 @@
     assign jewelry_only = true
     assign schema_include_products = false
   endif
-  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
+  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,estate-jewelry,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
   assign has_active_filters = false
   for filter in collection.filters
@@ -58,8 +58,29 @@
         <a href="/collections/bracelets" class="lm-collection__chip">Bracelets</a>
         <a href="/collections/pendants-1" class="lm-collection__chip">Pendants</a>
         <a href="/collections/engagement-rings" class="lm-collection__chip">Engagement</a>
-        <a href="/collections/vintage-jewelry" class="lm-collection__chip">Estate</a>
+        <a href="/collections/estate-jewelry" class="lm-collection__chip">Estate</a>
         <a href="/collections/time-pieces" class="lm-collection__chip">Timepieces</a>
+      </nav>
+    {%- endif -%}
+
+    {%- liquid
+      assign estate_has_maison_chip = false
+      for block in section.blocks
+        if block.settings.link contains '/collections/cartier'
+          assign estate_has_maison_chip = true
+        endif
+      endfor
+    -%}
+    {%- if jewelry_only == false and collection.handle == 'estate-jewelry' and estate_has_maison_chip == false -%}
+      <nav class="lm-collection__chips" aria-label="Shop by maison">
+        <span class="lm-collection__chips-label">Shop by maison</span>
+        <a href="/collections/cartier" class="lm-collection__chip">Cartier</a>
+        <a href="/collections/van-cleef-arpels" class="lm-collection__chip">Van Cleef &amp; Arpels</a>
+        <a href="/collections/bvlgari" class="lm-collection__chip">Bvlgari</a>
+        <a href="/collections/tiffany" class="lm-collection__chip">Tiffany &amp; Co.</a>
+        <a href="/collections/hermes" class="lm-collection__chip">Hermès</a>
+        <a href="/collections/chopard" class="lm-collection__chip">Chopard</a>
+        <a href="/collections/vintage-jewelry" class="lm-collection__chip">Vintage edit</a>
       </nav>
     {%- endif -%}
 
