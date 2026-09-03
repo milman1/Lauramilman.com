@@ -102,6 +102,7 @@
           <select id="ConsultInterest" name="contact[interest]">
             <option value="A timepiece">A timepiece</option>
             <option value="An estate / vintage piece">An estate / vintage piece</option>
+            <option value="Fine jewelry">Fine jewelry</option>
             <option value="A private consultation">A private consultation</option>
             <option value="Diamond or gemstone sourcing">Diamond or gemstone sourcing</option>
             <option value="A bespoke commission">A bespoke commission</option>
@@ -383,6 +384,8 @@
     if (interestSelect) {
       if (interest === 'watch') interestSelect.value = 'A timepiece';
       if (interest === 'estate' || interest === 'vintage') interestSelect.value = 'An estate / vintage piece';
+      if (interest === 'jewelry' || interest === 'fine-jewelry') interestSelect.value = 'Fine jewelry';
+      if (interest === 'diamond') interestSelect.value = 'Diamond or gemstone sourcing';
     }
     if (message && piece && !message.value) {
       message.value = 'I would like a private viewing of: ' + piece;
@@ -396,6 +399,8 @@
       var tags = ['private-viewing'];
       if (value === 'A timepiece') tags.push('watch-interest');
       if (value === 'An estate / vintage piece') tags.push('vintage-interest');
+      if (value === 'Fine jewelry') tags.push('jewelry-interest');
+      if (value === 'Diamond or gemstone sourcing') tags.push('diamond-interest');
       return tags.join(',');
     }
 

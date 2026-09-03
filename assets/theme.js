@@ -298,7 +298,11 @@ function formatMoney(cents) {
 (function () {
   var MAX_ATTEMPTS = 40;
   var RETRY_MS = 250;
+  var FILL_ATTEMPTS = 20;
+  var FILL_MS = 400;
   var opening = false;
+  var pendingPayload = null;
+  var fillTimer = null;
 
   function clickEl(el) {
     if (!el) return false;
@@ -325,11 +329,11 @@ function formatMoney(cents) {
   }
 
   /* Current Inbox embed is <shopify-chat> from storefront/web-components/chat.js.
-     It exposes show()/open. Do not treat an un-upgraded host as success. */
+     Always call show() — a leftover open attribute is not a visible panel.
+     When that host exists, do not click the launcher; that click toggles and can close chat. */
   function tryOpenShopifyChat() {
     var host = document.querySelector('shopify-chat');
     if (!host || typeof host.show !== 'function') return false;
-    if (host.open === true || host.hasAttribute('open')) return true;
     try {
       host.show();
       return true;
@@ -379,15 +383,151 @@ function formatMoney(cents) {
   }
 
   function tryOpenInbox() {
-    return tryOpenShopifyChat() || tryOpenLegacyInbox();
+    if (document.querySelector('shopify-chat')) {
+      return tryOpenShopifyChat();
+    }
+    return tryOpenLegacyInbox();
+  }
+
+  function composerMessage(payload) {
+    payload = payload || {};
+    var title = payload.productTitle || '';
+    var url = payload.productUrl || '';
+    var intent = payload.intent || 'ask';
+    var piece = title ? title : 'this piece';
+    var link = url ? ' (' + url + ')' : '';
+    if (intent === 'offer') {
+      return 'Hi — I would like to make an offer on ' + piece + link + '.';
+    }
+    if (intent === 'message') {
+      return "Hi — I'd like to message about " + piece + link + '.';
+    }
+    if (title) {
+      return "Hi — I'm looking at " + title + link + '.';
+    }
+    return '';
+  }
+
+  function isComposer(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.disabled || el.getAttribute('aria-hidden') === 'true') return false;
+    var tag = el.tagName;
+    if (tag === 'TEXTAREA') return true;
+    if (tag === 'INPUT') {
+      var type = (el.getAttribute('type') || 'text').toLowerCase();
+      return type === 'text' || type === 'search' || type === '';
+    }
+    if (el.isContentEditable) return true;
+    return el.getAttribute('role') === 'textbox';
+  }
+
+  function walkComposers(root, found) {
+    if (!root || found.el) return;
+    var nodes;
+    try {
+      nodes = root.querySelectorAll('textarea, input, [contenteditable="true"], [role="textbox"]');
+    } catch (err) {
+      nodes = [];
+    }
+    for (var i = 0; i < nodes.length; i++) {
+      if (isComposer(nodes[i])) {
+        found.el = nodes[i];
+        return;
+      }
+    }
+    var all;
+    try {
+      all = root.querySelectorAll('*');
+    } catch (err2) {
+      all = [];
+    }
+    for (var j = 0; j < all.length; j++) {
+      var node = all[j];
+      if (node.shadowRoot) walkComposers(node.shadowRoot, found);
+      if (found.el) return;
+      if (node.tagName === 'IFRAME') {
+        try {
+          var doc = node.contentDocument || (node.contentWindow && node.contentWindow.document);
+          if (doc) walkComposers(doc, found);
+        } catch (err3) {}
+      }
+      if (found.el) return;
+    }
+  }
+
+  function findComposer() {
+    var found = { el: null };
+    var host = document.querySelector('shopify-chat');
+    if (host) {
+      if (host.shadowRoot) walkComposers(host.shadowRoot, found);
+      if (!found.el) walkComposers(host, found);
+    }
+    if (!found.el) {
+      var legacy = inboxWidget();
+      if (legacy && legacy.shadowRoot) walkComposers(legacy.shadowRoot, found);
+      if (!found.el && legacy) walkComposers(legacy, found);
+    }
+    return found.el;
+  }
+
+  function setComposerValue(el, text) {
+    if (el.isContentEditable || el.getAttribute('role') === 'textbox') {
+      el.textContent = text;
+      try { el.dispatchEvent(new InputEvent('input', { bubbles: true, data: text })); } catch (err) {
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      return;
+    }
+    var proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    var desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    if (desc && desc.set) desc.set.call(el, text);
+    else el.value = text;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function composerCurrent(el) {
+    if (!el) return '';
+    return String(el.value || el.textContent || '').trim();
+  }
+
+  function fillComposer(payload) {
+    var text = composerMessage(payload);
+    if (!text) return false;
+    var el = findComposer();
+    if (!el) return false;
+    var current = composerCurrent(el);
+    if (current && current !== text) return true;
+    setComposerValue(el, text);
+    return true;
+  }
+
+  function scheduleFill(payload) {
+    if (fillTimer) {
+      window.clearTimeout(fillTimer);
+      fillTimer = null;
+    }
+    var attempt = 0;
+    function tick() {
+      if (fillComposer(payload) || attempt >= FILL_ATTEMPTS) {
+        fillTimer = null;
+        return;
+      }
+      attempt += 1;
+      fillTimer = window.setTimeout(tick, FILL_MS);
+    }
+    tick();
   }
 
   function openInbox(attempt) {
-    if (tryOpenInbox()) return true;
+    if (tryOpenInbox()) {
+      scheduleFill(pendingPayload);
+      return true;
+    }
     if ((attempt || 0) >= MAX_ATTEMPTS) return false;
     if (!attempt && window.customElements && customElements.whenDefined) {
       customElements.whenDefined('shopify-chat').then(function () {
-        tryOpenInbox();
+        if (tryOpenInbox()) scheduleFill(pendingPayload);
       }).catch(function () {});
     }
     window.setTimeout(function () {
@@ -396,18 +536,35 @@ function formatMoney(cents) {
     return false;
   }
 
-  function requestOpen() {
-    if (opening) return;
+  function requestOpen(payload) {
+    pendingPayload = payload || pendingPayload;
+    if (opening) {
+      scheduleFill(pendingPayload);
+      tryOpenInbox();
+      return;
+    }
     opening = true;
     openInbox(0);
     window.setTimeout(function () {
       opening = false;
-    }, 1000);
+    }, 400);
+  }
+
+  function payloadFromButton(btn) {
+    if (!btn) return {};
+    return {
+      productTitle: btn.getAttribute('data-product-title') || '',
+      productUrl: btn.getAttribute('data-product-url') || window.location.href,
+      productId: btn.getAttribute('data-product-id') || '',
+      productHandle: btn.getAttribute('data-product-handle') || '',
+      productImage: btn.getAttribute('data-product-image') || '',
+      intent: btn.getAttribute('data-chat-intent') || 'ask'
+    };
   }
 
   window.lmChat = {
-    open: function () {
-      requestOpen();
+    open: function (payload) {
+      requestOpen(payload || {});
     }
   };
 
@@ -415,7 +572,7 @@ function formatMoney(cents) {
     var btn = event.target && event.target.closest && event.target.closest('.js-open-product-chat');
     if (!btn) return;
     event.preventDefault();
-    requestOpen();
+    requestOpen(payloadFromButton(btn));
   });
 })();
 

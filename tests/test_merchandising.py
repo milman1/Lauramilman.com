@@ -314,7 +314,13 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     settings = load_json(ROOT / "config/settings_data.json")
     assert "render 'chat-widget'" not in layout
     app_blocks = settings["current"]["blocks"].values()
-    assert any("shopify://apps/inbox/blocks/chat/" in block["type"] for block in app_blocks)
+    inbox_blocks = [
+        block
+        for block in app_blocks
+        if "shopify://apps/inbox/blocks/chat/" in block["type"]
+    ]
+    assert inbox_blocks
+    assert inbox_blocks[0]["settings"]["show_featured_products"] is False
     theme_js = (ROOT / "assets/theme.js").read_text()
     assert "querySelector('shopify-chat')" in theme_js
     assert "host.show" in theme_js
@@ -322,12 +328,21 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     assert "dummy-chat-button" in theme_js
     assert "window.lmChat" in theme_js
     assert "js-open-product-chat" in theme_js
+    assert "productTitle" in theme_js
+    assert "I'm looking at" in theme_js
     assert "getElementById('chat-trigger')" not in theme_js
+    assert "showFeaturedProducts = false" in layout
+    assert "shopify-chat-app-embed-data" in layout
     inquiry = (ROOT / "snippets/product-inquiry.liquid").read_text()
     assert "js-open-product-chat" in inquiry
     assert "Make an offer" in inquiry
     assert "lmChat.open" in inquiry
     assert "chat-trigger" not in inquiry
+    assert "data-product-id=" in inquiry
+    assert inquiry.count("/pages/private-clients?interest={{ viewing_interest }}&amp;piece=") >= 2
+    consult = (ROOT / "sections/private-client.liquid").read_text()
+    assert "interest === 'jewelry'" in consult
+    assert "Fine jewelry" in consult
 
 
 if __name__ == "__main__":

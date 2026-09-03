@@ -45,7 +45,15 @@ describe('product-page Make an offer CTA', () => {
     expect(chatJs).toContain('host.show');
     expect(chatJs).toContain("closest('.js-open-product-chat')");
     expect(chatJs).toContain('window.lmChat');
+    expect(chatJs).toContain('productTitle');
+    expect(chatJs).toContain("I'm looking at");
     expect(chatJs).not.toContain("getElementById('chat-trigger')");
+  });
+
+  it('sends the current piece to private-clients from Book a call', () => {
+    expect(inquiry).toContain("assign viewing_interest = 'jewelry'");
+    expect(inquiry).toContain("/pages/private-clients?interest={{ viewing_interest }}&amp;piece=");
+    expect(inquiry).toContain("Book a call");
   });
 
   it('treats designer-jewelry tags as maison/vintage so Back Vault pieces get the tab', () => {
