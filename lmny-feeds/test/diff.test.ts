@@ -4,6 +4,7 @@ import {
   applyUnavailableArchives,
   diffCatalog,
   kindForHandle,
+  promoteMarketplaceQuantityUpdates,
   promoteShortMediaUpdates,
   promoteUntrackNonMarketplaceInventory,
   promoteUntrackedInventoryUpdates,
@@ -255,6 +256,43 @@ describe('promoteUntrackNonMarketplaceInventory', () => {
     const d = diffCatalog([want('lg-small', 'h1')], catalog, ALL_KINDS);
     expect(promoteUntrackNonMarketplaceInventory(d, catalog, watchesOnly)).toBe(0);
     expect(d[0]?.action).toBe('skip');
+  });
+});
+
+describe('promoteMarketplaceQuantityUpdates', () => {
+  it('restores a hash-skipped watch that Shopify still shows at qty 0', () => {
+    const catalog = [
+      entry({
+        handle: 'w-3194',
+        contentHash: 'h1',
+        inventoryTracked: true,
+        inventoryQuantity: 0,
+        inventoryItemId: 'gid://shopify/InventoryItem/9',
+      }),
+    ];
+    const d = diffCatalog([want('w-3194', 'h1')], catalog, ALL_KINDS);
+    const n = promoteMarketplaceQuantityUpdates(d, catalog, new Map([['w-3194', 1]]));
+    expect(n).toBe(1);
+    expect(d[0]).toMatchObject({ action: 'update', reason: 'uploadify_qty_restore' });
+  });
+
+  it('does not restore diamonds (desired qty 0) or watches already at qty 1', () => {
+    const catalog = [
+      entry({ handle: 'lg-small', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 0 }),
+      entry({ handle: 'w-ok', contentHash: 'h1', inventoryTracked: true, inventoryQuantity: 1 }),
+    ];
+    const d = diffCatalog([want('lg-small', 'h1'), want('w-ok', 'h1')], catalog, ALL_KINDS);
+    expect(
+      promoteMarketplaceQuantityUpdates(
+        d,
+        catalog,
+        new Map([
+          ['lg-small', 0],
+          ['w-ok', 1],
+        ]),
+      ),
+    ).toBe(0);
+    expect(d.every((x) => x.action === 'skip')).toBe(true);
   });
 });
 

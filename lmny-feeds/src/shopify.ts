@@ -668,24 +668,27 @@ export class ShopifyClient {
   }
 
   /**
-   * Stock a variant at `locationId`. productSet can set tracked + quantities
-   * on create; updates of previously untracked watches often need activate
-   * first. Idempotent: already-stocked items fall through to a quantity set.
+   * Stock a variant at `locationId`. Activate without `available` — Shopify
+   * rejects setting quantity on activate once the item is already stocked
+   * ("Not allowed to set available quantity when the item is already active
+   * at the location"). Then always `inventorySetQuantities`, which is the
+   * mutation that actually moves on-hand on an active item.
    */
   async stockInventoryItem(inventoryItemId: string, locationId: string, quantity: number): Promise<string[]> {
     const activated = await this.gql<{
       inventoryActivate: { userErrors: Array<{ message: string }> };
     }>(
-      `mutation($inventoryItemId: ID!, $locationId: ID!, $available: Int) {
-        inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId, available: $available) {
+      `mutation($inventoryItemId: ID!, $locationId: ID!) {
+        inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId) {
           userErrors { field message }
         }
       }`,
-      { inventoryItemId, locationId, available: quantity },
+      { inventoryItemId, locationId },
     );
     const activateErrors = activated.inventoryActivate.userErrors.map((e) => e.message);
-    if (activateErrors.length === 0) return [];
-    const alreadyStocked = activateErrors.every((m) => /already stocked|already activated/i.test(m));
+    const alreadyStocked =
+      activateErrors.length === 0 ||
+      activateErrors.every((m) => /already stocked|already activated|already active/i.test(m));
     if (!alreadyStocked) return activateErrors;
 
     const set = await this.gql<{

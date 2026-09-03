@@ -21,6 +21,7 @@ import {
   kindForHandle,
   PRICING_REVIEW_HOLD_REASONS,
   promoteShortMediaUpdates,
+  promoteMarketplaceQuantityUpdates,
   promoteUntrackNonMarketplaceInventory,
   promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
@@ -349,6 +350,16 @@ async function main() {
         `${zeroedForUploadify} loose diamond(s) still tracked qty > 0 — writing qty 0 so Uploadify delists while the Online Store keeps them`,
       );
     }
+    const restoredForUploadify = promoteMarketplaceQuantityUpdates(
+      decisions,
+      catalog,
+      marketplaceQtyByHandle,
+    );
+    if (restoredForUploadify > 0) {
+      notes.push(
+        `${restoredForUploadify} watch(es) still tracked qty 0 — restoring qty ${UNIQUE_IN_STOCK_QTY} so Uploadify can list them`,
+      );
+    }
   } else if (!notes.some((n) => n.includes('Inventory location lookup failed'))) {
     notes.push('Unique inventory not applied: no active Shopify location. Untracked products will keep reporting qty 0 to Uploadify.');
   }
@@ -464,7 +475,35 @@ async function main() {
     // and rejected as a duplicate handle, so every write carries the catalogue
     // id when the handle is already known.
     const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
-    const toWrite = decisions.filter((d) => d.action === 'create' || d.action === 'update');
+    const qtyOnlyReasons = new Set(['uploadify_qty_restore', 'uploadify_qty_zero']);
+    const qtyOnly = decisions.filter(
+      (d) =>
+        d.action === 'update' &&
+        qtyOnlyReasons.has(d.reason) &&
+        Boolean(catalogByHandle.get(d.handle)?.inventoryItemId),
+    );
+    const qtyOnlyHandles = new Set(qtyOnly.map((d) => d.handle));
+    const toWrite = decisions.filter(
+      (d) => d.action === 'create' || (d.action === 'update' && !qtyOnlyHandles.has(d.handle)),
+    );
+    if (locationId && qtyOnly.length > 0) {
+      console.log(`Setting inventory on ${qtyOnly.length} product(s) without rewriting listings…`);
+      for (const d of qtyOnly) {
+        const existing = catalogByHandle.get(d.handle);
+        const desired =
+          marketplaceQtyByHandle.get(d.handle) ?? (d.reason === 'uploadify_qty_zero' ? 0 : null);
+        writeErrors.push(
+          ...(await applyTrackedStock(
+            shopify,
+            locationId,
+            d.handle,
+            existing?.inventoryItemId ?? null,
+            desired,
+            existing?.inventoryQuantity ?? null,
+          )),
+        );
+      }
+    }
     const inputs = toWrite
       .map((d) => byHandle.get(d.handle))
       .filter((p): p is Publishable => Boolean(p))
@@ -831,9 +870,10 @@ async function applyTrackedStock(
   currentQty: number | null,
 ): Promise<string[]> {
   if (!inventoryItemId || desiredQty == null) return [];
-  // Qty 0 still needs inventoryActivate when the variant was untracked —
-  // productSet often leaves those items unstocked at the location.
-  if (currentQty === desiredQty && desiredQty > 0) return [];
+  // Already at the target on-hand (including diamonds at 0). A previous
+  // activate-with-available call on stocked items failed 21k writes; skip
+  // those no-ops and only move quantity when it actually differs.
+  if (currentQty === desiredQty) return [];
   const errors = await shopify.stockInventoryItem(inventoryItemId, locationId, desiredQty);
   return errors.map((e) => `inventory ${handle}: ${e}`);
 }

@@ -197,6 +197,34 @@ export function promoteUntrackNonMarketplaceInventory(
   return promoted;
 }
 
+/**
+ * Hash-skipped watches (desired qty > 0) that Shopify still shows at a
+ * different on-hand count. The diamond qty-0 pass can leave watches at 0
+ * when productSet/inventoryActivate cannot set quantity on an already-active
+ * location — Uploadify then delists them. Restore via inventorySetQuantities
+ * without rewriting the product.
+ */
+export function promoteMarketplaceQuantityUpdates(
+  decisions: Decision[],
+  catalog: CatalogEntry[],
+  desiredQtyByHandle: Map<string, number>,
+): number {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const d of decisions) {
+    if (d.action !== 'skip' || d.reason !== 'unchanged') continue;
+    const desired = desiredQtyByHandle.get(d.handle);
+    if (desired == null || desired <= 0) continue;
+    const have = catalogByHandle.get(d.handle);
+    if (!have || have.inventoryTracked !== true) continue;
+    if ((have.inventoryQuantity ?? 0) === desired) continue;
+    d.action = 'update';
+    d.reason = 'uploadify_qty_restore';
+    promoted += 1;
+  }
+  return promoted;
+}
+
 /** @deprecated Use promoteUntrackedInventoryUpdates */
 export const promoteWatchInventoryUpdates = promoteUntrackedInventoryUpdates;
 

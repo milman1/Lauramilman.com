@@ -82,7 +82,11 @@ holds a stones table — Shopify products are the only live copy.
    Category is still written (Watches `aa-6-11`, loose diamonds Jewelry
    `aa-6`). Hash-matched untracked products are promoted to an update
    (`inventory_untracked`); diamonds that are still tracked qty 1 are
-   promoted to qty 0 (`uploadify_qty_zero`). Uploadify metafields
+   promoted to qty 0 (`uploadify_qty_zero`). Watches that are tracked but
+   still qty 0 are restored to qty 1 (`uploadify_qty_restore`) via
+   `inventorySetQuantities` — Shopify rejects setting on-hand on
+   `inventoryActivate` once the item is already active at the location.
+   Uploadify metafields
    (`uploadify` / `uploadify_product`, including `uploadify_active`) are
    deleted on loose diamonds only so the app cannot keep them listed; watches
    keep theirs. Archive sets qty `0`
