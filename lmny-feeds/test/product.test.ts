@@ -13,6 +13,7 @@ import {
   seoTitleFor,
   tagsFor,
   titleFor,
+  uniqueStockQtyFor,
   vendorFor,
   writeErrorsAreSystemic,
 } from '../src/product.js';
@@ -41,6 +42,19 @@ describe('handle generation', () => {
     expect(sanitizeRef('AB/12#34')).toBe('ab-12-34');
     expect(sanitizeRef('--weird--')).toBe('weird');
     expect(handleFor(naturalStone({ stockRef: 'AB/12#34' }))).toBe(handleFor(naturalStone({ stockRef: 'ab/12#34' })));
+  });
+});
+
+describe('uniqueStockQtyFor', () => {
+  it('is 1 for watches so Uploadify keeps them listed', () => {
+    expect(uniqueStockQtyFor(watch(), true)).toBe(1);
+  });
+
+  it('is 0 for every loose diamond so Uploadify does not import them', () => {
+    expect(uniqueStockQtyFor(naturalStone(), true)).toBe(0);
+    expect(uniqueStockQtyFor(labStone({ carat: 5 }), true)).toBe(0);
+    expect(uniqueStockQtyFor(labStone({ carat: 4.99 }), true)).toBe(0);
+    expect(uniqueStockQtyFor(labStone({ carat: 2.01 }), true)).toBe(0);
   });
 });
 
@@ -299,17 +313,35 @@ describe('updates target the existing product by id', () => {
     expect(variant.inventoryItem.tracked).toBe(false);
   });
 
-  it('a locationId turns on tracked qty 1 for loose diamonds', () => {
+  it('a locationId writes loose diamonds as tracked qty 0 so Uploadify does not import them', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, undefined, 'gid://shopify/Location/1');
     const variant = (input.variants as Array<{
       sku: string;
+      inventoryPolicy: string;
       inventoryItem: { tracked: boolean };
       inventoryQuantities: Array<{ quantity: number }>;
     }>)[0]!;
     expect(variant.sku).toBe('BD-1234');
+    expect(variant.inventoryPolicy).toBe('CONTINUE');
     expect(variant.inventoryItem.tracked).toBe(true);
-    expect(variant.inventoryQuantities[0]!.quantity).toBe(1);
+    expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
     expect(input.category).toBe('gid://shopify/TaxonomyCategory/aa-6');
+    expect(input.status).toBe('ACTIVE');
+  });
+
+  it('a lab of any size with a location is tracked qty 0 so Uploadify delists it', () => {
+    for (const carat of [4.99, 5]) {
+      const input = buildProductSetInput(labStone({ carat }), priced(), at, undefined, 'gid://shopify/Location/1');
+      const variant = (input.variants as Array<{
+        inventoryPolicy: string;
+        inventoryItem: { tracked: boolean };
+        inventoryQuantities: Array<{ quantity: number }>;
+      }>)[0]!;
+      expect(variant.inventoryPolicy).toBe('CONTINUE');
+      expect(variant.inventoryItem.tracked).toBe(true);
+      expect(variant.inventoryQuantities[0]!.quantity).toBe(0);
+      expect(input.status).toBe('ACTIVE');
+    }
   });
 
   it('a lab stone uses the same Jewelry category as naturals', () => {
@@ -418,7 +450,7 @@ describe('imageless products are quarantined at creation', () => {
   });
 
   it('retries a rejected file URL as a DRAFT with no files', () => {
-    const input = buildProductSetInput(naturalStone(), priced(), '2026-07-28T00:00:00Z', undefined, 'gid://shopify/Location/1');
+    const input = buildProductSetInput(watch(), priced(), '2026-07-28T00:00:00Z', undefined, 'gid://shopify/Location/1');
     expect(input.files).toBeDefined();
     const quarantined = quarantineProductSetInput(input);
     expect(quarantined.files).toBeUndefined();
@@ -427,6 +459,24 @@ describe('imageless products are quarantined at creation', () => {
     const qty = (quarantined.variants as Array<{ inventoryQuantities?: Array<{ quantity: number }> }>)[0]
       ?.inventoryQuantities?.[0]?.quantity;
     expect(qty).toBe(0);
+  });
+
+  it('an imageless diamond is tracked qty 0 when quarantined', () => {
+    const input = buildProductSetInput(
+      naturalStone(),
+      priced(),
+      '2026-07-28T00:00:00Z',
+      undefined,
+      'gid://shopify/Location/1',
+    );
+    const quarantined = quarantineProductSetInput(input);
+    const variant = (quarantined.variants as Array<{
+      inventoryItem: { tracked: boolean };
+      inventoryQuantities?: Array<{ quantity: number }>;
+    }>)[0]!;
+    expect(quarantined.status).toBe('DRAFT');
+    expect(variant.inventoryItem.tracked).toBe(true);
+    expect(variant.inventoryQuantities?.[0]?.quantity).toBe(0);
   });
 });
 
