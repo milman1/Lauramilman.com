@@ -137,8 +137,10 @@ def test_shop_page_mirrors_worlds_first() -> None:
     assert "jacob-co" in watches
     assert "rolex-watches" in watches
     hero = data["sections"]["hero"]["settings"]
-    assert hero["primary_cta_text"] == "Shop Fine Jewelry"
-    assert hero["secondary_cta_url"] == "/collections/natural-diamonds"
+    assert hero["primary_cta_text"] == "Shop Pre-Owned Maison"
+    assert hero["primary_cta_url"] == "/collections/estate-jewelry"
+    assert hero["secondary_cta_text"] == "Shop Fine Jewelry"
+    assert hero["secondary_cta_url"] == "/collections/all"
     grid = data["sections"]["collections-grid"]
     assert grid["settings"]["title"] == "Necklaces, Rings & More"
     handles = [
@@ -252,8 +254,9 @@ def test_hero_copy_names_the_full_assortment() -> None:
     assert "diamond" in sub
     assert "maison" in sub
     assert "timepiece" in sub
-    assert data["sections"]["hero"]["settings"]["primary_cta_text"] == "Shop Fine Jewelry"
-    assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/natural-diamonds"
+    assert data["sections"]["hero"]["settings"]["primary_cta_text"] == "Shop Pre-Owned Maison"
+    assert data["sections"]["hero"]["settings"]["primary_cta_url"] == "/collections/estate-jewelry"
+    assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/all"
 
 
 def test_worlds_cards_use_category_images_and_theme_tones() -> None:
@@ -316,16 +319,25 @@ def test_preowned_maison_points_at_the_estate_vault() -> None:
     shop = load_json(ROOT / "templates/page.shop.json")
     assert home["sections"]["shop-worlds"]["blocks"]["world-maison"]["settings"]["collection"] == "estate-jewelry"
     assert home["sections"]["preowned-maison"]["settings"]["cta_url"] == "/collections/estate-jewelry"
+    assert home["sections"]["hero"]["settings"]["primary_cta_url"] == "/collections/estate-jewelry"
+    assert home["sections"]["featured-products"]["settings"]["collection"] == "estate-jewelry"
     assert shop["sections"]["shop-worlds"]["blocks"]["world-maison"]["settings"]["collection"] == "estate-jewelry"
     assert shop["sections"]["preowned-maison"]["settings"]["cta_url"] == "/collections/estate-jewelry"
+    assert shop["sections"]["featured-products"]["settings"]["collection"] == "estate-jewelry"
     header = (ROOT / "sections/header.liquid").read_text()
-    assert 'href="/collections/estate-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>' in header
+    assert 'href="/collections/estate-jewelry" class="nav__item-link"' in header
+    assert 'href="/collections/estate-jewelry" class="nav__dropdown-link">Shop the Maison Vault</a>' in header
     footer = (ROOT / "sections/footer.liquid").read_text()
     assert footer.count("/collections/estate-jewelry") >= 2
     worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
     assert "'vintage-jewelry', 'estate-jewelry'" in worlds
     vintage = (ROOT / "snippets/product-is-vintage.liquid").read_text()
     assert "estate-jewelry" in vintage
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "collection.handle == 'estate-jewelry'" in collection
+    assert 'href="/collections/cartier" class="lm-collection__chip">Cartier</a>' in collection
+    vault = load_json(ROOT / "templates/collection.estate-jewelry.json")
+    assert vault["sections"]["main"]["blocks"]["chip-cartier"]["settings"]["link"] == "/collections/cartier"
     auth = load_json(ROOT / "templates/page.authentication.json")
     assert "/collections/estate-jewelry" in auth["sections"]["main"]["blocks"]["cta-vault"]["settings"]["link"]
 

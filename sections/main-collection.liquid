@@ -63,6 +63,27 @@
       </nav>
     {%- endif -%}
 
+    {%- liquid
+      assign estate_has_maison_chip = false
+      for block in section.blocks
+        if block.settings.link contains '/collections/cartier'
+          assign estate_has_maison_chip = true
+        endif
+      endfor
+    -%}
+    {%- if jewelry_only == false and collection.handle == 'estate-jewelry' and estate_has_maison_chip == false -%}
+      <nav class="lm-collection__chips" aria-label="Shop by maison">
+        <span class="lm-collection__chips-label">Shop by maison</span>
+        <a href="/collections/cartier" class="lm-collection__chip">Cartier</a>
+        <a href="/collections/van-cleef-arpels" class="lm-collection__chip">Van Cleef &amp; Arpels</a>
+        <a href="/collections/bvlgari" class="lm-collection__chip">Bvlgari</a>
+        <a href="/collections/tiffany" class="lm-collection__chip">Tiffany &amp; Co.</a>
+        <a href="/collections/hermes" class="lm-collection__chip">Hermès</a>
+        <a href="/collections/chopard" class="lm-collection__chip">Chopard</a>
+        <a href="/collections/vintage-jewelry" class="lm-collection__chip">Vintage edit</a>
+      </nav>
+    {%- endif -%}
+
     <!-- Shop-by chips -->
     {%- if jewelry_only == false and section.blocks.size > 0 -%}
       <nav class="lm-collection__chips" aria-label="Shop by">

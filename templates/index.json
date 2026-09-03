@@ -15,10 +15,10 @@
         "eyebrow": "Laura Milman · New York",
         "heading": "Designed in New York.\nCrafted in Italy.",
         "subheading": "Fine jewelry, certified diamonds, authenticated maison pieces, and pre-owned timepieces — designed in New York, crafted in Italy.",
-        "primary_cta_text": "Shop Fine Jewelry",
-        "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Explore Diamonds",
-        "secondary_cta_url": "/collections/natural-diamonds",
+        "primary_cta_text": "Shop Pre-Owned Maison",
+        "primary_cta_url": "/collections/estate-jewelry",
+        "secondary_cta_text": "Shop Fine Jewelry",
+        "secondary_cta_url": "/collections/all",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
@@ -351,13 +351,13 @@
     "featured-products": {
       "type": "featured-products",
       "settings": {
-        "eyebrow": "The Signature Edit",
-        "title": "Pieces to Wear Now",
-        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
-        "collection": "bracelets",
+        "eyebrow": "The Pre-Owned Maison",
+        "title": "Authenticated estate, ready to wear",
+        "description": "Signed Cartier, Van Cleef, Tiffany, and Bvlgari — sourced and authenticated in New York.",
+        "collection": "estate-jewelry",
         "product_count": 4,
-        "cta_text": "View All",
-        "cta_url": "/collections/all"
+        "cta_text": "Shop the Maison Vault",
+        "cta_url": "/collections/estate-jewelry"
       }
     },
     "shop-the-look": {

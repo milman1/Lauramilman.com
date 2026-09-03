@@ -762,15 +762,21 @@
           </div>
         </div>
 
+        {%- comment -%}
+          Pre-Owned Maison is the sales path. Parent goes to the estate vault;
+          caret / hover opens maison brand collections. Do not use a <span>
+          here — shoppers never reach the 80+ piece vault if the label is not
+          a link (Journal already works this way).
+        {%- endcomment -%}
         <div class="nav__item">
-          <span class="nav__item-link">
+          <a href="/collections/estate-jewelry" class="nav__item-link">
             {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-          </span>
+          </a>
           <div class="nav__dropdown">
-            <a href="/collections/estate-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
+            <a href="/collections/estate-jewelry" class="nav__dropdown-link">Shop the Maison Vault</a>
             <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
             <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
             <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
