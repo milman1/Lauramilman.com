@@ -59,6 +59,7 @@ Deno.serve(async (req) => {
       )
       .eq("stock_ref", stockRef)
       .eq("available", true)
+      .not("image_urls", "eq", "{}")
       .maybeSingle();
     if (error) return json({ error: error.message }, 500);
     if (!data) return json({ error: "not_found" }, 404);
@@ -80,7 +81,8 @@ Deno.serve(async (req) => {
       { count: "exact" },
     )
     .eq("kind", kind)
-    .eq("available", true);
+    .eq("available", true)
+    .not("image_urls", "eq", "{}");
 
   const shapes = csv(url.searchParams.get("shape") || url.searchParams.get("shapes"));
   if (shapes.length) q = q.in("shape", shapes);
