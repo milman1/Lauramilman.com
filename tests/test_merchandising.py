@@ -326,7 +326,15 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     inquiry = (ROOT / "snippets/product-inquiry.liquid").read_text()
     assert "js-open-product-chat" in inquiry
     assert "Make an offer" in inquiry
-    assert "lmChat.open" in inquiry
+    assert "Ask about this piece" in inquiry
+    assert "Private viewing" in inquiry
+    assert "Hold this piece" not in inquiry
+    assert "Book a call" not in inquiry
+    assert "Direct message" not in inquiry
+    assert "data-open-hold" not in inquiry
+    assert "render 'piece-hold'" not in inquiry
+    assert "/pages/private-clients" not in inquiry
+    assert inquiry.count("js-open-product-chat") >= 3
     assert "chat-trigger" not in inquiry
 
 
