@@ -330,6 +330,11 @@ export class ShopifyClient {
       { namespace: CUSTOM_NAMESPACE, key: 'reference', name: 'Reference', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'year', name: 'Year', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'case_size', name: 'Case size', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'band_material', name: 'Band material', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'department', name: 'Department', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'handedness', name: 'Handedness', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'style', name: 'Style', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
+      { namespace: CUSTOM_NAMESPACE, key: 'type', name: 'Type', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'metal', name: 'Metal', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'dial', name: 'Dial', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
       { namespace: CUSTOM_NAMESPACE, key: 'bezel', name: 'Bezel', type: 'single_line_text_field', storefront: 'PUBLIC_READ' },
@@ -829,6 +834,38 @@ export class ShopifyClient {
       );
       for (const e of data.metafieldsDelete.userErrors) {
         if (/does not exist|not found/i.test(e.message)) continue;
+        errors.push(e.message);
+      }
+    }
+    return errors;
+  }
+
+  /**
+   * Upsert metafields in batches of 25 (Shopify's metafieldsSet cap).
+   * Used by the eBay watch-specifics backfill so we do not productSet the
+   * whole listing just to fill custom.band_material etc.
+   */
+  async setMetafields(
+    metafields: Array<{ ownerId: string; namespace: string; key: string; type: string; value: string }>,
+  ): Promise<string[]> {
+    const errors: string[] = [];
+    for (let i = 0; i < metafields.length; i += 25) {
+      const batch = metafields.slice(i, i + 25);
+      const data = await this.gql<{
+        metafieldsSet: {
+          metafields: Array<{ key: string }> | null;
+          userErrors: Array<{ message: string; field?: string[] | null }>;
+        };
+      }>(
+        `mutation($metafields: [MetafieldsSetInput!]!) {
+          metafieldsSet(metafields: $metafields) {
+            metafields { key namespace }
+            userErrors { field message }
+          }
+        }`,
+        { metafields: batch },
+      );
+      for (const e of data.metafieldsSet.userErrors) {
         errors.push(e.message);
       }
     }

@@ -192,6 +192,30 @@ npm run backfill:watch-pricing            # counts only
 npm run backfill:watch-pricing -- --apply # after reviewing counts
 ```
 
+### eBay watch item specifics
+
+Fills `custom.band_material`, `custom.case_size`, `custom.department`,
+`custom.handedness`, `custom.model`, `custom.style`, and `custom.type` on every
+`product_type:Watch` product so Marketplace Connect can map those keys once
+(Mapping → Item specifics → Use [key] from custom).
+
+Constants: `type` is `Wristwatch`, `handedness` is `Right`. Department is
+`Women's` / `Men's` / `Unisex` only when the title says so — Rolex feed titles
+are left blank rather than guessed as Men's. Band material and case size are
+parsed from description HTML when the copy actually states them (steel buckle
+is not band material; a satin band is flagged, not turned into Leather).
+Existing `custom.model` / `custom.case_size` on feed watches are kept.
+
+```sh
+npm run backfill:ebay-watch-specifics            # counts + CSVs, no writes
+npm run backfill:ebay-watch-specifics -- --apply # after reviewing out/*.csv
+```
+
+The Actions workflow **LMNY eBay watch specifics** is the same path (dry-run
+default). Duplicate SKUs (original estate import + `bv-` Back Vault copy of
+the same watch) are written to `out/ebay-watch-duplicates.csv` — do not list
+both on eBay.
+
 ### Lab pricing backfill
 
 After unpublishing Lab-Grown Diamond `lmny-feed` products:

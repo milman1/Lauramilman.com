@@ -1,5 +1,6 @@
 import { contentHash } from '../hash.js';
 import { taxonomyGidForProductType } from '../taxonomy.js';
+import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
 import type { BackVaultItem } from './types.js';
@@ -10,7 +11,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 4;
+export const PRODUCT_SCHEMA_VERSION = 5;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -65,6 +66,25 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
     type: 'single_line_text_field',
     value: conditionMetafield(item.specs.condition),
   });
+  const listing = buildJewelryListing(item);
+  if (listing.productType === 'Watch') {
+    const ebay = extractEbayWatchSpecifics({
+      title: listing.title,
+      descriptionHtml: `${item.descriptionHtml ?? ''}\n${listing.descriptionHtml}`,
+      sku: item.sku,
+    });
+    const pushEbay = (key: string, value?: string) => {
+      if (!value) return;
+      fields.push({ namespace: c, key, type: 'single_line_text_field', value });
+    };
+    pushEbay('band_material', ebay.values.band_material);
+    pushEbay('case_size', ebay.values.case_size);
+    pushEbay('department', ebay.values.department);
+    pushEbay('handedness', ebay.values.handedness);
+    pushEbay('model', ebay.values.model);
+    pushEbay('style', ebay.values.style);
+    pushEbay('type', ebay.values.type);
+  }
   return fields;
 }
 

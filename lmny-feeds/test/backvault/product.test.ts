@@ -107,17 +107,28 @@ describe('buildProductSetInput', () => {
     ).toThrow(/Back Vault reference survived/);
   });
 
-  it('allows supplier CDN image URLs so Shopify can copy them', () => {
+  it('writes eBay custom.* specifics on watches from title + original copy', () => {
     const input = buildProductSetInput(
       item({
-        imageUrls: ['https://thebackvault.com/cdn/shop/cartier.jpg'],
-        title: 'Cartier Ring',
-        productType: 'RING',
-        descriptionHtml: '<p>18K Yellow Gold.</p>',
+        sourceHandle: 'chopard-platinum-deco-watch-rr9688',
+        title: 'Chopard Platinum Deco Diamond And Green Emerald Women Watch',
+        vendor: 'Chopard',
+        productType: 'WATCH',
+        sku: 'RR9688',
+        descriptionHtml:
+          '<p>The watch features a sleek satin black band and a sturdy steel buckle. The case, including lugs, measures 14mm x 75mm.</p>',
       }),
       '2026-08-17T00:00:00.000Z',
     );
-    expect(input.status).toBe('ACTIVE');
-    expect((input.files as Array<{ originalSource: string }>)[0]!.originalSource).toContain('thebackvault.com');
+    const fields = (input.metafields as Array<{ namespace: string; key: string; value: string }>).filter(
+      (m) => m.namespace === 'custom',
+    );
+    const byKey = Object.fromEntries(fields.map((m) => [m.key, m.value]));
+    expect(input.productType).toBe('Watch');
+    expect(byKey.type).toBe('Wristwatch');
+    expect(byKey.handedness).toBe('Right');
+    expect(byKey.department).toBe("Women's");
+    expect(byKey.case_size).toBe('14mm x 75mm');
+    expect(byKey.band_material).toBe('Satin');
   });
 });

@@ -70,6 +70,8 @@ export interface NeedsReview {
 // inventory (see "Explicitly out of scope" in docs/watch-listing-schema.md).
 // SEO description still always ends with "Authenticated by Laura Milman New York."
 
+import { extractEbayWatchSpecifics } from './ebayWatchSpecifics.js';
+
 const CONFIG = {
   trustLine: '', // e.g. "Authenticated and hand-inspected by Laura Milman New York."
 };
@@ -271,6 +273,21 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   pushCustom('original_tag', ogTagYesNo);
   pushCustom('link', linkValue);
   pushCustom('stock_number', record.stockNumber ?? null);
+
+  // eBay item specifics (Marketplace Connect maps custom.* once). Model and
+  // case_size above are the PDP values — extractor fills the rest, never
+  // overwriting those two.
+  const ebay = extractEbayWatchSpecifics({
+    title,
+    descriptionHtml,
+    sku: record.stockNumber,
+  });
+  pushCustom('type', ebay.values.type);
+  pushCustom('handedness', ebay.values.handedness);
+  pushCustom('department', ebay.values.department);
+  pushCustom('style', ebay.values.style);
+  pushCustom('band_material', ebay.values.band_material);
+  if (!caseSize) pushCustom('case_size', ebay.values.case_size);
 
   const metafields = [
     {

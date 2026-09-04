@@ -1,0 +1,82 @@
+# One-shot backfill of custom.* eBay item specifics on every Watch product.
+#
+# Dry-run by default (counts + CSVs, no Shopify writes). Untick dry_run for
+# a live metafieldsSet. Does not list anything on eBay — after this runs,
+# map the seven keys once in Marketplace Connect (Mapping → Item specifics).
+#
+# Secrets: SHOPIFY_STORE_DOMAIN plus SHOPIFY_ADMIN_TOKEN or
+# SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET.
+name: LMNY eBay watch specifics
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+      limit:
+        description: 'Optional cap (empty = all Watch products)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Backfill eBay watch specifics
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          LIMIT_INPUT: ${{ inputs.limit }}
+        run: |
+          extra=""
+          if [ -n "$LIMIT_INPUT" ]; then
+            extra="--limit=$LIMIT_INPUT"
+          fi
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            echo "Mode: LIVE"
+            npx tsx scripts/backfill-ebay-watch-specifics.ts --apply $extra
+          else
+            echo "Mode: dry run"
+            npx tsx scripts/backfill-ebay-watch-specifics.ts $extra
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/ebay-watch-report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ebay-watch-specifics-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/ebay-watch-report.md
+            lmny-feeds/out/ebay-watch-specifics.csv
+            lmny-feeds/out/ebay-watch-flags.csv
+            lmny-feeds/out/ebay-watch-duplicates.csv
+            lmny-feeds/out/ebay-watch-errors.txt
+          if-no-files-found: ignore

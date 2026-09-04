@@ -124,6 +124,9 @@ describe('buildWatchListing', () => {
       bezel: 'Octagon',
       link: '19',
       original_tag: 'Yes',
+      type: 'Wristwatch',
+      handedness: 'Right',
+      style: 'Submariner Date',
     });
     expect(listing.descriptionHtml).not.toContain('<table>');
   });

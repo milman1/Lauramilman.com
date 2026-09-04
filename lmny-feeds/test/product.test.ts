@@ -242,7 +242,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for Amount-as-cost pricing', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(19);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(20);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -434,6 +434,8 @@ describe('updates target the existing product by id', () => {
     expect(find(fields, 'custom', 'bezel')?.value).toBe('Smooth');
     expect(find(fields, 'custom', 'bracelet')?.value).toBe('Jubilee');
     expect(find(fields, 'custom', 'link')?.value).toBe('-5');
+    expect(find(fields, 'custom', 'type')?.value).toBe('Wristwatch');
+    expect(find(fields, 'custom', 'handedness')?.value).toBe('Right');
   });
 });
 
