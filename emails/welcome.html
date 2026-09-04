@@ -1,40 +1,91 @@
+<!--
+  Full HTML document for a raw editor (Klaviyo HTML, or any tool that
+  accepts a complete email). Do NOT paste this into Shopify Messaging —
+  that editor keeps locked system blocks and only allows Custom Liquid
+  underneath. For Messaging, paste emails/welcome.messaging-block.html.
+  Subject: Your inner-circle welcome — 10% off jewelry
+  Preview: Your code is LMNYWELCOME. Jewelry only, one use.
+-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Your welcome offer</title>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Your inner-circle welcome — 10% off jewelry</title>
 </head>
 <body style="margin:0;padding:0;background:#F5F0E8;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F0E8;">
-    <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
-          <tr>
-            <td style="background:#1E1109;padding:28px 32px;text-align:center;">
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></div>
-              <div style="margin-top:8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York · Inner Circle</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:40px 36px 24px;text-align:center;">
-              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#C9A050;">A private welcome</p>
-              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#2C1810;">10% off your first jewel</h1>
-              <p style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">Thank you for joining. Use this code once on jewelry — not watches — at checkout.</p>
-              <div style="display:inline-block;margin-bottom:24px;padding:12px 22px;border:1px solid #C9A050;font-family:Arial,Helvetica,sans-serif;font-size:18px;letter-spacing:0.2em;color:#1E1109;">LMNYWELCOME</div>
-              <p>
-                <a href="https://www.lauramilman.com/collections/all" style="display:inline-block;padding:14px 28px;background:#C9A050;color:#1A140C;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;">Shop jewelry</a>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 36px 36px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8070;text-align:center;">
-              One use per customer. Jewelry only. Timepieces excluded. 14-day returns on jewelry; watches are exchanges only.
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+  <div lang="en" dir="ltr">
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      Your code is LMNYWELCOME. 10% off jewelry — watches excluded.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+            <tr>
+              <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+                <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></p>
+                <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York · Inner Circle</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 36px 8px;text-align:center;">
+                <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">A private welcome</p>
+                <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">10% off your first jewel</h1>
+                <p style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+                  {% if customer.first_name != blank %}{{ customer.first_name }},{% else %}Hello,{% endif %}
+                  thank you for joining. Use this code once on jewelry — not watches — at checkout.
+                </p>
+                <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 24px;">
+                  <tr>
+                    <td style="padding:14px 24px;border:1px solid #C9A050;">
+                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:18px;letter-spacing:0.2em;color:#1E1109;">LMNYWELCOME</p>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 8px;">
+                  <tr>
+                    <td style="background:#C9A050;">
+                      <a href="https://www.lauramilman.com/collections/all" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#1A140C;box-sizing:border-box;">Shop jewelry</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 36px 8px;text-align:center;">
+                <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#5A5248;">As an Inner Circle member you will also hear first about new arrivals, rare estate pieces, and private viewings in New York.</p>
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;">Prefer to talk it through? <a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">Book a consultation</a>.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 36px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#5A5248;text-align:center;">
+                One use per customer. Jewelry only. Timepieces excluded. 14-day returns on jewelry; watches are exchanges only.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 36px 28px;border-top:1px solid #DDD5C5;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#5A5248;">
+                <p style="margin:0 0 8px;color:#2C1810;">Laura Milman New York</p>
+                <p style="margin:0 0 12px;">
+                  {% if shop.address.address1 != blank %}{{ shop.address.address1 }}{% if shop.address.address2 != blank %}, {{ shop.address.address2 }}{% endif %}<br>{% endif %}
+                  {% if shop.address.city != blank %}{{ shop.address.city }}{% if shop.address.province != blank %}, {{ shop.address.province }}{% endif %} {{ shop.address.zip }}<br>{% else %}New York, NY · By appointment<br>{% endif %}
+                  <a href="mailto:hello@lauramilman.com" style="color:#4A1428;">hello@lauramilman.com</a>
+                </p>
+                <p style="margin:0 0 8px;">You received this because you joined the Inner Circle at lauramilman.com.</p>
+                <p style="margin:0;">
+                  <a href="{{ unsubscribe_url }}" style="color:#4A1428;">Unsubscribe</a>
+                  ·
+                  <a href="https://www.lauramilman.com/policies/privacy-policy" style="color:#4A1428;">Privacy policy</a>
+                </p>
+                {{ open_tracking }}
+                {{ open_tracking_block }}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>

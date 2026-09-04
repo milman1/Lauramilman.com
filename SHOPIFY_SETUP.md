@@ -226,20 +226,36 @@ The storefront popup and newsletter reveal this code after signup.
 
 ## 7. Branded emails
 
-HTML to paste lives in `/emails`:
+Paste-ready HTML lives in `/emails`. Shopify **Basic** has no
+`abandoned_checkout` Notifications template (404). Messaging cannot replace
+locked blocks.
+
+**Already live:** order confirmation and shipping confirmation.
+
+**Welcome:** Marketing → Automations → Custom Liquid →
+`emails/welcome.messaging-block.html`. From:
+`Laura Milman New York <hello@lauramilman.com>`.
+
+**Abandoned cart (Basic):** keep **You left items in your cart** Active.
+Add Custom Liquid → `emails/abandoned-cart.messaging-block.html`.
+Do not Draft that automation — it is the only recovery email on Basic.
+
+**Account:** Settings → Notifications → Edit code for customer account
+welcome and invite.
 
 | File | Use in |
 |------|--------|
-| `emails/abandoned-checkout.html` | Shopify Email → Abandoned checkout |
-| `emails/abandoned-cart.html` | Shopify Email → Abandoned cart (or Klaviyo) |
-| `emails/order-confirmation.html` | Settings → Notifications → Order confirmation (replace body) |
-| `emails/shipping-confirmation.html` | Settings → Notifications → Shipping confirmation |
-| `emails/welcome.html` | Shopify Email → Customer welcome / newsletter |
+| `emails/welcome.messaging-block.html` | Messaging → Welcome → Custom Liquid |
+| `emails/abandoned-cart.messaging-block.html` | Messaging → You left items in your cart → Custom Liquid |
+| `emails/abandoned-checkout.messaging-block.html` | Messaging → Abandoned checkout → Custom Liquid (if that automation exists) |
+| `emails/customer-account-welcome.html` | Settings → Notifications → Customer account welcome |
+| `emails/customer-account-invite.html` | Settings → Notifications → Customer account invite |
+| `emails/order-confirmation.html` | Already saved |
+| `emails/shipping-confirmation.html` | Already saved |
 
-Replace merge tags (`{{ first_name }}`, `{{ abandoned_checkout_url }}`, etc.)
-with the tags your email app provides. Update **Settings → Policies → Refund
-policy** to match the 14-day jewelry / watches-exchange-only copy on
-`/pages/shipping-returns`.
+Full steps: `emails/README.md`. Set **Settings → General → Store address**.
+Verify sender `hello@lauramilman.com`. Update **Settings → Policies → Refund
+policy** to match `/pages/shipping-returns`.
 
 ---
 
