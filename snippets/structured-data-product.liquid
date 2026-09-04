@@ -11,7 +11,8 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
 {% enddoc %}
 
 {%- liquid
-  assign schema_brand = product.metafields.custom.brand.value | default: product.vendor | default: shop.name
+  assign schema_brand = product.metafields.custom.brand.value | default: product.vendor | default: shop.name | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign schema_name = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign schema_condition = product.metafields.custom.condition.value | downcase
   capture is_vintage
     render 'product-is-vintage', product: product
@@ -28,7 +29,7 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
   "@context": "https://schema.org",
   "@type": "Product",
   "@id": {{ canonical_url | append: '#product' | json }},
-  "name": {{ product.title | json }},
+  "name": {{ schema_name | json }},
   "description": {{ product.description | strip_html | strip | truncate: 500 | json }},
   "url": {{ canonical_url | json }},
   "image": [
@@ -86,7 +87,7 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
     ,{
       "@type": "ListItem",
       "position": {% if collection_title != blank and collection_url != blank %}3{% else %}2{% endif %},
-      "name": {{ product.title | json }},
+      "name": {{ schema_name | json }},
       "item": {{ canonical_url | json }}
     }
   ]

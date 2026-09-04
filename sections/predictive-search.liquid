@@ -86,9 +86,9 @@
                       <div class="predictive-search__item-content{% unless settings.predictive_search_show_vendor or settings.predictive_search_show_price %} predictive-search__item-content--centered{% endunless %}">
                         {%- if settings.predictive_search_show_vendor -%}
                           <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
-                          <div class="predictive-search__item-vendor caption-with-letter-spacing">{{ product.vendor }}</div>
+                          <div class="predictive-search__item-vendor caption-with-letter-spacing">{{ product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.' }}</div>
                         {%- endif -%}
-                        <p class="predictive-search__item-heading h5">{{ product.title }}
+                        <p class="predictive-search__item-heading h5">{{ product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.' }}
                         </p>
                         {%- if settings.predictive_search_show_price -%}
                           {% render 'price', product: product, use_variant: true, show_badges: false %}

@@ -7,11 +7,14 @@ function themeJs(): string {
 
 function chatIife(): string {
   const src = themeJs();
+  const helperStart = src.indexOf('function brandJacobCo');
+  const helperEnd = src.indexOf('/* === Cart Notification');
   const start = src.indexOf('/* === Shopify Inbox from PDP buttons');
   const end = src.indexOf('/* === Newsletter Form');
+  expect(helperStart).toBeGreaterThan(-1);
   expect(start).toBeGreaterThan(-1);
   expect(end).toBeGreaterThan(start);
-  return src.slice(start, end);
+  return src.slice(helperStart, helperEnd) + src.slice(start, end);
 }
 
 type Host = {
@@ -230,7 +233,8 @@ describe('PDP Shopify chat opener', () => {
       .flatMap((child) => [child.textContent, ...(child.children || []).map((n) => n.textContent)])
       .join(' ');
     expect(texts).toContain('Make an offer');
-    expect(texts).toContain('Jacob & Company Five Time Zone Watch (Diamond Bezel)');
+    expect(texts).toContain('Jacob & Co. Five Time Zone Watch (Diamond Bezel)');
+    expect(texts).not.toContain('Jacob & Company');
   });
 
   it('does not treat a leftover open flag as success without show()', () => {

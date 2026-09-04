@@ -345,6 +345,12 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     assert "data-product-id=" in inquiry
     assert inquiry.count("js-open-product-chat") >= 3
     assert "lm-chat-piece" in theme_js
+    assert "brandJacobCo" in theme_js
+    assert "Jacob & Co." in (ROOT / "snippets/jacob-co-name.liquid").read_text()
+    assert "display_title" in inquiry
+    main_product = (ROOT / "sections/main-product.liquid").read_text()
+    assert "assign display_title" in main_product
+    assert '<h1 class="product-title">{{ display_title }}</h1>' in main_product
     consult = (ROOT / "sections/private-client.liquid").read_text()
     assert "interest === 'jewelry'" in consult
     assert "Fine jewelry" in consult

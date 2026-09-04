@@ -8,6 +8,7 @@
   if product.featured_image
     assign product_image = product.featured_image | image_url: width: 240
   endif
+  assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
 -%}
 
 <div class="pdp-inquire">
@@ -19,7 +20,7 @@
       data-chat-intent="ask"
       data-product-id="{{ product.id }}"
       data-product-handle="{{ product.handle }}"
-      data-product-title="{{ product.title | escape }}"
+      data-product-title="{{ display_title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"
       data-product-image="{{ product_image | escape }}"
     >
@@ -31,7 +32,7 @@
       data-chat-intent="offer"
       data-product-id="{{ product.id }}"
       data-product-handle="{{ product.handle }}"
-      data-product-title="{{ product.title | escape }}"
+      data-product-title="{{ display_title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"
       data-product-image="{{ product_image | escape }}"
     >
@@ -43,7 +44,7 @@
       data-chat-intent="message"
       data-product-id="{{ product.id }}"
       data-product-handle="{{ product.handle }}"
-      data-product-title="{{ product.title | escape }}"
+      data-product-title="{{ display_title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"
       data-product-image="{{ product_image | escape }}"
     >

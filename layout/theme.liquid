@@ -17,7 +17,7 @@
     {%- endunless -%}
 
     {%- liquid
-      assign seo_page_title = page_title
+      assign seo_page_title = page_title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
       assign seo_meta_description = page_description
       assign seo_social_title = page_title
       if request.page_type == 'index'

@@ -41,7 +41,14 @@ describe('product-page inquiry pills', () => {
     expect(chatJs).toContain("I'm looking at");
     expect(chatJs).toContain('lm-chat-piece');
     expect(chatJs).toContain('mountPieceCard');
+    expect(chatJs).toContain('brandJacobCo');
     expect(chatJs).not.toContain("getElementById('chat-trigger')");
+  });
+
+  it('prints Jacob & Co. never Jacob & Company', () => {
+    expect(inquiry).toContain("replace: 'Jacob & Company', 'Jacob & Co.'");
+    expect(mainProduct).toContain('<h1 class="product-title">{{ display_title }}</h1>');
+    expect(themeFile('snippets/jacob-co-name.liquid')).toContain('Jacob & Co.');
   });
 
   it('treats designer-jewelry tags as maison/vintage', () => {

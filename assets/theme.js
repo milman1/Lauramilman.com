@@ -1,5 +1,39 @@
 'use strict';
 
+/* House style: never print Jacob & Company. */
+function brandJacobCo(text) {
+  return String(text || '')
+    .replace(/Jacob\s*&\s*Company/gi, 'Jacob & Co.')
+    .replace(/Jacob\s+and\s+Company/gi, 'Jacob & Co.');
+}
+
+function rewriteJacobCoIn(root) {
+  if (!root) return;
+  if (root.nodeType === 3) {
+    var next = brandJacobCo(root.nodeValue);
+    if (next !== root.nodeValue) root.nodeValue = next;
+    return;
+  }
+  if (document.createTreeWalker && root.nodeType === 1) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      var branded = brandJacobCo(node.nodeValue);
+      if (branded !== node.nodeValue) node.nodeValue = branded;
+    }
+    var attrs = ['title', 'alt', 'aria-label', 'data-product-title', 'data-title'];
+    var els = root.querySelectorAll('[' + attrs.join('],[') + ']');
+    for (var i = 0; i < els.length; i++) {
+      for (var a = 0; a < attrs.length; a++) {
+        var v = els[i].getAttribute(attrs[a]);
+        if (!v) continue;
+        var n = brandJacobCo(v);
+        if (n !== v) els[i].setAttribute(attrs[a], n);
+      }
+    }
+  }
+}
+
 /* === Cart Notification === */
 function showCartNotification() {
   var note = document.getElementById('cart-notification');
@@ -391,7 +425,7 @@ function formatMoney(cents) {
 
   function composerMessage(payload) {
     payload = payload || {};
-    var title = payload.productTitle || '';
+    var title = brandJacobCo(payload.productTitle || '');
     var url = payload.productUrl || '';
     var intent = payload.intent || 'ask';
     var piece = title ? title : 'this piece';
@@ -460,7 +494,7 @@ function formatMoney(cents) {
       card.setAttribute('role', 'status');
       document.body.appendChild(card);
     }
-    var title = payload.productTitle || 'this piece';
+    var title = brandJacobCo(payload.productTitle || 'this piece');
     var url = payload.productUrl || '';
     var img = payload.productImage || '';
     card.innerHTML = '';
@@ -672,7 +706,7 @@ function formatMoney(cents) {
   function payloadFromButton(btn) {
     if (!btn) return {};
     return {
-      productTitle: btn.getAttribute('data-product-title') || '',
+      productTitle: brandJacobCo(btn.getAttribute('data-product-title') || ''),
       productUrl: btn.getAttribute('data-product-url') || window.location.href,
       productId: btn.getAttribute('data-product-id') || '',
       productHandle: btn.getAttribute('data-product-handle') || '',
@@ -723,3 +757,5 @@ function formatMoney(cents) {
 
 /* === Initialise === */
 updateCartCount();
+document.title = brandJacobCo(document.title);
+rewriteJacobCoIn(document.body);
