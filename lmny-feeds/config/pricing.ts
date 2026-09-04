@@ -98,11 +98,68 @@ export const WATCH = {
   reviewTag: 'pricing-review',
 } as const;
 
-/** Quality gates for stones (natural and lab). Worst grade allowed through. */
+/** Quality gates for natural stones. Worst grade allowed through. */
 export const STONE_GATES = {
   worstColor: 'L',
   worstClarity: 'SI2',
 } as const;
+
+/**
+ * Lab-grown loose diamonds are merchandised as fine jewelry, not commercial
+ * melee. Anything past these floors is held at normalize, unpublished from
+ * the storefront API, and deleted from Shopify on the next successful lab
+ * sync so it cannot come back.
+ */
+export const LAB_GATES = {
+  worstColor: 'G',
+  worstClarity: 'VS2',
+  /** Ungraded fancy shapes pass; known Good/Fair/Poor do not. */
+  worstCut: 'Very Good',
+  /** Loose lab solitaires start at 2.00ct. Under that is held out. */
+  minCarat: 2,
+  certLabs: ['IGI', 'GIA', 'GCAL', 'HRD', 'AGS'] as const,
+} as const;
+
+/** Sidestone / novelty shapes — not solitaire loose diamonds. */
+export const LAB_SIDESTONE_SHAPES: readonly string[] = [
+  'Baguette',
+  'Trapezoid',
+  'Bullet',
+  'Halfmoon',
+  'Shield',
+  'Kite',
+  'Kite Step Cut',
+  'Triangle',
+  'Trilliant',
+  'Hexagonal',
+  'Hexagon Step',
+  'Hexagonal Modified Brill',
+  'Lozenge',
+  'Lozenge Step Cut',
+  'Capsule',
+  'Pentagonal',
+  'Pentagonal Step',
+  'Pentagonal Modified Bril',
+  'Octagonal',
+  'Octagonal Step Cut',
+  'Cadillac',
+  'Star',
+  'Round Star',
+  'Horse Head',
+  'Lily',
+  'Butterfly',
+  'Briolette',
+  'Lady Heart',
+];
+
+export const LAB_QUALITY_HOLD_REASONS = new Set([
+  'lab_color_below_floor',
+  'lab_clarity_below_floor',
+  'lab_cut_below_floor',
+  'lab_uncertified',
+  'lab_sidestone_shape',
+  'lab_below_min_carat',
+]);
 
 /**
  * Watch brands that are merchandised under their own storefront collections /

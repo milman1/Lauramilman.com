@@ -35,6 +35,41 @@ describe('stone normalization', () => {
     expect(okay.items).toHaveLength(1);
   });
 
+  it('holds lab stones below the fine-jewelry floor and lets matching naturals through', () => {
+    expect(normalizeStones([{ ...stoneRow, color: 'H' }], 'lab').holds[0]?.reason).toBe(
+      'lab_color_below_floor',
+    );
+    expect(normalizeStones([{ ...stoneRow, color: 'H' }], 'natural').items).toHaveLength(1);
+
+    expect(normalizeStones([{ ...stoneRow, clarity: 'SI1' }], 'lab').holds[0]?.reason).toBe(
+      'lab_clarity_below_floor',
+    );
+    expect(normalizeStones([{ ...stoneRow, clarity: 'SI1' }], 'natural').items).toHaveLength(1);
+
+    expect(normalizeStones([{ ...stoneRow, cut: 'Good' }], 'lab').holds[0]?.reason).toBe(
+      'lab_cut_below_floor',
+    );
+    expect(normalizeStones([{ ...stoneRow, lab: 'UNCERTIFIED' }], 'lab').holds[0]?.reason).toBe(
+      'lab_uncertified',
+    );
+    expect(normalizeStones([{ ...stoneRow, shape: 'Baguette' }], 'lab').holds[0]?.reason).toBe(
+      'lab_sidestone_shape',
+    );
+    expect(normalizeStones([{ ...stoneRow, shape: 'Trapezoid' }], 'lab').holds[0]?.reason).toBe(
+      'lab_sidestone_shape',
+    );
+
+    const keep = normalizeStones([{ ...stoneRow, color: 'G', clarity: 'VS2', lab: 'IGI' }], 'lab');
+    expect(keep.holds).toEqual([]);
+    expect(keep.items).toHaveLength(1);
+
+    expect(normalizeStones([{ ...stoneRow, carat: '1.99' }], 'lab').holds[0]?.reason).toBe(
+      'lab_below_min_carat',
+    );
+    expect(normalizeStones([{ ...stoneRow, carat: '2.00' }], 'lab').items).toHaveLength(1);
+    expect(normalizeStones([{ ...stoneRow, carat: '1.50' }], 'natural').items).toHaveLength(1);
+  });
+
   it('holds rows missing grading fields or cost', () => {
     expect(normalizeStones([{ ...stoneRow, lab: '' }], 'lab').holds[0]?.reason).toBe('missing_grading_fields');
     expect(normalizeStones([{ ...stoneRow, cost: '' }], 'lab').holds[0]?.reason).toBe('missing_cost');
