@@ -143,6 +143,8 @@ describe('tags', () => {
     expect(tagsFor(watch())).toContain('Rolex');
     expect(tagsFor(watch())).toContain('Pre-Owned Watches');
     expect(tagsFor(watch())).toContain('lmny-feed');
+    expect(tagsFor(watch())).toContain('ebay');
+    expect(tagsFor(naturalStone())).not.toContain('ebay');
   });
 
   it('tags non-curated brands for the Other Watch Brands collection', () => {

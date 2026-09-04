@@ -11,6 +11,8 @@ import {
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
+/** Marketplace Connect / eBay: watches only. Never tag loose diamonds. */
+export const EBAY_TAG = 'ebay';
 /** Tag for watches held out of auto-pricing (missing supplier cost). */
 export const PRICING_REVIEW_TAG = WATCH.reviewTag;
 /** Tag for watches whose brand is outside the curated WATCH_BRANDS list. */
@@ -194,6 +196,7 @@ export function caratBand(carat: number): string {
 export function tagsFor(item: FeedItem): string[] {
   const tags: string[] = [FEED_TAG];
   if (item.kind === 'watch') {
+    tags.push(EBAY_TAG);
     const listing = watchListingFor(item);
     if (listing) {
       // Schema marketing tags (TitleCase brand/model, "Pre-Owned Watches", …)

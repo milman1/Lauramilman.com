@@ -76,7 +76,8 @@ holds a stones table — Shopify products are the only live copy.
    (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
    **Unique inventory + Category:** watches are written as tracked qty `1` at
    the primary location (SKU = stock ref, `inventoryPolicy: DENY`) so
-   Uploadify keeps them listed. Loose diamonds (natural and lab) stay
+   Marketplace Connect can list them on eBay (`ebay` tag + Timepieces
+   collection). Loose diamonds (natural and lab) stay
    `ACTIVE` on the Online Store but are written **tracked qty `0`** with
    `CONTINUE` so Uploadify delists them while the site can still sell.
    Category is still written (Watches `aa-6-11`, loose diamonds Jewelry
