@@ -65,6 +65,21 @@
     {{ 'theme.css' | asset_url | stylesheet_tag }}
 
     {{ content_for_header }}
+    <script>
+      /* Inbox "featured products" with an empty picker falls back to popular
+         catalog cards (Jacob watches on a wedding-band PDP). Force it off. */
+      (function () {
+        var el = document.getElementById('shopify-chat-app-embed-data');
+        if (!el) return;
+        try {
+          var data = JSON.parse(el.textContent);
+          if (!data || !data.settings) return;
+          data.settings.showFeaturedProducts = false;
+          data.settings.featuredProducts = [];
+          el.textContent = JSON.stringify(data);
+        } catch (err) {}
+      })();
+    </script>
 
     {% style %}
       :root {

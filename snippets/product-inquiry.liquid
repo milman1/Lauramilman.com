@@ -11,9 +11,18 @@
   if is_watch == 'true' or is_vintage == 'true'
     assign desk_piece = true
   endif
-  assign viewing_interest = 'estate'
+  assign viewing_interest = 'jewelry'
+  assign type_l = product.type | downcase
   if is_watch == 'true'
     assign viewing_interest = 'watch'
+  elsif is_vintage == 'true'
+    assign viewing_interest = 'estate'
+  elsif type_l contains 'diamond'
+    assign viewing_interest = 'diamond'
+  endif
+  assign product_image = ''
+  if product.featured_image
+    assign product_image = product.featured_image | image_url: width: 240
   endif
 -%}
 
@@ -30,8 +39,11 @@
         type="button"
         class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
         data-chat-intent="offer"
+        data-product-id="{{ product.id }}"
+        data-product-handle="{{ product.handle }}"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-image="{{ product_image | escape }}"
       >
         Make an offer
       </button>
@@ -46,19 +58,30 @@
       type="button"
       class="pdp-inquire__btn{% if desk_piece %} pdp-inquire__btn--ghost{% endif %} js-open-product-chat"
       data-chat-intent="ask"
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle }}"
       data-product-title="{{ product.title | escape }}"
       data-product-url="{{ shop.url }}{{ product.url }}"
+      data-product-image="{{ product_image | escape }}"
     >
       Ask about this piece
     </button>
     {%- unless desk_piece -%}
-      <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/pages/private-clients">Book a call</a>
+      <a
+        class="pdp-inquire__btn pdp-inquire__btn--ghost"
+        href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
+      >
+        Book a call
+      </a>
       <button
         type="button"
         class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="ask"
+        data-chat-intent="message"
+        data-product-id="{{ product.id }}"
+        data-product-handle="{{ product.handle }}"
         data-product-title="{{ product.title | escape }}"
         data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-image="{{ product_image | escape }}"
       >
         Direct message
       </button>
@@ -136,12 +159,18 @@
 
 <script>
   (function () {
-    function openChat(btn) {
-      var payload = {
+    function payloadFrom(btn) {
+      return {
         productTitle: btn.getAttribute('data-product-title') || '',
         productUrl: btn.getAttribute('data-product-url') || window.location.href,
+        productId: btn.getAttribute('data-product-id') || '',
+        productHandle: btn.getAttribute('data-product-handle') || '',
+        productImage: btn.getAttribute('data-product-image') || '',
         intent: btn.getAttribute('data-chat-intent') || 'ask'
       };
+    }
+    function openChat(btn) {
+      var payload = payloadFrom(btn);
       function go() {
         if (window.lmChat && typeof window.lmChat.open === 'function') {
           window.lmChat.open(payload);
@@ -157,7 +186,11 @@
       }, 100);
     }
     document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
-      btn.addEventListener('click', function () { openChat(btn); });
+      btn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openChat(btn);
+      });
     });
   })();
 </script>

@@ -122,7 +122,7 @@
         "disabled": false,
         "settings": {
           "greeting_message": "",
-          "show_featured_products": true,
+          "show_featured_products": false,
           "featured_products": [],
           "background_color": "#fdfaf6",
           "font_color": "#2c1810",
