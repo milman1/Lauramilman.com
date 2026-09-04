@@ -1,25 +1,9 @@
 {%- comment -%}
-  Product-page concierge. Ask / Direct message / Make an offer open Shopify
-  Inbox with this product already in context. Watches and maison/vintage
-  jewelry also get Hold and private viewing so the desk can continue in chat,
-  by phone, or in person.
+  Product-page concierge. Every product — watches, jewelry, diamonds —
+  gets the same three pills. Each one opens Shopify Inbox with this
+  product already named in the chat. Hold is intentionally not rendered.
 {%- endcomment -%}
-{%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
-{%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
 {%- liquid
-  assign desk_piece = false
-  if is_watch == 'true' or is_vintage == 'true'
-    assign desk_piece = true
-  endif
-  assign viewing_interest = 'jewelry'
-  assign type_l = product.type | downcase
-  if is_watch == 'true'
-    assign viewing_interest = 'watch'
-  elsif is_vintage == 'true'
-    assign viewing_interest = 'estate'
-  elsif type_l contains 'diamond'
-    assign viewing_interest = 'diamond'
-  endif
   assign product_image = ''
   if product.featured_image
     assign product_image = product.featured_image | image_url: width: 240
@@ -27,36 +11,11 @@
 -%}
 
 <div class="pdp-inquire">
-  <p class="pdp-inquire__label">
-    {%- if desk_piece -%}See this piece privately{%- else -%}Questions about this piece?{%- endif -%}
-  </p>
+  <p class="pdp-inquire__label">Questions about this piece?</p>
   <div class="pdp-inquire__actions">
-    {%- if desk_piece -%}
-      <button type="button" class="pdp-inquire__btn" data-open-hold>
-        Hold this piece
-      </button>
-      <button
-        type="button"
-        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="offer"
-        data-product-id="{{ product.id }}"
-        data-product-handle="{{ product.handle }}"
-        data-product-title="{{ product.title | escape }}"
-        data-product-url="{{ shop.url }}{{ product.url }}"
-        data-product-image="{{ product_image | escape }}"
-      >
-        Make an offer
-      </button>
-      <a
-        class="pdp-inquire__btn pdp-inquire__btn--ghost"
-        href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
-      >
-        Private viewing
-      </a>
-    {%- endif -%}
     <button
       type="button"
-      class="pdp-inquire__btn{% if desk_piece %} pdp-inquire__btn--ghost{% endif %} js-open-product-chat"
+      class="pdp-inquire__btn js-open-product-chat"
       data-chat-intent="ask"
       data-product-id="{{ product.id }}"
       data-product-handle="{{ product.handle }}"
@@ -66,30 +25,32 @@
     >
       Ask about this piece
     </button>
-    {%- unless desk_piece -%}
-      <a
-        class="pdp-inquire__btn pdp-inquire__btn--ghost"
-        href="/pages/private-clients?interest={{ viewing_interest }}&amp;piece={{ product.title | url_encode }}"
-      >
-        Book a call
-      </a>
-      <button
-        type="button"
-        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="message"
-        data-product-id="{{ product.id }}"
-        data-product-handle="{{ product.handle }}"
-        data-product-title="{{ product.title | escape }}"
-        data-product-url="{{ shop.url }}{{ product.url }}"
-        data-product-image="{{ product_image | escape }}"
-      >
-        Direct message
-      </button>
-    {%- endunless -%}
+    <button
+      type="button"
+      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+      data-chat-intent="offer"
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-url="{{ shop.url }}{{ product.url }}"
+      data-product-image="{{ product_image | escape }}"
+    >
+      Make an offer
+    </button>
+    <button
+      type="button"
+      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+      data-chat-intent="message"
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-url="{{ shop.url }}{{ product.url }}"
+      data-product-image="{{ product_image | escape }}"
+    >
+      Direct message
+    </button>
   </div>
 </div>
-
-{% render 'piece-hold', product: product %}
 
 <style>
   .pdp-inquire {
