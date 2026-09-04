@@ -1,11 +1,9 @@
 {%- comment -%}
   One grade scale (clarity / colour / cut) for the diamond filter.
 
-  Rendered as a threshold slider, not a grid of tiles. Grade scales are
-  ordered, and shoppers pick a floor — "VS1 and better" — not a set. A grid of
-  equal-weight tiles says "tick the ones you want", so selecting the lowest
-  grade lights up every tile and reads as a bug. A track with a filled run to
-  the right of the handle shows what actually happened.
+  Rendered as a grade picker, not a floor slider. Shoppers can select VS2
+  only — or any set of grades — instead of "VS2 and better". Each grade is
+  a real checkbox bound to its published facet param.
 
   Shopify returns facet values ordered by count, which is meaningless here, so
   `order` supplies the gemological sequence worst → best. Grades the feed
@@ -26,7 +24,7 @@
   <div class="lm-scale" data-scale>
     <div class="lm-scale__track" aria-hidden="true"><div class="lm-scale__fill" data-scale-fill></div></div>
 
-    <div class="lm-scale__stops" role="group" aria-label="{{ title }} minimum">
+    <div class="lm-scale__stops" role="group" aria-label="{{ title }}">
       {%- for grade in order -%}
         {%- for value in filter.values -%}
           {%- if value.label == grade -%}

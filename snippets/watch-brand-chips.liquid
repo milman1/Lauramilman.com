@@ -1,0 +1,30 @@
+{%- comment -%}
+  Brand chips for watch collections, plus a link back to every timepiece.
+  Usage: {% render 'watch-brand-chips', collection: collection %}
+{%- endcomment -%}
+{%- liquid
+  assign wc_handle = collection.handle | downcase
+  assign wc_is_watch = false
+  if wc_handle == 'time-pieces' or wc_handle == 'jacob-co' or wc_handle == 'other-watch-brands' or wc_handle contains 'watch' or wc_handle contains 'timepiece' or wc_handle contains 'time-piece'
+    assign wc_is_watch = true
+  endif
+-%}
+{%- if wc_is_watch -%}
+  <div class="lm-watch-nav">
+    {%- unless wc_handle == 'time-pieces' -%}
+      <a href="/collections/time-pieces" class="lm-collection__back">All Timepieces</a>
+    {%- endunless -%}
+    <nav class="lm-collection__chips" aria-label="Shop by brand">
+      <span class="lm-collection__chips-label">Shop by brand</span>
+      <a href="/collections/time-pieces" class="lm-collection__chip{% if wc_handle == 'time-pieces' %} is-active{% endif %}">All</a>
+      <a href="/collections/rolex-watches" class="lm-collection__chip{% if wc_handle == 'rolex-watches' %} is-active{% endif %}">Rolex</a>
+      <a href="/collections/cartier-watches" class="lm-collection__chip{% if wc_handle == 'cartier-watches' %} is-active{% endif %}">Cartier</a>
+      <a href="/collections/jacob-co" class="lm-collection__chip{% if wc_handle == 'jacob-co' %} is-active{% endif %}">Jacob &amp; Co.</a>
+      <a href="/collections/audemars-piguet-watches" class="lm-collection__chip{% if wc_handle == 'audemars-piguet-watches' %} is-active{% endif %}">Audemars Piguet</a>
+      <a href="/collections/bvlgari-watches" class="lm-collection__chip{% if wc_handle == 'bvlgari-watches' %} is-active{% endif %}">Bvlgari</a>
+      <a href="/collections/van-cleef-arpels-watches" class="lm-collection__chip{% if wc_handle == 'van-cleef-arpels-watches' %} is-active{% endif %}">Van Cleef &amp; Arpels</a>
+      <a href="/collections/chopard-watches" class="lm-collection__chip{% if wc_handle == 'chopard-watches' %} is-active{% endif %}">Chopard</a>
+      <a href="/collections/other-watch-brands" class="lm-collection__chip{% if wc_handle == 'other-watch-brands' %} is-active{% endif %}">Other brands</a>
+    </nav>
+  </div>
+{%- endif -%}
