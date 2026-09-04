@@ -7,11 +7,14 @@ function themeJs(): string {
 
 function chatIife(): string {
   const src = themeJs();
+  const helperStart = src.indexOf('function brandJacobCo');
+  const helperEnd = src.indexOf('/* === Cart Notification');
   const start = src.indexOf('/* === Shopify Inbox from PDP buttons');
   const end = src.indexOf('/* === Newsletter Form');
+  expect(helperStart).toBeGreaterThan(-1);
   expect(start).toBeGreaterThan(-1);
   expect(end).toBeGreaterThan(start);
-  return src.slice(start, end);
+  return src.slice(helperStart, helperEnd) + src.slice(start, end);
 }
 
 type Host = {
@@ -51,12 +54,61 @@ function installDom(hostOpen = true) {
     querySelectorAll: () => [],
     hasAttribute: (name: string) => name === 'open' && hostOpen,
     getAttribute: () => (hostOpen ? 'true' : null),
+    getBoundingClientRect: () => ({ left: 900, top: 200, width: 360, height: 480, right: 1260, bottom: 680 }),
   };
 
   const buttons: Element[] = [];
   const clickListeners: Array<(event: Event) => void> = [];
 
+  const created: Record<string, { id?: string; innerHTML: string; hidden: boolean; style: Record<string, string>; children: unknown[]; appendChild: (n: unknown) => void; querySelector: () => null; setAttribute: () => void; textContent: string; className: string; href?: string; src?: string; alt?: string; target?: string; rel?: string }> = {};
+
   const document = {
+    head: { appendChild: vi.fn() },
+    body: { appendChild: vi.fn() },
+    execCommand: vi.fn(() => false),
+    createElement: (tag: string) => {
+      const el: {
+        tagName: string;
+        innerHTML: string;
+        hidden: boolean;
+        style: Record<string, string>;
+        children: unknown[];
+        textContent: string;
+        className: string;
+        id: string;
+        href?: string;
+        src?: string;
+        alt?: string;
+        target?: string;
+        rel?: string;
+        appendChild: (n: unknown) => void;
+        querySelector: () => null;
+        setAttribute: (name: string, value: string) => void;
+      } = {
+        tagName: tag.toUpperCase(),
+        innerHTML: '',
+        hidden: false,
+        style: {},
+        children: [],
+        textContent: '',
+        className: '',
+        id: '',
+        appendChild(n: unknown) { this.children.push(n); },
+        querySelector: () => null,
+        setAttribute(name: string, value: string) {
+          if (name === 'id') el.id = value;
+        },
+      };
+      Object.defineProperty(el, 'id', {
+        get() { return (el as { _id?: string })._id || ''; },
+        set(v: string) {
+          (el as { _id?: string })._id = v;
+          if (v) created[v] = el;
+        },
+        configurable: true,
+      });
+      return el;
+    },
     querySelector: (sel: string) => {
       if (sel === 'shopify-chat') return host;
       if (sel === 'inbox-online-store-chat') return null;
@@ -66,7 +118,7 @@ function installDom(hostOpen = true) {
       if (sel === '.js-open-product-chat') return buttons;
       return [];
     },
-    getElementById: () => null,
+    getElementById: (id: string) => created[id] || null,
     addEventListener: (type: string, fn: (event: Event) => void) => {
       if (type === 'click') clickListeners.push(fn);
     },
@@ -80,6 +132,9 @@ function installDom(hostOpen = true) {
     location: { href: 'https://www.lauramilman.com/products/channel-set-diamond-stackable-eternity-band' },
     setTimeout: globalThis.setTimeout.bind(globalThis),
     clearTimeout: globalThis.clearTimeout.bind(globalThis),
+    setInterval: vi.fn(),
+    innerWidth: 1280,
+    innerHeight: 800,
     customElements,
   };
   windowObj.window = windowObj;
@@ -162,6 +217,24 @@ describe('PDP Shopify chat opener', () => {
     });
     vi.runAllTimers();
     expect(composer.value).toBe('Can you hold this in a size 6?');
+  });
+
+  it('pins this product on the chat panel when a pill is clicked', () => {
+    const { windowObj, document } = installDom(true);
+    (windowObj as { lmChat: { open: (p: object) => void } }).lmChat.open({
+      productTitle: 'Jacob & Company Five Time Zone Watch (Diamond Bezel)',
+      productUrl: 'https://www.lauramilman.com/products/jacob-company-five-time-zone-watch-diamond-bezel',
+      productImage: 'https://cdn.shopify.com/watch.jpg',
+      intent: 'offer',
+    });
+    const card = document.getElementById('lm-chat-piece') as { children: Array<{ textContent?: string; children?: Array<{ textContent?: string }> }> } | null;
+    expect(card).toBeTruthy();
+    const texts = (card?.children || [])
+      .flatMap((child) => [child.textContent, ...(child.children || []).map((n) => n.textContent)])
+      .join(' ');
+    expect(texts).toContain('Make an offer');
+    expect(texts).toContain('Jacob & Co. Five Time Zone Watch (Diamond Bezel)');
+    expect(texts).not.toContain('Jacob & Company');
   });
 
   it('does not treat a leftover open flag as success without show()', () => {

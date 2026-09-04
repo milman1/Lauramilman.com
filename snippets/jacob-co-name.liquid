@@ -1,0 +1,12 @@
+{%- comment -%}
+  House style: always Jacob & Co., never Jacob & Company.
+  Usage: {% render 'jacob-co-name', text: product.title %}
+{%- endcomment -%}
+{%- liquid
+  assign out = text | default: ''
+  assign out = out | replace: 'Jacob & Company', 'Jacob & Co.'
+  assign out = out | replace: 'Jacob &amp; Company', 'Jacob & Co.'
+  assign out = out | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign out = out | replace: 'JACOB & COMPANY', 'Jacob & Co.'
+-%}
+{{- out -}}

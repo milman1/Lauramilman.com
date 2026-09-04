@@ -1,5 +1,39 @@
 'use strict';
 
+/* House style: never print Jacob & Company. */
+function brandJacobCo(text) {
+  return String(text || '')
+    .replace(/Jacob\s*&\s*Company/gi, 'Jacob & Co.')
+    .replace(/Jacob\s+and\s+Company/gi, 'Jacob & Co.');
+}
+
+function rewriteJacobCoIn(root) {
+  if (!root) return;
+  if (root.nodeType === 3) {
+    var next = brandJacobCo(root.nodeValue);
+    if (next !== root.nodeValue) root.nodeValue = next;
+    return;
+  }
+  if (document.createTreeWalker && root.nodeType === 1) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      var branded = brandJacobCo(node.nodeValue);
+      if (branded !== node.nodeValue) node.nodeValue = branded;
+    }
+    var attrs = ['title', 'alt', 'aria-label', 'data-product-title', 'data-title'];
+    var els = root.querySelectorAll('[' + attrs.join('],[') + ']');
+    for (var i = 0; i < els.length; i++) {
+      for (var a = 0; a < attrs.length; a++) {
+        var v = els[i].getAttribute(attrs[a]);
+        if (!v) continue;
+        var n = brandJacobCo(v);
+        if (n !== v) els[i].setAttribute(attrs[a], n);
+      }
+    }
+  }
+}
+
 /* === Cart Notification === */
 function showCartNotification() {
   var note = document.getElementById('cart-notification');
@@ -391,7 +425,7 @@ function formatMoney(cents) {
 
   function composerMessage(payload) {
     payload = payload || {};
-    var title = payload.productTitle || '';
+    var title = brandJacobCo(payload.productTitle || '');
     var url = payload.productUrl || '';
     var intent = payload.intent || 'ask';
     var piece = title ? title : 'this piece';
@@ -408,6 +442,101 @@ function formatMoney(cents) {
     return '';
   }
 
+  function intentLabel(intent) {
+    if (intent === 'offer') return 'Make an offer';
+    if (intent === 'message') return 'Direct message';
+    return 'Ask about this piece';
+  }
+
+  function ensurePieceCardStyle() {
+    if (document.getElementById('lm-chat-piece-style')) return;
+    var style = document.createElement('style');
+    style.id = 'lm-chat-piece-style';
+    style.textContent =
+      '#lm-chat-piece{position:fixed;z-index:2147483646;display:flex;gap:10px;align-items:center;' +
+      'padding:10px 12px;background:#fff;border:1px solid #e6dfd4;border-radius:12px;' +
+      'box-shadow:0 8px 24px rgba(30,17,9,.12);font-family:Montserrat,system-ui,sans-serif;}' +
+      '#lm-chat-piece[hidden]{display:none!important;}' +
+      '.lm-chat-piece__img{width:52px;height:52px;object-fit:cover;border-radius:8px;background:#f3eee6;flex:none;}' +
+      '.lm-chat-piece__intent{margin:0 0 2px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8A8070;}' +
+      '.lm-chat-piece__title{margin:0;font-size:13px;font-weight:600;line-height:1.35;color:#2C1810;}' +
+      '.lm-chat-piece__url{display:block;margin:2px 0 0;font-size:11px;color:#8A8070;text-decoration:none;word-break:break-all;}';
+    document.head.appendChild(style);
+  }
+
+  function positionPieceCard(card) {
+    var host = document.querySelector('shopify-chat');
+    if (!host || !card) return;
+    var rect = host.getBoundingClientRect();
+    var width = 336;
+    var left;
+    var top;
+    if (rect.width >= 280 && rect.height >= 160) {
+      width = Math.min(336, rect.width - 24);
+      left = rect.left + 12;
+      top = rect.top + 72;
+    } else {
+      left = window.innerWidth - 16 - width;
+      top = window.innerHeight - 92 - 88;
+    }
+    card.style.left = Math.max(8, left) + 'px';
+    card.style.top = Math.max(8, top) + 'px';
+    card.style.width = width + 'px';
+  }
+
+  function mountPieceCard(payload) {
+    ensurePieceCardStyle();
+    payload = payload || {};
+    var card = document.getElementById('lm-chat-piece');
+    if (!card) {
+      card = document.createElement('aside');
+      card.id = 'lm-chat-piece';
+      card.setAttribute('role', 'status');
+      document.body.appendChild(card);
+    }
+    var title = brandJacobCo(payload.productTitle || 'this piece');
+    var url = payload.productUrl || '';
+    var img = payload.productImage || '';
+    card.innerHTML = '';
+    if (img) {
+      var image = document.createElement('img');
+      image.className = 'lm-chat-piece__img';
+      image.alt = title;
+      image.src = img;
+      card.appendChild(image);
+    }
+    var copy = document.createElement('div');
+    var intentEl = document.createElement('p');
+    intentEl.className = 'lm-chat-piece__intent';
+    intentEl.textContent = intentLabel(payload.intent);
+    var titleEl = document.createElement('p');
+    titleEl.className = 'lm-chat-piece__title';
+    titleEl.textContent = title;
+    copy.appendChild(intentEl);
+    copy.appendChild(titleEl);
+    if (url) {
+      var link = document.createElement('a');
+      link.className = 'lm-chat-piece__url';
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = url.replace(/^https?:\/\//, '');
+      copy.appendChild(link);
+    }
+    card.appendChild(copy);
+    card.hidden = false;
+    positionPieceCard(card);
+  }
+
+  function hidePieceCardIfChatClosed() {
+    var card = document.getElementById('lm-chat-piece');
+    if (!card || card.hidden) return;
+    var host = document.querySelector('shopify-chat');
+    var open = host && (host.open === true || host.hasAttribute('open'));
+    if (!open) card.hidden = true;
+    else positionPieceCard(card);
+  }
+
   function isComposer(el) {
     if (!el || el.nodeType !== 1) return false;
     if (el.disabled || el.getAttribute('aria-hidden') === 'true') return false;
@@ -417,7 +546,8 @@ function formatMoney(cents) {
       var type = (el.getAttribute('type') || 'text').toLowerCase();
       return type === 'text' || type === 'search' || type === '';
     }
-    if (el.isContentEditable) return true;
+    var editable = el.getAttribute('contenteditable');
+    if (editable === '' || editable === 'true' || editable === 'plaintext-only' || el.isContentEditable) return true;
     return el.getAttribute('role') === 'textbox';
   }
 
@@ -425,7 +555,7 @@ function formatMoney(cents) {
     if (!root || found.el) return;
     var nodes;
     try {
-      nodes = root.querySelectorAll('textarea, input, [contenteditable="true"], [role="textbox"]');
+      nodes = root.querySelectorAll('textarea, input, [contenteditable], [contenteditable="true"], [contenteditable="plaintext-only"], [role="textbox"]');
     } catch (err) {
       nodes = [];
     }
@@ -471,9 +601,20 @@ function formatMoney(cents) {
   }
 
   function setComposerValue(el, text) {
-    if (el.isContentEditable || el.getAttribute('role') === 'textbox') {
-      el.textContent = text;
-      try { el.dispatchEvent(new InputEvent('input', { bubbles: true, data: text })); } catch (err) {
+    try { el.focus(); } catch (err) {}
+    if (el.isContentEditable || el.getAttribute('contenteditable') === '' ||
+        el.getAttribute('contenteditable') === 'true' ||
+        el.getAttribute('contenteditable') === 'plaintext-only' ||
+        el.getAttribute('role') === 'textbox') {
+      try { document.execCommand('selectAll', false, null); } catch (err2) {}
+      try {
+        if (!document.execCommand('insertText', false, text)) {
+          el.textContent = text;
+        }
+      } catch (err3) {
+        el.textContent = text;
+      }
+      try { el.dispatchEvent(new InputEvent('input', { bubbles: true, data: text })); } catch (err4) {
         el.dispatchEvent(new Event('input', { bubbles: true }));
       }
       return;
@@ -525,13 +666,20 @@ function formatMoney(cents) {
 
   function openInbox(attempt) {
     if (tryOpenInbox()) {
+      mountPieceCard(pendingPayload);
       scheduleFill(pendingPayload);
       return true;
     }
-    if ((attempt || 0) >= MAX_ATTEMPTS) return false;
+    if ((attempt || 0) >= MAX_ATTEMPTS) {
+      mountPieceCard(pendingPayload);
+      return false;
+    }
     if (!attempt && window.customElements && customElements.whenDefined) {
       customElements.whenDefined('shopify-chat').then(function () {
-        if (tryOpenInbox()) scheduleFill(pendingPayload);
+        if (tryOpenInbox()) {
+          mountPieceCard(pendingPayload);
+          scheduleFill(pendingPayload);
+        }
       }).catch(function () {});
     }
     window.setTimeout(function () {
@@ -542,6 +690,7 @@ function formatMoney(cents) {
 
   function requestOpen(payload) {
     pendingPayload = payload || pendingPayload;
+    mountPieceCard(pendingPayload);
     if (opening) {
       scheduleFill(pendingPayload);
       tryOpenInbox();
@@ -557,7 +706,7 @@ function formatMoney(cents) {
   function payloadFromButton(btn) {
     if (!btn) return {};
     return {
-      productTitle: btn.getAttribute('data-product-title') || '',
+      productTitle: brandJacobCo(btn.getAttribute('data-product-title') || ''),
       productUrl: btn.getAttribute('data-product-url') || window.location.href,
       productId: btn.getAttribute('data-product-id') || '',
       productHandle: btn.getAttribute('data-product-handle') || '',
@@ -578,6 +727,8 @@ function formatMoney(cents) {
     event.preventDefault();
     requestOpen(payloadFromButton(btn));
   });
+
+  window.setInterval(hidePieceCardIfChatClosed, 400);
 })();
 
 /* === Newsletter Form === */
@@ -606,3 +757,5 @@ function formatMoney(cents) {
 
 /* === Initialise === */
 updateCartCount();
+document.title = brandJacobCo(document.title);
+rewriteJacobCoIn(document.body);

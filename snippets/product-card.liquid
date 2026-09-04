@@ -11,20 +11,22 @@
   assign pc_tags = product.tags | join: '|||' | downcase
   assign pc_metal = product.metafields.custom.metal_type.value | default: '' | downcase
   assign pc_carat = product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value | default: ''
+  assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
 -%}
 
 <div
   class="product-card"
   data-tags="{{ pc_tags | escape }}"
-  data-title="{{ product.title | escape }}"
-  data-title-lower="{{ product.title | downcase | escape }}"
+  data-title="{{ display_title | escape }}"
+  data-title-lower="{{ display_title | downcase | escape }}"
   data-type="{{ product.type | downcase | escape }}"
   data-price-cents="{{ product.price }}"
   data-metal="{{ pc_metal | escape }}"
   data-carat="{{ pc_carat | escape }}"
   data-vendor="{{ product.vendor | downcase | escape }}"
 >
-  <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ product.title | escape }}">
+  <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ display_title | escape }}">
     {%- if product.tags contains 'new' or product.tags contains 'new-arrival' -%}
       <span class="product-card__badge product-card__badge--new">New</span>
     {%- elsif product.tags contains 'bestseller' -%}
@@ -37,7 +39,7 @@
       <img
         class="product-card__image product-card__image--primary"
         src="{{ product.featured_image | image_url: width: 600 }}"
-        alt="{{ product.featured_image.alt | default: product.title | escape }}"
+        alt="{{ product.featured_image.alt | default: display_title | escape }}"
         width="{{ product.featured_image.width }}"
         height="{{ product.featured_image.height }}"
         loading="lazy"
@@ -46,7 +48,7 @@
         <img
           class="product-card__image product-card__image--hover"
           src="{{ product.images[1] | image_url: width: 600 }}"
-          alt="{{ product.images[1].alt | default: product.title | escape }}"
+          alt="{{ product.images[1].alt | default: display_title | escape }}"
           width="{{ product.images[1].width }}"
           height="{{ product.images[1].height }}"
           loading="lazy"
@@ -63,7 +65,7 @@
     {%- render 'lab-grown-tag', product: product -%}
 
     <h3 class="product-card__title">
-      <a href="{{ product.url }}">{{ product.title }}</a>
+      <a href="{{ product.url }}">{{ display_title }}</a>
     </h3>
 
     <div class="product-card__price">
@@ -77,7 +79,7 @@
 
     <div class="product-card__meta">
       {%- if product.vendor != blank -%}
-        <span class="product-card__vendor">{{ product.vendor }}</span>
+        <span class="product-card__vendor">{{ display_vendor }}</span>
       {%- elsif product.type != blank -%}
         <span class="product-card__type">{{ product.type }}</span>
       {%- endif -%}

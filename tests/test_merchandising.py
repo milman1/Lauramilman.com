@@ -336,10 +336,21 @@ def test_only_shopify_inbox_chat_is_rendered() -> None:
     inquiry = (ROOT / "snippets/product-inquiry.liquid").read_text()
     assert "js-open-product-chat" in inquiry
     assert "Make an offer" in inquiry
+    assert "Direct message" in inquiry
+    assert "Ask about this piece" in inquiry
     assert "lmChat.open" in inquiry
     assert "chat-trigger" not in inquiry
+    assert "Hold this piece" not in inquiry
+    assert "piece-hold" not in inquiry
     assert "data-product-id=" in inquiry
-    assert inquiry.count("/pages/private-clients?interest={{ viewing_interest }}&amp;piece=") >= 2
+    assert inquiry.count("js-open-product-chat") >= 3
+    assert "lm-chat-piece" in theme_js
+    assert "brandJacobCo" in theme_js
+    assert "Jacob & Co." in (ROOT / "snippets/jacob-co-name.liquid").read_text()
+    assert "display_title" in inquiry
+    main_product = (ROOT / "sections/main-product.liquid").read_text()
+    assert "assign display_title" in main_product
+    assert '<h1 class="product-title">{{ display_title }}</h1>' in main_product
     consult = (ROOT / "sections/private-client.liquid").read_text()
     assert "interest === 'jewelry'" in consult
     assert "Fine jewelry" in consult

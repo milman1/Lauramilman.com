@@ -11,6 +11,8 @@
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'product-form-' | append: section.id
   assign crumb_collection = collection | default: product.collections.first
+  assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid
@@ -93,7 +95,7 @@
       <a href="{{ crumb_collection.url }}">{{ crumb_collection.title }}</a>
       <span class="sep" aria-hidden="true">/</span>
     {%- endif -%}
-    <span class="current" aria-current="page">{{ product.title | truncate: 48 }}</span>
+    <span class="current" aria-current="page">{{ display_title | truncate: 48 }}</span>
   </nav>
 
   <div class="product-layout">
@@ -115,7 +117,7 @@
                   echo ' — Laura Milman New York'
                 endunless
               else
-                echo product.title | append: ' — Laura Milman New York'
+                echo display_title | append: ' — Laura Milman New York'
               endif
             endcapture
             assign media_alt = media_alt | strip
@@ -202,12 +204,12 @@
 
     <div class="product-info">
 
-      {%- if section.settings.show_vendor and product.vendor != blank -%}
-        <p class="product-vendor">{{ product.vendor }}</p>
+      {%- if section.settings.show_vendor and display_vendor != blank -%}
+        <p class="product-vendor">{{ display_vendor }}</p>
       {%- endif -%}
 
       <!-- 3. Title -->
-      <h1 class="product-title">{{ product.title }}</h1>
+      <h1 class="product-title">{{ display_title }}</h1>
 
       {%- form 'product', product, id: product_form_id, data-product-form: '' -%}
 
@@ -320,7 +322,7 @@
             type="submit"
             class="atc-btn"
             {% unless current_variant.available %}disabled{% endunless %}
-            aria-label="Add {{ product.title | escape }} to cart"
+            aria-label="Add {{ display_title | escape }} to cart"
           >
             {%- if current_variant.available -%}
               {{ 'products.product.add_to_cart' | t | default: 'Add to Cart' }}
@@ -398,7 +400,7 @@
 <!-- Sticky mobile add-to-cart -->
 <div class="pdp-sticky" id="PdpSticky" aria-hidden="true">
   <div class="pdp-sticky__info">
-    <span class="pdp-sticky__title">{{ product.title }}</span>
+    <span class="pdp-sticky__title">{{ display_title }}</span>
     <span class="pdp-sticky__price">{{ current_variant.price | money }}</span>
   </div>
   <button
