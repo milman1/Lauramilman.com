@@ -1,4 +1,9 @@
 import { STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
+import {
+  ALLOWED_WATCH_STOCK_RE,
+  EXCLUDED_WATCH_PARTNERS,
+  EXCLUDED_WATCH_STOCK_RE,
+} from '../config/watchGates.js';
 import type { FeedItem, Hold, Kind, StoneItem, WatchItem } from './types.js';
 
 /** Best → worst. Grades past the configured floor are held. */
@@ -283,14 +288,68 @@ export function isCuratedWatchBrand(brand: string): boolean {
 }
 
 /**
- * Feed condition "aftermarket" (any casing / surrounding text) means the
- * piece is excluded entirely — never imported, never priced. The label lives
- * on the feed's condition field and does not surface in Shopify tags once
- * the product is held out.
+ * Feed "aftermarket" (any casing / surrounding text) means the piece is
+ * excluded entirely — never imported, never priced. The label shows up on
+ * Condition and, for dial/custom jobs, on Comment (e.g. "DIAL AFTERMARKET").
  */
 export function isAftermarketCondition(condition: string | undefined): boolean {
   if (!condition) return false;
   return /\bafter[\s_-]?market\b/i.test(condition);
+}
+
+export function isAftermarketWatch(condition: string | undefined, comment: string | undefined): boolean {
+  return isAftermarketCondition(condition) || isAftermarketCondition(comment);
+}
+
+/** Comment column: "ICED OUT", "ICED OUT- NATURAL DIAMONDS", … */
+export function isIcedOutComment(comment: string | undefined): boolean {
+  if (!comment) return false;
+  return /\biced[\s_-]*out\b/i.test(comment);
+}
+
+/** Comment column: "NAKED", "NAKED- ICED OUT", … */
+export function isNakedComment(comment: string | undefined): boolean {
+  if (!comment) return false;
+  return /\bnaked\b/i.test(comment);
+}
+
+function partnerBlob(raw: Raw): string {
+  return [str(raw, ['branch', 'partner', 'dealer', 'vendor', 'source', 'company', 'supplier'])]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+}
+
+export interface WatchNormalizeOptions {
+  /**
+   * Stock numbers from allowed partner books (ROMAN / TLV / Vivid). When
+   * set, any other stock is held as `watch_excluded_partner`.
+   */
+  allowedStocks?: Set<string>;
+  /**
+   * When the partner allowlist could not be fetched, keep only T/RW/R
+   * prefixes so numeric Uncle Manny stock cannot leak through.
+   */
+  prefixFallback?: boolean;
+}
+
+/** Power Watch (`P`) and Uncle Manny (`U`, `M`) stock prefixes, plus Branch. */
+export function isExcludedWatchPartner(raw: Raw, stockRef: string): boolean {
+  if (EXCLUDED_WATCH_STOCK_RE.test(stockRef.trim())) return true;
+  const blob = partnerBlob(raw);
+  if (!blob) return false;
+  return EXCLUDED_WATCH_PARTNERS.some((name) => blob.includes(name));
+}
+
+export function isAllowedWatchStock(stockRef: string, opts?: WatchNormalizeOptions): boolean {
+  const stock = stockRef.trim();
+  if (opts?.allowedStocks && opts.allowedStocks.size > 0) {
+    return opts.allowedStocks.has(stock);
+  }
+  if (opts?.prefixFallback) {
+    return ALLOWED_WATCH_STOCK_RE.test(stock);
+  }
+  return true;
 }
 
 export interface NormalizeResult {
@@ -505,7 +564,7 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
   return { items, holds };
 }
 
-export function normalizeWatches(rows: Raw[]): NormalizeResult {
+export function normalizeWatches(rows: Raw[], opts?: WatchNormalizeOptions): NormalizeResult {
   const items: FeedItem[] = [];
   const holds: Hold[] = [];
   const kind: Kind = 'watch';
@@ -528,8 +587,18 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       continue;
     }
     const condition = str(raw, ['condition', 'condition_grade', 'state']);
-    if (isAftermarketCondition(condition)) {
-      holds.push({ kind, stockRef, reason: 'watch_aftermarket', detail: condition });
+    const comment = str(raw, ['comment', 'notes', 'note']);
+    if (isExcludedWatchPartner(raw, stockRef) || !isAllowedWatchStock(stockRef, opts)) {
+      holds.push({
+        kind,
+        stockRef,
+        reason: 'watch_excluded_partner',
+        detail: str(raw, ['branch', 'partner', 'dealer']) ?? stockRef,
+      });
+      continue;
+    }
+    if (isAftermarketWatch(condition, comment)) {
+      holds.push({ kind, stockRef, reason: 'watch_aftermarket', detail: condition ?? comment });
       continue;
     }
     // Brands outside WATCH_BRANDS still import — they are tagged
@@ -537,6 +606,18 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
     // Brands collection. Curation no longer holds them out of the catalogue.
     const box = bool(raw, ['box', 'has_box', 'with_box', 'original_box']);
     const papers = bool(raw, ['paper', 'papers', 'has_papers', 'with_papers', 'original_papers', 'card']);
+    if (!papers) {
+      holds.push({ kind, stockRef, reason: 'watch_no_papers' });
+      continue;
+    }
+    if (isNakedComment(comment)) {
+      holds.push({ kind, stockRef, reason: 'watch_naked_comment', detail: comment });
+      continue;
+    }
+    if (isIcedOutComment(comment)) {
+      holds.push({ kind, stockRef, reason: 'watch_iced_out', detail: comment });
+      continue;
+    }
     // Spec fields confirmed on the live developer-api/watch payload (2026-08-09
     // key dump): Dial, Bezel, Bracelet, Metal, MM, Links (plural), Comment.
     // OG Tag is not present on the API — do not invent it.
@@ -558,7 +639,7 @@ export function normalizeWatches(rows: Raw[]): NormalizeResult {
       bracelet: str(raw, ['bracelet']),
       // API field is `Links` (plural); schema / listing table label stays "Link".
       link: str(raw, ['links', 'link']),
-      comment: str(raw, ['comment', 'notes', 'note']),
+      comment,
       costUsd,
       imageUrls: collectUrls(raw, IMAGE_KEYS),
       videoUrls: collectUrls(raw, VIDEO_KEYS),

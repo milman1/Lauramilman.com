@@ -30,15 +30,15 @@ const watchRecord = {
   Reference: '116610LV',
   Year: '2014',
   Condition: 'MINT',
-  Box: 'NO',
-  Paper: 'NO',
+  Box: 'YES',
+  Paper: 'YES',
   MM: '40',
   Metal: 'STEEL',
   Bracelet: 'OYSTER',
   Dial: 'GREEN',
   Bezel: 'CERACHROM',
   Links: '2',
-  Comment: 'NAKED',
+  Comment: 'HULK',
   Price: '17500',
   ImageLink: 'https://dnalinks.in/2115.jpg',
   VideoLink: 'https://dnalinks.in/2115.mp4',
@@ -138,9 +138,9 @@ describe('Belgium Dia real-schema watch record', () => {
       brand: 'ROLEX',
       reference: '116610LV',
       costUsd: 17500,
-      box: false,
-      papers: false,
-      isNaked: true,
+      box: true,
+      papers: true,
+      isNaked: false,
       year: '2014',
       caseSizeMm: '40',
       metal: 'STEEL',
@@ -148,14 +148,20 @@ describe('Belgium Dia real-schema watch record', () => {
       bezel: 'CERACHROM',
       bracelet: 'OYSTER',
       link: '2',
-      comment: 'NAKED',
+      comment: 'HULK',
     });
     expect(w.kind === 'watch' && w.imageUrls[0]).toBe('https://dnalinks.in/2115.jpg');
   });
 
   it('maps the live API Links field (plural) and keeps negative link counts', () => {
-    const { items, holds } = normalizeWatches([{ ...watchRecord, Stock: '10005', Links: '-5' }]);
+    const { items, holds } = normalizeWatches([{ ...watchRecord, Stock: 'T3717', Links: '-5' }]);
     expect(holds).toEqual([]);
-    expect(items[0]).toMatchObject({ stockRef: '10005', link: '-5' });
+    expect(items[0]).toMatchObject({ stockRef: 'T3717', link: '-5' });
+  });
+
+  it('holds a live NAKED / no-papers row instead of importing it', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRecord, Stock: '2115', Box: 'NO', Paper: 'NO', Comment: 'NAKED' }]);
+    expect(items).toEqual([]);
+    expect(holds[0]?.reason).toBe('watch_no_papers');
   });
 });

@@ -13,6 +13,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
+import { fetchAllowedWatchStocks } from './feeds/watchPartners.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
 import {
@@ -156,6 +157,18 @@ async function resolveShopifyToken(domain: string): Promise<string> {
   return token;
 }
 
+async function normalizeWatchFeed(rows: Record<string, unknown>[]) {
+  try {
+    const allowedStocks = await fetchAllowedWatchStocks();
+    console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch, TLV, Vivid)`);
+    return normalizeWatches(rows, { allowedStocks });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error(`Watch partner allowlist failed (${detail}) — keeping T/RW/R prefixes only`);
+    return normalizeWatches(rows, { prefixFallback: true });
+  }
+}
+
 async function main() {
   const flags = parseFlags(process.argv.slice(2));
   const startedAt = new Date().toISOString();
@@ -208,7 +221,10 @@ async function main() {
         console.error(`Feed ${kind}: 0 rows — treating as outage; catalog segment will NOT be archived`);
         continue;
       }
-      const result = kind === 'watch' ? normalizeWatches(rows) : normalizeStones(rows, kind);
+      const result =
+        kind === 'watch'
+          ? await normalizeWatchFeed(rows)
+          : normalizeStones(rows, kind);
       feeds[kind].fetched = rows.length;
       items.push(...result.items);
       holds.push(...result.holds);
