@@ -48,6 +48,15 @@ describe('buildWatchListing', () => {
     });
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe('Pre-Owned');
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe(
+      'Pre-owned',
+    );
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'features')?.value).toBe(
+      'With Box, With Papers',
+    );
+    expect(listing.descriptionHtml).toContain('with its original box and papers');
+    expect(listing.descriptionHtml).not.toMatch(/new with box/i);
+    expect(listing.descriptionHtml).not.toContain('as a full set');
   });
 
   it('maps grade values to Pre-Owned and writes Condition Grade metafield', () => {
@@ -152,6 +161,9 @@ describe('buildWatchListing', () => {
     expect(listing.tags).toContain('SLIDER');
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe(
       'SLIDER',
+    );
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe(
+      'Pre-owned',
     );
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
     expect(

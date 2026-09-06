@@ -70,6 +70,11 @@ export interface NeedsReview {
 // inventory (see "Explicitly out of scope" in docs/watch-listing-schema.md).
 // SEO description still always ends with "Authenticated by Laura Milman New York."
 
+import {
+  boxPaperClause,
+  ebayConditionForWatch,
+  ebayFeaturesFromBoxPapers,
+} from './ebayCondition.js';
 import { extractEbayWatchSpecifics } from './ebayWatchSpecifics.js';
 
 const CONFIG = {
@@ -176,16 +181,8 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** Built from the box/paper booleans. Returns null when both are unstated. */
-function boxPaperClause(box: boolean | null | undefined, paper: boolean | null | undefined): string | null {
-  const boxKnown = box !== null && box !== undefined;
-  const paperKnown = paper !== null && paper !== undefined;
-  if (!boxKnown && !paperKnown) return null;
-  if (box && paper) return 'as a full set with box and papers';
-  if (box && !paper) return 'with its original box, but without papers';
-  if (!box && paper) return 'with its papers, but without the original box';
-  return 'on its own, without box or papers';
-}
+// boxPaperClause lives in ebayCondition.ts — eBay hides Pre-Owned titles when
+// Features/Condition say "New with box and papers", so the copy never uses that phrase.
 
 function yesNo(v: boolean | null | undefined): string | null {
   if (v === null || v === undefined) return null;
@@ -270,6 +267,8 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   pushCustom('condition_grade', grade);
   pushCustom('box', boxYesNo);
   pushCustom('papers', paperYesNo);
+  pushCustom('ebay_condition', ebayConditionForWatch({ title, state: mapping?.state ?? null }));
+  pushCustom('features', ebayFeaturesFromBoxPapers(record.box, record.paper));
   pushCustom('original_tag', ogTagYesNo);
   pushCustom('link', linkValue);
   pushCustom('stock_number', record.stockNumber ?? null);

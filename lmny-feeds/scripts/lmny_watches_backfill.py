@@ -146,7 +146,7 @@ def box_paper_clause(box, paper):
     if box is None and paper is None:
         return None
     if box and paper:
-        return "as a full set with box and papers"
+        return "with its original box and papers"
     if box and not paper:
         return "with its original box, but without papers"
     if not box and paper:
@@ -283,7 +283,25 @@ def build_listing(feed, handle=None):
     metafields = [
         {"namespace": "mm-google-shopping", "key": "condition", "value": mapping["google"], "type": "single_line_text_field"},
         {"namespace": "global", "key": "MPN", "value": reference, "type": "single_line_text_field"},
+        {
+            "namespace": "custom",
+            "key": "ebay_condition",
+            "value": "New with tags" if title_word == "Unworn" else "Pre-owned",
+            "type": "single_line_text_field",
+        },
     ]
+    feature_parts = []
+    if box:
+        feature_parts.append("With Box")
+    if paper:
+        feature_parts.append("With Papers")
+    if feature_parts:
+        metafields.append({
+            "namespace": "custom",
+            "key": "features",
+            "value": ", ".join(feature_parts),
+            "type": "single_line_text_field",
+        })
 
     return {
         "title": title, "descriptionHtml": description_html,

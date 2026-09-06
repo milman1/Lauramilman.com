@@ -35,7 +35,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 20;
+export const PRODUCT_SCHEMA_VERSION = 21;
 
 /**
  * Unique watches are one-of-one. Uploadify (and other marketplace apps) keep
@@ -295,7 +295,7 @@ export function descriptionFor(item: FeedItem): string {
   if (item.kind === 'watch') {
     const listing = watchListingFor(item);
     if (listing) return listing.descriptionHtml;
-    const set = item.box && item.papers ? 'Full set (box and papers)' : item.box ? 'With original box' : item.papers ? 'With papers' : 'Watch only';
+    const set = item.box && item.papers ? 'With original box and papers' : item.box ? 'With original box' : item.papers ? 'With papers' : 'Watch only';
     const rows = [
       ['Brand', item.brand],
       ['Model', item.model],

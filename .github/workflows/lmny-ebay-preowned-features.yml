@@ -1,0 +1,85 @@
+# One-shot Shopify fix: eBay Pre-Owned titles must not ship
+# Condition/Features "New with box and papers".
+#
+# Dry-run by default on workflow_dispatch. Pull requests that touch this
+# workflow apply live so Marketplace Connect can re-list hidden watches.
+#
+# Secrets: SHOPIFY_STORE_DOMAIN plus SHOPIFY_ADMIN_TOKEN or
+# SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET.
+name: LMNY eBay pre-owned features
+
+on:
+  pull_request:
+    paths:
+      - 'lmny-feeds/src/ebayCondition.ts'
+      - 'lmny-feeds/scripts/fix-ebay-preowned-features.ts'
+      - '.github/workflows/lmny-ebay-preowned-features.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+      limit:
+        description: 'Optional cap (empty = all Watch / ebay-tagged products)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Fix eBay pre-owned features
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          DRY_RUN_INPUT: ${{ github.event_name == 'pull_request' && 'false' || inputs.dry_run }}
+          LIMIT_INPUT: ${{ inputs.limit }}
+        run: |
+          extra=""
+          if [ -n "$LIMIT_INPUT" ]; then
+            extra="--limit=$LIMIT_INPUT"
+          fi
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            echo "Mode: LIVE"
+            npx tsx scripts/fix-ebay-preowned-features.ts --apply $extra
+          else
+            echo "Mode: dry run"
+            npx tsx scripts/fix-ebay-preowned-features.ts $extra
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/ebay-preowned-features.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ebay-preowned-features-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/ebay-preowned-features.md
+            lmny-feeds/out/ebay-preowned-features.csv
+            lmny-feeds/out/ebay-preowned-features-errors.txt
+          if-no-files-found: ignore

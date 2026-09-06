@@ -120,6 +120,8 @@ escaped (`&`, `<`, `>`).
 | `dial` / `bezel` / `bracelet` | Title-cased |
 | `condition` / `condition_grade` | Title word / grade when mapped; otherwise the nonblank raw condition / omitted |
 | `box` / `papers` / `original_tag` | `Yes` / `No` when stated |
+| `ebay_condition` | `Pre-owned` unless state/title is Unworn (`New with tags`). Never `New with box and papers`. |
+| `features` | eBay accessory aspects only: `With Box`, `With Papers`, or both. Omit when unstated. |
 | `link` | Feed `Links` value as string |
 | `stock_number` | LMNY stock # |
 
@@ -128,9 +130,11 @@ Empty values are omitted so the theme can hide those cells.
 `yearClause`: ` from {normalizedYear}` or empty.
 `boxPaperClause`: built from the `box`/`paper` booleans — when present, a
 leading space plus one of:
-"as a full set with box and papers" (both true), "with its original box,
+"with its original box and papers" (both true), "with its original box,
 but without papers" (box only), "with its papers, but without the
 original box" (paper only), "on its own, without box or papers" (neither).
+Never "New with box and papers" and never "as a full set with box and papers":
+eBay treats that canned Features/Condition value as brand-new unworn stock.
 Omitted entirely if both are unstated (so the sentence reads
 `…is offered by Laura Milman New York.`).
 `gradeClause`: ` It is in {grade} condition.` or empty. Grade is lowercased
@@ -185,6 +189,8 @@ tags the product already has, so existing operational tags are preserved.
 | Namespace.Key | Value |
 |---|---|
 | `mm-google-shopping.condition` | `new` if state = unworn, `used` if pre-owned; omitted when unclassified |
+| `custom.ebay_condition` | `Pre-owned` or `New with tags` (Unworn only). Marketplace Connect maps this to eBay Condition. |
+| `custom.features` | `With Box` / `With Papers` when stated. Never `New with box and papers`. |
 | `global.MPN` | reference |
 
 ## Idempotency
