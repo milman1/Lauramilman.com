@@ -55,6 +55,8 @@ describe('buildWatchListing', () => {
       'With Box, With Papers',
     );
     expect(listing.descriptionHtml).toContain('with its original box and papers');
+    expect(listing.descriptionHtml).toContain('Authenticated and hand-inspected by Laura Milman New York.');
+    expect(listing.descriptionHtml).toContain('Watches are exchanges only');
     expect(listing.descriptionHtml).not.toMatch(/new with box/i);
     expect(listing.descriptionHtml).not.toContain('as a full set');
   });

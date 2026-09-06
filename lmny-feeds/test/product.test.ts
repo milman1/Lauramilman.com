@@ -242,7 +242,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for Amount-as-cost pricing', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(21);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(22);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -389,6 +389,8 @@ describe('updates target the existing product by id', () => {
     const input = buildProductSetInput(watch(), priced(), at);
     expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN');
     expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
+    expect(String(input.descriptionHtml)).toContain('Authenticated and hand-inspected by Laura Milman New York.');
+    expect(String(input.descriptionHtml)).toContain('Watches are exchanges only');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
       title: 'Rolex Submariner 126610LN – Pre-Owned Watch',

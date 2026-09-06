@@ -50,7 +50,9 @@ describe('buildJewelryListing', () => {
     expect(listing.productType).toBe('Bracelets');
     expect(listing.descriptionHtml).toBe(
       '<p>This Cartier estate bracelet in 18K Yellow Gold is offered by Laura Milman New York. It is in excellent condition.</p>' +
-        '<p>Authenticated and hand-inspected by Laura Milman New York.</p>',
+        '<p>Authenticated and hand-inspected by Laura Milman New York.</p>' +
+        '<p>Selected with over 30 years of New York Diamond District expertise. Every piece is condition-graded and photographed as it truly is. Hallmarks, serial numbers, and construction are verified before a listing goes live.</p>' +
+        '<p>The Laura Milman New York Guarantee includes authenticity documentation, complimentary insured shipping, 14-day jewelry returns, and a lifetime warranty.</p>',
     );
     expect(listing.seoTitle).toBe('Cartier Love Bracelet | Estate Jewelry');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
@@ -91,6 +93,8 @@ describe('buildJewelryListing', () => {
     expect(listing.productType).toBe('Watch');
     expect(listing.descriptionHtml).toContain('This Pre-Owned Bvlgari');
     expect(listing.descriptionHtml).toContain('is offered by Laura Milman New York.');
+    expect(listing.descriptionHtml).toContain('Authenticated and hand-inspected by Laura Milman New York.');
+    expect(listing.descriptionHtml).toContain('Watches are exchanges only');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoTitle).toMatch(/\| Pre-Owned Watch$/);
     expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');

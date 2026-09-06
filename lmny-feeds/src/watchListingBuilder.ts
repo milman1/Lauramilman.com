@@ -65,21 +65,13 @@ export interface NeedsReview {
   record: WatchFeedRecord;
 }
 
-// ---------------------------------------------------------------------------
-// Config — flip once the "estate" trust line is confirmed true for this
-// inventory (see "Explicitly out of scope" in docs/watch-listing-schema.md).
-// SEO description still always ends with "Authenticated by Laura Milman New York."
-
+import { brandedDescriptionHtml } from './brandedDescription.js';
 import {
   boxPaperClause,
   ebayConditionForWatch,
   ebayFeaturesFromBoxPapers,
 } from './ebayCondition.js';
 import { extractEbayWatchSpecifics } from './ebayWatchSpecifics.js';
-
-const CONFIG = {
-  trustLine: '', // e.g. "Authenticated and hand-inspected by Laura Milman New York."
-};
 
 // ---------------------------------------------------------------------------
 // Condition mapping — the two known STATE values, plus known GRADE values
@@ -177,10 +169,6 @@ function fitWithSuffix(lead: string, suffix: string, maxLen: number): string {
   return `${truncateAtWord(lead, available)} ${suffix}`.trim();
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
 // boxPaperClause lives in ebayCondition.ts — eBay hides Pre-Owned titles when
 // Features/Condition say "New with box and papers", so the copy never uses that phrase.
 
@@ -205,7 +193,6 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const identity = `${brand} ${model} ${reference}`;
   const title = titleWord ? `${titleWord} ${identity}` : identity;
 
-  const yearClause = year ? ` from ${escapeHtml(year)}` : '';
   const gradeClause = grade ? ` It is in ${grade.toLowerCase()} condition.` : '';
   const bpClause = boxPaperClause(record.box, record.paper);
   const openingClause = ` is offered by Laura Milman New York${bpClause ? ` ${bpClause}` : ''}`;
@@ -224,19 +211,14 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
       : null;
   const caseSize = record.caseSizeMm ? `${String(record.caseSizeMm).trim()}mm` : null;
 
-  const trustParagraph = CONFIG.trustLine ? `<p>${escapeHtml(CONFIG.trustLine)}</p>` : '';
-
   const commentIsRedundant =
     (record.comment || '').trim().toUpperCase() === 'NAKED' && record.box === false && record.paper === false;
-  const notesParagraph =
-    record.comment && !commentIsRedundant ? `<p>${escapeHtml(record.comment)}</p>` : '';
+  const notes = record.comment && !commentIsRedundant ? record.comment : null;
 
   const descriptionIdentity = titleWord ? `${titleWord} ${brand} ${model} ${reference}` : identity;
-  const descriptionHtml =
-    `<p>This ${escapeHtml(descriptionIdentity)}` +
-    `${yearClause}${openingClause}.${gradeClause}</p>` +
-    notesParagraph +
-    trustParagraph;
+  const opening =
+    `This ${descriptionIdentity}${year ? ` from ${year}` : ''}${openingClause}.${gradeClause}`;
+  const descriptionHtml = brandedDescriptionHtml({ opening, notes, kind: 'watch' });
 
   const seoTitle = fitWithSuffix(identity, titleWord ? `– ${titleWord} Watch` : 'Watch', 60);
 
