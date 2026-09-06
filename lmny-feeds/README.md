@@ -113,7 +113,11 @@ holds a stones table — Shopify products are the only live copy.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
-  namespace so it is never exposed to the theme or Storefront API).
+  namespace so it is never exposed to the theme or Storefront API). Watches
+  also write Belgium Dia cost to Shopify **Cost per item** (`inventoryItem.cost`,
+  the field next to Price on the product page) and to `lmny_feed.cost_usd`
+  (admin-only money metafield). Cost is never written to `custom.*`, the
+  storefront, or eBay.
 - Stone 360° videos stay embedded from the supplier rather than attached as
   Shopify media — re-hosting ~24k per run isn't affordable. `lmny_feed.video_url`
   is the first (what the diamond PDP's 360° tab reads today);
