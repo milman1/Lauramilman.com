@@ -18,12 +18,13 @@ holds a stones table — Shopify products are the only live copy.
    Cloudflare feed-cache Worker (`lmny-feeds/cloudflare-worker/feed-cache.js`).
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
    stones. Watches are held out unless they have **papers**, are not
-   aftermarket, do not say **naked** or **iced out** in Comment, and are not
-   from **Power Watch LLC** or **Uncle Manny LLC**. Partner is matched on
-   Branch when present, on `P`/`U`/`M` stock prefixes, and on a live stock
-   allowlist from Belgium Watch (ROMAN), TLV, and Vivid. Brands outside the
-   curated list still import and are tagged `other-watch-brand`. Other
-   failing rows are *held* (never created).
+   aftermarket (Condition field), do not say **naked** or **iced out** in
+   Comment, and are not from **Power Watch LLC** or **Uncle Manny LLC**.
+   Dial-aftermarket notes in Comment still sell (`8114`). That book is 115
+   watches. Partner is matched on Branch when present, on `P`/`U`/`M` stock
+   prefixes, and on a live stock allowlist from Belgium Watch (ROMAN), TLV,
+   and Vivid. Brands outside the curated list still import and are tagged
+   `other-watch-brand`. Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
      confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per

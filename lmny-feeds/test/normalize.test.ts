@@ -147,9 +147,12 @@ describe('watch normalization', () => {
     expect(holds[0]?.reason).toBe('watch_aftermarket');
   });
 
-  it('excludes aftermarket when it only appears in Comment', () => {
-    const { holds } = normalizeWatches([{ ...watchRow, Condition: 'RETAIL READY', Comment: 'DIAL AFTERMARKET, CARD SAY BLACK' }]);
-    expect(holds[0]?.reason).toBe('watch_aftermarket');
+  it('does not treat a dial-aftermarket comment as the After Market category', () => {
+    const { items, holds } = normalizeWatches([
+      { ...watchRow, stock_no: '8114', Condition: 'RETAIL READY', Comment: 'DIAL AFTERMARKET, CARD SAY BLACK' },
+    ]);
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({ stockRef: '8114', comment: 'DIAL AFTERMARKET, CARD SAY BLACK' });
   });
 
   it('curation is case-insensitive for listed brands', () => {

@@ -288,17 +288,14 @@ export function isCuratedWatchBrand(brand: string): boolean {
 }
 
 /**
- * Feed "aftermarket" (any casing / surrounding text) means the piece is
- * excluded entirely — never imported, never priced. The label shows up on
- * Condition and, for dial/custom jobs, on Comment (e.g. "DIAL AFTERMARKET").
+ * Feed condition "aftermarket" (any casing / surrounding text) means the
+ * piece is excluded entirely. Dial-aftermarket notes in Comment (e.g.
+ * "DIAL AFTERMARKET, CARD SAY BLACK" on a Retail Ready GMT) are not the
+ * After Market category and still sell when papers are present.
  */
 export function isAftermarketCondition(condition: string | undefined): boolean {
   if (!condition) return false;
   return /\bafter[\s_-]?market\b/i.test(condition);
-}
-
-export function isAftermarketWatch(condition: string | undefined, comment: string | undefined): boolean {
-  return isAftermarketCondition(condition) || isAftermarketCondition(comment);
 }
 
 /** Comment column: "ICED OUT", "ICED OUT- NATURAL DIAMONDS", … */
@@ -597,8 +594,8 @@ export function normalizeWatches(rows: Raw[], opts?: WatchNormalizeOptions): Nor
       });
       continue;
     }
-    if (isAftermarketWatch(condition, comment)) {
-      holds.push({ kind, stockRef, reason: 'watch_aftermarket', detail: condition ?? comment });
+    if (isAftermarketCondition(condition)) {
+      holds.push({ kind, stockRef, reason: 'watch_aftermarket', detail: condition });
       continue;
     }
     // Brands outside WATCH_BRANDS still import — they are tagged

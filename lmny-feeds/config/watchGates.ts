@@ -7,8 +7,10 @@
  * Partners we publish: Belgium Watch (ROMAN), TLV Watches, Vivid Watches.
  * Partners we never publish: Power Watch LLC, Uncle Manny LLC.
  *
- * Also required: papers (Paper = YES). Held out: aftermarket, comment
- * containing "naked", comment containing "iced out".
+ * Also required: papers (Paper = YES). Held out: aftermarket *condition*,
+ * comment containing "naked", comment containing "iced out".
+ * A Comment of "DIAL AFTERMARKET" on a Retail Ready piece is not held
+ * (`8114` GMT 116718LN). That book is 115 watches to sell.
  */
 
 /** Partner books that never publish. Match is case-insensitive / substring. */
