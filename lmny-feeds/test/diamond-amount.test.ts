@@ -59,7 +59,7 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
         {
           Stock_No: 'L-71',
           Shape: 'ROUND',
-          Weight: '1.50',
+          Weight: '2.50',
           Color: 'E',
           Clarity: 'VS1',
           Lab: 'IGI',
