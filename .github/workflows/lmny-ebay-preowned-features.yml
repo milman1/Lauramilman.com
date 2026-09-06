@@ -3,6 +3,8 @@
 #
 # Dry-run by default on workflow_dispatch. Pull requests that touch this
 # workflow apply live so Marketplace Connect can re-list hidden watches.
+# Uses paginated Admin GraphQL (not bulkOperationRunQuery) so it does not
+# race the hourly feed sync on currentBulkOperation.
 #
 # Secrets: SHOPIFY_STORE_DOMAIN plus SHOPIFY_ADMIN_TOKEN or
 # SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET.

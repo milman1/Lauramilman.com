@@ -21,7 +21,7 @@ import {
   type EbayConditionPlan,
 } from '../src/ebayCondition.js';
 import { EBAY_TAG, PRODUCT_TYPES } from '../src/product.js';
-import { ShopifyClient, downloadJsonl, exchangeClientCredentials } from '../src/shopify.js';
+import { ShopifyClient, exchangeClientCredentials } from '../src/shopify.js';
 
 const OUT_DIR = 'out';
 
@@ -76,98 +76,80 @@ function csvEscape(value: string): string {
   return value;
 }
 
-async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
-  const query = `{
-    products(query: "product_type:'${PRODUCT_TYPES.watch}' OR tag:${EBAY_TAG}") {
-      edges {
-        node {
-          id
-          handle
-          title
-          productType
-          status
-          tags
-          descriptionHtml
-          metafields {
-            edges {
-              node { namespace key value }
-            }
-          }
-        }
+const CATALOG_QUERY = `#graphql
+  query EbayPreownedCatalog($cursor: String, $q: String!) {
+    products(first: 100, after: $cursor, query: $q) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        id
+        handle
+        title
+        productType
+        status
+        tags
+        descriptionHtml
+        box: metafield(namespace: "custom", key: "box") { value }
+        papers: metafield(namespace: "custom", key: "papers") { value }
+        ebayCondition: metafield(namespace: "custom", key: "ebay_condition") { value }
+        features: metafield(namespace: "custom", key: "features") { value }
+        googleCondition: metafield(namespace: "mm-google-shopping", key: "condition") { value }
       }
     }
-  }`;
-
-  const start = await shopify.gql<{
-    bulkOperationRunQuery: { bulkOperation: { id: string } | null; userErrors: Array<{ message: string }> };
-  }>(
-    `mutation($query: String!) {
-      bulkOperationRunQuery(query: $query) { bulkOperation { id } userErrors { message } }
-    }`,
-    { query },
-  );
-  if (start.bulkOperationRunQuery.userErrors.length) {
-    throw new Error(start.bulkOperationRunQuery.userErrors.map((e) => e.message).join('; '));
   }
+`;
 
-  const url = await pollBulk(shopify);
-  if (!url) return [];
-  const lines = await downloadJsonl(url);
-
-  const byId = new Map<string, CatalogRow>();
-  const order: string[] = [];
-  for (const row of lines) {
-    const r = row as Record<string, unknown>;
-    if (typeof r.handle === 'string' && typeof r.id === 'string' && typeof r.title === 'string') {
-      byId.set(r.id, {
-        id: r.id,
-        handle: r.handle,
-        title: r.title,
-        productType: String(r.productType ?? ''),
-        status: String(r.status ?? ''),
-        tags: (r.tags as string[]) ?? [],
-        descriptionHtml: String(r.descriptionHtml ?? ''),
-        box: null,
-        papers: null,
-        ebayCondition: null,
-        features: null,
-        googleCondition: null,
-      });
-      order.push(r.id);
-      continue;
-    }
-    if (typeof r.__parentId !== 'string') continue;
-    const parent = byId.get(r.__parentId);
-    if (!parent) continue;
-    if (typeof r.namespace !== 'string' || typeof r.key !== 'string') continue;
-    const value = typeof r.value === 'string' ? r.value : null;
-    if (r.namespace === 'custom' && r.key === 'box') parent.box = value;
-    if (r.namespace === 'custom' && r.key === 'papers') parent.papers = value;
-    if (r.namespace === 'custom' && r.key === EBAY_CONDITION_KEY) parent.ebayCondition = value;
-    if (r.namespace === 'custom' && r.key === EBAY_FEATURES_KEY) parent.features = value;
-    if (r.namespace === 'mm-google-shopping' && r.key === 'condition') parent.googleCondition = value;
-  }
-  return order.map((id) => byId.get(id)!);
+function mfValue(field: { value?: string | null } | null | undefined): string | null {
+  const v = field?.value;
+  return typeof v === 'string' && v.trim() ? v : null;
 }
 
-async function pollBulk(shopify: ShopifyClient): Promise<string | null> {
+async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
+  // Paginated Admin GraphQL — not bulkOperationRunQuery. A bulk op races the
+  // hourly feed sync on currentBulkOperation; this job already parsed that
+  // JSONL (no title field) as zero watches.
+  const q = `product_type:${PRODUCT_TYPES.watch} OR tag:${EBAY_TAG}`;
+  const rows: CatalogRow[] = [];
+  let cursor: string | null = null;
   for (;;) {
     const data = await shopify.gql<{
-      currentBulkOperation: {
-        status: string;
-        errorCode: string | null;
-        url: string | null;
-        objectCount: string;
-      } | null;
-    }>(`{ currentBulkOperation(type: QUERY) { status errorCode url objectCount } }`);
-    const op = data.currentBulkOperation;
-    if (!op) return null;
-    if (op.status === 'COMPLETED') return op.url;
-    if (op.status === 'FAILED' || op.status === 'CANCELED') {
-      throw new Error(`Bulk operation ${op.status}: ${op.errorCode ?? 'unknown'}`);
+      products: {
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        nodes: Array<{
+          id: string;
+          handle: string;
+          title: string;
+          productType: string | null;
+          status: string;
+          tags: string[];
+          descriptionHtml: string | null;
+          box: { value?: string | null } | null;
+          papers: { value?: string | null } | null;
+          ebayCondition: { value?: string | null } | null;
+          features: { value?: string | null } | null;
+          googleCondition: { value?: string | null } | null;
+        }>;
+      };
+    }>(CATALOG_QUERY, { cursor, q });
+    for (const node of data.products.nodes) {
+      rows.push({
+        id: node.id,
+        handle: node.handle,
+        title: node.title,
+        productType: node.productType ?? '',
+        status: node.status,
+        tags: node.tags ?? [],
+        descriptionHtml: node.descriptionHtml ?? '',
+        box: mfValue(node.box),
+        papers: mfValue(node.papers),
+        ebayCondition: mfValue(node.ebayCondition),
+        features: mfValue(node.features),
+        googleCondition: mfValue(node.googleCondition),
+      });
     }
-    await new Promise((r) => setTimeout(r, 2000));
+    if (!data.products.pageInfo.hasNextPage) break;
+    cursor = data.products.pageInfo.endCursor;
   }
+  return rows;
 }
 
 function planFor(row: CatalogRow): EbayConditionPlan | null {
@@ -209,6 +191,9 @@ async function main() {
 
   let rows = await fetchRows(shopify);
   console.log(`Fetched ${rows.length} Watch / ebay-tagged products`);
+  if (flags.apply && rows.length === 0) {
+    throw new Error('Fetched 0 Watch products — refusing to no-op APPLY (likely a catalog query failure).');
+  }
   if (flags.limit) rows = rows.slice(0, flags.limit);
 
   const preview: string[] = [
