@@ -54,10 +54,17 @@ if not TOKEN:
 SESSION = requests.Session()
 SESSION.headers.update({"X-Shopify-Access-Token": TOKEN, "Content-Type": "application/json"})
 
-# --- CONFIG: mirrors watchListingBuilder.ts CONFIG ---------------------------
-# Leave empty until confirmed true for this inventory (see schema doc).
-# SEO description still always ends with "Authenticated by Laura Milman New York."
-TRUST_LINE = ""
+# --- CONFIG: mirrors src/brandedDescription.ts --------------------------------
+AUTH_LINE = "Authenticated and hand-inspected by Laura Milman New York."
+HOUSE_WATCH = (
+    "Selected with over 30 years of New York Diamond District expertise. "
+    "Every timepiece is condition-graded and photographed as it truly is. "
+    "Serial numbers and construction are verified before a listing goes live."
+)
+GUARANTEE_WATCH = (
+    "The Laura Milman New York Guarantee includes authenticity documentation "
+    "and complimentary insured shipping. Watches are exchanges only."
+)
 
 # --- condition mapping: mirrors docs/watch-listing-schema.md exactly --------
 STATE_MAP = {
@@ -227,45 +234,29 @@ def build_listing(feed, handle=None):
 
     title = f"{title_word} {brand} {model} {reference}"
 
-    year_clause = f" from {escape_html(year)}" if year else ""
     grade_clause = f" It is in {grade.lower()} condition." if grade else ""
     box, paper = infer_box_paper(feed["accessories"])
     bp_clause = box_paper_clause(box, paper)
     opening_clause = f" is offered by Laura Milman New York{' ' + bp_clause if bp_clause else ''}"
 
-    # Stock # isn't in the description, but the handle carries it: "w-3194"
-    # -> "3194", "w-p5344" -> "P5344". Matches the master sheet's format
-    # closely enough to be useful, even though it's a derivation, not a
-    # direct read of the Stock# column.
-    stock_number = None
-    if handle and handle.startswith("w-"):
-        stock_number = handle[2:].upper()
-
-    rows = [
-        f"<tr><td>Brand</td><td>{escape_html(brand)}</td></tr>",
-        f"<tr><td>Model</td><td>{escape_html(model)}</td></tr>",
-        f"<tr><td>Reference</td><td>{escape_html(reference)}</td></tr>",
-    ]
-    if year:
-        rows.append(f"<tr><td>Year</td><td>{escape_html(year)}</td></tr>")
-    rows.append(f"<tr><td>Condition</td><td>{title_word}</td></tr>")
-    if grade:
-        rows.append(f"<tr><td>Condition Grade</td><td>{escape_html(grade)}</td></tr>")
-    box_yn, paper_yn = yes_no(box), yes_no(paper)
-    if box_yn:
-        rows.append(f"<tr><td>Box</td><td>{box_yn}</td></tr>")
-    if paper_yn:
-        rows.append(f"<tr><td>Papers</td><td>{paper_yn}</td></tr>")
-    if stock_number:
-        rows.append(f"<tr><td>Stock #</td><td>{escape_html(stock_number)}</td></tr>")
-
-    trust = f"<p>{escape_html(TRUST_LINE)}</p>" if TRUST_LINE else ""
-
-    description_html = (
-        f"<p>This {title_word} {escape_html(brand)} {escape_html(model)} {escape_html(reference)}"
-        f"{year_clause}{opening_clause}.{grade_clause}</p>"
-        f"<h3>Specifications</h3><table>{''.join(rows)}</table>{trust}"
+    opening = (
+        f"This {title_word} {brand} {model} {reference}"
+        f"{(' from ' + year) if year else ''}{opening_clause}.{grade_clause}"
     )
+    notes = None
+    comment = (feed.get("comment") or "").strip()
+    if comment and not (
+        comment.upper() == "NAKED" and box is False and paper is False
+    ):
+        notes = comment
+
+    parts = [f"<p>{escape_html(opening)}</p>"]
+    if notes:
+        parts.append(f"<p>{escape_html(notes)}</p>")
+    parts.append(f"<p>{escape_html(AUTH_LINE)}</p>")
+    parts.append(f"<p>{escape_html(HOUSE_WATCH)}</p>")
+    parts.append(f"<p>{escape_html(GUARANTEE_WATCH)}</p>")
+    description_html = "".join(parts)
 
     seo_title = f"{brand} {model} {reference} \u2013 {title_word}"
     if len(seo_title) > 60:

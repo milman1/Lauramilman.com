@@ -102,13 +102,19 @@ Examples:
 ```html
 <p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{ boxPaperClause}.{gradeClause}</p>
 <p>{comment}</p>                                              <!-- see Comment rule above -->
+<p>Authenticated and hand-inspected by Laura Milman New York.</p>
+<p>Selected with over 30 years of New York Diamond District expertise. Every timepiece is condition-graded and photographed as it truly is. Serial numbers and construction are verified before a listing goes live.</p>
+<p>The Laura Milman New York Guarantee includes authenticity documentation and complimentary insured shipping. Watches are exchanges only.</p>
 ```
 
-Specs are **not** inlined as an HTML table. They are written to storefront-readable
-`custom.*` metafields and rendered by the theme’s jewelry-style
-`.product-specs` grid in `sections/main-product.liquid` (same chrome as
-earrings / rings). All free-text values in the prose HTML must still be
-escaped (`&`, `<`, `>`).
+This is the branded body Marketplace Connect copies onto eBay. No off-eBay
+URLs, phone, or email. Specs are **not** inlined as an HTML table. They are
+written to storefront-readable `custom.*` metafields and rendered by the
+theme’s jewelry-style `.product-specs` grid in `sections/main-product.liquid`
+(same chrome as earrings / rings). All free-text values in the prose HTML
+must still be escaped (`&`, `<`, `>`). The shared helper is
+`src/brandedDescription.ts` (used by live ingest, Back Vault, and the
+catalog backfill).
 
 ### Spec metafields (PDP grid)
 
@@ -167,9 +173,9 @@ Shop this {titleWord, lowercase} {Brand} {Model} {reference}{, gradeClause if pr
 ```
 Truncated at a word boundary to 160 characters if needed.
 
-The SEO authenticated sentence is intentional and always present. It is
-separate from the optional in-body trust paragraph (`CONFIG.trustLine` /
-`TRUST_LINE`), which stays off until confirmed for feed-sourced inventory.
+The SEO authenticated sentence is intentional and always present. The in-body
+trust paragraph is the same branded template (`src/brandedDescription.ts`)
+used on eBay listings.
 
 ### Tags
 
@@ -204,13 +210,6 @@ the listing payload shape changes so live feed products refresh once.
 
 ## Explicitly out of scope for this pass
 
-- **Trust/authentication line in the body.** The existing "estate" template
-  (Bvlgari, Cartier, etc.) says "Authenticated and hand-inspected by Laura
-  Milman New York." Whether that claim is true for the feed-sourced watches
-  (Rolex, AP, Patek, etc.) hasn't been confirmed. Both implementations have
-  a single config flag for this line, defaulted to *off*. Turn it on only
-  once it's confirmed true for this inventory. SEO description still uses
-  `Authenticated by Laura Milman New York.` as specified above.
 - **Theme-level `itemCondition` in JSON-LD.** Shopify's default Product
   structured data does not include `itemCondition`, which is a real,
   separate lever for AI/Shopping visibility beyond title and description.

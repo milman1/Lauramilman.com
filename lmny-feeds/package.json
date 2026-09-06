@@ -15,6 +15,7 @@
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
     "backfill:ebay-watch-specifics": "tsx scripts/backfill-ebay-watch-specifics.ts",
     "backfill:ebay-preowned-features": "tsx scripts/fix-ebay-preowned-features.ts",
+    "backfill:branded-descriptions": "tsx scripts/apply-branded-descriptions.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

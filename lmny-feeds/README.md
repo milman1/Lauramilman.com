@@ -230,7 +230,7 @@ Live ingest now writes:
   `as a full set with box and papers`
 
 Map those two keys once in Marketplace Connect (Condition → `ebay_condition`,
-Features → `features`). Schema version 21 refreshes feed watches on the next
+Features → `features`). Schema version 22 refreshes feed watches on the next
 hourly sync.
 
 One-shot backfill of every Watch / `ebay`-tagged product (estate + feed):
@@ -241,6 +241,24 @@ npm run backfill:ebay-preowned-features -- --apply
 ```
 
 The Actions workflow **LMNY eBay pre-owned features** is the same path.
+
+### Branded listing descriptions (Shopify + eBay)
+
+Watch and estate listing bodies use `src/brandedDescription.ts`: the product
+opener, then authentication, Diamond District house copy, and the Laura
+Milman New York Guarantee. Marketplace Connect copies `descriptionHtml` onto
+eBay, so this is the eBay listing template as well. No off-eBay URLs. Unique
+estate copy is kept; missing branded paragraphs are appended.
+
+Schema version 22 (watches) / 7 (Back Vault) refreshes feed products after
+merge. One-shot backfill of every Watch / `ebay`-tagged product:
+
+```sh
+npm run backfill:branded-descriptions            # counts + CSV, no writes
+npm run backfill:branded-descriptions -- --apply
+```
+
+The Actions workflow **LMNY branded listing descriptions** is the same path.
 
 ### Lab pricing backfill
 
@@ -288,9 +306,8 @@ npm run sync:backvault       # live (needs Shopify env vars)
 5. **Rewrite listing copy** (`src/backvault/listing.ts`) to the same
    estate / watch SEO schema already used on the store:
    - Title: `{Brand} {normalized remainder}`; watches get a `Pre-Owned` prefix
-   - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
-     plus `Authenticated and hand-inspected by Laura Milman New York.`
-     Specs stay in metafields, not an HTML table.
+   - Body: branded template (`src/brandedDescription.ts`) — product opener,
+     authentication, Diamond District house copy, and the LMNY Guarantee.
    - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
@@ -360,9 +377,9 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 
 ### Belgium Dia / watch / stone
 
-- Watch body trust line (`CONFIG.trustLine` / `TRUST_LINE`) stays off until
-  confirmed for feed inventory; SEO still says
-  `Authenticated by Laura Milman New York.`
+- Watch and estate listing bodies use the branded template in
+  `src/brandedDescription.ts` (authentication, house copy, guarantee). SEO
+  still ends with `Authenticated by Laura Milman New York.`
 - Watch `OG Tag` is not on the Belgium Dia developer API — omitted from
   listings until another source exists. Dial / Bezel / Bracelet / Metal / MM /
   Links come from the feed and refresh on schema-version bumps.

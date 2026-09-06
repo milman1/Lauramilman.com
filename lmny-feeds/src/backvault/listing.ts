@@ -8,8 +8,8 @@
  *
  * Title:      {Brand} {normalized remainder}
  *             Watches: Pre-Owned {Brand} {remainder}
- * Body:       "This {Brand} estate {type}… is offered by Laura Milman New York."
- *             + "Authenticated and hand-inspected by Laura Milman New York."
+ * Body:       branded description template (`src/brandedDescription.ts`) —
+ *             product opener + authentication, house, and guarantee paragraphs.
  *             Specs live in custom.* metafields, not in the HTML.
  * SEO title:  ≤ 60 chars, product identity + `| Estate Jewelry` or
  *             `| Pre-Owned Watch`; the theme supplies the store-name suffix.
@@ -17,6 +17,7 @@
  */
 
 import type { BackVaultItem, ExtractedSpecs } from './types.js';
+import { brandedDescriptionHtml } from '../brandedDescription.js';
 
 export interface JewelryListing {
   title: string;
@@ -149,7 +150,10 @@ function buildDescription(
       ` is offered by Laura Milman New York.${conditionClause}`;
   }
 
-  return `<p>${escapeHtml(opening)}</p><p>Authenticated and hand-inspected by Laura Milman New York.</p>`;
+  return brandedDescriptionHtml({
+    opening,
+    kind: isWatch ? 'watch' : 'jewelry',
+  });
 }
 
 function buildSeoTitle(title: string, isWatch: boolean): string {
@@ -301,10 +305,6 @@ function truncateAtWord(s: string, maxLen: number): string {
   const cut = s.slice(0, maxLen);
   const lastSpace = cut.lastIndexOf(' ');
   return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function escapeRegex(s: string): string {
