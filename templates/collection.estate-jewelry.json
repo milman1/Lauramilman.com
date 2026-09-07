@@ -7,9 +7,11 @@
         "chip-vca": { "type": "chip", "settings": { "label": "Van Cleef & Arpels", "link": "/collections/van-cleef-arpels" } },
         "chip-bvlgari": { "type": "chip", "settings": { "label": "Bvlgari", "link": "/collections/bvlgari" } },
         "chip-tiffany": { "type": "chip", "settings": { "label": "Tiffany & Co.", "link": "/collections/tiffany" } },
-        "chip-vintage": { "type": "chip", "settings": { "label": "Maison Vault", "link": "/collections/estate-jewelry" } }
+        "chip-hermes": { "type": "chip", "settings": { "label": "Hermès", "link": "/collections/hermes" } },
+        "chip-chopard": { "type": "chip", "settings": { "label": "Chopard", "link": "/collections/chopard" } },
+        "chip-vintage": { "type": "chip", "settings": { "label": "Vintage edit", "link": "/collections/vintage-jewelry" } }
       },
-      "block_order": ["chip-cartier", "chip-vca", "chip-bvlgari", "chip-tiffany", "chip-vintage"],
+      "block_order": ["chip-cartier", "chip-vca", "chip-bvlgari", "chip-tiffany", "chip-hermes", "chip-chopard", "chip-vintage"],
       "settings": {
         "products_per_page": 48,
         "chips_label": "Shop by maison",

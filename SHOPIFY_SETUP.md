@@ -222,6 +222,11 @@ Create an Online Store page with handle `shop` and template **shop**.
 
 The storefront popup and newsletter reveal this code after signup.
 
+Both forms send `contact[accepts_marketing]=true`. Without that field,
+Shopify creates a customer who is **not** subscribed to Email marketing —
+they never receive campaigns. After a signup, confirm Admin → Customers
+shows **Email marketing: Subscribed**.
+
 ---
 
 ## 7. Branded emails
@@ -337,4 +342,40 @@ npx tsx scripts/validate-jewelry-csv.ts ../products.csv
 Expect exit 0 and `Jewelry CSV OK`. Fix every listed row before Shopify
 Admin → Products → Import. This is the same idea as the Back Vault scrub
 in §3b: catch blanks before they go live.
+
+---
+
+## 12. Shop channel + Google Merchant Center
+
+These cannot be created from the theme or the feed app. Install them once:
+
+1. Shopify Admin → **Sales channels** → **Shop**. Add Shop. Featured
+   collections should include **Estate (Pre-Owned) Jewelry**
+   (`estate-jewelry`), Cartier, and Timepieces — not the mixed All catalog.
+2. Sales channels → **Google & YouTube**. Add it, then connect **Google
+   Merchant Center**. Sync the Online Store.
+3. Run GitHub Action **Jacob listing formula** with Dry run **unticked**.
+   That job rewrites Jacob listings, then publishes Pre-Owned Maison and
+   watch products to Shop and Google when those publications exist.
+
+Watches stay tracked quantity `1` so Uploadify keeps listing them. Loose
+diamonds stay quantity `0` so Uploadify skips them.
+
+---
+
+## 13. Journal pages that 404
+
+The Journal nav links to three Online Store pages whose templates already
+live in the theme. Create them (or let the merchandising script create them)
+with these handles and theme templates:
+
+| Handle | Template | Title |
+|---|---|---|
+| `best-bars-nyc` | `page.best-bars-nyc` | Best After-Work Bars in New York |
+| `power-dressing-nyc` | `page.power-dressing-nyc` | Power Dressing Jewelry for New York |
+| `hotel-bars-nyc` | `page.hotel-bars-nyc` | The Hotel Bar Edit |
+
+Also add a URL redirect from
+`/blogs/news/how-to-buy-pre-owned-cartier-van-cleef-tiffany` →
+`/blogs/journal/how-to-buy-pre-owned-cartier-van-cleef-tiffany`.
 

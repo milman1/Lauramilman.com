@@ -31,7 +31,7 @@
   endif
 
   assign fd_is_estate = false
-  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned'
+  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned'
     unless fd_is_watch
       assign fd_is_estate = true
     endunless
