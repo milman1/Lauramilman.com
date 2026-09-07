@@ -189,6 +189,27 @@ function yesNo(v: boolean | null | undefined): string | null {
   return v ? 'Yes' : 'No';
 }
 
+/**
+ * Human-readable bracelet link copy from the feed `Links` field.
+ * Positive = extra links included; negative = links short of a full bracelet.
+ */
+export function linkClause(link: number | string | null | undefined): string | null {
+  if (link === null || link === undefined) return null;
+  const raw = String(link).trim();
+  if (!raw) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n === 0) return null;
+  if (n > 0) {
+    return n === 1
+      ? 'It includes 1 additional bracelet link'
+      : `It includes ${n} additional bracelet links`;
+  }
+  const missing = Math.abs(Math.trunc(n));
+  return missing === 1
+    ? 'The bracelet is 1 link short of a full set'
+    : `The bracelet is ${missing} links short of a full set`;
+}
+
 // ---------------------------------------------------------------------------
 // Main transform
 
@@ -208,7 +229,9 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const yearClause = year ? ` from ${escapeHtml(year)}` : '';
   const gradeClause = grade ? ` It is in ${grade.toLowerCase()} condition.` : '';
   const bpClause = boxPaperClause(record.box, record.paper);
+  const linkText = linkClause(record.link);
   const openingClause = ` is offered by Laura Milman New York${bpClause ? ` ${bpClause}` : ''}`;
+  const linkSentence = linkText ? ` ${linkText}.` : '';
 
   // Specs render in the theme's `.product-specs` grid via custom.* metafields
   // (same PDP chrome as jewelry). Description keeps prose only — no HTML table.
@@ -234,7 +257,7 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const descriptionIdentity = titleWord ? `${titleWord} ${brand} ${model} ${reference}` : identity;
   const descriptionHtml =
     `<p>This ${escapeHtml(descriptionIdentity)}` +
-    `${yearClause}${openingClause}.${gradeClause}</p>` +
+    `${yearClause}${openingClause}.${linkSentence}${gradeClause}</p>` +
     notesParagraph +
     trustParagraph;
 

@@ -100,7 +100,7 @@ Examples:
 ### Description (HTML)
 
 ```html
-<p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{ boxPaperClause}.{gradeClause}</p>
+<p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{ boxPaperClause}.{linkSentence}{gradeClause}</p>
 <p>{comment}</p>                                              <!-- see Comment rule above -->
 ```
 
@@ -137,6 +137,12 @@ Never "New with box and papers" and never "as a full set with box and papers":
 eBay treats that canned Features/Condition value as brand-new unworn stock.
 Omitted entirely if both are unstated (so the sentence reads
 `…is offered by Laura Milman New York.`).
+`linkSentence`: when the feed `Links` value is present and non-zero, a second
+sentence in the same opening paragraph:
+- positive `n` → ` It includes {n} additional bracelet link(s).`
+- negative `-n` → ` The bracelet is {n} link(s) short of a full set.`
+The raw value is still written to `custom.link` for the PDP specs grid.
+Omitted when `Links` is blank or zero.
 `gradeClause`: ` It is in {grade} condition.` or empty. Grade is lowercased
 in the sentence (`excellent`, not `Excellent`).
 
