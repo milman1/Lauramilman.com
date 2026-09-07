@@ -226,6 +226,32 @@ default). Duplicate SKUs (original estate import + `bv-` Back Vault copy of
 the same watch) are written to `out/ebay-watch-duplicates.csv` — do not list
 both on eBay.
 
+### eBay Pre-Owned vs "New with box and papers"
+
+eBay hides a listing when the title says Pre-Owned but Condition/Features is
+the canned value **New with box and papers** (condition 1000: brand new, never
+worn). Marketplace Connect was matching "box and papers" copy onto that value.
+
+Live ingest now writes:
+
+- `custom.ebay_condition` = `3000` (Used / Pre-owned) or `1000` (Unworn / New with tags). Text `Pre-owned` is not a valid ConditionID.
+- `custom.features` = `With Box` / `With Papers` (never "New with…")
+- Description clause `with its original box and papers` instead of
+  `as a full set with box and papers`
+
+Map those two keys once in Marketplace Connect (Condition → `ebay_condition`,
+Features → `features`). Schema version 21 refreshes feed watches on the next
+hourly sync.
+
+One-shot backfill of every Watch / `ebay`-tagged product (estate + feed):
+
+```sh
+npm run backfill:ebay-preowned-features            # counts + CSV, no writes
+npm run backfill:ebay-preowned-features -- --apply
+```
+
+The Actions workflow **LMNY eBay pre-owned features** is the same path.
+
 ### Lab pricing backfill
 
 After unpublishing Lab-Grown Diamond `lmny-feed` products:

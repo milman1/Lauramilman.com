@@ -1,5 +1,6 @@
 import { contentHash } from '../hash.js';
 import { taxonomyGidForProductType } from '../taxonomy.js';
+import { ebayConditionForWatch, EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
 import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
@@ -11,7 +12,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 5;
+export const PRODUCT_SCHEMA_VERSION = 6;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -67,6 +68,15 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
     value: conditionMetafield(item.specs.condition),
   });
   const listing = buildJewelryListing(item);
+  fields.push({
+    namespace: c,
+    key: 'ebay_condition',
+    type: 'single_line_text_field',
+    value:
+      listing.productType === 'Watch'
+        ? ebayConditionForWatch({ title: listing.title })
+        : EBAY_CONDITION_PREOWNED,
+  });
   if (listing.productType === 'Watch') {
     const ebay = extractEbayWatchSpecifics({
       title: listing.title,
