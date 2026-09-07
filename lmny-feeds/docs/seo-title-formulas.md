@@ -1,5 +1,7 @@
 # Product SEO title formulas
 
+> **Master doc:** [`docs/seo-geo-copy.md`](../../docs/seo-geo-copy.md) — full SEO + GEO copy rules (titles, descriptions, body, JSON-LD, eBay).
+
 Shopify's theme adds the store name to the HTML `<title>`. The sync therefore
 uses the 60-character `seo.title` budget for product identity and search intent,
 without repeating “Laura Milman New York.”
