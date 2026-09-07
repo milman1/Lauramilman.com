@@ -229,10 +229,17 @@ interface MetafieldValue {
   value: string;
 }
 
+/** Shopify money metafield JSON. Admin-only — never write this to custom.*. */
+export function moneyUsdValue(amount: number): string {
+  return JSON.stringify({ amount: amount.toFixed(2), currency_code: 'USD' });
+}
+
 /**
  * lmny_feed.* metafields carry sync state. cost_cents lives in the
  * app-reserved namespace so it never reaches the theme or Storefront API,
  * and no compare-at price is ever derived from Rap or comp values.
+ * Watches also get lmny_feed.cost_usd (money, storefront NONE) so Cost is
+ * visible in Admin next to the native Cost per item field.
  */
 export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, syncedAt: string): MetafieldValue[] {
   const ns = METAFIELD_NAMESPACE;
@@ -275,6 +282,9 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     );
     if (item.cut) fields.push({ namespace: c, key: 'cut', type: 'single_line_text_field', value: item.cut });
   } else {
+    // Merchant-visible in Admin metafields. Storefront NONE — never custom.*
+    // (those keys map to eBay item specifics).
+    fields.push({ namespace: ns, key: 'cost_usd', type: 'money', value: moneyUsdValue(item.costUsd) });
     fields.push({ namespace: ns, key: 'is_naked', type: 'boolean', value: String(item.isNaked) });
     const listing = watchListingFor(item);
     if (listing) {
@@ -358,6 +368,9 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     seoDescription: seoDescriptionFor(item),
     price: priced.retailUsd,
     costCents: Math.round(item.costUsd * 100),
+    // One-time watch rewrite so already-live SKUs pick up Cost per item
+    // (inventoryItem.cost) and lmny_feed.cost_usd without touching diamonds.
+    watchCostAdmin: item.kind === 'watch' ? 1 : null,
     images: item.imageUrls,
     videos: item.videoUrls,
     certNumber: item.kind !== 'watch' ? (item.certNumber ?? null) : null,
@@ -398,8 +411,8 @@ function variantPayload(
   const inventoryItem: Record<string, unknown> = {
     tracked: false,
     requiresShipping: true,
-    // Shopify InventoryItem.cost — required so margin is auditable in admin
-    // independently of Supabase / $app.cost_cents.
+    // Shopify InventoryItem.cost — Admin "Cost per item", shown next to Price.
+    // Independent of Supabase / $app.cost_cents / lmny_feed.cost_usd.
     cost: item.costUsd.toFixed(2),
   };
   const variant: Record<string, unknown> = {

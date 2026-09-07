@@ -6,6 +6,7 @@ import {
   contentHashFor,
   handleFor,
   isInvalidShopifyFileUrlError,
+  moneyUsdValue,
   metafieldsFor,
   quarantineProductSetInput,
   sanitizeRef,
@@ -238,6 +239,20 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, '$app', 'cost_cents')?.value).toBe('1000000');
     expect(fields.filter((f) => f.key === 'cost_cents').map((f) => f.namespace)).toEqual(['$app']);
   });
+
+  it('watches expose cost as an admin-only lmny_feed money metafield, never custom.*', () => {
+    const fields = metafieldsFor(watch({ costUsd: 17_500 }), priced(), 'hash', at);
+    const cost = find(fields, 'lmny_feed', 'cost_usd');
+    expect(cost?.type).toBe('money');
+    expect(cost?.value).toBe(moneyUsdValue(17_500));
+    expect(find(fields, 'custom', 'cost_usd')).toBeUndefined();
+    expect(find(fields, '$app', 'cost_cents')?.value).toBe('1750000');
+  });
+
+  it('stones do not get the watch cost metafield', () => {
+    const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
+    expect(find(fields, 'lmny_feed', 'cost_usd')).toBeUndefined();
+  });
 });
 
 describe('content hash', () => {
@@ -259,6 +274,11 @@ describe('content hash', () => {
     const base = contentHashFor(naturalStone(), priced());
     expect(contentHashFor(naturalStone({ cut: 'Very Good' }), priced())).not.toBe(base);
     expect(contentHashFor(naturalStone({ carat: 2.02 }), priced())).not.toBe(base);
+  });
+
+  it('changes when watch cost changes so Admin Cost per item stays in sync', () => {
+    const base = contentHashFor(watch({ costUsd: 17_500 }), priced());
+    expect(contentHashFor(watch({ costUsd: 18_000 }), priced())).not.toBe(base);
   });
 });
 
@@ -313,6 +333,18 @@ describe('updates target the existing product by id', () => {
     const variant = (input.variants as Array<{ inventoryItem: { cost: string; tracked: boolean } }>)[0]!;
     expect(variant.inventoryItem.cost).toBe('585.60');
     expect(variant.inventoryItem.tracked).toBe(false);
+  });
+
+  it('a watch writes Cost per item next to Price', () => {
+    const input = buildProductSetInput(watch({ costUsd: 17_500 }), priced({ retailUsd: 21_000 }), at);
+    const variant = (input.variants as Array<{
+      price: string;
+      inventoryItem: { cost: string };
+    }>)[0]!;
+    expect(variant.price).toBe('21000.00');
+    expect(variant.inventoryItem.cost).toBe('17500.00');
+    const costMf = (input.metafields as Metafield[]).find((f) => f.namespace === 'lmny_feed' && f.key === 'cost_usd');
+    expect(costMf?.value).toBe(moneyUsdValue(17_500));
   });
 
   it('a locationId writes loose diamonds as tracked qty 0 so Uploadify does not import them', () => {

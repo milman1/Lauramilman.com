@@ -295,6 +295,7 @@ export class ShopifyClient {
       name: string;
       type: string;
       storefront?: 'NONE' | 'PUBLIC_READ';
+      pin?: boolean;
     }> = [
       { namespace: METAFIELD_NAMESPACE, key: 'stock_ref', name: 'Stock ref', type: 'single_line_text_field' },
       { namespace: METAFIELD_NAMESPACE, key: 'kind', name: 'Feed kind', type: 'single_line_text_field' },
@@ -303,6 +304,9 @@ export class ShopifyClient {
       { namespace: METAFIELD_NAMESPACE, key: 'content_hash', name: 'Content hash', type: 'single_line_text_field' },
       { namespace: METAFIELD_NAMESPACE, key: 'synced_at', name: 'Synced at', type: 'date_time' },
       { namespace: METAFIELD_NAMESPACE, key: 'is_naked', name: 'Watch is naked', type: 'boolean' },
+      // Pinned so Cost sits at the top of the product metafields card in Admin.
+      // Native Cost per item (inventoryItem.cost) is the field next to Price.
+      { namespace: METAFIELD_NAMESPACE, key: 'cost_usd', name: 'Cost', type: 'money', pin: true },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_mid_usd', name: 'Comp mid (USD)', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_low_usd', name: 'Comp low (USD)', type: 'number_decimal' },
       { namespace: METAFIELD_NAMESPACE, key: 'comp_anchor_usd', name: 'Comp anchor (USD)', type: 'number_decimal' },

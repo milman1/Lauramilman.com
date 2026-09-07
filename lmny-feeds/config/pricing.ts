@@ -84,7 +84,8 @@ export const LAB_GUARDS = {
 
 /**
  * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
- * Hours comps are not used. Aftermarket rows are excluded at normalize.
+ * Hours comps are not used. Aftermarket, no-papers, iced-out, naked-comment,
+ * Power Watch LLC, and Uncle Manny LLC rows are excluded at normalize.
  * Missing cost → hold with tag `pricing-review`; existing Shopify price
  * is left alone.
  *

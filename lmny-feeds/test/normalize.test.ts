@@ -60,15 +60,74 @@ const watchRow = {
   reference: '126610LN',
   cost: 9000,
   box: 'yes',
-  papers: 'no',
+  papers: 'yes',
 };
 
 describe('watch normalization', () => {
-  it('parses a watch row and derives is_naked', () => {
-    const { items } = normalizeWatches([watchRow]);
-    expect(items[0]).toMatchObject({ kind: 'watch', stockRef: 'W-9', box: true, papers: false, isNaked: false });
-    const naked = normalizeWatches([{ ...watchRow, box: 'no', papers: '' }]);
-    expect(naked.items[0]).toMatchObject({ isNaked: true });
+  it('parses a watch row with papers', () => {
+    const { items, holds } = normalizeWatches([watchRow]);
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({
+      kind: 'watch',
+      stockRef: 'W-9',
+      box: true,
+      papers: true,
+      isNaked: false,
+    });
+  });
+
+  it('holds watches without papers', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, papers: 'no' }]);
+    expect(items).toEqual([]);
+    expect(holds[0]).toMatchObject({ reason: 'watch_no_papers', stockRef: 'W-9' });
+  });
+
+  it('holds NAKED in the comment column even when papers are present', () => {
+    const { holds } = normalizeWatches([{ ...watchRow, Comment: 'NAKED' }]);
+    expect(holds[0]?.reason).toBe('watch_naked_comment');
+  });
+
+  it('holds ICED OUT in the comment column', () => {
+    const { holds } = normalizeWatches([{ ...watchRow, Comment: 'ICED OUT- NATURAL DIAMONDS' }]);
+    expect(holds[0]?.reason).toBe('watch_iced_out');
+  });
+
+  it('holds Power Watch LLC and Uncle Manny LLC by stock prefix and by Branch', () => {
+    expect(normalizeWatches([{ ...watchRow, stock_no: 'P5365' }]).holds[0]?.reason).toBe('watch_excluded_partner');
+    expect(normalizeWatches([{ ...watchRow, Branch: 'POWER WATCH LLC' }]).holds[0]?.reason).toBe(
+      'watch_excluded_partner',
+    );
+    expect(normalizeWatches([{ ...watchRow, stock_no: 'U1175' }]).holds[0]?.reason).toBe('watch_excluded_partner');
+    expect(normalizeWatches([{ ...watchRow, stock_no: 'M3982' }]).holds[0]?.reason).toBe('watch_excluded_partner');
+    expect(normalizeWatches([{ ...watchRow, Branch: 'Uncle Manny LLC' }]).holds[0]?.reason).toBe(
+      'watch_excluded_partner',
+    );
+    expect(normalizeWatches([{ ...watchRow, Branch: 'Uncle Manny' }]).holds[0]?.reason).toBe('watch_excluded_partner');
+  });
+
+  it('holds numeric Uncle Manny stock when the partner allowlist is present', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, stock_no: '10005' }], {
+      allowedStocks: new Set(['RW3085', 'T3717']),
+    });
+    expect(items).toEqual([]);
+    expect(holds[0]?.reason).toBe('watch_excluded_partner');
+  });
+
+  it('keeps Belgium Watch / TLV stock on the allowlist', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, stock_no: 'T3717' }], {
+      allowedStocks: new Set(['T3717']),
+    });
+    expect(holds).toEqual([]);
+    expect(items[0]?.stockRef).toBe('T3717');
+  });
+
+  it('prefix fallback keeps T/RW/R and drops numeric Uncle Manny', () => {
+    const tlv = normalizeWatches([{ ...watchRow, stock_no: 'T3717' }], { prefixFallback: true });
+    expect(tlv.items).toHaveLength(1);
+    const roman = normalizeWatches([{ ...watchRow, stock_no: 'RW3085' }], { prefixFallback: true });
+    expect(roman.items).toHaveLength(1);
+    const manny = normalizeWatches([{ ...watchRow, stock_no: '10005' }], { prefixFallback: true });
+    expect(manny.holds[0]?.reason).toBe('watch_excluded_partner');
   });
 
   it('imports non-curated brands (they land in Other Watch Brands)', () => {
@@ -86,6 +145,14 @@ describe('watch normalization', () => {
   it('excludes aftermarket regardless of casing or surrounding text', () => {
     const { holds } = normalizeWatches([{ ...watchRow, Condition: 'Pre-owned aftermarket piece' }]);
     expect(holds[0]?.reason).toBe('watch_aftermarket');
+  });
+
+  it('does not treat a dial-aftermarket comment as the After Market category', () => {
+    const { items, holds } = normalizeWatches([
+      { ...watchRow, stock_no: '8114', Condition: 'RETAIL READY', Comment: 'DIAL AFTERMARKET, CARD SAY BLACK' },
+    ]);
+    expect(holds).toEqual([]);
+    expect(items[0]).toMatchObject({ stockRef: '8114', comment: 'DIAL AFTERMARKET, CARD SAY BLACK' });
   });
 
   it('curation is case-insensitive for listed brands', () => {

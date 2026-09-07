@@ -17,9 +17,14 @@ holds a stones table — Shopify products are the only live copy.
 1. **Fetch** all three feeds (`src/feeds/belgiumdia.ts`), usually via the
    Cloudflare feed-cache Worker (`lmny-feeds/cloudflare-worker/feed-cache.js`).
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
-   stones; watches whose feed condition is `aftermarket` are held out. Brands
-   outside the curated list still import and are tagged `other-watch-brand`.
-   Other failing rows are *held* (never created).
+   stones. Watches are held out unless they have **papers**, are not
+   aftermarket (Condition field), do not say **naked** or **iced out** in
+   Comment, and are not from **Power Watch LLC** or **Uncle Manny LLC**.
+   Dial-aftermarket notes in Comment still sell (`8114`). That book is 115
+   watches. Partner is matched on Branch when present, on `P`/`U`/`M` stock
+   prefixes, and on a live stock allowlist from Belgium Watch (ROMAN), TLV,
+   and Vivid. Brands outside the curated list still import and are tagged
+   `other-watch-brand`. Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
      confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per
@@ -36,7 +41,8 @@ holds a stones table — Shopify products are the only live copy.
      | ≤ $4,000 | 1.30× | ~23% |
      | above $4,000 | 1.25× | 20% |
    - watches: supplier cost × chart (`src/watchPricing.ts`). **No Hours mid.**
-     Aftermarket is excluded at normalize. Missing cost is tagged
+     Aftermarket, no-papers, iced-out, naked-comment, Power Watch, and
+     Uncle Manny are excluded at normalize. Missing cost is tagged
      `pricing-review` and the existing Shopify price is left alone.
 
      | Supplier cost | Multiplier | Retail |
@@ -107,7 +113,11 @@ holds a stones table — Shopify products are the only live copy.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
 - Metafields under `lmny_feed` (+ `cost_cents` under the app-reserved `$app`
-  namespace so it is never exposed to the theme or Storefront API).
+  namespace so it is never exposed to the theme or Storefront API). Watches
+  also write Belgium Dia cost to Shopify **Cost per item** (`inventoryItem.cost`,
+  the field next to Price on the product page) and to `lmny_feed.cost_usd`
+  (admin-only money metafield). Cost is never written to `custom.*`, the
+  storefront, or eBay.
 - Stone 360° videos stay embedded from the supplier rather than attached as
   Shopify media — re-hosting ~24k per run isn't affordable. `lmny_feed.video_url`
   is the first (what the diamond PDP's 360° tab reads today);
