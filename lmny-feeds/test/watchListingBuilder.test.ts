@@ -49,7 +49,7 @@ describe('buildWatchListing', () => {
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe('Pre-Owned');
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe(
-      'Pre-owned',
+      '3000',
     );
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'features')?.value).toBe(
       'With Box, With Papers',
@@ -163,7 +163,7 @@ describe('buildWatchListing', () => {
       'SLIDER',
     );
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe(
-      'Pre-owned',
+      '3000',
     );
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'brand')?.value).toBe('Rolex');
     expect(

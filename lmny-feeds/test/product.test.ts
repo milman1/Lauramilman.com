@@ -242,7 +242,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for Amount-as-cost pricing', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(21);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(22);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {

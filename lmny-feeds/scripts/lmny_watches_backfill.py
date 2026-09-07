@@ -286,7 +286,7 @@ def build_listing(feed, handle=None):
         {
             "namespace": "custom",
             "key": "ebay_condition",
-            "value": "New with tags" if title_word == "Unworn" else "Pre-owned",
+            "value": "1000" if title_word == "Unworn" else "3000",
             "type": "single_line_text_field",
         },
     ]

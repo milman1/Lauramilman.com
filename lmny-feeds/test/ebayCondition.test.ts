@@ -13,14 +13,14 @@ import {
 } from '../src/ebayCondition.js';
 
 describe('ebayConditionForWatch', () => {
-  it('uses Pre-owned for Pre-Owned titles and feed preowned state', () => {
+  it('uses ConditionID 3000 for Pre-Owned titles and feed preowned state', () => {
     expect(ebayConditionForWatch({ title: 'Pre-Owned Rolex Submariner 126610LN', state: 'preowned' })).toBe(
       EBAY_CONDITION_PREOWNED,
     );
     expect(ebayConditionForWatch({ title: 'Rolex Datejust 126334' })).toBe(EBAY_CONDITION_PREOWNED);
   });
 
-  it('uses New with tags only when the watch is Unworn', () => {
+  it('uses ConditionID 1000 only when the watch is Unworn', () => {
     expect(ebayConditionForWatch({ title: 'Unworn Rolex Submariner Date 126610LN', state: 'unworn' })).toBe(
       EBAY_CONDITION_UNWORN,
     );
@@ -87,14 +87,14 @@ describe('planEbayConditionFix', () => {
       googleCondition: 'new',
     });
     expect(plan).not.toBeNull();
-    expect(plan?.ebayCondition).toBe('Pre-owned');
+    expect(plan?.ebayCondition).toBe('3000');
     expect(plan?.features).toBe('With Box, With Papers');
     expect(plan?.googleCondition).toBe('used');
     expect(plan?.descriptionHtml).toContain('with its original box and papers');
     expect(plan?.descriptionHtml).not.toContain('as a full set');
   });
 
-  it('leaves a settled Unworn watch alone', () => {
+  it('rewrites legacy New with tags text to ConditionID 1000', () => {
     const plan = planEbayConditionFix({
       title: 'Unworn Rolex Submariner Date 126610LN',
       descriptionHtml: '<p>Unworn Rolex with its original box and papers.</p>',
@@ -102,6 +102,20 @@ describe('planEbayConditionFix', () => {
       box: 'Yes',
       papers: 'Yes',
       ebayCondition: 'New with tags',
+      features: 'With Box, With Papers',
+      googleCondition: 'new',
+    });
+    expect(plan?.ebayCondition).toBe('1000');
+  });
+
+  it('leaves a settled Unworn watch on ConditionID 1000 alone', () => {
+    const plan = planEbayConditionFix({
+      title: 'Unworn Rolex Submariner Date 126610LN',
+      descriptionHtml: '<p>Unworn Rolex with its original box and papers.</p>',
+      productType: 'Watch',
+      box: 'Yes',
+      papers: 'Yes',
+      ebayCondition: '1000',
       features: 'With Box, With Papers',
       googleCondition: 'new',
     });

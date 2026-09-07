@@ -224,7 +224,7 @@ worn). Marketplace Connect was matching "box and papers" copy onto that value.
 
 Live ingest now writes:
 
-- `custom.ebay_condition` = `Pre-owned` (or `New with tags` only for Unworn)
+- `custom.ebay_condition` = `3000` (Used / Pre-owned) or `1000` (Unworn / New with tags). Text `Pre-owned` is not a valid ConditionID.
 - `custom.features` = `With Box` / `With Papers` (never "New with…")
 - Description clause `with its original box and papers` instead of
   `as a full set with box and papers`

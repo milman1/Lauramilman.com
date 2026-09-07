@@ -130,6 +130,6 @@ describe('buildProductSetInput', () => {
     expect(byKey.department).toBe("Women's");
     expect(byKey.case_size).toBe('14mm x 75mm');
     expect(byKey.band_material).toBe('Satin');
-    expect(byKey.ebay_condition).toBe('Pre-owned');
+    expect(byKey.ebay_condition).toBe('3000');
   });
 });

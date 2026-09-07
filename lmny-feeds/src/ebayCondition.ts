@@ -7,17 +7,21 @@
  * title is Pre-Owned, and eBay then hides the listing.
  *
  * Accessories belong in Features (`With Box`, `With Papers`). Condition is
- * `Pre-owned` unless the title/state is Unworn.
+ * the numeric eBay ConditionID Marketplace Connect expects — not the display
+ * name. Wristwatch categories reject `Pre-owned` as a Condition ID
+ * ("Condition ID Pre-owned is not supported for this category").
+ *
+ * 3000 = Used / Pre-owned on watches. 1000 = New with tags (Unworn only).
  */
 
 export const EBAY_CONDITION_NAMESPACE = 'custom';
 export const EBAY_CONDITION_KEY = 'ebay_condition';
 export const EBAY_FEATURES_KEY = 'features';
 
-/** eBay Wristwatch condition aspect — never "New with box and papers" for used stock. */
-export const EBAY_CONDITION_PREOWNED = 'Pre-owned';
-/** Unworn pieces only. "New with tags" is not the box-and-papers condition. */
-export const EBAY_CONDITION_UNWORN = 'New with tags';
+/** eBay ConditionID for used / pre-owned watches. Never 1000 on used stock. */
+export const EBAY_CONDITION_PREOWNED = '3000';
+/** Unworn only. 1000 is New with tags — box/papers stay in Features. */
+export const EBAY_CONDITION_UNWORN = '1000';
 
 export const NEW_WITH_BOX_RE = /new\s+with\s+box(?:\s+and\s+papers)?/i;
 export const FULL_SET_BOX_PAPERS_RE = /as a full set with box and papers/gi;
