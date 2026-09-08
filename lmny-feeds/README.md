@@ -304,14 +304,26 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
-6. **Price**: listed price from The Back Vault is passed through unchanged
-   (no markup). Cost is not known, so `inventoryItem.cost` is omitted.
-7. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
+6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
+   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is a
+   flat **cost + $200**, and the cost is written to Shopify **Cost per item**
+   (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
+   the markup is a pull request against `config/pricing.ts`; the next run
+   reprices every listed piece because price and cost are in the content
+   hash.
+7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
+   decides what gets *created*, but a piece already on the store stays
+   listed for as long as the supplier's full `/products.json` still shows
+   it in stock, even after it rolls off new-arrivals. A piece missing from
+   both feeds (sold / withdrawn) or out of stock archives. If the
+   full-catalog fetch fails, the run archives by new-arrivals alone and
+   says so in the report.
+8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
    ACTIVE products that exist but are not on the Online Store channel
    get a `publish` decision (no rewrite) so a re-run can put them live.
-8. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
+9. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
    sync uses, then `publishablePublish` to the Online Store channel.
    `productSet` alone leaves products in Admin but 404ing on the storefront.
 

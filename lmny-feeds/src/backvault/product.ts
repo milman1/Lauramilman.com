@@ -12,7 +12,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 6;
+export const PRODUCT_SCHEMA_VERSION = 7;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -112,6 +112,7 @@ export function contentHashFor(item: BackVaultItem): string {
     seoTitle: listing.seoTitle,
     seoDescription: listing.seoDescription,
     price: item.priceUsd,
+    cost: item.costUsd,
     images: item.imageUrls,
     specs: item.specs,
   });
@@ -178,6 +179,9 @@ export function buildProductSetInput(
         inventoryItem: {
           tracked: Boolean(locationId),
           requiresShipping: true,
+          // Admin "Cost per item", next to Price. The supplier's listed
+          // price is what LMNY pays; retail is cost + BACKVAULT.markupUsd.
+          cost: item.costUsd.toFixed(2),
         },
         ...(locationId
           ? {

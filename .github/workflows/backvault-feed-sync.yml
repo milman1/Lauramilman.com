@@ -3,8 +3,12 @@
 # Fetches new-arrivals from thebackvault.com/collections/new-arrivals,
 # filters to the 40 curated "top designer" brands, scrubs all supplier
 # branding, and upserts/archives in the Shopify catalog (tag: backvault-feed).
+# Pieces already on the store stay listed while the supplier's full
+# /products.json still has them in stock (weekly availability check);
+# sold / withdrawn pieces are archived.
 #
-# Price = listed price on The Back Vault (no markup per project config).
+# Price = The Back Vault listed price (LMNY cost) + $200 (config/pricing.ts
+# BACKVAULT.markupUsd). Cost is written to Shopify "Cost per item".
 #
 # Runs live weekly (Sunday midnight UTC) and on demand.
 # For a dry-run before going live: workflow_dispatch → leave dry_run=true.

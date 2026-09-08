@@ -135,3 +135,17 @@ export const WATCH_BRANDS: string[] = [
   'Zenith',
   'Ulysse Nardin',
 ];
+
+/**
+ * The Back Vault (estate / vintage designer jewelry, src/backvault/).
+ *
+ * The supplier's listed price is LMNY's cost. Retail is a flat markup over
+ * that cost, and the cost is written to Shopify **Cost per item**
+ * (`inventoryItem.cost`) so margin shows next to Price in Admin.
+ *
+ *   retail = cost + $200
+ */
+export const BACKVAULT = {
+  /** Flat dollar markup added to the supplier's listed (cost) price. */
+  markupUsd: 200,
+} as const;

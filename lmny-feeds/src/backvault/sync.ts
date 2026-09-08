@@ -1,9 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
+import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
 import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates, type Decision } from './diff.js';
-import { fetchBackVaultFeed } from './feed.js';
+import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
@@ -34,11 +35,24 @@ async function resolveToken(): Promise<{ domain: string; token: string }> {
   throw new Error('Set SHOPIFY_ADMIN_TOKEN, or SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET');
 }
 
+/** Weekly availability check against the supplier's full in-stock catalog. */
+interface AvailabilityStats {
+  /** Rows in the supplier's full products.json (null when the fetch failed). */
+  fullCatalogFetched: number | null;
+  /** Top-designer in-stock items in the full catalog. */
+  fullCatalogInStock: number;
+  /** Store items that left new-arrivals but are still in stock — kept, not archived. */
+  retained: number;
+  /** Set when the full-catalog fetch failed; archives then follow new-arrivals only. */
+  error?: string;
+}
+
 interface RunSummary {
   startedAt: string;
   finishedAt: string;
   dryRun: boolean;
   feedStats: ReturnType<typeof normalizeBackVaultFeed>['stats'];
+  availability: AvailabilityStats;
   decisions: Decision[];
   published: number;
   errors: string[];
@@ -84,8 +98,38 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const catalog = await fetchBackVaultCatalog(client);
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
 
+  // Availability: a piece already on the store that rolled off new-arrivals
+  // stays listed while the supplier's full catalog still has it in stock.
+  // If that fetch fails, fall back to new-arrivals alone (the pre-existing
+  // behavior) and say so in the report.
+  const availability: AvailabilityStats = { fullCatalogFetched: null, fullCatalogInStock: 0, retained: 0 };
+  let desiredItems = items;
+  if (!opts.limit) {
+    try {
+      const allRows = await fetchBackVaultAllProducts();
+      const full = normalizeBackVaultFeed(allRows);
+      const merged = mergeAvailability(
+        items,
+        full.items.filter((item) => !isUnavailableProductHandle(handleFor(item))),
+        catalog.map((c) => c.handle),
+      );
+      desiredItems = merged.desired;
+      availability.fullCatalogFetched = allRows.length;
+      availability.fullCatalogInStock = full.stats.accepted;
+      availability.retained = merged.retained;
+      console.log(
+        `Availability: ${allRows.length} rows in the full catalog, ${full.stats.accepted} top-designer in stock, ` +
+          `${merged.retained} store items retained after leaving new-arrivals`,
+      );
+    } catch (err) {
+      availability.error = err instanceof Error ? err.message : String(err);
+      errors.push(`availability check: ${availability.error}`);
+      console.error(`Availability check failed (${availability.error}); archiving by new-arrivals only`);
+    }
+  }
+
   const itemByHandle = new Map<string, BackVaultItem>();
-  const desired = items.map((item) => {
+  const desired = desiredItems.map((item) => {
     const handle = handleFor(item);
     itemByHandle.set(handle, item);
     return { handle, contentHash: contentHashFor(item) };
@@ -169,6 +213,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     finishedAt: new Date().toISOString(),
     dryRun: opts.dryRun,
     feedStats: stats,
+    availability,
     decisions,
     published,
     errors,
@@ -209,6 +254,15 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Skipped — not a top designer: ${summary.feedStats.notTopDesigner}`,
     `- Skipped — out of stock: ${summary.feedStats.outOfStock}`,
     `- Skipped — malformed row: ${summary.feedStats.malformed}`,
+    '',
+    `## Availability check (full supplier catalog)`,
+    ...(summary.availability.error
+      ? [`- FAILED: ${summary.availability.error} — archived by new-arrivals only this run`]
+      : [
+          `- Rows fetched: ${summary.availability.fullCatalogFetched ?? 'skipped'}`,
+          `- Top designer, in stock: ${summary.availability.fullCatalogInStock}`,
+          `- Retained after leaving new-arrivals: ${summary.availability.retained}`,
+        ]),
     '',
     `## Catalog changes`,
     `- Create: ${counts.create ?? 0}`,
