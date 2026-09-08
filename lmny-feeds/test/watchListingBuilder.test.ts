@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   alreadyProcessed,
   buildWatchListing,
+  linkClause,
   type WatchFeedRecord,
 } from '../src/watchListingBuilder.js';
 
@@ -140,6 +141,28 @@ describe('buildWatchListing', () => {
     expect(listing.descriptionHtml).not.toContain('<table>');
   });
 
+  it('writes human-readable link copy for extra and missing bracelet links', () => {
+    const extra = buildWatchListing(base({ link: 19 }));
+    expect('needsReview' in extra).toBe(false);
+    if ('needsReview' in extra) return;
+    expect(extra.descriptionHtml).toContain('It includes 19 additional bracelet links.');
+
+    const missing = buildWatchListing(base({ link: '-5' }));
+    expect('needsReview' in missing).toBe(false);
+    if ('needsReview' in missing) return;
+    expect(missing.descriptionHtml).toContain('The bracelet is 5 links short of a full set.');
+
+    const oneMissing = buildWatchListing(base({ link: -1 }));
+    expect('needsReview' in oneMissing).toBe(false);
+    if ('needsReview' in oneMissing) return;
+    expect(oneMissing.descriptionHtml).toContain('The bracelet is 1 link short of a full set.');
+
+    const none = buildWatchListing(base({ link: 0 }));
+    expect('needsReview' in none).toBe(false);
+    if ('needsReview' in none) return;
+    expect(none.descriptionHtml).not.toContain('bracelet link');
+  });
+
   it('drops redundant NAKED comments when box and paper are both No', () => {
     const listing = buildWatchListing(
       base({ box: false, paper: false, comment: 'NAKED' }),
@@ -199,6 +222,16 @@ describe('buildWatchListing', () => {
     if ('needsReview' in listing) return;
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoTitle).toMatch(/– Pre-Owned Watch$/);
+  });
+});
+
+describe('linkClause', () => {
+  it('maps signed link counts to prose', () => {
+    expect(linkClause(2)).toBe('It includes 2 additional bracelet links');
+    expect(linkClause(1)).toBe('It includes 1 additional bracelet link');
+    expect(linkClause('-5')).toBe('The bracelet is 5 links short of a full set');
+    expect(linkClause(0)).toBeNull();
+    expect(linkClause(null)).toBeNull();
   });
 });
 
