@@ -5,6 +5,10 @@
  * happen via pull request against this file — never via database pokes or
  * ad-hoc edits in Shopify admin.
  *
+ * Every source has its own rule and its own constant; there is no
+ * store-wide multiplier. The full matrix (including the sources that are
+ * merchant-set and deliberately not in code) is AGENTS.md section 2a.
+ *
  * Guards in markup.ts fail closed if the Belgium Dia cost mapping regresses
  * (e.g. treating $/ct as total).
  */
@@ -160,14 +164,21 @@ export const BACKVAULT = {
 } as const;
 
 /**
- * Supplier catalog intake (Royal Chain and similar trade suppliers).
+ * Royal Chain basic chains ONLY (AGENTS.md section 2a and recipe H).
  * Retail is a straight multiple of the wholesale cost read from the
- * merchant's trade account; see AGENTS.md recipe H. Only trending items
- * are imported, never a whole category.
+ * merchant's Royal Chain trade account. Only trending items are imported,
+ * never a whole category.
  *
  *   retail = roundUpTo5(cost × 3)
+ *
+ * This multiple applies to no other source. Watches, loose stones, and
+ * Back Vault pieces have their own rules above; Laura Milman fine
+ * jewelry, Peaceful Diamonds lab-grown jewelry, and hand-imported estate
+ * pieces are merchant-set and have no automated rule. A new supplier gets
+ * its own constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {
+  supplier: 'Royal Chain',
   costMultiple: 3,
   roundUpToUsd: 5,
 } as const;
