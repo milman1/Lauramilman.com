@@ -78,15 +78,24 @@ its row; if the row says "merchant-set", ask, never assume.
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500 | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
-| Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No automated rule; do not reprice without an explicit instruction and the rule to apply. | Not in code |
-| Lab-grown jewelry (vendor Peaceful Diamonds and lab-tagged pieces) | Merchant's own cost sheet | **Merchant-set.** Different from loose lab stones and from fine jewelry; no automated rule. | Not in code |
-| Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** | Not in code |
+| Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Scraped from the Jacob & Co. site unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the boutique list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
+| Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
+| Lab-grown jewelry (vendor Peaceful Diamonds, SKUs `BC14…` / `NK14…`, and lab-tagged pieces) | Merchant's own cost sheet | **Merchant-set.** No formula in the repo and no cost recorded on any piece (checked 25). Different from loose lab stones and from fine jewelry. | Not in code |
+| Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** No formula in the repo. | Not in code |
 | Any new supplier | Its own trade account | Its own row here and its own constant in `config/pricing.ts` before the first product is created | Added per supplier |
 
-The last three rows are the ones a model is most likely to get wrong by
+The merchant-set rows are the ones a model is most likely to get wrong by
 borrowing a neighbour's multiplier. When the merchant states a rule for
 one of them, add the constant to `config/pricing.ts`, update this row,
 and only then reprice.
+
+Repo check, 2026-09-09: `config/pricing.ts`, `src/watchPricing.ts`,
+`src/markup.ts`, the scripts, and the docs hold rules only for the five
+coded rows above. Nothing in the repository defines a rule for fine
+jewelry, lab-grown jewelry, hand-imported estate, or Jacob & Co. One
+Royal Chain item already in the store (`MZ003379`, a 14K franco chain
+under the house vendor) was priced by hand at ×2.8 before the ×3 rule
+existed; the rule, not the precedent, applies from now on.
 
 ---
 
@@ -272,6 +281,19 @@ gathers hooks by web search (Sonnet 5), Opus 5 writes two drafts in the
 existing voice with product links and a FAQ block, drafts are saved
 **unpublished**, a person publishes. Never publish from a job; never
 claim a celebrity owns a piece we sell; never name a supplier.
+
+### G2. Jacob & Co. boutique watches
+Source is the Jacob & Co. site (or a hand upload). Sonnet 5 through
+Firecrawl reads the boutique product page: reference, collection, case,
+dial, strap, list price, images. The product is created DRAFT under
+vendor `Jacob & Co`, tags `jacob-co-boutique` plus `new-unworn` when
+unworn, SKU = reference, price = the boutique list price as scraped, tag
+`price-unconfirmed` until the merchant confirms the number, and never
+ACTIVE by a job. Title format is "Unworn Jacob & Co {Collection} {Dial}
+{Reference}"; the theme prints "Jacob & Co." and never "Jacob & Company"
+(`snippets/jacob-co-name.liquid`, tests in `test/theme-pdp-offer.test.ts`).
+Product type is `Watch` (singular; nine older uploads say `Watches` and
+should be normalized). Condition metafield `1000` when unworn.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
 Merchant rules (2026-09-09): **never import a whole category**; import
