@@ -110,6 +110,7 @@ describe('buildProductSetInput', () => {
     const input = buildProductSetInput(item({ imageUrls: [] }), '2026-08-17T00:00:00.000Z');
     expect(input.status).toBe('DRAFT');
     expect(input.tags).toContain('media-missing');
+    expect(input.tags).not.toContain('ebay');
   });
 
   it('throws instead of publishing if a Back Vault reference survives into any audited field', () => {

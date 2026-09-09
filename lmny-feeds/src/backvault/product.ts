@@ -155,7 +155,9 @@ export function buildProductSetInput(
 
   const hash = contentHashFor(item);
   const hasImages = item.imageUrls.length > 0;
-  const finalTags = hasImages ? tags : [...tags, 'media-missing'].sort();
+  // A piece without photos is written DRAFT and must never reach a
+  // marketplace: drop the ebay tag along with adding media-missing.
+  const finalTags = hasImages ? tags : [...tags.filter((t) => t !== 'ebay'), 'media-missing'].sort();
 
   const input: Record<string, unknown> = {
     handle,
