@@ -24,7 +24,8 @@ handed back.
 | Automations | `.github/workflows/*.yml` | Cron schedules and one-shot backfills. Secrets live in the repo's Actions settings. |
 | Feed cache | `lmny-feeds/cloudflare-worker/`, `wrangler.jsonc` | Cloudflare Worker + KV that caches the Belgium Dia feeds. |
 | Stones DB (in progress) | `lmny-feeds/supabase/` | Supabase `stones` table; dual-write target for moving diamonds off Shopify products. |
-| eBay | Shopify Marketplace Connect app | Lists products carrying the `ebay` tag (today: watches only, 109 of 173). Description template is `snippets/ebay-default.liquid`, pasted into the app by hand. |
+| eBay | Shopify Marketplace Connect app | Lists ACTIVE products carrying the `ebay` tag plus `custom.ebay_condition`. Since 2026-09-09: watches, all 732 estate pieces, and 525 fine, lab-grown, and hand-imported estate pieces. Never loose stones or drafts. Description template is `snippets/ebay-default.liquid`, pasted into the app by hand. |
+| Supplier intake | `.github/workflows/royalchain-costs.yml`, `lmny-feeds/scripts/royalchain-costs.ts` | Reads wholesale cost from the Royal Chain trade account with Playwright (secrets `ROYALCHAIN_USERNAME` / `ROYALCHAIN_PASSWORD`) for a shortlist CSV; retail = cost x 3. Recipe H. |
 | Uploadify | Shopify app | Jewelry marketplace feed. Needs ACTIVE, SKU, qty > 0, Category. Loose diamonds are deliberately kept at qty 0 so it skips them. |
 | Journal (blog) | Shopify Online Store blog `journal` | Nine published articles as of 2026-09-08, linked from header and footer. No automated writer exists in this repo. |
 | Setup docs | `SHOPIFY_SETUP.md`, `lmny-feeds/README.md`, `lmny-feeds/docs/` | Metafield definitions, brand collections, listing schemas, SEO title formulas. Read the relevant one before touching that area. |
@@ -270,12 +271,14 @@ merchant's trade account.
    the merchant before anything is priced.
 3. **Get cost without credentials in chat.** The merchant adds the trade
    login as GitHub Actions secrets (`ROYALCHAIN_USERNAME`,
-   `ROYALCHAIN_PASSWORD`). A workflow with a dry-run input logs in with
-   Playwright, reads cost for each item on the shortlist, and writes
-   `out/supplier-costs.csv` as an artifact. Credentials never appear in a
-   prompt, a transcript, a commit, or a screenshot. Astra is the fallback
-   only if the login has a CAPTCHA or MFA that a headless job cannot
-   pass, and then the merchant runs the Astra session themselves.
+   `ROYALCHAIN_PASSWORD`), then runs the "Royal Chain costs" workflow
+   from the Actions tab: dry run first (logs in, reads one item), then
+   full. It writes `out/supplier-costs.csv` (cost, retail, lengths) as an
+   artifact. Credentials never appear in a prompt, a transcript, a
+   commit, or a screenshot. The login page carries a reCAPTCHA badge; if
+   the headless login is refused, the job uploads a screenshot and the
+   fallback is a browser session the merchant runs themselves (Astra or
+   by hand), never credentials pasted into chat.
 4. **Price and create.** Retail = cost × 3, rounded up to the nearest $5.
    Cost is written to Cost per item. Products are created with
    `create-product` as DRAFT, vendor = the merchant's house brand (not the
