@@ -47,6 +47,9 @@ export interface BackVaultItem {
   vendor: string;
   productType: string;
   descriptionHtml: string;
+  /** The supplier's listed price — LMNY's cost. Written to Shopify Cost per item. */
+  costUsd: number;
+  /** Retail on the store: cost + config/pricing.ts BACKVAULT.markupUsd. */
   priceUsd: number;
   available: boolean;
   sku?: string;

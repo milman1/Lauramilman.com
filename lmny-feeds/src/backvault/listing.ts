@@ -109,6 +109,8 @@ export function buildJewelryListing(item: BackVaultItem): JewelryListing {
     'antique-estate',
     'designer-jewelry',
   ];
+  // Every estate piece lists on eBay through Marketplace Connect (merchant decision 2026-09-08).
+  tags.push('ebay');
   if (isWatch) tags.push('Pre-Owned Watches', 'Watches');
   if (item.specs.era) tags.push(titleCaseJewelry(item.specs.era));
   const typeTag = productType.toLowerCase();
