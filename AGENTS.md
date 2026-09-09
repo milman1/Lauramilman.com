@@ -281,21 +281,92 @@ from repo settings, never from a file.
 
 ---
 
-## 8. Handoff between vendors
+## 8. Shared task tracking and handoff between vendors
 
-When Claude hands a task to an OpenAI model or the reverse, the handoff is a
-file in the repo or scratchpad, never a chat summary alone:
+GitHub is the shared record of work (merchant decision 2026-09-09).
+Claude and OpenAI sessions do not automatically share chats or local files.
 
-- `scratchpad/<job>/brief.md` using the job brief template.
-- Any source, plan, and verify CSVs.
-- `scratchpad/<job>/log.md` with what was run, when, and the result report.
+### Where information belongs
 
-The receiving model reads this file, does not redo finished steps, and
-appends to the same log.
+- `AGENTS.md`: lasting project rules, routing, and safeguards.
+- GitHub Issues: current task scope, priority, owner, status, blockers, and
+  links to the pull request and committed handoff.
+- Pull requests: implementation changes, review, and verification evidence.
+- `docs/handoffs/<issue-number>-<task>.md`: durable continuation instructions,
+  committed and pushed to this repository. A local `scratchpad/` file or
+  chat summary alone is never a handoff.
+
+Create or reuse an Issue for substantive work; search for an existing task
+before creating a duplicate. Simple questions and trivial documentation
+corrections may use the PR alone. Record status in the Issue as planned,
+in progress, blocked, in review, or done. Do not maintain a second live
+backlog in this file.
+
+### Ownership and continuation
+
+One assistant/session owns a task at a time. Record the owner, session or
+branch identifier, update time in UTC, and files or live product scope
+before starting writes. Separate tasks may run concurrently only when
+their edits and live write scopes do not overlap. Read the latest Issue
+and handoff before claiming work; if another session owns it, coordinate
+the transfer before writing. An Issue entry is coordination, not an
+automatic lock.
+
+Before stopping, switching vendors, or handing off blocked work:
+
+1. Update and push the handoff with completed steps, checks and outcomes,
+   outstanding work, blockers, and the exact next action.
+2. Link the Issue, PR, branch, and relevant commit or workflow run.
+   Distinguish committed, merged, deployed, and live-verified states.
+3. Update the Issue's status and owner. Leave it open when verification
+   or required work remains.
+4. For unfinished work, link the pushed branch and handoff directly from
+   the Issue; do not merge incomplete implementation merely to hand off.
+   Completed changes follow rule 11 and land on `main` through a PR.
+
+The receiving assistant reads `AGENTS.md`, the Issue, the linked handoff,
+and current branch/PR state, then verifies the relevant current state.
+Continue unfinished steps without rerunning verified writes blindly.
+Append dated entries to the same handoff to preserve the work history.
+
+### Handoff template
+
+```markdown
+# Task: <title>
+- Issue:
+- Updated (UTC):
+- Owner / session:
+- Status:
+- Goal and acceptance criteria:
+- Scope (files / live records):
+- Branch / commit / PR:
+- Completed steps:
+- Verification (checks, outcomes, evidence links, unverified items):
+- Deployment / live state:
+- Remaining work:
+- Blockers / decisions needed:
+- Exact next action:
+- Supporting artifacts (durable location, access, expiry if applicable):
+
+## Work log
+- <UTC timestamp>: <action, result, evidence>
+```
+
+Scratchpad files may still be used for execution. Preserve the supporting
+source, plan, and verification artifacts needed to resume, and link their
+durable locations in the handoff. Check that the receiving environment can
+access them. Never commit secrets, customer records, supplier costs, or
+other sensitive raw data to this public repository. Keep restricted data
+in its approved system; commit only sanitized summaries and references.
+If required evidence is inaccessible or expired, record that blocker.
 
 ---
 
-## 9. Backlog (owner tier, status)
+## 9. Historical backlog snapshot (2026-09-09)
+
+This table preserves the original handoff context; it is not current task
+status. Track subsequent progress in GitHub Issues as described in section 8.
+Verify the relevant state before resuming any item below.
 
 | Task | Owner | Status (2026-09-09) |
 |---|---|---|
