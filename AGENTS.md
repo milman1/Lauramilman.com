@@ -344,6 +344,146 @@ inputs for dry run and limit, a report written to `out/` and uploaded as an
 artifact, and a `concurrency` group so two runs never overlap. Secrets come
 from repo settings, never from a file.
 
+### I. Product content: images, copy, descriptions for every upload
+
+Every product needs images, a title, a body, SEO fields, tags, a product type,
+and metafields before it can be sold anywhere. This recipe says who makes each
+piece and what is never invented. It reuses the formulas in
+`lmny-feeds/docs/seo-title-formulas.md` and `docs/watch-listing-schema.md`,
+implemented in `src/backvault/listing.ts` and `src/watchListingBuilder.ts`.
+
+**1. Trigger and scope.** Orchestrator tier (Fable 5.1) sizes the batch.
+
+1. The trigger is any path into the catalog: the hourly Belgium Dia sync, the
+   weekly Back Vault sync, a jewelry CSV import (`SHOPIFY_SETUP.md` section 11),
+   supplier intake (recipe H), the Jacob & Co. path (recipe G2), or a hand
+   upload. Content is finished before ACTIVE, never after.
+2. Generated: title, body HTML, SEO title, SEO description, tags, product
+   type, image alt text, and images only where step 2 allows them.
+3. Never generated: specs (metal, weights, measurements, gemstones, era,
+   condition, reference, case size), cost, price, certificate and stock
+   numbers, provenance, and real photos of a one-of-one piece. Those come from
+   the supplier record or the merchant. A missing spec is left empty so the
+   theme hides that cell; it is never inferred.
+4. A product with no usable image is written DRAFT with `media-missing` and the
+   `ebay` tag stripped, as `src/backvault/product.ts` already does.
+
+**2. Images.** Higgsfield MCP renders, Opus 5 writes the prompts, a person
+approves. Astra is not involved.
+
+1. Generation is allowed for house-brand chains (Royal Chain, recipe H),
+   Peaceful Diamonds lab-grown jewelry, made-to-order fine jewelry, and
+   lifestyle or hero frames that show a style rather than one object.
+2. Generation is forbidden for estate pieces, watches, Jacob & Co., and any
+   one-of-one item: real photos only. A generated image never stands in for a
+   specific pre-owned piece, because the buyer is buying that object.
+3. Renderer is the Higgsfield MCP with the stack in the
+   `peaceful-diamonds-higgsfield` skill: `gpt_image_2` at quality high and
+   resolution 2k for the product shot (1:1) and editorial still (9:16),
+   `kling3_0` pro, 8 seconds, sound off, 9:16 for motion; `soul_2` was tested
+   and rejected. Load it and `peaceful-diamonds-content` first; those two are
+   the source of truth for Peaceful Diamonds imagery and tone.
+4. Reference chain: upload the real product photo through the media upload
+   widget, generate the product shot from it, then the editorial still from the
+   approved product-shot job id, not the raw upload. Prompts end with "nothing
+   added or changed from the reference piece"; product frames carry no hands.
+5. Required set: hero on cream `#FAF6F0` or warm white `#FDFAF6`, one detail
+   macro, one on-body or scale frame, one lifestyle frame, hero first. Named
+   `{handle}-hero.jpg`, `{handle}-detail-1.jpg`, `{handle}-onbody.jpg`,
+   `{handle}-lifestyle.jpg`, lowercase, no supplier name in a file name.
+6. Alt text is descriptive and names the brand and the product type, following
+   the sync's pattern of the product title with "view 2", "view 3" appended
+   for later images. No keyword stuffing, no price, no supplier.
+7. Files land in Shopify Files through the sync's staged upload path
+   (`stagedUploadsCreate` in `src/shopify.ts`) or as an `images` URL on the
+   product payload. Never hotlinked from a supplier site in a description.
+8. A person reviews the set, then the product is set ACTIVE.
+
+**3. Copy and messaging.** Opus 5 writes anything a customer reads. Every
+source reuses the schemas above; only the prefix and the intent suffix change.
+
+| Source | Product title | SEO title (≤ 60) |
+|---|---|---|
+| Loose diamonds (feed) | `{carat}ct {shape} {Natural\|Lab-Grown} Diamond — {color} {clarity}, {lab} Certified` | `… \| {lab}` |
+| Watches (feed) | `{Pre-Owned\|Unworn} {brand} {model} {reference}` | `{brand} {model} {reference} – {titleWord} Watch` |
+| Estate jewelry (Back Vault) | `{brand} {normalized identifying details}`, watches `Pre-Owned {brand} {remainder}` | `… \| Estate Jewelry` or `… \| Pre-Owned Watch` |
+| Jacob & Co. (recipe G2) | `Unworn Jacob & Co {Collection} {Dial} {Reference}` | `… – Unworn Watch` |
+| Fine jewelry, Royal Chain chains, Peaceful Diamonds | `{prefix}{distinctive design/model} {primary gemstone} {product type} in {metal}` | `… \| Laura Milman` |
+
+1. Per-source prefix rule: the prefix is empty for house fine jewelry and
+   chains, `Lab Grown` for Peaceful Diamonds pieces, and the condition word
+   (`Pre-Owned` or `Unworn`) for anything owned before or boutique-unworn. An
+   unrecognized condition stays unclassified and gets no prefix, as
+   `watchListingBuilder.ts` handles it. Never invent a condition word.
+2. Body follows `listing.ts`: one prose paragraph, "This {brand} estate
+   {noun}{era}{metal}{stones} is offered by Laura Milman New York." plus a
+   grade sentence when a grade is known. Specs are never inlined as a table;
+   they go to `custom.*` metafields and the theme renders the grid. Escape
+   `&`, `<`, `>`. No price in the body.
+3. Pre-owned pieces close with a second paragraph, "Authenticated and
+   hand-inspected by Laura Milman New York." New and house-made pieces omit it;
+   it stays off for feed watches until the merchant confirms it.
+4. Tone: no supplier names (rule 1), no cost (rule 2), no hype ("stunning",
+   "must-have"), no invented provenance, no celebrity claim, no price language
+   in a title. Peaceful Diamonds copy follows `peaceful-diamonds-content`:
+   direct, factual, price-forward, never led by a sustainability hook.
+5. SEO title at or below 60 characters, truncated at a word boundary with the
+   intent suffix reserved. SEO description at or below 160 characters, word
+   boundary truncation, always ending "Authenticated by Laura Milman New York."
+6. Tags come from the existing set only (`ebay`, `lab-grown`, `antique-estate`,
+   `designer-jewelry`, `backvault-feed`, `lmny-feed`, `jacob-co-boutique`,
+   `new-unworn`, brand, product type, era). No new tag without a reason in the
+   Issue.
+7. Product type comes from the store's list, singular where the store already
+   uses singular (`Ring`, `Necklace`, `Watch`) and the established plural
+   otherwise (`Rings`, `Necklaces`, `Earrings`, `Bracelets`, `Brooches`,
+   `Pendants`, `Cufflinks`, `Jewelry`). Never blank. Product Category maps from
+   the table in `SHOPIFY_SETUP.md` section 11. Haiku 4.5 may assign type,
+   category, and tags at volume from the fact JSON; a low-confidence row goes
+   to a review file, never a guess.
+8. Populate the seven `custom.*` metafields where known (`metal_type`,
+   `metal_weight`, `diamond_weight`, `measurements`, `gemstones`, `era`,
+   `condition`, `SHOPIFY_SETUP.md` section 1) plus `custom.ebay_condition` for
+   anything tagged `ebay`.
+9. A new source means a new listing builder in `lmny-feeds` with unit tests,
+   shaped like `listing.ts` and `watchListingBuilder.ts`, plus a schema note in
+   `docs/`. A listing formula is code, never prose in a prompt.
+
+**4. Descriptions at volume.** Sonnet 5 drafts, Opus 5 spot-checks.
+
+1. Each worker gets a per-product JSON of facts (title parts, specs, type,
+   condition, tags) built by the orchestrator. Never copy from a photo alone,
+   never a live read mid-run.
+2. 100 products per worker, one output line per product, appended per item.
+3. Every draft passes the Back Vault scrub (`src/backvault/scrub.ts`) so no
+   supplier reference survives in title, body, SEO fields, alt text, handle,
+   tags, or metafields. A hit fails the row; it is not edited around.
+4. Opus 5 reviews a 5% sample against the formulas above before anything is
+   applied.
+5. Output is a plan CSV with final values precomputed; workers apply it with
+   `productSet` or `productUpdate`. Products stay DRAFT until a person
+   approves the batch.
+
+**5. Verification.** An independent read, by a different agent than the one
+that wrote, per rule 4.
+
+1. Title at or below 70 characters on site, except feed watches, where a longer
+   title carrying the reference is correct (`watch-listing-schema.md`).
+2. SEO title at or below 60, SEO description at or below 160 and ending
+   "Authenticated by Laura Milman New York." where the schema requires it.
+3. No empty product type; a Product Category on anything going to a marketplace.
+4. At least 3 images, or DRAFT with `media-missing`. Alt on every image.
+5. Scrub passes on the live values read back, not on the plan file.
+6. Counts in a table, errors by handle, files named. Zero mismatches is the
+   only "done" (rule 9).
+
+**6. Handoff.** No step here goes to Astra unless the work is inside an app UI
+with no API, such as checking how a listing renders on eBay or the Shop app. A
+content worker gets the section 5 job brief template filled with the input JSON
+path, the plan CSV path, the formula doc, and the rules in order, including "do
+not stop early", "do not ask", and "leave every product DRAFT". Results come
+back on the result report template.
+
 ---
 
 ## 7. Environment facts that cost time when forgotten
