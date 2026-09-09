@@ -171,5 +171,60 @@ the midpoint rule the moment its stock number appears on their site.
 
 ## 6. Sales channels
 
-See the channel matrix appended by the channel audit when it completes;
-recommendations follow it.
+Ten publications are installed: Online Store, Shop, Google & YouTube,
+Facebook & Instagram, Pinterest, TikTok, Inbox, Microsoft Channel, Faire
+(wholesale), Buy Button. No Marketplace Connect (eBay) publication is
+visible through the API; that app selects products on its own side, so
+its rule has to be confirmed in the app itself.
+
+Share of each segment published per channel (loose diamonds sampled at
+100 each):
+
+| Segment | Online Store | Shop | Google & YouTube | Facebook & Instagram | Pinterest | TikTok | Microsoft | Faire | Buy Button |
+|---|---|---|---|---|---|---|---|---|---|
+| Fine and lab-grown (534) | 99% | 100% | 100% | 100% | 100% | 86% | 85% | 87% | 86% |
+| Estate (732) | 100% | 78% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| Watches (173) | 100% | 96% | 20% | 20% | 20% | 20% | 20% | 20% | 20% |
+| Natural diamonds (sample) | 100% | 100% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| Lab-grown diamonds (sample) | 100% | 98% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+
+What this means:
+
+- **The 732 signed estate pieces and 138 of the 173 watches are invisible
+  on Google Shopping, Instagram and Facebook Shops, and Pinterest.** They
+  are the highest-ticket, most-searched items in the store ("pre-owned
+  Cartier Love bracelet", "David Webb enamel bracelet") and the only
+  segments where the store has no real competition on price. The feed
+  syncs publish to Online Store only; nothing else was ever switched on.
+- 22% of estate pieces and 4% of watches are not on Shop either.
+- Loose diamonds are Online Store and Shop only. That is defensible:
+  about 10,000 one-of-one SKUs without GTINs would swamp Merchant Center
+  and Meta's catalog limits for little return. Leave as is unless a
+  curated subset (say, GIA rounds over 1 carat) is wanted on Google.
+- Fine jewelry is the only segment fully on Google, Meta, and Pinterest;
+  about 75 older pieces miss TikTok, Microsoft, Faire, and Buy Button.
+- Faire is wholesale; estate consignment and one-of-one pieces do not
+  belong there, and the zero-product `for-shopify-performance-tracking`
+  collection is its artifact.
+
+Recommended, in order:
+
+1. **Publish estate and watches to Google & YouTube, Facebook & Instagram,
+   Pinterest, and Shop.** One-time backfill of about 900 products by
+   workers (one `publishablePublish` call per product with all four
+   publications), then a code change so both feed syncs publish new
+   pieces to that channel list instead of Online Store alone. Before the
+   backfill: confirm Merchant Center and Meta Commerce are verified and
+   in good standing, since a burst of 900 high-value pre-owned listings
+   will be reviewed; pre-owned condition is already set on every piece.
+2. **Fill the fine-jewelry gaps** (TikTok, Microsoft, Buy Button) for the
+   75 older pieces once product types and SEO fields from the fix list
+   are in, so they enter those channels clean.
+3. **Confirm the Marketplace Connect rule** in the app: it must select by
+   the `ebay` tag and map `custom.ebay_condition` to Condition ID.
+   Browser-only; Astra or a person.
+4. **Do not publish loose diamonds** beyond Online Store and Shop without
+   a curated rule.
+
+Nothing was published in this audit; item 1 is a merchant decision
+because it puts 900 listings in front of Google and Meta review at once.
