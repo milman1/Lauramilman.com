@@ -158,3 +158,24 @@ export const BACKVAULT = {
     baseUrl: 'https://robinsonsjewelers.com',
   },
 } as const;
+
+/**
+ * Supplier catalog intake (Royal Chain and similar trade suppliers).
+ * Retail is a straight multiple of the wholesale cost read from the
+ * merchant's trade account; see AGENTS.md recipe H. Only trending items
+ * are imported, never a whole category.
+ *
+ *   retail = roundUpTo5(cost × 3)
+ */
+export const SUPPLIER_INTAKE = {
+  costMultiple: 3,
+  roundUpToUsd: 5,
+} as const;
+
+export function supplierRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Supplier pricing: invalid cost ${costUsd}`);
+  }
+  const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
+  return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+}

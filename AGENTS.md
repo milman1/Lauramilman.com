@@ -250,14 +250,44 @@ existing voice with product links and a FAQ block, drafts are saved
 claim a celebrity owns a piece we sell; never name a supplier.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
-Sonnet 5 through Firecrawl reads everything public (listing pages,
-product pages, spec tables). Royal Chain is Magento; its 901 basic chains
-show no prices without a trade login and expose no best-seller signal.
-"Most popular" therefore comes from the merchant (sales history or a
-named list), not from the site. Astra is the tool only when prices must
-be read from behind the trade login, in a browser session the merchant
-owns. Creating Shopify products from a supplier list follows recipe A's
-protocol with `create-product`, DRAFT first, a human reviews, then ACTIVE.
+Merchant rules (2026-09-09): **never import a whole category**; import
+only what is trending; **retail = wholesale cost × 3**
+(`config/pricing.ts` `SUPPLIER_INTAKE.costMultiple`); cost comes from the
+merchant's trade account.
+
+1. **Scrape what is public.** Sonnet 5 through Firecrawl reads listing
+   pages, product pages, and spec tables into `chains.csv` (or the
+   equivalent). Royal Chain is Magento; prices need a trade login and the
+   site has no best-seller signal, so popularity never comes from the
+   supplier.
+2. **Rank by trend, not by catalog.** Sonnet 5 runs web search across
+   current trend reports (retailer trend pages, fashion press, men's and
+   women's chain guides for the current year) and writes a ranked style
+   list with a one-line reason and two sources each. Opus 5 turns that
+   into a shortlist of specific supplier items: mainstream metal (14K
+   yellow), the widths those reports name, no pavé or novelty finishes.
+   Twenty to thirty items is a normal first batch. The shortlist goes to
+   the merchant before anything is priced.
+3. **Get cost without credentials in chat.** The merchant adds the trade
+   login as GitHub Actions secrets (`ROYALCHAIN_USERNAME`,
+   `ROYALCHAIN_PASSWORD`). A workflow with a dry-run input logs in with
+   Playwright, reads cost for each item on the shortlist, and writes
+   `out/supplier-costs.csv` as an artifact. Credentials never appear in a
+   prompt, a transcript, a commit, or a screenshot. Astra is the fallback
+   only if the login has a CAPTCHA or MFA that a headless job cannot
+   pass, and then the merchant runs the Astra session themselves.
+4. **Price and create.** Retail = cost × 3, rounded up to the nearest $5.
+   Cost is written to Cost per item. Products are created with
+   `create-product` as DRAFT, vendor = the merchant's house brand (not the
+   supplier), product type from the store's list (`Necklaces`), lengths
+   as variants, supplier item number as SKU, images copied from the
+   supplier page, then a human reviews and sets ACTIVE. Supplier names
+   never appear on the storefront.
+5. **Refresh.** Gold-weight chains reprice with the metal market. A
+   monthly rerun of the cost job plus the same × 3 rule keeps them
+   current; that job never touches products it did not create.
+
+Current shortlist: `docs/suppliers/royal-chain-shortlist-2026-09.csv`.
 
 ### G. Recurring automations
 GitHub Actions cron, off the top of the hour, with `workflow_dispatch`
