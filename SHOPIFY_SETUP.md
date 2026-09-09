@@ -112,7 +112,7 @@ These 38 brands already have dropdown entries wired up in
 | Marina B              | marina-b                 |
 | Mikimoto              | mikimoto                 |
 | Patek Philippe        | patek-philippe           |
-| Tiffany & Co.         | tiffany-co               |
+| Tiffany & Co.         | tiffany                  |
 | Van Cleef & Arpels    | van-cleef-arpels         |
 
 ### 2d. Adding a new brand later
