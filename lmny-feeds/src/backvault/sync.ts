@@ -1,8 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { BACKVAULT } from '../../config/pricing.js';
 import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
+import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
 import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates, type Decision } from './diff.js';
 import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
 import { normalizeBackVaultFeed } from './normalize.js';
@@ -35,6 +37,13 @@ async function resolveToken(): Promise<{ domain: string; token: string }> {
   throw new Error('Set SHOPIFY_ADMIN_TOKEN, or SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET');
 }
 
+/** Competitor price fetch (config/pricing.ts BACKVAULT.competitor). */
+interface CompetitorStats {
+  rowsFetched: number | null;
+  stockRefsIndexed: number;
+  error?: string;
+}
+
 /** Weekly availability check against the supplier's full in-stock catalog. */
 interface AvailabilityStats {
   /** Rows in the supplier's full products.json (null when the fetch failed). */
@@ -52,6 +61,7 @@ interface RunSummary {
   finishedAt: string;
   dryRun: boolean;
   feedStats: ReturnType<typeof normalizeBackVaultFeed>['stats'];
+  competitor: CompetitorStats;
   availability: AvailabilityStats;
   decisions: Decision[];
   published: number;
@@ -68,7 +78,23 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const rawRows = await fetchBackVaultFeed();
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
-  const { items: allItems, stats } = normalizeBackVaultFeed(rawRows);
+  // Competitor prices: a failed fetch means no matches this run (every piece
+  // falls back to the flat markup) and a line in the report, never a crash.
+  let competitor: CompetitorIndex | undefined;
+  const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
+  try {
+    const competitorRows = await fetchCompetitorCatalog();
+    competitor = indexCompetitor(competitorRows);
+    competitorStats.rowsFetched = competitorRows.length;
+    competitorStats.stockRefsIndexed = competitor.size;
+    console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
+  } catch (err) {
+    competitorStats.error = err instanceof Error ? err.message : String(err);
+    errors.push(`competitor fetch: ${competitorStats.error}`);
+    console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
+  }
+
+  const { items: allItems, stats } = normalizeBackVaultFeed(rawRows, competitor);
   const availableItems = allItems.filter((item) => !isUnavailableProductHandle(handleFor(item)));
   const droppedUnavailable = allItems.length - availableItems.length;
   const items = opts.limit ? availableItems.slice(0, opts.limit) : availableItems;
@@ -107,7 +133,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   if (!opts.limit) {
     try {
       const allRows = await fetchBackVaultAllProducts();
-      const full = normalizeBackVaultFeed(allRows);
+      const full = normalizeBackVaultFeed(allRows, competitor);
       const merged = mergeAvailability(
         items,
         full.items.filter((item) => !isUnavailableProductHandle(handleFor(item))),
@@ -213,6 +239,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     finishedAt: new Date().toISOString(),
     dryRun: opts.dryRun,
     feedStats: stats,
+    competitor: competitorStats,
     availability,
     decisions,
     published,
@@ -254,6 +281,12 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Skipped — not a top designer: ${summary.feedStats.notTopDesigner}`,
     `- Skipped — out of stock: ${summary.feedStats.outOfStock}`,
     `- Skipped — malformed row: ${summary.feedStats.malformed}`,
+    `- Priced from a competitor match: ${summary.feedStats.competitorMatched}`,
+    '',
+    `## Competitor prices (${BACKVAULT.competitor.name})`,
+    ...(summary.competitor.error
+      ? [`- FAILED: ${summary.competitor.error} — flat markup only this run`]
+      : [`- Rows fetched: ${summary.competitor.rowsFetched ?? 'skipped'}`, `- Stock numbers indexed: ${summary.competitor.stockRefsIndexed}`]),
     '',
     `## Availability check (full supplier catalog)`,
     ...(summary.availability.error

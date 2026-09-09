@@ -113,6 +113,7 @@ export function contentHashFor(item: BackVaultItem): string {
     seoDescription: listing.seoDescription,
     price: item.priceUsd,
     cost: item.costUsd,
+    competitorPrice: item.competitorPriceUsd ?? null,
     images: item.imageUrls,
     specs: item.specs,
   });
