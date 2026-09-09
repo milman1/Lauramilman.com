@@ -87,20 +87,44 @@ export const LAB_GUARDS = {
 } as const;
 
 /**
- * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
- * Hours comps are not used. Aftermarket, no-papers, iced-out, naked-comment,
- * Power Watch LLC, and Uncle Manny LLC rows are excluded at normalize.
- * Missing cost → hold with tag `pricing-review`; existing Shopify price
- * is left alone.
+ * Watches from the Belgium Dia / deal API (product type `Watch`, handle `w-`).
+ * Retail from supplier unit cost only. Hours comps are not used.
+ * Aftermarket, no-papers, iced-out, naked-comment, Power Watch LLC, and
+ * Uncle Manny LLC rows are excluded at normalize. Missing cost → hold with
+ * tag `pricing-review`; existing Shopify price is left alone.
  *
+ * Chart (first matching band wins); applied in `src/watchPricing.ts`:
  *   Under $5,000          1.30×  round up to $100
  *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
  *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
  *   Above $40,000         1.08×  round up to $100, min $44,800
  */
+export const WATCH_COST_TIERS = [
+  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
+  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
+] as const;
+
+export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
+  costTiers: WATCH_COST_TIERS,
+} as const;
+
+/**
+ * Lab-grown jewelry (finished pieces — Peaceful Diamonds / lab-tagged SKUs).
+ * Distinct from loose Lab-Grown Diamond feed items priced by `STONE_TIERS`.
+ * Not sourced from the Belgium Dia diamond API. Merchant-set: no automated
+ * retail formula. Do not apply stone, watch, Back Vault, or Royal Chain rules.
+ */
+export const LAB_GROWN_JEWELRY = {
+  pricing: 'merchant-set' as const,
+  vendors: ['Peaceful Diamonds'] as const,
+  /** Common Peaceful Diamonds SKU prefixes observed on the store. */
+  skuPrefixes: ['BC14', 'NK14'] as const,
 } as const;
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */

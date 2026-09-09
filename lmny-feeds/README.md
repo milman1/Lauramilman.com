@@ -40,10 +40,11 @@ holds a stones table — Shopify products are the only live copy.
      | ≤ $1,500 | 1.35× | ~26% |
      | ≤ $4,000 | 1.30× | ~23% |
      | above $4,000 | 1.25× | 20% |
-   - watches: supplier cost × chart (`src/watchPricing.ts`). **No Hours mid.**
-     Aftermarket, no-papers, iced-out, naked-comment, Power Watch, and
-     Uncle Manny are excluded at normalize. Missing cost is tagged
-     `pricing-review` and the existing Shopify price is left alone.
+   - watches: supplier cost × chart (`config/pricing.ts` `WATCH_COST_TIERS`,
+     applied in `src/watchPricing.ts`). **No Hours mid.** Aftermarket,
+     no-papers, iced-out, naked-comment, Power Watch, and Uncle Manny are
+     excluded at normalize. Missing cost is tagged `pricing-review` and the
+     existing Shopify price is left alone.
 
      | Supplier cost | Multiplier | Retail |
      |---|---|---|
@@ -51,6 +52,9 @@ holds a stones table — Shopify products are the only live copy.
      | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
      | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
+   - lab-grown jewelry (Peaceful Diamonds / finished pieces): merchant-set;
+     marker only in `config/pricing.ts` `LAB_GROWN_JEWELRY` — never use
+     `STONE_TIERS` or watch tiers on those products.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    delete / archive / skip. Unchanged hashes are skipped entirely. Loose
    diamonds that leave a successfully fetched feed are permanently deleted
