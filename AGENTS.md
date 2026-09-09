@@ -139,7 +139,7 @@ model make scope decisions.
 | Product copy, SEO titles and descriptions at volume | Worker | Sonnet 5 / Terra | Per 100 products | Follow `lmny-feeds/docs/seo-title-formulas.md` and `watch-listing-schema.md`. Opus 5 spot-checks a 5% sample. |
 | Brand voice pieces (homepage, journal articles, campaign copy) | Build | Opus 5 / Sol | No | One author, one voice. |
 | Classify or tag thousands of rows | Classifier | Haiku 4.5 / Luna | Per 2,000 rows | Provide the label set and three examples per label. |
-| Audit (SEO, metafields, schema.org, AI-search readiness) | Orchestrator plans, Worker collects | Fable 5.1 plans; Sonnet 5 collects; Opus 5 writes the report | Collection only | Output is a findings file with severity, evidence, and a proposed fix per row. |
+| SEO program (strategy, build, audit, repairs) | Strategist and auditor: Astra; builder: Fable 5.1 orchestrating | Astra plans and audits; Sonnet 5 / Terra / Luna / Haiku 4.5 do the work; Opus 5 for customer-facing copy | Per plan item | Recipe E. Every stage writes a committed file under `docs/seo/`. |
 | Operate an admin UI with no API | UI operator | Astra | No | Marketplace Connect template editor, eBay Seller Hub, Uploadify. Take a screenshot before and after every save. Never enter credentials from a chat transcript. |
 | Second opinion on a plan or diff | Reviewer | Opus 5 / Sol (blind, fresh agent) | No | Step 3 of the operating loop (section 5a). Review-only; the reviewer does not edit. |
 | Recurring job (weekly, hourly) | Build | Opus 5 writes the workflow | No | GitHub Actions cron for anything that touches code or Shopify. n8n only for glue between SaaS tools. Every cron job has a dry-run input and a report artifact. |
@@ -297,14 +297,50 @@ stylesheets, no JavaScript. Saving it into the app is browser-only work:
 Astra (or a person) pastes it into Marketplace Connect's template editor,
 saves, previews one listing, and screenshots before and after.
 
-### E. SEO and AI-search audit
-Collect per product: title, SEO title, SEO description, handle, product
-type, category, the seven `custom.*` metafields, image alt text, structured
-data emitted by the theme (`snippets/` JSON-LD), canonical, and whether the
-page is indexable. Collect per page and collection the same plus H1 and
-internal links. Check `robots.txt`, `sitemap.xml`, and the theme's
-`llms.txt` if any. Score against `docs/seo-title-formulas.md`. Report is a
-findings file plus a prioritized fix list; fixes are separate tasks.
+### E. SEO program: Astra plans, Fable builds, Astra audits
+The merchant's SEO program (decision 2026-09-09) is a fixed pipeline.
+Astra (OpenAI GPT-6 Astra) is the strategist and the auditor. Fable 5.1 is
+the builder in the orchestrator sense of rule 13: it plans the
+implementation and briefs lower-tier workers who do the grunt work; it
+writes nothing itself. Every stage's output is a committed file under
+`docs/seo/` per section 8, never a chat summary.
+
+| Stage | Owner | Input | Does | Output file |
+|---|---|---|---|---|
+| SEO goal | Merchant | The business target (a collection to rank, a product line to grow, a query family to own) | States the goal, the time window, and the success measure | `docs/seo/<yyyy-mm>-goal.md` |
+| Strategy | Astra (strategist) | The goal, the latest audit, Search Console and analytics exports the merchant provides | Keyword, SERP, and ICP research; search intent per query family; content opportunities; site architecture; competitive gaps; and AI-search readiness (llms.txt, agent-facing sitemap, structured data completeness). Astra may delegate collection to Terra or Luna workers (crawls, SERP pulls, keyword exports) but writes the plan itself | `docs/seo/<yyyy-mm>-plan.md`: prioritized items, each with target URL, intent, the exact metadata or structure change, and the acceptance check Astra will audit against |
+| Build | Fable 5.1 (builder, orchestrating) | The plan | Turns each plan item into a worker brief; Sonnet 5 or Terra write metadata fields, alt text, internal-link data, sitemap entries, and canonicals through the store API or plan files, following the snapshot, plan-file, and independent-verification discipline of rules 4 and 5 and the fan-out protocol in section 5b; any change to theme code (Liquid, JSON-LD snippets, page structure, performance fixes in the theme) goes to the build tier from the routing table (Opus 5 or Sol) as a pull request; Haiku 4.5 or Luna classify and tag at volume; Fable orchestrates all of it and writes none of it. Every theme pull request gets the section 5a blind review (a fresh Opus 5 or Sol reviewer) before Fable merges it; Astra's audit is the post-deploy check on the live site, not a substitute for that review. Bulk field writes get the independent verification read of rule 4 before the build log records them | `docs/seo/<yyyy-mm>-build-log.md`: item by item, what changed, PR or plan file, verification read |
+| Audit | Astra (auditor, blind) | The plan, the build log, and the live site; not the workers' transcripts | Checks every plan item against its acceptance check on the live storefront, plus a regression sweep (indexability, canonicals, schema validity, Core Web Vitals, internal links, no supplier names, no cost) and AI-search readiness (llms.txt, agent-facing sitemap, structured data completeness) | `docs/seo/<yyyy-mm>-audit.md`: per item PASS or NEEDS FIXES with evidence and the exact failed check; one verdict line |
+| Repairs | Fable 5.1 (orchestrating) | The audit | Briefs the same worker tier to fix only what failed, reads the diff back, re-runs the item's check, then returns the file to Astra for re-audit; a second NEEDS FIXES on the same item escalates to the merchant | Append to the build log, then Astra appends to the audit |
+
+**Grunt work goes down, judgment stays up**
+
+- Crawls, exports, SERP pulls, keyword lists, per-page metadata writing,
+  alt text, schema templating, internal-link insertion, and sitemap edits
+  are worker jobs (Sonnet 5, Terra, Luna, Haiku 4.5) from written briefs
+  with the acceptance check inside the brief.
+- Astra and Fable never do those themselves.
+- Copy that a customer reads still follows recipe I (Opus 5 templates,
+  Sonnet 5 volume).
+- Anything browser-only (Search Console, Merchant Center, Marketplace
+  Connect) is Astra's, per the routing table.
+
+**Fixed rules for this program**
+
+- Never noindex or remove a product or collection page as an SEO fix
+  without merchant sign-off.
+- Canonicals point at the store's own URLs only.
+- Structured data states only facts on the product record (no invented
+  ratings, provenance, or availability).
+- The supplier scrub (rule 1) and the cost rule (rule 2) apply to every
+  metadata field.
+- The pipeline order is fixed, so an audit is never skipped because the
+  build "looked fine".
+
+The first cycle starts from `docs/audits/2026-09-09-site-audit.md`, whose
+12-item fix list is the seed for the first plan; Astra reads it, adds the
+research it lacks (keywords, SERP, ICP, competitors), and writes
+`docs/seo/2026-09-plan.md`.
 
 ### F. Journal (blog) pipeline
 Articles are Shopify `Article` objects on blog `journal`. Check
