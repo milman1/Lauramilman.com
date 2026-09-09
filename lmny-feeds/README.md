@@ -305,8 +305,12 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
-   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is a
-   flat **cost + $500**, and the cost is written to Shopify **Cost per item**
+   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is the
+   **midpoint between cost and Robinson's Jewelers' price** when the same
+   supplier stock number is found in their public catalog
+   (`src/backvault/competitor.ts`; exact stock-number match only, ambiguous
+   numbers dropped), floored at the flat rule; otherwise a flat
+   **cost + $500**. The cost is written to Shopify **Cost per item**
    (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
    the markup is a pull request against `config/pricing.ts`; the next run
    reprices every listed piece because price and cost are in the content

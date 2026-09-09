@@ -143,13 +143,18 @@ export const WATCH_BRANDS: string[] = [
  * that cost, and the cost is written to Shopify **Cost per item**
  * (`inventoryItem.cost`) so margin shows next to Price in Admin.
  *
- *   retail = cost + $500
+ *   matched on a competitor:  retail = max((cost + competitor) / 2, cost + $500)
+ *   no competitor match:      retail = cost + $500
  *
- * A competitor midpoint rule (Robinson's Jewelers) was considered on
- * 2026-09-08; their catalog carries none of the curated designer houses, so
- * the flat markup is the rule for every piece until that changes.
+ * The competitor is Robinson's Jewelers, which stocks the same supplier
+ * pieces; the match key is the supplier stock number
+ * (src/backvault/competitor.ts). Never a fuzzy title match.
  */
 export const BACKVAULT = {
   /** Flat dollar markup added to the supplier's listed (cost) price. */
   markupUsd: 500,
+  competitor: {
+    name: "Robinson's Jewelers",
+    baseUrl: 'https://robinsonsjewelers.com',
+  },
 } as const;

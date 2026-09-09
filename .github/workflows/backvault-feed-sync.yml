@@ -7,8 +7,10 @@
 # /products.json still has them in stock (weekly availability check);
 # sold / withdrawn pieces are archived.
 #
-# Price = The Back Vault listed price (LMNY cost) + $500 (config/pricing.ts
-# BACKVAULT.markupUsd). Cost is written to Shopify "Cost per item".
+# Price = midpoint between The Back Vault listed price (LMNY cost) and
+# Robinson's Jewelers' price for the same stock number, floored at cost + $500;
+# cost + $500 when there is no match (config/pricing.ts BACKVAULT). Cost is
+# written to Shopify "Cost per item".
 #
 # Runs live weekly (Sunday midnight UTC) and on demand.
 # For a dry-run before going live: workflow_dispatch → leave dry_run=true.
@@ -22,6 +24,7 @@
 # Optional environment variables (Settings → Actions → Variables):
 #   BACKVAULT_BASE_URL           override the supplier base URL for testing
 #   BACKVAULT_COLLECTION_HANDLE  override the collection slug (default: new-arrivals)
+#   COMPETITOR_BASE_URL          override the competitor store URL (default: robinsonsjewelers.com)
 name: The Back Vault weekly sync
 
 on:
