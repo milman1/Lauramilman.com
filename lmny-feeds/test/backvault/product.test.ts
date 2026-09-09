@@ -31,6 +31,7 @@ describe('tagsFor', () => {
   it('always includes the feed tag and vendor', () => {
     const tags = tagsFor(item());
     expect(tags).toContain('backvault-feed');
+    expect(tags).toContain('ebay');
     expect(tags).toContain('Cartier');
     expect(tags).toContain('antique-estate');
     expect(tags).toContain('Bracelets');

@@ -3,15 +3,15 @@ import { BACKVAULT } from '../../config/pricing.js';
 import { backVaultRetailFromCost } from '../../src/backvault/pricing.js';
 
 describe('backVaultRetailFromCost', () => {
-  it('is a flat $200 over the supplier price', () => {
-    expect(BACKVAULT.markupUsd).toBe(200);
-    expect(backVaultRetailFromCost(67600)).toBe(67800);
-    expect(backVaultRetailFromCost(0)).toBe(200);
-    expect(backVaultRetailFromCost(1234.56)).toBe(1434.56);
+  it('is a flat $500 over the supplier price', () => {
+    expect(BACKVAULT.markupUsd).toBe(500);
+    expect(backVaultRetailFromCost(67600)).toBe(68100);
+    expect(backVaultRetailFromCost(0)).toBe(500);
+    expect(backVaultRetailFromCost(1234.56)).toBe(1734.56);
   });
 
   it('rounds to cents', () => {
-    expect(backVaultRetailFromCost(0.1 + 0.2)).toBe(200.3);
+    expect(backVaultRetailFromCost(0.1 + 0.2)).toBe(500.3);
   });
 
   it('rejects a missing or negative cost instead of publishing a bad ticket', () => {

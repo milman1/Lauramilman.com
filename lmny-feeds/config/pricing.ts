@@ -143,9 +143,13 @@ export const WATCH_BRANDS: string[] = [
  * that cost, and the cost is written to Shopify **Cost per item**
  * (`inventoryItem.cost`) so margin shows next to Price in Admin.
  *
- *   retail = cost + $200
+ *   retail = cost + $500
+ *
+ * A competitor midpoint rule (Robinson's Jewelers) was considered on
+ * 2026-09-08; their catalog carries none of the curated designer houses, so
+ * the flat markup is the rule for every piece until that changes.
  */
 export const BACKVAULT = {
   /** Flat dollar markup added to the supplier's listed (cost) price. */
-  markupUsd: 200,
+  markupUsd: 500,
 } as const;

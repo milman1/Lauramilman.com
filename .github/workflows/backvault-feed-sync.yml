@@ -7,7 +7,7 @@
 # /products.json still has them in stock (weekly availability check);
 # sold / withdrawn pieces are archived.
 #
-# Price = The Back Vault listed price (LMNY cost) + $200 (config/pricing.ts
+# Price = The Back Vault listed price (LMNY cost) + $500 (config/pricing.ts
 # BACKVAULT.markupUsd). Cost is written to Shopify "Cost per item".
 #
 # Runs live weekly (Sunday midnight UTC) and on demand.
