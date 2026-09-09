@@ -79,7 +79,7 @@ its row; if the row says "merchant-set", ask, never assume.
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `config/pricing.ts` `WATCH_COST_TIERS`, `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500 | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
-| Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Scraped from the Jacob & Co. site unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the boutique list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
+| Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; sourced from Bucherer and Exquisite Timepieces; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Retailer list price as scraped from Bucherer or Exquisite Timepieces (the lower when both list the reference) unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the boutique list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
 | Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
 | Lab-grown jewelry (vendor Peaceful Diamonds, SKUs `BC14…` / `NK14…`, and lab-tagged pieces) | Merchant wholesale / Shopify Cost per item | **Cost × 4**, rounded to the nearest dollar. Different from loose lab stones and from fine jewelry. On 2026-09-09 no piece had a cost recorded (25 checked), so the rule cannot run until Cost per item is entered; a reprice job must skip pieces with no cost, never infer one. | `config/pricing.ts` `LAB_GROWN_JEWELRY`, `labGrownJewelryRetailFromCost` |
 | Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** No formula in the repo. | Not in code |
@@ -152,6 +152,7 @@ Use Astra when the work is in a browser rather than an API:
 - Mapping metafields to eBay item specifics in the Marketplace Connect UI.
 - Checking how a listing renders on eBay, Google Shopping, or the Shop app.
 - Reproducing a storefront bug that only appears with a real browser session.
+- Jacob & Co. sourcing. The merchant's two source sites (decision 2026-09-09) are Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/, e.g. https://www.bucherer.com/us/en/watches/jacob-co/epic-x/1362-322-2.html) and Exquisite Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x). Exquisite Timepieces is a Shopify store, so its catalog reads through `/products.json` and is a Sonnet 5 or Terra job through Firecrawl. Bucherer is a custom site with rendered product pages; if Firecrawl cannot return the price, reference, and images, Astra reads the page in a browser and writes the same facts JSON a worker would. Astra never creates the Shopify product; that is recipe G2.
 
 Do not use Astra for bulk API work, code changes, or anything a Shopify
 GraphQL call can do; Sonnet 5 is a fifth of the price and leaves an audit
@@ -356,17 +357,24 @@ existing voice with product links and a FAQ block, drafts are saved
 claim a celebrity owns a piece we sell; never name a supplier.
 
 ### G2. Jacob & Co. boutique watches
-Source is the Jacob & Co. site (or a hand upload). Sonnet 5 through
-Firecrawl reads the boutique product page: reference, collection, case,
-dial, strap, list price, images. The product is created DRAFT under
-vendor `Jacob & Co`, tags `jacob-co-boutique` plus `new-unworn` when
-unworn, SKU = reference, price = the boutique list price as scraped, tag
+Sources are the two retailer sites the merchant chose on 2026-09-09:
+Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/) and Exquisite
+Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x),
+or a hand upload. Sonnet 5 or Terra through Firecrawl reads each product
+page (Exquisite Timepieces also exposes
+`/collections/jacob-co-epic-x/products.json`): reference, collection, case,
+dial, strap, list price, images; Bucherer pages that Firecrawl cannot
+render go to Astra per the routing table. The product is created DRAFT
+under vendor `Jacob & Co`, tags `jacob-co-boutique` plus `new-unworn` when
+unworn, SKU = reference, price = the retailer's list price as scraped
+(when both sites list the same reference, the lower of the two), tag
 `price-unconfirmed` until the merchant confirms the number, and never
 ACTIVE by a job. Title format is "Unworn Jacob & Co {Collection} {Dial}
 {Reference}"; the theme prints "Jacob & Co." and never "Jacob & Company"
 (`snippets/jacob-co-name.liquid`, tests in `test/theme-pdp-offer.test.ts`).
 Product type is `Watch` (singular; nine older uploads say `Watches` and
-should be normalized). Condition metafield `1000` when unworn.
+should be normalized). Condition metafield `1000` when unworn. Neither
+retailer's name appears anywhere on the store, per rule 1.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
 Merchant rules (2026-09-09): **never import a whole category**; import
@@ -586,6 +594,7 @@ back on the result report template.
 - `productsCount` caps at 10,000. Loose diamonds alone exceed it.
 - Shopify search filters are limited to the documented fields. Unknown fields are silently ignored and return everything.
 - Back Vault's new-arrivals collection had 1,177 rows on 2026-09-06, 734 matched top designers. The full catalog is larger; the sync now checks it for availability.
+- bucherer.com and exquisitetimepieces.com have not been fetched from this environment yet; expect the same egress block as the other retail sites, so Firecrawl or Astra, never curl.
 
 ---
 
