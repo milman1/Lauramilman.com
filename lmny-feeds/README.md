@@ -52,9 +52,9 @@ holds a stones table — Shopify products are the only live copy.
      | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
      | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
-   - lab-grown jewelry (Peaceful Diamonds / finished pieces): merchant-set;
-     marker only in `config/pricing.ts` `LAB_GROWN_JEWELRY` — never use
-     `STONE_TIERS` or watch tiers on those products.
+   - lab-grown jewelry (Peaceful Diamonds / finished pieces):
+     `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
+     Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    delete / archive / skip. Unchanged hashes are skipped entirely. Loose
    diamonds that leave a successfully fetched feed are permanently deleted

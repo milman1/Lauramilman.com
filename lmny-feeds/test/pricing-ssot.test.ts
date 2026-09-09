@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
+  labGrownJewelryRetailFromCost,
   STONE_TIERS,
   WATCH,
   WATCH_COST_TIERS,
@@ -17,9 +18,16 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(WATCH.reviewTag).toBe('pricing-review');
   });
 
-  it('marks lab-grown jewelry as merchant-set (not API stone pricing)', () => {
-    expect(LAB_GROWN_JEWELRY.pricing).toBe('merchant-set');
+  it('prices lab-grown jewelry at cost × 4', () => {
+    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(4);
     expect(LAB_GROWN_JEWELRY.vendors).toContain('Peaceful Diamonds');
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
+    expect(labGrownJewelryRetailFromCost(250)).toBe(1000);
+    expect(labGrownJewelryRetailFromCost(333.33)).toBe(1333);
+  });
+
+  it('rejects non-positive lab jewelry cost', () => {
+    expect(() => labGrownJewelryRetailFromCost(0)).toThrow(/invalid cost/);
+    expect(() => labGrownJewelryRetailFromCost(-10)).toThrow(/invalid cost/);
   });
 });
