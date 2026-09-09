@@ -54,7 +54,7 @@ old CSV import are hidden and untouched.
 
 1. **The supplier is never named on the store.** "The Back Vault", "Back Vault", "back-vault", "thebackvault" must not appear in any title, body, tag, SEO field, alt text, handle, or metafield. `src/backvault/scrub.ts` enforces this and a run throws if a reference survives. Same discipline for any future supplier.
 2. **Cost is never public.** Cost lives in Shopify "Cost per item" (`inventoryItem.cost`), `lmny_feed.cost_usd`, and `$app.cost_cents`. Never in `custom.*`, storefront copy, eBay, or a feed.
-3. **Pricing changes are pull requests against `lmny-feeds/config/pricing.ts`.** Never a one-off number typed into Shopify admin, never a hardcoded value in a script. A bulk reprice done by hand must match the rule in that file, and the file must be merged before the next scheduled sync or the sync will revert it.
+3. **Pricing changes are pull requests against `lmny-feeds/config/pricing.ts`.** Never a one-off number typed into Shopify admin, never a hardcoded value in a script. A bulk reprice done by hand must match the rule in that file, and the file must be merged before the next scheduled sync or the sync will revert it. **Every source has its own rule** (section 2a); there is no store-wide multiplier, and a rule from one source is never applied to another.
 4. **Dry-run before live, verify after live.** Every bulk write is preceded by a read that produces a plan file, and followed by an independent read that confirms the store matches the plan. The verification is done by a different agent or a fresh query, never by trusting the write responses alone.
 5. **Idempotent work files.** Bulk jobs run from a snapshot file (CSV or JSONL) with the final values precomputed. Re-running a line must produce the same result. Never compute a delta from live data mid-run.
 6. **No destructive operations without an explicit instruction.** No product deletes, no theme deletes, no history rewrites on shared branches, no force-push. Archive instead of delete. Loose diamonds are the one exception already coded into the Belgium sync.
@@ -64,6 +64,29 @@ old CSV import are hidden and untouched.
 10. **Never send customer data to an unrelated service.** Customer records stay in Shopify, Resend, and Supabase.
 11. **Work lands on `main`.** Every task ends with its branch merged to `main` through a pull request (merchant decision 2026-09-09). Scheduled jobs run `main` only, so an unmerged branch is work that does not exist. Restart the working branch from `main` after each merge.
 12. **Never tag a draft or a loose stone for eBay.** The Back Vault sync strips the `ebay` tag from any piece it writes as DRAFT; CSV imports carry the tag only on ACTIVE rows (`SHOPIFY_SETUP.md` section 11).
+
+### 2a. Pricing matrix: wholesale cost to retail, by source
+
+Cost means what LMNY pays. Each row is a different supplier, a different
+margin, and a different place in code. Before repricing anything, find
+its row; if the row says "merchant-set", ask, never assume.
+
+| Source (how to recognize it) | Cost comes from | Retail rule | Where it lives |
+|---|---|---|---|
+| Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | Tiered: ≤$500 ×1.40, ≤$1,500 ×1.35, ≤$4,000 ×1.30, above ×1.25; held under 20% margin | `config/pricing.ts` `STONE_TIERS`, `src/markup.ts` |
+| Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | Same tiers as natural, plus fail-closed guards against a $/ct read as a total | `STONE_TIERS`, `LAB_GUARDS`, `src/markup.ts` |
+| Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `src/watchPricing.ts` |
+| Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500 | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts` |
+| Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
+| Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No automated rule; do not reprice without an explicit instruction and the rule to apply. | Not in code |
+| Lab-grown jewelry (vendor Peaceful Diamonds and lab-tagged pieces) | Merchant's own cost sheet | **Merchant-set.** Different from loose lab stones and from fine jewelry; no automated rule. | Not in code |
+| Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** | Not in code |
+| Any new supplier | Its own trade account | Its own row here and its own constant in `config/pricing.ts` before the first product is created | Added per supplier |
+
+The last three rows are the ones a model is most likely to get wrong by
+borrowing a neighbour's multiplier. When the merchant states a rule for
+one of them, add the constant to `config/pricing.ts`, update this row,
+and only then reprice.
 
 ---
 
@@ -252,9 +275,9 @@ claim a celebrity owns a piece we sell; never name a supplier.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
 Merchant rules (2026-09-09): **never import a whole category**; import
-only what is trending; **retail = wholesale cost × 3**
-(`config/pricing.ts` `SUPPLIER_INTAKE.costMultiple`); cost comes from the
-merchant's trade account.
+only what is trending; **retail = wholesale cost × 3 for Royal Chain
+only** (`config/pricing.ts` `SUPPLIER_INTAKE`; every other source has its
+own row in section 2a); cost comes from the merchant's trade account.
 
 1. **Scrape what is public.** Sonnet 5 through Firecrawl reads listing
    pages, product pages, and spec tables into `chains.csv` (or the
