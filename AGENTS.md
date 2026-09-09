@@ -75,12 +75,12 @@ its row; if the row says "merchant-set", ask, never assume.
 |---|---|---|---|
 | Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | Tiered: ≤$500 ×1.40, ≤$1,500 ×1.35, ≤$4,000 ×1.30, above ×1.25; held under 20% margin | `config/pricing.ts` `STONE_TIERS`, `src/markup.ts` |
 | Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | Same tiers as natural, plus fail-closed guards against a $/ct read as a total | `STONE_TIERS`, `LAB_GUARDS`, `src/markup.ts` |
-| Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `src/watchPricing.ts` |
+| Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `config/pricing.ts` `WATCH_COST_TIERS`, `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500 | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
 | Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Scraped from the Jacob & Co. site unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the boutique list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
 | Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
-| Lab-grown jewelry (vendor Peaceful Diamonds, SKUs `BC14…` / `NK14…`, and lab-tagged pieces) | Merchant's own cost sheet | **Merchant-set.** No formula in the repo and no cost recorded on any piece (checked 25). Different from loose lab stones and from fine jewelry. | Not in code |
+| Lab-grown jewelry (vendor Peaceful Diamonds, SKUs `BC14…` / `NK14…`, and lab-tagged pieces) | Merchant wholesale / Shopify Cost per item | **Cost × 4**, rounded to the nearest dollar. Different from loose lab stones and from fine jewelry. | `config/pricing.ts` `LAB_GROWN_JEWELRY`, `labGrownJewelryRetailFromCost` |
 | Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** No formula in the repo. | Not in code |
 | Any new supplier | Its own trade account | Its own row here and its own constant in `config/pricing.ts` before the first product is created | Added per supplier |
 
@@ -89,13 +89,14 @@ borrowing a neighbour's multiplier. When the merchant states a rule for
 one of them, add the constant to `config/pricing.ts`, update this row,
 and only then reprice.
 
-Repo check, 2026-09-09: `config/pricing.ts`, `src/watchPricing.ts`,
-`src/markup.ts`, the scripts, and the docs hold rules only for the five
-coded rows above. Nothing in the repository defines a rule for fine
-jewelry, lab-grown jewelry, hand-imported estate, or Jacob & Co. One
-Royal Chain item already in the store (`MZ003379`, a 14K franco chain
-under the house vendor) was priced by hand at ×2.8 before the ×3 rule
-existed; the rule, not the precedent, applies from now on.
+Repo check, 2026-09-09 (updated): `config/pricing.ts` holds coded rules for
+loose diamonds (`STONE_TIERS`), watches (`WATCH_COST_TIERS`), Back Vault,
+Royal Chain, and lab-grown jewelry (`LAB_GROWN_JEWELRY`, cost × 4). Nothing
+in the repository defines a retail multiplier for fine jewelry,
+hand-imported estate, or Jacob & Co. One Royal Chain item already in the
+store (`MZ003379`, a 14K franco chain under the house vendor) was priced
+by hand at ×2.8 before the ×3 rule existed; the rule, not the precedent,
+applies from now on.
 
 ---
 

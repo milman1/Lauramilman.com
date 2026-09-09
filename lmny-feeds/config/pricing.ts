@@ -87,21 +87,59 @@ export const LAB_GUARDS = {
 } as const;
 
 /**
- * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
- * Hours comps are not used. Aftermarket, no-papers, iced-out, naked-comment,
- * Power Watch LLC, and Uncle Manny LLC rows are excluded at normalize.
- * Missing cost → hold with tag `pricing-review`; existing Shopify price
- * is left alone.
+ * Watches from the Belgium Dia / deal API (product type `Watch`, handle `w-`).
+ * Retail from supplier unit cost only. Hours comps are not used.
+ * Aftermarket, no-papers, iced-out, naked-comment, Power Watch LLC, and
+ * Uncle Manny LLC rows are excluded at normalize. Missing cost → hold with
+ * tag `pricing-review`; existing Shopify price is left alone.
  *
+ * Chart (first matching band wins); applied in `src/watchPricing.ts`:
  *   Under $5,000          1.30×  round up to $100
  *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
  *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
  *   Above $40,000         1.08×  round up to $100, min $44,800
  */
+export const WATCH_COST_TIERS = [
+  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
+  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
+] as const;
+
+export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
+  costTiers: WATCH_COST_TIERS,
 } as const;
+
+/**
+ * Lab-grown jewelry (finished pieces — Peaceful Diamonds / lab-tagged SKUs).
+ * Distinct from loose Lab-Grown Diamond feed items priced by `STONE_TIERS`.
+ * Not sourced from the Belgium Dia diamond API.
+ *
+ *   retail = round(cost × 4)
+ *
+ * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
+ * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
+ * Royal Chain rules to these products.
+ */
+export const LAB_GROWN_JEWELRY = {
+  vendors: ['Peaceful Diamonds'] as const,
+  /** Common Peaceful Diamonds SKU prefixes observed on the store. */
+  skuPrefixes: ['BC14', 'NK14'] as const,
+  /** retail = cost × this. */
+  costMultiple: 4,
+} as const;
+
+/** Retail for lab-grown jewelry from recorded wholesale cost. */
+export function labGrownJewelryRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
+}
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
 export const STONE_GATES = {
@@ -173,9 +211,9 @@ export const BACKVAULT = {
  *
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
- * jewelry, Peaceful Diamonds lab-grown jewelry, and hand-imported estate
- * pieces are merchant-set and have no automated rule. A new supplier gets
- * its own constant here, never this one.
+ * jewelry and hand-imported estate pieces are merchant-set and have no
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×4). A new
+ * supplier gets its own constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
