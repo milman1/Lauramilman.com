@@ -61,6 +61,8 @@ old CSV import are hidden and untouched.
 8. **eBay scope.** Loose stones never go to eBay. Watches, estate designer pieces, fine jewelry, and lab-grown jewelry may. Condition IDs: `3000` pre-owned, `1000` new.
 9. **Do not report done until verified.** If a step could not be verified, say so first.
 10. **Never send customer data to an unrelated service.** Customer records stay in Shopify, Resend, and Supabase.
+11. **Work lands on `main`.** Every task ends with its branch merged to `main` through a pull request (merchant decision 2026-09-09). Scheduled jobs run `main` only, so an unmerged branch is work that does not exist. Restart the working branch from `main` after each merge.
+12. **Never tag a draft or a loose stone for eBay.** The Back Vault sync strips the `ebay` tag from any piece it writes as DRAFT; CSV imports carry the tag only on ACTIVE rows (`SHOPIFY_SETUP.md` section 11).
 
 ---
 
@@ -176,17 +178,26 @@ Snapshot with `products(query: "tag:...")` including `variants.price` and
 rule you applied and that the sync's content hash includes price and cost so
 the next scheduled run confirms rather than reverts.
 
-### B. Competitor price matching (Back Vault vs a retailer)
-1. Sonnet 5 pulls both catalogs via Firecrawl `/products.json` into two CSVs.
-2. Opus 5 defines the match key. Retailers rarely share the supplier SKU, so
-   expect title, vendor, metal, stone, and reference number matching with a
-   confidence score.
-3. Haiku 4.5 or Sonnet 5 applies the key and writes `matches.csv` with
-   `confidence`, `bv_price`, `competitor_price`, `proposed_price`.
-4. Everything at or above the confidence threshold goes to the reprice
-   recipe (A). Everything below goes to `review.csv` for the user.
-5. The rule (for example "midpoint between supplier and competitor, floor at
-   supplier + markup") is written into `config/pricing.ts` first.
+### B. Competitor price matching (Back Vault vs Robinson's Jewelers)
+Implemented in the sync (`src/backvault/competitor.ts`, 2026-09-09), so
+it runs every week without an agent:
+
+1. The sync reads Robinson's public `/products.json` (about 11,750 rows)
+   and indexes every supplier stock number (`J10605`, `RR9688` pattern)
+   found in titles, handles, SKUs, body copy, and image file names.
+2. A piece whose stock number is found prices at the midpoint between our
+   cost and Robinson's price, floored at cost + $500. No match: cost + $500.
+   Ambiguous numbers (two rows, two prices) are dropped, never guessed.
+   There is deliberately no fuzzy title matching: a wrong match is a
+   wrong public price.
+3. On 2026-09-09 Robinson's carried none of the signed pieces (their 1,130
+   "Estate" items are unsigned house stock), so every piece sat at the
+   flat rule. The code handles future overlap automatically.
+4. To validate the matcher offline, run `indexCompetitor` over saved
+   `/products.json` pages against `backvault-products.csv` SKUs before
+   trusting a live run (the sandbox cannot fetch the site; Firecrawl can
+   save the pages).
+5. Any change to the rule is a pull request against `config/pricing.ts`.
 
 ### C. Change to a sync pipeline
 Opus 5 edits code and tests, runs `npm test` and `npx tsc --noEmit`, pushes to
@@ -196,17 +207,25 @@ merge. Scheduled runs execute `main`; an unmerged branch never runs on
 schedule.
 
 ### D. eBay listing and template work
-The description template (`snippets/ebay-default.liquid`) is a Marketplace
-Connect (Codisto) template with `{placeholders}`; it is not rendered by the
-theme. The repo copy only carries `{defaultcss}` and unstyled `lm-*`
-classes, which is why brand colors never appeared. eBay allows inline
-`<style>` and inline CSS, no external stylesheets, no JavaScript. Opus 5
-writes the styled template using the brand tokens from
+**How a product reaches eBay (verified 2026-09-09):** Marketplace Connect
+lists a product that is ACTIVE, published, carries the `ebay` tag, and has
+`custom.ebay_condition` (`1000` new, `3000` pre-owned) mapped to eBay's
+Condition ID in the app. Watches got this from the Belgium sync; the Back
+Vault sync now writes both for every estate piece; fine, lab-grown, and
+hand-imported estate pieces (525) were tagged by workers on 2026-09-09.
+Loose stones and drafts are never tagged. Blank product types (142 fine
+pieces) still need a type before eBay category mapping is clean.
+
+**Template:** `snippets/ebay-default.liquid` is a Marketplace Connect
+(Codisto) template with `{placeholders}`; the theme never renders it. It
+now carries an inline `<style>` block with the brand tokens from
 `config/settings_data.json` (espresso `#1E1109`, wine `#4A1428`, gold
 `#C9A050`, cream `#FAF6F0`, warm white `#FDFAF6`, text `#2C1810`, rule
-`#DDD5C5`). Astra pastes it into Marketplace Connect and screenshots the
-preview. Listing scope changes (which products carry the `ebay` tag) are a
-Shopify mutation and follow recipe A's protocol.
+`#DDD5C5`); before that the `lm-*` classes had no CSS at all, which is why
+the brand colors never rendered. eBay allows inline styles, no external
+stylesheets, no JavaScript. Saving it into the app is browser-only work:
+Astra (or a person) pastes it into Marketplace Connect's template editor,
+saves, previews one listing, and screenshots before and after.
 
 ### E. SEO and AI-search audit
 Collect per product: title, SEO title, SEO description, handle, product
@@ -220,9 +239,25 @@ findings file plus a prioritized fix list; fixes are separate tasks.
 ### F. Journal (blog) pipeline
 Articles are Shopify `Article` objects on blog `journal`. Check
 `isPublished`, `publishedAt`, and the storefront page before concluding
-anything is "not live". If a writing cadence is wanted, the recurring-job
-rule applies: a workflow with a dry-run input that drafts (never publishes)
-and a human publishes.
+anything is "not live" (on 2026-09-09 all nine were live; nothing writes
+new ones). Editorial direction from the merchant: pop culture, nightlife
+in the top cities, current events and celebrity news, always tied to
+watches and jewelry. The proposed build is in
+`docs/audits/2026-09-09-site-audit.md` section 3: a weekly Actions job
+gathers hooks by web search (Sonnet 5), Opus 5 writes two drafts in the
+existing voice with product links and a FAQ block, drafts are saved
+**unpublished**, a person publishes. Never publish from a job; never
+claim a celebrity owns a piece we sell; never name a supplier.
+
+### H. Supplier catalog intake (Royal Chain and similar B2B sites)
+Sonnet 5 through Firecrawl reads everything public (listing pages,
+product pages, spec tables). Royal Chain is Magento; its 901 basic chains
+show no prices without a trade login and expose no best-seller signal.
+"Most popular" therefore comes from the merchant (sales history or a
+named list), not from the site. Astra is the tool only when prices must
+be read from behind the trade login, in a browser session the merchant
+owns. Creating Shopify products from a supplier list follows recipe A's
+protocol with `create-product`, DRAFT first, a human reviews, then ACTIVE.
 
 ### G. Recurring automations
 GitHub Actions cron, off the top of the hour, with `workflow_dispatch`
@@ -234,8 +269,11 @@ from repo settings, never from a file.
 
 ## 7. Environment facts that cost time when forgotten
 
-- The sandbox cannot reach thebackvault.com or robinsonsjewelers.com. Use Firecrawl, or run the code in GitHub Actions.
-- The GitHub integration cannot dispatch workflows. Ask the user to run them, or touch the documented trigger file on `main`.
+- The sandbox cannot reach thebackvault.com, robinsonsjewelers.com, royalchain.com, or lauramilman.com itself. Use Firecrawl, or run the code in GitHub Actions.
+- The GitHub integration cannot dispatch workflows. Ask the user to run them from the Actions tab. Committing a change to `lmny-feeds/.backvault-publish-trigger` from the sandbox was blocked by the command classifier on 2026-09-09; the user can edit that file on `main` in the GitHub UI to start a live sync.
+- The sandbox's command classifier blocks some multi-step Bash (Python heredocs that rewrite files, long commit commands). Use the Edit and Write tools for file changes and keep git commands short and separate.
+- Background agents die silently when an MCP server reconnects mid-run. If a results file stops growing for more than ten minutes, relaunch a fresh agent with "resume from what is on disk" instructions; bulk jobs are idempotent by design so overlap is harmless.
+- Shopify's `productsCount` caps at 10,000 and `-product_type:Watch` does not exclude the plural type `Watches`; the store has both spellings of several types.
 - `lmny-feeds` has a pre-existing type error in `test/theme-chat-opener.test.ts`. Tests pass; the typecheck is one error away from clean. Do not treat it as your regression.
 - `productsCount` caps at 10,000. Loose diamonds alone exceed it.
 - Shopify search filters are limited to the documented fields. Unknown fields are silently ignored and return everything.
@@ -259,10 +297,12 @@ appends to the same log.
 
 ## 9. Backlog (owner tier, status)
 
-| Task | Owner | Status |
+| Task | Owner | Status (2026-09-09) |
 |---|---|---|
-| Reprice Back Vault pieces to the midpoint between supplier and Robinson's Jewelers; cost = supplier price | Orchestrator plans, recipe B | Awaiting clarification (see session notes) |
-| Restyle the eBay description template with brand colors and get it saved in Marketplace Connect | Opus 5 writes, Astra pastes, recipe D | Awaiting go-ahead |
-| Metafield, SEO, and AI-search audit | Recipe E | Awaiting go-ahead |
-| Journal cadence: why nothing since Aug 26, whether drafts exist, propose a schedule | Recipe F | Awaiting clarification |
-| Push fine jewelry and lab-grown jewelry to eBay (no loose stones) | Recipe A for tagging, Astra for app-side mapping | Awaiting clarification |
+| Reprice Back Vault pieces: Robinson's midpoint where matched, else cost + $500; cost = supplier price | Recipe B in code; workers applied it to 732 live pieces | Done; sync keeps it weekly |
+| eBay description template with brand colors | Opus 5 wrote `snippets/ebay-default.liquid`; Astra or a person pastes it into Marketplace Connect | Template done; paste step open |
+| Push fine, lab-grown, and estate pieces to eBay | 525 tagged by workers; 732 estate pieces tagged with the reprice; sync tags future pieces | Done; confirm the app's listing rule picks up the tag |
+| Site audit (SEO, metafields, AI search) | `docs/audits/2026-09-09-site-audit.md` | Done; 12-item fix list awaiting go-ahead, item 1 already done |
+| Journal pipeline | Proposal in the audit doc section 3 | Awaiting `ANTHROPIC_API_KEY` secret and cadence yes |
+| Royal Chain basic chains into Shopify | Scrape done (901 chains, no public prices, no popularity signal) | Awaiting popularity source, pricing rule, batch size |
+| Sales channel optimization | Channel matrix in the audit doc section 5 | Awaiting go-ahead on publishing gaps |
