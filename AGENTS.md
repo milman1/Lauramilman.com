@@ -64,6 +64,7 @@ old CSV import are hidden and untouched.
 10. **Never send customer data to an unrelated service.** Customer records stay in Shopify, Resend, and Supabase.
 11. **Work lands on `main`.** Every task ends with its branch merged to `main` through a pull request (merchant decision 2026-09-09). Scheduled jobs run `main` only, so an unmerged branch is work that does not exist. Restart the working branch from `main` after each merge.
 12. **Never tag a draft or a loose stone for eBay.** The Back Vault sync strips the `ebay` tag from any piece it writes as DRAFT; CSV imports carry the tag only on ACTIVE rows (`SHOPIFY_SETUP.md` section 11).
+13. **The orchestrator briefs and verifies; it does not do the work.** Fable 5.1 (or Astra on the OpenAI side) plans, writes the brief, adjudicates the review, and merges. It never writes code, docs, or copy itself and never runs bulk mutations itself. Doing the work in the orchestrator model is the most expensive way to do it and burns the session limit (merchant decision 2026-09-09).
 
 ### 2a. Pricing matrix: wholesale cost to retail, by source
 
@@ -140,7 +141,7 @@ model make scope decisions.
 | Classify or tag thousands of rows | Classifier | Haiku 4.5 / Luna | Per 2,000 rows | Provide the label set and three examples per label. |
 | Audit (SEO, metafields, schema.org, AI-search readiness) | Orchestrator plans, Worker collects | Fable 5.1 plans; Sonnet 5 collects; Opus 5 writes the report | Collection only | Output is a findings file with severity, evidence, and a proposed fix per row. |
 | Operate an admin UI with no API | UI operator | Astra | No | Marketplace Connect template editor, eBay Seller Hub, Uploadify. Take a screenshot before and after every save. Never enter credentials from a chat transcript. |
-| Second opinion on a plan or diff | Reviewer | The other vendor's build tier | No | Review-only; the reviewer does not edit. |
+| Second opinion on a plan or diff | Reviewer | Opus 5 / Sol (blind, fresh agent) | No | Step 3 of the operating loop (section 5a). Review-only; the reviewer does not edit. |
 | Recurring job (weekly, hourly) | Build | Opus 5 writes the workflow | No | GitHub Actions cron for anything that touches code or Shopify. n8n only for glue between SaaS tools. Every cron job has a dry-run input and a report artifact. |
 
 ### When to use OpenAI GPT-6 Astra specifically
@@ -160,6 +161,38 @@ save; those go into the task's results folder like any other evidence.
 ---
 
 ## 5. When to spawn agents
+
+### 5a. The operating loop
+
+Every task moves through four steps. The orchestrator (Fable 5.1 or Astra)
+plans and sets guardrails; a worker (Sonnet 5, Terra, or Luna, chosen by the
+routing table in section 4) does the work from a written brief; a reviewer
+(Opus 5 or Sol) reviews blind; the orchestrator adjudicates the review and
+sends the work back for repairs or accepts it. Nothing lands on `main` or in
+Shopify without passing through all four steps.
+
+| Step | Who | Gets | Produces | Never does |
+|---|---|---|---|---|
+| Plan | Orchestrator | The request, the playbook, and the current state of the repo and store | A brief per the job brief template (section 5) with scope, guardrails, stop rules, and the acceptance checks | Never writes the deliverable itself |
+| Work | Worker | Only the brief and the files it names | The deliverable plus a result report per the template | Never widens scope, never asks questions mid-run, never touches anything outside the brief |
+| Review | Reviewer | The brief, the acceptance checks, and the deliverable, and not the worker's transcript or reasoning | A findings list with severity, evidence, and a proposed fix per item, and an explicit pass or fail | Never edits the deliverable, never talks to the worker |
+| Adjudicate | Orchestrator | The brief, the deliverable, and the review | A decision per finding: fix, waive with a reason, or escalate to the merchant; then a repair brief back to the worker or a merge | Never fixes things itself |
+
+Blind review means:
+
+- The reviewer sees the brief and the output, not the worker's chat or reasoning.
+- The reviewer is a different model tier from the worker and a fresh agent, never the same session.
+- For code, the reviewer runs the tests and reads the diff; for copy, it checks every acceptance rule in the brief; for bulk store writes, it runs the independent verification read.
+
+Repair round:
+
+- The repair brief quotes the finding verbatim and names the acceptance check that failed.
+- The same worker tier redoes only what the finding covers.
+- A second failed review on the same finding escalates to the merchant instead of a third round.
+
+For a one-line fix or a single query the orchestrator may skip the worker
+and reviewer, but it still does not merge its own change without the tests
+passing and the diff read back.
 
 Spawn when at least one of these is true:
 
