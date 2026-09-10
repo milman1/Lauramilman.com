@@ -36,7 +36,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import Anthropic from '@anthropic-ai/sdk';
-import { containsBackVaultReference } from '../src/backvault/scrub.js';
+import { containsBackVaultReference, scrubText } from '../src/backvault/scrub.js';
 import { exchangeClientCredentials, ShopifyClient } from '../src/shopify.js';
 
 const OUT_DIR = 'out';
@@ -148,6 +148,7 @@ export type ViolationKind =
   | 'word-count'
   | 'faq-count'
   | 'featured-handle'
+  | 'html-not-allowed'
   | 'model-error';
 
 export interface Violation {
@@ -168,6 +169,7 @@ export interface JournalArticle {
   isPublished: boolean;
   createdAt: string;
   publishedAt: string | null;
+  blog: { id: string };
 }
 
 export interface HookItem {
@@ -265,20 +267,48 @@ export function findExternalLinks(html: string): string[] {
   return extractHrefs(html).filter((href) => parseStoreLink(href) === null);
 }
 
-const PRICE_PATTERNS: RegExp[] = [
-  // $1,200 / $ 950 / US$4,500 / $12.5k
-  /(?:US\s*)?\$\s?\d[\d,.]*\s*(?:k|K|m|M|million)?/g,
-  // 1,200 dollars / 950 USD
-  /\b\d[\d,.]*\s*(?:dollars|USD)\b/gi,
-  // "priced at four thousand", "under twenty thousand dollars"
-  /\b(?:priced at|costs?|retails? for|starting at)\b[^.]{0,40}?\b(?:hundred|thousand|million)\b/gi,
+// --- prices ---------------------------------------------------------------
+//
+// Prices change, so the Journal never states one. The three literal patterns
+// below cover symbol-first ($4,500, EUR5,000, GBP5,000), code-first (USD 5,000,
+// USD5000) and number-first ("2,400 dollars", "a 5,000-dollar watch") forms.
+// Spelled-out amounts ("around five thousand") are handled separately because a
+// magnitude word on its own is usually not a price ("a hundred years of Tank").
+
+const LITERAL_PRICE_PATTERNS: RegExp[] = [
+  // Symbol first: $1,200 / $ 950 / US$4,500 / EUR5,000 / GBP5,000 / $12.5k
+  /(?:US|CA|AU|NZ)?\s?[$€£¥₹]\s?\d[\d,.]*\s*(?:k|K|m|M|bn|million|billion)?/g,
+  // Code first: USD 5,000 / USD5000 / EUR 4.500 / CHF 9,000
+  /\b(?:USD|EUR|GBP|CHF|CAD|AUD|JPY)\s*\d[\d,.]*\s*(?:k|K|m|M|million)?/gi,
+  // Number first, including the hyphenated attributive form "5,000-dollar":
+  /\b\d[\d,.]*\s*(?:-\s*)?(?:dollars?|euros?|pounds?|USD|EUR|GBP|CHF|CAD|AUD)\b/gi,
 ];
 
-/** Any dollar price in the copy. Prices change; the Journal never states one. */
+/** "five thousand", "a hundred", "twenty thousand" — a magnitude, not yet a price. */
+const SPELLED_MAGNITUDE =
+  /\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|a|couple|few|several)\s+(?:hundred|thousand|million)\b/gi;
+
+/** Words that turn a magnitude into a price when they sit just before it. */
+const PRICE_CONTEXT =
+  /\b(?:priced?|prices|pricing|cost|costs|costing|retails?|sells? for|sold for|worth|budget|spend|spent|under|over|around|about|roughly|nearly|near|from|starting at|between|up to|less than|more than|north of|fetched|hammered|paid|pay)\b/i;
+
+/** Nouns that make a following magnitude a count or a span rather than a price. */
+const NON_PRICE_NOUN =
+  /^[\s,]*(?:years?|months?|weeks?|days?|hours?|minutes?|pieces?|stones?|carats?|times?|ways?|people|customers?|clients?|collectors?|watches|watch|rings?|examples?|listings?|words?|miles?|kilometres?|kilometers?|hands?|links?)\b/i;
+
+/** A currency word straight after a magnitude makes it a price outright. */
+const TRAILING_CURRENCY = /^[\s-]*(?:dollars?|euros?|pounds?|USD|EUR|GBP|CHF)\b/i;
+
+/**
+ * Any stated price in the copy, in any of the forms a writer reaches for.
+ * Reference numbers, years, carat weights, metal marks ("18K") and plain counts
+ * ("five stones") are deliberately not prices.
+ */
 export function findPrices(text: string): string[] {
   const plain = stripHtml(text);
   const hits: string[] = [];
-  for (const pattern of PRICE_PATTERNS) {
+
+  for (const pattern of LITERAL_PRICE_PATTERNS) {
     const re = new RegExp(pattern.source, pattern.flags);
     let m: RegExpExecArray | null;
     while ((m = re.exec(plain)) !== null) {
@@ -286,49 +316,198 @@ export function findPrices(text: string): string[] {
       if (m.index === re.lastIndex) re.lastIndex += 1;
     }
   }
+
+  const magnitude = new RegExp(SPELLED_MAGNITUDE.source, SPELLED_MAGNITUDE.flags);
+  let m: RegExpExecArray | null;
+  while ((m = magnitude.exec(plain)) !== null) {
+    const before = plain.slice(Math.max(0, m.index - 40), m.index);
+    const after = plain.slice(m.index + m[0].length);
+    if (TRAILING_CURRENCY.test(after)) {
+      hits.push(`${m[0].trim()}${after.slice(0, 12).replace(/[^A-Za-z\s-].*$/, '').trimEnd()}`.trim());
+      continue;
+    }
+    if (NON_PRICE_NOUN.test(after)) continue;
+    if (PRICE_CONTEXT.test(before)) hits.push(m[0].trim());
+  }
+
   return hits;
 }
 
-/**
- * Verbs that assert a specific actor owns or wore something. Deliberately no
- * bare infinitive ("wear", "buy"): "you can wear our Tank" is normal styling
- * copy, "she wears our Tank" is an ownership claim.
- */
-const OWNERSHIP_VERB =
-  /(?<![\w-])(owns|owned|wears|wore|wearing|bought|buys|purchased|picked up|sported|was gifted|received)(?![\w-])/i;
+// --- HTML allow-list ------------------------------------------------------
+
+/** The only tags a Journal body may use. */
+export const ALLOWED_HTML_TAGS = new Set([
+  'p',
+  'h2',
+  'h3',
+  'ul',
+  'ol',
+  'li',
+  'a',
+  'strong',
+  'em',
+  'blockquote',
+  'section',
+]);
+
+/** The only attributes any of those tags may carry. */
+const ALLOWED_HTML_ATTRIBUTES: Record<string, Set<string>> = {
+  a: new Set(['href']),
+  section: new Set(['class']),
+};
 
 /**
- * A reference that ties the sentence to our own inventory: a link to a product
- * or collection, a first-person possessive, or an availability phrase.
+ * Enforce the markup contract in code rather than trusting the prompt. Anything
+ * outside the tag allow-list (an <img>, a <script>, a bare <div>), any attribute
+ * that is not `href` on an anchor or `class` on the FAQ section, and any `src`
+ * anywhere is a violation.
+ */
+export function findHtmlViolations(html: string): string[] {
+  const problems: string[] = [];
+  const tagRe = /<\s*(\/?)\s*([A-Za-z][A-Za-z0-9-]*)((?:"[^"]*"|'[^']*'|[^>"'])*?)\/?\s*>/g;
+  let m: RegExpExecArray | null;
+  while ((m = tagRe.exec(html)) !== null) {
+    const closing = m[1] === '/';
+    const tag = (m[2] ?? '').toLowerCase();
+    const rawAttrs = m[3] ?? '';
+    if (!ALLOWED_HTML_TAGS.has(tag)) {
+      problems.push(`tag <${closing ? '/' : ''}${tag}>`);
+      continue;
+    }
+    if (closing) continue;
+    const allowed = ALLOWED_HTML_ATTRIBUTES[tag] ?? new Set<string>();
+    const attrRe = /([A-Za-z_:][-A-Za-z0-9_:.]*)\s*(?:=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/g;
+    let a: RegExpExecArray | null;
+    while ((a = attrRe.exec(rawAttrs)) !== null) {
+      const name = (a[1] ?? '').toLowerCase();
+      if (name.length === 0) continue;
+      if (!allowed.has(name)) problems.push(`attribute ${name} on <${tag}>`);
+    }
+  }
+  // Belt and braces: a src must never survive, whatever tag carries it.
+  if (/\bsrc\s*=/i.test(html)) problems.push('attribute src');
+  return Array.from(new Set(problems));
+}
+
+// --- celebrity ownership claims -------------------------------------------
+
+/**
+ * Verbs that put a specific actor together with a specific object. Strong verbs
+ * assert wearing or owning on their own; weak verbs ("picked", "is the one")
+ * are ordinary editorial words that only matter next to a named person, so they
+ * are kept in a separate tier. No bare infinitive: "you can wear our Tank" is
+ * styling copy, "she wears our Tank" is a claim.
+ */
+const STRONG_OWNERSHIP_VERBS =
+  'owns|owned|wears|wore|wearing|bought|buys|purchased|picked up|sported|sporting|was gifted|received|photographed in|photographed wearing|seen in|seen wearing|spotted in|spotted wearing';
+const WEAK_OWNERSHIP_VERBS = 'picked|picks|chose|chooses|choosing|is the one|are the ones|was the one';
+const ANY_OWNERSHIP_VERBS = `${STRONG_OWNERSHIP_VERBS}|${WEAK_OWNERSHIP_VERBS}`;
+
+function verbPattern(source: string): RegExp {
+  return new RegExp(`(?<![\\w-])(?:${source})(?![\\w-])`, 'i');
+}
+
+const STRONG_VERB = verbPattern(STRONG_OWNERSHIP_VERBS);
+const ANY_VERB = verbPattern(ANY_OWNERSHIP_VERBS);
+
+/**
+ * A reference that ties the text to our own inventory: a link to a product or
+ * collection, a first-person possessive, or an availability phrase.
  */
 const OUR_INVENTORY_REFERENCE =
   /(href\s*=\s*["']\s*(?:https?:\/\/(?:www\.)?lauramilman\.com)?\/(?:products|collections)\/)|\b(our|we sell|we carry|we stock|this exact piece|the piece below|in our vault|available here|shop (?:it|the piece|this))\b/i;
 
 /**
- * Reject any sentence that claims a named person owns, wore, or bought a piece
- * we sell (AGENTS.md recipe F; audit section 3 item 4). The test is deliberately
- * two-sided: an ownership verb *and* a reference to our own inventory in the
- * same sentence. "Zendaya wore a Cartier Tank on the red carpet" is fine copy;
- * "Zendaya wore our Cartier Tank" is not.
+ * A reference to *this specific object* rather than to the category. These are
+ * what make a paragraph-level pairing a claim: "the exact piece", "the same
+ * reference we have listed", "the one you can see in our estate edit".
  */
+const SPECIFIC_PIECE_REFERENCE =
+  /\b(the exact (?:piece|watch|ring|one)|this exact (?:piece|watch|ring|one)|the same (?:reference|piece|watch|ring)|the very (?:piece|one)|the piece below|the one (?:you can see|shown|below|here|we)|we have listed|listed here|listed below|available here|in our vault|shop (?:it|the piece|this piece|this))\b/i;
+
+/** Third-person pronouns — the cheapest signal that a person is the subject. */
+const THIRD_PERSON_PRONOUN = /(?<![\w-])(he|she|they|him|her|his|their|hers)(?![\w-])/i;
+
+/**
+ * Capitalized openers that are not names, so "We picked ..." and "The exact
+ * piece is ..." never read as a celebrity mention.
+ */
+const NAME_STOPWORDS = new Set([
+  'we', 'i', 'you', 'our', 'ours', 'your', 'the', 'a', 'an', 'this', 'that', 'these', 'those',
+  'it', 'and', 'but', 'when', 'if', 'here', 'there', 'now', 'then', 'every', 'each', 'both',
+  'many', 'most', 'some', 'no', 'new', 'one', 'two', 'three', 'shop', 'read', 'browse',
+]);
+
+/** True when a capitalized name sits directly in front of an ownership verb. */
+function hasNamedActor(plain: string): boolean {
+  const re = new RegExp(
+    `([A-Z][A-Za-z'’.-]+)(?:\\s+[A-Z][A-Za-z'’.-]+){0,2}\\s+(?:was\\s+|were\\s+|has\\s+|have\\s+|had\\s+|is\\s+|are\\s+|also\\s+|later\\s+)*(?:${ANY_OWNERSHIP_VERBS})(?![\\w-])`,
+    'g',
+  );
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(plain)) !== null) {
+    if (!NAME_STOPWORDS.has((m[1] ?? '').toLowerCase())) return true;
+  }
+  return false;
+}
+
+/** A person is the subject: a third-person pronoun, or a name before the verb. */
+export function hasPersonSignal(plain: string): boolean {
+  return THIRD_PERSON_PRONOUN.test(plain) || hasNamedActor(plain);
+}
+
 /** Sentinel used to cut the body into block-level chunks before sentence splitting. */
 const BLOCK_SEPARATOR = '\u0000';
 
+/**
+ * Reject copy that ties a named person to a piece we sell (AGENTS.md recipe F;
+ * audit section 3 item 4). Two passes, because the claim can be split across a
+ * full stop:
+ *
+ *   Sentence pass — an ownership verb plus any reference to our inventory in
+ *   one sentence. "Zendaya wore our Cartier Tank" fails here.
+ *
+ *   Paragraph pass — a person, an ownership verb, and a reference to *this
+ *   specific object* anywhere in the same block. "Zendaya wore a Cartier Tank.
+ *   The exact piece is in our vault." fails here.
+ *
+ * Reporting what somebody wore in public and then writing about the category is
+ * still allowed: "Zendaya wore a Cartier Tank on the red carpet. Our estate edit
+ * has several Tanks from the same era." passes both passes.
+ */
 export function findCelebrityOwnershipClaims(html: string): string[] {
   const hits: string[] = [];
-  // Split into block-level chunks first, then into sentences, so one long
-  // <p> cannot pair a verb in its first sentence with "our" in its last.
-  const chunks = html
+  const blocks = html
     .replace(/<\/(?:p|li|h[1-6]|div|blockquote|section)>/gi, BLOCK_SEPARATOR)
-    .split(BLOCK_SEPARATOR)
-    .flatMap((block) => block.split(/(?<=[.!?])\s+/));
-  for (const chunk of chunks) {
-    const text = chunk.trim();
-    if (text.length === 0) continue;
-    if (!OWNERSHIP_VERB.test(stripHtml(text))) continue;
-    if (!OUR_INVENTORY_REFERENCE.test(text)) continue;
-    hits.push(stripHtml(text).slice(0, 160));
+    .split(BLOCK_SEPARATOR);
+
+  for (const block of blocks) {
+    if (block.trim().length === 0) continue;
+    const blockPlain = stripHtml(block);
+
+    // Sentence pass.
+    let sentenceHit = false;
+    for (const sentence of block.split(/(?<=[.!?])\s+/)) {
+      const text = sentence.trim();
+      if (text.length === 0) continue;
+      const plain = stripHtml(text);
+      const strong = STRONG_VERB.test(plain);
+      const weak = !strong && ANY_VERB.test(plain);
+      if (!strong && !weak) continue;
+      if (weak && !hasPersonSignal(plain)) continue;
+      if (!OUR_INVENTORY_REFERENCE.test(text)) continue;
+      hits.push(plain.slice(0, 160));
+      sentenceHit = true;
+    }
+    if (sentenceHit) continue;
+
+    // Paragraph pass.
+    if (!ANY_VERB.test(blockPlain)) continue;
+    if (!hasPersonSignal(blockPlain)) continue;
+    if (!SPECIFIC_PIECE_REFERENCE.test(blockPlain)) continue;
+    hits.push(blockPlain.slice(0, 160));
   }
+
   return hits;
 }
 
@@ -374,7 +553,12 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
     violations.push({ kind: 'price', detail: price });
   }
 
-  // 4. Links: internal only, every handle known, at least three.
+  // 4. Markup: allow-list enforced here, not just asked for in the prompt.
+  for (const problem of findHtmlViolations(draft.bodyHtml)) {
+    violations.push({ kind: 'html-not-allowed', detail: problem });
+  }
+
+  // 5. Links: internal only, every handle known, at least three.
   for (const href of findExternalLinks(draft.bodyHtml)) {
     violations.push({ kind: 'external-link', detail: href });
   }
@@ -389,12 +573,12 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
     violations.push({ kind: 'too-few-links', detail: `${links.length} store links, need ${MIN_STORE_LINKS}` });
   }
 
-  // 5. Tags.
+  // 6. Tags.
   for (const tag of findUnknownTags(draft.tags)) {
     violations.push({ kind: 'unknown-tag', detail: tag });
   }
 
-  // 6. SEO lengths (docs/seo-title-formulas.md).
+  // 7. SEO lengths (docs/seo-title-formulas.md).
   if (draft.seoTitle.length > SEO_TITLE_MAX) {
     violations.push({ kind: 'seo-title-length', detail: `${draft.seoTitle.length} > ${SEO_TITLE_MAX}` });
   }
@@ -405,7 +589,7 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
     });
   }
 
-  // 7. Shape: length and FAQ block.
+  // 8. Shape: length and FAQ block.
   const words = wordCount(draft.bodyHtml) + wordCount(faqText);
   if (words < WORD_COUNT_MIN || words > WORD_COUNT_MAX) {
     violations.push({ kind: 'word-count', detail: `${words} words, need ${WORD_COUNT_MIN}-${WORD_COUNT_MAX}` });
@@ -414,7 +598,7 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
     violations.push({ kind: 'faq-count', detail: `${draft.faq.length} FAQ questions, need ${FAQ_QUESTIONS}` });
   }
 
-  // 8. Featured product must be a real, active handle.
+  // 9. Featured product must be a real, live handle.
   const featured = draft.featuredProductHandle.trim().toLowerCase();
   if (!catalog.productHandles.has(featured)) {
     violations.push({ kind: 'featured-handle', detail: featured || '(empty)' });
@@ -424,17 +608,21 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
 }
 
 /**
- * Housekeeping filter. Only unpublished articles that carry `journal-draft` and
- * are older than `maxAgeDays` are eligible for deletion. A published article, or
- * a draft somebody else made without the tag, is never returned.
+ * Housekeeping filter — report only. The job never deletes anything; this picks
+ * the drafts the run report asks the merchant to clear out. Only unpublished
+ * articles on the expected blog that carry `journal-draft` and are older than
+ * `maxAgeDays` qualify. A published article, an article on another blog, or a
+ * draft somebody else made without the tag is never returned.
  */
 export function selectStaleDrafts(
   articles: JournalArticle[],
   now: Date,
+  blogId: string | null = null,
   maxAgeDays: number = DRAFT_MAX_AGE_DAYS,
 ): JournalArticle[] {
   const cutoff = now.getTime() - maxAgeDays * 24 * 60 * 60 * 1000;
   return articles.filter((a) => {
+    if (blogId !== null && a.blog?.id !== blogId) return false;
     if (a.isPublished) return false;
     if (a.publishedAt !== null) return false;
     if (!a.tags.some((t) => t.trim().toLowerCase() === JOURNAL_DRAFT_TAG)) return false;
@@ -444,15 +632,46 @@ export function selectStaleDrafts(
   });
 }
 
+/**
+ * Admin deep link for a stale draft, so the merchant can open and delete it
+ * from the run report without hunting for it.
+ */
+export function adminArticleUrl(domain: string, articleGid: string): string {
+  const host = domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const numericId = /(\d+)\s*$/.exec(articleGid)?.[1] ?? '';
+  const storeHandle = /^(.+)\.myshopify\.com$/i.exec(host)?.[1];
+  return storeHandle
+    ? `https://admin.shopify.com/store/${storeHandle}/articles/${numericId}`
+    : `https://${host}/admin/articles/${numericId}`;
+}
+
+/**
+ * Fold a tag onto the spelling the Journal already uses, so "van cleef &
+ * arpels" and "VAN CLEEF & ARPELS" both land on the one live tag rather than
+ * creating a third. An unrecognised tag is left alone; `checkDraft` has already
+ * rejected the draft by then.
+ */
+export function canonicalizeTags(tags: string[]): string[] {
+  const canonical = new Map<string, string>(
+    [...JOURNAL_TAGS, JOURNAL_DRAFT_TAG].map((t) => [t.toLowerCase(), t]),
+  );
+  const out: string[] = [];
+  for (const raw of tags) {
+    const trimmed = raw.trim();
+    if (trimmed.length === 0) continue;
+    const resolved = canonical.get(trimmed.toLowerCase()) ?? trimmed;
+    if (!out.includes(resolved)) out.push(resolved);
+  }
+  return out;
+}
+
 /** The exact `articleCreate` input, `isPublished: false`, never a publish date. */
 export function buildArticleCreateInput(
   draft: JournalDraft,
   blogId: string,
-  image: { url: string; altText: string } | null,
+  image: { url: string; altText: string; fallbackAltText: string } | null,
 ): Record<string, unknown> {
-  const tags = Array.from(
-    new Set([...draft.tags.map((t) => t.trim()).filter(Boolean), JOURNAL_DRAFT_TAG]),
-  );
+  const tags = canonicalizeTags([...draft.tags, JOURNAL_DRAFT_TAG]);
   const input: Record<string, unknown> = {
     blogId,
     title: draft.title,
@@ -476,7 +695,15 @@ export function buildArticleCreateInput(
       },
     ],
   };
-  if (image) input.image = { url: image.url, altText: image.altText };
+  if (image) {
+    // Rule 1 applies to alt text like any other field. The product's alt text
+    // comes from the catalogue, so scrub it; if the scrub changed anything, the
+    // alt is not trustworthy and the product title stands in instead.
+    const scrubbed = scrubText(image.altText);
+    const clean = scrubbed === image.altText.trim() && scrubbed.length > 0;
+    const altText = clean ? scrubbed : scrubText(image.fallbackAltText) || draft.title;
+    input.image = { url: image.url, altText };
+  }
   return input;
 }
 
@@ -554,7 +781,7 @@ const BLOG_QUERY = `query JournalBlog($handle: String!) {
 const ARTICLES_QUERY = `query JournalArticles($cursor: String, $q: String!) {
   articles(first: 50, after: $cursor, query: $q) {
     pageInfo { hasNextPage endCursor }
-    nodes { id title handle tags isPublished createdAt publishedAt }
+    nodes { id title handle tags isPublished createdAt publishedAt blog { id } }
   }
 }`;
 
@@ -579,8 +806,8 @@ const PRODUCTS_QUERY = `query JournalProducts($cursor: String, $q: String!) {
   }
 }`;
 
-const COLLECTIONS_QUERY = `query JournalCollections($cursor: String) {
-  collections(first: 100, after: $cursor) {
+export const COLLECTIONS_QUERY = `query JournalCollections($cursor: String, $q: String!) {
+  collections(first: 100, after: $cursor, query: $q) {
     pageInfo { hasNextPage endCursor }
     nodes { handle title }
   }
@@ -593,25 +820,31 @@ export const ARTICLE_CREATE_MUTATION = `mutation JournalArticleCreate($article: 
   }
 }`;
 
-export const ARTICLE_DELETE_MUTATION = `mutation JournalArticleDelete($id: ID!) {
-  articleDelete(id: $id) {
-    deletedArticleId
-    userErrors { code field message }
-  }
-}`;
+/**
+ * Product segments the Journal is allowed to link to. Loose stones are excluded.
+ *
+ * Both halves matter: `status:ACTIVE` is the product's own status, and
+ * `published_status:published` is whether it is actually live on the online
+ * store. An ACTIVE product that is unpublished 404s for a reader, so a link to
+ * it would be a broken link in a published article. The code re-checks
+ * `status === 'ACTIVE'` on every row afterwards, because a filter field Shopify
+ * does not recognise is silently ignored and returns everything.
+ */
+const LIVE_FILTER = 'status:ACTIVE AND published_status:published';
 
-/** Product segments the Journal is allowed to link to. Loose stones are excluded. */
-const PRODUCT_SEGMENTS: Array<{ segment: string; query: string }> = [
-  { segment: 'watch', query: "status:ACTIVE AND (product_type:Watch OR product_type:Watches)" },
+/** Collections must be live on the online store for the same reason. */
+export const COLLECTIONS_FILTER = 'published_status:published';
+
+export const PRODUCT_SEGMENTS: Array<{ segment: string; query: string }> = [
+  { segment: 'watch', query: `${LIVE_FILTER} AND (product_type:Watch OR product_type:Watches)` },
   {
     segment: 'estate',
-    query: 'status:ACTIVE AND (tag:backvault-feed OR tag:antique-estate OR tag:designer-jewelry)',
+    query: `${LIVE_FILTER} AND (tag:backvault-feed OR tag:antique-estate OR tag:designer-jewelry)`,
   },
-  { segment: 'lab-grown', query: 'status:ACTIVE AND tag:lab-grown' },
+  { segment: 'lab-grown', query: `${LIVE_FILTER} AND tag:lab-grown` },
   {
     segment: 'fine',
-    query:
-      "status:ACTIVE AND (vendor:'Laura Milman New York' OR vendor:'Milman New York' OR vendor:\"Laura's Gems\")",
+    query: `${LIVE_FILTER} AND (vendor:'Laura Milman New York' OR vendor:'Milman New York' OR vendor:"Laura's Gems")`,
   },
 ];
 
@@ -723,7 +956,7 @@ async function fetchCollections(client: ShopifyClient): Promise<CollectionRow[]>
         pageInfo: { hasNextPage: boolean; endCursor: string | null };
         nodes: CollectionRow[];
       };
-    } = await client.gql(COLLECTIONS_QUERY, { cursor });
+    } = await client.gql(COLLECTIONS_QUERY, { cursor, q: COLLECTIONS_FILTER });
     out.push(...data.collections.nodes);
     if (!data.collections.pageInfo.hasNextPage) break;
     cursor = data.collections.pageInfo.endCursor;
@@ -819,32 +1052,69 @@ Return ONLY a JSON array, no prose around it, of ten objects:
  * as an error block rather than throwing, so we fall back to public RSS feeds
  * read with plain fetch and hand those headlines to the same model.
  */
+/** How many times a `pause_turn` may be continued before we give up on search. */
+export const MAX_PAUSE_TURN_CONTINUATIONS = 3;
+
 async function gatherHooks(
   anthropic: Anthropic,
 ): Promise<{ hooks: HookItem[]; source: string; note: string | null }> {
-  const stream = anthropic.messages.stream({
-    model: HOOK_MODEL,
-    max_tokens: 16000,
-    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 12 }],
-    messages: [{ role: 'user', content: HOOK_INSTRUCTIONS }],
-  });
-  const message = await stream.finalMessage();
+  let searchNote: string | null = null;
+  let message: Anthropic.Message | null = null;
+  const messages: Anthropic.MessageParam[] = [{ role: 'user', content: HOOK_INSTRUCTIONS }];
 
-  const searchFailed = message.content.some(
-    (b) => b.type === 'web_search_tool_result' && !Array.isArray(b.content),
-  );
-  const searchRan = message.content.some((b) => b.type === 'server_tool_use');
+  try {
+    // A long web_search turn can come back as `pause_turn`: the model is not
+    // finished, it is asking to continue. Echo the partial assistant turn back
+    // and let it carry on, a bounded number of times.
+    for (let attempt = 0; ; attempt++) {
+      const next = await anthropic.messages
+        .stream({
+          model: HOOK_MODEL,
+          max_tokens: 16000,
+          tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 12 }],
+          messages,
+        })
+        .finalMessage();
+      message = next;
+      if (next.stop_reason !== 'pause_turn') break;
+      if (attempt >= MAX_PAUSE_TURN_CONTINUATIONS - 1) {
+        searchNote = `web_search paused ${MAX_PAUSE_TURN_CONTINUATIONS} times without finishing`;
+        message = null;
+        break;
+      }
+      messages.push({ role: 'assistant', content: next.content });
+    }
+  } catch (err) {
+    searchNote = `web_search call failed: ${err instanceof Error ? err.message : String(err)}`;
+    message = null;
+  }
 
-  if (!searchFailed && searchRan) {
-    const hooks = normalizeHooks(extractJson(textOf(message)));
-    if (hooks.length > 0) {
-      return { hooks, source: 'the web_search server tool (Claude Sonnet 5)', note: null };
+  if (message !== null) {
+    const searchFailed = message.content.some(
+      (b) => b.type === 'web_search_tool_result' && !Array.isArray(b.content),
+    );
+    const searchRan = message.content.some((b) => b.type === 'server_tool_use');
+    if (searchFailed) searchNote = 'web_search returned an error result';
+    if (!searchRan) searchNote = searchNote ?? 'web_search did not run';
+
+    if (!searchFailed && searchRan) {
+      // A malformed answer is a reason to fall through to RSS, not to crash.
+      try {
+        const hooks = normalizeHooks(extractJson(textOf(message)));
+        if (hooks.length > 0) {
+          return { hooks, source: 'the web_search server tool (Claude Sonnet 5)', note: null };
+        }
+        searchNote = 'web_search returned no usable hooks';
+      } catch (err) {
+        searchNote = `web_search answer was not parseable JSON: ${
+          err instanceof Error ? err.message : String(err)
+        }`;
+      }
     }
   }
 
   const headlines = await fetchFallbackHeadlines();
-  const note =
-    'web_search was unavailable or returned nothing; hooks were gathered from public RSS feeds fetched directly.';
+  const note = `${searchNote ?? 'web_search was unavailable'}; hooks were gathered from public RSS feeds fetched directly.`;
   console.warn(`Hook gathering: ${note}`);
   if (headlines.length === 0) {
     return { hooks: [], source: 'no source (web search unavailable, every RSS feed failed)', note };
@@ -861,8 +1131,14 @@ async function gatherHooks(
       },
     ],
   }).finalMessage();
+  let fallbackHooks: HookItem[] = [];
+  try {
+    fallbackHooks = normalizeHooks(extractJson(textOf(fallback)));
+  } catch (err) {
+    console.warn(`RSS shortlist was not parseable JSON: ${err instanceof Error ? err.message : String(err)}`);
+  }
   return {
-    hooks: normalizeHooks(extractJson(textOf(fallback))),
+    hooks: fallbackHooks,
     source: 'public RSS feeds fetched directly (Claude Sonnet 5 shortlisted)',
     note,
   };
@@ -924,11 +1200,16 @@ const DRAFT_SCHEMA = {
     bodyHtml: { type: 'string' },
     faq: {
       type: 'array',
+      minItems: FAQ_QUESTIONS,
+      maxItems: FAQ_QUESTIONS,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['question', 'answer'],
-        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        properties: {
+          question: { type: 'string', minLength: 1 },
+          answer: { type: 'string', minLength: 1 },
+        },
       },
     },
     tags: { type: 'array', items: { type: 'string' } },
@@ -962,7 +1243,7 @@ Hard rules, checked in code after you answer. A draft that breaks one is thrown 
 6. Body between ${WORD_COUNT_MIN} and ${WORD_COUNT_MAX} words including the FAQ answers.
 7. Exactly ${FAQ_QUESTIONS} FAQ questions, returned in the "faq" field. Do not also write a FAQ section inside bodyHtml.
 8. Tags only from this list, two to four of them: ${JOURNAL_TAGS.join(', ')}.
-9. bodyHtml is clean HTML fragments only — <h2>, <h3>, <p>, <ul>, <li>, <a>, <em>, <strong>. No <html>, <head>, <body>, <img>, <script>, or style attributes.
+9. bodyHtml uses only these tags: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <a>, <strong>, <em>, <blockquote>. The only attribute allowed anywhere is href on an anchor. No <img>, no <script>, no <div>, no src, no class, no style, no id, no target.
 10. "featuredProductHandle" is one product handle from the list; its photo becomes the article image, so pick a piece the article actually discusses.`;
 }
 
@@ -970,6 +1251,20 @@ function catalogPrompt(products: ProductRow[], collections: CollectionRow[]): st
   const productLines = products.map((p) => `${p.handle} :: ${p.title} :: ${p.productType || 'n/a'} :: ${p.segment}`);
   const collectionLines = collections.map((c) => `${c.handle} :: ${c.title}`);
   return `LIVE PRODUCT HANDLES (handle :: title :: type :: segment) — link only to these:\n${productLines.join('\n')}\n\nLIVE COLLECTION HANDLES (handle :: title) — link only to these:\n${collectionLines.join('\n')}`;
+}
+
+/**
+ * System prompt as two blocks: the voice and rules, then the catalogue. The
+ * cache breakpoint sits after the catalogue, so the second draft of a run (and
+ * the repair pass) reads the whole 400-product list from cache instead of
+ * paying for it again. Everything volatile — the hooks, the repair feedback —
+ * stays in the user turn, after the breakpoint.
+ */
+function systemBlocks(system: string, catalogText: string): Anthropic.TextBlockParam[] {
+  return [
+    { type: 'text', text: system },
+    { type: 'text', text: catalogText, cache_control: { type: 'ephemeral' } },
+  ];
 }
 
 async function writeDraft(
@@ -993,12 +1288,12 @@ Pick one hook and write one Journal article from it, tying it back to watches or
     .stream({
       model: ARTICLE_MODEL,
       max_tokens: 32000,
-      system,
+      system: systemBlocks(system, catalogText),
       output_config: {
         effort: 'high',
         format: { type: 'json_schema', schema: DRAFT_SCHEMA as unknown as Record<string, unknown> },
       },
-      messages: [{ role: 'user', content: `${catalogText}\n\n${task}` }],
+      messages: [{ role: 'user', content: task }],
     })
     .finalMessage();
 
@@ -1141,14 +1436,22 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     written.push(draft.title);
 
     const featured = productsById.get(draft.featuredProductHandle) ?? null;
-    let image: { url: string; altText: string } | null = null;
+    let image: { url: string; altText: string; fallbackAltText: string } | null = null;
     if (featured?.imageUrl) {
-      image = { url: featured.imageUrl, altText: featured.imageAlt ?? featured.title };
+      image = {
+        url: featured.imageUrl,
+        altText: featured.imageAlt ?? featured.title,
+        fallbackAltText: featured.title,
+      };
     } else if (accepted) {
       for (const link of extractStoreLinks(draft.bodyHtml)) {
         const candidate = link.kind === 'product' ? productsById.get(link.handle) : undefined;
         if (candidate?.imageUrl) {
-          image = { url: candidate.imageUrl, altText: candidate.imageAlt ?? candidate.title };
+          image = {
+            url: candidate.imageUrl,
+            altText: candidate.imageAlt ?? candidate.title,
+            fallbackAltText: candidate.title,
+          };
           break;
         }
       }
@@ -1193,32 +1496,19 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     });
   }
 
-  // 4. Housekeeping: only unpublished, only tagged, only older than 21 days.
+  // 4. Housekeeping is report-only. The job lists stale drafts for the merchant
+  //    and deletes nothing — no articleDelete anywhere in this file.
   const candidates = await fetchArticles(
     shopify,
     `blog_id:${blogNumericId(blogId)} AND published_status:unpublished AND tag:'${JOURNAL_DRAFT_TAG}'`,
   );
-  const stale = selectStaleDrafts(candidates, startedAt);
-  const deleted: string[] = [];
-  for (const article of stale) {
-    if (opts.dryRun) {
-      console.log(`Would delete stale draft ${article.id} (${article.title}, created ${article.createdAt})`);
-      continue;
-    }
-    const res = await shopify.gql<{
-      articleDelete: {
-        deletedArticleId: string | null;
-        userErrors: Array<{ field: string[] | null; message: string }>;
-      };
-    }>(ARTICLE_DELETE_MUTATION, { id: article.id });
-    if (res.articleDelete.userErrors.length > 0) {
-      errors.push(
-        `Delete ${article.id}: ${res.articleDelete.userErrors.map((e) => e.message).join('; ')}`,
-      );
-    } else {
-      deleted.push(article.id);
-      console.log(`Deleted stale draft ${article.id} (${article.title})`);
-    }
+  const stale = selectStaleDrafts(candidates, startedAt, blogId).map((article) => ({
+    title: article.title,
+    createdAt: article.createdAt,
+    adminUrl: adminArticleUrl(domain, article.id),
+  }));
+  for (const item of stale) {
+    console.log(`Stale draft for review: ${item.title} (created ${item.createdAt}) ${item.adminUrl}`);
   }
 
   // 5. Report.
@@ -1232,8 +1522,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     productCount: products.length,
     collectionCount: collections.length,
     outcomes,
-    staleFound: stale.length,
-    staleDeleted: deleted.length,
+    stale,
     candidatesScanned: candidates.length,
     errors,
   });
@@ -1255,10 +1544,16 @@ interface ReportInput {
   productCount: number;
   collectionCount: number;
   outcomes: DraftOutcome[];
-  staleFound: number;
-  staleDeleted: number;
+  stale: StaleDraft[];
   candidatesScanned: number;
   errors: string[];
+}
+
+/** A draft the merchant may want to clear out. The job never deletes it. */
+export interface StaleDraft {
+  title: string;
+  createdAt: string;
+  adminUrl: string;
 }
 
 export function renderReport(input: ReportInput): string {
@@ -1275,7 +1570,7 @@ export function renderReport(input: ReportInput): string {
     `- Catalogue read: ${input.productCount} ACTIVE products, ${input.collectionCount} collections`,
     `- Drafts accepted: ${accepted.length}`,
     `- Drafts rejected: ${rejected.length}`,
-    `- Stale drafts scanned / matched / deleted: ${input.candidatesScanned} / ${input.staleFound} / ${input.staleDeleted}`,
+    `- Stale drafts scanned / older than ${DRAFT_MAX_AGE_DAYS} days: ${input.candidatesScanned} / ${input.stale.length} (nothing is ever deleted by this job)`,
     '',
     '## Hooks',
     '',
@@ -1308,11 +1603,25 @@ export function renderReport(input: ReportInput): string {
           ]),
         ]
       : []),
+    `## Stale drafts for the merchant to delete`,
+    '',
+    `Unpublished articles on \`${BLOG_HANDLE}\` tagged \`${JOURNAL_DRAFT_TAG}\` and older than ${DRAFT_MAX_AGE_DAYS} days. This job never deletes an article; delete these by hand if they are no longer wanted.`,
+    '',
+    ...(input.stale.length > 0
+      ? [
+          '| Title | Created | Admin |',
+          '|---|---|---|',
+          ...input.stale.map(
+            (d) => `| ${d.title.replace(/\|/g, '\\|')} | ${d.createdAt.slice(0, 10)} | ${d.adminUrl} |`,
+          ),
+        ]
+      : ['_none_']),
+    '',
     '## Errors',
     '',
     ...(input.errors.length > 0 ? input.errors.map((e) => `- ${e}`) : ['_none_']),
     '',
-    'Nothing in this run was published. A person publishes from Shopify admin.',
+    'Nothing in this run was published and nothing was deleted. A person publishes, and a person deletes, from Shopify admin.',
     '',
   ];
   return lines.join('\n');

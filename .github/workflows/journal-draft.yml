@@ -10,13 +10,14 @@
 # drafts with Claude Opus 5 and creates them as UNPUBLISHED articles on blog
 # `journal` (articleCreate, isPublished: false, tag `journal-draft`).
 #
-# The job never publishes. A person publishes from Shopify admin. Unpublished
-# articles older than 21 days that carry `journal-draft` are deleted by the next
-# run; published articles and untagged drafts are never touched.
+# The job never publishes and never deletes. A person publishes from Shopify
+# admin. Unpublished articles older than 21 days that carry `journal-draft` are
+# listed in the run report for the merchant to delete by hand; the job itself
+# touches no existing article.
 #
-# Runs live weekly (Monday 13:00 UTC = 09:00 New York) and on demand.
-# For a dry-run: workflow_dispatch → leave dry_run=true (nothing is created or
-# deleted; the drafts land in the report artifact instead).
+# Runs live weekly (Monday 13:23 UTC = 09:23 New York) and on demand.
+# For a dry-run: workflow_dispatch → leave dry_run=true (nothing is created; the
+# drafts land in the report artifact instead).
 #
 # Secrets needed (Settings → Secrets and variables → Actions → Secrets):
 #   SHOPIFY_STORE_DOMAIN    e.g. laura-milman.myshopify.com
@@ -28,13 +29,14 @@ name: Journal weekly drafts
 
 on:
   schedule:
-    # Monday 13:00 UTC = 09:00 New York (EDT). Scheduled runs are live and
-    # create unpublished drafts.
-    - cron: '0 13 * * 1'
+    # Weekly: Monday 13:23 UTC = 09:23 New York (EDT). Offset from the top of
+    # the hour to avoid GitHub scheduler congestion at :00. Scheduled runs are
+    # live and create unpublished drafts.
+    - cron: '23 13 * * 1'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (no articles created, nothing deleted)'
+        description: 'Dry run (no articles created)'
         type: boolean
         default: true
       count:

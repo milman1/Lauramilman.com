@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  adminArticleUrl,
   buildArticleCreateInput,
+  canonicalizeTags,
   checkDraft,
+  COLLECTIONS_FILTER,
   DRAFT_MAX_AGE_DAYS,
   extractStoreLinks,
   findCelebrityOwnershipClaims,
   findExternalLinks,
+  findHtmlViolations,
   findPrices,
   findUnknownTags,
   JOURNAL_DRAFT_TAG,
@@ -14,6 +18,7 @@ import {
   parseArgs,
   parseFeedItems,
   parseStoreLink,
+  PRODUCT_SEGMENTS,
   selectStaleDrafts,
   SEO_DESCRIPTION_MAX,
   SEO_TITLE_MAX,
@@ -117,6 +122,26 @@ describe('celebrity ownership claims', () => {
     expect(findCelebrityOwnershipClaims(html)).toEqual([]);
   });
 
+  it.each([
+    '<p>He was photographed in the same reference we have listed here.</p>',
+    '<p>Her Tank is the one you can see in our estate edit.</p>',
+    '<p>Zendaya wore a Cartier Tank. The exact piece is in our vault.</p>',
+    '<p>She was seen wearing the very piece we have listed below.</p>',
+  ])('flags the passive and split forms: %s', (html) => {
+    expect(findCelebrityOwnershipClaims(html).length).toBeGreaterThan(0);
+  });
+
+  it('allows a sighting followed by category copy in the same paragraph', () => {
+    const html =
+      '<p>Zendaya wore a Cartier Tank on the red carpet. Our estate edit has several Tanks from the same era.</p>';
+    expect(findCelebrityOwnershipClaims(html)).toEqual([]);
+  });
+
+  it('allows first-person editorial choices', () => {
+    const html = '<p>We picked three pieces from our vault for this story.</p>';
+    expect(findCelebrityOwnershipClaims(html)).toEqual([]);
+  });
+
   it('surfaces as a violation on a full draft', () => {
     const bad = draft({
       bodyHtml: longBody('<p>Rihanna owns our <a href="/products/lmny-emerald-ring">emerald ring</a>.</p>'),
@@ -142,21 +167,71 @@ describe('supplier scrub', () => {
 });
 
 describe('prices', () => {
-  it.each(['$1,200', '$ 950', 'US$4,500', '2,400 dollars', '18000 USD'])('finds %s', (price) => {
-    expect(findPrices(`<p>The piece is listed at ${price} today.</p>`).length).toBeGreaterThan(0);
+  it.each([
+    '$1,200',
+    '$ 950',
+    'US$4,500',
+    '2,400 dollars',
+    '18000 USD',
+    'USD 5,000',
+    'USD5000',
+    'a 5,000-dollar watch',
+    'well under twenty thousand dollars',
+    'around five thousand',
+    '\u20ac5,000',
+    '\u00a35,000',
+  ])('finds %s', (price) => {
+    expect(findPrices(`<p>The story mentions ${price} in passing.</p>`).length).toBeGreaterThan(0);
   });
 
-  it('finds a spelled-out price', () => {
-    expect(findPrices('<p>It retails for about twelve thousand.</p>').length).toBeGreaterThan(0);
-  });
-
-  it('leaves reference numbers and years alone', () => {
-    expect(findPrices('<p>Reference 16233, first made in 1988, 36mm case.</p>')).toEqual([]);
+  it.each([
+    'Reference 16233, first made in 1988, 36mm case',
+    'the 1990s brought the 18K bracelet back',
+    'a 2.01ct centre stone with 1.5 carat of side stones',
+    'five stones set across the band',
+    'Cartier has made the Tank for about a hundred years',
+    'a twelve link bracelet, sized down by three links',
+  ])('leaves %s alone', (text) => {
+    expect(findPrices(`<p>${text}.</p>`)).toEqual([]);
   });
 
   it('surfaces as a violation on a full draft', () => {
     const bad = draft({ seoDescription: 'Estate tank watches from $4,200 this week.' });
     expect(checkDraft(bad, CATALOG).map((v) => v.kind)).toContain('price');
+  });
+});
+
+describe('HTML allow-list', () => {
+  it('accepts every allowed tag and attribute', () => {
+    expect(
+      findHtmlViolations(
+        '<h2>A</h2><p><strong>b</strong> <em>c</em> <a href="/products/x">d</a></p>' +
+          '<ul><li>e</li></ul><ol><li>f</li></ol><blockquote>g</blockquote>' +
+          '<section class="journal-faq"><h3>h</h3><p>i</p></section>',
+      ),
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['<p><img src="https://example.com/a.jpg"></p>', 'tag <img>'],
+    ['<p>x</p><script>alert(1)</script>', 'tag <script>'],
+    ['<div>x</div>', 'tag <div>'],
+    ['<h1>x</h1>', 'tag <h1>'],
+    ['<p style="color:red">x</p>', 'attribute style on <p>'],
+    ['<a href="/products/x" target="_blank">y</a>', 'attribute target on <a>'],
+    ['<section id="faq">y</section>', 'attribute id on <section>'],
+    ['<a class="btn" href="/products/x">y</a>', 'attribute class on <a>'],
+  ])('rejects %s', (html, expected) => {
+    expect(findHtmlViolations(html)).toContain(expected);
+  });
+
+  it('rejects a src on any tag', () => {
+    expect(findHtmlViolations('<p src="x">y</p>')).toContain('attribute src');
+  });
+
+  it('surfaces as a violation on a full draft', () => {
+    const bad = draft({ bodyHtml: longBody('<p><img src="https://example.com/a.jpg"></p>') });
+    expect(checkDraft(bad, CATALOG).map((v) => v.kind)).toContain('html-not-allowed');
   });
 });
 
@@ -214,6 +289,26 @@ describe('store links', () => {
   });
 });
 
+describe('catalogue queries', () => {
+  it('asks Shopify for products that are ACTIVE and live on the online store', () => {
+    expect(PRODUCT_SEGMENTS).toHaveLength(4);
+    for (const segment of PRODUCT_SEGMENTS) {
+      expect(segment.query).toContain('status:ACTIVE');
+      expect(segment.query).toContain('published_status:published');
+    }
+    expect(PRODUCT_SEGMENTS.map((s) => s.segment).sort()).toEqual([
+      'estate',
+      'fine',
+      'lab-grown',
+      'watch',
+    ]);
+  });
+
+  it('asks for published collections only', () => {
+    expect(COLLECTIONS_FILTER).toBe('published_status:published');
+  });
+});
+
 describe('tag validation', () => {
   it('accepts the existing set and the job tag', () => {
     expect(findUnknownTags([...JOURNAL_TAGS])).toEqual([]);
@@ -229,6 +324,18 @@ describe('tag validation', () => {
     expect(checkDraft(draft({ tags: ['Watches', 'Nightlife'] }), CATALOG).map((v) => v.kind)).toContain(
       'unknown-tag',
     );
+  });
+
+  it('folds casing onto the live spelling and deduplicates', () => {
+    expect(canonicalizeTags(['van cleef & arpels', 'WATCHES', 'Watches', ' style '])).toEqual([
+      'Van Cleef & Arpels',
+      'Watches',
+      'Style',
+    ]);
+  });
+
+  it('leaves an unrecognised tag untouched rather than inventing a spelling', () => {
+    expect(canonicalizeTags(['Nightlife'])).toEqual(['Nightlife']);
   });
 });
 
@@ -274,10 +381,11 @@ describe('shape checks', () => {
   });
 });
 
-describe('selectStaleDrafts', () => {
+describe('selectStaleDrafts (report only — the job never deletes)', () => {
   const now = new Date('2026-09-10T13:00:00Z');
   const old = '2026-08-01T00:00:00Z'; // 40 days
   const recent = '2026-09-05T00:00:00Z'; // 5 days
+  const JOURNAL_BLOG = 'gid://shopify/Blog/123';
 
   function article(overrides: Partial<JournalArticle>): JournalArticle {
     return {
@@ -288,41 +396,61 @@ describe('selectStaleDrafts', () => {
       isPublished: false,
       createdAt: old,
       publishedAt: null,
+      blog: { id: JOURNAL_BLOG },
       ...overrides,
     };
   }
 
-  it('deletes only unpublished, tagged drafts older than 21 days', () => {
-    const picked = selectStaleDrafts([article({})], now);
+  it('reports only unpublished, tagged drafts older than 21 days', () => {
+    const picked = selectStaleDrafts([article({})], now, JOURNAL_BLOG);
     expect(picked.map((a) => a.id)).toEqual(['gid://shopify/Article/1']);
   });
 
-  it('never touches a published article, even an old tagged one', () => {
+  it('never reports a published article, even an old tagged one', () => {
     const published = article({ id: 'p', isPublished: true, publishedAt: '2026-08-02T00:00:00Z' });
-    expect(selectStaleDrafts([published], now)).toEqual([]);
+    expect(selectStaleDrafts([published], now, JOURNAL_BLOG)).toEqual([]);
   });
 
-  it('never touches a scheduled article that is not yet visible', () => {
+  it('never reports a scheduled article that is not yet visible', () => {
     const scheduled = article({ id: 's', isPublished: false, publishedAt: '2026-12-01T00:00:00Z' });
-    expect(selectStaleDrafts([scheduled], now)).toEqual([]);
+    expect(selectStaleDrafts([scheduled], now, JOURNAL_BLOG)).toEqual([]);
   });
 
-  it('never touches a draft without the journal-draft tag', () => {
+  it('never reports a draft without the journal-draft tag', () => {
     const untagged = article({ id: 'u', tags: ['Watches'] });
-    expect(selectStaleDrafts([untagged], now)).toEqual([]);
+    expect(selectStaleDrafts([untagged], now, JOURNAL_BLOG)).toEqual([]);
+  });
+
+  it('never reports a draft that belongs to another blog', () => {
+    const elsewhere = article({ id: 'o', blog: { id: 'gid://shopify/Blog/999' } });
+    expect(selectStaleDrafts([elsewhere], now, JOURNAL_BLOG)).toEqual([]);
   });
 
   it('keeps a draft that is still inside the window', () => {
-    expect(selectStaleDrafts([article({ id: 'r', createdAt: recent })], now)).toEqual([]);
+    expect(selectStaleDrafts([article({ id: 'r', createdAt: recent })], now, JOURNAL_BLOG)).toEqual([]);
   });
 
   it('treats the boundary as not yet stale', () => {
     const exactly = new Date(now.getTime() - DRAFT_MAX_AGE_DAYS * 24 * 60 * 60 * 1000).toISOString();
-    expect(selectStaleDrafts([article({ id: 'b', createdAt: exactly })], now)).toEqual([]);
+    expect(selectStaleDrafts([article({ id: 'b', createdAt: exactly })], now, JOURNAL_BLOG)).toEqual([]);
   });
 
-  it('ignores an unparseable createdAt rather than deleting it', () => {
-    expect(selectStaleDrafts([article({ id: 'x', createdAt: 'not a date' })], now)).toEqual([]);
+  it('ignores an unparseable createdAt', () => {
+    expect(selectStaleDrafts([article({ id: 'x', createdAt: 'not a date' })], now, JOURNAL_BLOG)).toEqual([]);
+  });
+});
+
+describe('adminArticleUrl', () => {
+  it('builds an admin.shopify.com link from a myshopify domain', () => {
+    expect(adminArticleUrl('laura-milman.myshopify.com', 'gid://shopify/Article/558')).toBe(
+      'https://admin.shopify.com/store/laura-milman/articles/558',
+    );
+  });
+
+  it('falls back to the store host for a custom domain', () => {
+    expect(adminArticleUrl('https://lauramilman.com/', 'gid://shopify/Article/558')).toBe(
+      'https://lauramilman.com/admin/articles/558',
+    );
   });
 });
 
@@ -330,6 +458,7 @@ describe('buildArticleCreateInput', () => {
   const input = buildArticleCreateInput(draft(), 'gid://shopify/Blog/123', {
     url: 'https://cdn.shopify.com/tank.jpg',
     altText: 'Cartier Tank',
+    fallbackAltText: 'Cartier Tank 1962 in 18K gold',
   });
 
   it('never publishes and never schedules', () => {
@@ -368,6 +497,32 @@ describe('buildArticleCreateInput', () => {
 
   it('omits the image when the featured product has none', () => {
     expect(buildArticleCreateInput(draft(), 'gid://shopify/Blog/123', null)).not.toHaveProperty('image');
+  });
+
+  it('replaces alt text the supplier scrub would change with the product title', () => {
+    const scrubbed = buildArticleCreateInput(draft(), 'gid://shopify/Blog/123', {
+      url: 'https://cdn.shopify.com/tank.jpg',
+      altText: 'Cartier Tank from The Back Vault',
+      fallbackAltText: 'Cartier Tank 1962 in 18K gold',
+    });
+    expect(scrubbed.image).toEqual({
+      url: 'https://cdn.shopify.com/tank.jpg',
+      altText: 'Cartier Tank 1962 in 18K gold',
+    });
+  });
+
+  it('falls back to the article title when the product title is unusable too', () => {
+    const scrubbed = buildArticleCreateInput(draft(), 'gid://shopify/Blog/123', {
+      url: 'https://cdn.shopify.com/tank.jpg',
+      altText: 'Back Vault piece',
+      fallbackAltText: 'The Back Vault',
+    });
+    expect((scrubbed.image as { altText: string }).altText).toBe(draft().title);
+  });
+
+  it('canonicalizes tag casing before it reaches Shopify', () => {
+    const odd = buildArticleCreateInput(draft({ tags: ['watches', 'STYLE'] }), 'gid://shopify/Blog/123', null);
+    expect(odd.tags).toEqual(['Watches', 'Style', JOURNAL_DRAFT_TAG]);
   });
 });
 
