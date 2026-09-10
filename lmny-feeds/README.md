@@ -103,6 +103,21 @@ holds a stones table — Shopify products are the only live copy.
    keep theirs. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
+
+   **Sales channels.** Every product this step creates is published with one
+   `publishablePublish` call carrying the whole channel list from
+   `config/channels.ts` (merchant decision 2026-09-10), not Online Store
+   alone. Watches go to all five — Online Store, Shop, Google & YouTube,
+   Facebook & Instagram, Pinterest — because they are high-ticket and
+   searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
+   (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
+   swamp Merchant Center and Meta's catalog limits. The kind is read from
+   the handle prefix, so a product whose handle did not come back from a
+   bulk write takes the narrower stone list. Publication names resolve once
+   per run; one that is not installed on the store is logged and skipped,
+   never thrown on. Changing the list is a pull request against
+   `config/channels.ts` — eBay is not in it, because Marketplace Connect is
+   not a publication and selects by the `ebay` tag on its own side.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -329,11 +344,28 @@ npm run sync:backvault       # live (needs Shopify env vars)
 8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
-   ACTIVE products that exist but are not on the Online Store channel
+   ACTIVE products that exist but are missing any configured sales channel
    get a `publish` decision (no rewrite) so a re-run can put them live.
 9. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
-   sync uses, then `publishablePublish` to the Online Store channel.
+   sync uses, then `publishablePublish` to every sales channel.
    `productSet` alone leaves products in Admin but 404ing on the storefront.
+
+   **Sales channels.** Estate pieces are published to the full list in
+   `config/channels.ts` — Online Store, Shop, Google & YouTube, Facebook &
+   Instagram, Pinterest (merchant decision 2026-09-10; before it, the 732
+   estate pieces were on the Online Store alone and invisible on Google
+   Shopping, Meta, and Pinterest, per `docs/audits/2026-09-09-site-audit.md`
+   §6). The ids resolve once per run in a single `publications` query, and
+   each piece is published to all of them in one `publishablePublish` call.
+   The catalog read records which of those channels a piece is missing
+   (`missingChannels`), so an existing piece that is live on the storefront
+   but off Pinterest is picked up by a `publish` decision on the next run
+   without rewriting it. A channel that is not installed on the store is
+   logged and skipped rather than retried forever. The run report line says
+   how many pieces were published and to how many channels. Changing the
+   list is a pull request against `config/channels.ts`; eBay is not in it
+   (Marketplace Connect is an app, not a publication, and selects by the
+   `ebay` tag).
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated

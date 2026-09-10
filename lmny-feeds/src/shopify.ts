@@ -901,6 +901,35 @@ export class ShopifyClient {
     return online.id;
   }
 
+  /**
+   * Publication ids for the requested channel names, in one query.
+   *
+   * The names come from `config/channels.ts`; a name that is not installed
+   * on the store is logged and left out of the map rather than thrown on,
+   * so uninstalling a channel degrades a sync to the channels that remain
+   * instead of failing the run.
+   */
+  async publicationIdsByName(names: string[]): Promise<Map<string, string>> {
+    const data = await this.gql<{ publications: { nodes: Array<{ id: string; name: string }> } }>(
+      `{ publications(first: 30) { nodes { id name } } }`,
+    );
+    const installed = new Map(data.publications.nodes.map((p) => [p.name, p.id]));
+    const found = new Map<string, string>();
+    const missing: string[] = [];
+    for (const name of names) {
+      const id = installed.get(name);
+      if (id) found.set(name, id);
+      else missing.push(name);
+    }
+    if (missing.length > 0) {
+      console.warn(
+        `Sales channels not installed on this store, skipping: ${missing.join(', ')} ` +
+          `(installed: ${[...installed.keys()].join(', ') || 'none'})`,
+      );
+    }
+    return found;
+  }
+
   async publishResource(id: string, publicationId: string): Promise<string[]> {
     const data = await this.gql<{
       publishablePublish: { userErrors: Array<{ message: string }> };
@@ -909,6 +938,24 @@ export class ShopifyClient {
         publishablePublish(id: $id, input: $input) { userErrors { message } }
       }`,
       { id, input: [{ publicationId }] },
+    );
+    return data.publishablePublish.userErrors.map((e) => e.message);
+  }
+
+  /**
+   * Publish one resource to several channels in a single mutation.
+   * `publishablePublish` takes the whole publication list at once, so a
+   * five-channel publish costs one call, not five.
+   */
+  async publishToChannels(id: string, publicationIds: string[]): Promise<string[]> {
+    if (publicationIds.length === 0) return [];
+    const data = await this.gql<{
+      publishablePublish: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($id: ID!, $input: [PublicationInput!]!) {
+        publishablePublish(id: $id, input: $input) { userErrors { message } }
+      }`,
+      { id, input: publicationIds.map((publicationId) => ({ publicationId })) },
     );
     return data.publishablePublish.userErrors.map((e) => e.message);
   }

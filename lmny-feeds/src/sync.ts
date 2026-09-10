@@ -15,6 +15,7 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { fetchAllowedWatchStocks } from './feeds/watchPartners.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
+import { channelsFor } from '../config/channels.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
 import {
   applyUnavailableArchives,
@@ -534,11 +535,14 @@ async function main() {
         );
       });
 
-    let createdIds: string[] = [];
+    // Handle travels with the id: the channel list a product is published to
+    // depends on its kind (config/channels.ts), and the handle prefix is what
+    // says whether it is a watch or a loose stone.
+    let createdRefs: Array<{ id: string; handle: string | null }> = [];
     if (inputs.length >= BULK_THRESHOLD) {
       console.log(`Writing ${inputs.length} products via bulk productSet…`);
       const result = await shopify.bulkProductSet(inputs);
-      createdIds = result.ids;
+      createdRefs = result.products.map((p) => ({ id: p.id, handle: p.handle }));
       writeErrors.push(...result.errors);
       if (locationId) {
         const qtyByHandle = new Map(
@@ -569,7 +573,7 @@ async function main() {
           );
           result = await shopify.productSet(quarantined);
         }
-        if (result.id) createdIds.push(result.id);
+        if (result.id) createdRefs.push({ id: result.id, handle: String(input.handle) });
         writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
         if (locationId) {
           writeErrors.push(
@@ -586,12 +590,33 @@ async function main() {
       }
     }
 
-    if (createdIds.length > 0) {
-      const publicationId = await shopify.onlineStorePublicationId();
-      console.log(`Publishing ${createdIds.length} products to Online Store…`);
-      for (const id of createdIds) {
-        const errors = await shopify.publishResource(id, publicationId);
-        writeErrors.push(...errors.map((e) => `publish ${id}: ${e}`));
+    if (createdRefs.length > 0) {
+      // Watches go to every channel in config/channels.ts; loose stones stay
+      // on Online Store and Shop (about 10,000 one-of-one SKUs would swamp
+      // Merchant Center and Meta). Both lists resolve from one publications
+      // query. A product whose handle did not come back takes the narrower
+      // diamond list rather than being pushed to Google and Meta by accident.
+      const watchChannels = channelsFor('watch');
+      const diamondChannels = channelsFor('diamond');
+      const wanted = [...new Set([...watchChannels, ...diamondChannels])];
+      const publicationsByName = await shopify.publicationIdsByName(wanted);
+      const idsFor = (names: readonly string[]): string[] =>
+        names.map((n) => publicationsByName.get(n)).filter((id): id is string => Boolean(id));
+      const watchPublicationIds = idsFor(watchChannels);
+      const diamondPublicationIds = idsFor(diamondChannels);
+      const watchRefs = createdRefs.filter((r) => r.handle !== null && kindForHandle(r.handle) === 'watch');
+      console.log(
+        `Publishing ${createdRefs.length} products: ${watchRefs.length} watches to ` +
+          `${watchPublicationIds.length} channels (${watchChannels.join(', ')}), ` +
+          `${createdRefs.length - watchRefs.length} stones to ` +
+          `${diamondPublicationIds.length} channels (${diamondChannels.join(', ')})…`,
+      );
+      for (const ref of createdRefs) {
+        const isWatch = ref.handle !== null && kindForHandle(ref.handle) === 'watch';
+        const publicationIds = isWatch ? watchPublicationIds : diamondPublicationIds;
+        if (publicationIds.length === 0) continue;
+        const errors = await shopify.publishToChannels(ref.id, publicationIds);
+        writeErrors.push(...errors.map((e) => `publish ${ref.handle ?? ref.id}: ${e}`));
       }
     }
 

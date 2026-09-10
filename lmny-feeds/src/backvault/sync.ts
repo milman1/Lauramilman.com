@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { channelsFor } from '../../config/channels.js';
 import { BACKVAULT } from '../../config/pricing.js';
 import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
@@ -65,6 +66,8 @@ interface RunSummary {
   availability: AvailabilityStats;
   decisions: Decision[];
   published: number;
+  /** Sales channels each published piece was sent to (config/channels.ts). */
+  channels: string[];
   errors: string[];
 }
 
@@ -115,7 +118,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     if (missing.length > 0) {
       throw new Error(
         `Refusing to write: Shopify token is missing ${missing.join(', ')} ` +
-          `(granted: ${scopes.join(', ') || 'none'}). Online Store publish needs write_publications.`,
+          `(granted: ${scopes.join(', ') || 'none'}). Sales channel publish needs write_publications.`,
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
@@ -170,7 +173,19 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   }
   if (locationId) promoteBackVaultInventoryUpdates(decisions, catalog);
   const syncedAt = new Date().toISOString();
-  const publicationId = opts.dryRun ? null : await client.onlineStorePublicationId();
+  // Estate pieces go to every channel in config/channels.ts — Online Store,
+  // Shop, Google & YouTube, Facebook & Instagram, Pinterest (merchant
+  // decision 2026-09-10). Resolved once per run; a channel that is not
+  // installed is logged by the client and left out.
+  const wantedChannels = [...channelsFor('estate')];
+  const publicationsByName = opts.dryRun
+    ? new Map<string, string>()
+    : await client.publicationIdsByName(wantedChannels);
+  const publicationIds = [...publicationsByName.values()];
+  const channelNames = opts.dryRun ? wantedChannels : [...publicationsByName.keys()];
+  if (!opts.dryRun) {
+    console.log(`Publishing to ${publicationIds.length} sales channels: ${channelNames.join(', ') || 'none'}`);
+  }
   let published = 0;
 
   for (const decision of decisions) {
@@ -194,8 +209,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
         continue;
       }
       if (decision.action === 'publish') {
-        if (!opts.dryRun && decision.productId && publicationId) {
-          const pubErrors = await client.publishResource(decision.productId, publicationId);
+        if (!opts.dryRun && decision.productId && publicationIds.length > 0) {
+          const pubErrors = await client.publishToChannels(decision.productId, publicationIds);
           if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
           else published += 1;
         } else if (opts.dryRun) {
@@ -223,8 +238,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
           }
         }
         const productId = result.id ?? decision.productId;
-        if (productId && publicationId && result.errors.length === 0) {
-          const pubErrors = await client.publishResource(productId, publicationId);
+        if (productId && publicationIds.length > 0 && result.errors.length === 0) {
+          const pubErrors = await client.publishToChannels(productId, publicationIds);
           if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
           else published += 1;
         }
@@ -243,6 +258,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     availability,
     decisions,
     published,
+    channels: channelNames,
     errors,
   };
 
@@ -253,7 +269,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     return acc;
   }, {});
   console.log(
-    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} published=${published} errors=${errors.length}`,
+    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
+      `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
+      `published=${published} to ${channelNames.length} channels (${channelNames.join(', ') || 'none'}) ` +
+      `errors=${errors.length}`,
   );
   if (errors.length > 0) {
     console.error('Errors:');
