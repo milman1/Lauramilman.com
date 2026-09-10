@@ -1,0 +1,105 @@
+# Weekly Journal drafting job (AGENTS.md recipe F,
+# docs/audits/2026-09-09-site-audit.md section 3; merchant approved 2026-09-10,
+# two drafts a week).
+#
+# Gathers the week's hooks (red carpet and premiere jewelry, watch sightings on
+# athletes and musicians, auction results, brand launches, nightlife openings in
+# New York, Miami, Los Angeles, Las Vegas) with Claude Sonnet 5 and the
+# web_search server tool, reads the store's live ACTIVE products and every
+# collection so a draft can only link to handles that exist, then writes two
+# drafts with Claude Opus 5 and creates them as UNPUBLISHED articles on blog
+# `journal` (articleCreate, isPublished: false, tag `journal-draft`).
+#
+# The job never publishes. A person publishes from Shopify admin. Unpublished
+# articles older than 21 days that carry `journal-draft` are deleted by the next
+# run; published articles and untagged drafts are never touched.
+#
+# Runs live weekly (Monday 13:00 UTC = 09:00 New York) and on demand.
+# For a dry-run: workflow_dispatch → leave dry_run=true (nothing is created or
+# deleted; the drafts land in the report artifact instead).
+#
+# Secrets needed (Settings → Secrets and variables → Actions → Secrets):
+#   SHOPIFY_STORE_DOMAIN    e.g. laura-milman.myshopify.com
+#   SHOPIFY_ADMIN_TOKEN     shpat_… static token, OR use the client-credentials pair:
+#   SHOPIFY_CLIENT_ID       Dev Dashboard app Client ID
+#   SHOPIFY_CLIENT_SECRET   Dev Dashboard app Client Secret
+#   ANTHROPIC_API_KEY       Anthropic API key (the job calls the API from Actions)
+name: Journal weekly drafts
+
+on:
+  schedule:
+    # Monday 13:00 UTC = 09:00 New York (EDT). Scheduled runs are live and
+    # create unpublished drafts.
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no articles created, nothing deleted)'
+        type: boolean
+        default: true
+      count:
+        description: 'How many drafts to write'
+        type: string
+        default: '2'
+
+concurrency:
+  group: journal-draft
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Write drafts
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EVENT: ${{ github.event_name }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          COUNT_INPUT: ${{ inputs.count }}
+        run: |
+          COUNT="${COUNT_INPUT:-2}"
+          if [ "$EVENT" = "schedule" ]; then
+            echo "Mode: LIVE (schedule)"
+            npx tsx scripts/journal-draft.ts --count="$COUNT"
+          elif [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; then
+            echo "Mode: LIVE"
+            npx tsx scripts/journal-draft.ts --count="$COUNT"
+          else
+            echo "Mode: dry run"
+            npx tsx scripts/journal-draft.ts --dry-run --count="$COUNT"
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/journal-report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload drafts and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journal-drafts-${{ github.run_id }}
+          path: lmny-feeds/out/journal-*.md
+          if-no-files-found: ignore

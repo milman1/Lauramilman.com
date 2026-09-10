@@ -391,6 +391,39 @@ Always live on the schedule (user chose no dry-run gate). Use
 
 ---
 
+## Journal drafting job
+
+`scripts/journal-draft.ts` (`.github/workflows/journal-draft.yml`, Monday
+13:00 UTC = 09:00 New York) writes the Journal's queue and never publishes it.
+Each run gathers the week's hooks — red carpet and premiere jewelry, watch
+sightings on athletes and musicians, auction results, brand launches, and
+nightlife openings in New York, Miami, Los Angeles, and Las Vegas — with Claude
+Sonnet 5 and the Anthropic `web_search` server tool (available to the SDK from
+Actions; if the key cannot use it the run falls back to the public RSS feeds in
+`FALLBACK_HOOK_FEEDS`, fetched with plain `fetch`, and says so in the report),
+shortlists ten into `out/journal-hooks.md`, reads the store's live ACTIVE estate,
+watch, fine, and lab-grown products plus all collections so a draft can only link
+to handles that exist, and has Claude Opus 5 write two drafts of 900–1,400 words
+in the Journal voice with an SEO title and description, at least three store
+links, a three-question FAQ, tags from the existing Journal set, and a featured
+product whose photo becomes the article image. Every draft is then checked in
+code, not just in the prompt — a celebrity ownership claim, a supplier name (the
+`src/backvault/scrub.ts` scrub), a dollar price, an external or unknown handle,
+an over-length SEO field, or an invented tag fails the draft, which is
+regenerated once and then rejected — and only a clean draft is created through
+`articleCreate` with `isPublished: false`, author "Laura Milman New York", and
+the `journal-draft` tag. **The job never publishes; a person publishes from
+Shopify admin.** Housekeeping deletes only unpublished articles carrying
+`journal-draft` that are older than 21 days, never a published article and never
+an untagged draft. Run it with `npx tsx scripts/journal-draft.ts [--dry-run]
+[--count=2]` (a dry run does everything except `articleCreate` and delete, and
+writes the drafts to `out/journal-draft-N.md`), or from the Actions tab with
+`dry_run` and `count`; `out/journal-report.md` and the hooks and drafts are
+uploaded as the run artifact. Needs `ANTHROPIC_API_KEY` alongside the usual
+Shopify secrets.
+
+---
+
 ## CI / schedule (Belgium Dia)
 
 `.github/workflows/lmny-feed-sync.yml`:
