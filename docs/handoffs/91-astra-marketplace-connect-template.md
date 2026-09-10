@@ -16,3 +16,16 @@
 
 ## Work log
 - 2026-09-10: Handoff file created. No work performed yet.
+
+## Current execution brief (sanitized)
+- Owner / session: Astra, session 01a08b5a-6720-7b13-8cf4-75c014fad2c7.
+- Status: in progress. No completed live changes; no template save, publish, relist, end, disable, price, product, or condition changes occurred.
+- Branch: codex/91-marketplace-template-20260910. No pull request or merge yet.
+- Guardrails: do not change prices, products, listing end/disable/relist state, or credentials/customer data. Stop if the editor truncates content or strips the inline style block.
+- Plan: capture editor and estate/watch baseline screenshots to the designated Drive folder “LMNY supplier costs”; paste the full snippets/ebay-default.liquid snippet unchanged, save, fresh-read that the style remains intact; then capture estate/watch after screenshots; read the actual selection and condition mapping rules without editing; obtain blind Sol review and independent Terra fresh-read verification (Claude unavailable); open/merge a PR only after completion and verification.
+- Observations to date: Shopify is signed in. Marketplace Connect shows an eBay degraded API performance banner. The current pendant preview already shows espresso/gold styling. The editor click initially did not open an editor; the later editor action opened a new Shopify Online Store Code Editor tab for the live git-connected Lauramilman.com/main theme (theme 143930720327), at snippets/ebay-default.liquid; no edits were made. The selected personal Google account sign-in has succeeded; Drive folder search is ongoing.
+- Source/criterion note: the source uses white #FFFFFF for .lm-card and cream #FAF6F0 for accents/panels. Preserve the exact source and record the literal cream-card criterion mismatch if the rendered evidence does not show cream cards; do not falsely mark it passed.
+- Known observations retained: no LMNY supplier costs folder was found in the earlier signed-in account, and the merchant requested the correct account/link. Do not place account or email details in this repository.
+
+## Work log
+- 2026-09-10T12:57:30Z: Astra resumed the handoff after Google sign-in succeeded. No live write occurred. The code editor opened the live theme source in a new tab for comparison only; Drive evidence-folder search and source comparison remain pending. Next action: locate/confirm the designated Drive folder, then capture the required before screenshot before any template save.
