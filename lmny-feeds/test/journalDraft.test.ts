@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   adminArticleUrl,
+  continuationMessages,
   buildArticleCreateInput,
   canonicalizeTags,
   checkDraft,
@@ -523,6 +524,26 @@ describe('buildArticleCreateInput', () => {
   it('canonicalizes tag casing before it reaches Shopify', () => {
     const odd = buildArticleCreateInput(draft({ tags: ['watches', 'STYLE'] }), 'gid://shopify/Blog/123', null);
     expect(odd.tags).toEqual(['Watches', 'Style', JOURNAL_DRAFT_TAG]);
+  });
+});
+
+describe('continuationMessages', () => {
+  const block = { type: 'text' as const, text: 'partial', citations: null };
+
+  it('is exactly the user turn plus one assistant turn', () => {
+    const messages = continuationMessages('ask', [block]);
+    expect(messages.map((m) => m.role)).toEqual(['user', 'assistant']);
+    expect(messages[0]).toEqual({ role: 'user', content: 'ask' });
+    expect(messages[1]?.content).toEqual([block]);
+  });
+
+  it('replaces the assistant turn on a second continuation rather than stacking one', () => {
+    const second = { type: 'text' as const, text: 'more', citations: null };
+    let messages = continuationMessages('ask', [block]);
+    messages = continuationMessages('ask', [second]);
+    expect(messages.map((m) => m.role)).toEqual(['user', 'assistant']);
+    expect(messages).toHaveLength(2);
+    expect(messages[1]?.content).toEqual([second]);
   });
 });
 

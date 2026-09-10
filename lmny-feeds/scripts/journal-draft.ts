@@ -25,8 +25,9 @@
  *      (`articleCreate`, `isPublished: false`, author "Laura Milman New York",
  *      tag `journal-draft`, featured image taken from the featured product).
  *      A person publishes. This job never publishes.
- *   6. Deletes unpublished articles on that blog that are older than 21 days
- *      and carry the `journal-draft` tag. Nothing else is ever deleted.
+ *   6. Lists, in the run report, unpublished articles on that blog that are
+ *      older than 21 days and carry the `journal-draft` tag, so the merchant
+ *      can clear them out. The job never deletes an article.
  *
  * Env: SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN (or SHOPIFY_CLIENT_ID +
  * SHOPIFY_CLIENT_SECRET), ANTHROPIC_API_KEY.
@@ -1055,17 +1056,34 @@ Return ONLY a JSON array, no prose around it, of ten objects:
 /** How many times a `pause_turn` may be continued before we give up on search. */
 export const MAX_PAUSE_TURN_CONTINUATIONS = 3;
 
+/**
+ * Messages for a `pause_turn` continuation: exactly the original user turn plus
+ * the paused assistant turn. Each continuation *replaces* the assistant entry
+ * rather than appending, so roles always alternate — two assistant entries in a
+ * row is a 400 from the API.
+ */
+export function continuationMessages(
+  userContent: string,
+  assistantContent: Anthropic.ContentBlock[],
+): Anthropic.MessageParam[] {
+  return [
+    { role: 'user', content: userContent },
+    { role: 'assistant', content: assistantContent as unknown as Anthropic.ContentBlockParam[] },
+  ];
+}
+
 async function gatherHooks(
   anthropic: Anthropic,
 ): Promise<{ hooks: HookItem[]; source: string; note: string | null }> {
   let searchNote: string | null = null;
   let message: Anthropic.Message | null = null;
-  const messages: Anthropic.MessageParam[] = [{ role: 'user', content: HOOK_INSTRUCTIONS }];
+  let messages: Anthropic.MessageParam[] = [{ role: 'user', content: HOOK_INSTRUCTIONS }];
 
   try {
     // A long web_search turn can come back as `pause_turn`: the model is not
-    // finished, it is asking to continue. Echo the partial assistant turn back
-    // and let it carry on, a bounded number of times.
+    // finished, it is asking to continue. Send the paused assistant turn back
+    // and let it carry on, a bounded number of times. The array is rebuilt to
+    // [user, assistant] every round so the roles keep alternating.
     for (let attempt = 0; ; attempt++) {
       const next = await anthropic.messages
         .stream({
@@ -1082,7 +1100,7 @@ async function gatherHooks(
         message = null;
         break;
       }
-      messages.push({ role: 'assistant', content: next.content });
+      messages = continuationMessages(HOOK_INSTRUCTIONS, next.content);
     }
   } catch (err) {
     searchNote = `web_search call failed: ${err instanceof Error ? err.message : String(err)}`;
@@ -1119,23 +1137,34 @@ async function gatherHooks(
   if (headlines.length === 0) {
     return { hooks: [], source: 'no source (web search unavailable, every RSS feed failed)', note };
   }
-  const fallback = await anthropic.messages.stream({
-    model: HOOK_MODEL,
-    max_tokens: 16000,
-    messages: [
-      {
-        role: 'user',
-        content: `${HOOK_INSTRUCTIONS}\n\nWeb search is unavailable. Use ONLY the feed items below; do not invent anything that is not in this list, and reuse each item's own link as sourceUrl.\n\n${headlines
-          .map((h) => `- ${h.title} — ${h.link}`)
-          .join('\n')}`,
-      },
-    ],
-  }).finalMessage();
+  // The shortlist call is the last thing between here and a report. An API
+  // error must not abort the run before out/journal-report.md is written, so it
+  // is recorded in the note and the run carries on with no hooks.
   let fallbackHooks: HookItem[] = [];
   try {
+    const fallback = await anthropic.messages
+      .stream({
+        model: HOOK_MODEL,
+        max_tokens: 16000,
+        messages: [
+          {
+            role: 'user',
+            content: `${HOOK_INSTRUCTIONS}\n\nWeb search is unavailable. Use ONLY the feed items below; do not invent anything that is not in this list, and reuse each item's own link as sourceUrl.\n\n${headlines
+              .map((h) => `- ${h.title} — ${h.link}`)
+              .join('\n')}`,
+          },
+        ],
+      })
+      .finalMessage();
     fallbackHooks = normalizeHooks(extractJson(textOf(fallback)));
   } catch (err) {
-    console.warn(`RSS shortlist was not parseable JSON: ${err instanceof Error ? err.message : String(err)}`);
+    const reason = err instanceof Error ? err.message : String(err);
+    console.warn(`RSS shortlist failed: ${reason}`);
+    return {
+      hooks: [],
+      source: 'no source (web search unavailable, RSS shortlist failed)',
+      note: `${note} The RSS shortlist call then failed: ${reason}`,
+    };
   }
   return {
     hooks: fallbackHooks,
