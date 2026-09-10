@@ -1,37 +1,162 @@
+<!--
+  Shopify Admin → Settings → Notifications → Customer notifications
+  Template: Order confirmation (Edit code)
+  This transactional email sends automatically when an order is placed.
+  Subject: keep Shopify default, or: Your order {{ name }} is confirmed
+  Order id: use {{ name }} (e.g. #1001). {{ order_number }} is the digits
+  only. Do not use order.name — that object is out of scope here.
+-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Order confirmed</title>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Order {{ name }} is confirmed</title>
 </head>
 <body style="margin:0;padding:0;background:#F5F0E8;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F0E8;">
-    <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
-          <tr>
-            <td style="background:#1E1109;padding:28px 32px;text-align:center;">
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></div>
-              <div style="margin-top:8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:40px 36px 28px;text-align:center;">
-              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#C9A050;">Thank you</p>
-              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#2C1810;">Your order is confirmed</h1>
-              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#8A8070;">Order {{ order_number | default: order.name }} is in our workshop. In-stock jewelry ships insured within 2–3 business days. We will send tracking as soon as it leaves.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 36px 36px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#8A8070;">
-              <p><strong style="color:#2C1810;">Returns.</strong> Jewelry: 14 days from delivery, unworn, original packaging. Watches: exchanges only, 14 days, with box, papers, and tags. Bespoke and engraved pieces are final sale.</p>
-              <p>Questions about this order? Write hello@lauramilman.com or <a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">book a call</a>.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+  <div lang="en" dir="ltr">
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      Order {{ name }} is in our workshop. We will send tracking when it ships.
+    </div>
+    {%- assign has_watch = false -%}
+    {%- for line in subtotal_line_items -%}
+      {%- assign ptype = line.product.type | downcase -%}
+      {%- if ptype == 'watch' or ptype == 'watches' or ptype == 'timepiece' -%}
+        {%- assign has_watch = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+            <tr>
+              <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+                <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></p>
+                <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 36px 16px;text-align:center;">
+                <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Thank you</p>
+                <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">Your order is confirmed</h1>
+                <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+                  {% if billing_address.first_name %}{{ billing_address.first_name }}{% elsif customer.first_name %}{{ customer.first_name }}{% else %}Hello{% endif %} — order <strong style="color:#2C1810;">{{ name }}</strong> is in our workshop.
+                  {% if has_pending_payment %}We are waiting on payment before we ship.{% else %}In-stock jewelry ships insured within 2–3 business days.{% endif %}
+                  We will send tracking as soon as it leaves.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 36px 16px;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <caption style="text-align:left;padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#A88340;">Items</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" align="left" style="padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#5A5248;border-bottom:1px solid #DDD5C5;font-weight:normal;">Item</th>
+                      <th scope="col" align="right" style="padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#5A5248;border-bottom:1px solid #DDD5C5;font-weight:normal;">Qty</th>
+                      <th scope="col" align="right" style="padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#5A5248;border-bottom:1px solid #DDD5C5;font-weight:normal;">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for line in subtotal_line_items %}
+                    <tr>
+                      <td style="padding:12px 0;border-bottom:1px solid #DDD5C5;vertical-align:top;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                          <tr>
+                            {% if line.image %}
+                            <td width="72" style="padding-right:12px;vertical-align:top;">
+                              <img src="{{ line | img_url: 'compact_cropped' }}" width="72" height="72" alt="{{ line.title | escape }}" style="display:block;border:0;width:72px;height:72px;">
+                            </td>
+                            {% endif %}
+                            <td style="vertical-align:top;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#2C1810;">
+                              {{ line.title }}
+                              {% if line.variant_title != blank and line.variant_title != 'Default Title' %}
+                              <br><span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#5A5248;">{{ line.variant_title }}</span>
+                              {% endif %}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td align="right" style="padding:12px 8px 12px 0;border-bottom:1px solid #DDD5C5;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;vertical-align:top;">{{ line.quantity }}</td>
+                      <td align="right" style="padding:12px 0;border-bottom:1px solid #DDD5C5;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;vertical-align:top;">{{ line.final_line_price | money }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:12px;">
+                  <tr>
+                    <td style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5A5248;">Subtotal</td>
+                    <td align="right" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;">{{ subtotal_price | money }}</td>
+                  </tr>
+                  {% if discounts_savings %}
+                  <tr>
+                    <td style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5A5248;">Discount</td>
+                    <td align="right" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;">{{ discounts_savings | money }}</td>
+                  </tr>
+                  {% endif %}
+                  <tr>
+                    <td style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5A5248;">Shipping{% if shipping_method.title %} ({{ shipping_method.title }}){% endif %}</td>
+                    <td align="right" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;">{{ shipping_price | money }}</td>
+                  </tr>
+                  {% if tax_price %}
+                  <tr>
+                    <td style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5A5248;">Tax</td>
+                    <td align="right" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2C1810;">{{ tax_price | money }}</td>
+                  </tr>
+                  {% endif %}
+                  <tr>
+                    <td style="padding:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#2C1810;">Total</td>
+                    <td align="right" style="padding:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#2C1810;">{{ total_price | money }}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            {% if shipping_address %}
+            <tr>
+              <td style="padding:8px 36px 8px;">
+                <h2 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#A88340;font-weight:normal;">Shipping to</h2>
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#5A5248;">
+                  {{ shipping_address.name }}<br>
+                  {{ shipping_address.address1 }}{% if shipping_address.address2 %}, {{ shipping_address.address2 }}{% endif %}<br>
+                  {{ shipping_address.city }}, {{ shipping_address.province }} {{ shipping_address.zip }}<br>
+                  {{ shipping_address.country }}
+                </p>
+              </td>
+            </tr>
+            {% endif %}
+            <tr>
+              <td align="center" style="padding:24px 36px 12px;">
+                <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="background:#1E1109;">
+                      <a href="{{ order_status_url }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">View order status</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 36px 28px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;">
+                <h2 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#A88340;font-weight:normal;">Returns</h2>
+                <p style="margin:0 0 12px;"><strong style="color:#2C1810;">Jewelry:</strong> 14 days from delivery, unworn, original packaging.{% if has_watch %} <strong style="color:#2C1810;">Watches:</strong> exchanges only, 14 days, with box, papers, and tags.{% endif %} Bespoke and engraved pieces are final sale.</p>
+                <p style="margin:0;">Questions about this order? Write <a href="mailto:hello@lauramilman.com" style="color:#4A1428;">hello@lauramilman.com</a> or <a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">book a call</a>.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 36px 28px;border-top:1px solid #DDD5C5;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#5A5248;">
+                <p style="margin:0 0 8px;color:#2C1810;">Laura Milman New York</p>
+                <p style="margin:0;">
+                  {% if shop.address.address1 != blank %}{{ shop.address.address1 }}{% if shop.address.address2 != blank %}, {{ shop.address.address2 }}{% endif %}<br>{% endif %}
+                  {% if shop.address.city != blank %}{{ shop.address.city }}{% if shop.address.province != blank %}, {{ shop.address.province }}{% endif %} {{ shop.address.zip }}<br>{% else %}New York, NY · By appointment<br>{% endif %}
+                  <a href="mailto:hello@lauramilman.com" style="color:#4A1428;">hello@lauramilman.com</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>
