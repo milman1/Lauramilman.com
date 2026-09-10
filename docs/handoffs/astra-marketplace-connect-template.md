@@ -1,0 +1,18 @@
+# Task: Paste the eBay description template into Marketplace Connect and confirm the listing rule
+- Issue:
+- Updated (UTC): 2026-09-10
+- Owner / session: Astra (OpenAI GPT-6 Astra), browser session run by the merchant
+- Status: planned
+- Goal and acceptance criteria: Get `snippets/ebay-default.liquid` live inside the Marketplace Connect (Codisto) eBay description template editor so eBay listings render with the brand's espresso, gold, and cream styling instead of unstyled `lm-*` markup, and confirm the app's listing rule matches what `AGENTS.md` recipe D and rule 8 assume. Acceptance: a before screenshot and an after screenshot for one estate listing and one watch listing both show the brand colors (espresso header `#1E1109`, gold rule `#C9A050`, cream cards `#FAF6F0`); and either the app's listing rule is confirmed to select products by the `ebay` tag with `custom.ebay_condition` mapped to eBay Condition ID (`1000` new, `3000` pre-owned), or, if the rule found in the app differs from that, the exact rule as configured is written into the work log below instead of assumed. Do not change any price. Do not end, disable, or relist anything.
+- Scope (files / live records): Read-only on `snippets/ebay-default.liquid` in this repository (copy its contents, do not edit the file). Live scope is the Marketplace Connect app's eBay description template editor and its listing rule configuration screen inside Shopify admin for the `laura-milman` store. No other app screen, no product record, no price field.
+- Branch / commit / PR:
+- Completed steps:
+- Verification (checks, outcomes, evidence links, unverified items):
+- Deployment / live state:
+- Remaining work: Everything. Open `snippets/ebay-default.liquid` in this repo and copy the full file, including its inline `<style>` block, exactly as written. Open Marketplace Connect (Codisto) in Shopify admin, find the eBay description template editor, and screenshot its current state before making any change. Paste the full snippet contents into the template editor, replacing whatever is there, and save. Open one live estate listing preview and one live watch listing preview inside the app (or on eBay's listing preview if the app offers one) and screenshot both after the save. Compare the two sets of screenshots for the espresso, gold, and cream tokens. Then locate the app's listing selection rule (what determines which products the app lists on eBay) and its item-specifics / condition mapping screen; read exactly what field and tag the rule currently uses to select products, and exactly what it maps `custom.ebay_condition` to. Write what you actually find, not what the playbook expects, into the work log, and state plainly whether it matches "`ebay` tag selects the product, `custom.ebay_condition` maps to eBay Condition ID with `1000` new and `3000` pre-owned" or not.
+- Blockers / decisions needed: None known yet. If the template editor enforces a character limit shorter than the snippet, or strips the `<style>` block on save, stop and record that as a blocker rather than trimming the snippet yourself.
+- Exact next action: Open Shopify admin for the `laura-milman` store, go to Apps > Marketplace Connect (Codisto), locate the eBay description template editor, and take the "before" screenshot.
+- Supporting artifacts (durable location, access, expiry if applicable): `snippets/ebay-default.liquid` in this repository (source of the template text). Screenshots and the listing-rule finding belong in this handoff's work log or a linked location the merchant can reach; note where you saved them.
+
+## Work log
+- 2026-09-10: Handoff file created. No work performed yet.

@@ -153,6 +153,7 @@ Use Astra when the work is in a browser rather than an API:
 - Checking how a listing renders on eBay, Google Shopping, or the Shop app.
 - Reproducing a storefront bug that only appears with a real browser session.
 - Jacob & Co. sourcing. The merchant's two source sites (decision 2026-09-09) are Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/, e.g. https://www.bucherer.com/us/en/watches/jacob-co/epic-x/1362-322-2.html) and Exquisite Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x). Exquisite Timepieces is a Shopify store, so its catalog reads through `/products.json` and is a Sonnet 5 or Terra job through Firecrawl. Bucherer is a custom site with rendered product pages; if Firecrawl cannot return the price, reference, and images, Astra reads the page in a browser and writes the same facts JSON a worker would. Astra never creates the Shopify product; that is recipe G2.
+- Open Astra tasks are committed handoff files under `docs/handoffs/astra-*.md` (section 8). Astra reads the file, does the work in the merchant's browser session, commits its output file on a branch, and appends to the handoff's work log. Nothing about a task lives only in chat.
 
 Do not use Astra for bulk API work, code changes, or anything a Shopify
 GraphQL call can do; Sonnet 5 is a fifth of the price and leaves an audit
