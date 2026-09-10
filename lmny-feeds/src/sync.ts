@@ -19,6 +19,7 @@ import { channelsFor } from '../config/channels.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
 import {
   applyUnavailableArchives,
+  channelsForHandle,
   diffCatalog,
   kindForHandle,
   PRICING_REVIEW_HOLD_REASONS,
@@ -405,6 +406,9 @@ async function main() {
   let mediaVideosAttached = 0;
   let redirectsCreated = 0;
   let collectionsCreated: string[] = [];
+  let publicationsByName = new Map<string, string>();
+  let publishedToChannels = 0;
+  let skippedDraft = 0;
 
   if (!flags.dryRun) {
     // Assert write scopes before the first real write; fail loudly if missing.
@@ -417,6 +421,26 @@ async function main() {
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
+
+    // Sales channels resolve before the first write, not after it: if Online
+    // Store cannot be resolved the run would create products that 404 on the
+    // storefront, so the whole write phase is aborted instead.
+    const wantedChannels = [...new Set([...channelsFor('watch'), ...channelsFor('diamond')])];
+    const publications = await shopify.publicationIdsByName(wantedChannels);
+    publicationsByName = publications.ids;
+    for (const name of wantedChannels) {
+      if (publicationsByName.has(name)) continue;
+      // A configured channel that does not resolve is a run error: the sync
+      // silently under-publishes otherwise.
+      writeErrors.push(`sales channel not resolved: '${name}' is not installed on this store`);
+    }
+    if (!publicationsByName.has('Online Store')) {
+      throw new Error(
+        'Refusing to write: the Online Store publication did not resolve — ' +
+          'every product would be written but left 404ing on the storefront',
+      );
+    }
+    console.log(`Sales channels: ${[...publicationsByName.keys()].join(', ')}`);
 
     const uploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
     if (uploadifyDeletes.length > 0) {
@@ -535,14 +559,21 @@ async function main() {
         );
       });
 
-    // Handle travels with the id: the channel list a product is published to
-    // depends on its kind (config/channels.ts), and the handle prefix is what
-    // says whether it is a watch or a loose stone.
-    let createdRefs: Array<{ id: string; handle: string | null }> = [];
+    // Handle and status travel with the id: the channel list depends on the
+    // kind (config/channels.ts), which the handle prefix carries, and a
+    // product written as DRAFT is never published to anything.
+    const statusByHandle = new Map(
+      inputs.map((input) => [String(input.handle), String(input.status ?? 'ACTIVE')]),
+    );
+    let createdRefs: Array<{ id: string; handle: string | null; status: string }> = [];
     if (inputs.length >= BULK_THRESHOLD) {
       console.log(`Writing ${inputs.length} products via bulk productSet…`);
       const result = await shopify.bulkProductSet(inputs);
-      createdRefs = result.products.map((p) => ({ id: p.id, handle: p.handle }));
+      createdRefs = result.products.map((p) => ({
+        id: p.id,
+        handle: p.handle,
+        status: (p.handle && statusByHandle.get(p.handle)) || 'ACTIVE',
+      }));
       writeErrors.push(...result.errors);
       if (locationId) {
         const qtyByHandle = new Map(
@@ -565,15 +596,23 @@ async function main() {
     } else if (inputs.length > 0) {
       console.log(`Writing ${inputs.length} products via direct productSet…`);
       for (const input of inputs) {
+        let written = input;
         let result = await shopify.productSet(input);
         if (result.errors.some((e) => isInvalidShopifyFileUrlError(e))) {
           const quarantined = quarantineProductSetInput(input);
           console.warn(
             `${input.handle}: Shopify rejected file URL — retrying as DRAFT without photos`,
           );
+          written = quarantined;
           result = await shopify.productSet(quarantined);
         }
-        if (result.id) createdRefs.push({ id: result.id, handle: String(input.handle) });
+        if (result.id) {
+          createdRefs.push({
+            id: result.id,
+            handle: String(input.handle),
+            status: String(written.status ?? 'ACTIVE'),
+          });
+        }
         writeErrors.push(...result.errors.map((e) => `${input.handle}: ${e}`));
         if (locationId) {
           writeErrors.push(
@@ -593,30 +632,40 @@ async function main() {
     if (createdRefs.length > 0) {
       // Watches go to every channel in config/channels.ts; loose stones stay
       // on Online Store and Shop (about 10,000 one-of-one SKUs would swamp
-      // Merchant Center and Meta). Both lists resolve from one publications
-      // query. A product whose handle did not come back takes the narrower
-      // diamond list rather than being pushed to Google and Meta by accident.
-      const watchChannels = channelsFor('watch');
-      const diamondChannels = channelsFor('diamond');
-      const wanted = [...new Set([...watchChannels, ...diamondChannels])];
-      const publicationsByName = await shopify.publicationIdsByName(wanted);
-      const idsFor = (names: readonly string[]): string[] =>
-        names.map((n) => publicationsByName.get(n)).filter((id): id is string => Boolean(id));
-      const watchPublicationIds = idsFor(watchChannels);
-      const diamondPublicationIds = idsFor(diamondChannels);
-      const watchRefs = createdRefs.filter((r) => r.handle !== null && kindForHandle(r.handle) === 'watch');
+      // Merchant Center and Meta). Ids resolved before the write phase.
+      // Only ACTIVE products publish: a DRAFT is either quarantined media or
+      // a piece the sync held back, and publishing one lists it.
+      const publishable = createdRefs.filter((ref) => ref.status === 'ACTIVE');
+      skippedDraft = createdRefs.length - publishable.length;
+      // Cache by channel-list identity: `channelsFor` returns the same two
+      // constants every time, so this resolves each list once. A cache miss
+      // only recomputes; nothing depends on the identity being stable.
+      const idsCache = new Map<readonly string[], string[]>();
+      const idsFor = (channels: readonly string[]): string[] => {
+        const cached = idsCache.get(channels);
+        if (cached) return cached;
+        const ids = channels
+          .map((name) => publicationsByName.get(name))
+          .filter((id): id is string => Boolean(id));
+        idsCache.set(channels, ids);
+        return ids;
+      };
+      const watchCount = publishable.filter(
+        (ref) => ref.handle !== null && kindForHandle(ref.handle) === 'watch',
+      ).length;
       console.log(
-        `Publishing ${createdRefs.length} products: ${watchRefs.length} watches to ` +
-          `${watchPublicationIds.length} channels (${watchChannels.join(', ')}), ` +
-          `${createdRefs.length - watchRefs.length} stones to ` +
-          `${diamondPublicationIds.length} channels (${diamondChannels.join(', ')})…`,
+        `Publishing ${publishable.length} products: ${watchCount} watch(es) to ` +
+          `${idsFor(channelsFor('watch')).length} channels, ${publishable.length - watchCount} stone(s) to ` +
+          `${idsFor(channelsFor('diamond')).length} channels` +
+          (skippedDraft > 0 ? ` (${skippedDraft} not ACTIVE, skipped)` : '') +
+          '…',
       );
-      for (const ref of createdRefs) {
-        const isWatch = ref.handle !== null && kindForHandle(ref.handle) === 'watch';
-        const publicationIds = isWatch ? watchPublicationIds : diamondPublicationIds;
+      for (const ref of publishable) {
+        const publicationIds = idsFor(channelsForHandle(ref.handle));
         if (publicationIds.length === 0) continue;
         const errors = await shopify.publishToChannels(ref.id, publicationIds);
         writeErrors.push(...errors.map((e) => `publish ${ref.handle ?? ref.id}: ${e}`));
+        if (errors.length === 0) publishedToChannels += 1;
       }
     }
 
@@ -816,6 +865,11 @@ async function main() {
         retailUsd: p.priced.retailUsd,
         marginPct: p.priced.marginPct,
       })),
+    publishing: {
+      published: publishedToChannels,
+      skippedDraft,
+      channels: [...publicationsByName.keys()],
+    },
     watchPricing: { lines: watchLines },
     watchGalleries,
     decisions: summary,

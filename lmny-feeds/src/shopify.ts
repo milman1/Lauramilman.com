@@ -1,4 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { publicationMatchesChannel } from '../config/channels.js';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
 import {
@@ -904,30 +905,30 @@ export class ShopifyClient {
   /**
    * Publication ids for the requested channel names, in one query.
    *
-   * The names come from `config/channels.ts`; a name that is not installed
-   * on the store is logged and left out of the map rather than thrown on,
-   * so uninstalling a channel degrades a sync to the channels that remain
-   * instead of failing the run.
+   * Returns the ids that resolved, keyed by the configured channel name, and
+   * every publication name installed on the store. `installedNames` is the
+   * only trustworthy installed set: a product's own `resourcePublications`
+   * lists the channels it IS on, so a channel it was never published to
+   * simply has no row and cannot be told apart from an uninstalled one.
+   *
+   * A requested name missing from `ids` is a run error for the caller to
+   * record — this method neither warns nor throws, because only the caller
+   * knows whether the channel is required (Online Store) or optional.
    */
-  async publicationIdsByName(names: string[]): Promise<Map<string, string>> {
+  async publicationIdsByName(
+    names: string[],
+  ): Promise<{ ids: Map<string, string>; installedNames: string[] }> {
     const data = await this.gql<{ publications: { nodes: Array<{ id: string; name: string }> } }>(
       `{ publications(first: 30) { nodes { id name } } }`,
     );
-    const installed = new Map(data.publications.nodes.map((p) => [p.name, p.id]));
-    const found = new Map<string, string>();
-    const missing: string[] = [];
+    const nodes = data.publications.nodes;
+    const ids = new Map<string, string>();
     for (const name of names) {
-      const id = installed.get(name);
-      if (id) found.set(name, id);
-      else missing.push(name);
+      // Alias-aware: 'Online Store 2.0' is the same channel as 'Online Store'.
+      const match = nodes.find((p) => publicationMatchesChannel(name, p.name));
+      if (match) ids.set(name, match.id);
     }
-    if (missing.length > 0) {
-      console.warn(
-        `Sales channels not installed on this store, skipping: ${missing.join(', ')} ` +
-          `(installed: ${[...installed.keys()].join(', ') || 'none'})`,
-      );
-    }
-    return found;
+    return { ids, installedNames: nodes.map((p) => p.name) };
   }
 
   async publishResource(id: string, publicationId: string): Promise<string[]> {

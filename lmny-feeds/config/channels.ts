@@ -24,11 +24,13 @@
  * `ebay` tag plus `custom.ebay_condition` (AGENTS.md section 2 rule 8).
  * Adding 'eBay' to this list would do nothing but log a missing channel.
  *
- * Names must match the publication names Shopify returns exactly. Ten
- * publications are installed as of 2026-09-09: Online Store, Shop,
- * Google & YouTube, Facebook & Instagram, Pinterest, TikTok, Inbox,
- * Microsoft Channel, Faire, Buy Button. A name that is not installed is
- * logged and skipped, never thrown on.
+ * Names must match the publication names Shopify returns exactly. The
+ * store's publication list, as the API returns it (2026-09-09), is:
+ * Online Store, Facebook & Instagram, Google & YouTube, Pinterest, Shop,
+ * TikTok, Inbox, Microsoft Channel, Faire: Sell Wholesale, Buy Button.
+ * Note "Faire: Sell Wholesale", not "Faire". A configured name that does
+ * not resolve against that list is a run error, not a warning: the sync
+ * records it and, when Online Store itself is missing, refuses to write.
  */
 export const SALES_CHANNELS = [
   'Online Store',
@@ -53,4 +55,19 @@ export type ChannelKind = 'diamond' | 'watch' | 'estate';
  */
 export function channelsFor(kind: ChannelKind): readonly string[] {
   return kind === 'diamond' ? LOOSE_DIAMOND_CHANNELS : SALES_CHANNELS;
+}
+
+/**
+ * Shopify renamed the storefront publication once. Both names mean the same
+ * channel, and a store can return either, so every comparison between a
+ * configured channel and a publication name goes through
+ * `publicationMatchesChannel` — the client resolving ids and the catalog
+ * read computing missing channels must agree on this.
+ */
+export const ONLINE_STORE_ALIASES: readonly string[] = ['Online Store', 'Online Store 2.0'];
+
+/** True when a Shopify publication name is the configured channel. */
+export function publicationMatchesChannel(channel: string, publicationName: string): boolean {
+  if (channel === 'Online Store') return ONLINE_STORE_ALIASES.includes(publicationName);
+  return channel === publicationName;
 }

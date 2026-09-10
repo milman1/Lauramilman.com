@@ -104,7 +104,7 @@ holds a stones table — Shopify products are the only live copy.
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 
-   **Sales channels.** Every product this step creates is published with one
+   **Sales channels.** Every product this step writes is published with one
    `publishablePublish` call carrying the whole channel list from
    `config/channels.ts` (merchant decision 2026-09-10), not Online Store
    alone. Watches go to all five — Online Store, Shop, Google & YouTube,
@@ -112,12 +112,27 @@ holds a stones table — Shopify products are the only live copy.
    searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
    (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
    swamp Merchant Center and Meta's catalog limits. The kind is read from
-   the handle prefix, so a product whose handle did not come back from a
-   bulk write takes the narrower stone list. Publication names resolve once
-   per run; one that is not installed on the store is logged and skipped,
-   never thrown on. Changing the list is a pull request against
+   the handle prefix (`channelsForHandle` in `src/diff.ts`), so a product
+   whose handle did not come back from a bulk write takes the narrower stone
+   list. **Only ACTIVE products publish:** a product written as DRAFT —
+   including one quarantined mid-run because Shopify rejected its photo URLs
+   — is counted as `skippedDraft` in the report and sent to no channel at
+   all. Publication ids resolve once, *before* the first write: a configured
+   channel that does not resolve is a write error, and if Online Store
+   itself does not resolve the run refuses to write rather than creating
+   products that 404. Changing the list is a pull request against
    `config/channels.ts` — eBay is not in it, because Marketplace Connect is
    not a publication and selects by the `ebay` tag on its own side.
+
+   **This step only publishes what it writes.** Unlike the Back Vault sync,
+   the Belgium Dia path has no publish-only decision: a product that is
+   already correct (hash unchanged) is skipped entirely and never
+   re-examined for channel coverage, so only `create` and `update`
+   decisions ever reach `publishablePublish`. The 173 watches already on
+   the store were therefore backfilled onto the four new channels once by
+   hand on 2026-09-10; from then on the syncs keep new and changed pieces
+   in step. If the channel list in `config/channels.ts` grows again,
+   existing watches need another one-off backfill.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -355,17 +370,25 @@ npm run sync:backvault       # live (needs Shopify env vars)
    Instagram, Pinterest (merchant decision 2026-09-10; before it, the 732
    estate pieces were on the Online Store alone and invisible on Google
    Shopping, Meta, and Pinterest, per `docs/audits/2026-09-09-site-audit.md`
-   §6). The ids resolve once per run in a single `publications` query, and
-   each piece is published to all of them in one `publishablePublish` call.
-   The catalog read records which of those channels a piece is missing
-   (`missingChannels`), so an existing piece that is live on the storefront
-   but off Pinterest is picked up by a `publish` decision on the next run
-   without rewriting it. A channel that is not installed on the store is
-   logged and skipped rather than retried forever. The run report line says
-   how many pieces were published and to how many channels. Changing the
-   list is a pull request against `config/channels.ts`; eBay is not in it
-   (Marketplace Connect is an app, not a publication, and selects by the
-   `ebay` tag).
+   §6). One `publications` query runs before the catalog read and yields
+   both the ids to publish to and **the store's installed publication
+   list**; each piece is then published to all of them in one
+   `publishablePublish` call. The installed list has to come from the shop,
+   not from the product: `resourcePublications` returns a row only for a
+   channel the product is already on, so a channel it has never been
+   published to is indistinguishable from an uninstalled one. With that
+   list, the catalog read records which configured channels a piece is
+   missing (`missingChannels`), and a piece that is live on the storefront
+   but off Pinterest gets a `publish` decision on the next run without being
+   rewritten. Only ACTIVE pieces publish — a DRAFT (no photos yet) is
+   counted as `skippedDraft`. A configured channel that does not resolve is
+   a run error rather than a warning, and a live run whose Online Store
+   publication does not resolve refuses to write; a dry run keeps going,
+   assumes every configured channel is installed, and reports its channels
+   as `unresolved (dry run)`. The Done line says how many pieces were
+   published and to how many channels. Changing the list is a pull request
+   against `config/channels.ts`; eBay is not in it (Marketplace Connect is
+   an app, not a publication, and selects by the `ebay` tag).
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated

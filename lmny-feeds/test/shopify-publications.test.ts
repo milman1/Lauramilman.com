@@ -27,23 +27,49 @@ describe('ShopifyClient.publicationIdsByName', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
     const client = new ShopifyClient('example.myshopify.com', 'test-token');
-    const ids = await client.publicationIdsByName([...SALES_CHANNELS]);
+    const { ids } = await client.publicationIdsByName([...SALES_CHANNELS]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect([...ids.keys()]).toEqual([...SALES_CHANNELS]);
     expect(ids.get('Pinterest')).toBe('gid://shopify/Publication/5');
   });
 
-  it('logs an uninstalled channel instead of throwing', async () => {
+  it('returns the store publication list as the installed set', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse({ publications: { nodes: INSTALLED } })),
+    );
+    const client = new ShopifyClient('example.myshopify.com', 'test-token');
+    const { installedNames } = await client.publicationIdsByName(['Online Store']);
+    // Everything on the store, not just what was asked for — the catalog read
+    // needs it to tell an unpublished channel from an uninstalled one.
+    expect(installedNames).toEqual(INSTALLED.map((p) => p.name));
+  });
+
+  it('leaves an uninstalled channel out of the map without warning or throwing', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => jsonResponse({ publications: { nodes: INSTALLED.slice(0, 2) } })),
     );
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const client = new ShopifyClient('example.myshopify.com', 'test-token');
-    const ids = await client.publicationIdsByName([...SALES_CHANNELS]);
+    const { ids } = await client.publicationIdsByName([...SALES_CHANNELS]);
     expect([...ids.keys()]).toEqual(['Online Store', 'Shop']);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(String(warn.mock.calls[0]?.[0])).toContain('Pinterest');
+    // The caller records the miss as a run error; the client stays silent.
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('resolves Online Store from the legacy Online Store 2.0 publication', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        jsonResponse({
+          publications: { nodes: [{ id: 'gid://shopify/Publication/99', name: 'Online Store 2.0' }] },
+        }),
+      ),
+    );
+    const client = new ShopifyClient('example.myshopify.com', 'test-token');
+    const { ids } = await client.publicationIdsByName(['Online Store']);
+    expect(ids.get('Online Store')).toBe('gid://shopify/Publication/99');
   });
 });
 
