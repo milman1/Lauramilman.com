@@ -434,6 +434,22 @@ inputs for dry run and limit, a report written to `out/` and uploaded as an
 artifact, and a `concurrency` group so two runs never overlap. Secrets come
 from repo settings, never from a file.
 
+Current recurring jobs:
+
+- Belgium Dia diamonds and watches sync, hourly (`lmny-feeds/src/sync.ts`).
+- Back Vault estate jewelry sync, weekly, Sunday 00:17 UTC
+  (`lmny-feeds/src/backvault/`).
+- Royal Chain cost refresh, monthly (`.github/workflows/royalchain-costs.yml`,
+  `lmny-feeds/scripts/royalchain-costs.ts`; recipe H).
+- Journal drafting job, weekly, Monday 13:23 UTC
+  (`.github/workflows/journal-draft.yml`,
+  `lmny-feeds/scripts/journal-draft.ts`). Sonnet 5 gathers ten hooks by web
+  search (RSS fallback); Opus 5 writes two drafts with SEO fields, live
+  product links, and a FAQ; drafts are created UNPUBLISHED on the journal
+  blog with tag `journal-draft`. It never publishes and never deletes;
+  stale drafts are only listed in the report for a person to act on. See
+  recipe F and the audit doc section 3.
+
 ### I. Product content: images, copy, descriptions for every upload
 
 Every product needs images, a title, a body, SEO fields, tags, a product type,
@@ -689,18 +705,21 @@ If required evidence is inaccessible or expired, record that blocker.
 
 ---
 
-## 9. Historical backlog snapshot (2026-09-09)
+## 9. Historical backlog snapshot (2026-09-10)
 
-This table preserves the original handoff context; it is not current task
-status. Track subsequent progress in GitHub Issues as described in section 8.
-Verify the relevant state before resuming any item below.
+This is a snapshot, not a second backlog; the Issues are the live list
+(section 8). Verify the relevant state before resuming any item below.
 
-| Task | Owner | Status (2026-09-09) |
-|---|---|---|
-| Reprice Back Vault pieces: Robinson's midpoint where matched, else cost + $500; cost = supplier price | Recipe B in code; workers applied it to 732 live pieces | Done; sync keeps it weekly |
-| eBay description template with brand colors | Opus 5 wrote `snippets/ebay-default.liquid`; Astra or a person pastes it into Marketplace Connect | Template done; paste step open |
-| Push fine, lab-grown, and estate pieces to eBay | 525 tagged by workers; 732 estate pieces tagged with the reprice; sync tags future pieces | Done; confirm the app's listing rule picks up the tag |
-| Site audit (SEO, metafields, AI search) | `docs/audits/2026-09-09-site-audit.md` | Done; 12-item fix list awaiting go-ahead, item 1 already done |
-| Journal pipeline | Proposal in the audit doc section 3 | Awaiting `ANTHROPIC_API_KEY` secret and cadence yes |
-| Royal Chain basic chains into Shopify | Scrape done (901 chains, no public prices, no popularity signal) | Awaiting popularity source, pricing rule, batch size |
-| Sales channel optimization | Channel matrix in the audit doc section 5 | Awaiting go-ahead on publishing gaps |
+Done: Back Vault reprice and cost (recipe B, weekly in the sync); eBay
+tagging (525 fine, lab-grown, and hand-imported estate pieces, plus the
+732 estate pieces and watches already tagged); sales-channel backfill and
+the sync config change (audit doc section 6); the Journal drafting job
+built (recipe F, recipe G); six Astra handoffs #91 to #96 committed, with
+the Peaceful Diamonds SKU export.
+
+Open: Astra tasks #91 to #96; the Journal job's first dry run, by the
+merchant; the Sunday 2026-09-13 Back Vault sync run, to confirm the new
+pricing, availability, and channel code; audit fix list items 2 to 12,
+which belong to the first SEO plan (recipe E); the lab-grown reprice,
+waiting on #94's cost data; Royal Chain product creation, waiting on
+#93's cost data.
