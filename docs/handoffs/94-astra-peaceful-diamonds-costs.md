@@ -17,3 +17,4 @@
 ## Work log
 - 2026-09-10: Handoff file created. `docs/suppliers/peaceful-diamonds-skus-2026-09.csv` is committed at that path with 94 rows.
 - 2026-09-10 Claude worker: exported 94 active SKUs to docs/suppliers/peaceful-diamonds-skus-2026-09.csv.
+- 2026-09-10 Claude worker: 8 active Peaceful Diamonds products have no SKU on any variant and are excluded from the CSV: lab-grown-diamond-drop-earrings, luxury-drop-earrings-with-lab-grown-diamonds, chandelier-earrings-with-lab-grown-diamonds, marquise-and-pear-shape-lab-grown-diamond-drop-earrings, marquise-lab-grown-diamond-engagement-ring, three-stone-lab-grown-diamond-engagement-ring, daisy-flower-bracelet-with-lab-grown-diamonds, diamond-lariat-necklace. Cost for those is a merchant question, not an Astra task.
