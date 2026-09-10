@@ -1,0 +1,49 @@
+{%- comment -%}
+  Append lab-grown jewelry onto a Fine Jewelry type collection.
+  Sister lab-grown-* collections come through in full. Peaceful Diamonds
+  pieces are included when product.type matches the page (rings, earrings,
+  etc.) so the Fine Jewelry grid is not empty of lab-grown stock.
+
+  Peaceful Diamonds remains the dedicated lab-grown home in the nav.
+
+  Usage:
+    {% render 'collection-mix-lab', mix_handle: mix_handle, mix_type: mix_type, seen_ids: seen_ids %}
+{%- endcomment -%}
+{%- if mix_handle != blank -%}
+  {%- assign mix_seen = seen_ids | default: ',' -%}
+  {%- assign mix_sources = mix_handle | append: ',peaceful-diamonds-by-laura-milman-new-york' | split: ',' -%}
+  {%- for src_handle in mix_sources -%}
+    {%- assign mix_col = collections[src_handle] -%}
+    {%- if mix_col != blank -%}
+      {%- for product in mix_col.products limit: 48 -%}
+        {%- assign pid = ',' | append: product.id | append: ',' -%}
+        {%- unless mix_seen contains pid -%}
+          {%- assign type_ok = true -%}
+          {%- if src_handle == 'peaceful-diamonds-by-laura-milman-new-york' -%}
+            {%- assign type_ok = false -%}
+            {%- assign ptype = product.type | downcase -%}
+            {%- if mix_type == 'earring' and ptype contains 'earring' -%}
+              {%- assign type_ok = true -%}
+            {%- elsif mix_type == 'bracelet' and ptype contains 'bracelet' -%}
+              {%- assign type_ok = true -%}
+            {%- elsif mix_type == 'necklace' and ptype contains 'necklace' -%}
+              {%- assign type_ok = true -%}
+            {%- elsif mix_type == 'pendant' and ptype contains 'pendant' -%}
+              {%- assign type_ok = true -%}
+            {%- elsif mix_type == 'engagement' and ptype contains 'engagement' -%}
+              {%- assign type_ok = true -%}
+            {%- elsif mix_type == 'ring' and ptype contains 'ring' -%}
+              {%- unless ptype contains 'earring' or ptype contains 'engagement' -%}
+                {%- assign type_ok = true -%}
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endif -%}
+          {%- if type_ok -%}
+            {%- render 'product-card', product: product -%}
+            {%- assign mix_seen = mix_seen | append: product.id | append: ',' -%}
+          {%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}

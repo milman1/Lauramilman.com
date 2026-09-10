@@ -59,7 +59,7 @@
       .filter(Boolean);
   }
 
-  /** Grade scale: floor and better (checked stops). */
+  /** Grade scale: checked grades only (VS2 means VS2, not VS2 and better). */
   function selectedGrades(name) {
     return Array.prototype.map
       .call(form.querySelectorAll('[data-scale="' + name + '"] input:checked'), function (el) {
@@ -253,7 +253,7 @@
         if (!data.stones || !data.stones.length) {
           resultsEl.innerHTML =
             '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">No stones match</p>' +
-            '<p class="lm-dfilter__empty-copy">Widen a grade or carat range and try again.</p></div>';
+            '<p class="lm-dfilter__empty-copy">Try another grade, shape, or carat range.</p></div>';
         } else {
           resultsEl.innerHTML =
             '<div class="products-grid lm-dfilter__results">' +
@@ -286,38 +286,39 @@
       var noun = hint ? hint.textContent : '';
 
       function paint() {
-        var floor = -1;
+        var selected = [];
+        var first = -1;
+        var last = -1;
         stops.forEach(function (stop, i) {
           var on = stop.querySelector('input').checked;
           stop.classList.toggle('is-in-range', on);
-          stop.classList.remove('is-floor');
-          if (on && floor === -1) floor = i;
+          stop.classList.toggle('is-floor', on);
+          if (on) {
+            selected.push(stop.dataset.grade);
+            if (first === -1) first = i;
+            last = i;
+          }
         });
         if (fill) {
-          if (floor === -1) {
+          var contiguous = first !== -1 && selected.length === last - first + 1;
+          if (!contiguous) {
             fill.style.left = '0%';
             fill.style.right = '100%';
           } else {
-            stops[floor].classList.add('is-floor');
-            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
-            fill.style.right = (100 / stops.length) * 0.5 + '%';
+            fill.style.left = ((first + 0.5) / stops.length) * 100 + '%';
+            fill.style.right = ((stops.length - last - 0.5) / stops.length) * 100 + '%';
           }
         }
         if (hint) {
-          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
+          hint.textContent = selected.length ? selected.join(' · ') : noun;
         }
       }
 
-      stops.forEach(function (stop, index) {
-        stop.addEventListener('click', function (event) {
-          event.preventDefault();
-          var isFloor = stop.classList.contains('is-floor');
-          stops.forEach(function (s, i) {
-            s.querySelector('input').checked = !isFloor && i >= index;
-          });
-          paint();
-        });
+      stops.forEach(function (stop) {
+        var input = stop.querySelector('input');
+        if (input && !scale.dataset.wired) input.addEventListener('change', paint);
       });
+      scale.dataset.wired = '1';
       paint();
     });
   }

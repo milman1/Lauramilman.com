@@ -167,17 +167,65 @@ def test_header_nav_order_puts_differentiators_early() -> None:
 
 def test_timepieces_navigation_includes_jacob_and_co() -> None:
     header = (ROOT / "sections/header.liquid").read_text()
-    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    chips = (ROOT / "snippets/watch-brand-chips.liquid").read_text()
     jacob_link = 'href="/collections/jacob-co"'
     assert jacob_link in header
     assert "Jacob &amp; Co." in header
-    assert jacob_link in collection
-    assert "Jacob &amp; Co." in collection
+    assert jacob_link in chips
+    assert "Jacob &amp; Co." in chips
     # Keep Jacob with the lead brands so it is not clipped under Other Brands.
     assert header.index('href="/collections/cartier-watches"') < header.index(jacob_link)
     assert header.index(jacob_link) < header.index('href="/collections/other-watch-brands"')
     assert "max-height: 500px" not in header
-    assert collection.index('href="/collections/cartier-watches"') < collection.index(jacob_link)
+    assert chips.index('href="/collections/cartier-watches"') < chips.index(jacob_link)
+
+
+def test_watch_brand_pages_link_back_to_all_timepieces() -> None:
+    chips = (ROOT / "snippets/watch-brand-chips.liquid").read_text()
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    assert 'href="/collections/time-pieces"' in chips
+    assert "All Timepieces" in chips
+    assert "watch-brand-chips" in collection
+    assert "lm-watch-nav" in chips
+    assert "lm-watch-nav" in collection
+
+
+def test_mobile_popular_searches_are_sticky() -> None:
+    popular = (ROOT / "sections/popular-searches.liquid").read_text()
+    mobile = popular.split("@media (max-width: 768px)")[1]
+    assert "position: sticky" in mobile
+    assert "var(--header-height" in mobile
+
+
+def test_fine_jewelry_mixes_lab_grown_collections() -> None:
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    mix = (ROOT / "snippets/collection-mix-lab.liquid").read_text()
+    assert "lab-grown-rings" in collection
+    assert "lab-grown-necklaces" in collection
+    assert "lab-grown-bracelets" in collection
+    assert "lab-grown-earrings" in collection
+    assert "lab-grown-pendants" in collection
+    assert "lab-grown-engagement-rings" in collection
+    assert "collection-mix-lab" in collection
+    assert "peaceful-diamonds-by-laura-milman-new-york" in mix
+    assert "Peaceful Diamonds remains the dedicated lab-grown home" in collection
+    header = (ROOT / "sections/header.liquid").read_text()
+    fine_block = header.split("All Fine Jewelry")[1].split("Loose stones")[0]
+    assert "lab-grown-rings" not in fine_block
+
+
+def test_diamond_grade_scale_selects_individual_grades() -> None:
+    storefront = (ROOT / "assets/diamond-storefront.js").read_text()
+    facet = (ROOT / "sections/diamond-filter.liquid").read_text()
+    scale = (ROOT / "snippets/diamond-grade-scale.liquid").read_text()
+    assert "VS2 means VS2, not VS2 and better" in storefront
+    assert "Click VS2 to select VS2 only" in facet
+    assert 'addEventListener("change", paint)' in storefront.replace("'", '"')
+    assert "preventDefault" not in storefront.split("function wireScales")[1].split("function wireShapes")[0]
+    assert "event.preventDefault()" not in facet.split("Grade scales are independent")[1].split("Shape tiles")[0]
+    assert "VS2 and better" in scale
+    assert "relaxing a grade by one step" not in facet
+
 
 
 def test_footer_and_search_surface_the_worlds() -> None:
@@ -305,8 +353,33 @@ def test_refine_drawer_hides_mismatched_and_low_value_filters() -> None:
     assert "diamond shape" in drawer
     assert "useful_values" in drawer
     collection = (ROOT / "sections/main-collection.liquid").read_text()
-    assert "Shop by brand" in collection
-    assert "/collections/rolex-watches" in collection
+    chips = (ROOT / "snippets/watch-brand-chips.liquid").read_text()
+    assert "Shop by brand" in chips
+    assert "/collections/rolex-watches" in chips
+    assert "watch-brand-chips" in collection
+
+
+def test_gemological_filters_live_only_on_loose_diamonds() -> None:
+    """Clarity / shape / GIA color / cut are loose-diamond 4Cs, not jewelry."""
+    drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
+    diamonds = (ROOT / "sections/diamond-filter.liquid").read_text()
+    jewelry_templates = (ROOT / "templates/collection.json").read_text()
+    diamond_templates = (ROOT / "templates/collection.diamonds.json").read_text()
+    lab_templates = (ROOT / "templates/collection.diamonds-lab.json").read_text()
+
+    assert 'title: \'Clarity\'' in diamonds or "title: 'Clarity'" in diamonds
+    assert "type: diamond-filter" in diamond_templates.replace('"', "")
+    assert "diamond-filter" in lab_templates
+    assert "diamond-filter" not in jewelry_templates
+
+    skip_block = drawer.split("Shape / color / clarity / cut belong on loose diamonds only.")[1].split(
+        "fd_is_watch"
+    )[0]
+    for needle in ("clarity", "diamond shape", "cut grade", "'color'", "'colour'"):
+        assert needle in skip_block
+
+    assert "natural-diamonds or lab-grown-diamonds" in drawer
+
 
 
 def test_only_shopify_inbox_chat_is_rendered() -> None:

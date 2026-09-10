@@ -9,7 +9,7 @@
   </span>
   <div class="lm-scale" data-scale="{{ name }}">
     <div class="lm-scale__track" aria-hidden="true"><div class="lm-scale__fill" data-scale-fill></div></div>
-    <div class="lm-scale__stops" role="group" aria-label="{{ title }} minimum">
+    <div class="lm-scale__stops" role="group" aria-label="{{ title }}">
       {%- for grade in order -%}
         <label class="lm-scale__stop" data-grade="{{ grade | escape }}">
           <input type="checkbox" name="{{ name }}" value="{{ grade | escape }}">
