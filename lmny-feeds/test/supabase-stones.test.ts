@@ -59,6 +59,12 @@ describe('stoneRowFor', () => {
     expect(row.clarity).toBe('VS1');
     expect(row.cut).toBe('Excellent');
   });
+
+  it('marks imageless stones unavailable so the grid cannot list them', () => {
+    const row = stoneRowFor(labStone({ imageUrls: [] }), 120, 'h', '2026-08-02T00:00:00Z');
+    expect(row.available).toBe(false);
+    expect(row.image_urls).toEqual([]);
+  });
 });
 
 describe('dualWriteStones', () => {

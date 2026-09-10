@@ -48,13 +48,16 @@ create index if not exists stones_filter_idx
 comment on table public.stones is
   'Belgium Dia stones dual-written by lmny-feeds sync. Source of truth for the App Proxy diamond filter once Shopify products are retired.';
 
--- Storefront reads via the anon key + RLS: only available rows, no cost.
+-- Storefront reads via the anon key + RLS: only available rows with a still
+-- photo, no cost. Belgium Dia omits ImageLink on a large share of (especially
+-- cheaper lab) stones; Shopify drafts those as media-missing, and the grid
+-- must do the same or it paints cream placeholders.
 alter table public.stones enable row level security;
 
 drop policy if exists stones_public_read on public.stones;
 create policy stones_public_read on public.stones
   for select
   to anon, authenticated
-  using (available = true);
+  using (available = true AND cardinality(image_urls) > 0);
 
 -- Service role (sync) bypasses RLS; no insert/update policy for anon.
