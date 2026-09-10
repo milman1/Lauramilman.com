@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { channelsFor } from '../../config/channels.js';
 import { BACKVAULT } from '../../config/pricing.js';
 import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
@@ -65,6 +66,12 @@ interface RunSummary {
   availability: AvailabilityStats;
   decisions: Decision[];
   published: number;
+  /** Sales channels that actually resolved and were published to. */
+  channels: string[];
+  /** False when the publications read failed (dry run only — a live run refuses to write). */
+  channelsResolved: boolean;
+  /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
+  skippedDraft: number;
   errors: string[];
 }
 
@@ -115,13 +122,64 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     if (missing.length > 0) {
       throw new Error(
         `Refusing to write: Shopify token is missing ${missing.join(', ')} ` +
-          `(granted: ${scopes.join(', ') || 'none'}). Online Store publish needs write_publications.`,
+          `(granted: ${scopes.join(', ') || 'none'}). Sales channel publish needs write_publications.`,
       );
     }
     console.log(`Write scopes OK (granted: ${scopes.join(', ')})`);
   }
 
-  const catalog = await fetchBackVaultCatalog(client);
+  // Estate pieces go to every channel in config/channels.ts — Online Store,
+  // Shop, Google & YouTube, Facebook & Instagram, Pinterest (merchant
+  // decision 2026-09-10). Resolved once per run, before the catalog read:
+  // the catalog needs the store's installed publication list to work out
+  // which channels a piece is missing, and a product's own
+  // resourcePublications cannot supply it (it only lists what the product
+  // is already on).
+  const wantedChannels = [...channelsFor('estate')];
+  let publicationsByName = new Map<string, string>();
+  let installedNames: readonly string[] = wantedChannels;
+  let channelsResolved = false;
+  try {
+    const publications = await client.publicationIdsByName(wantedChannels);
+    publicationsByName = publications.ids;
+    installedNames = publications.installedNames;
+    channelsResolved = true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    errors.push(`sales channel lookup: ${message}`);
+    if (!opts.dryRun) {
+      throw new Error(`Refusing to write: the sales channel lookup failed (${message})`);
+    }
+    // A dry run is a plan, not a write: fall back to assuming every
+    // configured channel is installed, which over-reports publish decisions
+    // rather than hiding them, and say so in the report.
+    console.error(
+      `Sales channel lookup failed (${message}); this dry run assumes all ${wantedChannels.length} ` +
+        'configured channels are installed and reports its channels as unresolved',
+    );
+  }
+  if (channelsResolved) {
+    for (const name of wantedChannels) {
+      if (publicationsByName.has(name)) continue;
+      // Not a warning: a configured channel that does not resolve means the
+      // run silently under-publishes, so it belongs in the run's errors.
+      errors.push(`sales channel not resolved: '${name}' is not installed on this store`);
+    }
+    if (!publicationsByName.has('Online Store')) {
+      const message =
+        'the Online Store publication did not resolve — every piece would be written but left 404ing';
+      errors.push(`sales channels: ${message}`);
+      if (!opts.dryRun) throw new Error(`Refusing to write: ${message}`);
+    }
+  }
+  const publicationIds = [...publicationsByName.values()];
+  const channelNames = [...publicationsByName.keys()];
+  const channelLabel = channelsResolved
+    ? `${channelNames.length} channels (${channelNames.join(', ') || 'none'})`
+    : 'unresolved (dry run)';
+  console.log(`Sales channels: ${channelLabel}`);
+
+  const catalog = await fetchBackVaultCatalog(client, installedNames);
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
 
   // Availability: a piece already on the store that rolled off new-arrivals
@@ -170,8 +228,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   }
   if (locationId) promoteBackVaultInventoryUpdates(decisions, catalog);
   const syncedAt = new Date().toISOString();
-  const publicationId = opts.dryRun ? null : await client.onlineStorePublicationId();
   let published = 0;
+  let skippedDraft = 0;
 
   for (const decision of decisions) {
     if (decision.action === 'skip') continue;
@@ -194,8 +252,15 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
         continue;
       }
       if (decision.action === 'publish') {
-        if (!opts.dryRun && decision.productId && publicationId) {
-          const pubErrors = await client.publishResource(decision.productId, publicationId);
+        // Never publish anything that is not ACTIVE: a DRAFT piece is one the
+        // sync deliberately held back (no photos, scrub pending), and pushing
+        // it to Google and Meta would list it.
+        if (catalogByHandle.get(decision.handle)?.status !== 'ACTIVE') {
+          skippedDraft += 1;
+          continue;
+        }
+        if (!opts.dryRun && decision.productId && publicationIds.length > 0) {
+          const pubErrors = await client.publishToChannels(decision.productId, publicationIds);
           if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
           else published += 1;
         } else if (opts.dryRun) {
@@ -223,8 +288,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
           }
         }
         const productId = result.id ?? decision.productId;
-        if (productId && publicationId && result.errors.length === 0) {
-          const pubErrors = await client.publishResource(productId, publicationId);
+        const wroteActive = String(input.status) === 'ACTIVE';
+        if (!wroteActive) skippedDraft += 1;
+        if (wroteActive && productId && publicationIds.length > 0 && result.errors.length === 0) {
+          const pubErrors = await client.publishToChannels(productId, publicationIds);
           if (pubErrors.length) errors.push(`${decision.handle}: publish ${pubErrors.join('; ')}`);
           else published += 1;
         }
@@ -243,6 +310,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     availability,
     decisions,
     published,
+    channels: channelNames,
+    channelsResolved,
+    skippedDraft,
     errors,
   };
 
@@ -253,7 +323,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     return acc;
   }, {});
   console.log(
-    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} published=${published} errors=${errors.length}`,
+    `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
+      `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
+      `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
+      `errors=${errors.length}`,
   );
   if (errors.length > 0) {
     console.error('Errors:');

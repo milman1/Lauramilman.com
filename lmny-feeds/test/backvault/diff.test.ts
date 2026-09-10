@@ -2,8 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates } from '../../src/backvault/diff.js';
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
 
-function entry(handle: string, hash: string | null, status = 'ACTIVE', published = true): BackVaultCatalogEntry {
-  return { id: `gid://shopify/Product/${handle}`, handle, status, contentHash: hash, imageCount: 1, published };
+function entry(
+  handle: string,
+  hash: string | null,
+  status = 'ACTIVE',
+  published = true,
+  missingChannels: string[] = published ? [] : ['Online Store'],
+): BackVaultCatalogEntry {
+  return {
+    id: `gid://shopify/Product/${handle}`,
+    handle,
+    status,
+    contentHash: hash,
+    imageCount: 1,
+    published,
+    missingChannels,
+  };
 }
 
 describe('diffBackVaultCatalog', () => {
@@ -38,6 +52,27 @@ describe('diffBackVaultCatalog', () => {
       reason: 'unpublished',
       productId: 'gid://shopify/Product/bv-cartier',
     });
+  });
+
+  it('publishes an item that is on the Online Store but missing a configured channel', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'abc' }],
+      [entry('bv-cartier', 'abc', 'ACTIVE', false, ['Google & YouTube', 'Pinterest'])],
+    );
+    expect(decisions[0]).toEqual({
+      handle: 'bv-cartier',
+      action: 'publish',
+      reason: 'unpublished',
+      productId: 'gid://shopify/Product/bv-cartier',
+    });
+  });
+
+  it('skips an item published to every configured channel', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'abc' }],
+      [entry('bv-cartier', 'abc', 'ACTIVE', true, [])],
+    );
+    expect(decisions[0]!.action).toBe('skip');
   });
 
   it('reactivates an inactive item with a matching hash', () => {

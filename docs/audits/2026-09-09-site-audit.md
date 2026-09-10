@@ -132,6 +132,23 @@ Proposed pipeline (recipe F in `AGENTS.md`):
 5. **Needs from you**: an `ANTHROPIC_API_KEY` repository secret (the job
    calls the API from Actions), and a yes on the two-per-week cadence.
 
+### 2026-09-10 status
+
+The drafting job is built: `.github/workflows/journal-draft.yml` and
+`lmny-feeds/scripts/journal-draft.ts`. Monday 13:23 UTC, Sonnet 5 with web
+search gathers ten hooks (RSS fallback), Opus 5 writes two 900 to
+1,400-word drafts with SEO fields, three live links, a three-question
+FAQ, and tags from the existing set, created UNPUBLISHED on the journal
+blog with tag `journal-draft`. Guardrails in code reject
+celebrity-owns-our-piece claims, supplier names, prices, non-live links,
+disallowed HTML, and over-length SEO fields. Stale drafts are listed in
+the report and never deleted.
+
+First step for the merchant: run it from the Actions tab with `dry_run`
+true and read `out/journal-report.md` and `out/journal-draft-1.md` before
+the first Monday. Requires `ANTHROPIC_API_KEY`, which the merchant says
+already exists, plus the Shopify secrets the other workflows use.
+
 ## 4. Royal Chain (basic chains)
 
 - 901 basic chains in the category: 14K gold 492, silver 181, 10K gold
@@ -228,3 +245,29 @@ Recommended, in order:
 
 Nothing was published in this audit; item 1 is a merchant decision
 because it puts 900 listings in front of Google and Meta review at once.
+
+### 2026-09-10 backfill, done and verified
+
+732 ACTIVE estate pieces (tag `backvault-feed`) and 173 ACTIVE watches
+(product type `Watch`, 29 overlap) were published to Shop, Google &
+YouTube, Facebook & Instagram, and Pinterest with `publishablePublish` by
+four Sonnet 5 workers from plan files. 30 pre-owned watches got
+`mm-google-shopping.condition` set to "used". An independent Sonnet 5 read
+afterward found all 905 on all five channels including Online Store, 0
+missing, 0 pre-owned with empty Google condition, 0 drafts or archived
+products on any of the four channels (50 sampled each), 0 price mismatches
+in a 20-piece spot check.
+
+Loose diamonds stay on Online Store and Shop only; about 10,000 one-of-one
+stones would swamp Merchant Center and Meta.
+
+Going forward, both feed syncs publish new ACTIVE products to the list in
+`lmny-feeds/config/channels.ts` (watches and estate: five channels;
+diamonds: two), merged today.
+
+Note: the store's publications also include TikTok, Inbox, Microsoft
+Channel, Faire: Sell Wholesale, Buy Button, and two not returned by the
+publications query (Meta, Microsoft Copilot); none of these are
+configured, and adding one is a pull request against `channels.ts` plus a
+one-off backfill, since unchanged products are never re-published by the
+syncs.

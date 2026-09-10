@@ -152,7 +152,8 @@ Use Astra when the work is in a browser rather than an API:
 - Mapping metafields to eBay item specifics in the Marketplace Connect UI.
 - Checking how a listing renders on eBay, Google Shopping, or the Shop app.
 - Reproducing a storefront bug that only appears with a real browser session.
-- Jacob & Co. sourcing. The merchant's two source sites (decision 2026-09-09) are Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/, e.g. https://www.bucherer.com/us/en/watches/jacob-co/epic-x/1362-322-2.html) and Exquisite Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x). Exquisite Timepieces is a Shopify store, so its catalog reads through `/products.json` and is a Sonnet 5 or Terra job through Firecrawl. Bucherer is a custom site with rendered product pages; if Firecrawl cannot return the price, reference, and images, Astra reads the page in a browser and writes the same facts JSON a worker would. Astra never creates the Shopify product; that is recipe G2.
+- Jacob & Co. sourcing. The merchant's two source sites (decision 2026-09-09) are Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/, e.g. https://www.bucherer.com/us/en/watches/jacob-co/epic-x/1362-322-2.html) and Exquisite Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x). The routing is split and fixed: Exquisite Timepieces is a Shopify store, so a Claude Sonnet 5 worker reads its `/products.json` feed through Firecrawl and writes those rows into the sourcing CSV first; Astra then reads Bucherer in a browser session — the sandbox cannot reach bucherer.com (section 7; this is an egress restriction on this environment, not a claim that Bucherer's pages require client-side rendering) — fills in the Bucherer columns, and cross-references by reference number. Astra never creates the Shopify product; that is recipe G2, which prices each product at the lower of the two list prices.
+- Open Astra tasks are GitHub Issues plus committed handoff files `docs/handoffs/<issue>-astra-<task>.md` (section 8). Astra reads the file, does the work in the merchant's browser session, saves anything with cost or credentials to the merchant's Google Drive folder, commits public outputs on a branch, opens a pull request, merges it to main, and appends to the handoff's work log. Nothing about a task lives only in chat.
 
 Do not use Astra for bulk API work, code changes, or anything a Shopify
 GraphQL call can do; Sonnet 5 is a fifth of the price and leaves an audit
@@ -308,7 +309,7 @@ writes nothing itself. Every stage's output is a committed file under
 
 | Stage | Owner | Input | Does | Output file |
 |---|---|---|---|---|
-| SEO goal | Merchant | The business target (a collection to rank, a product line to grow, a query family to own) | States the goal, the time window, and the success measure | `docs/seo/<yyyy-mm>-goal.md` |
+| SEO goal | Merchant; when no goal file exists, Astra drafts one for the merchant to confirm | The business target (a collection to rank, a product line to grow, a query family to own) | States the goal, the time window, and the success measure | `docs/seo/<yyyy-mm>-goal.md` |
 | Strategy | Astra (strategist) | The goal, the latest audit, Search Console and analytics exports the merchant provides | Keyword, SERP, and ICP research; search intent per query family; content opportunities; site architecture; competitive gaps; and AI-search readiness (llms.txt, agent-facing sitemap, structured data completeness). Astra may delegate collection to Terra or Luna workers (crawls, SERP pulls, keyword exports) but writes the plan itself | `docs/seo/<yyyy-mm>-plan.md`: prioritized items, each with target URL, intent, the exact metadata or structure change, and the acceptance check Astra will audit against |
 | Build | Fable 5.1 (builder, orchestrating) | The plan | Turns each plan item into a worker brief; Sonnet 5 or Terra write metadata fields, alt text, internal-link data, sitemap entries, and canonicals through the store API or plan files, following the snapshot, plan-file, and independent-verification discipline of rules 4 and 5 and the fan-out protocol in section 5b; any change to theme code (Liquid, JSON-LD snippets, page structure, performance fixes in the theme) goes to the build tier from the routing table (Opus 5 or Sol) as a pull request; Haiku 4.5 or Luna classify and tag at volume; Fable orchestrates all of it and writes none of it. Every theme pull request gets the section 5a blind review (a fresh Opus 5 or Sol reviewer) before Fable merges it; Astra's audit is the post-deploy check on the live site, not a substitute for that review. Bulk field writes get the independent verification read of rule 4 before the build log records them | `docs/seo/<yyyy-mm>-build-log.md`: item by item, what changed, PR or plan file, verification read |
 | Audit | Astra (auditor, blind) | The plan, the build log, and the live site; not the workers' transcripts | Checks every plan item against its acceptance check on the live storefront, plus a regression sweep (indexability, canonicals, schema validity, Core Web Vitals, internal links, no supplier names, no cost) and AI-search readiness (llms.txt, agent-facing sitemap, structured data completeness) | `docs/seo/<yyyy-mm>-audit.md`: per item PASS or NEEDS FIXES with evidence and the exact failed check; one verdict line |
@@ -360,11 +361,15 @@ claim a celebrity owns a piece we sell; never name a supplier.
 Sources are the two retailer sites the merchant chose on 2026-09-09:
 Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/) and Exquisite
 Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x),
-or a hand upload. Sonnet 5 or Terra through Firecrawl reads each product
-page (Exquisite Timepieces also exposes
-`/collections/jacob-co-epic-x/products.json`): reference, collection, case,
-dial, strap, list price, images; Bucherer pages that Firecrawl cannot
-render go to Astra per the routing table. The product is created DRAFT
+or a hand upload. The routing is split and fixed, not conditional on what
+Firecrawl can render: a Claude Sonnet 5 worker reads the Exquisite
+Timepieces `/collections/jacob-co-epic-x/products.json` feed through
+Firecrawl and writes reference, collection, case, dial, strap, list price,
+and images into the sourcing CSV first; Astra then reads every Bucherer
+listing in a browser session (the sandbox cannot reach bucherer.com,
+section 7 — an egress restriction on this environment, not a claim that
+Bucherer pages require client-side rendering), fills in the Bucherer
+columns, and cross-references by reference. The product is created DRAFT
 under vendor `Jacob & Co`, tags `jacob-co-boutique` plus `new-unworn` when
 unworn, SKU = reference, price = the retailer's list price as scraped
 (when both sites list the same reference, the lower of the two), tag
@@ -395,16 +400,21 @@ own row in section 2a); cost comes from the merchant's trade account.
    yellow), the widths those reports name, no pavé or novelty finishes.
    Twenty to thirty items is a normal first batch. The shortlist goes to
    the merchant before anything is priced.
-3. **Get cost without credentials in chat.** The merchant adds the trade
-   login as GitHub Actions secrets (`ROYALCHAIN_USERNAME`,
-   `ROYALCHAIN_PASSWORD`), then runs the "Royal Chain costs" workflow
+3. **Get cost without credentials in chat.** The merchant decided on
+   2026-09-10 that the **primary** path is an Astra browser session: the
+   merchant logs in to their own Royal Chain trade account themselves and
+   Astra reads cost per item, per the format in the current
+   `docs/handoffs/<issue>-astra-royal-chain-costs.md` handoff. The
+   **fallback** is the GitHub Actions "Royal Chain costs" workflow: the
+   merchant adds the trade login as GitHub Actions secrets
+   (`ROYALCHAIN_USERNAME`, `ROYALCHAIN_PASSWORD`), then runs the workflow
    from the Actions tab: dry run first (logs in, reads one item), then
    full. It writes `out/supplier-costs.csv` (cost, retail, lengths) as an
    artifact. Credentials never appear in a prompt, a transcript, a
    commit, or a screenshot. The login page carries a reCAPTCHA badge; if
-   the headless login is refused, the job uploads a screenshot and the
-   fallback is a browser session the merchant runs themselves (Astra or
-   by hand), never credentials pasted into chat.
+   the headless login is refused, the job uploads a screenshot; if the
+   Astra browser session is blocked instead, fall back to this workflow.
+   Either way, never credentials pasted into chat.
 4. **Price and create.** Retail = cost × 3, rounded up to the nearest $5.
    Cost is written to Cost per item. Products are created with
    `create-product` as DRAFT, vendor = the merchant's house brand (not the
@@ -423,6 +433,22 @@ GitHub Actions cron, off the top of the hour, with `workflow_dispatch`
 inputs for dry run and limit, a report written to `out/` and uploaded as an
 artifact, and a `concurrency` group so two runs never overlap. Secrets come
 from repo settings, never from a file.
+
+Current recurring jobs:
+
+- Belgium Dia diamonds and watches sync, hourly (`lmny-feeds/src/sync.ts`).
+- Back Vault estate jewelry sync, weekly, Sunday 00:17 UTC
+  (`lmny-feeds/src/backvault/`).
+- Royal Chain cost refresh, monthly (`.github/workflows/royalchain-costs.yml`,
+  `lmny-feeds/scripts/royalchain-costs.ts`; recipe H).
+- Journal drafting job, weekly, Monday 13:23 UTC
+  (`.github/workflows/journal-draft.yml`,
+  `lmny-feeds/scripts/journal-draft.ts`). Sonnet 5 gathers ten hooks by web
+  search (RSS fallback); Opus 5 writes two drafts with SEO fields, live
+  product links, and a FAQ; drafts are created UNPUBLISHED on the journal
+  blog with tag `journal-draft`. It never publishes and never deletes;
+  stale drafts are only listed in the report for a person to act on. See
+  recipe F and the audit doc section 3.
 
 ### I. Product content: images, copy, descriptions for every upload
 
@@ -679,18 +705,21 @@ If required evidence is inaccessible or expired, record that blocker.
 
 ---
 
-## 9. Historical backlog snapshot (2026-09-09)
+## 9. Historical backlog snapshot (2026-09-10)
 
-This table preserves the original handoff context; it is not current task
-status. Track subsequent progress in GitHub Issues as described in section 8.
-Verify the relevant state before resuming any item below.
+This is a snapshot, not a second backlog; the Issues are the live list
+(section 8). Verify the relevant state before resuming any item below.
 
-| Task | Owner | Status (2026-09-09) |
-|---|---|---|
-| Reprice Back Vault pieces: Robinson's midpoint where matched, else cost + $500; cost = supplier price | Recipe B in code; workers applied it to 732 live pieces | Done; sync keeps it weekly |
-| eBay description template with brand colors | Opus 5 wrote `snippets/ebay-default.liquid`; Astra or a person pastes it into Marketplace Connect | Template done; paste step open |
-| Push fine, lab-grown, and estate pieces to eBay | 525 tagged by workers; 732 estate pieces tagged with the reprice; sync tags future pieces | Done; confirm the app's listing rule picks up the tag |
-| Site audit (SEO, metafields, AI search) | `docs/audits/2026-09-09-site-audit.md` | Done; 12-item fix list awaiting go-ahead, item 1 already done |
-| Journal pipeline | Proposal in the audit doc section 3 | Awaiting `ANTHROPIC_API_KEY` secret and cadence yes |
-| Royal Chain basic chains into Shopify | Scrape done (901 chains, no public prices, no popularity signal) | Awaiting popularity source, pricing rule, batch size |
-| Sales channel optimization | Channel matrix in the audit doc section 5 | Awaiting go-ahead on publishing gaps |
+Done: Back Vault reprice and cost (recipe B, weekly in the sync); eBay
+tagging (525 fine, lab-grown, and hand-imported estate pieces, plus the
+732 estate pieces and watches already tagged); sales-channel backfill and
+the sync config change (audit doc section 6); the Journal drafting job
+built (recipe F, recipe G); six Astra handoffs #91 to #96 committed, with
+the Peaceful Diamonds SKU export.
+
+Open: Astra tasks #91 to #96; the Journal job's first dry run, by the
+merchant; the Sunday 2026-09-13 Back Vault sync run, to confirm the new
+pricing, availability, and channel code; audit fix list items 2 to 12,
+which belong to the first SEO plan (recipe E); the lab-grown reprice,
+waiting on #94's cost data; Royal Chain product creation, waiting on
+#93's cost data.

@@ -103,6 +103,36 @@ holds a stones table — Shopify products are the only live copy.
    keep theirs. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
+
+   **Sales channels.** Every product this step writes is published with one
+   `publishablePublish` call carrying the whole channel list from
+   `config/channels.ts` (merchant decision 2026-09-10), not Online Store
+   alone. Watches go to all five — Online Store, Shop, Google & YouTube,
+   Facebook & Instagram, Pinterest — because they are high-ticket and
+   searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
+   (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
+   swamp Merchant Center and Meta's catalog limits. The kind is read from
+   the handle prefix (`channelsForHandle` in `src/diff.ts`), so a product
+   whose handle did not come back from a bulk write takes the narrower stone
+   list. **Only ACTIVE products publish:** a product written as DRAFT —
+   including one quarantined mid-run because Shopify rejected its photo URLs
+   — is counted as `skippedDraft` in the report and sent to no channel at
+   all. Publication ids resolve once, *before* the first write: a configured
+   channel that does not resolve is a write error, and if Online Store
+   itself does not resolve the run refuses to write rather than creating
+   products that 404. Changing the list is a pull request against
+   `config/channels.ts` — eBay is not in it, because Marketplace Connect is
+   not a publication and selects by the `ebay` tag on its own side.
+
+   **This step only publishes what it writes.** Unlike the Back Vault sync,
+   the Belgium Dia path has no publish-only decision: a product that is
+   already correct (hash unchanged) is skipped entirely and never
+   re-examined for channel coverage, so only `create` and `update`
+   decisions ever reach `publishablePublish`. The 173 watches already on
+   the store were therefore backfilled onto the four new channels once by
+   hand on 2026-09-10; from then on the syncs keep new and changed pieces
+   in step. If the channel list in `config/channels.ts` grows again,
+   existing watches need another one-off backfill.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -329,11 +359,36 @@ npm run sync:backvault       # live (needs Shopify env vars)
 8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
-   ACTIVE products that exist but are not on the Online Store channel
+   ACTIVE products that exist but are missing any configured sales channel
    get a `publish` decision (no rewrite) so a re-run can put them live.
 9. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
-   sync uses, then `publishablePublish` to the Online Store channel.
+   sync uses, then `publishablePublish` to every sales channel.
    `productSet` alone leaves products in Admin but 404ing on the storefront.
+
+   **Sales channels.** Estate pieces are published to the full list in
+   `config/channels.ts` — Online Store, Shop, Google & YouTube, Facebook &
+   Instagram, Pinterest (merchant decision 2026-09-10; before it, the 732
+   estate pieces were on the Online Store alone and invisible on Google
+   Shopping, Meta, and Pinterest, per `docs/audits/2026-09-09-site-audit.md`
+   §6). One `publications` query runs before the catalog read and yields
+   both the ids to publish to and **the store's installed publication
+   list**; each piece is then published to all of them in one
+   `publishablePublish` call. The installed list has to come from the shop,
+   not from the product: `resourcePublications` returns a row only for a
+   channel the product is already on, so a channel it has never been
+   published to is indistinguishable from an uninstalled one. With that
+   list, the catalog read records which configured channels a piece is
+   missing (`missingChannels`), and a piece that is live on the storefront
+   but off Pinterest gets a `publish` decision on the next run without being
+   rewritten. Only ACTIVE pieces publish — a DRAFT (no photos yet) is
+   counted as `skippedDraft`. A configured channel that does not resolve is
+   a run error rather than a warning, and a live run whose Online Store
+   publication does not resolve refuses to write; a dry run keeps going,
+   assumes every configured channel is installed, and reports its channels
+   as `unresolved (dry run)`. The Done line says how many pieces were
+   published and to how many channels. Changing the list is a pull request
+   against `config/channels.ts`; eBay is not in it (Marketplace Connect is
+   an app, not a publication, and selects by the `ebay` tag).
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated
@@ -356,6 +411,45 @@ pair). Additional optional variables:
 `.github/workflows/backvault-feed-sync.yml` — weekly, Sunday 00:17 UTC.
 Always live on the schedule (user chose no dry-run gate). Use
 `workflow_dispatch` with `dry_run=true` to inspect a run without writes.
+
+---
+
+## Journal drafting job
+
+`scripts/journal-draft.ts` (`.github/workflows/journal-draft.yml`, Monday
+13:23 UTC = 09:23 New York) writes the Journal's queue and never publishes it.
+Each run gathers the week's hooks — red carpet and premiere jewelry, watch
+sightings on athletes and musicians, auction results, brand launches, and
+nightlife openings in New York, Miami, Los Angeles, and Las Vegas — with Claude
+Sonnet 5 and the Anthropic `web_search` server tool (available to the SDK from
+Actions; if the key cannot use it, if the turn keeps pausing, or if the answer
+comes back unparseable, the run falls back to the public RSS feeds in
+`FALLBACK_HOOK_FEEDS`, fetched with plain `fetch`, and says so in the report),
+shortlists ten into `out/journal-hooks.md`, reads the estate, watch, fine, and
+lab-grown products that are both ACTIVE and published to the online store plus
+every published collection, so a draft can only link to handles a reader can
+actually open, and has Claude Opus 5 write two drafts of 900–1,400 words in the
+Journal voice with an SEO title and description, at least three store links, a
+three-question FAQ, tags from the existing Journal set, and a featured product
+whose photo becomes the article image. Every draft is then checked in code, not
+just in the prompt — a celebrity ownership claim (checked both within a sentence
+and across the enclosing paragraph), a supplier name (the
+`src/backvault/scrub.ts` scrub, which also guards the featured image's alt
+text), a price in any currency or spelled out, markup outside the tag and
+attribute allow-list, an external or unknown handle, an over-length SEO field,
+or an invented tag fails the draft, which is regenerated once and then rejected
+— and only a clean draft is created through `articleCreate` with
+`isPublished: false`, author "Laura Milman New York", and the `journal-draft`
+tag. **The job never publishes and never deletes; a person does both from
+Shopify admin.** Housekeeping is report-only: unpublished articles on the
+`journal` blog that carry `journal-draft` and are older than 21 days are listed
+in `out/journal-report.md` under "Stale drafts for the merchant to delete" with
+their created date and an admin link, and nothing is removed. Run it with
+`npx tsx scripts/journal-draft.ts [--dry-run] [--count=2]` (a dry run does
+everything except `articleCreate`, and writes the drafts to
+`out/journal-draft-N.md`), or from the Actions tab with `dry_run` and `count`;
+`out/journal-report.md` and the hooks and drafts are uploaded as the run
+artifact. Needs `ANTHROPIC_API_KEY` alongside the usual Shopify secrets.
 
 ---
 

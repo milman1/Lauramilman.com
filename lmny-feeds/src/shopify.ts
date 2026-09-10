@@ -1,4 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { publicationMatchesChannel } from '../config/channels.js';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
 import {
@@ -901,6 +902,35 @@ export class ShopifyClient {
     return online.id;
   }
 
+  /**
+   * Publication ids for the requested channel names, in one query.
+   *
+   * Returns the ids that resolved, keyed by the configured channel name, and
+   * every publication name installed on the store. `installedNames` is the
+   * only trustworthy installed set: a product's own `resourcePublications`
+   * lists the channels it IS on, so a channel it was never published to
+   * simply has no row and cannot be told apart from an uninstalled one.
+   *
+   * A requested name missing from `ids` is a run error for the caller to
+   * record — this method neither warns nor throws, because only the caller
+   * knows whether the channel is required (Online Store) or optional.
+   */
+  async publicationIdsByName(
+    names: string[],
+  ): Promise<{ ids: Map<string, string>; installedNames: string[] }> {
+    const data = await this.gql<{ publications: { nodes: Array<{ id: string; name: string }> } }>(
+      `{ publications(first: 30) { nodes { id name } } }`,
+    );
+    const nodes = data.publications.nodes;
+    const ids = new Map<string, string>();
+    for (const name of names) {
+      // Alias-aware: 'Online Store 2.0' is the same channel as 'Online Store'.
+      const match = nodes.find((p) => publicationMatchesChannel(name, p.name));
+      if (match) ids.set(name, match.id);
+    }
+    return { ids, installedNames: nodes.map((p) => p.name) };
+  }
+
   async publishResource(id: string, publicationId: string): Promise<string[]> {
     const data = await this.gql<{
       publishablePublish: { userErrors: Array<{ message: string }> };
@@ -909,6 +939,24 @@ export class ShopifyClient {
         publishablePublish(id: $id, input: $input) { userErrors { message } }
       }`,
       { id, input: [{ publicationId }] },
+    );
+    return data.publishablePublish.userErrors.map((e) => e.message);
+  }
+
+  /**
+   * Publish one resource to several channels in a single mutation.
+   * `publishablePublish` takes the whole publication list at once, so a
+   * five-channel publish costs one call, not five.
+   */
+  async publishToChannels(id: string, publicationIds: string[]): Promise<string[]> {
+    if (publicationIds.length === 0) return [];
+    const data = await this.gql<{
+      publishablePublish: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($id: ID!, $input: [PublicationInput!]!) {
+        publishablePublish(id: $id, input: $input) { userErrors { message } }
+      }`,
+      { id, input: publicationIds.map((publicationId) => ({ publicationId })) },
     );
     return data.publishablePublish.userErrors.map((e) => e.message);
   }

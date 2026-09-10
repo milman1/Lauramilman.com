@@ -37,9 +37,11 @@ export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVault
       decisions.push({ handle: want.handle, action: 'update', reason: 'hash_changed', productId: have.id });
     } else if (have.status !== 'ACTIVE') {
       decisions.push({ handle: want.handle, action: 'update', reason: 'reactivate', productId: have.id });
-    } else if (!have.published) {
-      // productSet does not publish to Online Store. The first live run created
-      // 741 ACTIVE products that 404 on the storefront until this fires.
+    } else if (have.missingChannels.length > 0) {
+      // productSet does not publish anything. The first live run created 741
+      // ACTIVE products that 404 on the storefront until this fires, and since
+      // 2026-09-10 the same decision also covers a piece that is on the Online
+      // Store but missing one of the other channels in config/channels.ts.
       decisions.push({ handle: want.handle, action: 'publish', reason: 'unpublished', productId: have.id });
     } else {
       decisions.push({ handle: want.handle, action: 'skip', reason: 'unchanged', productId: have.id });
