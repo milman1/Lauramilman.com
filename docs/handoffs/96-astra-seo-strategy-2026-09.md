@@ -1,18 +1,73 @@
-# Task: Write the September SEO goal and plan (recipe E, strategy stage)
+# Task: September SEO goal and strategy
+
 - Issue: https://github.com/milman1/Lauramilman.com/issues/96
-- Updated (UTC): 2026-09-10
-- Owner / session: Astra (OpenAI GPT-6 Astra), browser session run by the merchant
-- Status: planned
-- Goal and acceptance criteria: Run the strategy stage of `AGENTS.md` recipe E. Per the updated recipe E goal-stage ownership, the merchant owns the SEO goal; when no goal file exists (true as of 2026-09-10), Astra drafts one for the merchant to confirm. Inputs are `docs/audits/2026-09-09-site-audit.md` and its 12-item fix list, the live storefront, and Astra's own research; the merchant has no Search Console export and stated no written goal as of 2026-09-10, so the working goal, marked as a draft the merchant confirms, is: grow non-brand organic traffic and AI-agent visibility for pre-owned designer jewelry (David Webb, Cartier, Van Cleef & Arpels, Tiffany), pre-owned watches, and lab-grown jewelry, and clear the technical debt in the audit — within a 90-day window from plan approval, measured by (1) non-brand organic sessions and impressions by query family from Search Console once the merchant connects it, (2) indexed-page count, and (3) AI-search citations checked monthly by a Luna worker. Astra writes `docs/seo/2026-09-goal.md` restating that goal, the time window, and the three success measures in the merchant's terms, marked as a draft for the merchant to confirm or amend, and `docs/seo/2026-09-plan.md` in the format recipe E specifies: a prioritized list of items, each with target URL, intent, the exact metadata or structure change, and the acceptance check Astra itself will audit against later. The plan must cover keyword, SERP, and ICP research; search intent per query family; content opportunities; site architecture; competitive gaps — identify the five strongest organic competitors for the query families and name them in the plan (the audit names none); and AI-search readiness (llms.txt, agent-facing sitemap, structured data completeness). Astra delegates mechanical collection by writing the collection-crawl brief directly into this handoff (see Remaining work) for a Claude Sonnet 5 worker to run through Firecrawl; Astra writes the plan itself. Acceptance: every plan item in `docs/seo/2026-09-plan.md` has all four fields (target URL, intent, exact change, acceptance check); every one of the audit's 12 fix-list items is either included in the plan (by reference to its number) or explicitly deferred in the plan with a stated reason; the goal file names the time window and all three success measures and is marked draft/unconfirmed. Independent check: a Claude worker (Sonnet 5) re-reads the result with a fresh query or a fresh page load and records the count in the work log before Status changes to done.
-- Scope (files / live records): Read `docs/audits/2026-09-09-site-audit.md` in this repository (its 12-item fix list and evidence sections). Live scope is read-only browsing of the storefront at lauramilman.com plus Astra's own external research (competitor sites, SERPs, keyword tools available to the browser session). Output is two new files, `docs/seo/2026-09-goal.md` and `docs/seo/2026-09-plan.md`, committed in this repository. No Shopify write, no theme change; implementation is a separate stage owned by Fable 5.1 per recipe E.
-- Branch / commit / PR:
-- Completed steps:
-- Verification (checks, outcomes, evidence links, unverified items):
-- Deployment / live state:
-- Remaining work: Write `docs/seo/2026-09-goal.md` restating the working goal above — including the 90-day window from plan approval and the three success measures (non-brand organic sessions/impressions by query family once Search Console is connected; indexed-page count; monthly AI-search citation checks by a Luna worker) — in plain terms, marked as a draft for the merchant to confirm or amend. Then do the strategy research: keyword, SERP, and ICP research for the query families implied by the goal (pre-owned David Webb / Cartier / Van Cleef & Arpels / Tiffany jewelry, pre-owned watches, lab-grown jewelry); search intent per query family; content opportunities (collection pages, journal topics, buying guides); site architecture gaps (missing collection pages, thin pages, navigation); competitive gaps — identify the five strongest organic competitors for these query families (the audit surfaces none) and name them in the plan with the evidence for each; and AI-search readiness (the audit already found `llms.txt` and an agentic sitemap present — check their completeness and note gaps, don't assume they are perfect). For mechanical collection (site crawls, SERP pulls, keyword exports), write a collection-crawl brief directly into this handoff's work log per the job brief template in `AGENTS.md` section 5 (goal, tool = Firecrawl, input/output files, rules) for a Claude Sonnet 5 worker to run; Astra writes the plan itself from the results. Write `docs/seo/2026-09-plan.md` as a prioritized list of items, each with target URL, intent, the exact metadata or structure change to make, and the acceptance check Astra will use in the later audit stage. Walk through the audit's 12-item fix list one by one and either fold each into a plan item (citing the audit's item number) or write an explicit deferral with a reason (for example, out of scope for this cycle, needs a merchant decision first, or already superseded). Do not noindex or remove any page as part of this plan without merchant sign-off (recipe E fixed rules), and do not write canonicals to anything but the store's own URLs. When both files are written, commit them on a branch, open a pull request, and merge it to main; the handoff is not done until it is on main.
-- Blockers / decisions needed: The merchant has not confirmed the working goal yet; `docs/seo/2026-09-goal.md` is written for confirmation, not as a settled fact — say so in the file itself. No Search Console or analytics export exists; note this as a research limitation in the plan rather than inventing traffic numbers.
-- Exact next action: Read `docs/audits/2026-09-09-site-audit.md` in full, then draft `docs/seo/2026-09-goal.md` restating the working goal, time window, and success measures above.
-- Supporting artifacts (durable location, access, expiry if applicable): `docs/audits/2026-09-09-site-audit.md` (committed in this repository, 12-item fix list plus evidence). Output `docs/seo/2026-09-goal.md` and `docs/seo/2026-09-plan.md` are committed on a branch, then merged to `main` via pull request; link the branch name, PR, and commit hash here once pushed. After this stage, Fable 5.1 briefs the build stage per recipe E.
+- Updated: 2026-09-11
+- Owner: Astra; Terra collected evidence; independent Sol and Terra checks.
+- Status: strategy and merchant-goal draft prepared; final documentation review and merge pending. No live implementation.
+- Scope: docs/seo/2026-09-goal.md, docs/seo/2026-09-plan.md and this handoff.
+- Branch: codex/96-seo-strategy; PR/merge pending.
+
+## Goal and acceptance
+
+Produce the recipe E strategy stage: an explicitly unconfirmed merchant goal
+with a 90-day window from approval and three success measures, plus a researched
+plan covering six query families, customer intent, competitive gaps, site
+architecture, content and AI/agent readiness. Every plan row contains target URL
+or bounded cohort, intent, exact proposed change and acceptance check. All twelve
+September 9 audit items must be included or explicitly deferred.
+
+## Completed work and verification
+
+Astra read the audit and wrote both deliverables. The goal separates Search
+Console clicks/impressions from analytics sessions and invents no baseline.
+Terra collected six dated query samples, five qualified comparator domains and
+primary Google guidance. The plan corrects the audit's assumptions about FAQ
+rich results and special AI files. It has fifteen items, P0–P14, and reconciles
+all twelve audit items.
+
+Sol passed substantive strategy and goal content, requesting current handoff
+fields. Terra verified coverage and comparator evidence, finding one unescaped
+table separator. This handoff is updated and the example title now uses a dash.
+Both final rereads passed: Sol accepted all three documents, and Terra found
+zero mismatches across 15 plan rows, 12 audit items, six query families, five
+comparators and three goal measures.
+
+## Live state and remaining work
+
+No Shopify, theme, schema, robots, publication or catalog change was performed
+for #96. Current endpoint reads failed in the collection environment; the Mac
+locked during browser work. The strategy distinguishes those limits from the
+September 9 audit's historical observations. No Search Console/analytics export
+or merchant approval of the draft goal is recorded.
+
+Finish independent documentation checks, commit these three files and merge the
+strategy PR. The merchant then reviews the draft goal; approved implementation
+proceeds through recipe E worker briefs, fresh exact URL/value manifests, dry
+runs and independent live verification. Do not redraft completed files or treat
+a strategy merge as a live SEO audit pass.
+
+Exact next action: final documentation review and merge, then merchant review
+of the goal/strategy before the implementation stage. Record PR/merge in #96.
+
+## Collection brief — 2026-09-11
+
+- Goal: current public evidence; Astra owns strategic judgment and drafting.
+- Worker: Terra, the available OpenAI equivalent; Claude unavailable.
+- Tools: Firecrawl if available, otherwise web search and primary public pages.
+- Inputs: this handoff and docs/audits/2026-09-09-site-audit.md.
+- Working output: work/priorities/96-research.md; selected source links and
+  evidence limits are preserved in the committed strategy.
+- Rules: inspect robots, sitemap, llms.txt, agentic sitemap and six query
+  families (pre-owned David Webb, Cartier, Van Cleef, Tiffany jewelry, pre-owned
+  Rolex, lab-grown tennis bracelets). Record query/date and evidence; invent no
+  rank, volume, traffic or crawl completeness. No mutations or sensitive data.
+- Report: completed queries, verified/inaccessible endpoints, comparator
+  evidence and gaps. Independent Sol review follows the strategy.
 
 ## Work log
-- 2026-09-10: Handoff file created. No goal or plan file written yet.
+
+- 2026-09-10: Initial handoff created; no goal/plan existed at that time.
+- 2026-09-11: Six-family collection and Astra drafting completed. Sol passed
+  content and requested current handoff fields; Terra verified 15-row/12-item
+  coverage and requested one table-format correction. Both corrections were
+  made. Final Sol and Terra checks passed; merge remains pending.
