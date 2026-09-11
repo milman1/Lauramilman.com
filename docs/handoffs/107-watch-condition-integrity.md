@@ -3,8 +3,8 @@
 - Issue: https://github.com/milman1/Lauramilman.com/issues/107
 - Updated (UTC): 2026-09-11
 - Owner / session: Astra / condition-integrity audit
-- Status: **open; blocked on live packed-weight input and source API availability**
-- Branch: `codex/107-watch-condition-handoff`
+- Status: **open; weight input saved, blocked on Marketplace delivery verification and source API availability**
+- Branch: `codex/107-weight-handoff`
 - Scope: watch condition evidence and the existing Marketplace Connect condition mapping only
 
 ## Goal and acceptance criteria
@@ -22,13 +22,14 @@ The strict gate is:
 
 - PR #108 merged at `386da74ecdcb3506f13748a9770993887d747975`.
 - PR #109 merged at `1404c6e7f1af953beeea60bb08ec7a8518caf85e`; automatic condition apply is disabled and now requires an exact manual opt-in.
+- PR #111 merged at `79d066858edbac206f1fc31562f9a552e9f2d30f`; the source-backed, condition-only repair requires a reviewed dry-run artifact and SHA-256, stale-drift preflight, and post-read verification. It has not been applied live.
 - The PR #108 condition workflow completed successfully in run [34627345486](https://github.com/milman1/Lauramilman.com/actions/runs/34627345486). The implementation and focused validation reported 630 tests passed; schema version 24 is the current schema reference, not a test count. The independent review reported 97 focused tests at `34a7b14`.
 - The automatic PR workflow applied 85 product updates and 151 metafield upserts. Independent review found metadata-only changes: no feature deletes or body rewrites. The reviewed population was 71 archived, 10 active, and 4 draft; 66 eBay condition values were `3000` and 85 Google values were `used`. This is a historical execution record, not proof that every watch mismatch is fixed.
 - The write-disabled main dry-run [34627710402](https://github.com/milman1/Lauramilman.com/actions/runs/34627710402) failed closed after about 7m28s: the direct Belgium Dia API URL was unset or rate-limited, it returned zero natural/lab/watch API rows, and it performed zero writes. This run cannot serve as a fresh source-backed repair plan.
 - The sold trigger is eBay item `366649317404` (Rolex 116000): public condition says “New with box and papers” while the description says “Pre-Owned.” This is a verified mismatch and does not authorize inference from marketplace copy.
 - Fresh active evidence identifies item `366650116144`, SKU `RW3096`, “Pre-Owned Rolex Datejust 126334.” Its actual evidence says New with box and papers while Marketplace Connect is Listed and Enabled. It was outside the 85-row repair population, so its underlying delivery remains unresolved.
 - Public listing item `366655791728`, SKU `4159`, currently shows Pre-owned / Good, with a pre-owned description and no original box. This is current public-listing evidence, not a conclusion drawn from the sold listing.
-- The latest RW3096 Marketplace state is Listed and Enabled with an Offer error: “Package weight not valid or missing.” Shopify currently records package weight `0.0 lb`; the shipping policy is Free-2Day Insured Shipping. Condition correction is authorized, but the merchant’s actual packed weight and unit are still pending, so no package weight can be entered yet.
+- The latest RW3096 Marketplace state was Listed and Enabled with an Offer error: “Package weight not valid or missing.” The merchant supplied `1 lb`; Shopify product `7642022805575` / SKU `RW3096` was saved with package weight `1.0 lb` and unit `lb`, and a fresh Shopify reload confirmed the saved value. The shipping policy is Free-2Day Insured Shipping. A fresh post-save read still shows eBay item `366650116144` as New with box and papers while Marketplace detail remains Offer Listed with Error and the intended condition is Pre-owned / Good; delivery verification remains pending.
 
 ## Source and candidate audit state
 
@@ -46,7 +47,7 @@ PR #109 workflow run [34628174469](https://github.com/milman1/Lauramilman.com/ac
 
 ## Remaining work and blockers
 
-1. Obtain the merchant’s actual packed weight and unit for RW3096 before considering the Marketplace package error.
+1. Freshly verify Marketplace/eBay delivery for RW3096 after the saved `1 lb` package weight; do not rely on the cached pre-save error.
 2. Restore or provide an approved structured source API response, then generate an exact joined dry-run plan.
 3. Blind-review the bounded candidate classification and keep ambiguous rows out of any automatic plan.
 4. Review the dry-run, use the exact manual opt-in if authorized, and independently verify the resulting condition mapping.
@@ -61,5 +62,6 @@ PR #109 workflow run [34628174469](https://github.com/milman1/Lauramilman.com/ac
 
 ## Work log
 
-- 2026-09-11: Created this durable handoff from merged main commit `1404c6e`; recorded the verified 85-row metadata execution, the zero-write source-validation failure, the sold/active mismatches, and the remaining packed-weight/API blockers.
+- 2026-09-11: Created this durable handoff from merged main commit `1404c6e`; recorded the verified 85-row metadata execution, the zero-write source-validation failure, the sold/active mismatches, and the remaining source/API and Marketplace blockers.
 - 2026-09-11: Built and independently reviewed the source-backed, reviewed-snapshot repair workflow; recorded that it remains blocked on a nonzero API response and that no live apply has occurred.
+- 2026-09-11: Merchant supplied `1 lb`; Shopify product `7642022805575` / SKU `RW3096` was saved and fresh-reload verified at `1.0 lb` with unit `lb`. Fresh post-save eBay/Marketplace evidence still reports the delivery error, so delivery verification and the source-backed condition apply remain pending.
