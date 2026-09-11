@@ -25,6 +25,18 @@ function csv(value: unknown): string {
   const text = String(value ?? '');
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
+function collectedImageUrls(row: Record<string, string>): string[] {
+  return (row.image_urls ?? '')
+    .split(/[;|]/)
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+function sourceCondition(row: Record<string, string>): RoyalChainSource['condition'] {
+  const state = (row.condition ?? '').trim().toLowerCase();
+  if (!state) return undefined;
+  if (state !== 'new' && state !== 'preowned') throw new Error(`${row.item_number ?? 'unknown'}: invalid condition state`);
+  return { state, evidence: row.condition_evidence ?? '' };
+}
 
 export async function generateRoyalChainPlan(opts: { shortlistPath: string; privatePath: string; outputDir: string; expectedProducts?: number; expectedVariants?: number }): Promise<{ products: number; variants: number }> {
   const shortlist = records(await readFile(opts.shortlistPath, 'utf8'));
@@ -41,7 +53,15 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
     const first = variants[0];
     if (!first || money(priv.cost ?? '') !== first.costUsd) throw new Error(`${itemNumber}: top-level cost is not the first displayed variant`);
     if (money(priv.retail ?? '') !== supplierRetailFromCost(first.costUsd)) throw new Error(`${itemNumber}: top-level retail fails pricing rule`);
-    const source: RoyalChainSource = { itemNumber, style: row.style ?? '', widthMm: row.width_mm ?? '', imageUrl: row.image_url ?? '', variants };
+    const source: RoyalChainSource = {
+      itemNumber,
+      style: row.style ?? '',
+      widthMm: row.width_mm ?? '',
+      imageUrl: row.image_url ?? '',
+      imageUrls: collectedImageUrls(row),
+      condition: sourceCondition(row),
+      variants,
+    };
     products.push(buildRoyalChainProduct(source));
   }
   if (products.length !== privateRows.length) throw new Error('public/private item sets differ');
