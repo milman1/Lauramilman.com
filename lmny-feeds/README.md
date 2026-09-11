@@ -271,13 +271,17 @@ worn). Marketplace Connect was matching "box and papers" copy onto that value.
 
 Live ingest now writes:
 
-- `custom.ebay_condition` = `3000` (Used / Pre-owned) or `1000` (Unworn / New with tags). Text `Pre-owned` is not a valid ConditionID.
+- `custom.ebay_condition` = `3000` for a source-confirmed pre-owned watch or
+  unknown source state; `1000` only when the source says Unworn and explicitly
+  confirms both box and papers; otherwise a source-confirmed Unworn watch uses
+  `1500` (New without a complete box-and-papers set). Titles never establish
+  condition. Text `Pre-owned` is not a valid ConditionID.
 - `custom.features` = `With Box` / `With Papers` (never "New with…")
 - Description clause `with its original box and papers` instead of
   `as a full set with box and papers`
 
 Map those two keys once in Marketplace Connect (Condition → `ebay_condition`,
-Features → `features`). Schema version 21 refreshes feed watches on the next
+Features → `features`). Schema version 24 refreshes feed watches on the next
 hourly sync.
 
 One-shot backfill of every Watch / `ebay`-tagged product (estate + feed):
@@ -286,6 +290,11 @@ One-shot backfill of every Watch / `ebay`-tagged product (estate + feed):
 npm run backfill:ebay-preowned-features            # counts + CSV, no writes
 npm run backfill:ebay-preowned-features -- --apply
 ```
+
+This repair reads mutable Shopify catalog data, not the supplier API, so it
+never upgrades a watch to `1000` or `1500`, even when `custom.condition` says
+Unworn. It fails closed to `3000`; the hourly API sync restores legitimate new
+conditions from authoritative source state and accessory fields.
 
 The Actions workflow **LMNY eBay pre-owned features** is the same path.
 
