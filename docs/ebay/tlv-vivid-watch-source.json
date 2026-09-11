@@ -1,0 +1,398 @@
+{
+  "observedAt": "2026-09-11T06:04:29.934Z",
+  "url": "https://belgiumdia.com/watch",
+  "tlv": [
+    {
+      "brand": "PATEK PHILIPPE",
+      "model": "CALATRAVA",
+      "reference": "6119R",
+      "sku": "T3505"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "116234",
+      "sku": "T3489"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126231",
+      "sku": "T3708"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126234",
+      "sku": "T3691"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126333",
+      "sku": "T3659"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126334",
+      "sku": "T3713"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126334",
+      "sku": "T3760"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126334",
+      "sku": "T3748"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126334",
+      "sku": "T3732"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "126334",
+      "sku": "T3718"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "278274",
+      "sku": "T3669"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DATEJUST",
+      "reference": "278274",
+      "sku": "T3709"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DAYDATE",
+      "reference": "228238",
+      "sku": "T3757"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DAYTONA",
+      "reference": "116500LN",
+      "sku": "T3735"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DAYTONA",
+      "reference": "116520",
+      "sku": "T3595"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DAYTONA",
+      "reference": "126500LN",
+      "sku": "T3753"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "DAYTONA",
+      "reference": "126500LN",
+      "sku": "T3688"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "EXPLORER II",
+      "reference": "226570",
+      "sku": "T3734"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "EXPLORER II",
+      "reference": "226570",
+      "sku": "T3740"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "EXPLORER II",
+      "reference": "226570",
+      "sku": "T3741"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "116713LN",
+      "sku": "T3652"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "126710BLNR",
+      "sku": "T3673"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "126710BLNR",
+      "sku": "T3712"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "126710BLRO",
+      "sku": "T3431"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "126710GRNR",
+      "sku": "T3653"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "GMT MASTER II",
+      "reference": "126720VTNR",
+      "sku": "T3693"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "LADY DATE JUST",
+      "reference": "179174",
+      "sku": "T3492"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "LADY DATE JUST",
+      "reference": "279171",
+      "sku": "T3682"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "LADY DATE JUST",
+      "reference": "279173",
+      "sku": "T3687"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "LADY DATE JUST",
+      "reference": "279174",
+      "sku": "T3614"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "LADY DATE JUST",
+      "reference": "69178",
+      "sku": "T3514"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "MILGAUSS",
+      "reference": "116400GV",
+      "sku": "T3755"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "OYSTER PERPETUAL",
+      "reference": "116000",
+      "sku": "T3633"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "OYSTER PERPETUAL",
+      "reference": "124300",
+      "sku": "T3759"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "OYSTER PERPETUAL",
+      "reference": "277200",
+      "sku": "T3702"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "326935",
+      "sku": "T3724"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3676"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3678"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3487"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3555"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3683"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3639"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3677"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SKY DWELLER",
+      "reference": "336934",
+      "sku": "T3650"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116610LN",
+      "sku": "T3662"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116610LN",
+      "sku": "T3663"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116610LN",
+      "sku": "T3549"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116610LV",
+      "sku": "T3590"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116610LV",
+      "sku": "T3572"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "116613LN",
+      "sku": "T3690"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "126610LN",
+      "sku": "T3717"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "126613LB",
+      "sku": "T3610"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "126613LB",
+      "sku": "T3609"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "126613LB",
+      "sku": "T3608"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "126618LB",
+      "sku": "T3666"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "16610",
+      "sku": "T3604"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "16610",
+      "sku": "T3607"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "909010LN",
+      "sku": "T3649"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "909010LN",
+      "sku": "T3744"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER DATE",
+      "reference": "909010LN",
+      "sku": "T3745"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER NO DATE",
+      "reference": "124060",
+      "sku": "T3737"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER NO DATE",
+      "reference": "124060",
+      "sku": "T3559"
+    },
+    {
+      "brand": "ROLEX",
+      "model": "SUBMARINER NO DATE",
+      "reference": "124060",
+      "sku": "T3513"
+    }
+  ],
+  "vivid": [
+    {
+      "sku": "6197",
+      "brand": "AUDEMARS PIGUET",
+      "model": "ROYAL OAK SELFWINDING",
+      "reference": "26240BA.OO.1320BA.02"
+    },
+    {
+      "sku": "6198",
+      "brand": "ROLEX",
+      "model": "DAYTONA",
+      "reference": "126515LN"
+    }
+  ]
+}
