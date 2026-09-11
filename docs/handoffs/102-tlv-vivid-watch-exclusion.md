@@ -4,7 +4,7 @@ Status: in progress. GitHub issue: https://github.com/milman1/Lauramilman.com/is
 
 Documentation PR: https://github.com/milman1/Lauramilman.com/pull/104. Exact next action: confirm whether unlabeled eBay item [366655791728](https://www.ebay.com/itm/366655791728), described as January 2024 with papers and no original box, is TLV stock T3759; the merchant has been asked and no action was taken on that ambiguous listing.
 
-Execution update dated 2026-09-11: PR #103 is merged and CI-verified. The combined 104-row Shopify archive has fresh evidence showing 104 unique products, all Archived. Marketplace Connect has fresh after-state evidence for all 104 exact SKUs, all Disabled; the write log records 66 saved changes (58 current plus 8 historical), with 38 rows already Disabled before the writes. Seller Hub's captured Active view contains 182 unique listing IDs, 167 nonblank custom-label/SKU pairs, and 15 unlabeled rows; zero target SKU matches and zero raw target-SKU occurrences were found. One unlabeled Rolex 124300 could be a duplicate of in-scope T3759, so the capture does not prove absence for that one item. Seventeen restricted screenshots are uploaded and verified in the canonical Drive folder. A post-next-scheduled-sync observation has not been recorded.
+Execution update dated 2026-09-11: PR #103 is merged and CI-verified. The combined 104-row Shopify archive has fresh evidence showing 104 unique products, all Archived. Marketplace Connect has fresh after-state evidence for all 104 exact SKUs, all Disabled; the write log records 66 saved changes (58 current plus 8 historical), with 38 rows already Disabled before the writes. Seller Hub's captured Active view contains 182 unique listing IDs, 168 nonblank custom-label/SKU pairs across 142 distinct SKUs, and 14 unlabeled rows; zero target SKU matches and zero raw target-SKU occurrences were found. Fresh accessibility evidence parses item 366655791728 as SKU 4159, outside the TLV/Vivid scope; this corrects the prior parser output without asserting a live state change. Seventeen restricted screenshots are uploaded and verified in the canonical Drive folder. A post-next-scheduled-sync observation has not been recorded.
 
 ## Goal
 
@@ -19,14 +19,14 @@ Withdraw the final exact 104-SKU TLV/Vivid watch scope authorized by the merchan
 - Shopify after-state: docs/ebay/tlv-vivid-shopify-after-104.csv (104 unique observed product IDs, all Archived; no SKU-to-ID inference).
 - Drive evidence: canonical folder https://drive.google.com/drive/folders/1XnQxUkd8jHCzF4CaAjOS-VlnNB_8gB9n with 17 verified restricted screenshots (16 batch/state captures plus the final eBay evidence screenshot).
 - Code/CI evidence: PR #103 commit 4f1d212348d78c51a133716d60f8da53ff13bb46; Actions run https://github.com/milman1/Lauramilman.com/actions/runs/34606495411.
-- Seller Hub evidence: 182 unique active listing IDs inspected; 167 had nonblank custom labels and 15 had no parseable label, recorded in docs/ebay/tlv-vivid-ebay-active-after.csv. Zero of the 104 target SKUs matched the extracted pairs or appeared elsewhere in the captured DOM. The unlabeled Rolex 124300 may duplicate T3759; no eBay completion is inferred from Shopify or Marketplace state.
+- Seller Hub evidence: 182 unique active listing IDs inspected; 168 had nonblank custom labels across 142 distinct SKUs and 14 had no parseable label, recorded in docs/ebay/tlv-vivid-ebay-active-after.csv. Zero of the 104 target SKUs matched the extracted pairs or appeared elsewhere in the captured DOM. Item 366655791728 is parsed as SKU 4159 and is outside the TLV/Vivid scope; no eBay completion is inferred from Shopify or Marketplace state.
 - Repository audit and historical evidence: docs/ebay/tlv-vivid-historical-evidence.md.
 
 ## Completed execution and remaining acceptance
 
 1. The permanent exclusion was implemented and independently reviewed before writes: TLV WATCHES LLC and VIVID WATCHES LLC were removed from the allowed branches, ROMAN retained, and allowlist lookup failure made fail-closed. Tests and CI dry-run passed before catalog writes.
 2. The final 104 exact-SKU plan was used for Shopify and Marketplace Connect. Shopify after-state is 104/104 Archived; Marketplace Connect after-state is 104/104 Disabled.
-3. The exact-SKU Seller Hub Active-view check is recorded with zero parsed target matches, with the unlabeled Rolex 124300 caveat. Keep issue #102 open for the post-next-scheduled-sync observation and resolution of that caveat; do not claim either has occurred.
+3. The exact-SKU Seller Hub Active-view check is recorded with zero parsed target matches. Keep issue #102 open only for the post-next-scheduled-sync observation; do not claim that observation has occurred.
 
 ## Guardrails
 
@@ -34,5 +34,5 @@ Withdraw the final exact 104-SKU TLV/Vivid watch scope authorized by the merchan
 - Do not infer SKU-to-product-ID mappings from source or rendered row order.
 - Do not delete products/listings.
 - Do not include costs, credentials, or customer data.
-- Shopify archive is independently verified for all 104 rows. Marketplace Connect is independently verified for all 104 rows as Disabled. Seller Hub has zero parsed target matches, with one unlabeled possible T3759 duplicate; the post-next-scheduled-sync observation remains pending.
+- Shopify archive is independently verified for all 104 rows. Marketplace Connect is independently verified for all 104 rows as Disabled. Seller Hub has zero parsed target matches; the post-next-scheduled-sync observation remains pending.
 - Acceptance requires the sync block to be merged and tested before archive/disable, and no supplier row may be reactivated by the next sync.

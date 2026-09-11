@@ -1,6 +1,6 @@
 # Historical TLV + combined supplier withdrawal evidence
 
-Status: execution evidence recorded 2026-09-11. The permanent sync exclusion merged in PR #103 before catalog writes. Shopify and Marketplace Connect verification completed for all 104 exact-SKU rows. Seller Hub captured zero parsed target matches, with one unlabeled Rolex 124300 that could duplicate T3759. Issue #102 remains open for the next scheduled sync observation and this caveat.
+Status: execution evidence recorded 2026-09-11. The permanent sync exclusion merged in PR #103 before catalog writes. Shopify and Marketplace Connect verification completed for all 104 exact-SKU rows. Seller Hub captured zero parsed target matches; fresh accessibility evidence parses item 366655791728 as SKU 4159, outside the TLV/Vivid scope. Issue #102 remains open for the next scheduled sync observation.
 
 ## Frozen batches
 
@@ -26,7 +26,7 @@ The supplied all-T Shopify UI query returned 102 products over three pages (50 +
 1. The initial 65-row batch and separate 39-row historical batch were frozen as the combined 104-row plan.
 2. The permanent ROMAN-only sync exclusion and fail-closed allowlist behavior were merged and independently verified before live writes.
 3. Shopify archive verification is 104/104 Archived. Marketplace Connect after-state verification is 104/104 Disabled; the write log contains 66 saved changes and 38 rows were already Disabled.
-4. Seller Hub verification found 182 unique active listing IDs with 167 nonblank custom-label/SKU pairs and 15 unlabeled rows; zero target SKU matches and zero raw target-SKU occurrences were found. The unlabeled Rolex 124300 could duplicate T3759, so the capture does not prove absence for that one item. Sanitized extracted pairs are in docs/ebay/tlv-vivid-ebay-active-after.csv.
+4. Seller Hub verification found 182 unique active listing IDs with 168 nonblank custom-label/SKU pairs across 142 distinct SKUs and 14 unlabeled rows; zero target SKU matches and zero raw target-SKU occurrences were found. Fresh accessibility evidence corrects item 366655791728 to SKU 4159, outside the TLV/Vivid scope. Sanitized extracted pairs are in docs/ebay/tlv-vivid-ebay-active-after.csv.
 
 Drive evidence: 17 restricted screenshots are uploaded and verified in the canonical merchant folder: https://drive.google.com/drive/folders/1XnQxUkd8jHCzF4CaAjOS-VlnNB_8gB9n.
 
