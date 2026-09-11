@@ -186,9 +186,6 @@ function catalogEntry(overrides: Record<string, unknown> = {}) {
     inventoryTracked: true,
     inventoryItemId: 'gid://shopify/InventoryItem/1',
     inventoryQuantity: 1,
-    price: 69800,
-    variantCount: 1,
-    firstVariantPrice: 69800,
     // What the last matching run remembered: a 72,000 comparison read a week
     // ago, which against the 67,600 cost is the 69,800 midpoint on the store.
     rememberedCompetitorPrice: 72000,
@@ -460,7 +457,7 @@ describe('a supplier markdown across two consecutive degraded runs', () => {
     // Run 2: the supplier cut the cost to 60,000. The storefront must follow.
     productSets.length = 0;
     state.feedRow = supplierRowAt(60000);
-    state.catalog = [{ ...noMemory, price: 68100, firstVariantPrice: 68100 }];
+    state.catalog = [noMemory];
     await run([]);
     expect(String(productSets[0]!.variants[0].price)).toBe('60500.00');
     expect(report().json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });

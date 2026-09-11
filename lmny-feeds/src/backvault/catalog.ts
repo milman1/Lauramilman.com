@@ -55,23 +55,6 @@ export interface BackVaultCatalogEntry {
   inventoryItemId?: string;
   inventoryQuantity?: number;
   /**
-   * The live retail price, null when it cannot be read — no variant, a
-   * non-numeric or non-positive price, or MORE THAN ONE VARIANT, where one
-   * variant's price says nothing about the piece's ticket.
-   *
-   * NOTE: nothing prices off this any more. It was the record a competitor
-   * match left behind, back when an unmatched piece was pinned to its own live
-   * ticket; the remembered competitor price below replaced that, because a
-   * frozen ticket cannot follow the supplier's cost down. Kept as a plain,
-   * tested read of what is on the store — delete it and its two companions
-   * below if nothing has taken it up by the next change here.
-   */
-  price: number | null;
-  /** Variants on the product. >1 is why `price` can be null on a priced piece. */
-  variantCount: number;
-  /** The first variant's price whatever the variant count. See the note on `price`. */
-  firstVariantPrice: number | null;
-  /**
    * The competitor price this piece last matched at, remembered on the product
    * (`backvault_feed.competitor_price`), null when there is none or it cannot
    * be read. On a run whose competitor index is incomplete, an unmatched piece
@@ -115,10 +98,8 @@ export async function fetchBackVaultCatalog(
           competitorPriceAt: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
-          variantsCount?: { count?: number | null } | null;
           variants?: {
             nodes?: Array<{
-              price?: string | null;
               inventoryQuantity?: number | null;
               inventoryItem?: { id?: string; tracked?: boolean } | null;
             }>;
@@ -138,8 +119,7 @@ export async function fetchBackVaultCatalog(
             competitorPriceAt: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "competitor_price_at") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
-            variantsCount { count }
-            variants(first: 1) { nodes { price inventoryQuantity inventoryItem { id tracked } } }
+            variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
           }
         }
       }`,
@@ -154,18 +134,10 @@ export async function fetchBackVaultCatalog(
         ESTATE_CHANNELS,
         installedNames,
       );
-      const variants = node.variants?.nodes ?? [];
-      const variant = variants[0];
-      const variantCount = node.variantsCount?.count ?? variants.length;
-      // `Number(null)` is 0, which would read as a real $0 ticket, so a
-      // missing price stays null rather than going through Number().
-      // A multi-variant product reads as unpriced: `variants(first: 1)` says
-      // nothing about what the other variants cost.
-      const rawPrice = variant?.price == null ? Number.NaN : Number(variant.price);
-      const firstVariantPrice = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
-      const price = variantCount > 1 ? Number.NaN : rawPrice;
-      // Same treatment again: `Number(null)` is 0, and a remembered $0 would
-      // price every unmatched piece at half its cost.
+      const variant = node.variants?.nodes?.[0];
+      // `Number(null)` is 0, and a remembered $0 would price every unmatched
+      // piece at half its cost, so a missing value stays null rather than
+      // going through Number().
       const rawRemembered = node.competitorPrice?.value == null ? Number.NaN : Number(node.competitorPrice.value);
       entries.push({
         id: node.id,
@@ -178,9 +150,6 @@ export async function fetchBackVaultCatalog(
         inventoryTracked: variant?.inventoryItem?.tracked,
         inventoryItemId: variant?.inventoryItem?.id,
         inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
-        price: Number.isFinite(price) && price > 0 ? price : null,
-        variantCount,
-        firstVariantPrice,
         rememberedCompetitorPrice: Number.isFinite(rawRemembered) && rawRemembered > 0 ? rawRemembered : null,
         rememberedCompetitorPriceAt: node.competitorPriceAt?.value ?? null,
       });

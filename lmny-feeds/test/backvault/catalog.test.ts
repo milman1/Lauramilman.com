@@ -111,10 +111,11 @@ describe('publishStateFor', () => {
 });
 
 /**
- * Response parsing, and specifically `price` — the only record of what a
- * competitor match produced, since the competitor price itself is never stored
- * on the product. A null here means the competitor-unavailable pin stands down,
- * so every way of reading it wrong matters.
+ * Response parsing, and specifically the remembered competitor comparison —
+ * the only record of what a match produced, and the one thing that keeps an
+ * unmatched piece off the flat markup when the competitor index is incomplete.
+ * Every way of reading it wrong matters: a $0 read as real would halve a
+ * price, and a missing date silently expires the memory.
  */
 describe('fetchBackVaultCatalog response parsing', () => {
   function node(overrides: Record<string, unknown> = {}) {
@@ -127,8 +128,7 @@ describe('fetchBackVaultCatalog response parsing', () => {
       competitorPriceAt: { value: '2026-09-04T12:00:00Z' },
       media: { edges: [{ node: { status: 'READY', mediaContentType: 'IMAGE' } }] },
       resourcePublications: { nodes: [{ isPublished: true, publication: { name: 'Online Store' } }] },
-      variantsCount: { count: 1 },
-      variants: { nodes: [{ price: '69800.00', inventoryQuantity: 1, inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true } }] },
+      variants: { nodes: [{ inventoryQuantity: 1, inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true } }] },
       ...overrides,
     };
   }
@@ -140,14 +140,14 @@ describe('fetchBackVaultCatalog response parsing', () => {
     } as unknown as ShopifyClient;
   }
 
-  async function priceOf(overrides: Record<string, unknown> = {}) {
+  async function entryFor(overrides: Record<string, unknown> = {}) {
     const [entry] = await fetchBackVaultCatalog(clientFor([node(overrides)]), ['Online Store']);
     return entry!;
   }
 
-  it('asks Shopify for the fields the price guard depends on', async () => {
-    // Deleting `price` or `variantsCount` from the query would otherwise leave
-    // every parsing test green while the guard silently stood down forever.
+  it('asks Shopify for the fields the pricing memory depends on', async () => {
+    // Deleting a metafield from the query would otherwise leave every parsing
+    // test green while every unmatched piece silently dropped to flat.
     let asked = '';
     const client = {
       gql: async (query: string) => {
@@ -156,26 +156,36 @@ describe('fetchBackVaultCatalog response parsing', () => {
       },
     } as unknown as ShopifyClient;
     await fetchBackVaultCatalog(client, ['Online Store']);
-    expect(asked).toMatch(/variants\(first: 1\) \{ nodes \{ price /);
-    expect(asked).toContain('variantsCount { count }');
     // The remembered comparison is what prices an unmatched piece on an
     // incomplete index; dropping either metafield sends every such piece to
     // the flat markup without anyone noticing.
     expect(asked).toContain('key: "competitor_price"');
     expect(asked).toContain('key: "competitor_price_at"');
     expect(asked).toContain('key: "content_hash"');
+    // Nothing reads a variant price or the variant count any more: the price
+    // pin that needed them was replaced by the remembered comparison, and this
+    // query runs over 700-plus products every week.
+    expect(asked).not.toContain('variantsCount');
+    expect(asked).toMatch(/variants\(first: 1\) \{ nodes \{ inventoryQuantity /);
   });
 
-  it('reads a normal price string as a number', async () => {
-    const entry = await priceOf();
-    expect(entry.price).toBe(69800);
-    expect(entry.variantCount).toBe(1);
+  it('reads the fields the diff and the inventory promotion use', async () => {
+    const entry = await entryFor();
     expect(entry.imageCount).toBe(1);
     expect(entry.inventoryItemId).toBe('gid://shopify/InventoryItem/1');
+    expect(entry.inventoryTracked).toBe(true);
+    expect(entry.inventoryQuantity).toBe(1);
+  });
+
+  it('survives a product with no variants at all', async () => {
+    const entry = await entryFor({ variants: undefined });
+    expect(entry.inventoryItemId).toBeUndefined();
+    expect(entry.inventoryQuantity).toBeUndefined();
+    expect(entry.rememberedCompetitorPrice).toBe(72000);
   });
 
   it('reads the remembered competitor comparison and its date', async () => {
-    const entry = await priceOf();
+    const entry = await entryFor();
     expect(entry.rememberedCompetitorPrice).toBe(72000);
     expect(entry.rememberedCompetitorPriceAt).toBe('2026-09-04T12:00:00Z');
     expect(entry.contentHash).toBe('hash-1');
@@ -184,50 +194,13 @@ describe('fetchBackVaultCatalog response parsing', () => {
   it('is null for a missing, zero or non-numeric remembered price rather than reading it as $0', async () => {
     // A remembered $0 would price every unmatched piece at half its cost.
     for (const competitorPrice of [null, { value: null }, { value: '0.00' }, { value: '' }, { value: 'n/a' }]) {
-      const entry = await priceOf({ competitorPrice });
+      const entry = await entryFor({ competitorPrice });
       expect(entry.rememberedCompetitorPrice).toBeNull();
     }
   });
 
   it('is null for a missing read date', async () => {
-    expect((await priceOf({ competitorPriceAt: null })).rememberedCompetitorPriceAt).toBeNull();
+    expect((await entryFor({ competitorPriceAt: null })).rememberedCompetitorPriceAt).toBeNull();
   });
 
-  it('reads a fractional price', async () => {
-    expect((await priceOf({ variants: { nodes: [{ price: '1250.50' }] } })).price).toBe(1250.5);
-  });
-
-  it('is null when the variants array is missing', async () => {
-    expect((await priceOf({ variants: undefined, variantsCount: undefined })).price).toBeNull();
-    expect((await priceOf({ variants: { nodes: [] }, variantsCount: { count: 0 } })).price).toBeNull();
-  });
-
-  it('is null for a null price rather than reading it as $0', async () => {
-    expect((await priceOf({ variants: { nodes: [{ price: null }] } })).price).toBeNull();
-  });
-
-  it('is null for a zero or negative price', async () => {
-    expect((await priceOf({ variants: { nodes: [{ price: '0.00' }] } })).price).toBeNull();
-    expect((await priceOf({ variants: { nodes: [{ price: '-100.00' }] } })).price).toBeNull();
-  });
-
-  it('is null for a non-numeric price', async () => {
-    expect((await priceOf({ variants: { nodes: [{ price: 'call for price' }] } })).price).toBeNull();
-    expect((await priceOf({ variants: { nodes: [{ price: '' }] } })).price).toBeNull();
-  });
-
-  it('is null when the product has more than one variant', async () => {
-    const entry = await priceOf({ variantsCount: { count: 3 } });
-    expect(entry.price).toBeNull();
-    expect(entry.variantCount).toBe(3);
-    // Kept so the warning can count the multi-variant pieces that would
-    // actually have been pinned, rather than every one in the run.
-    expect(entry.firstVariantPrice).toBe(69800);
-  });
-
-  it('falls back to the returned variant count when variantsCount is absent', async () => {
-    const entry = await priceOf({ variantsCount: undefined });
-    expect(entry.variantCount).toBe(1);
-    expect(entry.price).toBe(69800);
-  });
 });

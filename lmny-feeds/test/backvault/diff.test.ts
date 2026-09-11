@@ -16,8 +16,6 @@ function entry(
   status = 'ACTIVE',
   published = true,
   missingChannels: string[] = published ? [] : ['Online Store'],
-  price: number | null = null,
-  variantCount = 1,
   remembered: { price: number | null; at: string | null } = { price: null, at: null },
 ): BackVaultCatalogEntry {
   return {
@@ -28,11 +26,6 @@ function entry(
     imageCount: 1,
     published,
     missingChannels,
-    price,
-    variantCount,
-    // Mirrors the real read: the first variant's price survives even when the
-    // multi-variant rule makes `price` unreadable.
-    firstVariantPrice: price,
     rememberedCompetitorPrice: remembered.price,
     rememberedCompetitorPriceAt: remembered.at,
   };
@@ -162,7 +155,7 @@ describe('applyRememberedCompetitorPrices', () => {
     remembered: { price: number | null; at: string | null },
     overrides: Partial<BackVaultCatalogEntry> = {},
   ): BackVaultCatalogEntry {
-    return { ...entry(handleFor(item()), 'old-hash', 'ACTIVE', true, [], 69800, 1, remembered), ...overrides };
+    return { ...entry(handleFor(item()), 'old-hash', 'ACTIVE', true, [], remembered), ...overrides };
   }
 
   const HANDLE = handleFor(item());
@@ -348,7 +341,7 @@ describe('promoteBackVaultCompetitorMemory', () => {
     const promoted = promoteBackVaultCompetitorMemory(
       decisions,
       [one],
-      [entry(handle, 'hash', 'ACTIVE', true, [], 69800, 1, { price: 72000, at: daysAgo(45) })],
+      [entry(handle, 'hash', 'ACTIVE', true, [], { price: 72000, at: daysAgo(45) })],
       { now: NOW },
     );
     expect(promoted).toBe(1);
@@ -366,7 +359,7 @@ describe('promoteBackVaultCompetitorMemory', () => {
       promoteBackVaultCompetitorMemory(
         decisions,
         [one],
-        [entry(handle, 'hash', 'ACTIVE', true, [], 69800, 1, remembered)],
+        [entry(handle, 'hash', 'ACTIVE', true, [], remembered)],
         { now: NOW },
       );
       expect(decisions[0]!.action).toBe('update');
@@ -380,7 +373,7 @@ describe('promoteBackVaultCompetitorMemory', () => {
     const promoted = promoteBackVaultCompetitorMemory(
       decisions,
       [one],
-      [entry(handle, 'hash', 'ACTIVE', true, [], 69800, 1, { price: 72000, at: daysAgo(3) })],
+      [entry(handle, 'hash', 'ACTIVE', true, [], { price: 72000, at: daysAgo(3) })],
       { now: NOW },
     );
     expect(promoted).toBe(0);
@@ -395,7 +388,7 @@ describe('promoteBackVaultCompetitorMemory', () => {
     promoteBackVaultCompetitorMemory(
       decisions,
       [one],
-      [entry(handle, 'hash', 'ACTIVE', true, [], 69800, 1, { price: null, at: null })],
+      [entry(handle, 'hash', 'ACTIVE', true, [], { price: null, at: null })],
       { now: NOW },
     );
     expect(decisions[0]!.action).toBe('skip');
@@ -432,7 +425,7 @@ describe('promoteBackVaultCompetitorMemory never rewrites a memory-priced piece'
     const promoted = promoteBackVaultCompetitorMemory(
       decisions,
       [one],
-      [entry(handle, 'hash', 'ACTIVE', true, [], 69800, 1, { price: 72000, at: daysAgo(60) })],
+      [entry(handle, 'hash', 'ACTIVE', true, [], { price: 72000, at: daysAgo(60) })],
       { now: NOW, pricedFromMemory: [handle] },
     );
     expect(promoted).toBe(0);
