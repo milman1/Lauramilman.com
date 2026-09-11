@@ -34,13 +34,15 @@ The strict gate is:
 
 The active-listing source extraction and watch-title classification remain a bounded audit aid only. The working candidate CSV is not committed to this repository and is pending blind review. It contains only `item_id`, `sku`, and `title`; it carries no condition decision. Ambiguous and obvious non-watch rows remain separate. Do not treat the working candidate list as the complete API-backed repair population, and do not infer a condition from a title, description, or SKU.
 
-The bounded repair writer is built and under review; its current validation reports 634 tests. It must use an exact source join, fail closed when the structured API is unavailable, and produce a dry-run report before any manual opt-in. No further live condition correction is claimed here.
+The bounded repair writer is built as **LMNY source-backed watch condition repair** in `.github/workflows/lmny-source-watch-condition-repair.yml`, with its implementation in `lmny-feeds/scripts/repair-source-watch-conditions.ts`. It joins only active Watch products to allowed ROMAN API rows by exact SKU or deterministic/legacy watch handle, stops on zero source data or duplicate/ambiguous identity, and writes only `custom.ebay_condition` and `mm-google-shopping.condition`. A dry run emits a schema-validated plan, timestamp, and SHA-256. Apply requires the reviewed dry-run workflow run ID plus that exact hash, downloads the original artifact without rebuilding source state, rejects plans over 24 hours old, and aborts before all writes if a fresh read shows status, SKU, handle, or condition drift. No source-backed plan or live apply has run because the API remains unavailable; this work does not verify or reverse all 85 historical updates.
 
 The optional candidate audit remains incomplete: independent review found 150 saved rows, 13 blank SKUs, and the omission of MICHELE watch item 366650784419. The input title/SKU associations passed review, but this incomplete classification is not a repair cohort and must not determine condition changes; use exact authoritative API joins instead.
 
 ## Deployment and live state
 
 PR #109 is merged and the automatic apply path is disabled. The 85-row historical workflow execution is recorded above. The latest source-validation dry-run performed zero writes and failed closed. There is no verified completion of the full active-watch audit or of all Marketplace delivery mismatches.
+
+PR #109 workflow run [34628174469](https://github.com/milman1/Lauramilman.com/actions/runs/34628174469) also succeeded in dry-run mode with `DRY_RUN_INPUT=true`: it read 2,069 catalog products, planned zero changes, and made zero writes. That confirms the repaired trigger is write-disabled; it does not establish current API truth or verify the 85 historical updates.
 
 ## Remaining work and blockers
 
@@ -60,3 +62,4 @@ PR #109 is merged and the automatic apply path is disabled. The 85-row historica
 ## Work log
 
 - 2026-09-11: Created this durable handoff from merged main commit `1404c6e`; recorded the verified 85-row metadata execution, the zero-write source-validation failure, the sold/active mismatches, and the remaining packed-weight/API blockers.
+- 2026-09-11: Built and independently reviewed the source-backed, reviewed-snapshot repair workflow; recorded that it remains blocked on a nonzero API response and that no live apply has occurred.

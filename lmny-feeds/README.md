@@ -301,6 +301,21 @@ Pull-request runs are always dry-run. A live repair runs only from a manual
 workflow dispatch where **Dry run (no writes to Shopify)** is explicitly
 turned off.
 
+For a source-backed condition-only correction, use **LMNY source-backed watch
+condition repair**. It joins active Watch products to the Belgium Dia watch
+API by exact variant SKU or deterministic watch handle, then intersects those
+matches with the live ROMAN allowlist. It never uses title, price, or mutable
+Shopify condition copy as source evidence. Duplicate or ambiguous identifiers,
+an empty API response, or an empty allowlist stop the run before writes.
+
+The dry run saves `out/source-watch-condition-plan.json` with exact SKU,
+product ID, and before/after values plus its SHA-256. Apply requires the reviewed
+dry-run workflow run ID and that exact hash, downloads that run's artifact, and
+rejects plans older than 24 hours. It fresh-reads status, SKU, handle, and both
+before-values and aborts all writes on drift. Only then can it write
+`custom.ebay_condition` and `mm-google-shopping.condition`; a second fresh read
+verifies both fields. Pull-request runs always remain dry-run.
+
 ### Lab pricing backfill
 
 After unpublishing Lab-Grown Diamond `lmny-feed` products:
