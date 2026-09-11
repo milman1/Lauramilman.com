@@ -36,7 +36,7 @@ The active-listing source extraction and watch-title classification remain a bou
 
 The bounded repair writer is built and under review; its current validation reports 634 tests. It must use an exact source join, fail closed when the structured API is unavailable, and produce a dry-run report before any manual opt-in. No further live condition correction is claimed here.
 
-The latest blind candidate review reports 151 candidate rows and 14 blank-SKU rows, with the explicit MICHELE Bracelet Watch retained; this remains pending fresh verification and is not a committed repair cohort. The candidate audit has zero source-association mismatches in the reviewed input. Do not infer condition from this classification.
+The optional candidate audit remains incomplete: independent review found 150 saved rows, 13 blank SKUs, and the omission of MICHELE watch item 366650784419. The input title/SKU associations passed review, but this incomplete classification is not a repair cohort and must not determine condition changes; use exact authoritative API joins instead.
 
 ## Deployment and live state
 
