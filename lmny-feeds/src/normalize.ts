@@ -1,6 +1,5 @@
 import { STONE_GATES, WATCH_BRANDS } from '../config/pricing.js';
 import {
-  ALLOWED_WATCH_STOCK_RE,
   EXCLUDED_WATCH_PARTNERS,
   EXCLUDED_WATCH_STOCK_RE,
 } from '../config/watchGates.js';
@@ -319,15 +318,10 @@ function partnerBlob(raw: Raw): string {
 
 export interface WatchNormalizeOptions {
   /**
-   * Stock numbers from allowed partner books (ROMAN / TLV / Vivid). When
-   * set, any other stock is held as `watch_excluded_partner`.
+   * Stock numbers fetched from the allowed ROMAN partner branch. Any other
+   * stock is held as `watch_excluded_partner`.
    */
-  allowedStocks?: Set<string>;
-  /**
-   * When the partner allowlist could not be fetched, keep only T/RW/R
-   * prefixes so numeric Uncle Manny stock cannot leak through.
-   */
-  prefixFallback?: boolean;
+  allowedStocks: ReadonlySet<string>;
 }
 
 /** Power Watch (`P`) and Uncle Manny (`U`, `M`) stock prefixes, plus Branch. */
@@ -340,13 +334,9 @@ export function isExcludedWatchPartner(raw: Raw, stockRef: string): boolean {
 
 export function isAllowedWatchStock(stockRef: string, opts?: WatchNormalizeOptions): boolean {
   const stock = stockRef.trim();
-  if (opts?.allowedStocks && opts.allowedStocks.size > 0) {
-    return opts.allowedStocks.has(stock);
-  }
-  if (opts?.prefixFallback) {
-    return ALLOWED_WATCH_STOCK_RE.test(stock);
-  }
-  return true;
+  // Fail closed for every caller. Supplier attribution is not safe when the
+  // ROMAN stock allowlist is absent or empty, regardless of the SKU prefix.
+  return Boolean(opts?.allowedStocks.size && opts.allowedStocks.has(stock));
 }
 
 export interface NormalizeResult {

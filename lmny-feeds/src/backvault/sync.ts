@@ -5,10 +5,20 @@ import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
-import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
 import {
+  describeCompetitorStop,
+  fetchCompetitorCatalog,
+  indexCompetitor,
+  type CompetitorIndex,
+  type CompetitorStopReason,
+} from './competitor.js';
+import {
+  applyRememberedCompetitorPrices,
+  COMPETITOR_MEMORY_DAYS,
+  flatFallbackCount,
+  type CompetitorMemoryStats,
   diffBackVaultCatalog,
-  pinLivePricesWhenCompetitorUnavailable,
+  promoteBackVaultCompetitorMemory,
   promoteBackVaultInventoryUpdates,
   type Decision,
 } from './diff.js';
@@ -45,8 +55,24 @@ async function resolveToken(): Promise<{ domain: string; token: string }> {
 
 /** Competitor price fetch (config/pricing.ts BACKVAULT.competitor). */
 interface CompetitorStats {
+  /**
+   * The run's competitor state in one word, so a reader of the JSON report
+   * never has to infer 'failed' from the presence of `error`.
+   */
+  state: 'complete' | 'partial' | 'failed';
   rowsFetched: number | null;
   stockRefsIndexed: number;
+  /**
+   * True only when the retailer's whole catalogue was read. False means the
+   * index is PARTIAL — matches in it are good, but a piece missing from it may
+   * be priced on a page that was never read, so an unmatched piece falls back
+   * to the comparison remembered on the product.
+   */
+  complete: boolean;
+  pagesRead: number;
+  stoppedReason?: CompetitorStopReason;
+  /** How far the partial walk got and why it stopped. Absent on a complete read. */
+  partial?: string;
   error?: string;
 }
 
@@ -77,14 +103,31 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
-  /** Pieces written with the live price because the competitor fetch failed. */
-  pricePinned: number;
-  /** Pieces the price check stood down on: more than one variant, so no readable live price. */
-  multiVariantUnchecked: number;
   /**
-   * Something degraded this run without invalidating it — a failed competitor
-   * fetch, prices held back. Reported, but never a non-zero exit: only
-   * `errors` fails the run.
+   * Pieces that matched the competitor in this run's rows, counted over the
+   * SAME set as the two below — everything this run will write, including
+   * pieces the availability check retained. `feedStats.competitorMatched` is
+   * the new-arrivals normalization and is a different basis.
+   */
+  competitorMatched: number;
+  /**
+   * Unmatched pieces whose remembered comparison actually set the price. A
+   * remembered midpoint that lost to the cost + markup floor is NOT counted
+   * here: that piece was written at the flat price.
+   */
+  pricedFromMemory: number;
+  /** Which ones, named so a person can check them rather than take the count on trust. */
+  memoryHandles: string[];
+  /** Unmatched pieces written at the plain flat rule, for any of the four reasons. */
+  flatFallback: number;
+  /** The four reasons, counted apart. */
+  flatFallbackReasons: { unremembered: number; expired: number; unusable: number; flooredToFlat: number };
+  /** Pieces rewritten only to refresh a remembered comparison that was going stale. */
+  memoryRefreshed: number;
+  /**
+   * Something degraded this run without invalidating it — a failed or partial
+   * competitor fetch, pieces priced from a remembered comparison. Reported, but
+   * never a non-zero exit: only `errors` fails the run.
    */
   warnings: string[];
   errors: string[];
@@ -104,22 +147,57 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const rawRows = await fetchBackVaultFeed();
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
-  // Competitor prices: a failed fetch means no matches this run (every piece
-  // falls back to the flat markup), a warning in the report, and the price pin
-  // below — never a crash, and never a failed run on its own.
+  // Competitor prices, in three states. COMPLETE: every match priced at the
+  // midpoint, and an unmatched piece is genuinely unmatched. PARTIAL (the
+  // retailer's pagination cap, or the fetch deadline): the rows that came back
+  // are still indexed and matched, and an unmatched piece falls back to the
+  // comparison remembered on the product, because it may well have a match on
+  // a page that was never read. FAILED: no matches at all, so every piece is
+  // priced from memory or flat. None of the three is a crash or a failed run
+  // on its own.
   let competitor: CompetitorIndex | undefined;
-  const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
+  const competitorStats: CompetitorStats = {
+    state: 'failed',
+    rowsFetched: null,
+    stockRefsIndexed: 0,
+    complete: false,
+    pagesRead: 0,
+  };
+  // Set by a failed fetch AND by a partial one: in both cases a piece with no
+  // match may still have one we could not read, so the live price is protected.
+  let competitorDegraded = false;
   try {
-    const competitorRows = await fetchCompetitorCatalog();
-    competitor = indexCompetitor(competitorRows);
-    competitorStats.rowsFetched = competitorRows.length;
+    const result = await fetchCompetitorCatalog();
+    competitor = indexCompetitor(result.rows);
+    competitorStats.rowsFetched = result.rows.length;
     competitorStats.stockRefsIndexed = competitor.size;
-    console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
+    competitorStats.complete = result.complete;
+    competitorStats.pagesRead = result.pagesRead;
+    competitorStats.stoppedReason = result.stoppedReason;
+    if (result.complete) {
+      competitorStats.state = 'complete';
+      console.log(
+        `Competitor: ${result.rows.length} rows over ${result.pagesRead} pages, ` +
+          `${competitor.size} stock numbers indexed (complete)`,
+      );
+    } else {
+      // Partial, not failed: the rows that came back are indexed and used, so
+      // a piece that IS found still gets its midpoint price.
+      competitorStats.state = 'partial';
+      competitorDegraded = true;
+      competitorStats.partial = describeCompetitorStop(result);
+      console.warn(`Competitor: PARTIAL index — ${competitorStats.partial}; ${competitor.size} stock numbers indexed`);
+    }
   } catch (err) {
+    competitorStats.state = 'failed';
     competitorStats.error = err instanceof Error ? err.message : String(err);
-    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, live prices pinned`);
+    competitorDegraded = true;
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
+  // The warning itself is raised AFTER the memory pass below: what a degraded
+  // index actually cost this run is not known until the matching and the
+  // memory fallback have run, and a warning that claims more than was checked
+  // is worse than none.
 
   const { items: allItems, stats } = normalizeBackVaultFeed(rawRows, competitor);
   const availableItems = allItems.filter((item) => !isUnavailableProductHandle(handleFor(item)));
@@ -232,33 +310,29 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     }
   }
 
-  // With no competitor prices, pin any piece whose recomputed price would fall
-  // below the ticket already on the store. Must run BEFORE the content hashes
-  // are computed, so the hash matches the price actually written; the piece is
-  // otherwise updated, reactivated and published exactly as normal.
-  let pricePinned = 0;
-  let multiVariantUnchecked = 0;
-  if (competitorStats.error !== undefined) {
-    const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
-    pricePinned = pins.pinned;
-    multiVariantUnchecked = pins.multiVariant;
-    const notes: string[] = [];
-    if (pricePinned > 0) {
-      notes.push(
-        `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
-          '(the competitor comparison data was missing, so a lower flat price was not written)',
-      );
-    }
-    if (multiVariantUnchecked > 0) {
-      notes.push(
-        `${multiVariantUnchecked} piece${multiVariantUnchecked === 1 ? '' : 's'} with more than one variant ` +
-          `${multiVariantUnchecked === 1 ? 'has' : 'have'} no readable live price and ` +
-          `${multiVariantUnchecked === 1 ? 'was' : 'were'} written at the computed price`,
-      );
-    }
-    if (notes.length > 0) {
-      warnings.push(notes.join('; '));
-      console.warn(notes.join('; '));
+  // An unmatched piece on an incomplete index is priced from what the last
+  // matching run remembered about it, against this run's cost. Must run BEFORE
+  // the content hashes are computed, so the hash matches the price actually
+  // written; it also stamps the read date on every piece that matched today.
+  const memory = applyRememberedCompetitorPrices(desiredItems, catalog, {
+    indexComplete: competitorStats.state === 'complete',
+  });
+  const pricedFromMemory = memory.pricedFromMemory;
+  const memoryHandles = memory.memoryHandles;
+  const flatFallback = flatFallbackCount(memory);
+  // Every competitor count on the Done line and in the report is taken over
+  // the SAME set — the pieces this run will write, retained ones included —
+  // so they can be read against each other. feedStats.competitorMatched is a
+  // different basis (new arrivals only) and stays under '## Feed'.
+  const competitorMatched = memory.matchedThisRun;
+  if (competitorDegraded) {
+    warnings.push(competitorWarning(competitorStats, memory));
+    if (pricedFromMemory > 0) {
+      const note =
+        `${pricedFromMemory} piece${pricedFromMemory === 1 ? '' : 's'} priced from a remembered competitor ` +
+        `comparison (${memoryHandles.join(', ')}) — the midpoint against this run's cost, not a frozen ticket`;
+      warnings.push(note);
+      console.warn(note);
     }
   }
 
@@ -270,6 +344,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   });
 
   const decisions = diffBackVaultCatalog(desired, catalog);
+  // A piece that matched today but is otherwise unchanged still needs its
+  // remembered comparison rewritten before it ages out.
+  const memoryRefreshed = promoteBackVaultCompetitorMemory(decisions, desiredItems, catalog, {
+    pricedFromMemory: memoryHandles,
+  });
+  if (memoryRefreshed > 0) {
+    console.log(`Competitor memory: ${memoryRefreshed} piece(s) rewritten to refresh the remembered comparison`);
+  }
   let locationId: string | null = null;
   try {
     locationId = await client.primaryLocationId();
@@ -363,8 +445,17 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channels: channelNames,
     channelsResolved,
     skippedDraft,
-    pricePinned,
-    multiVariantUnchecked,
+    competitorMatched,
+    pricedFromMemory,
+    memoryHandles,
+    flatFallback,
+    flatFallbackReasons: {
+      unremembered: memory.unremembered,
+      expired: memory.expired,
+      unusable: memory.unusable,
+      flooredToFlat: memory.flooredToFlat,
+    },
+    memoryRefreshed,
     warnings,
     errors,
   };
@@ -379,7 +470,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
-      `price_pinned=${pricePinned} warnings=${warnings.length} errors=${errors.length}`,
+      `competitor=${competitorLabel(competitorStats)} ` +
+      `competitor_matched=${competitorMatched} ` +
+      `priced_from_memory=${pricedFromMemory} flat_fallback=${flatFallback} ` +
+      `warnings=${warnings.length} errors=${errors.length}`,
   );
   if (warnings.length > 0) {
     console.warn('Warnings:');
@@ -392,6 +486,91 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     for (const e of errors) console.error(`  - ${e}`);
     process.exitCode = 1;
   }
+}
+
+/**
+ * The one warning a degraded competitor run raises, built from what actually
+ * happened rather than from what the code intends to do. Every clause here is
+ * a number this run measured: delete the memory lookup or its expiry and the
+ * sentence changes with it.
+ */
+function competitorWarning(stats: CompetitorStats, memory: CompetitorMemoryStats): string {
+  const matched = memory.matchedThisRun;
+  const flat = flatFallbackCount(memory);
+  const memoryClause =
+    memory.pricedFromMemory > 0
+      ? `${memory.pricedFromMemory} unmatched piece${memory.pricedFromMemory === 1 ? '' : 's'} priced from a ` +
+        `remembered comparison under ${COMPETITOR_MEMORY_DAYS} days old`
+      : 'no piece could be priced from a remembered comparison';
+  const flatClause =
+    flat > 0
+      ? `${flat} priced flat at cost + markup (${memory.unremembered} with nothing remembered, ` +
+        `${memory.expired} whose memory had expired, ${memory.unusable} whose memory had no readable date, ` +
+        `${memory.flooredToFlat} whose remembered midpoint lost to the floor)`
+      : 'nothing fell back to the flat markup';
+  if (stats.state === 'failed') {
+    return (
+      `competitor fetch: ${stats.error} — nothing could be matched this run; ${memoryClause}; ${flatClause}`
+    );
+  }
+  const matchClause =
+    matched > 0
+      ? `${matched} piece${matched === 1 ? '' : 's'} priced from a match in the rows that were read`
+      : 'no piece matched in the rows that were read';
+  return `competitor index is PARTIAL: ${stats.partial}. ${matchClause}; ${memoryClause}; ${flatClause}`;
+}
+
+/**
+ * The competitor section of the report, in the same three states as the Done
+ * line. A partial read is a WARNING, not an error: it says how much was read,
+ * why it stopped, how many pieces it actually priced, how many were priced
+ * from a remembered comparison, and how many fell back to the flat markup.
+ * Every claim is a counted one.
+ */
+function competitorReportLines(summary: RunSummary): string[] {
+  const stats = summary.competitor;
+  const reasons = summary.flatFallbackReasons;
+  const aftermath = [
+    `- Pieces priced from a match in this run's rows: ${summary.competitorMatched}`,
+    summary.pricedFromMemory > 0
+      ? `- Priced from a remembered comparison (under ${COMPETITOR_MEMORY_DAYS} days old): ` +
+        `${summary.pricedFromMemory} (${summary.memoryHandles.join(', ')})`
+      : '- Priced from a remembered comparison: none',
+    `- Fell back to the flat markup: ${summary.flatFallback} ` +
+      `(${reasons.unremembered} nothing remembered, ${reasons.expired} memory expired, ` +
+      `${reasons.unusable} memory with no readable date, ${reasons.flooredToFlat} remembered midpoint below the floor)`,
+  ];
+  if (stats.state === 'failed') {
+    return [`- FAILED: ${stats.error} — no match was possible this run`, ...aftermath];
+  }
+  if (stats.state === 'partial') {
+    return [
+      `- PARTIAL: ${stats.partial ?? 'the walk stopped early'}`,
+      `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
+      ...aftermath,
+      '- A piece with no match here may have one on a page that was not read, which is why an unmatched piece ' +
+        `with a comparison under ${COMPETITOR_MEMORY_DAYS} days old is priced against that rather than dropped ` +
+        'to the flat markup. This is a warning, not an error.',
+    ];
+  }
+  return [
+    `- Rows fetched: ${stats.rowsFetched ?? 'skipped'} over ${stats.pagesRead} pages (complete)`,
+    `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
+    `- Pieces priced from a competitor match: ${summary.competitorMatched}`,
+  ];
+}
+
+/**
+ * The competitor fetch in one token for the Done line: complete, partial (with
+ * how much was read and why it stopped), or failed. A partial index priced
+ * whatever it matched, so it must not read as a failure — and must not read as
+ * a clean run either. What it cost is on the same line, in competitor_matched
+ * priced_from_memory and flat_fallback, rather than asserted here.
+ */
+function competitorLabel(stats: CompetitorStats): string {
+  if (stats.state === 'failed') return 'failed';
+  if (stats.state === 'partial') return `PARTIAL(${stats.partial ?? 'stopped early'})`;
+  return `complete(${stats.rowsFetched ?? 0} rows/${stats.pagesRead} pages)`;
 }
 
 async function writeReport(summary: RunSummary): Promise<void> {
@@ -416,9 +595,7 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Priced from a competitor match: ${summary.feedStats.competitorMatched}`,
     '',
     `## Competitor prices (${BACKVAULT.competitor.name})`,
-    ...(summary.competitor.error
-      ? [`- FAILED: ${summary.competitor.error} — flat markup only this run`]
-      : [`- Rows fetched: ${summary.competitor.rowsFetched ?? 'skipped'}`, `- Stock numbers indexed: ${summary.competitor.stockRefsIndexed}`]),
+    ...competitorReportLines(summary),
     '',
     `## Availability check (full supplier catalog)`,
     ...(summary.availability.error
@@ -435,8 +612,10 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Publish to sales channels: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
     `- Unchanged: ${counts.skip ?? 0}`,
-    `- Price pinned to the live ticket (competitor unavailable): ${summary.pricePinned}`,
-    `- Multi-variant pieces with no readable live price: ${summary.multiVariantUnchecked}`,
+    `- Priced from a remembered competitor comparison: ${summary.pricedFromMemory}`,
+    ...(summary.memoryHandles.length > 0 ? [`  - From memory: ${summary.memoryHandles.join(', ')}`] : []),
+    `- Fell back to the flat markup (nothing remembered, expired, undated, or below the floor): ${summary.flatFallback}`,
+    `- Rewritten only to refresh a remembered comparison: ${summary.memoryRefreshed}`,
     `- Published this run: ${summary.published}`,
     '',
   ];

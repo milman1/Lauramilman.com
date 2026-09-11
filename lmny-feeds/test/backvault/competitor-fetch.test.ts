@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  CAP_PAGE_FLOOR,
+  describeCompetitorStop,
   FETCH_DEADLINE_MS,
   fetchCompetitorCatalog,
   fetchCompetitorPage,
   PAGE_DELAY_MS,
+  PAGINATION_CAP_PAGES,
   retryAfterMs,
 } from '../../src/backvault/competitor.js';
 
@@ -161,8 +164,9 @@ describe('fetchCompetitorCatalog pacing', () => {
       .mockResolvedValueOnce(jsonPage(FULL_PAGE))
       .mockResolvedValueOnce(jsonPage(FULL_PAGE))
       .mockResolvedValueOnce(jsonPage([{ handle: 'last' }]));
-    const rows = await fetchCompetitorCatalog({ sleep, now });
-    expect(rows).toHaveLength(501);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(501);
+    expect(result).toMatchObject({ complete: true, pagesRead: 3, stoppedReason: 'exhausted' });
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(PAGE_DELAY_MS).toBe(250);
     expect(waits).toEqual([PAGE_DELAY_MS, PAGE_DELAY_MS]);
@@ -173,8 +177,9 @@ describe('fetchCompetitorCatalog pacing', () => {
       .mockResolvedValueOnce(jsonPage(FULL_PAGE))
       .mockResolvedValueOnce(errorPage(429, '2'))
       .mockResolvedValueOnce(jsonPage([{ handle: 'last' }]));
-    const rows = await fetchCompetitorCatalog({ sleep, now });
-    expect(rows).toHaveLength(251);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(251);
+    expect(result.complete).toBe(true);
     expect(waits).toEqual([PAGE_DELAY_MS, 2000]);
   });
 
@@ -189,6 +194,164 @@ describe('fetchCompetitorCatalog pacing', () => {
 });
 
 /**
+ * The retailer caps page-based pagination at 100 pages of 250. On 2026-09-11
+ * page 101 came back HTTP 400 after 25,000 rows had been read, and the walk
+ * threw all 25,000 away, so the price comparison had still never run. A 4xx
+ * past page 1 is the end of the road, not a failure.
+ */
+describe('fetchCompetitorCatalog pagination cap', () => {
+  /**
+   * Serves `cap` full pages and `status` for every page past them, keyed off
+   * the page number in the URL — so a re-request of page 1 answers like page
+   * 1, which is what the liveness probe depends on.
+   */
+  function cappedAt(cap: number, status: number, probe?: () => Response): void {
+    let seenPageOne = false;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1) {
+        if (seenPageOne && probe) return probe();
+        seenPageOne = true;
+      }
+      return page <= cap ? jsonPage(FULL_PAGE) : errorPage(status);
+    });
+  }
+
+  it('keeps all 25,000 rows when page 101 returns 400', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 400);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.pagesRead).toBe(100);
+    expect(result.complete).toBe(false);
+    expect(result.stoppedReason).toBe('pagination-cap');
+    expect(result.stoppedDetail).toContain('page 101 returned HTTP 400');
+    // 100 pages + the 400 (not retried, it is not transient) + one probe.
+    expect(fetchMock).toHaveBeenCalledTimes(102);
+  });
+
+  it('treats 404, 414 and 422 at the cap the same way', async () => {
+    for (const status of [404, 414, 422]) {
+      fetchMock.mockReset();
+      cappedAt(PAGINATION_CAP_PAGES, status);
+      const result = await fetchCompetitorCatalog({ sleep, now });
+      expect(result.rows).toHaveLength(25_000);
+      expect(result.stoppedReason).toBe('pagination-cap');
+    }
+  });
+
+  it('throws on a 4xx far short of the cap, even with page 1 alive', async () => {
+    // A feed that moved and starts 404ing at page 2 would otherwise hand back
+    // a 250-row partial carrying a fabricated pagination-cap diagnosis.
+    cappedAt(1, 404);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 404 for page 2');
+  });
+
+  it('reads the cap no earlier than CAP_PAGE_FLOOR pages', async () => {
+    expect(CAP_PAGE_FLOOR).toBe(90);
+    cappedAt(CAP_PAGE_FLOOR - 1, 400);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 90');
+    fetchMock.mockReset();
+    cappedAt(CAP_PAGE_FLOOR, 400);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.stoppedReason).toBe('pagination-cap');
+    expect(result.pagesRead).toBe(CAP_PAGE_FLOOR);
+  });
+
+  it('throws when the probe finds page 1 gone: the feed moved, it is not a cap', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => errorPage(404));
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 101');
+  });
+
+  it('throws when the probe finds page 1 no longer full', async () => {
+    // A page-1 that suddenly holds 3 rows is a feed that was rebuilt, not a
+    // catalogue whose 101st page does not exist.
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => jsonPage([{ handle: 'a' }, { handle: 'b' }, { handle: 'c' }]));
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 101');
+  });
+
+  it('keeps the rows when the probe is throttled to exhaustion: unanswered is not "gone"', async () => {
+    // The 2026-09-11 run had a mid-walk 429 AND the cap. A probe that the
+    // retailer simply refuses to answer says nothing about the feed, and
+    // reading it as "gone" would throw away all 25,000 rows — the exact bug
+    // this module exists to prevent.
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => errorPage(429));
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.stoppedReason).toBe('pagination-cap');
+    expect(result.stoppedDetail).toContain('UNCONFIRMED');
+  });
+
+  it('keeps the rows when the probe fails on the network', async () => {
+    let served = 0;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1 && served++ > 0) throw new Error('ECONNRESET');
+      return page <= PAGINATION_CAP_PAGES ? jsonPage(FULL_PAGE) : errorPage(400);
+    });
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.stoppedReason).toBe('pagination-cap');
+  });
+
+  it('keeps the rows when the budget runs out during the probe', async () => {
+    // Every probe attempt burns clock until the deadline passes mid-probe.
+    // A deadline is the walk ending, not a verdict on the feed.
+    let served = 0;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1 && served++ > 0) {
+        clock += FETCH_DEADLINE_MS;
+        throw new Error('This operation was aborted');
+      }
+      return page <= PAGINATION_CAP_PAGES ? jsonPage(FULL_PAGE) : errorPage(400);
+    });
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.complete).toBe(false);
+    expect(result.stoppedReason).toBe('deadline');
+  });
+
+  it('still throws on a 400 on page 1 — a feed that is wrong or gone', async () => {
+    cappedAt(0, 400);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 1');
+  });
+
+  it('still throws on a 403 at the cap — blocked is not exhausted', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 403);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 403 for page 101');
+  });
+
+  it('still throws on a 500 mid-walk, after its retries', async () => {
+    cappedAt(1, 500);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 500 for page 2');
+  });
+
+  it('still throws on a malformed response', async () => {
+    fetchMock.mockResolvedValueOnce(jsonPage(FULL_PAGE)).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: async () => ({}),
+    } as unknown as Response);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('response had no `products` array');
+  });
+
+  it('describes the partial read in one line for the report', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 400);
+    const said = describeCompetitorStop(await fetchCompetitorCatalog({ sleep, now }));
+    expect(said).toContain('25000 rows over 100 pages');
+    expect(said).toContain('caps page-based pagination at 100 pages of 250');
+  });
+
+  it('calls a walk that ran out of pages complete', async () => {
+    fetchMock.mockResolvedValueOnce(jsonPage(FULL_PAGE)).mockResolvedValueOnce(jsonPage([]));
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result).toMatchObject({ complete: true, stoppedReason: 'exhausted', pagesRead: 2 });
+    expect(describeCompetitorStop(result)).toBe('250 rows over 2 pages (the whole catalogue)');
+  });
+});
+
+/**
  * Wall-clock bound. 4 attempts x 30 s plus three 30 s waits is 210 s per page;
  * across 200 pages a sustained throttle would run for hours and be cancelled
  * by the job timeout with no report at all — worse than the 429 the retry
@@ -199,7 +362,7 @@ describe('fetchCompetitorCatalog deadline', () => {
     expect(FETCH_DEADLINE_MS).toBe(600_000);
   });
 
-  it('stops paginating and names how far it got', async () => {
+  it('stops paginating and keeps the rows it already read', async () => {
     // A competitor that throttles every page once, then serves it: each page
     // costs a 30 s wait (Retry-After 60, capped) plus pacing, so the walk eats
     // the budget around page 12 instead of grinding through all 200.
@@ -207,9 +370,13 @@ describe('fetchCompetitorCatalog deadline', () => {
     fetchMock.mockImplementation(async () =>
       call++ % 2 === 0 ? errorPage(429, '60') : jsonPage(FULL_PAGE),
     );
-    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
-      /10-minute fetch deadline passed after \d+ of up to 200 pages \(\d+ rows read\)/,
-    );
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    // A partial index, not a throw: the pages already read still price pieces.
+    expect(result.complete).toBe(false);
+    expect(result.stoppedReason).toBe('deadline');
+    expect(result.pagesRead).toBeGreaterThan(0);
+    expect(result.rows).toHaveLength(result.pagesRead * 250);
+    expect(result.stoppedDetail).toMatch(/10-minute fetch deadline passed/);
     // Bounded by the budget, not by 200 pages x 4 attempts.
     expect(clock - 1_000_000).toBeLessThanOrEqual(FETCH_DEADLINE_MS);
     expect(fetchMock.mock.calls.length).toBeLessThan(60);
@@ -233,8 +400,9 @@ describe('fetchCompetitorCatalog deadline', () => {
 
   it('leaves a healthy walk untouched', async () => {
     fetchMock.mockResolvedValueOnce(jsonPage(FULL_PAGE)).mockResolvedValueOnce(jsonPage([{ handle: 'last' }]));
-    const rows = await fetchCompetitorCatalog({ sleep, now });
-    expect(rows).toHaveLength(251);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(251);
+    expect(result).toMatchObject({ complete: true, stoppedReason: 'exhausted' });
     expect(clock - 1_000_000).toBe(PAGE_DELAY_MS);
   });
 });
@@ -245,9 +413,9 @@ describe('deadline message', () => {
     fetchMock.mockImplementation(async () =>
       call++ % 2 === 0 ? errorPage(429, '60') : jsonPage(FULL_PAGE),
     );
-    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
-      /after \d+ retries — the competitor was throttling/,
-    );
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.stoppedDetail).toMatch(/after \d+ retries — the competitor was throttling/);
+    expect(describeCompetitorStop(result)).toMatch(/^\d+ rows over \d+ pages — /);
   });
 
   it('says the walk was too slow when nothing was ever retried', async () => {
@@ -257,7 +425,8 @@ describe('deadline message', () => {
       clock += 40_000;
       return jsonPage(FULL_PAGE);
     });
-    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.stoppedDetail).toMatch(
       /with no retries — the walk was simply too slow, so the deadline is mis-sized/,
     );
   });

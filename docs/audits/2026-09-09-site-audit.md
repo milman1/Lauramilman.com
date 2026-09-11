@@ -177,9 +177,15 @@ Decision needed before anything is created in Shopify:
 
 ## 5. Back Vault pricing check against Robinson's Jewelers
 
-Robinson's public catalog was read in full through Firecrawl: 20,000
-products across 80 pages of `/products.json` (the catalog continues past
-that). Vendors are Olas d'Oro, Royal Jewelry, Robinson's own line,
+Robinson's public catalog was read through Firecrawl as far as that read
+got: 20,000 products across 80 pages of `/products.json`, and the catalog
+continues past that — this was never a complete read. The 2026-09-11 live
+sync got 25,000 rows over 100 pages before the retailer's page-based
+pagination cap cut it off (page 101 answered HTTP 400), so the catalogue
+is at least 25,000 products and its full size is still unknown; the
+zero-match finding below covers only the part that was read.
+
+Vendors in that read are Olas d'Oro, Royal Jewelry, Robinson's own line,
 Covaloro, Afarin, and an "Estate" vendor of 1,130 unsigned house pieces.
 Exactly four rows mention Cartier, Van Cleef, or Tiffany, and none carry
 a Back Vault stock number in any field. Result: zero matches, every piece

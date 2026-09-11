@@ -145,3 +145,56 @@ describe('buildProductSetInput', () => {
     expect(byKey.ebay_condition).toBe('3000');
   });
 });
+
+/**
+ * The competitor comparison is remembered ON THE PRODUCT, because a run that
+ * cannot read the whole competitor catalogue has nowhere else to learn it
+ * from. Written only when there is one to remember, and never cleared: the
+ * read date is what expires it (src/backvault/diff.ts).
+ */
+describe('the remembered competitor comparison', () => {
+  function metafields(one: BackVaultItem) {
+    const input = buildProductSetInput(one, '2026-09-11T00:00:00.000Z');
+    const fields = input.metafields as Array<{ namespace: string; key: string; type: string; value: string }>;
+    return fields.filter((m) => m.namespace === 'backvault_feed');
+  }
+
+  it('writes the price and the date it was read', () => {
+    const fields = metafields(
+      item({ competitorPriceUsd: 72000, competitorPriceReadAt: '2026-09-04T12:00:00.000Z' }),
+    );
+    expect(fields).toContainEqual({
+      namespace: 'backvault_feed',
+      key: 'competitor_price',
+      type: 'number_decimal',
+      value: '72000.00',
+    });
+    expect(fields).toContainEqual({
+      namespace: 'backvault_feed',
+      key: 'competitor_price_at',
+      type: 'date_time',
+      value: '2026-09-04T12:00:00.000Z',
+    });
+  });
+
+  it('falls back to this run for the date when the item carries none', () => {
+    const at = metafields(item({ competitorPriceUsd: 72000 })).find((m) => m.key === 'competitor_price_at');
+    expect(at!.value).toBe('2026-09-11T00:00:00.000Z');
+  });
+
+  it('writes nothing for a piece with no comparison, rather than a zero', () => {
+    const keys = metafields(item()).map((m) => m.key);
+    expect(keys).not.toContain('competitor_price');
+    expect(keys).not.toContain('competitor_price_at');
+    expect(keys).toContain('content_hash');
+  });
+
+  it('keeps the read date out of the content hash', () => {
+    // A date that moved every week would rewrite every matched piece weekly.
+    const monday = item({ competitorPriceUsd: 72000, competitorPriceReadAt: '2026-09-07T00:00:00.000Z' });
+    const friday = item({ competitorPriceUsd: 72000, competitorPriceReadAt: '2026-09-11T00:00:00.000Z' });
+    expect(contentHashFor(monday)).toBe(contentHashFor(friday));
+    // The price itself IS in the hash, so a new comparison does reprice.
+    expect(contentHashFor(item({ competitorPriceUsd: 70000 }))).not.toBe(contentHashFor(monday));
+  });
+});

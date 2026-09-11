@@ -53,6 +53,20 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
       value: 'used',
     },
   ];
+  // The competitor comparison, remembered on the product so a run that cannot
+  // read the whole competitor catalogue can still price this piece against the
+  // CURRENT cost instead of dropping it to the flat markup (see
+  // applyRememberedCompetitorPrices in diff.ts). Written only when there is a
+  // price to remember; never cleared, because the read date is what expires it.
+  if (typeof item.competitorPriceUsd === 'number') {
+    fields.push({ namespace: ns, key: 'competitor_price', type: 'number_decimal', value: item.competitorPriceUsd.toFixed(2) });
+    fields.push({
+      namespace: ns,
+      key: 'competitor_price_at',
+      type: 'date_time',
+      value: item.competitorPriceReadAt ?? syncedAt,
+    });
+  }
   // The theme's product-card.liquid and main-product.liquid already read
   // these exact custom.* keys for existing estate jewelry (SHOPIFY_SETUP.md §1).
   if (item.specs.metalType) fields.push({ namespace: c, key: 'metal_type', type: 'single_line_text_field', value: item.specs.metalType });
