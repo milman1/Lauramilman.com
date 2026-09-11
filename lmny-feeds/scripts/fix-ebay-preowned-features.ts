@@ -40,7 +40,6 @@ interface CatalogRow {
   descriptionHtml: string;
   box: string | null;
   papers: string | null;
-  condition: string | null;
   ebayCondition: string | null;
   features: string | null;
   googleCondition: string | null;
@@ -91,7 +90,6 @@ const CATALOG_QUERY = `#graphql
         descriptionHtml
         box: metafield(namespace: "custom", key: "box") { value }
         papers: metafield(namespace: "custom", key: "papers") { value }
-        condition: metafield(namespace: "custom", key: "condition") { value }
         ebayCondition: metafield(namespace: "custom", key: "ebay_condition") { value }
         features: metafield(namespace: "custom", key: "features") { value }
         googleCondition: metafield(namespace: "mm-google-shopping", key: "condition") { value }
@@ -126,7 +124,6 @@ async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
           descriptionHtml: string | null;
           box: { value?: string | null } | null;
           papers: { value?: string | null } | null;
-          condition: { value?: string | null } | null;
           ebayCondition: { value?: string | null } | null;
           features: { value?: string | null } | null;
           googleCondition: { value?: string | null } | null;
@@ -144,7 +141,6 @@ async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
         descriptionHtml: node.descriptionHtml ?? '',
         box: mfValue(node.box),
         papers: mfValue(node.papers),
-        condition: mfValue(node.condition),
         ebayCondition: mfValue(node.ebayCondition),
         features: mfValue(node.features),
         googleCondition: mfValue(node.googleCondition),
@@ -157,19 +153,16 @@ async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
 }
 
 function planFor(row: CatalogRow): EbayConditionPlan | null {
-  const condition = row.condition?.trim().toLowerCase();
-  const state = condition === 'unworn'
-    ? 'unworn'
-    : condition === 'pre-owned' || condition === 'pre owned'
-      ? 'preowned'
-      : null;
   return planEbayConditionFix({
     title: row.title,
     descriptionHtml: row.descriptionHtml,
     productType: row.productType,
     box: row.box,
     papers: row.papers,
-    state,
+    // Shopify catalog fields, including custom.condition, are mutable and do
+    // not prove supplier state. This repair therefore never upgrades a watch
+    // to new; the normal API sync is the only authoritative new-state path.
+    state: null,
     ebayCondition: row.ebayCondition,
     features: row.features,
     googleCondition: row.googleCondition,

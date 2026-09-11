@@ -291,6 +291,11 @@ npm run backfill:ebay-preowned-features            # counts + CSV, no writes
 npm run backfill:ebay-preowned-features -- --apply
 ```
 
+This repair reads mutable Shopify catalog data, not the supplier API, so it
+never upgrades a watch to `1000` or `1500`, even when `custom.condition` says
+Unworn. It fails closed to `3000`; the hourly API sync restores legitimate new
+conditions from authoritative source state and accessory fields.
+
 The Actions workflow **LMNY eBay pre-owned features** is the same path.
 
 ### Lab pricing backfill

@@ -131,7 +131,7 @@ describe('planEbayConditionFix', () => {
     expect(plan).toBeNull();
   });
 
-  it('does not infer new condition from an Unworn title when source state is unknown', () => {
+  it('keeps repair output pre-owned without source proof even if catalog copy says Unworn with box and papers', () => {
     const plan = planEbayConditionFix({
       title: 'Unworn Rolex Submariner Date 126610LN',
       descriptionHtml: '',
@@ -139,6 +139,9 @@ describe('planEbayConditionFix', () => {
       box: 'Yes',
       papers: 'Yes',
       ebayCondition: '1000',
+      // A repair row may also carry custom.condition=Unworn, but mutable
+      // catalog data is deliberately not passed as authoritative state.
+      state: null,
     });
     expect(plan?.ebayCondition).toBe('3000');
     expect(plan?.reasons).toContain('unclassified watch source state; fail closed to pre-owned');
