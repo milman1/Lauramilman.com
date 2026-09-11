@@ -22,19 +22,21 @@ The strict gate is:
 
 - PR #108 merged at `386da74ecdcb3506f13748a9770993887d747975`.
 - PR #109 merged at `1404c6e7f1af953beeea60bb08ec7a8518caf85e`; automatic condition apply is disabled and now requires an exact manual opt-in.
-- The PR #108 condition workflow completed successfully in run [34627345486](https://github.com/milman1/Lauramilman.com/actions/runs/34627345486). The implementation and focused validation reported 630 tests passed and 24 schema checks; the independent review reported 97 focused tests at `34a7b14`.
+- The PR #108 condition workflow completed successfully in run [34627345486](https://github.com/milman1/Lauramilman.com/actions/runs/34627345486). The implementation and focused validation reported 630 tests passed; schema version 24 is the current schema reference, not a test count. The independent review reported 97 focused tests at `34a7b14`.
 - The automatic PR workflow applied 85 product updates and 151 metafield upserts. Independent review found metadata-only changes: no feature deletes or body rewrites. The reviewed population was 71 archived, 10 active, and 4 draft; 66 eBay condition values were `3000` and 85 Google values were `used`. This is a historical execution record, not proof that every watch mismatch is fixed.
 - The write-disabled main dry-run [34627710402](https://github.com/milman1/Lauramilman.com/actions/runs/34627710402) failed closed after about 7m28s: the direct Belgium Dia API URL was unset or rate-limited, it returned zero natural/lab/watch API rows, and it performed zero writes. This run cannot serve as a fresh source-backed repair plan.
 - The sold trigger is eBay item `366649317404` (Rolex 116000): public condition says “New with box and papers” while the description says “Pre-Owned.” This is a verified mismatch and does not authorize inference from marketplace copy.
 - Fresh active evidence identifies item `366650116144`, SKU `RW3096`, “Pre-Owned Rolex Datejust 126334.” Its actual evidence says New with box and papers while Marketplace Connect is Listed and Enabled. It was outside the 85-row repair population, so its underlying delivery remains unresolved.
-- Public item `366655791728`, SKU `4159`, currently maps to Pre-owned / Good, with a pre-owned description and no original box. This is current source evidence; it is not a conclusion drawn from the sold listing.
-- The latest RW3096 Marketplace state is Listed and Enabled with an Offer error: “Package weight not valid or missing.” The shipping policy is Free-2Day Insured Shipping. The merchant’s actual packed weight and unit are still pending, so no listing edit is authorized.
+- Public listing item `366655791728`, SKU `4159`, currently shows Pre-owned / Good, with a pre-owned description and no original box. This is current public-listing evidence, not a conclusion drawn from the sold listing.
+- The latest RW3096 Marketplace state is Listed and Enabled with an Offer error: “Package weight not valid or missing.” Shopify currently records package weight `0.0 lb`; the shipping policy is Free-2Day Insured Shipping. Condition correction is authorized, but the merchant’s actual packed weight and unit are still pending, so no package weight can be entered yet.
 
 ## Source and candidate audit state
 
 The active-listing source extraction and watch-title classification remain a bounded audit aid only. The working candidate CSV is not committed to this repository and is pending blind review. It contains only `item_id`, `sku`, and `title`; it carries no condition decision. Ambiguous and obvious non-watch rows remain separate. Do not treat the working candidate list as the complete API-backed repair population, and do not infer a condition from a title, description, or SKU.
 
-The planned bounded repair writer is still in progress. It must use an exact source join, fail closed when the structured API is unavailable, and produce a dry-run report before any manual opt-in. No further live condition correction is claimed here.
+The bounded repair writer is built and under review; its current validation reports 634 tests. It must use an exact source join, fail closed when the structured API is unavailable, and produce a dry-run report before any manual opt-in. No further live condition correction is claimed here.
+
+The latest blind candidate review reports 151 candidate rows and 14 blank-SKU rows, with the explicit MICHELE Bracelet Watch retained; this remains pending fresh verification and is not a committed repair cohort. The candidate audit has zero source-association mismatches in the reviewed input. Do not infer condition from this classification.
 
 ## Deployment and live state
 
