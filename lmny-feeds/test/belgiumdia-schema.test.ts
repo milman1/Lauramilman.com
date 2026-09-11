@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeStones, normalizeWatches } from '../src/normalize.js';
+import { normalizeStones, normalizeWatches as normalizeWatchesWithGate } from '../src/normalize.js';
+
+function normalizeWatches(rows: Record<string, unknown>[]) {
+  const allowedStocks = new Set(rows.map((row) => String(row.Stock ?? '').trim()).filter(Boolean));
+  return normalizeWatchesWithGate(rows, { allowedStocks });
+}
 
 // Records shaped exactly like the Belgium Dia developer API responses.
 const naturalRecord = {

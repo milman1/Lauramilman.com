@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { collectUrls, normalizeStones, normalizeWatches, shopifyFileUrl } from '../src/normalize.js';
+import {
+  collectUrls,
+  normalizeStones,
+  normalizeWatches as normalizeWatchesWithGate,
+  shopifyFileUrl,
+} from '../src/normalize.js';
+
+function normalizeWatches(rows: Record<string, unknown>[], opts?: { allowedStocks: ReadonlySet<string> }) {
+  if (opts) return normalizeWatchesWithGate(rows, opts);
+  const allowedStocks = new Set(rows.map((row) => String(row.stock_no ?? row.Stock ?? '').trim()).filter(Boolean));
+  return normalizeWatchesWithGate(rows, { allowedStocks });
+}
 
 const stoneRow = {
   stock_ref: 'BD-1',
@@ -113,21 +124,54 @@ describe('watch normalization', () => {
     expect(holds[0]?.reason).toBe('watch_excluded_partner');
   });
 
-  it('keeps Belgium Watch / TLV stock on the allowlist', () => {
-    const { items, holds } = normalizeWatches([{ ...watchRow, stock_no: 'T3717' }], {
-      allowedStocks: new Set(['T3717']),
+  it('keeps a stock returned by the ROMAN allowlist', () => {
+    const { items, holds } = normalizeWatches([{ ...watchRow, stock_no: 'RW3085' }], {
+      allowedStocks: new Set(['RW3085']),
     });
     expect(holds).toEqual([]);
-    expect(items[0]?.stockRef).toBe('T3717');
+    expect(items[0]?.stockRef).toBe('RW3085');
   });
 
-  it('prefix fallback keeps T/RW/R and drops numeric Uncle Manny', () => {
-    const tlv = normalizeWatches([{ ...watchRow, stock_no: 'T3717' }], { prefixFallback: true });
-    expect(tlv.items).toHaveLength(1);
-    const roman = normalizeWatches([{ ...watchRow, stock_no: 'RW3085' }], { prefixFallback: true });
-    expect(roman.items).toHaveLength(1);
-    const manny = normalizeWatches([{ ...watchRow, stock_no: '10005' }], { prefixFallback: true });
-    expect(manny.holds[0]?.reason).toBe('watch_excluded_partner');
+  it('fails closed without a non-empty ROMAN allowlist, regardless of stock prefix', () => {
+    for (const stock_no of ['T3717', 'RW3085', 'R3017', 'NEW-123']) {
+      const missing = normalizeWatchesWithGate([{ ...watchRow, stock_no }]);
+      expect(missing.items).toHaveLength(0);
+      expect(missing.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: stock_no });
+
+      const empty = normalizeWatchesWithGate([{ ...watchRow, stock_no }], { allowedStocks: new Set() });
+      expect(empty.items).toHaveLength(0);
+      expect(empty.holds[0]?.reason).toBe('watch_excluded_partner');
+    }
+  });
+
+  it('holds TLV and Vivid now and any future stocks not returned by ROMAN', () => {
+    const allowedStocks = new Set(['RW3085']);
+    const excludedRows: Array<[stockNo: string, branch: string | undefined]> = [
+      ['T3717', 'TLV WATCHES LLC'],
+      ['VIVID-FUTURE-1', 'VIVID WATCHES LLC'],
+      ['UNKNOWN-FUTURE-1', 'NEW SUPPLIER LLC'],
+      ['6197', undefined],
+      ['6198', undefined],
+    ];
+    for (const [stock_no, Branch] of excludedRows) {
+      const result = normalizeWatchesWithGate([{ ...watchRow, stock_no, Branch }], { allowedStocks });
+      expect(result.items).toHaveLength(0);
+      expect(result.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: stock_no });
+    }
+  });
+
+  it('holds TLV and Vivid by supplier name even if an upstream allowlist is polluted', () => {
+    const excludedRows: Array<[stockNo: string, branch: string]> = [
+      ['T3717', 'TLV WATCHES LLC'],
+      ['VIVID-1', 'VIVID WATCHES LLC'],
+    ];
+    for (const [stock_no, Branch] of excludedRows) {
+      const result = normalizeWatchesWithGate([{ ...watchRow, stock_no, Branch }], {
+        allowedStocks: new Set([stock_no]),
+      });
+      expect(result.items).toHaveLength(0);
+      expect(result.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: stock_no });
+    }
   });
 
   it('imports non-curated brands (they land in Other Watch Brands)', () => {

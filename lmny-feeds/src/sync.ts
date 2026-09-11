@@ -160,15 +160,9 @@ async function resolveShopifyToken(domain: string): Promise<string> {
 }
 
 async function normalizeWatchFeed(rows: Record<string, unknown>[]) {
-  try {
-    const allowedStocks = await fetchAllowedWatchStocks();
-    console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch, TLV, Vivid)`);
-    return normalizeWatches(rows, { allowedStocks });
-  } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    console.error(`Watch partner allowlist failed (${detail}) — keeping T/RW/R prefixes only`);
-    return normalizeWatches(rows, { prefixFallback: true });
-  }
+  const allowedStocks = await fetchAllowedWatchStocks();
+  console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch / ROMAN only)`);
+  return normalizeWatches(rows, { allowedStocks });
 }
 
 async function main() {
