@@ -54,6 +54,13 @@ export interface BackVaultCatalogEntry {
   inventoryTracked?: boolean;
   inventoryItemId?: string;
   inventoryQuantity?: number;
+  /**
+   * The live retail price on the first variant, null when it cannot be read.
+   * Only the competitor-unavailable guard in diff.ts uses it: the competitor
+   * price itself is never stored on the product, so the price already on the
+   * store is the only record of what a competitor match produced.
+   */
+  price: number | null;
 }
 
 /**
@@ -79,7 +86,7 @@ export async function fetchBackVaultCatalog(
           metafield: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
-          variants: { nodes: Array<{ inventoryQuantity?: number | null; inventoryItem?: { id?: string; tracked?: boolean } | null }> };
+          variants: { nodes: Array<{ price?: string | null; inventoryQuantity?: number | null; inventoryItem?: { id?: string; tracked?: boolean } | null }> };
         }>;
       };
     } = await client.gql(
@@ -93,7 +100,7 @@ export async function fetchBackVaultCatalog(
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
-            variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
+            variants(first: 1) { nodes { price inventoryQuantity inventoryItem { id tracked } } }
           }
         }
       }`,
@@ -109,6 +116,9 @@ export async function fetchBackVaultCatalog(
         installedNames,
       );
       const variant = node.variants.nodes[0];
+      // `Number(null)` is 0, which would read as a real $0 ticket, so a
+      // missing price stays null rather than going through Number().
+      const price = variant?.price == null ? Number.NaN : Number(variant.price);
       entries.push({
         id: node.id,
         handle: node.handle,
@@ -120,6 +130,7 @@ export async function fetchBackVaultCatalog(
         inventoryTracked: variant?.inventoryItem?.tracked,
         inventoryItemId: variant?.inventoryItem?.id,
         inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
+        price: Number.isFinite(price) && price > 0 ? price : null,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

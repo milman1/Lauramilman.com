@@ -6,7 +6,12 @@ import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
 import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
-import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates, type Decision } from './diff.js';
+import {
+  diffBackVaultCatalog,
+  heldForCompetitorUnavailable,
+  promoteBackVaultInventoryUpdates,
+  type Decision,
+} from './diff.js';
 import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
@@ -72,6 +77,14 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
+  /** Updates held back because the competitor fetch failed and they would cut a live price. */
+  heldPriceDrops: number;
+  /**
+   * Something degraded this run without invalidating it — a failed competitor
+   * fetch, prices held back. Reported, but never a non-zero exit: only
+   * `errors` fails the run.
+   */
+  warnings: string[];
   errors: string[];
 }
 
@@ -79,6 +92,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const opts = parseArgs(argv);
   const startedAt = new Date().toISOString();
   const errors: string[] = [];
+  // Degraded-but-valid outcomes. Kept apart from `errors` because `errors`
+  // alone sets a non-zero exit code: the 2026-09-11 dry run failed purely on
+  // a competitor 429 that the sync had already handled by design.
+  const warnings: string[] = [];
 
   console.log(`The Back Vault → Shopify sync starting (${opts.dryRun ? 'DRY RUN' : 'LIVE'})`);
 
@@ -86,7 +103,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
   // Competitor prices: a failed fetch means no matches this run (every piece
-  // falls back to the flat markup) and a line in the report, never a crash.
+  // falls back to the flat markup), a warning in the report, and the
+  // price-drop guard in diffBackVaultCatalog — never a crash, and never a
+  // failed run on its own.
   let competitor: CompetitorIndex | undefined;
   const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
   try {
@@ -97,7 +116,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
   } catch (err) {
     competitorStats.error = err instanceof Error ? err.message : String(err);
-    errors.push(`competitor fetch: ${competitorStats.error}`);
+    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, price drops held`);
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
 
@@ -216,10 +235,21 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const desired = desiredItems.map((item) => {
     const handle = handleFor(item);
     itemByHandle.set(handle, item);
-    return { handle, contentHash: contentHashFor(item) };
+    return { handle, contentHash: contentHashFor(item), priceUsd: item.priceUsd };
   });
 
-  const decisions = diffBackVaultCatalog(desired, catalog);
+  const competitorUnavailable = competitorStats.error !== undefined;
+  const decisions = diffBackVaultCatalog(desired, catalog, { competitorUnavailable });
+  const heldPriceDrops = heldForCompetitorUnavailable(decisions);
+  if (heldPriceDrops > 0) {
+    warnings.push(
+      `${heldPriceDrops} update${heldPriceDrops === 1 ? '' : 's'} held: the competitor fetch failed and ` +
+        'the flat-markup price would be lower than the price on the store',
+    );
+    console.warn(
+      `Held ${heldPriceDrops} price-lowering update(s) because the competitor fetch failed`,
+    );
+  }
   let locationId: string | null = null;
   try {
     locationId = await client.primaryLocationId();
@@ -313,6 +343,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channels: channelNames,
     channelsResolved,
     skippedDraft,
+    heldPriceDrops,
+    warnings,
     errors,
   };
 
@@ -326,8 +358,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
-      `errors=${errors.length}`,
+      `held_price_drops=${heldPriceDrops} warnings=${warnings.length} errors=${errors.length}`,
   );
+  if (warnings.length > 0) {
+    console.warn('Warnings:');
+    for (const w of warnings) console.warn(`  - ${w}`);
+  }
+  // Only errors fail the run. A warning is a degraded run that still did the
+  // right thing, and failing on it trains everyone to ignore red runs.
   if (errors.length > 0) {
     console.error('Errors:');
     for (const e of errors) console.error(`  - ${e}`);
@@ -375,10 +413,21 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Update: ${counts.update ?? 0}`,
     `- Publish to Online Store: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
-    `- Unchanged: ${counts.skip ?? 0}`,
+    // Held pieces are skips too, so they come out of Unchanged rather than
+    // being counted on both lines.
+    `- Unchanged: ${(counts.skip ?? 0) - summary.heldPriceDrops}`,
+    `- Held (competitor unavailable, would lower a live price): ${summary.heldPriceDrops}`,
     `- Published this run: ${summary.published}`,
     '',
   ];
+  if (summary.warnings.length > 0) {
+    lines.push(
+      `## Warnings (${summary.warnings.length})`,
+      '_Degraded, but the run still did the right thing — these do not fail the job._',
+      ...summary.warnings.map((w) => `- ${w}`),
+      '',
+    );
+  }
   if (summary.errors.length > 0) {
     lines.push(`## Errors (${summary.errors.length})`, ...summary.errors.map((e) => `- ${e}`), '');
   }

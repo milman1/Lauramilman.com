@@ -349,6 +349,15 @@ npm run sync:backvault       # live (needs Shopify env vars)
    the markup is a pull request against `config/pricing.ts`; the next run
    reprices every listed piece because price and cost are in the content
    hash.
+
+   **If the competitor fetch fails** (each page is retried up to 4 times on
+   429/5xx, honouring `Retry-After`, and pages are paced 250 ms apart), the
+   run keeps going on the flat markup, records a **warning** rather than an
+   error — a throttled competitor never fails the job — and **holds** any
+   update whose flat price is lower than the price already on the store
+   (`skip` / `competitor-unavailable-would-lower-price`), so
+   competitor-matched pieces are not repriced down this week and back up the
+   next. The held count is on the Done line and in the report.
 7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
    decides what gets *created*, but a piece already on the store stays
    listed for as long as the supplier's full `/products.json` still shows

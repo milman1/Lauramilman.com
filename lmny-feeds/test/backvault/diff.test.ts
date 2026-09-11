@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates } from '../../src/backvault/diff.js';
+import {
+  diffBackVaultCatalog,
+  heldForCompetitorUnavailable,
+  promoteBackVaultInventoryUpdates,
+} from '../../src/backvault/diff.js';
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
 
 function entry(
@@ -8,6 +12,7 @@ function entry(
   status = 'ACTIVE',
   published = true,
   missingChannels: string[] = published ? [] : ['Online Store'],
+  price: number | null = null,
 ): BackVaultCatalogEntry {
   return {
     id: `gid://shopify/Product/${handle}`,
@@ -17,6 +22,7 @@ function entry(
     imageCount: 1,
     published,
     missingChannels,
+    price,
   };
 }
 
@@ -104,5 +110,87 @@ describe('promoteBackVaultInventoryUpdates', () => {
     expect(d[0]?.action).toBe('skip');
     expect(promoteBackVaultInventoryUpdates(d, catalog)).toBe(1);
     expect(d[0]).toMatchObject({ action: 'update', reason: 'inventory_untracked' });
+  });
+});
+
+/**
+ * Competitor-unavailable guard. Retail is max((cost + competitor) / 2, cost +
+ * markup), so a competitor-matched piece sits at or above the flat price; if
+ * the competitor fetch fails, writing the flat price would cut every one of
+ * them and the next good run would put them back. That churn is held.
+ */
+describe('diffBackVaultCatalog with the competitor unavailable', () => {
+  const live = (price: number) => [entry('bv-cartier', 'old-hash', 'ACTIVE', true, [], price)];
+
+  it('holds an update that would lower the live price', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
+      live(69800),
+      { competitorUnavailable: true },
+    );
+    expect(decisions[0]).toEqual({
+      handle: 'bv-cartier',
+      action: 'skip',
+      reason: 'competitor-unavailable-would-lower-price',
+      productId: 'gid://shopify/Product/bv-cartier',
+    });
+    expect(heldForCompetitorUnavailable(decisions)).toBe(1);
+  });
+
+  it('writes an update that raises the price', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 70000 }],
+      live(69800),
+      { competitorUnavailable: true },
+    );
+    expect(decisions[0]!.action).toBe('update');
+    expect(heldForCompetitorUnavailable(decisions)).toBe(0);
+  });
+
+  it('writes an update that leaves the price equal', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 69800 }],
+      live(69800),
+      { competitorUnavailable: true },
+    );
+    expect(decisions[0]!.action).toBe('update');
+  });
+
+  it('does nothing when the competitor fetch succeeded, even at a lower price', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
+      live(69800),
+    );
+    expect(decisions[0]!.action).toBe('update');
+    expect(heldForCompetitorUnavailable(decisions)).toBe(0);
+  });
+
+  it('writes a create and an archive as normal', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-new', contentHash: 'h', priceUsd: 1 }],
+      live(69800),
+      { competitorUnavailable: true },
+    );
+    expect(decisions.map((d) => d.action)).toEqual(['create', 'archive']);
+  });
+
+  it('writes the update when the live price cannot be read', () => {
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
+      [entry('bv-cartier', 'old-hash', 'ACTIVE', true, [], null)],
+      { competitorUnavailable: true },
+    );
+    expect(decisions[0]!.action).toBe('update');
+  });
+
+  it('leaves a held piece alone when inventory promotion runs', () => {
+    const catalog = live(69800);
+    const decisions = diffBackVaultCatalog(
+      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
+      catalog,
+      { competitorUnavailable: true },
+    );
+    expect(promoteBackVaultInventoryUpdates(decisions, catalog)).toBe(0);
+    expect(decisions[0]!.reason).toBe('competitor-unavailable-would-lower-price');
   });
 });

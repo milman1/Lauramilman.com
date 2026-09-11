@@ -12,6 +12,21 @@ export interface Decision {
 export interface DesiredEntry {
   handle: string;
   contentHash: string;
+  /** Retail this run would write. Only the competitor-unavailable guard reads it. */
+  priceUsd?: number;
+}
+
+/** Reason on a skip held back by the competitor-unavailable guard. */
+export const HELD_PRICE_DROP_REASON = 'competitor-unavailable-would-lower-price';
+
+export interface DiffOptions {
+  /**
+   * True only when the competitor FETCH FAILED this run. An empty competitor
+   * index is a legitimate zero-match result and must not set this: the two
+   * cases are indistinguishable from the index alone, so the caller passes
+   * the fact through.
+   */
+  competitorUnavailable?: boolean;
 }
 
 /**
@@ -23,8 +38,22 @@ export interface DesiredEntry {
  * pulled, or no longer a top-designer match — and archives. Never deleted:
  * archived products keep their URL (redirected to the designer's
  * collection, same as the diamond/watch sync).
+ *
+ * When `options.competitorUnavailable` is set, any update that would LOWER a
+ * live price is held back (skip / HELD_PRICE_DROP_REASON). Retail is
+ * max((cost + competitor) / 2, cost + markup), so a piece matched on the
+ * competitor sits at or above the flat markup; with the competitor fetch
+ * failed every one of those would silently drop to the flat price this run
+ * and be raised again by the next successful run. That churn on a live
+ * storefront is worse than a week of stale pricing. Price rises and
+ * unchanged prices are written as normal, and a successful competitor fetch
+ * leaves behaviour exactly as it was.
  */
-export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVaultCatalogEntry[]): Decision[] {
+export function diffBackVaultCatalog(
+  desired: DesiredEntry[],
+  catalog: BackVaultCatalogEntry[],
+  options: DiffOptions = {},
+): Decision[] {
   const decisions: Decision[] = [];
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
   const desiredHandles = new Set(desired.map((d) => d.handle));
@@ -34,7 +63,11 @@ export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVault
     if (!have) {
       decisions.push({ handle: want.handle, action: 'create', reason: 'new' });
     } else if (have.contentHash !== want.contentHash) {
-      decisions.push({ handle: want.handle, action: 'update', reason: 'hash_changed', productId: have.id });
+      if (wouldLowerPrice(options, want, have)) {
+        decisions.push({ handle: want.handle, action: 'skip', reason: HELD_PRICE_DROP_REASON, productId: have.id });
+      } else {
+        decisions.push({ handle: want.handle, action: 'update', reason: 'hash_changed', productId: have.id });
+      }
     } else if (have.status !== 'ACTIVE') {
       decisions.push({ handle: want.handle, action: 'update', reason: 'reactivate', productId: have.id });
     } else if (have.missingChannels.length > 0) {
@@ -58,6 +91,21 @@ export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVault
   }
 
   return decisions;
+}
+
+/**
+ * True when this run has no competitor prices and the update would write a
+ * strictly lower ticket than the one on the store.
+ */
+function wouldLowerPrice(options: DiffOptions, want: DesiredEntry, have: BackVaultCatalogEntry): boolean {
+  if (!options.competitorUnavailable) return false;
+  if (typeof want.priceUsd !== 'number' || typeof have.price !== 'number') return false;
+  return want.priceUsd < have.price;
+}
+
+/** How many decisions the competitor-unavailable guard held back. */
+export function heldForCompetitorUnavailable(decisions: Decision[]): number {
+  return decisions.filter((d) => d.action === 'skip' && d.reason === HELD_PRICE_DROP_REASON).length;
 }
 
 /** Re-open hash-skips that still report untracked / qty 0 to Admin apps. */
