@@ -54,6 +54,23 @@ export interface BackVaultCatalogEntry {
   inventoryTracked?: boolean;
   inventoryItemId?: string;
   inventoryQuantity?: number;
+  /**
+   * The live retail price, null when it cannot be read — no variant, a
+   * non-numeric or non-positive price, or MORE THAN ONE VARIANT, where one
+   * variant's price says nothing about the piece's ticket. Only the
+   * competitor-unavailable price pin in diff.ts uses it: the competitor price
+   * itself is never stored on the product, so the price already on the store
+   * is the only record of what a competitor match produced.
+   */
+  price: number | null;
+  /** Variants on the product. >1 is why `price` can be null on a priced piece. */
+  variantCount: number;
+  /**
+   * The first variant's price whatever the variant count — never used to price
+   * anything, only to tell a multi-variant piece that WOULD have been pinned
+   * from one that was never in question, so the warning counts the real ones.
+   */
+  firstVariantPrice: number | null;
 }
 
 /**
@@ -79,7 +96,14 @@ export async function fetchBackVaultCatalog(
           metafield: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
-          variants: { nodes: Array<{ inventoryQuantity?: number | null; inventoryItem?: { id?: string; tracked?: boolean } | null }> };
+          variantsCount?: { count?: number | null } | null;
+          variants?: {
+            nodes?: Array<{
+              price?: string | null;
+              inventoryQuantity?: number | null;
+              inventoryItem?: { id?: string; tracked?: boolean } | null;
+            }>;
+          } | null;
         }>;
       };
     } = await client.gql(
@@ -93,7 +117,8 @@ export async function fetchBackVaultCatalog(
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
-            variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
+            variantsCount { count }
+            variants(first: 1) { nodes { price inventoryQuantity inventoryItem { id tracked } } }
           }
         }
       }`,
@@ -108,7 +133,16 @@ export async function fetchBackVaultCatalog(
         ESTATE_CHANNELS,
         installedNames,
       );
-      const variant = node.variants.nodes[0];
+      const variants = node.variants?.nodes ?? [];
+      const variant = variants[0];
+      const variantCount = node.variantsCount?.count ?? variants.length;
+      // `Number(null)` is 0, which would read as a real $0 ticket, so a
+      // missing price stays null rather than going through Number().
+      // A multi-variant product reads as unpriced: `variants(first: 1)` says
+      // nothing about what the other variants cost.
+      const rawPrice = variant?.price == null ? Number.NaN : Number(variant.price);
+      const firstVariantPrice = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+      const price = variantCount > 1 ? Number.NaN : rawPrice;
       entries.push({
         id: node.id,
         handle: node.handle,
@@ -120,6 +154,9 @@ export async function fetchBackVaultCatalog(
         inventoryTracked: variant?.inventoryItem?.tracked,
         inventoryItemId: variant?.inventoryItem?.id,
         inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
+        price: Number.isFinite(price) && price > 0 ? price : null,
+        variantCount,
+        firstVariantPrice,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

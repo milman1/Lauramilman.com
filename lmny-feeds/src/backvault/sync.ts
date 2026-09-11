@@ -6,7 +6,12 @@ import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
 import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
-import { diffBackVaultCatalog, promoteBackVaultInventoryUpdates, type Decision } from './diff.js';
+import {
+  diffBackVaultCatalog,
+  pinLivePricesWhenCompetitorUnavailable,
+  promoteBackVaultInventoryUpdates,
+  type Decision,
+} from './diff.js';
 import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
@@ -72,6 +77,16 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
+  /** Pieces written with the live price because the competitor fetch failed. */
+  pricePinned: number;
+  /** Pieces the price check stood down on: more than one variant, so no readable live price. */
+  multiVariantUnchecked: number;
+  /**
+   * Something degraded this run without invalidating it — a failed competitor
+   * fetch, prices held back. Reported, but never a non-zero exit: only
+   * `errors` fails the run.
+   */
+  warnings: string[];
   errors: string[];
 }
 
@@ -79,6 +94,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const opts = parseArgs(argv);
   const startedAt = new Date().toISOString();
   const errors: string[] = [];
+  // Degraded-but-valid outcomes. Kept apart from `errors` because `errors`
+  // alone sets a non-zero exit code: the 2026-09-11 dry run failed purely on
+  // a competitor 429 that the sync had already handled by design.
+  const warnings: string[] = [];
 
   console.log(`The Back Vault → Shopify sync starting (${opts.dryRun ? 'DRY RUN' : 'LIVE'})`);
 
@@ -86,7 +105,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
   // Competitor prices: a failed fetch means no matches this run (every piece
-  // falls back to the flat markup) and a line in the report, never a crash.
+  // falls back to the flat markup), a warning in the report, and the price pin
+  // below — never a crash, and never a failed run on its own.
   let competitor: CompetitorIndex | undefined;
   const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
   try {
@@ -97,7 +117,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
   } catch (err) {
     competitorStats.error = err instanceof Error ? err.message : String(err);
-    errors.push(`competitor fetch: ${competitorStats.error}`);
+    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, live prices pinned`);
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
 
@@ -212,6 +232,36 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     }
   }
 
+  // With no competitor prices, pin any piece whose recomputed price would fall
+  // below the ticket already on the store. Must run BEFORE the content hashes
+  // are computed, so the hash matches the price actually written; the piece is
+  // otherwise updated, reactivated and published exactly as normal.
+  let pricePinned = 0;
+  let multiVariantUnchecked = 0;
+  if (competitorStats.error !== undefined) {
+    const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
+    pricePinned = pins.pinned;
+    multiVariantUnchecked = pins.multiVariant;
+    const notes: string[] = [];
+    if (pricePinned > 0) {
+      notes.push(
+        `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
+          '(the competitor comparison data was missing, so a lower flat price was not written)',
+      );
+    }
+    if (multiVariantUnchecked > 0) {
+      notes.push(
+        `${multiVariantUnchecked} piece${multiVariantUnchecked === 1 ? '' : 's'} with more than one variant ` +
+          `${multiVariantUnchecked === 1 ? 'has' : 'have'} no readable live price and ` +
+          `${multiVariantUnchecked === 1 ? 'was' : 'were'} written at the computed price`,
+      );
+    }
+    if (notes.length > 0) {
+      warnings.push(notes.join('; '));
+      console.warn(notes.join('; '));
+    }
+  }
+
   const itemByHandle = new Map<string, BackVaultItem>();
   const desired = desiredItems.map((item) => {
     const handle = handleFor(item);
@@ -313,6 +363,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channels: channelNames,
     channelsResolved,
     skippedDraft,
+    pricePinned,
+    multiVariantUnchecked,
+    warnings,
     errors,
   };
 
@@ -326,8 +379,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
-      `errors=${errors.length}`,
+      `price_pinned=${pricePinned} warnings=${warnings.length} errors=${errors.length}`,
   );
+  if (warnings.length > 0) {
+    console.warn('Warnings:');
+    for (const w of warnings) console.warn(`  - ${w}`);
+  }
+  // Only errors fail the run. A warning is a degraded run that still did the
+  // right thing, and failing on it trains everyone to ignore red runs.
   if (errors.length > 0) {
     console.error('Errors:');
     for (const e of errors) console.error(`  - ${e}`);
@@ -373,12 +432,22 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `## Catalog changes`,
     `- Create: ${counts.create ?? 0}`,
     `- Update: ${counts.update ?? 0}`,
-    `- Publish to Online Store: ${counts.publish ?? 0}`,
+    `- Publish to sales channels: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
     `- Unchanged: ${counts.skip ?? 0}`,
+    `- Price pinned to the live ticket (competitor unavailable): ${summary.pricePinned}`,
+    `- Multi-variant pieces with no readable live price: ${summary.multiVariantUnchecked}`,
     `- Published this run: ${summary.published}`,
     '',
   ];
+  if (summary.warnings.length > 0) {
+    lines.push(
+      `## Warnings (${summary.warnings.length})`,
+      '_Degraded, but the run still did the right thing — these do not fail the job._',
+      ...summary.warnings.map((w) => `- ${w}`),
+      '',
+    );
+  }
   if (summary.errors.length > 0) {
     lines.push(`## Errors (${summary.errors.length})`, ...summary.errors.map((e) => `- ${e}`), '');
   }

@@ -1,4 +1,6 @@
 import type { BackVaultCatalogEntry } from './catalog.js';
+import { handleFor } from './product.js';
+import type { BackVaultItem } from './types.js';
 
 export type Action = 'create' | 'update' | 'archive' | 'skip' | 'publish';
 
@@ -14,6 +16,66 @@ export interface DesiredEntry {
   contentHash: string;
 }
 
+export interface PricePinStats {
+  /** Pieces whose computed price was replaced by the price already on the store. */
+  pinned: number;
+  /**
+   * Pieces the check stood down on because they have more than one variant AND
+   * whose first variant says the price would have fallen — the ones a reader
+   * should look at, not every multi-variant piece in the run.
+   */
+  multiVariant: number;
+}
+
+/**
+ * Pin prices to the live ticket when the competitor fetch FAILED this run.
+ *
+ * Retail is max((cost + competitor) / 2, cost + markup), so a piece matched on
+ * the competitor sits at or above the flat markup. With no competitor prices
+ * every matched piece would recompute to the flat price, drop on the storefront
+ * this week, and be raised again by the next successful run — price churn on
+ * live listings. So the computed price is replaced by the price already on the
+ * store wherever it would fall, and everything else about the piece (images,
+ * title, tags, cost, specs, channels, status) is written exactly as normal.
+ * The pin happens BEFORE the content hash is computed, so the hash matches
+ * what is actually written and the piece does not stay dirty for every
+ * following run.
+ *
+ * Call this only when the fetch failed. An empty competitor index is a
+ * legitimate zero-match result and must not trigger it: the two are
+ * indistinguishable from the index alone, which is why the caller passes the
+ * fact rather than guessing.
+ *
+ * A piece with more than one variant has no readable live price
+ * (`variants(first: 1)` says nothing about the rest), so it stands down and is
+ * counted separately rather than silently treated as unpriced.
+ */
+export function pinLivePricesWhenCompetitorUnavailable(
+  items: BackVaultItem[],
+  catalog: BackVaultCatalogEntry[],
+): PricePinStats {
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  const stats: PricePinStats = { pinned: 0, multiVariant: 0 };
+  for (const item of items) {
+    const have = catalogByHandle.get(handleFor(item));
+    if (!have) continue; // a new piece has no live price to protect
+    if (have.variantCount > 1) {
+      // Only worth naming when the first variant says this piece would have
+      // been pinned; a multi-variant piece whose price is rising or unchanged
+      // was never in question.
+      if (typeof have.firstVariantPrice === 'number' && item.priceUsd < have.firstVariantPrice) {
+        stats.multiVariant += 1;
+      }
+      continue;
+    }
+    if (typeof have.price !== 'number') continue;
+    if (item.priceUsd >= have.price) continue; // a rise or no change is written as normal
+    item.priceUsd = have.price;
+    stats.pinned += 1;
+  }
+  return stats;
+}
+
 /**
  * Diff this run's feed against the catalog of everything tagged
  * 'backvault-feed'. Same create/update/skip/archive shape as the Belgium
@@ -23,6 +85,12 @@ export interface DesiredEntry {
  * pulled, or no longer a top-designer match — and archives. Never deleted:
  * archived products keep their URL (redirected to the designer's
  * collection, same as the diamond/watch sync).
+ *
+ * Nothing here knows about competitor pricing: a missing competitor is
+ * handled upstream by pinLivePricesWhenCompetitorUnavailable, which changes
+ * the price the run writes, never whether it writes. A piece is never held
+ * out of an update for a pricing reason — doing that also withheld its
+ * reactivation, its missing sales channels, and that week's images.
  */
 export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVaultCatalogEntry[]): Decision[] {
   const decisions: Decision[] = [];
