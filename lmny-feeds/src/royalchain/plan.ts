@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { parseCsv } from '../jewelryCsv.js';
 import { supplierRetailFromCost } from '../../config/pricing.js';
-import { buildRoyalChainProduct, type RoyalChainSource } from './listing.js';
+import { buildRoyalChainProducts, type RoyalChainSource } from './listing.js';
 
 function records(text: string): Record<string, string>[] {
   const rows = parseCsv(text);
@@ -14,11 +14,14 @@ function money(raw: string): number {
   if (!Number.isFinite(n) || n <= 0) throw new Error('invalid private cost');
   return n;
 }
-function privateVariants(raw: string): Array<{ label: string; costUsd: number }> {
+function privateVariants(raw: string): RoyalChainSource['variants'] {
   return raw.split(';').filter(Boolean).map((segment) => {
     const at = segment.lastIndexOf('=');
     if (at < 1) throw new Error('invalid private variant segment');
-    return { label: segment.slice(0, at).trim(), costUsd: money(segment.slice(at + 1)) };
+    const [cost, sku = '', grams = '', available = ''] = segment.slice(at + 1).split('|').map((value) => value.trim());
+    const weightGrams = grams ? Number(grams) : undefined;
+    if (grams && (!Number.isFinite(weightGrams) || weightGrams! <= 0)) throw new Error('invalid private variant gram weight');
+    return { label: segment.slice(0, at).trim(), costUsd: money(cost ?? ''), sku, weightGrams, available: available === 'yes' ? true : available === 'no' ? false : undefined };
   });
 }
 function csv(value: unknown): string {
@@ -35,7 +38,7 @@ function sourceCondition(row: Record<string, string>): RoyalChainSource['conditi
   const state = (row.condition ?? '').trim().toLowerCase();
   if (!state) return undefined;
   if (state !== 'new' && state !== 'preowned') throw new Error(`${row.item_number ?? 'unknown'}: invalid condition state`);
-  return { state, evidence: row.condition_evidence ?? '' };
+  return { state, evidence: row.condition_evidence ?? '', originalPackagingEvidence: row.original_packaging_evidence ?? '' };
 }
 
 export async function generateRoyalChainPlan(opts: { shortlistPath: string; privatePath: string; outputDir: string; expectedProducts?: number; expectedVariants?: number }): Promise<{ products: number; variants: number }> {
@@ -62,9 +65,8 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
       condition: sourceCondition(row),
       variants,
     };
-    products.push(buildRoyalChainProduct(source));
+    products.push(...buildRoyalChainProducts(source));
   }
-  if (products.length !== privateRows.length) throw new Error('public/private item sets differ');
   const variantCount = products.reduce((n, p) => n + (p.variants as unknown[]).length, 0);
   if (products.length !== (opts.expectedProducts ?? 21) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
   await mkdir(opts.outputDir, { recursive: true });

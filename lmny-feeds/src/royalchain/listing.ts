@@ -4,18 +4,27 @@ import { taxonomyGidForProductType } from '../taxonomy.js';
 export const ROYALCHAIN_VENDOR = 'Laura Milman New York';
 export const ROYALCHAIN_PRODUCT_TYPE = 'Necklaces';
 export const ROYALCHAIN_CATEGORY = taxonomyGidForProductType(ROYALCHAIN_PRODUCT_TYPE);
+export const ROYALCHAIN_BRACELET_PRODUCT_TYPE = 'Bracelets';
 export const ROYALCHAIN_MINIMUM_IMAGES = 3;
 export const EBAY_TITLE_MAX = 80;
 
 export interface RoyalChainVariant {
   label: string;
   costUsd: number;
+  /** Supplier child SKU. Parent item numbers are never reused as marketplace SKUs. */
+  sku?: string;
+  /** Exact supplier-reported weight in grams. */
+  weightGrams?: number;
+  /** Explicit supplier availability for this child variant. */
+  available?: boolean;
 }
 
 /** A condition is usable only when the source record states it and preserves its evidence. */
 export interface RoyalChainCondition {
   state: 'new' | 'preowned';
   evidence: string;
+  /** Required before using eBay's New in original packaging condition. */
+  originalPackagingEvidence?: string;
 }
 
 export interface RoyalChainSource {
@@ -96,37 +105,62 @@ function conditionFacts(condition: RoyalChainCondition | undefined): { label: st
   if (!condition || !clean(condition.evidence)) return null;
   if (condition.state !== 'new' && condition.state !== 'preowned') throw new Error('invalid condition state');
   return condition.state === 'new'
-    ? { label: 'New', ebayCondition: '1000' }
+    ? { label: 'New', ebayCondition: clean(condition.originalPackagingEvidence ?? '') ? '1000' : '1500' }
     : { label: 'Pre-owned', ebayCondition: '3000' };
 }
 
-function metalAndLengths(variants: RoyalChainVariant[], itemNumber: string): { metal: string; lengths: string[] } {
-  const parsed = variants.map((variant) => {
+interface ParsedVariant {
+  variant: RoyalChainVariant;
+  metal: string;
+  length: string;
+  lengthInches: number;
+  productType: typeof ROYALCHAIN_PRODUCT_TYPE | typeof ROYALCHAIN_BRACELET_PRODUCT_TYPE;
+}
+
+function parseVariants(variants: RoyalChainVariant[], itemNumber: string): ParsedVariant[] {
+  return variants.map((variant) => {
     const label = clean(variant.label);
     const match = /^14K (Yellow|Rose|White):(\d+(?:\.\d+)?)in$/i.exec(label);
     const color = match?.[1];
     const length = match?.[2];
     if (!color || !length) throw new Error(`${itemNumber}: invalid variant label`);
-    return { label, metal: `14K ${color[0]!.toUpperCase()}${color.slice(1).toLowerCase()} Gold`, length: `${length} in` };
+    const lengthInches = Number(length);
+    return {
+      variant,
+      metal: `14K ${color[0]!.toUpperCase()}${color.slice(1).toLowerCase()} Gold`,
+      length: `${length} in`,
+      lengthInches,
+      productType: lengthInches < 14 ? ROYALCHAIN_BRACELET_PRODUCT_TYPE : ROYALCHAIN_PRODUCT_TYPE,
+    };
   });
+}
+
+function assertSingleMetal(parsed: ParsedVariant[], itemNumber: string): string {
   const metals = [...new Set(parsed.map((variant) => variant.metal))];
   if (metals.length !== 1) throw new Error(`${itemNumber}: variants do not share one metal`);
-  return { metal: metals[0]!, lengths: [...new Set(parsed.map((variant) => variant.length))] };
+  return metals[0]!;
 }
 
 function detailsHtml(details: Array<[string, string]>): string {
   return `<h2>Details</h2><ul>${details.map(([label, value]) => `<li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</li>`).join('')}</ul>`;
 }
 
-export function buildRoyalChainProduct(source: RoyalChainSource): Record<string, unknown> {
+function buildRoyalChainProductForType(
+  source: RoyalChainSource,
+  parsed: ParsedVariant[],
+  productType: typeof ROYALCHAIN_PRODUCT_TYPE | typeof ROYALCHAIN_BRACELET_PRODUCT_TYPE,
+  splitByType: boolean,
+): Record<string, unknown> {
   const itemNumber = clean(source.itemNumber);
   const style = clean(source.style);
   const width = clean(source.widthMm);
-  if (!itemNumber || !style || !width || source.variants.length === 0) throw new Error('incomplete Royal Chain source row');
+  if (!itemNumber || !style || !width || parsed.length === 0) throw new Error('incomplete Royal Chain source row');
 
-  const { metal, lengths } = metalAndLengths(source.variants, itemNumber);
+  const metal = assertSingleMetal(parsed, itemNumber);
+  const lengths = [...new Set(parsed.map((variant) => variant.length))];
   const condition = conditionFacts(source.condition);
-  const title = `${width}mm ${style} Chain in ${metal}`;
+  const singularType = productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? 'Bracelet' : 'Necklace';
+  const title = `${width}mm ${style} Chain ${singularType} in ${metal}`;
   const ebayTitle = truncateAtWord(title, EBAY_TITLE_MAX);
   const descriptionDetails: Array<[string, string]> = [
     ['Material', metal],
@@ -138,10 +172,11 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
   const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} chain is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
   const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
   const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
-  const handle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+  const baseHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+  const handle = splitByType ? `${baseHandle}-${singularType.toLowerCase()}` : baseHandle;
   const imageUrls = dedupeRoyalChainImageUrls(source);
   const mediaReady = imageUrls.length >= ROYALCHAIN_MINIMUM_IMAGES;
-  const tags = [ROYALCHAIN_VENDOR, ROYALCHAIN_PRODUCT_TYPE, ...(mediaReady ? [] : ['media-missing'])];
+  const tags = [ROYALCHAIN_VENDOR, productType, ...(mediaReady ? [] : ['media-missing'])];
   const metafields: MetafieldValue[] = [
     { namespace: 'custom', key: 'metal_type', type: 'single_line_text_field', value: metal },
     { namespace: 'custom', key: 'measurements', type: 'single_line_text_field', value: `${width} mm wide; available in ${lengths.join(', ')}` },
@@ -154,17 +189,24 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
   ];
   const contentReady = Boolean(title && descriptionHtml && seoTitle && seoDescription && metafields.length >= 2);
   const conditionReady = Boolean(condition);
+  const childSkus = parsed.map(({ variant }) => clean(variant.sku ?? ''));
+  const childSkuReady = childSkus.every(Boolean) && new Set(childSkus).size === childSkus.length;
+  const weightReady = parsed.every(({ variant }) => Number.isFinite(variant.weightGrams) && (variant.weightGrams ?? 0) > 0);
+  const availabilityReady = parsed.every(({ variant }) => variant.available === true);
   const ebay = {
-    eligible: mediaReady && contentReady && conditionReady,
+    eligible: mediaReady && contentReady && conditionReady && childSkuReady && weightReady && availabilityReady,
     blockers: [
       ...(mediaReady ? [] : [`requires at least ${ROYALCHAIN_MINIMUM_IMAGES} source images`]),
       ...(contentReady ? [] : ['requires complete public copy and item specifics']),
       ...(conditionReady ? [] : ['requires source-backed condition evidence']),
+      ...(childSkuReady ? [] : ['requires unique supplier child SKU for every variant']),
+      ...(weightReady ? [] : ['requires exact positive gram weight for every variant']),
+      ...(availabilityReady ? [] : ['requires explicit supplier availability for every variant']),
     ],
     title: ebayTitle,
     itemSpecifics: {
       Brand: ROYALCHAIN_VENDOR,
-      Type: 'Necklace',
+      Type: singularType,
       Material: 'Gold',
       Metal: metal,
       Style: style,
@@ -186,20 +228,27 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
     title,
     descriptionHtml,
     vendor: ROYALCHAIN_VENDOR,
-    productType: ROYALCHAIN_PRODUCT_TYPE,
-    category: ROYALCHAIN_CATEGORY,
+    productType,
+    category: taxonomyGidForProductType(productType),
     status: 'DRAFT' as const,
     tags,
     metafields,
     seo: { title: seoTitle, description: seoDescription },
-    productOptions: [{ name: 'Metal / Length', values: source.variants.map((variant) => ({ name: clean(variant.label).replace(':', ' / ') })) }],
-    variants: source.variants.map((variant) => ({
+    productOptions: [{ name: 'Metal / Length', values: parsed.map(({ variant }) => ({ name: clean(variant.label).replace(':', ' / ') })) }],
+    variants: parsed.map(({ variant }) => ({
       optionValues: [{ optionName: 'Metal / Length', name: clean(variant.label).replace(':', ' / ') }],
       price: supplierRetailFromCost(variant.costUsd).toFixed(2),
-      sku: itemNumber,
+      sku: clean(variant.sku ?? ''),
       taxable: true,
       inventoryPolicy: 'DENY',
-      inventoryItem: { tracked: true, requiresShipping: true, cost: variant.costUsd.toFixed(2) },
+      inventoryItem: {
+        tracked: true,
+        requiresShipping: true,
+        cost: variant.costUsd.toFixed(2),
+        ...(Number.isFinite(variant.weightGrams) && (variant.weightGrams ?? 0) > 0
+          ? { measurement: { weight: { value: variant.weightGrams, unit: 'GRAMS' } } }
+          : {}),
+      },
     })),
     files: imageUrls.map((url, index) => ({
       originalSource: url,
@@ -222,4 +271,24 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
     ebay: product.ebay,
   });
   return product;
+}
+
+/** Split 7–10in bracelet variants from 14in-and-up necklace variants. */
+export function buildRoyalChainProducts(source: RoyalChainSource): Record<string, unknown>[] {
+  if (!clean(source.itemNumber) || !clean(source.style) || !clean(source.widthMm) || source.variants.length === 0) {
+    throw new Error('incomplete Royal Chain source row');
+  }
+  const parsed = parseVariants(source.variants, clean(source.itemNumber));
+  assertSingleMetal(parsed, clean(source.itemNumber));
+  const groups = new Map<typeof ROYALCHAIN_PRODUCT_TYPE | typeof ROYALCHAIN_BRACELET_PRODUCT_TYPE, ParsedVariant[]>();
+  for (const variant of parsed) groups.set(variant.productType, [...(groups.get(variant.productType) ?? []), variant]);
+  const splitByType = groups.size > 1;
+  return [...groups.entries()].map(([productType, variants]) => buildRoyalChainProductForType(source, variants, productType, splitByType));
+}
+
+/** Compatibility helper for callers that have already separated product types. */
+export function buildRoyalChainProduct(source: RoyalChainSource): Record<string, unknown> {
+  const products = buildRoyalChainProducts(source);
+  if (products.length !== 1) throw new Error(`${clean(source.itemNumber)}: bracelet and necklace variants must be planned separately`);
+  return products[0]!;
 }

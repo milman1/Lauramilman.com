@@ -28,7 +28,11 @@ Marketplace Connect metafield mapping. It becomes eligible only when complete
 copy, at least three images, and source-backed condition evidence are present.
 An optional source `condition` (`new` or `preowned`) is accepted only with a
 non-empty `condition_evidence` field; otherwise no condition metafield or eBay
-condition ID is emitted. The builder never claims a box, papers, or packaging.
+condition ID is emitted. A source-confirmed new item uses eBay `1500` until an
+explicit `original_packaging_evidence` fact supports `1000`. Child SKU, exact
+gram weight, and explicit availability are required for every eBay-eligible
+variant. Variants below 14in become Bracelet products; 14in and above become
+Necklace products, so a marketplace listing never mixes those types.
 Variants are inventory-tracked with no positive quantity in the plan and use
 the deny policy, so a draft cannot be sold. House-brand copy makes no
 authentication claim.
