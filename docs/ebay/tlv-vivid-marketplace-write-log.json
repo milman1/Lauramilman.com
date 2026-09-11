@@ -1,0 +1,474 @@
+[
+  {
+    "sku": "T3489",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3708",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3691",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3659",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3713",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3748",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3732",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3718",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3669",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3709",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 1,
+    "saved": true
+  },
+  {
+    "sku": "T3735",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3595",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3688",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3734",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3740",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3741",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3652",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3673",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3712",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3431",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 2,
+    "saved": true,
+    "confirmation": "Save bar cleared; listing Publishing; fresh verification pending"
+  },
+  {
+    "sku": "T3653",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3693",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3492",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3682",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3687",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3614",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3633",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3702",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3724",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3676",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 3,
+    "saved": true
+  },
+  {
+    "sku": "T3678",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3487",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3555",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3683",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3639",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3677",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3650",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3662",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3663",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3549",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 4,
+    "saved": true
+  },
+  {
+    "sku": "T3590",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3572",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3690",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3717",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3610",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3609",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3608",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3666",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3604",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3607",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 5,
+    "saved": true
+  },
+  {
+    "sku": "T3649",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3744",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3745",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3737",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3559",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3513",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "6197",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "6198",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 6,
+    "saved": true
+  },
+  {
+    "sku": "T3581",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3606",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3696",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3700",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3715",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3716",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3729",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  },
+  {
+    "sku": "T3738",
+    "before": "Enabled",
+    "after": "Disabled",
+    "batch": 7,
+    "saved": true
+  }
+]
