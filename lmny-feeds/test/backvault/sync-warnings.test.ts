@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * Run-level behaviour of the competitor fail-safe. The 2026-09-11 dry run
  * (Actions 34558143992) exited 1 on nothing but a competitor 429 that the sync
  * had already handled by design: a degraded competitor fetch is a WARNING, and
- * only `errors` may fail the job. The other half of that fix is the price-drop
- * hold, counted on the Done line and in the report.
+ * only `errors` may fail the job. The other half of that fix is the price pin —
+ * the piece is still updated, only its price is left as it stands — counted on
+ * the Done line and in the report.
  */
 
 const SUPPLIER_ROW = {
@@ -89,6 +90,7 @@ function catalogEntry(overrides: Record<string, unknown> = {}) {
     inventoryItemId: 'gid://shopify/InventoryItem/1',
     inventoryQuantity: 1,
     price: 69800,
+    variantCount: 1,
     ...overrides,
   };
 }
@@ -132,7 +134,7 @@ describe('a failed competitor fetch', () => {
     await run(['--dry-run']);
     const { json } = report();
     expect(json.errors).toEqual([]);
-    expect(json.warnings).toHaveLength(2); // the fetch, plus the held price drop
+    expect(json.warnings).toHaveLength(2); // the fetch, plus the pinned price
     expect(json.warnings[0]).toContain('competitor fetch: Competitor feed: HTTP 429 for page 61');
     expect(process.exitCode).toBe(0);
   });
@@ -145,28 +147,53 @@ describe('a failed competitor fetch', () => {
     expect(process.exitCode).toBe(0);
   });
 
-  it('holds the price-lowering update and says so in a warning', async () => {
+  it('pins the price, still writes the update, and says so in a warning', async () => {
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json, md } = report();
-    expect(json.heldPriceDrops).toBe(1);
-    expect(json.decisions[0]).toMatchObject({
-      action: 'skip',
-      reason: 'competitor-unavailable-would-lower-price',
-    });
-    expect(json.warnings.some((w: string) => w.includes('1 update held'))).toBe(true);
+    expect(json.pricePinned).toBe(1);
+    // The piece is UPDATED, not held: it keeps this week's images, cost and
+    // channels; only the ticket is left where it stands.
+    expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
+    expect(json.warnings.some((w: string) => w.includes('1 piece updated with the price left as it stands'))).toBe(
+      true,
+    );
     expect(md).toContain('## Warnings (2)');
-    expect(md).toContain('- Held (competitor unavailable, would lower a live price): 1');
+    expect(md).toContain('- Price pinned to the live ticket (competitor unavailable): 1');
     expect(md).toContain('## Competitor prices');
     expect(md).toContain('- FAILED: Competitor feed: HTTP 429 for page 61');
   });
 
-  it('still writes an update that does not cut the price', async () => {
+  it('leaves a price that does not fall alone', async () => {
     state.catalog = [catalogEntry({ price: 100 })];
     await run(['--dry-run']);
     const { json } = report();
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
-    expect(json.heldPriceDrops).toBe(0);
+    expect(json.pricePinned).toBe(0);
+  });
+
+  it('stands down on a multi-variant piece and names it in the warning', async () => {
+    state.catalog = [catalogEntry({ price: null, variantCount: 4 })];
+    await run(['--dry-run']);
+    const { json, md } = report();
+    expect(json.pricePinned).toBe(0);
+    expect(json.multiVariantUnchecked).toBe(1);
+    expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
+    expect(json.warnings.some((w: string) => w.includes('1 piece with more than one variant'))).toBe(true);
+    expect(md).toContain('- Multi-variant pieces with no readable live price: 1');
+  });
+
+  it('still reaches the report when the fetch runs out of wall clock', async () => {
+    state.competitor = async () => {
+      throw new Error('Competitor feed: the 6-minute fetch deadline passed after 12 of up to 200 pages (3000 rows read)');
+    };
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { json, md } = report();
+    expect(json.errors).toEqual([]);
+    expect(process.exitCode).toBe(0);
+    expect(md).toContain('- FAILED: Competitor feed: the 6-minute fetch deadline passed after 12');
+    expect(json.pricePinned).toBe(1);
   });
 });
 
@@ -177,7 +204,7 @@ describe('a successful competitor fetch', () => {
     await run(['--dry-run']);
     const { json, md } = report();
     expect(json.warnings).toEqual([]);
-    expect(json.heldPriceDrops).toBe(0);
+    expect(json.pricePinned).toBe(0);
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
     expect(md).not.toContain('## Warnings');
     expect(process.exitCode).toBe(0);

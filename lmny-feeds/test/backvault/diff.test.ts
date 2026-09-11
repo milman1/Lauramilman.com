@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   diffBackVaultCatalog,
-  heldForCompetitorUnavailable,
+  pinLivePricesWhenCompetitorUnavailable,
   promoteBackVaultInventoryUpdates,
 } from '../../src/backvault/diff.js';
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
+import { contentHashFor, handleFor } from '../../src/backvault/product.js';
+import type { BackVaultItem } from '../../src/backvault/types.js';
 
 function entry(
   handle: string,
@@ -13,6 +15,7 @@ function entry(
   published = true,
   missingChannels: string[] = published ? [] : ['Online Store'],
   price: number | null = null,
+  variantCount = 1,
 ): BackVaultCatalogEntry {
   return {
     id: `gid://shopify/Product/${handle}`,
@@ -23,6 +26,7 @@ function entry(
     published,
     missingChannels,
     price,
+    variantCount,
   };
 }
 
@@ -114,83 +118,125 @@ describe('promoteBackVaultInventoryUpdates', () => {
 });
 
 /**
- * Competitor-unavailable guard. Retail is max((cost + competitor) / 2, cost +
- * markup), so a competitor-matched piece sits at or above the flat price; if
+ * Competitor-unavailable price pin. Retail is max((cost + competitor) / 2, cost
+ * + markup), so a competitor-matched piece sits at or above the flat price; if
  * the competitor fetch fails, writing the flat price would cut every one of
- * them and the next good run would put them back. That churn is held.
+ * them and the next good run would put them back. The piece is still updated —
+ * images, cost, status, channels — with only the price left as it stands.
  */
-describe('diffBackVaultCatalog with the competitor unavailable', () => {
-  const live = (price: number) => [entry('bv-cartier', 'old-hash', 'ACTIVE', true, [], price)];
+describe('pinLivePricesWhenCompetitorUnavailable', () => {
+  function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
+    return {
+      sourceHandle: 'cartier-dolphin-ring-j10605',
+      title: 'Cartier Dolphin Ring',
+      vendorRaw: 'Cartier',
+      vendor: 'Cartier',
+      productType: 'Ring',
+      descriptionHtml: '<p>18K Yellow Gold.</p>',
+      costUsd: 67600,
+      priceUsd: 68100, // flat markup: no competitor match this run
+      available: true,
+      sku: 'J10605',
+      imageUrls: ['https://cdn.example.com/J10605.jpg'],
+      specs: { metalType: '18K Yellow Gold' },
+      ...overrides,
+    };
+  }
 
-  it('holds an update that would lower the live price', () => {
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
-      live(69800),
-      { competitorUnavailable: true },
-    );
-    expect(decisions[0]).toEqual({
-      handle: 'bv-cartier',
-      action: 'skip',
-      reason: 'competitor-unavailable-would-lower-price',
-      productId: 'gid://shopify/Product/bv-cartier',
+  /** The catalog row for `item()`, at the price a competitor match produced. */
+  function live(price: number | null, overrides: Partial<BackVaultCatalogEntry> = {}): BackVaultCatalogEntry {
+    return { ...entry(handleFor(item()), 'old-hash', 'ACTIVE', true, [], price), ...overrides };
+  }
+
+  it('pins a price that would fall, and leaves the rest of the item alone', () => {
+    const one = item();
+    const stats = pinLivePricesWhenCompetitorUnavailable([one], [live(69800)]);
+    expect(stats).toEqual({ pinned: 1, multiVariant: 0 });
+    expect(one.priceUsd).toBe(69800);
+    expect(one.costUsd).toBe(67600);
+    expect(one.imageUrls).toEqual(['https://cdn.example.com/J10605.jpg']);
+  });
+
+  it('leaves an equal or higher computed price untouched', () => {
+    const equal = item({ priceUsd: 69800 });
+    const higher = item({ priceUsd: 70000 });
+    expect(pinLivePricesWhenCompetitorUnavailable([equal, higher], [live(69800)])).toEqual({
+      pinned: 0,
+      multiVariant: 0,
     });
-    expect(heldForCompetitorUnavailable(decisions)).toBe(1);
+    expect(equal.priceUsd).toBe(69800);
+    expect(higher.priceUsd).toBe(70000);
   });
 
-  it('writes an update that raises the price', () => {
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 70000 }],
-      live(69800),
-      { competitorUnavailable: true },
-    );
-    expect(decisions[0]!.action).toBe('update');
-    expect(heldForCompetitorUnavailable(decisions)).toBe(0);
+  it('stands down when the live price cannot be read', () => {
+    const one = item();
+    expect(pinLivePricesWhenCompetitorUnavailable([one], [live(null)])).toEqual({ pinned: 0, multiVariant: 0 });
+    expect(one.priceUsd).toBe(68100);
   });
 
-  it('writes an update that leaves the price equal', () => {
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 69800 }],
-      live(69800),
-      { competitorUnavailable: true },
-    );
-    expect(decisions[0]!.action).toBe('update');
+  it('stands down and counts a piece with more than one variant', () => {
+    const one = item();
+    const stats = pinLivePricesWhenCompetitorUnavailable([one], [live(69800, { variantCount: 3 })]);
+    expect(stats).toEqual({ pinned: 0, multiVariant: 1 });
+    expect(one.priceUsd).toBe(68100);
   });
 
-  it('does nothing when the competitor fetch succeeded, even at a lower price', () => {
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
-      live(69800),
-    );
-    expect(decisions[0]!.action).toBe('update');
-    expect(heldForCompetitorUnavailable(decisions)).toBe(0);
+  it('ignores a piece that is not on the store yet', () => {
+    const one = item();
+    expect(pinLivePricesWhenCompetitorUnavailable([one], [])).toEqual({ pinned: 0, multiVariant: 0 });
+    expect(one.priceUsd).toBe(68100);
   });
 
-  it('writes a create and an archive as normal', () => {
+  it('still updates a pinned piece whose other content changed', () => {
+    const one = item({ imageUrls: ['https://cdn.example.com/new.jpg'], costUsd: 60000 });
+    const catalog = [live(69800)];
+    pinLivePricesWhenCompetitorUnavailable([one], catalog);
     const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-new', contentHash: 'h', priceUsd: 1 }],
-      live(69800),
-      { competitorUnavailable: true },
-    );
-    expect(decisions.map((d) => d.action)).toEqual(['create', 'archive']);
-  });
-
-  it('writes the update when the live price cannot be read', () => {
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
-      [entry('bv-cartier', 'old-hash', 'ACTIVE', true, [], null)],
-      { competitorUnavailable: true },
-    );
-    expect(decisions[0]!.action).toBe('update');
-  });
-
-  it('leaves a held piece alone when inventory promotion runs', () => {
-    const catalog = live(69800);
-    const decisions = diffBackVaultCatalog(
-      [{ handle: 'bv-cartier', contentHash: 'new-hash', priceUsd: 68100 }],
+      [{ handle: handleFor(one), contentHash: contentHashFor(one) }],
       catalog,
-      { competitorUnavailable: true },
     );
-    expect(promoteBackVaultInventoryUpdates(decisions, catalog)).toBe(0);
-    expect(decisions[0]!.reason).toBe('competitor-unavailable-would-lower-price');
+    expect(decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
+    // The hash is computed from the item AS WRITTEN, so a re-run with the same
+    // pinned price sees no change rather than staying dirty forever.
+    const second = diffBackVaultCatalog(
+      [{ handle: handleFor(one), contentHash: contentHashFor(one) }],
+      [{ ...catalog[0]!, contentHash: contentHashFor(one) }],
+    );
+    expect(second[0]!.action).toBe('skip');
+  });
+
+  it('still publishes a pinned piece that is missing a sales channel', () => {
+    const one = item();
+    const catalog = [live(69800, { published: false, missingChannels: ['Pinterest'] })];
+    pinLivePricesWhenCompetitorUnavailable([one], catalog);
+    const catalogAtHash = [{ ...catalog[0]!, contentHash: contentHashFor(one) }];
+    const decisions = diffBackVaultCatalog([{ handle: handleFor(one), contentHash: contentHashFor(one) }], catalogAtHash);
+    expect(decisions[0]).toMatchObject({ action: 'publish', reason: 'unpublished' });
+  });
+
+  it('still reactivates a pinned piece that is DRAFT or ARCHIVED', () => {
+    for (const status of ['DRAFT', 'ARCHIVED']) {
+      const one = item();
+      const catalog = [live(69800, { status })];
+      pinLivePricesWhenCompetitorUnavailable([one], catalog);
+      const decisions = diffBackVaultCatalog(
+        [{ handle: handleFor(one), contentHash: contentHashFor(one) }],
+        [{ ...catalog[0]!, contentHash: contentHashFor(one) }],
+      );
+      expect(decisions[0]).toMatchObject({ action: 'update', reason: 'reactivate' });
+    }
+  });
+
+  it('is never consulted when the competitor fetch succeeded', () => {
+    // The caller only calls it on a failure; with a successful fetch the
+    // computed midpoint is written even when it is lower than the live price.
+    const one = item({ priceUsd: 68100, competitorPriceUsd: 68600 });
+    const catalog = [live(69800)];
+    const decisions = diffBackVaultCatalog(
+      [{ handle: handleFor(one), contentHash: contentHashFor(one) }],
+      catalog,
+    );
+    expect(decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
+    expect(one.priceUsd).toBe(68100);
   });
 });

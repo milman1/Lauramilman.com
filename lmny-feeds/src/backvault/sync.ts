@@ -8,7 +8,7 @@ import { fetchBackVaultCatalog } from './catalog.js';
 import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
 import {
   diffBackVaultCatalog,
-  heldForCompetitorUnavailable,
+  pinLivePricesWhenCompetitorUnavailable,
   promoteBackVaultInventoryUpdates,
   type Decision,
 } from './diff.js';
@@ -77,8 +77,10 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
-  /** Updates held back because the competitor fetch failed and they would cut a live price. */
-  heldPriceDrops: number;
+  /** Pieces written with the live price because the competitor fetch failed. */
+  pricePinned: number;
+  /** Pieces the price check stood down on: more than one variant, so no readable live price. */
+  multiVariantUnchecked: number;
   /**
    * Something degraded this run without invalidating it — a failed competitor
    * fetch, prices held back. Reported, but never a non-zero exit: only
@@ -103,9 +105,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
   // Competitor prices: a failed fetch means no matches this run (every piece
-  // falls back to the flat markup), a warning in the report, and the
-  // price-drop guard in diffBackVaultCatalog — never a crash, and never a
-  // failed run on its own.
+  // falls back to the flat markup), a warning in the report, and the price pin
+  // below — never a crash, and never a failed run on its own.
   let competitor: CompetitorIndex | undefined;
   const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
   try {
@@ -116,7 +117,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
   } catch (err) {
     competitorStats.error = err instanceof Error ? err.message : String(err);
-    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, price drops held`);
+    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, live prices pinned`);
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
 
@@ -231,25 +232,41 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     }
   }
 
+  // With no competitor prices, pin any piece whose recomputed price would fall
+  // below the ticket already on the store. Must run BEFORE the content hashes
+  // are computed, so the hash matches the price actually written; the piece is
+  // otherwise updated, reactivated and published exactly as normal.
+  let pricePinned = 0;
+  let multiVariantUnchecked = 0;
+  if (competitorStats.error !== undefined) {
+    const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
+    pricePinned = pins.pinned;
+    multiVariantUnchecked = pins.multiVariant;
+    if (pricePinned > 0 || multiVariantUnchecked > 0) {
+      warnings.push(
+        `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
+          '(the competitor comparison data was missing, so a lower flat price was not written)' +
+          (multiVariantUnchecked > 0
+            ? `; ${multiVariantUnchecked} piece${multiVariantUnchecked === 1 ? '' : 's'} with more than one ` +
+              `variant ${multiVariantUnchecked === 1 ? 'has' : 'have'} no readable live price and ` +
+              `${multiVariantUnchecked === 1 ? 'was' : 'were'} written normally`
+            : ''),
+      );
+      console.warn(
+        `Price pinned on ${pricePinned} piece(s) because the competitor fetch failed` +
+          (multiVariantUnchecked > 0 ? `; ${multiVariantUnchecked} multi-variant piece(s) not checked` : ''),
+      );
+    }
+  }
+
   const itemByHandle = new Map<string, BackVaultItem>();
   const desired = desiredItems.map((item) => {
     const handle = handleFor(item);
     itemByHandle.set(handle, item);
-    return { handle, contentHash: contentHashFor(item), priceUsd: item.priceUsd };
+    return { handle, contentHash: contentHashFor(item) };
   });
 
-  const competitorUnavailable = competitorStats.error !== undefined;
-  const decisions = diffBackVaultCatalog(desired, catalog, { competitorUnavailable });
-  const heldPriceDrops = heldForCompetitorUnavailable(decisions);
-  if (heldPriceDrops > 0) {
-    warnings.push(
-      `${heldPriceDrops} update${heldPriceDrops === 1 ? '' : 's'} held: the competitor fetch failed and ` +
-        'the flat-markup price would be lower than the price on the store',
-    );
-    console.warn(
-      `Held ${heldPriceDrops} price-lowering update(s) because the competitor fetch failed`,
-    );
-  }
+  const decisions = diffBackVaultCatalog(desired, catalog);
   let locationId: string | null = null;
   try {
     locationId = await client.primaryLocationId();
@@ -343,7 +360,8 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channels: channelNames,
     channelsResolved,
     skippedDraft,
-    heldPriceDrops,
+    pricePinned,
+    multiVariantUnchecked,
     warnings,
     errors,
   };
@@ -358,7 +376,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
-      `held_price_drops=${heldPriceDrops} warnings=${warnings.length} errors=${errors.length}`,
+      `price_pinned=${pricePinned} warnings=${warnings.length} errors=${errors.length}`,
   );
   if (warnings.length > 0) {
     console.warn('Warnings:');
@@ -411,12 +429,11 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `## Catalog changes`,
     `- Create: ${counts.create ?? 0}`,
     `- Update: ${counts.update ?? 0}`,
-    `- Publish to Online Store: ${counts.publish ?? 0}`,
+    `- Publish to sales channels: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
-    // Held pieces are skips too, so they come out of Unchanged rather than
-    // being counted on both lines.
-    `- Unchanged: ${(counts.skip ?? 0) - summary.heldPriceDrops}`,
-    `- Held (competitor unavailable, would lower a live price): ${summary.heldPriceDrops}`,
+    `- Unchanged: ${counts.skip ?? 0}`,
+    `- Price pinned to the live ticket (competitor unavailable): ${summary.pricePinned}`,
+    `- Multi-variant pieces with no readable live price: ${summary.multiVariantUnchecked}`,
     `- Published this run: ${summary.published}`,
     '',
   ];

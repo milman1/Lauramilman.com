@@ -26,6 +26,24 @@ const BASE_BACKOFF_MS = 1_000;
 /** No single wait is longer than this, even if `Retry-After` asks for more. */
 const MAX_BACKOFF_MS = 30_000;
 /**
+ * A `Retry-After` shorter than this is ignored in favour of the exponential
+ * backoff: a server that just answered 429 must not be hit again in
+ * milliseconds, which is what a 0 ms wait would do four times over.
+ */
+const MIN_RETRY_AFTER_MS = 1_000;
+/** Per-request timeout, also clamped so no request can outlive the deadline. */
+const REQUEST_TIMEOUT_MS = 30_000;
+/**
+ * Wall-clock budget for the WHOLE competitor fetch — requests, retry waits and
+ * page pacing together. 4 attempts x 30 s plus three 30 s waits is 210 s per
+ * page, which across 200 pages is a multi-hour run: a sustained throttle would
+ * be cancelled by the Actions job timeout with no report at all, which is worse
+ * than the 429 this retry exists for. Six minutes is ~15x the ~25 s a healthy
+ * full walk takes (14 pages at 250 ms pacing), so only a genuinely broken
+ * competitor hits it, and hitting it still leaves time for the rest of the run.
+ */
+export const FETCH_DEADLINE_MS = 6 * 60_000;
+/**
  * Pause between page requests. The 2026-09-11 weekly dry run walked all 200
  * pages back to back and the retailer rate-limited it with HTTP 429 at page
  * 61, which failed the whole competitor fetch. 250 ms costs ~50 s across a
@@ -58,7 +76,18 @@ export type CompetitorIndex = Map<string, number>;
 export interface CompetitorFetchOptions {
   /** Injected by tests so retry backoff and page pacing don't really wait. */
   sleep?: (ms: number) => Promise<void>;
+  /** Injected clock, so the deadline can be tested without real time. */
+  now?: () => number;
+  /**
+   * Absolute deadline on the `now()` clock. Set by fetchCompetitorCatalog so
+   * every page of one walk shares a single budget; a bare fetchCompetitorPage
+   * call gets its own.
+   */
+  deadlineAt?: number;
 }
+
+/** Thrown when the wall-clock budget for the fetch is gone. */
+export class CompetitorDeadlineError extends Error {}
 
 function defaultSleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -73,19 +102,44 @@ function isRetryableStatus(status: number): boolean {
   return status === 429 || status >= 500;
 }
 
+/** RFC 9110 IMF-fixdate, the only date form `Retry-After` is allowed to use. */
+const HTTP_DATE = /^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/;
+
 /**
- * How long to wait after a throttled response. `Retry-After` is either a
- * number of seconds or an HTTP date; anything else (or a missing header)
- * falls back to exponential backoff. Always capped at MAX_BACKOFF_MS.
+ * How long to wait after a throttled response. `Retry-After` is read
+ * STRICTLY: all-digit seconds, or an IMF-fixdate. V8's `Date.parse` is
+ * lenient enough to turn '-5' and '1,5' into a date in 2001, which used to
+ * come back as a 0 ms wait and burn all four attempts in milliseconds
+ * against a server that had just said 429. Anything else — a malformed value,
+ * a whitespace-only header, a date in the past, or any wait under
+ * MIN_RETRY_AFTER_MS — falls back to exponential backoff. Always capped at
+ * MAX_BACKOFF_MS.
  */
 export function retryAfterMs(header: string | null, attempt: number, now = Date.now()): number {
   const backoff = Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS);
   if (!header) return backoff;
-  const seconds = Number(header.trim());
-  if (Number.isFinite(seconds) && seconds >= 0) return Math.min(seconds * 1000, MAX_BACKOFF_MS);
-  const date = Date.parse(header);
-  if (Number.isFinite(date)) return Math.min(Math.max(date - now, 0), MAX_BACKOFF_MS);
-  return backoff;
+  const raw = header.trim();
+  let wait: number | null = null;
+  if (/^\d+$/.test(raw)) wait = Number(raw) * 1000;
+  else if (HTTP_DATE.test(raw)) {
+    const at = Date.parse(raw);
+    if (Number.isFinite(at)) wait = at - now;
+  }
+  if (wait === null || wait < MIN_RETRY_AFTER_MS) return backoff;
+  return Math.min(wait, MAX_BACKOFF_MS);
+}
+
+/**
+ * Release the socket for a response we are about to discard. Without this a
+ * retried page leaves its unread body holding the connection open.
+ */
+async function discardBody(res: Response): Promise<void> {
+  try {
+    if (res.body && typeof res.body.cancel === 'function') await res.body.cancel();
+    else if (typeof res.text === 'function') await res.text();
+  } catch {
+    // Nothing to drain, or the peer already closed it.
+  }
 }
 
 /**
@@ -95,16 +149,28 @@ export function retryAfterMs(header: string | null, attempt: number, now = Date.
  */
 export async function fetchCompetitorPage(page: number, options: CompetitorFetchOptions = {}): Promise<unknown[]> {
   const sleep = options.sleep ?? defaultSleep;
+  const now = options.now ?? Date.now;
+  const deadlineAt = options.deadlineAt ?? now() + FETCH_DEADLINE_MS;
   const url = `${baseUrl()}/products.json?limit=${PAGE_LIMIT}&page=${page}`;
   let res: Response | undefined;
   let lastErr = '';
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const remaining = deadlineAt - now();
+    if (remaining <= 0) throw new CompetitorDeadlineError(`Competitor feed: fetch deadline passed on page ${page}`);
     let candidate: Response | undefined;
     try {
-      candidate = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(30_000) });
+      candidate = await fetch(url, {
+        headers: REQUEST_HEADERS,
+        // Clamped to what is left of the budget: one hung request must not
+        // outlive the deadline the whole walk shares.
+        signal: AbortSignal.timeout(Math.max(1, Math.min(REQUEST_TIMEOUT_MS, remaining))),
+      });
     } catch (err) {
       lastErr = err instanceof Error ? err.message : String(err);
-      if (attempt < MAX_ATTEMPTS - 1) await sleep(Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS));
+      if (attempt === MAX_ATTEMPTS - 1) continue;
+      const wait = Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS);
+      if (now() + wait >= deadlineAt) throw new CompetitorDeadlineError(`Competitor feed: fetch deadline passed on page ${page}`);
+      await sleep(wait);
       continue;
     }
     if (candidate.ok) {
@@ -112,9 +178,12 @@ export async function fetchCompetitorPage(page: number, options: CompetitorFetch
       break;
     }
     if (!isRetryableStatus(candidate.status) || attempt === MAX_ATTEMPTS - 1) {
+      await discardBody(candidate);
       throw new Error(`Competitor feed: HTTP ${candidate.status} for page ${page}`);
     }
-    const wait = retryAfterMs(candidate.headers?.get?.('retry-after') ?? null, attempt);
+    const wait = retryAfterMs(candidate.headers?.get?.('retry-after') ?? null, attempt, now());
+    await discardBody(candidate);
+    if (now() + wait >= deadlineAt) throw new CompetitorDeadlineError(`Competitor feed: fetch deadline passed on page ${page}`);
     console.warn(
       `Competitor feed: HTTP ${candidate.status} for page ${page}, retrying in ${Math.round(wait / 100) / 10}s ` +
         `(attempt ${attempt + 2} of ${MAX_ATTEMPTS})`,
@@ -127,16 +196,38 @@ export async function fetchCompetitorPage(page: number, options: CompetitorFetch
   return body.products;
 }
 
+/** One message for every way the walk can run out of wall clock. */
+function deadlineMessage(pagesRead: number, rows: number): string {
+  return (
+    `Competitor feed: the ${FETCH_DEADLINE_MS / 60_000}-minute fetch deadline passed after ` +
+    `${pagesRead} of up to ${MAX_PAGES} pages (${rows} rows read)`
+  );
+}
+
 /**
- * Every page of the competitor's public catalog, paced by PAGE_DELAY_MS so
- * the walk does not trip the retailer's rate limit part-way through.
+ * Every page of the competitor's public catalog, paced by PAGE_DELAY_MS so the
+ * walk does not trip the retailer's rate limit part-way through, and bounded by
+ * FETCH_DEADLINE_MS end to end. Running out of budget throws, naming how far it
+ * got, so the caller's catch turns it into the warning path and the run still
+ * reaches its report — the opposite of a cancelled multi-hour job.
  */
 export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {}): Promise<unknown[]> {
   const sleep = options.sleep ?? defaultSleep;
+  const now = options.now ?? Date.now;
+  const deadlineAt = now() + FETCH_DEADLINE_MS;
   const all: unknown[] = [];
   for (let page = 1; page <= MAX_PAGES; page++) {
-    if (page > 1) await sleep(PAGE_DELAY_MS);
-    const rows = await fetchCompetitorPage(page, options);
+    if (page > 1) {
+      if (now() + PAGE_DELAY_MS >= deadlineAt) throw new Error(deadlineMessage(page - 1, all.length));
+      await sleep(PAGE_DELAY_MS);
+    }
+    let rows: unknown[];
+    try {
+      rows = await fetchCompetitorPage(page, { ...options, deadlineAt });
+    } catch (err) {
+      if (err instanceof CompetitorDeadlineError) throw new Error(deadlineMessage(page - 1, all.length));
+      throw err;
+    }
     if (rows.length === 0) break;
     all.push(...rows);
     if (page % PROGRESS_EVERY_PAGES === 0) {

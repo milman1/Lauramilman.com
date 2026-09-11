@@ -350,14 +350,19 @@ npm run sync:backvault       # live (needs Shopify env vars)
    reprices every listed piece because price and cost are in the content
    hash.
 
-   **If the competitor fetch fails** (each page is retried up to 4 times on
-   429/5xx, honouring `Retry-After`, and pages are paced 250 ms apart), the
-   run keeps going on the flat markup, records a **warning** rather than an
-   error — a throttled competitor never fails the job — and **holds** any
-   update whose flat price is lower than the price already on the store
-   (`skip` / `competitor-unavailable-would-lower-price`), so
-   competitor-matched pieces are not repriced down this week and back up the
-   next. The held count is on the Done line and in the report.
+   **If the competitor fetch fails** — each page is retried up to 4 times on
+   429/5xx honouring a strict `Retry-After`, pages are paced 250 ms apart, and
+   the whole walk is bounded by a 6-minute wall clock so a throttled retailer
+   can never run the job for hours — the run keeps going on the flat markup and
+   records a **warning** rather than an error, so a throttled competitor never
+   fails the job. Any piece whose recomputed price would fall below the ticket
+   already on the store is still updated in full (images, cost, tags, status,
+   sales channels); only its **price is pinned to the live ticket**, so
+   competitor-matched pieces are not marked down this week and back up the next.
+   The consequence is that a genuine supplier markdown is also deferred for that
+   week — the next successful run applies it. A piece with more than one variant
+   has no readable live price and is written normally. Both counts are on the
+   Done line and in the report.
 7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
    decides what gets *created*, but a piece already on the store stays
    listed for as long as the supplier's full `/products.json` still shows

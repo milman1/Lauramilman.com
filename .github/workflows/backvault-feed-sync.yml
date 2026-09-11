@@ -55,6 +55,11 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # Hard ceiling on the job. The competitor fetch has its own 6-minute
+    # wall-clock budget (src/backvault/competitor.ts FETCH_DEADLINE_MS) so a
+    # throttled retailer never gets near this; without either, a sustained 429
+    # could retry for hours and be cancelled with no report at all.
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: lmny-feeds
@@ -79,6 +84,7 @@ jobs:
           SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
           BACKVAULT_BASE_URL: ${{ vars.BACKVAULT_BASE_URL }}
           BACKVAULT_COLLECTION_HANDLE: ${{ vars.BACKVAULT_COLLECTION_HANDLE }}
+          COMPETITOR_BASE_URL: ${{ vars.COMPETITOR_BASE_URL }}
           EVENT: ${{ github.event_name }}
           DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
