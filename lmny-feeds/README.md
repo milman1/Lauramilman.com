@@ -350,20 +350,88 @@ npm run sync:backvault       # live (needs Shopify env vars)
    reprices every listed piece because price and cost are in the content
    hash.
 
-   **If the competitor fetch fails** — each page is retried up to 4 times on
-   429/5xx honouring a strict `Retry-After`, pages are paced 250 ms apart, and
-   the whole walk is bounded by a 10-minute wall clock so a throttled retailer
-   can never run the job for hours (the competitor's catalogue is roughly 80
-   pages of 250; the job itself is capped at 60 minutes) — the run keeps going on the flat markup and
-   records a **warning** rather than an error, so a throttled competitor never
-   fails the job. Any piece whose recomputed price would fall below the ticket
-   already on the store is still updated in full (images, cost, tags, status,
-   sales channels); only its **price is pinned to the live ticket**, so
-   competitor-matched pieces are not marked down this week and back up the next.
-   The consequence is that a genuine supplier markdown is also deferred for that
-   week — the next successful run applies it. A piece with more than one variant
-   has no readable live price and is written normally. Both counts are on the
-   Done line and in the report.
+   **The retailer's pagination cap.** Its public `/products.json` serves at
+   most **100 pages of 250** — roughly **25,000 products**. Observed
+   2026-09-11: page 101 answered HTTP 400 after 100 full pages. That 400 is
+   the end of available pagination, not a fault, so the walk stops there and
+   returns what it read as a **partial** index
+   (`{ rows, complete, pagesRead, stoppedReason }`), instead of discarding
+   25,000 rows. If the retailer's catalogue is ever larger than that, the rest
+   of it **cannot be read through this endpoint at all**; closing that gap
+   would need a different source (cursor pagination, a sitemap walk, or a feed
+   the retailer publishes) and **nothing here attempts one**. A 4xx on page 1
+   is still a hard failure — that means the feed is wrong or gone.
+
+   A 4xx is only read as the cap when **both** guards agree: at least 90 pages
+   are already in hand, and a re-read of page 1 still serves a full page. A
+   feed that moved and starts 404ing at page 2 therefore still fails loudly
+   instead of passing itself off as the cap.
+
+   **If the competitor fetch is partial** — the pagination cap above, or the
+   fetch deadline below — the rows that did come back are **indexed and used**,
+   so a piece found in them gets its midpoint price as normal. A piece that is
+   *not* found may still have a match on a page that was never read, so it is
+   priced from what the store already remembers about it (below) rather than
+   dropped straight to the flat markup. A partial read is a **warning**, never
+   an error, and the report and Done line say how many rows over how many pages
+   were read, why the walk stopped, how many pieces were priced from a match,
+   how many from a remembered comparison, and how many fell back to flat. One
+   further consequence: on a partial read the **ambiguous stock-number guard is
+   weaker**, because a second row carrying the same reference at a different
+   price may sit on a page that was never fetched, so a reference that would
+   have been dropped as ambiguous can survive as a match.
+
+   **If the competitor fetch fails outright** — each page is retried up to 4
+   times on 429/5xx honouring a strict `Retry-After`, pages are paced 250 ms
+   apart, and the whole walk is bounded by a 10-minute wall clock so a
+   throttled retailer can never run the job for hours (the 2026-09-11 run read
+   100 full pages of 250 and was still cut off by the cap, so the catalogue is
+   larger than that; the job itself is capped at 60 minutes). Running out of
+   clock part-way through is a partial result, as above; a failure on page 1, a
+   network failure that never read a page, or a malformed response is a real
+   failure. The run then keeps going, records a **warning** rather than an
+   error so a throttled competitor never fails the job, and prices every piece
+   from the remembered comparison below or flat. The piece itself is always
+   written in full either way (images, cost, tags, status, sales channels): a
+   piece is never held out of an update for a pricing reason. The competitor
+   state is on the Done line — `competitor=complete(...)`,
+   `competitor=PARTIAL(...)` or `competitor=failed`.
+
+   **The remembered comparison.** Every run that matches a piece writes the
+   competitor's price and the date it was read to that product, as
+   `backvault_feed.competitor_price` (`number_decimal`) and
+   `backvault_feed.competitor_price_at` (`date_time`). On a run whose index is
+   **not complete**, an unmatched piece is then priced by what is remembered:
+
+   - a comparison **no older than 90 days**, whose midpoint beats the flat
+     floor: it becomes this run's competitor price and the ordinary midpoint
+     rule runs against the **current** cost, so the ticket follows the supplier
+     down or up and keeps the midpoint premium;
+   - **nothing remembered**, a comparison **older than 90 days**, one with **no
+     readable date** (never usable rather than expired — with no date there is
+     nothing to age), or one whose **midpoint loses to the floor**: flat,
+     cost + $500 — exactly what the rule says for a piece that is not on the
+     competitor. Nothing is protected, nothing is frozen. The four are counted
+     apart in the report, because a piece written at the flat price was not
+     "priced from a remembered comparison" whatever is stored on it.
+
+   A comparison is **never cleared** from the product: only a real match writes
+   a new one, so an expired or stale value can sit in
+   `backvault_feed.competitor_price` indefinitely. It cannot affect pricing —
+   past 90 days it is ignored, and an unmatched piece prices flat — but anyone
+   reading that metafield in Admin should treat it as a record of the last
+   match, not as today's competitor price. `competitor_price_at` says when.
+
+   A complete index always wins over memory: with the whole catalogue read, an
+   unmatched piece is genuinely unmatched and prices flat. A fresh match wins
+   too, and refreshes both the value and the date. Because the content hash
+   already carries the competitor price, a piece priced from memory has a
+   stable hash and is not rewritten week after week; a piece that matched but
+   is otherwise unchanged is rewritten once every 30 days purely to keep its
+   remembered comparison from ageing out. Counts and handles for both are on
+   the Done line (`competitor_matched`, `priced_from_memory`, `flat_fallback`)
+   and in the report.
+
 7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
    decides what gets *created*, but a piece already on the store stays
    listed for as long as the supplier's full `/products.json` still shows

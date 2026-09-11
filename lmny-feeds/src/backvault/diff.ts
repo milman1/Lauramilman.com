@@ -1,4 +1,5 @@
 import type { BackVaultCatalogEntry } from './catalog.js';
+import { backVaultRetail, backVaultRetailFromCost } from './pricing.js';
 import { handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
 
@@ -16,64 +17,208 @@ export interface DesiredEntry {
   contentHash: string;
 }
 
-export interface PricePinStats {
-  /** Pieces whose computed price was replaced by the price already on the store. */
-  pinned: number;
+/** How long a remembered competitor comparison may be used before it expires. */
+export const COMPETITOR_MEMORY_DAYS = 90;
+/**
+ * Rewrite a matched piece's remembered comparison once it is this old, even
+ * when nothing else about the piece changed. Without it the memory is only
+ * refreshed when some other field moves, and a piece that matches every week
+ * but is otherwise static would let its own memory expire and drop to the flat
+ * markup on the next incomplete run — the churn this whole rule prevents.
+ */
+export const COMPETITOR_MEMORY_REFRESH_DAYS = 30;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** The two decimals a price survives as, once written to Shopify and read back. */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+export interface CompetitorMemoryStats {
   /**
-   * Pieces the check stood down on because they have more than one variant AND
-   * whose first variant says the price would have fallen — the ones a reader
-   * should look at, not every multi-variant piece in the run.
+   * Pieces that matched the competitor in THIS run's rows. Counted here rather
+   * than taken from the feed normalization so it shares one basis with every
+   * other count below: the full desired set, retained pieces included.
    */
-  multiVariant: number;
+  matchedThisRun: number;
+  /**
+   * Unmatched pieces whose remembered comparison actually set the price — the
+   * midpoint beat the cost + markup floor. A remembered comparison that LOST to
+   * the floor is counted in `flooredToFlat`, because the piece was written at
+   * the flat price and saying otherwise would overstate what the memory did.
+   */
+  pricedFromMemory: number;
+  /** Which ones, so the report can name them instead of just counting them. */
+  memoryHandles: string[];
+  /** Unmatched pieces whose remembered comparison was read too long ago to use. */
+  expired: number;
+  /**
+   * Unmatched pieces carrying a remembered price with no readable date. Not
+   * expired — never usable: with no date there is nothing to age, and a
+   * comparison of unknown age cannot be trusted to price a live listing.
+   */
+  unusable: number;
+  /** Unmatched pieces whose remembered midpoint lost to the cost + markup floor. */
+  flooredToFlat: number;
+  /** Unmatched pieces with no remembered comparison at all. */
+  unremembered: number;
+}
+
+/** Everything that ended up at the plain flat rule, whatever the reason. */
+export function flatFallbackCount(stats: CompetitorMemoryStats): number {
+  return stats.expired + stats.unusable + stats.flooredToFlat + stats.unremembered;
+}
+
+/** Age of an ISO timestamp in days, or null when it cannot be read. */
+function ageInDays(readAt: string | null, now: number): number | null {
+  if (!readAt) return null;
+  const at = Date.parse(readAt);
+  if (!Number.isFinite(at)) return null;
+  return (now - at) / DAY_MS;
 }
 
 /**
- * Pin prices to the live ticket when the competitor fetch FAILED this run.
+ * Price an unmatched piece from what the last matching run remembered about it.
  *
- * Retail is max((cost + competitor) / 2, cost + markup), so a piece matched on
- * the competitor sits at or above the flat markup. With no competitor prices
- * every matched piece would recompute to the flat price, drop on the storefront
- * this week, and be raised again by the next successful run — price churn on
- * live listings. So the computed price is replaced by the price already on the
- * store wherever it would fall, and everything else about the piece (images,
- * title, tags, cost, specs, channels, status) is written exactly as normal.
- * The pin happens BEFORE the content hash is computed, so the hash matches
- * what is actually written and the piece does not stay dirty for every
- * following run.
+ * The competitor's catalogue is larger than the page-based pagination its
+ * endpoint allows (src/backvault/competitor.ts), so a COMPLETE index is not
+ * reachable and some run will always fail to match a piece that is really
+ * there. Pricing that piece flat would cut its ticket this week and the next
+ * good match would raise it again — the churn the whole competitor rule exists
+ * to avoid.
  *
- * Call this only when the fetch failed. An empty competitor index is a
- * legitimate zero-match result and must not trigger it: the two are
- * indistinguishable from the index alone, which is why the caller passes the
- * fact rather than guessing.
+ * So each matched piece remembers the competitor price and the date it was
+ * read (`backvault_feed.competitor_price` / `competitor_price_at`), and on a
+ * run whose index is incomplete an unmatched piece is handled by that memory:
  *
- * A piece with more than one variant has no readable live price
- * (`variants(first: 1)` says nothing about the rest), so it stands down and is
- * counted separately rather than silently treated as unpriced.
+ *  - Remembered, and no older than COMPETITOR_MEMORY_DAYS: the remembered
+ *    price becomes this run's `competitorPriceUsd` and the ORDINARY pricing
+ *    rule computes the midpoint against the CURRENT cost. A supplier markdown
+ *    therefore still reaches the storefront, at the same midpoint premium, and
+ *    the price is stable week to week because the content hash already carries
+ *    `competitorPrice`.
+ *  - Nothing remembered, a memory with no readable date, one read too long
+ *    ago, or one whose midpoint loses to the floor: flat, cost + markup —
+ *    exactly what the rule says for a piece that is not on the competitor.
+ *    Nothing is protected and nothing is frozen. The four are counted apart,
+ *    because "we never knew", "we have forgotten", "we cannot tell how old
+ *    this is" and "the comparison was too cheap to matter" are different
+ *    facts about the same price.
+ *
+ * A complete index always wins over memory: with the whole catalogue read, an
+ * unmatched piece is genuinely unmatched. A fresh match always wins too, and
+ * refreshes both the value and the date.
+ *
+ * Mutates the items in place, and must run BEFORE the content hashes are
+ * computed so the hash matches the price actually written.
  */
-export function pinLivePricesWhenCompetitorUnavailable(
+export function applyRememberedCompetitorPrices(
   items: BackVaultItem[],
   catalog: BackVaultCatalogEntry[],
-): PricePinStats {
+  options: { indexComplete: boolean; now?: number; maxAgeDays?: number } = { indexComplete: false },
+): CompetitorMemoryStats {
+  const now = options.now ?? Date.now();
+  const maxAgeDays = options.maxAgeDays ?? COMPETITOR_MEMORY_DAYS;
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
-  const stats: PricePinStats = { pinned: 0, multiVariant: 0 };
+  const stats: CompetitorMemoryStats = {
+    matchedThisRun: 0,
+    pricedFromMemory: 0,
+    memoryHandles: [],
+    expired: 0,
+    unusable: 0,
+    flooredToFlat: 0,
+    unremembered: 0,
+  };
+  const nowIso = new Date(now).toISOString();
   for (const item of items) {
-    const have = catalogByHandle.get(handleFor(item));
-    if (!have) continue; // a new piece has no live price to protect
-    if (have.variantCount > 1) {
-      // Only worth naming when the first variant says this piece would have
-      // been pinned; a multi-variant piece whose price is rising or unchanged
-      // was never in question.
-      if (typeof have.firstVariantPrice === 'number' && item.priceUsd < have.firstVariantPrice) {
-        stats.multiVariant += 1;
-      }
+    // Matched this run: stamp today's date so the memory written to the
+    // product is this comparison, not the one it replaces.
+    if (typeof item.competitorPriceUsd === 'number') {
+      item.competitorPriceReadAt = nowIso;
+      stats.matchedThisRun += 1;
       continue;
     }
-    if (typeof have.price !== 'number') continue;
-    if (item.priceUsd >= have.price) continue; // a rise or no change is written as normal
-    item.priceUsd = have.price;
-    stats.pinned += 1;
+    if (options.indexComplete) continue; // a whole catalogue was read: unmatched means unmatched
+    const have = catalogByHandle.get(handleFor(item));
+    const remembered = have?.rememberedCompetitorPrice ?? null;
+    if (remembered === null) {
+      if (have) stats.unremembered += 1;
+      continue;
+    }
+    const age = ageInDays(have?.rememberedCompetitorPriceAt ?? null, now);
+    if (age === null) {
+      stats.unusable += 1;
+      continue;
+    }
+    if (age > maxAgeDays) {
+      stats.expired += 1;
+      continue;
+    }
+    // A midpoint that loses to the floor leaves the piece at the flat price it
+    // already had, so the memory decided nothing: say so, and leave the item
+    // untouched rather than recording a comparison that set no price.
+    if (backVaultRetail(item.costUsd, remembered) <= backVaultRetailFromCost(item.costUsd)) {
+      stats.flooredToFlat += 1;
+      continue;
+    }
+    item.competitorPriceUsd = remembered;
+    item.competitorPriceReadAt = have!.rememberedCompetitorPriceAt!;
+    item.priceUsd = backVaultRetail(item.costUsd, remembered);
+    stats.pricedFromMemory += 1;
+    stats.memoryHandles.push(handleFor(item));
   }
   return stats;
+}
+
+/**
+ * Promote a piece that matched the competitor this run from 'skip' to
+ * 'update' when its remembered comparison is missing or stale.
+ *
+ * The diff is driven by the content hash, and the read date is deliberately
+ * not in it, so a piece that matches every week but is otherwise unchanged is
+ * never rewritten and its memory ages out. This is the one thing that keeps
+ * the memory current, at a cost of one write per piece per
+ * COMPETITOR_MEMORY_REFRESH_DAYS. Same shape as
+ * promoteBackVaultInventoryUpdates below.
+ *
+ * `pricedFromMemory` names the pieces whose price CAME from the memory: they
+ * have a `competitorPriceUsd` like a matched piece, but rewriting them would
+ * store the same value under the same old date, week after week, forever.
+ * Only a piece that really matched the competitor this run has anything new
+ * to record.
+ */
+export function promoteBackVaultCompetitorMemory(
+  decisions: Decision[],
+  items: BackVaultItem[],
+  catalog: BackVaultCatalogEntry[],
+  options: { now?: number; refreshAfterDays?: number; pricedFromMemory?: Iterable<string> } = {},
+): number {
+  const now = options.now ?? Date.now();
+  const refreshAfterDays = options.refreshAfterDays ?? COMPETITOR_MEMORY_REFRESH_DAYS;
+  const fromMemory = new Set(options.pricedFromMemory ?? []);
+  const itemByHandle = new Map(items.map((i) => [handleFor(i), i]));
+  const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
+  let promoted = 0;
+  for (const decision of decisions) {
+    if (decision.action !== 'skip' || decision.reason !== 'unchanged') continue;
+    if (fromMemory.has(decision.handle)) continue; // nothing new to record
+    const item = itemByHandle.get(decision.handle);
+    if (!item || typeof item.competitorPriceUsd !== 'number') continue;
+    const have = catalogByHandle.get(decision.handle);
+    if (!have) continue;
+    const age = ageInDays(have.rememberedCompetitorPriceAt, now);
+    // The metafield is written with toFixed(2), so compare on that same
+    // two-decimal basis instead of guessing a tolerance around the round-trip.
+    const sameValue =
+      typeof have.rememberedCompetitorPrice === 'number' &&
+      round2(have.rememberedCompetitorPrice) === round2(item.competitorPriceUsd);
+    if (sameValue && age !== null && age <= refreshAfterDays) continue;
+    decision.action = 'update';
+    decision.reason = 'competitor_memory_refresh';
+    promoted += 1;
+  }
+  return promoted;
 }
 
 /**
@@ -86,11 +231,11 @@ export function pinLivePricesWhenCompetitorUnavailable(
  * archived products keep their URL (redirected to the designer's
  * collection, same as the diamond/watch sync).
  *
- * Nothing here knows about competitor pricing: a missing competitor is
- * handled upstream by pinLivePricesWhenCompetitorUnavailable, which changes
- * the price the run writes, never whether it writes. A piece is never held
- * out of an update for a pricing reason — doing that also withheld its
- * reactivation, its missing sales channels, and that week's images.
+ * Nothing here knows about competitor pricing: an incomplete competitor index
+ * is handled upstream by applyRememberedCompetitorPrices, which changes the
+ * price the run writes, never whether it writes. A piece is never held out of
+ * an update for a pricing reason — doing that also withheld its reactivation,
+ * its missing sales channels, and that week's images.
  */
 export function diffBackVaultCatalog(desired: DesiredEntry[], catalog: BackVaultCatalogEntry[]): Decision[] {
   const decisions: Decision[] = [];
