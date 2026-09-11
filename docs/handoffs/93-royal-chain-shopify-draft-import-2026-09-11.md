@@ -32,6 +32,15 @@ approved plan. The export also verified `453.59237` grams, equivalent to 1 lb,
 for every variant. Shopify's CDN image URLs and its normalized taxonomy display
 are expected platform transformations.
 
+The full post-import Shopify CSV export was also scanned across all 164
+exported fields in each of its 93 rows / 21 handles. A case-insensitive search
+for `royal\s*chain|royalchain.com` found zero hits. Public-facing fields use
+`Laura Milman New York`, and image fields use Shopify-hosted CDN URLs.
+
+The merged builder rejects the supplier name in the handle, title,
+description, SEO, image alt text, and vendor. Its tests enforce the same
+public-copy scrubbing rule.
+
 No supplier credentials, private source content, or wholesale values are
 recorded in this handoff.
 

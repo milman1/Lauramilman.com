@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { parseCsv } from '../jewelryCsv.js';
 import { supplierRetailFromCost } from '../../config/pricing.js';
-import { buildRoyalChainProduct, type RoyalChainSource } from './listing.js';
+import { buildRoyalChainProducts, type RoyalChainSource } from './listing.js';
 
 function records(text: string): Record<string, string>[] {
   const rows = parseCsv(text);
@@ -14,16 +14,34 @@ function money(raw: string): number {
   if (!Number.isFinite(n) || n <= 0) throw new Error('invalid private cost');
   return n;
 }
-function privateVariants(raw: string): Array<{ label: string; costUsd: number }> {
+function privateVariants(raw: string): RoyalChainSource['variants'] {
   return raw.split(';').filter(Boolean).map((segment) => {
     const at = segment.lastIndexOf('=');
     if (at < 1) throw new Error('invalid private variant segment');
-    return { label: segment.slice(0, at).trim(), costUsd: money(segment.slice(at + 1)) };
+    const [cost, sku = '', grams = '', available = ''] = segment.slice(at + 1).split('|').map((value) => value.trim());
+    const weightGrams = grams ? Number(grams) : undefined;
+    if (grams && (!Number.isFinite(weightGrams) || weightGrams! <= 0)) throw new Error('invalid private variant gram weight');
+    return { label: segment.slice(0, at).trim(), costUsd: money(cost ?? ''), sku, weightGrams, available: available === 'yes' ? true : available === 'no' ? false : undefined };
   });
 }
 function csv(value: unknown): string {
   const text = String(value ?? '');
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+function collectedImageUrls(row: Record<string, string>): string[] {
+  return (row.image_urls ?? '')
+    .split(/[;|]/)
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+function values(row: Record<string, string>, key: string): string[] {
+  return (row[key] ?? '').split(/[;|]/).map((value) => value.trim()).filter(Boolean);
+}
+function sourceCondition(row: Record<string, string>): RoyalChainSource['condition'] {
+  const state = (row.condition ?? '').trim().toLowerCase();
+  if (!state) return undefined;
+  if (state !== 'new' && state !== 'preowned') throw new Error(`${row.item_number ?? 'unknown'}: invalid condition state`);
+  return { state, evidence: row.condition_evidence ?? '', originalPackagingEvidence: row.original_packaging_evidence ?? '' };
 }
 
 export async function generateRoyalChainPlan(opts: { shortlistPath: string; privatePath: string; outputDir: string; expectedProducts?: number; expectedVariants?: number }): Promise<{ products: number; variants: number }> {
@@ -35,18 +53,39 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
   for (const row of shortlist) {
     const itemNumber = row.item_number ?? '';
     const url = row.url ?? '';
+    const existingHandle = row.existing_handle ?? '';
     const priv = privateByItem.get(itemNumber);
     if (!priv || priv.url !== url || priv.error) throw new Error(`${itemNumber}: private row missing, mismatched, or errored`);
     const variants = privateVariants(priv.lengths_karats ?? '');
     const first = variants[0];
     if (!first || money(priv.cost ?? '') !== first.costUsd) throw new Error(`${itemNumber}: top-level cost is not the first displayed variant`);
     if (money(priv.retail ?? '') !== supplierRetailFromCost(first.costUsd)) throw new Error(`${itemNumber}: top-level retail fails pricing rule`);
-    const source: RoyalChainSource = { itemNumber, style: row.style ?? '', widthMm: row.width_mm ?? '', imageUrl: row.image_url ?? '', variants };
-    products.push(buildRoyalChainProduct(source));
+    const source: RoyalChainSource = {
+      itemNumber,
+      existingHandle,
+      style: row.style ?? '',
+      widthMm: row.width_mm ?? '',
+      closure: row.closure ?? '',
+      finish: row.finish ?? '',
+      construction: row.construction ?? '',
+      imageUrl: row.image_url ?? '',
+      imageUrls: collectedImageUrls(row),
+      shopifyCdnImageUrls: values(row, 'shopify_cdn_image_urls'),
+      condition: sourceCondition(row),
+      variants,
+    };
+    products.push(...buildRoyalChainProducts(source));
   }
-  if (products.length !== privateRows.length) throw new Error('public/private item sets differ');
+  const publicItems = new Set(shortlist.map((row) => row.item_number ?? ''));
+  if (publicItems.size !== shortlist.length || publicItems.size !== privateByItem.size || [...publicItems].some((item) => !privateByItem.has(item))) {
+    throw new Error('public/private item sets differ');
+  }
+  const handles = products.map((product) => String(product.handle ?? ''));
+  if (handles.some((handle) => !handle) || new Set(handles).size !== handles.length) throw new Error('planned Royal Chain handles are not unique');
+  const childSkus = products.flatMap((product) => (product.variants as Array<{ sku?: string }>).map((variant) => (variant.sku ?? '').trim())).filter(Boolean);
+  if (new Set(childSkus).size !== childSkus.length) throw new Error('planned Royal Chain child SKUs are not unique');
   const variantCount = products.reduce((n, p) => n + (p.variants as unknown[]).length, 0);
-  if (products.length !== (opts.expectedProducts ?? 21) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
+  if (products.length !== (opts.expectedProducts ?? 32) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
   await mkdir(opts.outputDir, { recursive: true });
   await writeFile(path.join(opts.outputDir, 'royalchain-products.jsonl'), products.map((p) => JSON.stringify(p)).join('\n') + '\n');
   const lines = ['handle,status,vendor,product_type,category,title,image_url,tags,variant_label,sku,retail,cost'];
