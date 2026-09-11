@@ -255,9 +255,15 @@ the next scheduled run confirms rather than reverts.
 Implemented in the sync (`src/backvault/competitor.ts`, 2026-09-09), so
 it runs every week without an agent:
 
-1. The sync reads Robinson's public `/products.json` (about 11,750 rows)
+1. The sync reads the first 25,000 rows of Robinson's public
+   `/products.json` — 100 pages of 250, which is the retailer's page-based
+   pagination cap (observed 2026-09-11, when page 101 answered HTTP 400) —
    and indexes every supplier stock number (`J10605`, `RR9688` pattern)
-   found in titles, handles, SKUs, body copy, and image file names.
+   found in titles, handles, SKUs, body copy, and image file names. Their
+   catalogue is at least that large and its full size is unknown, so the
+   index may be partial. When it is partial, the matches it did find are
+   still used, and every unmatched piece has its live price protected
+   against a drop, per the pinning rule.
 2. A piece whose stock number is found prices at the midpoint between our
    cost and Robinson's price, floored at cost + $500. No match: cost + $500.
    Ambiguous numbers (two rows, two prices) are dropped, never guessed.
