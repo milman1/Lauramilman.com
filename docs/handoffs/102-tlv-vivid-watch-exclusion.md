@@ -2,6 +2,8 @@
 
 Status: in progress. GitHub issue: https://github.com/milman1/Lauramilman.com/issues/102
 
+Documentation PR: https://github.com/milman1/Lauramilman.com/pull/104. Exact next action: confirm whether unlabeled eBay item [366655791728](https://www.ebay.com/itm/366655791728), described as January 2024 with papers and no original box, is TLV stock T3759; the merchant has been asked and no action was taken on that ambiguous listing.
+
 Execution update dated 2026-09-11: PR #103 is merged and CI-verified. The combined 104-row Shopify archive has fresh evidence showing 104 unique products, all Archived. Marketplace Connect has fresh after-state evidence for all 104 exact SKUs, all Disabled; the write log records 66 saved changes (58 current plus 8 historical), with 38 rows already Disabled before the writes. Seller Hub's captured Active view contains 182 unique listing IDs, 167 nonblank custom-label/SKU pairs, and 15 unlabeled rows; zero target SKU matches and zero raw target-SKU occurrences were found. One unlabeled Rolex 124300 could be a duplicate of in-scope T3759, so the capture does not prove absence for that one item. Seventeen restricted screenshots are uploaded and verified in the canonical Drive folder. A post-next-scheduled-sync observation has not been recorded.
 
 ## Goal
