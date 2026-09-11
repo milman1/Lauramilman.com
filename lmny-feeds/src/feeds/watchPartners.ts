@@ -2,7 +2,8 @@
  * Belgium Dia website partner books. The developer watch API often omits
  * Branch, so numeric Uncle Manny stock (10005, 3124, …) is indistinguishable
  * from Belgium Watch numeric stock. This client reads the public watch table
- * filtered by Branch and returns the stock numbers we are allowed to publish.
+ * filtered to the ROMAN branch and returns the stock numbers we are allowed
+ * to publish. All other partner branches are intentionally excluded.
  *
  * Does not use BELGIUMDIA_API_KEY and does not count against the developer
  * API's 1-request-per-15-minutes limit.
@@ -76,9 +77,9 @@ async function fetchBranch(token: string, branch: string): Promise<string[]> {
 }
 
 /**
- * Stock numbers from Belgium Watch (ROMAN) + TLV + Vivid.
- * Throws if the list is empty so the caller can fall back to prefix rules
- * rather than publishing zero watches.
+ * Stock numbers from Belgium Watch (ROMAN). Throws if the list is empty or a
+ * branch request fails. The caller must then protect the whole watch segment;
+ * inferring suppliers from stock prefixes can import an excluded partner.
  */
 export async function fetchAllowedWatchStocks(): Promise<Set<string>> {
   const token = await guestToken();
