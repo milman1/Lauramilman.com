@@ -2,66 +2,40 @@
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/107
 - Updated (UTC): 2026-09-11
-- Owner / session: Astra / condition-integrity audit
-- Status: **open; weight input saved, blocked on Marketplace delivery verification and source API availability**
-- Branch: `codex/107-weight-handoff`
-- Scope: watch condition evidence and the existing Marketplace Connect condition mapping only
+- Status: **open; RW3096 delivery check resolved, full API-backed audit still pending**
+- Source: remote `main` handoff fetched at the requested `75bc1c` state; GitHub file blob SHA `18ed93daa1c3ff21d0eacd067bcdb3c5237177db`
+- Scope: watch condition evidence and Marketplace Connect condition mapping only
 
 ## Goal and acceptance criteria
 
-Audit existing watch condition mappings against structured source data and prepare bounded corrections. The merchant authorized condition correction only. Prices, orders, buyers, inventory, and unrelated listing scope remain outside this task. Close only after a dry-run report and an independent read-back verify every authorized mapping update.
+The merchant authorized correction of watch eBay condition mappings across the API-backed watch catalog. The trigger is sold item `366649317404` (Rolex 116000), whose public condition says “New with box and papers” while its description says “Pre-Owned.” Prices, orders, buyers, inventory, and unrelated listing scope remain outside this task.
 
-The strict gate is:
+The source gate remains strict: `1000` requires structured `UNWORN` plus box and papers; `1500` is incomplete-accessory `UNWORN`; `3000` is used, pre-owned, or unknown. Titles and marketplace copy cannot upgrade a condition. Missing source data fails closed.
 
-- `1000` only when structured API data explicitly says `UNWORN` and both box and papers are true.
-- `1500` for `UNWORN` when the complete box-and-papers requirement is not met.
-- `3000` for used, pre-owned, or unknown condition.
-- Titles, descriptions, and marketplace wording cannot upgrade a product. Missing or unavailable source data fails closed.
-
-## Verified evidence and completed work
+## Completed work and safeguards
 
 - PR #108 merged at `386da74ecdcb3506f13748a9770993887d747975`.
-- PR #109 merged at `1404c6e7f1af953beeea60bb08ec7a8518caf85e`; automatic condition apply is disabled and now requires an exact manual opt-in.
-- PR #111 merged at `79d066858edbac206f1fc31562f9a552e9f2d30f`; the source-backed, condition-only repair requires a reviewed dry-run artifact and SHA-256, stale-drift preflight, and post-read verification. It has not been applied live.
-- The PR #108 condition workflow completed successfully in run [34627345486](https://github.com/milman1/Lauramilman.com/actions/runs/34627345486). The implementation and focused validation reported 630 tests passed; schema version 24 is the current schema reference, not a test count. The independent review reported 97 focused tests at `34a7b14`.
-- The automatic PR workflow applied 85 product updates and 151 metafield upserts. Independent review found metadata-only changes: no feature deletes or body rewrites. The reviewed population was 71 archived, 10 active, and 4 draft; 66 eBay condition values were `3000` and 85 Google values were `used`. This is a historical execution record, not proof that every watch mismatch is fixed.
-- The write-disabled main dry-run [34627710402](https://github.com/milman1/Lauramilman.com/actions/runs/34627710402) failed closed after about 7m28s: the direct Belgium Dia API URL was unset or rate-limited, it returned zero natural/lab/watch API rows, and it performed zero writes. This run cannot serve as a fresh source-backed repair plan.
-- The sold trigger is eBay item `366649317404` (Rolex 116000): public condition says “New with box and papers” while the description says “Pre-Owned.” This is a verified mismatch and does not authorize inference from marketplace copy.
-- Fresh active evidence identifies item `366650116144`, SKU `RW3096`, “Pre-Owned Rolex Datejust 126334.” Its actual evidence says New with box and papers while Marketplace Connect is Listed and Enabled. It was outside the 85-row repair population, so its underlying delivery remains unresolved.
-- Public listing item `366655791728`, SKU `4159`, currently shows Pre-owned / Good, with a pre-owned description and no original box. This is current public-listing evidence, not a conclusion drawn from the sold listing.
-- The latest RW3096 Marketplace state was Listed and Enabled with an Offer error: “Package weight not valid or missing.” The merchant supplied `1 lb`; Shopify product `7642022805575` / SKU `RW3096` was saved with package weight `1.0 lb` and unit `lb`, and a fresh Shopify reload confirmed the saved value. The shipping policy is Free-2Day Insured Shipping. A fresh post-save read still shows eBay item `366650116144` as New with box and papers while Marketplace detail remains Offer Listed with Error and the intended condition is Pre-owned / Good; delivery verification remains pending.
+- PR #109 merged at `1404c6e7f1af953beeea60bb08ec7a8518caf85e`; automatic condition apply is disabled.
+- PR #111 merged at `79d066858edbac206f1fc31562f9a552e9f2d30f` as the source-backed, condition-only repair. It requires a reviewed dry-run artifact and SHA-256, stale-drift preflight, and post-read verification. It has not been applied live.
+- Historical PR workflow execution applied 85 product updates and 151 metafield upserts; review found metadata-only changes, with no feature deletes or body rewrites. This does not verify every watch mapping.
+- PR #109 dry-run `34628174469` read 2,069 catalog products and produced zero writes, upserts, feature deletes, or description rewrites.
+- The latest source validation returned zero natural/lab/watch API rows and zero writes. No source-backed plan or live condition apply has run.
 
-## Source and candidate audit state
+## RW3096 resolution
 
-The active-listing source extraction and watch-title classification remain a bounded audit aid only. The working candidate CSV is not committed to this repository and is pending blind review. It contains only `item_id`, `sku`, and `title`; it carries no condition decision. Ambiguous and obvious non-watch rows remain separate. Do not treat the working candidate list as the complete API-backed repair population, and do not infer a condition from a title, description, or SKU.
+The merchant supplied `1 lb`. Shopify product `7642022805575` / SKU `RW3096` was saved at `1.0 lb` with unit `lb`, and a fresh Shopify reload confirmed the value. A fresh post-save read now shows:
 
-The bounded repair writer is built as **LMNY source-backed watch condition repair** in `.github/workflows/lmny-source-watch-condition-repair.yml`, with its implementation in `lmny-feeds/scripts/repair-source-watch-conditions.ts`. It joins only active Watch products to allowed ROMAN API rows by exact SKU or deterministic/legacy watch handle, stops on zero source data or duplicate/ambiguous identity, and writes only `custom.ebay_condition` and `mm-google-shopping.condition`. A dry run emits a schema-validated plan, timestamp, and SHA-256. Apply requires the reviewed dry-run workflow run ID plus that exact hash, downloads the original artifact without rebuilding source state, rejects plans over 24 hours old, and aborts before all writes if a fresh read shows status, SKU, handle, or condition drift. No source-backed plan or live apply has run because the API remains unavailable; this work does not verify or reverse all 85 historical updates.
+- eBay item `366650116144`: main condition **Pre-owned - Good**.
+- Marketplace detail: heading **Offer Listed**, with no current Error heading; condition **Preowned Good**.
 
-The optional candidate audit remains incomplete: independent review found 150 saved rows, 13 blank SKUs, and the omission of MICHELE watch item 366650784419. The input title/SKU associations passed review, but this incomplete classification is not a repair cohort and must not determine condition changes; use exact authoritative API joins instead.
+The RW3096 package-weight and delivery blocker is resolved. This read does not establish that the source-backed condition repair has been applied across the watch catalog.
 
-## Deployment and live state
+## Remaining audit state
 
-PR #109 is merged and the automatic apply path is disabled. The 85-row historical workflow execution is recorded above. The latest source-validation dry-run performed zero writes and failed closed. There is no verified completion of the full active-watch audit or of all Marketplace delivery mismatches.
-
-PR #109 workflow run [34628174469](https://github.com/milman1/Lauramilman.com/actions/runs/34628174469) also succeeded in dry-run mode with `DRY_RUN_INPUT=true`: it read 2,069 catalog products, planned zero changes, and made zero writes. That confirms the repaired trigger is write-disabled; it does not establish current API truth or verify the 85 historical updates.
-
-## Remaining work and blockers
-
-1. Freshly verify Marketplace/eBay delivery for RW3096 after the saved `1 lb` package weight; do not rely on the cached pre-save error.
-2. Restore or provide an approved structured source API response, then generate an exact joined dry-run plan.
-3. Blind-review the bounded candidate classification and keep ambiguous rows out of any automatic plan.
-4. Review the dry-run, use the exact manual opt-in if authorized, and independently verify the resulting condition mapping.
-5. Keep the issue open until the above evidence is available and the live read-back is complete.
-
-## Supporting artifacts
-
-- Working evidence (restricted; not committed): `/Users/avimilman/Documents/Codex/2026-09-10/pu/work/watch-condition/sold-listing-before.txt`
-- Working candidate analysis (not committed; pending review): `/Users/avimilman/Documents/Codex/2026-09-10/pu/work/watch-condition/active-watch-candidates.csv` and `active-watch-ambiguous.csv`
-- PR #108 condition workflow: https://github.com/milman1/Lauramilman.com/actions/runs/34627345486
-- Main write-disabled dry-run: https://github.com/milman1/Lauramilman.com/actions/runs/34627710402
+The full API-backed watch audit remains open because the structured source returned zero rows. The exact source join, reviewed dry-run artifact, manual opt-in, and independent post-write read-back remain required. The optional title/SKU candidate classification remains incomplete and excluded from repair; no condition may be inferred from title, description, or SKU.
 
 ## Work log
 
-- 2026-09-11: Created this durable handoff from merged main commit `1404c6e`; recorded the verified 85-row metadata execution, the zero-write source-validation failure, the sold/active mismatches, and the remaining source/API and Marketplace blockers.
-- 2026-09-11: Built and independently reviewed the source-backed, reviewed-snapshot repair workflow; recorded that it remains blocked on a nonzero API response and that no live apply has occurred.
-- 2026-09-11: Merchant supplied `1 lb`; Shopify product `7642022805575` / SKU `RW3096` was saved and fresh-reload verified at `1.0 lb` with unit `lb`. Fresh post-save eBay/Marketplace evidence still reports the delivery error, so delivery verification and the source-backed condition apply remain pending.
+- 2026-09-11: PRs #108, #109, and #111 merged; automatic and source-backed repairs remain fail-closed without approved source evidence.
+- 2026-09-11: Merchant supplied 1 lb; Shopify saved and fresh-reload verified RW3096 at 1.0 lb/lb.
+- 2026-09-11: Fresh post-save Marketplace/eBay read verified RW3096 as Pre-owned - Good with Offer Listed and no current Error heading. Full API-backed condition audit remains open.
