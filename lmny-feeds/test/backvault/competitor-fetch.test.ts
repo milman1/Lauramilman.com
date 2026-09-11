@@ -195,8 +195,8 @@ describe('fetchCompetitorCatalog pacing', () => {
  * exists for. The budget is checked with an injected clock, never real time.
  */
 describe('fetchCompetitorCatalog deadline', () => {
-  it('is six minutes', () => {
-    expect(FETCH_DEADLINE_MS).toBe(360_000);
+  it('is ten minutes — sized for the competitor\'s ~80-page catalogue, not the supplier\'s', () => {
+    expect(FETCH_DEADLINE_MS).toBe(600_000);
   });
 
   it('stops paginating and names how far it got', async () => {
@@ -208,11 +208,11 @@ describe('fetchCompetitorCatalog deadline', () => {
       call++ % 2 === 0 ? errorPage(429, '60') : jsonPage(FULL_PAGE),
     );
     await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
-      /6-minute fetch deadline passed after \d+ of up to 200 pages \(\d+ rows read\)/,
+      /10-minute fetch deadline passed after \d+ of up to 200 pages \(\d+ rows read\)/,
     );
     // Bounded by the budget, not by 200 pages x 4 attempts.
     expect(clock - 1_000_000).toBeLessThanOrEqual(FETCH_DEADLINE_MS);
-    expect(fetchMock.mock.calls.length).toBeLessThan(40);
+    expect(fetchMock.mock.calls.length).toBeLessThan(60);
   });
 
   it('never sleeps past the deadline', async () => {
@@ -236,5 +236,49 @@ describe('fetchCompetitorCatalog deadline', () => {
     const rows = await fetchCompetitorCatalog({ sleep, now });
     expect(rows).toHaveLength(251);
     expect(clock - 1_000_000).toBe(PAGE_DELAY_MS);
+  });
+});
+
+describe('deadline message', () => {
+  it('says the competitor was throttling when retries were taken', async () => {
+    let call = 0;
+    fetchMock.mockImplementation(async () =>
+      call++ % 2 === 0 ? errorPage(429, '60') : jsonPage(FULL_PAGE),
+    );
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
+      /after \d+ retries — the competitor was throttling/,
+    );
+  });
+
+  it('says the walk was too slow when nothing was ever retried', async () => {
+    // Healthy pages, but each request eats 40 s of clock: no retry is taken,
+    // so the deadline is the thing that is wrong, and the message says so.
+    fetchMock.mockImplementation(async () => {
+      clock += 40_000;
+      return jsonPage(FULL_PAGE);
+    });
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
+      /with no retries — the walk was simply too slow, so the deadline is mis-sized/,
+    );
+  });
+
+  it('reports a request aborted at the end of the budget as the deadline, not a network failure', async () => {
+    // The clamped per-request timeout aborts the last attempt exactly as the
+    // budget runs out; without the deadline check on that path the run would
+    // lose the page and row counts to 'request failed (…aborted)'.
+    fetchMock.mockImplementation(async () => {
+      clock += 200_000;
+      throw new Error('This operation was aborted');
+    });
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
+      /10-minute fetch deadline passed after 0 of up to 200 pages \(0 rows read\)/,
+    );
+  });
+
+  it('still reports a plain network failure as one', async () => {
+    fetchMock.mockRejectedValue(new Error('ECONNRESET'));
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow(
+      'Competitor feed: request failed (ECONNRESET)',
+    );
   });
 });

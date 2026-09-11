@@ -55,7 +55,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    # Hard ceiling on the job. The competitor fetch has its own 6-minute
+    # Hard ceiling on the job. The competitor fetch has its own 10-minute
     # wall-clock budget (src/backvault/competitor.ts FETCH_DEADLINE_MS) so a
     # throttled retailer never gets near this; without either, a sustained 429
     # could retry for hours and be cancelled with no report at all.

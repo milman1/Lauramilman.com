@@ -35,14 +35,25 @@ const MIN_RETRY_AFTER_MS = 1_000;
 const REQUEST_TIMEOUT_MS = 30_000;
 /**
  * Wall-clock budget for the WHOLE competitor fetch — requests, retry waits and
- * page pacing together. 4 attempts x 30 s plus three 30 s waits is 210 s per
- * page, which across 200 pages is a multi-hour run: a sustained throttle would
- * be cancelled by the Actions job timeout with no report at all, which is worse
- * than the 429 this retry exists for. Six minutes is ~15x the ~25 s a healthy
- * full walk takes (14 pages at 250 ms pacing), so only a genuinely broken
- * competitor hits it, and hitting it still leaves time for the rest of the run.
+ * page pacing together. Without it, 4 attempts of up to 30 s plus three 30 s
+ * waits is 210 s for a single page, which across MAX_PAGES is a multi-hour run:
+ * a sustained throttle would be cancelled by the Actions job timeout with no
+ * report at all, which is worse than the 429 this retry exists for.
+ *
+ * Sized from the COMPETITOR's catalogue, not the supplier's. An independent
+ * full scan of the competitor earlier in this project counted roughly 20,000
+ * products — about 80 pages at PAGE_LIMIT 250 — and the 2026-09-11 run was
+ * still paginating at page 61 when it was throttled, so a healthy walk is on
+ * the order of 80 pages, and MAX_PAGES 200 is the ceiling it is allowed to
+ * reach. At 200 pages the pacing alone is 50 s and the requests can add
+ * minutes on a slow day, so 6 minutes could trip on a perfectly healthy run:
+ * 10 minutes keeps that headroom while still cutting a throttled walk short
+ * in time to write a report. The 60-minute job timeout is the backstop.
+ *
+ * To check the real page count against these figures, read the progress line
+ * this module logs every PROGRESS_EVERY_PAGES pages in a successful run.
  */
-export const FETCH_DEADLINE_MS = 6 * 60_000;
+export const FETCH_DEADLINE_MS = 10 * 60_000;
 /**
  * Pause between page requests. The 2026-09-11 weekly dry run walked all 200
  * pages back to back and the retailer rate-limited it with HTTP 429 at page
@@ -84,6 +95,8 @@ export interface CompetitorFetchOptions {
    * call gets its own.
    */
   deadlineAt?: number;
+  /** Called once per retry actually taken, so the walk can say why it ran out of time. */
+  onRetry?: () => void;
 }
 
 /** Thrown when the wall-clock budget for the fetch is gone. */
@@ -167,9 +180,16 @@ export async function fetchCompetitorPage(page: number, options: CompetitorFetch
       });
     } catch (err) {
       lastErr = err instanceof Error ? err.message : String(err);
+      // A request the clamped timeout aborted at the end of the budget is a
+      // deadline, not a network failure: reported as one, the page and row
+      // counts survive instead of a bare 'request failed (…aborted)'.
+      if (now() >= deadlineAt) {
+        throw new CompetitorDeadlineError(`Competitor feed: fetch deadline passed on page ${page}`);
+      }
       if (attempt === MAX_ATTEMPTS - 1) continue;
       const wait = Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS);
       if (now() + wait >= deadlineAt) throw new CompetitorDeadlineError(`Competitor feed: fetch deadline passed on page ${page}`);
+      options.onRetry?.();
       await sleep(wait);
       continue;
     }
@@ -188,6 +208,7 @@ export async function fetchCompetitorPage(page: number, options: CompetitorFetch
       `Competitor feed: HTTP ${candidate.status} for page ${page}, retrying in ${Math.round(wait / 100) / 10}s ` +
         `(attempt ${attempt + 2} of ${MAX_ATTEMPTS})`,
     );
+    options.onRetry?.();
     await sleep(wait);
   }
   if (!res) throw new Error(`Competitor feed: request failed (${lastErr})`);
@@ -196,11 +217,20 @@ export async function fetchCompetitorPage(page: number, options: CompetitorFetch
   return body.products;
 }
 
-/** One message for every way the walk can run out of wall clock. */
-function deadlineMessage(pagesRead: number, rows: number): string {
+/**
+ * One message for every way the walk can run out of wall clock, naming which
+ * of the two it was: retries mean the competitor was throttling, no retries at
+ * all mean nothing went wrong except the clock — the deadline is mis-sized for
+ * a catalogue this size.
+ */
+function deadlineMessage(pagesRead: number, rows: number, retries: number): string {
+  const cause =
+    retries > 0
+      ? `after ${retries} retr${retries === 1 ? 'y' : 'ies'} — the competitor was throttling`
+      : 'with no retries — the walk was simply too slow, so the deadline is mis-sized';
   return (
     `Competitor feed: the ${FETCH_DEADLINE_MS / 60_000}-minute fetch deadline passed after ` +
-    `${pagesRead} of up to ${MAX_PAGES} pages (${rows} rows read)`
+    `${pagesRead} of up to ${MAX_PAGES} pages (${rows} rows read), ${cause}`
   );
 }
 
@@ -216,16 +246,21 @@ export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {
   const now = options.now ?? Date.now;
   const deadlineAt = now() + FETCH_DEADLINE_MS;
   const all: unknown[] = [];
+  let retries = 0;
+  const onRetry = () => {
+    retries += 1;
+    options.onRetry?.();
+  };
   for (let page = 1; page <= MAX_PAGES; page++) {
     if (page > 1) {
-      if (now() + PAGE_DELAY_MS >= deadlineAt) throw new Error(deadlineMessage(page - 1, all.length));
+      if (now() + PAGE_DELAY_MS >= deadlineAt) throw new Error(deadlineMessage(page - 1, all.length, retries));
       await sleep(PAGE_DELAY_MS);
     }
     let rows: unknown[];
     try {
-      rows = await fetchCompetitorPage(page, { ...options, deadlineAt });
+      rows = await fetchCompetitorPage(page, { ...options, deadlineAt, onRetry });
     } catch (err) {
-      if (err instanceof CompetitorDeadlineError) throw new Error(deadlineMessage(page - 1, all.length));
+      if (err instanceof CompetitorDeadlineError) throw new Error(deadlineMessage(page - 1, all.length, retries));
       throw err;
     }
     if (rows.length === 0) break;

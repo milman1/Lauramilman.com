@@ -27,6 +27,9 @@ function entry(
     missingChannels,
     price,
     variantCount,
+    // Mirrors the real read: the first variant's price survives even when the
+    // multi-variant rule makes `price` unreadable.
+    firstVariantPrice: price,
   };
 }
 
@@ -174,11 +177,36 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
     expect(one.priceUsd).toBe(68100);
   });
 
-  it('stands down and counts a piece with more than one variant', () => {
+  it('stands down and counts a multi-variant piece whose price would have fallen', () => {
     const one = item();
-    const stats = pinLivePricesWhenCompetitorUnavailable([one], [live(69800, { variantCount: 3 })]);
+    const stats = pinLivePricesWhenCompetitorUnavailable(
+      [one],
+      [live(null, { variantCount: 3, firstVariantPrice: 69800 })],
+    );
     expect(stats).toEqual({ pinned: 0, multiVariant: 1 });
     expect(one.priceUsd).toBe(68100);
+  });
+
+  it('does not count a multi-variant piece that was never in question', () => {
+    const rising = item({ priceUsd: 70000 });
+    const unreadable = item({ priceUsd: 70000, sourceHandle: 'other-piece-rr9688' });
+    expect(
+      pinLivePricesWhenCompetitorUnavailable(
+        [rising],
+        [live(null, { variantCount: 3, firstVariantPrice: 69800 })],
+      ),
+    ).toEqual({ pinned: 0, multiVariant: 0 });
+    expect(
+      pinLivePricesWhenCompetitorUnavailable(
+        [unreadable],
+        [
+          {
+            ...live(null, { variantCount: 3, firstVariantPrice: null }),
+            handle: handleFor(unreadable),
+          },
+        ],
+      ),
+    ).toEqual({ pinned: 0, multiVariant: 0 });
   });
 
   it('ignores a piece that is not on the store yet', () => {

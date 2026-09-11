@@ -352,8 +352,9 @@ npm run sync:backvault       # live (needs Shopify env vars)
 
    **If the competitor fetch fails** — each page is retried up to 4 times on
    429/5xx honouring a strict `Retry-After`, pages are paced 250 ms apart, and
-   the whole walk is bounded by a 6-minute wall clock so a throttled retailer
-   can never run the job for hours — the run keeps going on the flat markup and
+   the whole walk is bounded by a 10-minute wall clock so a throttled retailer
+   can never run the job for hours (the competitor's catalogue is roughly 80
+   pages of 250; the job itself is capped at 60 minutes) — the run keeps going on the flat markup and
    records a **warning** rather than an error, so a throttled competitor never
    fails the job. Any piece whose recomputed price would fall below the ticket
    already on the store is still updated in full (images, cost, tags, status,

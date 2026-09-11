@@ -44,10 +44,29 @@ vi.mock('../../src/backvault/catalog.js', async (importOriginal) => ({
   fetchBackVaultCatalog: async () => state.catalog,
 }));
 
+/** Every productSet input a LIVE run sent, in order. */
+const productSets: Array<Record<string, any>> = [];
+
 vi.mock('../../src/shopify.js', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../src/shopify.js')>();
   const channels = ['Online Store', 'Shop', 'Google & YouTube', 'Facebook & Instagram', 'Pinterest'];
   class StubClient {
+    async productSet(input: Record<string, unknown>) {
+      productSets.push(input as Record<string, any>);
+      return { id: 'gid://shopify/Product/1', handle: input.handle, inventoryItemId: null, inventoryQuantity: null, errors: [] };
+    }
+    async publishToChannels(): Promise<string[]> {
+      return [];
+    }
+    async stockInventoryItem(): Promise<string[]> {
+      return [];
+    }
+    async archiveProduct(): Promise<string[]> {
+      return [];
+    }
+    async redirectProductUrl(): Promise<string[]> {
+      return [];
+    }
     async verifyAuth(): Promise<void> {}
     async grantedScopes(): Promise<string[]> {
       return ['write_products', 'write_publications', 'write_inventory', 'read_locations'];
@@ -91,6 +110,7 @@ function catalogEntry(overrides: Record<string, unknown> = {}) {
     inventoryQuantity: 1,
     price: 69800,
     variantCount: 1,
+    firstVariantPrice: 69800,
     ...overrides,
   };
 }
@@ -99,6 +119,7 @@ let exitCodeBefore: number | string | null | undefined;
 
 beforeEach(() => {
   writes.clear();
+  productSets.length = 0;
   state.competitor = async () => [];
   state.catalog = [];
   exitCodeBefore = process.exitCode;
@@ -173,7 +194,7 @@ describe('a failed competitor fetch', () => {
   });
 
   it('stands down on a multi-variant piece and names it in the warning', async () => {
-    state.catalog = [catalogEntry({ price: null, variantCount: 4 })];
+    state.catalog = [catalogEntry({ price: null, variantCount: 4, firstVariantPrice: 69800 })];
     await run(['--dry-run']);
     const { json, md } = report();
     expect(json.pricePinned).toBe(0);
@@ -185,14 +206,17 @@ describe('a failed competitor fetch', () => {
 
   it('still reaches the report when the fetch runs out of wall clock', async () => {
     state.competitor = async () => {
-      throw new Error('Competitor feed: the 6-minute fetch deadline passed after 12 of up to 200 pages (3000 rows read)');
+      throw new Error(
+        'Competitor feed: the 10-minute fetch deadline passed after 12 of up to 200 pages (3000 rows read), ' +
+          'after 9 retries — the competitor was throttling',
+      );
     };
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json, md } = report();
     expect(json.errors).toEqual([]);
     expect(process.exitCode).toBe(0);
-    expect(md).toContain('- FAILED: Competitor feed: the 6-minute fetch deadline passed after 12');
+    expect(md).toContain('- FAILED: Competitor feed: the 10-minute fetch deadline passed after 12');
     expect(json.pricePinned).toBe(1);
   });
 });
@@ -208,5 +232,61 @@ describe('a successful competitor fetch', () => {
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
     expect(md).not.toContain('## Warnings');
     expect(process.exitCode).toBe(0);
+  });
+});
+
+/**
+ * The ordering the whole repair rests on: the pin must run BEFORE the content
+ * hash is computed. Move it after, and the piece is written at the pinned price
+ * with a hash taken from the flat price, so every later run finds a mismatch
+ * and rewrites it forever. Two consecutive degraded LIVE runs over the same
+ * piece, with run 2 reading back the hash run 1 actually stored, is what makes
+ * that visible — and this also fails if the pin's effect is removed, because
+ * run 1 would write the flat price.
+ */
+describe('the price pin runs before the content hash (two degraded runs)', () => {
+  beforeEach(() => {
+    state.competitor = async () => {
+      throw new Error('Competitor feed: HTTP 429 for page 61');
+    };
+  });
+
+  /** The price and content_hash productSet actually sent. */
+  function wrote(input: Record<string, any>): { price: string; hash: string } {
+    const metafield = (input.metafields as Array<Record<string, string>>).find((m) => m.key === 'content_hash');
+    return { price: String(input.variants[0].price), hash: String(metafield!.value) };
+  }
+
+  it('writes the live price in run 1, then finds nothing to do in run 2', async () => {
+    // Run 1: the piece is on the store at 69,800 (a competitor match), the
+    // competitor is unreachable, so the recomputed flat price is 68,100.
+    state.catalog = [catalogEntry({ contentHash: 'stale-hash' })];
+    await run([]);
+    const firstRun = report().json;
+    expect(firstRun.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
+    expect(firstRun.pricePinned).toBe(1);
+    expect(productSets).toHaveLength(1);
+
+    const written = wrote(productSets[0]!);
+    // The pinned ticket, not the flat 68100.00 the competitor-less run computed.
+    expect(written.price).toBe('69800.00');
+
+    // Run 2: same degraded conditions, the store now holding exactly what run 1
+    // wrote. The hash must match, or the piece is rewritten every week forever.
+    productSets.length = 0;
+    state.catalog = [catalogEntry({ contentHash: written.hash })];
+    await run([]);
+    const secondRun = report().json;
+    expect(secondRun.decisions[0]).toMatchObject({ action: 'skip', reason: 'unchanged' });
+    expect(productSets).toHaveLength(0);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it('writes the computed price when the competitor fetch succeeds', async () => {
+    state.competitor = async () => [];
+    state.catalog = [catalogEntry({ contentHash: 'stale-hash' })];
+    await run([]);
+    expect(report().json.pricePinned).toBe(0);
+    expect(wrote(productSets[0]!).price).toBe('68100.00');
   });
 });

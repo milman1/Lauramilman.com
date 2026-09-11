@@ -65,6 +65,12 @@ export interface BackVaultCatalogEntry {
   price: number | null;
   /** Variants on the product. >1 is why `price` can be null on a priced piece. */
   variantCount: number;
+  /**
+   * The first variant's price whatever the variant count — never used to price
+   * anything, only to tell a multi-variant piece that WOULD have been pinned
+   * from one that was never in question, so the warning counts the real ones.
+   */
+  firstVariantPrice: number | null;
 }
 
 /**
@@ -134,7 +140,9 @@ export async function fetchBackVaultCatalog(
       // missing price stays null rather than going through Number().
       // A multi-variant product reads as unpriced: `variants(first: 1)` says
       // nothing about what the other variants cost.
-      const price = variant?.price == null || variantCount > 1 ? Number.NaN : Number(variant.price);
+      const rawPrice = variant?.price == null ? Number.NaN : Number(variant.price);
+      const firstVariantPrice = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+      const price = variantCount > 1 ? Number.NaN : rawPrice;
       entries.push({
         id: node.id,
         handle: node.handle,
@@ -148,6 +156,7 @@ export async function fetchBackVaultCatalog(
         inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
         price: Number.isFinite(price) && price > 0 ? price : null,
         variantCount,
+        firstVariantPrice,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

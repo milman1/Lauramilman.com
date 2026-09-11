@@ -193,6 +193,9 @@ describe('fetchBackVaultCatalog response parsing', () => {
     const entry = await priceOf({ variantsCount: { count: 3 } });
     expect(entry.price).toBeNull();
     expect(entry.variantCount).toBe(3);
+    // Kept so the warning can count the multi-variant pieces that would
+    // actually have been pinned, rather than every one in the run.
+    expect(entry.firstVariantPrice).toBe(69800);
   });
 
   it('falls back to the returned variant count when variantsCount is absent', async () => {

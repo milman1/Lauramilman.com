@@ -242,20 +242,23 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
     pricePinned = pins.pinned;
     multiVariantUnchecked = pins.multiVariant;
-    if (pricePinned > 0 || multiVariantUnchecked > 0) {
-      warnings.push(
+    const notes: string[] = [];
+    if (pricePinned > 0) {
+      notes.push(
         `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
-          '(the competitor comparison data was missing, so a lower flat price was not written)' +
-          (multiVariantUnchecked > 0
-            ? `; ${multiVariantUnchecked} piece${multiVariantUnchecked === 1 ? '' : 's'} with more than one ` +
-              `variant ${multiVariantUnchecked === 1 ? 'has' : 'have'} no readable live price and ` +
-              `${multiVariantUnchecked === 1 ? 'was' : 'were'} written normally`
-            : ''),
+          '(the competitor comparison data was missing, so a lower flat price was not written)',
       );
-      console.warn(
-        `Price pinned on ${pricePinned} piece(s) because the competitor fetch failed` +
-          (multiVariantUnchecked > 0 ? `; ${multiVariantUnchecked} multi-variant piece(s) not checked` : ''),
+    }
+    if (multiVariantUnchecked > 0) {
+      notes.push(
+        `${multiVariantUnchecked} piece${multiVariantUnchecked === 1 ? '' : 's'} with more than one variant ` +
+          `${multiVariantUnchecked === 1 ? 'has' : 'have'} no readable live price and ` +
+          `${multiVariantUnchecked === 1 ? 'was' : 'were'} written at the computed price`,
       );
+    }
+    if (notes.length > 0) {
+      warnings.push(notes.join('; '));
+      console.warn(notes.join('; '));
     }
   }
 

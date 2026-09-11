@@ -19,7 +19,11 @@ export interface DesiredEntry {
 export interface PricePinStats {
   /** Pieces whose computed price was replaced by the price already on the store. */
   pinned: number;
-  /** Pieces skipped by the check because their live price cannot be read (multi-variant). */
+  /**
+   * Pieces the check stood down on because they have more than one variant AND
+   * whose first variant says the price would have fallen — the ones a reader
+   * should look at, not every multi-variant piece in the run.
+   */
   multiVariant: number;
 }
 
@@ -56,7 +60,12 @@ export function pinLivePricesWhenCompetitorUnavailable(
     const have = catalogByHandle.get(handleFor(item));
     if (!have) continue; // a new piece has no live price to protect
     if (have.variantCount > 1) {
-      stats.multiVariant += 1;
+      // Only worth naming when the first variant says this piece would have
+      // been pinned; a multi-variant piece whose price is rising or unchanged
+      // was never in question.
+      if (typeof have.firstVariantPrice === 'number' && item.priceUsd < have.firstVariantPrice) {
+        stats.multiVariant += 1;
+      }
       continue;
     }
     if (typeof have.price !== 'number') continue;
