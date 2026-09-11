@@ -68,11 +68,11 @@ describe('titles', () => {
 
   it('builds watch titles from the listing schema when condition maps', () => {
     // Fixture condition is Excellent → grade → Pre-Owned title word.
-    expect(titleFor(watch())).toBe('Pre-Owned Rolex Submariner 126610LN');
+    expect(titleFor(watch())).toBe('Pre-Owned Rolex Submariner 126610LN 41mm');
   });
 
   it('falls back to brand model reference when condition is unrecognized', () => {
-    expect(titleFor(watch({ condition: 'SLIDER' }))).toBe('Rolex Submariner 126610LN');
+    expect(titleFor(watch({ condition: 'SLIDER' }))).toBe('Rolex Submariner 126610LN 41mm');
   });
 });
 
@@ -91,7 +91,7 @@ describe('SEO formulas', () => {
 
   it('uses brand, model, reference, condition, and product type for watches', () => {
     expect(seoTitleFor(watch())).toBe(
-      'Rolex Submariner 126610LN – Pre-Owned Watch',
+      'Rolex Submariner 126610LN Pre-Owned 41mm Watch',
     );
     expect(seoDescriptionFor(watch())).toContain(
       'Authenticated by Laura Milman New York.',
@@ -108,10 +108,12 @@ describe('SEO formulas', () => {
       model: 'Royal Oak Offshore Selfwinding Chronograph',
       reference: '26420SO.OO.A002CA.01',
     });
-    for (const item of [longStone, longWatch]) {
-      expect(seoTitleFor(item).length).toBeLessThanOrEqual(60);
-      expect(seoDescriptionFor(item).length).toBeLessThanOrEqual(160);
-    }
+    expect(seoTitleFor(longStone).length).toBeLessThanOrEqual(60);
+    // Watches may exceed the 60-character target to preserve their reference,
+    // but the marketplace-compatible hard limit remains 80.
+    expect(seoTitleFor(longWatch).length).toBeLessThanOrEqual(80);
+    expect(seoDescriptionFor(longStone).length).toBeLessThanOrEqual(160);
+    expect(seoDescriptionFor(longWatch).length).toBeLessThanOrEqual(160);
   });
 });
 
@@ -300,6 +302,15 @@ describe('updates target the existing product by id', () => {
     expect(input.handle).toBe('nd-bd-1234');
   });
 
+  it('fails closed before building an ACTIVE product when fixed watch identity cannot fit', () => {
+    const impossible = watch({
+      brand: 'Rolex',
+      model: 'X'.repeat(90),
+      reference: '126610LN',
+    });
+    expect(() => buildProductSetInput(impossible, priced(), at)).toThrow(/watch_listing|needs review/i);
+  });
+
   it('an update leaves existing media alone rather than re-downloading it', () => {
     const input = buildProductSetInput(naturalStone(), priced(), at, { id: 'gid://shopify/Product/1', imageCount: 1 });
     // `files` absent, not empty — an empty list would detach every image.
@@ -419,11 +430,11 @@ describe('updates target the existing product by id', () => {
 
   it('watch creates carry schema SEO and prose description (specs are metafields)', () => {
     const input = buildProductSetInput(watch(), priced(), at);
-    expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN');
+    expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN 41mm');
     expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
-      title: 'Rolex Submariner 126610LN – Pre-Owned Watch',
+      title: 'Rolex Submariner 126610LN Pre-Owned 41mm Watch',
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
   });
@@ -431,7 +442,7 @@ describe('updates target the existing product by id', () => {
   it('unknown-condition watches use neutral prose and remain active when media is present', () => {
     const input = buildProductSetInput(watch({ condition: 'SLIDER' }), priced(), at);
     expect(input.status).toBe('ACTIVE');
-    expect(input.title).toBe('Rolex Submariner 126610LN');
+    expect(input.title).toBe('Rolex Submariner 126610LN 41mm');
     expect(String(input.descriptionHtml)).toContain('This Rolex Submariner 126610LN');
     expect(String(input.descriptionHtml)).not.toContain('<ul>');
     expect(String(input.descriptionHtml)).not.toMatch(/Pre-Owned|Unworn/);

@@ -114,9 +114,9 @@ export function watchFeedRecordFrom(item: WatchItem): WatchFeedRecord {
  * Schema listing when condition maps cleanly; unknown values now produce a
  * neutral listing without inventing a Pre-Owned/Unworn classification.
  */
-export function watchListingFor(item: WatchItem): WatchListing | null {
+export function watchListingFor(item: WatchItem): WatchListing {
   const listing = buildWatchListing(watchFeedRecordFrom(item));
-  if ('needsReview' in listing) return null;
+  if ('needsReview' in listing) throw new Error(`watch ${item.stockRef} needs review: ${listing.reason}`);
   return listing;
 }
 

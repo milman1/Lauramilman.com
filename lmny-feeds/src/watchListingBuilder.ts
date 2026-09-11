@@ -3,13 +3,11 @@
  *
  * Pure, side-effect-free transform: raw feed record in, Shopify-ready
  * listing fields out. Wired into product.ts for the Belgium Dia watch
- * ingest path; also mirrored by scripts/lmny_watches_backfill.py for the
- * one-time backfill of already-live watches.
+ * ingest path. The retired scripts/lmny_watches_backfill.py must not be used
+ * to overwrite this structured-source copy.
  *
  * Implements docs/watch-listing-schema.md exactly. If you change a rule,
- * change it there first, then here, then in lmny_watches_backfill.py —
- * all three must agree or titles will differ depending on whether a watch
- * came in live or through the backfill.
+ * change it there first, then here.
  */
 
 // ---------------------------------------------------------------------------
@@ -152,15 +150,23 @@ const MONTHS: Record<string, string> = {
 
 /** "2014" -> "2014". "FEB-2016" -> "February 2016". Anything else -> passed through. */
 function normalizeYear(year: string | null | undefined): string | null {
-  if (!year) return null;
-  const bare = year.match(/^\d{4}$/);
-  if (bare) return year;
-  const monthYear = year.match(/^([A-Za-z]{3})-(\d{4})$/);
+  const raw = String(year ?? '').trim();
+  if (!raw || /^(?:0|n\/?a|-|unknown)$/i.test(raw)) return null;
+  const bare = raw.match(/^\d{4}$/);
+  if (bare) return raw;
+  const monthYear = raw.match(/^([A-Za-z]{3})-(\d{4})$/);
   if (monthYear) {
     const month = MONTHS[monthYear[1]!.toUpperCase()];
     if (month) return `${month} ${monthYear[2]}`;
   }
-  return year;
+  return raw;
+}
+
+export function normalizeCaseSize(size: number | string | null | undefined): string | null {
+  const raw = String(size ?? '').trim();
+  const match = raw.match(/^(\d+(?:\.\d+)?)\s*(?:mm)?$/i);
+  if (!match || Number(match[1]) <= 0) return null;
+  return `${match[1]}mm`;
 }
 
 /** Truncate at the last full word at or under maxLen. Never cuts mid-word. */
@@ -168,7 +174,7 @@ function truncateAtWord(s: string, maxLen: number): string {
   if (s.length <= maxLen) return s;
   const cut = s.slice(0, maxLen);
   const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : '').trim();
 }
 
 /** Preserve the commercial-intent suffix and shorten only model detail. */
@@ -194,20 +200,20 @@ function yesNo(v: boolean | null | undefined): string | null {
  * Positive = extra links included; negative = links short of a full bracelet.
  */
 export function linkClause(link: number | string | null | undefined): string | null {
-  if (link === null || link === undefined) return null;
+  if (link === null || link === undefined) return 'Not specified';
   const raw = String(link).trim();
-  if (!raw) return null;
+  if (!raw) return 'Not specified';
   const n = Number(raw);
-  if (!Number.isFinite(n) || n === 0) return null;
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n === 0) return 'Not specified';
   if (n > 0) {
     return n === 1
-      ? 'It includes 1 additional bracelet link'
-      : `It includes ${n} additional bracelet links`;
+      ? '1 additional bracelet link included'
+      : `${n} additional bracelet links included`;
   }
-  const missing = Math.abs(Math.trunc(n));
+  const missing = Math.abs(n);
   return missing === 1
-    ? 'The bracelet is 1 link short of a full set'
-    : `The bracelet is ${missing} links short of a full set`;
+    ? '1 bracelet link missing'
+    : `${missing} bracelet links missing`;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,17 +230,24 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const grade = mapping?.grade ?? null;
 
   const identity = `${brand} ${model} ${reference}`;
-  const title = titleWord ? `${titleWord} ${identity}` : identity;
+  const fixed = [titleWord, brand, reference].filter(Boolean).join(' ');
+  const modelBudget = 80 - fixed.length - 1;
+  const titleModel = truncateAtWord(model, modelBudget);
+  if (!titleModel || `${fixed} ${titleModel}`.length > 80) {
+    return { needsReview: true, reason: 'condition, brand, and reference leave no safe model title within 80 characters', record };
+  }
+  const titleIdentity = `${brand} ${titleModel} ${reference}`;
+  const baseTitle = titleWord ? `${titleWord} ${titleIdentity}` : titleIdentity;
 
   const yearClause = year ? ` from ${escapeHtml(year)}` : '';
   const gradeClause = grade ? ` It is in ${grade.toLowerCase()} condition.` : '';
   const bpClause = boxPaperClause(record.box, record.paper);
-  const linkText = linkClause(record.link);
+  const linkText = linkClause(record.link)!;
   const openingClause = ` is offered by Laura Milman New York${bpClause ? ` ${bpClause}` : ''}`;
-  const linkSentence = linkText ? ` ${linkText}.` : '';
 
   // Specs render in the theme's `.product-specs` grid via custom.* metafields
-  // (same PDP chrome as jewelry). Description keeps prose only — no HTML table.
+  // (same PDP chrome as jewelry), and the description repeats the buyer-facing
+  // source facts as a compact labeled block rather than an HTML table.
   const dial = record.dial ? titleCase(record.dial) : null;
   const bezel = record.bezel ? titleCase(record.bezel) : null;
   const bracelet = record.bracelet ? titleCase(record.bracelet) : null;
@@ -245,7 +258,12 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
     record.link !== null && record.link !== undefined && String(record.link).trim() !== ''
       ? String(record.link).trim()
       : null;
-  const caseSize = record.caseSizeMm ? `${String(record.caseSizeMm).trim()}mm` : null;
+  const caseSize = normalizeCaseSize(record.caseSizeMm);
+  const titleDetails = [caseSize, year].filter(Boolean) as string[];
+  let title = baseTitle;
+  for (const detail of titleDetails) {
+    if (`${title} ${detail}`.length <= 80) title += ` ${detail}`;
+  }
 
   const trustParagraph = CONFIG.trustLine ? `<p>${escapeHtml(CONFIG.trustLine)}</p>` : '';
 
@@ -257,17 +275,25 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const descriptionIdentity = titleWord ? `${titleWord} ${brand} ${model} ${reference}` : identity;
   const descriptionHtml =
     `<p>This ${escapeHtml(descriptionIdentity)}` +
-    `${yearClause}${openingClause}.${linkSentence}${gradeClause}</p>` +
+    `${yearClause}${openingClause}.${gradeClause}</p>` +
+    `<p><strong>Case size:</strong> ${escapeHtml(caseSize ?? 'Not specified')}<br>` +
+    `<strong>Year:</strong> ${escapeHtml(year ?? 'Not specified')}<br>` +
+    `<strong>Bracelet links:</strong> ${escapeHtml(linkText)}</p>` +
     notesParagraph +
     trustParagraph;
 
-  const seoTitle = fitWithSuffix(identity, titleWord ? `– ${titleWord} Watch` : 'Watch', 60);
+  let seoTitle = titleIdentity;
+  if (titleWord && `${seoTitle} ${titleWord}`.length <= 80) seoTitle += ` ${titleWord}`;
+  for (const detail of [caseSize, year, 'Watch'].filter(Boolean) as string[]) {
+    if (`${seoTitle} ${detail}`.length <= 60) seoTitle += ` ${detail}`;
+  }
 
   const gradeSuffix = grade ? `, ${grade.toLowerCase()} condition` : '';
-  let seoDescription = titleWord
-    ? `Shop this ${titleWord.toLowerCase()} ${identity}${gradeSuffix}. Authenticated by Laura Milman New York.`
-    : `Explore this ${identity} watch from Laura Milman New York.`;
-  seoDescription = truncateAtWord(seoDescription, 160);
+  const factParts = [caseSize ? `${caseSize} case` : null, year ? `year ${year}` : null, linkText !== 'Not specified' ? linkText : null].filter(Boolean);
+  const seoLead = titleWord
+    ? `Shop this ${titleWord.toLowerCase()} ${identity}${gradeSuffix}${factParts.length ? ` with ${factParts.join(', ')}` : ''}.`
+    : `Explore this ${identity} watch${factParts.length ? ` with ${factParts.join(', ')}` : ''}.`;
+  const seoDescription = fitWithSuffix(seoLead, 'Authenticated by Laura Milman New York.', 160);
 
   const conditionTag = titleWord ? `${titleWord} Watches` : record.conditionRaw.trim();
   const tags = Array.from(new Set([brand, conditionTag, reference, model, 'Watches'].filter(Boolean)));
