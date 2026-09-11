@@ -7,17 +7,27 @@
  *   npx tsx scripts/journal-draft.ts --count=3     # how many drafts to write (default 2)
  *
  * What it does, in order:
- *   1. Gathers this week's hooks (red carpet and premiere jewelry, watch
+ *   0. Preflight: resolves the Shopify token and runs one cheap query that
+ *      touches the blog. On failure — most likely the token missing
+ *      read_content / write_content — throws a plain-language error and
+ *      writes out/journal-report.md recording that the run stopped here, all
+ *      before the Anthropic client exists. See recipe F backlog note,
+ *      2026-09-11: a run that reached this failure only after gathering
+ *      hooks spent real Anthropic money for nothing.
+ *   1. Every Shopify read the rest of the job depends on: the store's live
+ *      ACTIVE products (estate, watch, fine, lab-grown) and every collection,
+ *      so a draft can only link to handles that exist, and the blog's own
+ *      published articles as the voice reference.
+ *   2. Gathers this week's hooks (red carpet and premiere jewelry, watch
  *      sightings on athletes and musicians, auction results, brand launches,
  *      nightlife openings in New York, Miami, Los Angeles, Las Vegas) with
  *      Claude Sonnet 5 and the web_search server tool, falling back to a fixed
  *      list of public RSS feeds read with plain fetch when web search is not
  *      available to the API key. Shortlists ten with a why and a source URL
- *      and writes out/journal-hooks.md.
- *   2. Reads the store's live ACTIVE products (estate, watch, fine, lab-grown)
- *      and every collection, so a draft can only link to handles that exist.
+ *      and writes out/journal-hooks.md. This is the first Anthropic spend of
+ *      the run — everything above it is a Shopify read.
  *   3. Writes `count` drafts with Claude Opus 5 in the Journal voice, using the
- *      blog's own published articles as the voice reference.
+ *      products, collections and voice reference read in step 1.
  *   4. Runs the guardrails in `checkDraft` (below) over every draft and
  *      regenerates once with the violations fed back. A draft that fails twice
  *      is rejected and never reaches Shopify.
@@ -861,6 +871,46 @@ async function fetchBlogId(client: ShopifyClient): Promise<string> {
   return blog.id;
 }
 
+/**
+ * What the preflight tells the merchant when the token cannot read the blog:
+ * the actual capability that is missing and what fixes it, not just the raw
+ * GraphQL "access denied" the API returns.
+ */
+const CONTENT_SCOPES_MESSAGE =
+  "Shopify GraphQL: access denied for blogs. The Journal job needs the read_content and write_content scopes " +
+  "on the app's access token; the sync scopes alone are not enough.";
+
+/**
+ * Preflight, run before anything else in `run()` — including before the
+ * Anthropic client is created. 2026-09-11: a dry run spent six minutes and
+ * real Anthropic spend gathering hooks, then died on this same query because
+ * the token lacked content scopes. Reuses `fetchBlogId`, the cheapest query
+ * that actually touches the field the job depends on, so a success here
+ * doubles as the blog lookup the rest of the run needs (its return value is
+ * reused, not re-fetched).
+ *
+ * Only the specific "access denied" failure is turned into the friendlier
+ * message; any other failure (the blog genuinely missing, a network error)
+ * is rethrown as-is; it is not this job's access scopes.
+ */
+async function preflightBlogAccess(client: ShopifyClient): Promise<string> {
+  try {
+    return await fetchBlogId(client);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!/access denied/i.test(message)) throw err;
+    let scopesClause = '';
+    try {
+      const scopes = await client.grantedScopes();
+      scopesClause = ` Granted scopes: ${scopes.join(', ') || 'none'}.`;
+    } catch {
+      // The scope check itself needs no special access, but if it still
+      // fails the access-denied message above already says enough.
+    }
+    throw new Error(`${CONTENT_SCOPES_MESSAGE}${scopesClause} No Anthropic API calls were made.`);
+  }
+}
+
 function blogNumericId(blogGid: string): string {
   const m = /(\d+)\s*$/.exec(blogGid);
   if (!m) throw new Error(`Unrecognised blog id: ${blogGid}`);
@@ -1103,16 +1153,36 @@ async function gatherHooks(
       messages = continuationMessages(HOOK_INSTRUCTIONS, next.content);
     }
   } catch (err) {
-    searchNote = `web_search call failed: ${err instanceof Error ? err.message : String(err)}`;
+    const errMessage = err instanceof Error ? err.message : String(err);
+    // "Server tool use limit exceeded" is an org-level cap on the web_search
+    // server tool, not a network failure — the 2026-09-11 run hit it on every
+    // call and the RSS fallback correctly took over. Called out by name here
+    // so a reader of the report does not have to guess which kind of outage
+    // this was from a generic "call failed" line.
+    searchNote = /server tool use limit exceeded/i.test(errMessage)
+      ? `web_search unavailable: Server tool use limit exceeded — an org-level limit on the web_search server tool, not a network failure (${errMessage})`
+      : `web_search call failed: ${errMessage}`;
     message = null;
   }
 
   if (message !== null) {
-    const searchFailed = message.content.some(
-      (b) => b.type === 'web_search_tool_result' && !Array.isArray(b.content),
-    );
+    // "too_many_requests" / "max_uses_exceeded" is the same org-level web_search
+    // limit as the thrown-error case above, just surfaced as a tool result
+    // instead of an exception; called out the same way so the report reads
+    // the same regardless of which shape the API used.
+    let searchErrorCode: string | undefined;
+    const searchFailed = message.content.some((b) => {
+      if (b.type !== 'web_search_tool_result' || Array.isArray(b.content)) return false;
+      searchErrorCode = b.content.error_code;
+      return true;
+    });
     const searchRan = message.content.some((b) => b.type === 'server_tool_use');
-    if (searchFailed) searchNote = 'web_search returned an error result';
+    if (searchFailed) {
+      searchNote =
+        searchErrorCode === 'too_many_requests' || searchErrorCode === 'max_uses_exceeded'
+          ? `web_search unavailable: Server tool use limit exceeded — an org-level limit on the web_search server tool, not a network failure (error_code: ${searchErrorCode})`
+          : `web_search returned an error result${searchErrorCode ? ` (error_code: ${searchErrorCode})` : ''}`;
+    }
     if (!searchRan) searchNote = searchNote ?? 'web_search did not run';
 
     if (!searchFailed && searchRan) {
@@ -1391,22 +1461,41 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const errors: string[] = [];
   console.log(`Journal drafting job starting (${opts.dryRun ? 'DRY RUN' : 'LIVE'}, count=${opts.count})`);
 
-  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
-  const anthropic = new Anthropic();
-  const { domain, token } = await resolveToken();
-  const shopify = new ShopifyClient(domain, token);
-  const { shop } = await shopify.verifyAuth();
-  console.log(`Shopify: ${shop}`);
-
+  // out/ must exist before the preflight can write a report on failure, so
+  // this comes before anything that can fail.
   await mkdir(OUT_DIR, { recursive: true });
 
-  // 1. Hooks.
-  const { hooks, source: hookSource, note: hookNote } = await gatherHooks(anthropic);
-  await writeFile(`${OUT_DIR}/journal-hooks.md`, renderHooksMarkdown(hooks, hookSource, startedAt.toISOString()));
-  console.log(`Hooks: ${hooks.length} shortlisted via ${hookSource}`);
+  // 0. Preflight — before the Anthropic client even exists. 2026-09-11: a dry
+  //    run spent six minutes and real Anthropic spend on hooks, then died on
+  //    this same query because the token lacked content scopes. Doubles as
+  //    the blog lookup the rest of the run needs: its id is reused below,
+  //    never re-fetched.
+  const { domain, token } = await resolveToken();
+  const shopify = new ShopifyClient(domain, token);
+  let blogId: string;
+  try {
+    blogId = await preflightBlogAccess(shopify);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    await writeFile(
+      `${OUT_DIR}/journal-report.md`,
+      renderPreflightFailureReport({
+        startedAt: startedAt.toISOString(),
+        finishedAt: new Date().toISOString(),
+        dryRun: opts.dryRun,
+        message,
+      }),
+    );
+    console.error(message);
+    throw err instanceof Error ? err : new Error(message);
+  }
+  const { shop } = await shopify.verifyAuth();
+  console.log(`Shopify: ${shop} — preflight OK, blog "${BLOG_HANDLE}" is readable`);
 
-  // 2. Catalogue.
-  const blogId = await fetchBlogId(shopify);
+  // 1. Catalogue and voice reference — every Shopify read the job depends on,
+  //    ahead of any Anthropic call: the blog lookup above, the existing
+  //    articles read for voice reference, and the product and collection
+  //    catalogue.
   const [products, collections, voiceSamples] = await Promise.all([
     fetchProducts(shopify),
     fetchCollections(shopify),
@@ -1424,6 +1513,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const system = articleSystemPrompt(voiceSamples);
   const promptProducts = sampleProductsForPrompt(products);
   const catalogText = catalogPrompt(promptProducts, collections);
+
+  // 2. Hooks — the first Anthropic spend of the run, only after every
+  //    Shopify read above has succeeded.
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
+  const anthropic = new Anthropic();
+  const { hooks, source: hookSource, note: hookNote } = await gatherHooks(anthropic);
+  await writeFile(`${OUT_DIR}/journal-hooks.md`, renderHooksMarkdown(hooks, hookSource, startedAt.toISOString()));
+  console.log(`Hooks: ${hooks.length} shortlisted via ${hookSource}`);
 
   // 3. Drafts.
   const outcomes: DraftOutcome[] = [];
@@ -1583,6 +1680,43 @@ export interface StaleDraft {
   title: string;
   createdAt: string;
   adminUrl: string;
+}
+
+export interface PreflightFailureReportInput {
+  startedAt: string;
+  finishedAt: string;
+  dryRun: boolean;
+  /** The preflight error message, already worded for a human. */
+  message: string;
+}
+
+/**
+ * Written instead of `renderReport` when the preflight fails: no hooks were
+ * gathered, no catalogue was read, no drafts were attempted, so a normal
+ * report full of zeros would read as "the run did nothing" rather than "the
+ * run correctly refused to spend money before checking access". This is what
+ * the workflow's summary step shows instead of "No report generated".
+ */
+export function renderPreflightFailureReport(input: PreflightFailureReportInput): string {
+  return [
+    '# Journal drafting run',
+    '',
+    `- Mode: ${input.dryRun ? 'DRY RUN' : 'LIVE'} — stopped at preflight, before any work started`,
+    `- Started: ${input.startedAt}`,
+    `- Finished: ${input.finishedAt}`,
+    '',
+    '## Preflight',
+    '',
+    `Stopped before hook gathering or drafting: ${input.message}`,
+    '',
+    'Nothing was spent: no Anthropic API calls were made, no hooks were gathered, no drafts were ' +
+      'written, and no Shopify writes were attempted. Fix the access token and rerun.',
+    '',
+    '## Errors',
+    '',
+    `- ${input.message}`,
+    '',
+  ].join('\n');
 }
 
 export function renderReport(input: ReportInput): string {
