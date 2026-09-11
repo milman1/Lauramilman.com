@@ -51,6 +51,11 @@ async function resolveToken(): Promise<{ domain: string; token: string }> {
 
 /** Competitor price fetch (config/pricing.ts BACKVAULT.competitor). */
 interface CompetitorStats {
+  /**
+   * The run's competitor state in one word, so a reader of the JSON report
+   * never has to infer 'failed' from the presence of `error`.
+   */
+  state: 'complete' | 'partial' | 'failed';
   rowsFetched: number | null;
   stockRefsIndexed: number;
   /**
@@ -93,8 +98,10 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
-  /** Pieces written with the live price because the competitor fetch failed. */
+  /** Pieces written with the live price because they had no competitor price this run. */
   pricePinned: number;
+  /** Which ones, named so a person can check them rather than take the count on trust. */
+  pinnedHandles: string[];
   /** Pieces the price check stood down on: more than one variant, so no readable live price. */
   multiVariantUnchecked: number;
   /**
@@ -128,7 +135,13 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // FAILED: no matches at all, flat markup, pin armed. None of the three is
   // a crash or a failed run on its own.
   let competitor: CompetitorIndex | undefined;
-  const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0, complete: false, pagesRead: 0 };
+  const competitorStats: CompetitorStats = {
+    state: 'failed',
+    rowsFetched: null,
+    stockRefsIndexed: 0,
+    complete: false,
+    pagesRead: 0,
+  };
   // Set by a failed fetch AND by a partial one: in both cases a piece with no
   // match may still have one we could not read, so the live price is protected.
   let competitorDegraded = false;
@@ -141,6 +154,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     competitorStats.pagesRead = result.pagesRead;
     competitorStats.stoppedReason = result.stoppedReason;
     if (result.complete) {
+      competitorStats.state = 'complete';
       console.log(
         `Competitor: ${result.rows.length} rows over ${result.pagesRead} pages, ` +
           `${competitor.size} stock numbers indexed (complete)`,
@@ -148,23 +162,20 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     } else {
       // Partial, not failed: the rows that came back are indexed and used, so
       // a piece that IS found still gets its midpoint price.
+      competitorStats.state = 'partial';
       competitorDegraded = true;
       competitorStats.partial = describeCompetitorStop(result);
-      warnings.push(
-        `competitor index is PARTIAL: ${competitorStats.partial}. Matches found were used; ` +
-          'pieces with no match may have one on a page that was not read, so their live prices were protected',
-      );
-      console.warn(
-        `Competitor: PARTIAL index — ${competitorStats.partial}; ${competitor.size} stock numbers indexed, ` +
-          'matches used, unmatched pieces price-pinned',
-      );
+      console.warn(`Competitor: PARTIAL index — ${competitorStats.partial}; ${competitor.size} stock numbers indexed`);
     }
   } catch (err) {
+    competitorStats.state = 'failed';
     competitorStats.error = err instanceof Error ? err.message : String(err);
     competitorDegraded = true;
-    warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, live prices pinned`);
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
+  // The warning itself is raised AFTER the pin below: what a degraded index
+  // actually cost this run is not known until the matching and the pin have
+  // run, and a warning that claims more than was checked is worse than none.
 
   const { items: allItems, stats } = normalizeBackVaultFeed(rawRows, competitor);
   const availableItems = allItems.filter((item) => !isUnavailableProductHandle(handleFor(item)));
@@ -282,16 +293,20 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // are computed, so the hash matches the price actually written; the piece is
   // otherwise updated, reactivated and published exactly as normal.
   let pricePinned = 0;
+  let pinnedHandles: string[] = [];
   let multiVariantUnchecked = 0;
   if (competitorDegraded) {
     const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
     pricePinned = pins.pinned;
+    pinnedHandles = pins.pinnedHandles;
     multiVariantUnchecked = pins.multiVariant;
+    warnings.push(competitorWarning(competitorStats, stats.competitorMatched, pricePinned));
     const notes: string[] = [];
     if (pricePinned > 0) {
       notes.push(
         `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
-          '(the competitor comparison data was missing or incomplete, so a lower flat price was not written)',
+          '(no competitor price for it this run, and its ticket sits above the flat rule, ' +
+          'so a lower flat price was not written)',
       );
     }
     if (multiVariantUnchecked > 0) {
@@ -409,6 +424,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channelsResolved,
     skippedDraft,
     pricePinned,
+    pinnedHandles,
     multiVariantUnchecked,
     warnings,
     errors,
@@ -425,6 +441,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
       `competitor=${competitorLabel(competitorStats)} ` +
+      `competitor_matched=${stats.competitorMatched} ` +
       `price_pinned=${pricePinned} warnings=${warnings.length} errors=${errors.length}`,
   );
   if (warnings.length > 0) {
@@ -441,27 +458,60 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
 }
 
 /**
- * The competitor section of the report, in the same three states as the Done
- * line. A partial read is a WARNING, not an error: it says how much was read
- * and why it stopped, that the matches it did find were used, and that the
- * pieces it could not match kept their live prices.
+ * The one warning a degraded competitor run raises, built from what actually
+ * happened rather than from what the code intends to do. Every clause here is
+ * a number this run measured: delete the partial-index matching or the pin and
+ * the sentence changes with it.
  */
-function competitorReportLines(stats: CompetitorStats): string[] {
-  if (stats.error !== undefined) {
-    return [`- FAILED: ${stats.error} — flat markup only this run`];
+function competitorWarning(stats: CompetitorStats, matched: number, pinned: number): string {
+  const pinClause =
+    pinned > 0
+      ? `${pinned} unmatched piece${pinned === 1 ? '' : 's'} kept ${pinned === 1 ? 'its' : 'their'} live price ` +
+        '(handles in the report)'
+      : 'no piece needed its live price protected';
+  if (stats.state === 'failed') {
+    return (
+      `competitor fetch: ${stats.error} — nothing could be matched this run, ` +
+      `so pricing fell back to the flat markup; ${pinClause}`
+    );
   }
-  if (!stats.complete) {
+  const matchClause =
+    matched > 0
+      ? `${matched} piece${matched === 1 ? '' : 's'} still priced from a match in the rows that were read`
+      : 'no piece matched in the rows that were read';
+  return `competitor index is PARTIAL: ${stats.partial}. ${matchClause}; ${pinClause}`;
+}
+
+/**
+ * The competitor section of the report, in the same three states as the Done
+ * line. A partial read is a WARNING, not an error: it says how much was read,
+ * why it stopped, how many pieces it actually priced, and which pieces kept
+ * their live price. Every claim is a counted one — nothing here asserts that
+ * matches "were used" without saying how many.
+ */
+function competitorReportLines(stats: CompetitorStats, matched: number, pinned: number, handles: string[]): string[] {
+  const aftermath = [
+    `- Pieces priced from a competitor match: ${matched}`,
+    pinned > 0
+      ? `- Live prices protected from a drop: ${pinned} (${handles.join(', ')})`
+      : '- Live prices protected from a drop: none needed it',
+  ];
+  if (stats.state === 'failed') {
+    return [`- FAILED: ${stats.error} — flat markup only this run`, ...aftermath];
+  }
+  if (stats.state === 'partial') {
     return [
       `- PARTIAL: ${stats.partial ?? 'the walk stopped early'}`,
       `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
-      '- Matches found in the partial index WERE used (midpoint pricing).',
-      '- Pieces with no match may have one on a page that was not read, so their live prices were protected ' +
-        '(see the price pin below). This is a warning, not an error.',
+      ...aftermath,
+      '- A piece with no match here may have one on a page that was not read, which is why the pieces above ' +
+        'kept their live prices. This is a warning, not an error.',
     ];
   }
   return [
     `- Rows fetched: ${stats.rowsFetched ?? 'skipped'} over ${stats.pagesRead} pages (complete)`,
     `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
+    `- Pieces priced from a competitor match: ${matched}`,
   ];
 }
 
@@ -469,11 +519,12 @@ function competitorReportLines(stats: CompetitorStats): string[] {
  * The competitor fetch in one token for the Done line: complete, partial (with
  * how much was read and why it stopped), or failed. A partial index priced
  * whatever it matched, so it must not read as a failure — and must not read as
- * a clean run either.
+ * a clean run either. What it cost is on the same line, in competitor_matched
+ * and price_pinned, rather than asserted here.
  */
 function competitorLabel(stats: CompetitorStats): string {
-  if (stats.error !== undefined) return 'failed';
-  if (!stats.complete) return `PARTIAL(${stats.partial ?? 'stopped early'}; matches used, rest price-pinned)`;
+  if (stats.state === 'failed') return 'failed';
+  if (stats.state === 'partial') return `PARTIAL(${stats.partial ?? 'stopped early'})`;
   return `complete(${stats.rowsFetched ?? 0} rows/${stats.pagesRead} pages)`;
 }
 
@@ -499,7 +550,12 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Priced from a competitor match: ${summary.feedStats.competitorMatched}`,
     '',
     `## Competitor prices (${BACKVAULT.competitor.name})`,
-    ...competitorReportLines(summary.competitor),
+    ...competitorReportLines(
+      summary.competitor,
+      summary.feedStats.competitorMatched,
+      summary.pricePinned,
+      summary.pinnedHandles,
+    ),
     '',
     `## Availability check (full supplier catalog)`,
     ...(summary.availability.error
@@ -516,7 +572,8 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Publish to sales channels: ${counts.publish ?? 0}`,
     `- Archive: ${counts.archive ?? 0}`,
     `- Unchanged: ${counts.skip ?? 0}`,
-    `- Price pinned to the live ticket (competitor unavailable): ${summary.pricePinned}`,
+    `- Price pinned to the live ticket (no competitor price for that piece this run): ${summary.pricePinned}`,
+    ...(summary.pinnedHandles.length > 0 ? [`  - Pinned: ${summary.pinnedHandles.join(', ')}`] : []),
     `- Multi-variant pieces with no readable live price: ${summary.multiVariantUnchecked}`,
     `- Published this run: ${summary.published}`,
     '',

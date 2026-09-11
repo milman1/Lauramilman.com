@@ -16,6 +16,7 @@ function entry(
   missingChannels: string[] = published ? [] : ['Online Store'],
   price: number | null = null,
   variantCount = 1,
+  storedCost: number | null = null,
 ): BackVaultCatalogEntry {
   return {
     id: `gid://shopify/Product/${handle}`,
@@ -30,6 +31,7 @@ function entry(
     // Mirrors the real read: the first variant's price survives even when the
     // multi-variant rule makes `price` unreadable.
     firstVariantPrice: price,
+    storedCost,
   };
 }
 
@@ -146,15 +148,21 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
     };
   }
 
-  /** The catalog row for `item()`, at the price a competitor match produced. */
+  /**
+   * The catalog row for `item()`, at the price a competitor match produced:
+   * 69,800 against a stored cost of 67,600, which is 1,700 above the flat
+   * 68,100 and so carries the evidence of a midpoint the pin looks for.
+   */
   function live(price: number | null, overrides: Partial<BackVaultCatalogEntry> = {}): BackVaultCatalogEntry {
-    return { ...entry(handleFor(item()), 'old-hash', 'ACTIVE', true, [], price), ...overrides };
+    return { ...entry(handleFor(item()), 'old-hash', 'ACTIVE', true, [], price, 1, 67600), ...overrides };
   }
+
+  const PINNED_HANDLE = handleFor(item());
 
   it('pins a price that would fall, and leaves the rest of the item alone', () => {
     const one = item();
     const stats = pinLivePricesWhenCompetitorUnavailable([one], [live(69800)]);
-    expect(stats).toEqual({ pinned: 1, multiVariant: 0 });
+    expect(stats).toEqual({ pinned: 1, pinnedHandles: [PINNED_HANDLE], multiVariant: 0 });
     expect(one.priceUsd).toBe(69800);
     expect(one.costUsd).toBe(67600);
     expect(one.imageUrls).toEqual(['https://cdn.example.com/J10605.jpg']);
@@ -165,6 +173,7 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
     const higher = item({ priceUsd: 70000 });
     expect(pinLivePricesWhenCompetitorUnavailable([equal, higher], [live(69800)])).toEqual({
       pinned: 0,
+      pinnedHandles: [],
       multiVariant: 0,
     });
     expect(equal.priceUsd).toBe(69800);
@@ -173,7 +182,11 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
 
   it('stands down when the live price cannot be read', () => {
     const one = item();
-    expect(pinLivePricesWhenCompetitorUnavailable([one], [live(null)])).toEqual({ pinned: 0, multiVariant: 0 });
+    expect(pinLivePricesWhenCompetitorUnavailable([one], [live(null)])).toEqual({
+      pinned: 0,
+      pinnedHandles: [],
+      multiVariant: 0,
+    });
     expect(one.priceUsd).toBe(68100);
   });
 
@@ -183,7 +196,7 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
       [one],
       [live(null, { variantCount: 3, firstVariantPrice: 69800 })],
     );
-    expect(stats).toEqual({ pinned: 0, multiVariant: 1 });
+    expect(stats).toEqual({ pinned: 0, pinnedHandles: [], multiVariant: 1 });
     expect(one.priceUsd).toBe(68100);
   });
 
@@ -195,7 +208,7 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
         [rising],
         [live(null, { variantCount: 3, firstVariantPrice: 69800 })],
       ),
-    ).toEqual({ pinned: 0, multiVariant: 0 });
+    ).toEqual({ pinned: 0, pinnedHandles: [], multiVariant: 0 });
     expect(
       pinLivePricesWhenCompetitorUnavailable(
         [unreadable],
@@ -206,12 +219,72 @@ describe('pinLivePricesWhenCompetitorUnavailable', () => {
           },
         ],
       ),
-    ).toEqual({ pinned: 0, multiVariant: 0 });
+    ).toEqual({ pinned: 0, pinnedHandles: [], multiVariant: 0 });
+  });
+
+  it('never pins a piece that DID match in a partial index', () => {
+    // cost 67,600 + competitor 70,000 -> midpoint 68,800, strictly BELOW the
+    // 69,800 already on the store. Pinning here would throw away the very
+    // price a partial index exists to recover, and record a competitor price
+    // the piece was not sold at.
+    const matched = item({ priceUsd: 68800, competitorPriceUsd: 70000 });
+    const stats = pinLivePricesWhenCompetitorUnavailable([matched], [live(69800)]);
+    expect(stats).toEqual({ pinned: 0, pinnedHandles: [], multiVariant: 0 });
+    expect(matched.priceUsd).toBe(68800);
+  });
+
+  it('never pins a flat-priced piece, so a real markdown still reaches the store', () => {
+    // Live 68,100 == stored cost 67,600 + the 500 markup: this piece never
+    // carried a midpoint. The supplier cut its cost to 60,000, so the computed
+    // 60,500 is a genuine markdown and must be written. Pinning it here is the
+    // one-way ratchet: the index can never be complete on a catalogue larger
+    // than the pagination cap, so the old ticket would stand forever.
+    const markedDown = item({ costUsd: 60000, priceUsd: 60500 });
+    const stats = pinLivePricesWhenCompetitorUnavailable(
+      [markedDown],
+      [live(68100, { storedCost: 67600 })],
+    );
+    expect(stats).toEqual({ pinned: 0, pinnedHandles: [], multiVariant: 0 });
+    expect(markedDown.priceUsd).toBe(60500);
+  });
+
+  it('still pins an unmatched piece whose ticket sits above the flat rule', () => {
+    // The same markdown on a piece that DOES carry midpoint evidence
+    // (69,800 > 67,600 + 500) is still held: it may match again next run.
+    const one = item({ costUsd: 60000, priceUsd: 60500 });
+    const stats = pinLivePricesWhenCompetitorUnavailable([one], [live(69800)]);
+    expect(stats.pinned).toBe(1);
+    expect(one.priceUsd).toBe(69800);
+  });
+
+  it('stands down when the stored cost cannot be read', () => {
+    // No cost on the product means no evidence of a midpoint, and inventing
+    // one would ratchet the price the same way.
+    const one = item();
+    expect(pinLivePricesWhenCompetitorUnavailable([one], [live(69800, { storedCost: null })])).toEqual({
+      pinned: 0,
+      pinnedHandles: [],
+      multiVariant: 0,
+    });
+    expect(one.priceUsd).toBe(68100);
+  });
+
+  it('does not count a multi-variant piece that was flat-priced', () => {
+    const one = item();
+    const stats = pinLivePricesWhenCompetitorUnavailable(
+      [one],
+      [live(null, { variantCount: 3, firstVariantPrice: 68100, storedCost: 67600 })],
+    );
+    expect(stats.multiVariant).toBe(0);
   });
 
   it('ignores a piece that is not on the store yet', () => {
     const one = item();
-    expect(pinLivePricesWhenCompetitorUnavailable([one], [])).toEqual({ pinned: 0, multiVariant: 0 });
+    expect(pinLivePricesWhenCompetitorUnavailable([one], [])).toEqual({
+      pinned: 0,
+      pinnedHandles: [],
+      multiVariant: 0,
+    });
     expect(one.priceUsd).toBe(68100);
   });
 

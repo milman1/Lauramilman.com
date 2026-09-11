@@ -36,6 +36,16 @@ const MAX_PAGES = 200;
  * reacts to the status it is given.
  */
 export const PAGINATION_CAP_PAGES = 100;
+/**
+ * How many pages must already be in hand before a non-retryable 4xx may be
+ * read as the pagination cap rather than a broken feed. A tolerance band under
+ * PAGINATION_CAP_PAGES, because the retailer's catalogue can shrink a little
+ * between runs and the cap would then land a page or two early. A feed that
+ * moved and starts 404ing at page 2 is nowhere near this, so it still throws
+ * instead of producing a 250-row partial with a fabricated diagnosis. The
+ * liveness probe in fetchCompetitorCatalog is the second half of that guard.
+ */
+export const CAP_PAGE_FLOOR = 90;
 
 /** Attempts per page: the first try plus three retries on 429/5xx or a network throw. */
 const MAX_ATTEMPTS = 4;
@@ -58,12 +68,13 @@ const REQUEST_TIMEOUT_MS = 30_000;
  * a sustained throttle would be cancelled by the Actions job timeout with no
  * report at all, which is worse than the 429 this retry exists for.
  *
- * Sized from the COMPETITOR's catalogue, not the supplier's. An independent
- * full scan of the competitor earlier in this project counted roughly 20,000
- * products — about 80 pages at PAGE_LIMIT 250 — and the 2026-09-11 run was
- * still paginating at page 61 when it was throttled, so a healthy walk is on
- * the order of 80 pages, and MAX_PAGES 200 is the ceiling it is allowed to
- * reach. At 200 pages the pacing alone is 50 s and the requests can add
+ * Sized from the COMPETITOR's catalogue, not the supplier's. An earlier scan
+ * counted roughly 20,000 products (about 80 pages at PAGE_LIMIT 250), but that
+ * scan was itself incomplete: the 2026-09-11 live run read 100 FULL pages —
+ * 25,000 rows — and was still cut off by the retailer's pagination cap, so a
+ * healthy walk is at least 100 pages and the catalogue is larger than that.
+ * PAGINATION_CAP_PAGES is where the endpoint stops answering, and MAX_PAGES
+ * 200 is the ceiling the walk is allowed to reach. At 200 pages the pacing alone is 50 s and the requests can add
  * minutes on a slow day, so 6 minutes could trip on a perfectly healthy run:
  * 10 minutes keeps that headroom while still cutting a throttled walk short
  * in time to write a report. The 60-minute job timeout is the backstop.
@@ -306,19 +317,57 @@ export function describeCompetitorStop(result: CompetitorCatalog): string {
 }
 
 /**
+ * Liveness probe: is the ENDPOINT still there, or has the feed gone?
+ *
+ * A 400/404 past the cap and a 400/404 from a feed that moved are the same
+ * status on the same URL shape, and the page number alone cannot tell them
+ * apart — so ask page 1 again. A full page back means the feed is alive and
+ * the 4xx really is the far edge of pagination; anything else (an error, or a
+ * page that is no longer full) means the feed itself is broken or gone, and
+ * the walk must throw rather than hand back a partial index with a fabricated
+ * diagnosis. Costs one extra request, once per run, only on this path.
+ */
+async function endpointStillAlive(cause: CompetitorHttpError, options: CompetitorFetchOptions): Promise<boolean> {
+  let probe: unknown[];
+  try {
+    probe = await fetchCompetitorPage(1, options);
+  } catch (probeErr) {
+    console.warn(
+      `Competitor feed: ${cause.message}, and re-reading page 1 failed too ` +
+        `(${probeErr instanceof Error ? probeErr.message : String(probeErr)}) — treating this as a broken feed, ` +
+        'not the pagination cap',
+    );
+    return false;
+  }
+  if (probe.length < PAGE_LIMIT) {
+    console.warn(
+      `Competitor feed: ${cause.message}, and page 1 now returns only ${probe.length} of ${PAGE_LIMIT} rows — ` +
+        'treating this as a broken feed, not the pagination cap',
+    );
+    return false;
+  }
+  return true;
+}
+
+/**
  * Every page of the competitor's public catalog, paced by PAGE_DELAY_MS so the
  * walk does not trip the retailer's rate limit part-way through, and bounded by
  * FETCH_DEADLINE_MS end to end.
  *
- * Rows already read are never thrown away. Once at least one page is in hand,
- * both of the endings that are not the catalogue running out — the retailer's
- * pagination cap (a non-retryable 4xx past page 1, see the file header) and the
- * wall-clock deadline — come back as a PARTIAL result naming how far it got,
- * because 25,000 rows that price most of the run are worth more than nothing.
+ * Rows already read are never thrown away: the two endings that are not the
+ * catalogue running out — the retailer's pagination cap and the wall-clock
+ * deadline — come back as a PARTIAL result naming how far it got, because
+ * 25,000 rows that price most of the run are worth more than nothing.
+ *
+ * A 4xx is only read as the cap when BOTH guards agree: at least
+ * CAP_PAGE_FLOOR pages are already in hand, and a re-read of page 1 still
+ * serves a full page (endpointStillAlive). Either one alone would let a feed
+ * that moved and 404s at page 2 pass itself off as a cap.
  *
  * It still throws when there is nothing worth returning or the feed itself is
  * wrong: any failure on page 1, a network failure that never read a page, a
- * blocked or missing feed (403, 401, 410 ...), or a malformed response.
+ * blocked or missing feed (403, 401, 410 ...), a 4xx too early or with a dead
+ * page 1, or a malformed response.
  */
 export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {}): Promise<CompetitorCatalog> {
   const sleep = options.sleep ?? defaultSleep;
@@ -342,10 +391,8 @@ export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {
   };
   for (let page = 1; page <= MAX_PAGES; page++) {
     if (page > 1) {
-      if (now() + PAGE_DELAY_MS >= deadlineAt) {
-        if (pagesRead === 0) throw new Error(deadlineMessage(pagesRead, all.length, retries));
-        return partial('deadline', deadlineDetail());
-      }
+      // page > 1 means page 1 was read, so there is always a partial to return.
+      if (now() + PAGE_DELAY_MS >= deadlineAt) return partial('deadline', deadlineDetail());
       await sleep(PAGE_DELAY_MS);
     }
     let rows: unknown[];
@@ -359,12 +406,18 @@ export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {
         throw err;
       }
       if (err instanceof CompetitorDeadlineError) return partial('deadline', deadlineDetail());
-      if (err instanceof CompetitorHttpError && PAGINATION_CAP_STATUSES.has(err.status)) {
+      if (
+        err instanceof CompetitorHttpError &&
+        PAGINATION_CAP_STATUSES.has(err.status) &&
+        pagesRead >= CAP_PAGE_FLOOR &&
+        (await endpointStillAlive(err, { ...options, deadlineAt, onRetry }))
+      ) {
         return partial(
           'pagination-cap',
-          `page ${err.page} returned HTTP ${err.status}: the retailer caps page-based pagination at ` +
-            `${PAGINATION_CAP_PAGES} pages of ${PAGE_LIMIT} (~${PAGINATION_CAP_PAGES * PAGE_LIMIT} products), ` +
-            'so the rest of its catalogue cannot be read through this endpoint',
+          `page ${err.page} returned HTTP ${err.status} with page 1 still serving a full page: the retailer ` +
+            `caps page-based pagination at ${PAGINATION_CAP_PAGES} pages of ${PAGE_LIMIT} ` +
+            `(~${PAGINATION_CAP_PAGES * PAGE_LIMIT} products), so the rest of its catalogue cannot be read ` +
+            'through this endpoint',
         );
       }
       throw err;

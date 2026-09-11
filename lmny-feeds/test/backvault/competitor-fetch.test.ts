@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  CAP_PAGE_FLOOR,
   describeCompetitorStop,
   FETCH_DEADLINE_MS,
   fetchCompetitorCatalog,
@@ -199,10 +200,21 @@ describe('fetchCompetitorCatalog pacing', () => {
  * past page 1 is the end of the road, not a failure.
  */
 describe('fetchCompetitorCatalog pagination cap', () => {
-  /** Serves `pages` full pages, then `status` for every page after them. */
-  function cappedAt(pages: number, status: number): void {
-    let served = 0;
-    fetchMock.mockImplementation(async () => (served++ < pages ? jsonPage(FULL_PAGE) : errorPage(status)));
+  /**
+   * Serves `cap` full pages and `status` for every page past them, keyed off
+   * the page number in the URL — so a re-request of page 1 answers like page
+   * 1, which is what the liveness probe depends on.
+   */
+  function cappedAt(cap: number, status: number, probe?: () => Response): void {
+    let seenPageOne = false;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1) {
+        if (seenPageOne && probe) return probe();
+        seenPageOne = true;
+      }
+      return page <= cap ? jsonPage(FULL_PAGE) : errorPage(status);
+    });
   }
 
   it('keeps all 25,000 rows when page 101 returns 400', async () => {
@@ -213,18 +225,48 @@ describe('fetchCompetitorCatalog pagination cap', () => {
     expect(result.complete).toBe(false);
     expect(result.stoppedReason).toBe('pagination-cap');
     expect(result.stoppedDetail).toContain('page 101 returned HTTP 400');
-    // Not retried: a 400 is not transient, so it costs exactly one request.
-    expect(fetchMock).toHaveBeenCalledTimes(101);
+    // 100 pages + the 400 (not retried, it is not transient) + one probe.
+    expect(fetchMock).toHaveBeenCalledTimes(102);
   });
 
-  it('treats 404, 414 and 422 past page 1 the same way', async () => {
+  it('treats 404, 414 and 422 at the cap the same way', async () => {
     for (const status of [404, 414, 422]) {
       fetchMock.mockReset();
-      cappedAt(2, status);
+      cappedAt(PAGINATION_CAP_PAGES, status);
       const result = await fetchCompetitorCatalog({ sleep, now });
-      expect(result.rows).toHaveLength(500);
+      expect(result.rows).toHaveLength(25_000);
       expect(result.stoppedReason).toBe('pagination-cap');
     }
+  });
+
+  it('throws on a 4xx far short of the cap, even with page 1 alive', async () => {
+    // A feed that moved and starts 404ing at page 2 would otherwise hand back
+    // a 250-row partial carrying a fabricated pagination-cap diagnosis.
+    cappedAt(1, 404);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 404 for page 2');
+  });
+
+  it('reads the cap no earlier than CAP_PAGE_FLOOR pages', async () => {
+    expect(CAP_PAGE_FLOOR).toBe(90);
+    cappedAt(CAP_PAGE_FLOOR - 1, 400);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 90');
+    fetchMock.mockReset();
+    cappedAt(CAP_PAGE_FLOOR, 400);
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.stoppedReason).toBe('pagination-cap');
+    expect(result.pagesRead).toBe(CAP_PAGE_FLOOR);
+  });
+
+  it('throws when the probe finds page 1 gone: the feed moved, it is not a cap', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => errorPage(404));
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 101');
+  });
+
+  it('throws when the probe finds page 1 no longer full', async () => {
+    // A page-1 that suddenly holds 3 rows is a feed that was rebuilt, not a
+    // catalogue whose 101st page does not exist.
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => jsonPage([{ handle: 'a' }, { handle: 'b' }, { handle: 'c' }]));
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 101');
   });
 
   it('still throws on a 400 on page 1 — a feed that is wrong or gone', async () => {
@@ -232,9 +274,9 @@ describe('fetchCompetitorCatalog pagination cap', () => {
     await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 1');
   });
 
-  it('still throws on a 403 mid-walk — blocked is not exhausted', async () => {
-    cappedAt(2, 403);
-    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 403 for page 3');
+  it('still throws on a 403 at the cap — blocked is not exhausted', async () => {
+    cappedAt(PAGINATION_CAP_PAGES, 403);
+    await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 403 for page 101');
   });
 
   it('still throws on a 500 mid-walk, after its retries', async () => {

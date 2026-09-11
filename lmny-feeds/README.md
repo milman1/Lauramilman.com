@@ -362,30 +362,52 @@ npm run sync:backvault       # live (needs Shopify env vars)
    the retailer publishes) and **nothing here attempts one**. A 4xx on page 1
    is still a hard failure — that means the feed is wrong or gone.
 
+   A 4xx is only read as the cap when **both** guards agree: at least 90 pages
+   are already in hand, and a re-read of page 1 still serves a full page. A
+   feed that moved and starts 404ing at page 2 therefore still fails loudly
+   instead of passing itself off as the cap.
+
    **If the competitor fetch is partial** — the pagination cap above, or the
    fetch deadline below — the rows that did come back are **indexed and used**,
-   so a piece found in them still gets its midpoint price. Because a piece
-   *missing* from a partial index may have a match on a page that was never
-   read, the price pin below stays armed for everything unmatched. A partial
-   read is a **warning**, never an error, and the report and Done line say how
-   many rows over how many pages were read and why the walk stopped.
+   so a piece found in them still gets its midpoint price and is never pinned.
+   Because a piece *missing* from a partial index may have a match on a page
+   that was never read, the price pin below stays armed for the unmatched
+   pieces **that show evidence of a past midpoint** (see the pin's rule). A
+   partial read is a **warning**, never an error, and the report and Done line
+   say how many rows over how many pages were read, why the walk stopped, how
+   many pieces were priced from a match, and which pieces kept their live
+   price. One further consequence: on a partial read the **ambiguous
+   stock-number guard is weaker**, because a second row carrying the same
+   reference at a different price may sit on a page that was never fetched, so
+   a reference that would have been dropped as ambiguous can survive as a
+   match.
 
    **If the competitor fetch fails** — each page is retried up to 4 times on
    429/5xx honouring a strict `Retry-After`, pages are paced 250 ms apart, and
    the whole walk is bounded by a 10-minute wall clock so a throttled retailer
-   can never run the job for hours (the competitor's catalogue is roughly 80
-   pages of 250; the job itself is capped at 60 minutes). Running out of clock
+   can never run the job for hours (the 2026-09-11 run read 100 full pages of
+   250 and was still cut off by the cap, so the catalogue is larger than that;
+   the job itself is capped at 60 minutes). Running out of clock
    part-way through is a partial result, as above; a failure on page 1, a
    network failure that never read a page, or a malformed response is a real
    failure — the run keeps going on the flat markup and
    records a **warning** rather than an error, so a throttled competitor never
    fails the job. Any piece whose recomputed price would fall below the ticket
-   already on the store is still updated in full (images, cost, tags, status,
-   sales channels); only its **price is pinned to the live ticket**, so
+   already on the store **and whose live ticket sits above `cost + $500`** — the
+   mark of a price that came from a competitor midpoint, read from the Cost per
+   item already on the product — is still updated in full (images, cost, tags,
+   status, sales channels); only its **price is pinned to the live ticket**, so
    competitor-matched pieces are not marked down this week and back up the next.
-   The consequence is that a genuine supplier markdown is also deferred for that
-   week — the next successful run applies it. A piece with more than one variant
-   has no readable live price and is written normally. Both counts are on the
+   Two pieces are deliberately never pinned: one that **did** match in whatever
+   index was read (nothing is missing for it), and one whose live ticket equals
+   `cost + $500`, which was flat-priced and never matched — a fall there is a
+   genuine supplier markdown and must reach the storefront. Without that second
+   exemption the pin would be a one-way ratchet on a retailer whose catalogue
+   is larger than its own pagination cap, where the index can never be complete.
+   A genuine supplier markdown on a piece that *is* pinned is still deferred —
+   the next run that matches it, or that reads a complete index, applies it.
+   A piece with more than one variant has no readable live price and is
+   written normally. Both counts are on the
    Done line and in the report, alongside the competitor state itself —
    `competitor=complete(...)`, `competitor=PARTIAL(...)` or
    `competitor=failed`.

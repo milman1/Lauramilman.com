@@ -126,7 +126,15 @@ describe('fetchBackVaultCatalog response parsing', () => {
       media: { edges: [{ node: { status: 'READY', mediaContentType: 'IMAGE' } }] },
       resourcePublications: { nodes: [{ isPublished: true, publication: { name: 'Online Store' } }] },
       variantsCount: { count: 1 },
-      variants: { nodes: [{ price: '69800.00', inventoryQuantity: 1, inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true } }] },
+      variants: {
+        nodes: [
+          {
+            price: '69800.00',
+            inventoryQuantity: 1,
+            inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true, unitCost: { amount: '67600.0' } },
+          },
+        ],
+      },
       ...overrides,
     };
   }
@@ -156,6 +164,9 @@ describe('fetchBackVaultCatalog response parsing', () => {
     await fetchBackVaultCatalog(client, ['Online Store']);
     expect(asked).toMatch(/variants\(first: 1\) \{ nodes \{ price /);
     expect(asked).toContain('variantsCount { count }');
+    // Cost per item is what tells a midpoint ticket from a flat-priced one, so
+    // dropping it from the query would disarm the pin's flat-price exemption.
+    expect(asked).toContain('unitCost { amount }');
   });
 
   it('reads a normal price string as a number', async () => {
@@ -164,6 +175,24 @@ describe('fetchBackVaultCatalog response parsing', () => {
     expect(entry.variantCount).toBe(1);
     expect(entry.imageCount).toBe(1);
     expect(entry.inventoryItemId).toBe('gid://shopify/InventoryItem/1');
+  });
+
+  it('reads the cost already recorded on the product', async () => {
+    expect((await priceOf()).storedCost).toBe(67600);
+  });
+
+  it('is null for a missing, zero or non-numeric cost rather than reading it as $0', async () => {
+    // A $0 cost would make every ticket look like a competitor midpoint and
+    // pin the whole catalogue against genuine markdowns.
+    for (const inventoryItem of [
+      { id: 'x', tracked: true },
+      { id: 'x', tracked: true, unitCost: null },
+      { id: 'x', tracked: true, unitCost: { amount: null } },
+      { id: 'x', tracked: true, unitCost: { amount: '0.00' } },
+      { id: 'x', tracked: true, unitCost: { amount: 'n/a' } },
+    ]) {
+      expect((await priceOf({ variants: { nodes: [{ price: '69800.00', inventoryItem }] } })).storedCost).toBeNull();
+    }
   });
 
   it('reads a fractional price', async () => {

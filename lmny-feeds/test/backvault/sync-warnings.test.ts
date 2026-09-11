@@ -28,18 +28,59 @@ function complete(rows: unknown[] = []): CompetitorCatalog {
   return { rows, complete: true, pagesRead: Math.max(1, Math.ceil(rows.length / 250)), stoppedReason: 'exhausted' };
 }
 
-/** The 2026-09-11 shape: 100 full pages read, then the retailer's HTTP 400. */
-function pagination_capped(rows: unknown[] = []): CompetitorCatalog {
-  return {
-    rows,
-    complete: false,
-    pagesRead: 100,
-    stoppedReason: 'pagination-cap',
-    stoppedDetail:
-      'page 101 returned HTTP 400: the retailer caps page-based pagination at 100 pages of 250 ' +
-      '(~25000 products), so the rest of its catalogue cannot be read through this endpoint',
-  };
+/**
+ * The 2026-09-11 shape — 100 full pages, then HTTP 400 on page 101 with page 1
+ * still alive — produced by running the REAL walk against a stubbed fetch,
+ * rather than hand-copying its wording into a literal here. A fixture copied
+ * by hand keeps passing after the production message changes, which is exactly
+ * the drift these tests are supposed to catch.
+ */
+async function buildPaginationCapped(match?: unknown): Promise<CompetitorCatalog> {
+  const actual = await vi.importActual<typeof import('../../src/backvault/competitor.js')>(
+    '../../src/backvault/competitor.js',
+  );
+  const filler = { handle: 'filler-row' };
+  const page = (n: number): unknown[] =>
+    Array.from({ length: 250 }, (_, i) => (n === 1 && i === 0 && match ? match : filler));
+  const realFetch = globalThis.fetch;
+  const quiet = [
+    vi.spyOn(console, 'log').mockImplementation(() => {}),
+    vi.spyOn(console, 'warn').mockImplementation(() => {}),
+  ];
+  vi.stubGlobal('fetch', async (url: string) => {
+    const n = Number(new URL(String(url)).searchParams.get('page'));
+    if (n <= 100) return { ok: true, status: 200, headers: { get: () => null }, json: async () => ({ products: page(n) }) };
+    return {
+      ok: false,
+      status: 400,
+      body: { cancel: async () => {} },
+      headers: { get: () => null },
+      json: async () => ({}),
+    };
+  });
+  let clock = 0;
+  try {
+    return await actual.fetchCompetitorCatalog({
+      sleep: async (ms: number) => {
+        clock += ms;
+      },
+      now: () => clock,
+    });
+  } finally {
+    vi.stubGlobal('fetch', realFetch);
+    for (const spy of quiet) spy.mockRestore();
+  }
 }
+
+/** Built once: 25,000 rows over 100 pages, with and without a matching row. */
+const CAPPED = await buildPaginationCapped();
+/** Priced at 70,000 on the competitor: midpoint with the 67,600 cost is 68,800. */
+const COMPETITOR_ROW = {
+  handle: 'cartier-dolphin-ring-j10605',
+  title: 'Cartier Dolphin Ring J10605',
+  variants: [{ sku: 'J10605', price: '70000.00', available: true }],
+};
+const CAPPED_WITH_MATCH = await buildPaginationCapped(COMPETITOR_ROW);
 
 /** Set per test: what the competitor fetch does, and what the catalog holds. */
 const state: { competitor: () => Promise<CompetitorCatalog>; catalog: unknown[] } = {
@@ -131,6 +172,10 @@ function catalogEntry(overrides: Record<string, unknown> = {}) {
     price: 69800,
     variantCount: 1,
     firstVariantPrice: 69800,
+    // 69,800 against this cost is 1,700 above the flat 68,100, so the ticket
+    // carries the midpoint evidence the pin looks for. A flat-priced piece
+    // (69,800 == cost + 500) is never pinned — see diff.test.ts.
+    storedCost: 67600,
     ...overrides,
   };
 }
@@ -206,7 +251,9 @@ describe('a failed competitor fetch', () => {
       true,
     );
     expect(md).toContain('## Warnings (2)');
-    expect(md).toContain('- Price pinned to the live ticket (competitor unavailable): 1');
+    // The label says why the price was held, and is not the false
+    // "competitor unavailable" on a run where the competitor answered.
+    expect(md).toContain('- Price pinned to the live ticket (no competitor price for that piece this run): 1');
     expect(md).toContain('## Competitor prices');
     expect(md).toContain('- FAILED: Competitor feed: HTTP 429 for page 61');
   });
@@ -268,40 +315,39 @@ describe('a successful competitor fetch', () => {
  * pin, because a piece missing from it may have a match on a page nobody read.
  */
 describe('a partial competitor index', () => {
-  /** Priced at 72,000 on the competitor: midpoint with the 67,600 cost is 69,800. */
-  const COMPETITOR_ROW = {
-    handle: 'cartier-dolphin-ring-j10605',
-    title: 'Cartier Dolphin Ring J10605',
-    variants: [{ sku: 'J10605', price: '72000.00', available: true }],
-  };
-
   function wrotePrice(input: Record<string, any>): string {
     return String(input.variants[0].price);
   }
 
-  it('prices a piece that IS in it from the competitor match', async () => {
-    state.competitor = async () => pagination_capped([COMPETITOR_ROW]);
+  it('prices a piece that IS in it from the competitor match, and never pins it', async () => {
+    state.competitor = async () => CAPPED_WITH_MATCH;
     state.catalog = [catalogEntry()];
     await run([]);
     const { json } = report();
     expect(json.feedStats.competitorMatched).toBe(1);
     expect(json.competitor.stockRefsIndexed).toBe(1);
-    // The midpoint, not the flat 68,100 a discarded index would have written.
-    expect(wrotePrice(productSets[0]!)).toBe('69800.00');
+    // cost 67,600 + competitor 70,000 -> midpoint 68,800, STRICTLY BELOW the
+    // 69,800 on the store. It is still written: the piece matched, so nothing
+    // about its price is missing and the pin must keep its hands off it.
+    expect(wrotePrice(productSets[0]!)).toBe('68800.00');
+    expect(json.pricePinned).toBe(0);
+    expect(json.pinnedHandles).toEqual([]);
     expect(json.errors).toEqual([]);
     expect(process.exitCode).toBe(0);
   });
 
   it('still arms the price pin for a piece it could not match', async () => {
-    state.competitor = async () => pagination_capped([]);
+    state.competitor = async () => CAPPED;
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json } = report();
     expect(json.competitor.error).toBeUndefined();
+    expect(json.competitor.state).toBe('partial');
     expect(json.competitor.complete).toBe(false);
     // Without the pin this piece would silently drop to the flat price on the
     // strength of an index that never saw the page it might be priced on.
     expect(json.pricePinned).toBe(1);
+    expect(json.pinnedHandles).toEqual([HANDLE]);
   });
 
   it('does not arm the pin when the index is complete', async () => {
@@ -309,35 +355,53 @@ describe('a partial competitor index', () => {
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json } = report();
-    expect(json.competitor.complete).toBe(true);
+    expect(json.competitor.state).toBe('complete');
     expect(json.pricePinned).toBe(0);
     expect(json.warnings).toEqual([]);
   });
 
   it('is a warning, not an error, and keeps the exit code at 0', async () => {
-    state.competitor = async () => pagination_capped([]);
+    state.competitor = async () => CAPPED;
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json } = report();
     expect(json.errors).toEqual([]);
     expect(process.exitCode).toBe(0);
+    // Every clause is a counted one: no match was found in the rows read, and
+    // exactly one piece kept its live price.
     expect(json.warnings[0]).toContain('competitor index is PARTIAL');
-    expect(json.warnings[0]).toContain('Matches found were used');
-    expect(json.warnings[0]).toContain('live prices were protected');
+    expect(json.warnings[0]).toContain('no piece matched in the rows that were read');
+    expect(json.warnings[0]).toContain('1 unmatched piece kept its live price');
+  });
+
+  it('counts the matches it really used in the warning', async () => {
+    state.competitor = async () => CAPPED_WITH_MATCH;
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { json } = report();
+    expect(json.warnings[0]).toContain('1 piece still priced from a match in the rows that were read');
+    expect(json.warnings[0]).toContain('no piece needed its live price protected');
   });
 
   it('says in the report how much it read, why it stopped, and what it did', async () => {
-    state.competitor = async () => pagination_capped([COMPETITOR_ROW]);
+    state.competitor = async () => CAPPED;
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { md } = report();
     expect(md).toContain('## Competitor prices');
-    expect(md).toContain('- PARTIAL: 1 rows over 100 pages');
+    expect(md).toContain('- PARTIAL: 25000 rows over 100 pages');
     expect(md).toContain('caps page-based pagination at 100 pages of 250');
-    expect(md).toContain('- Matches found in the partial index WERE used (midpoint pricing).');
-    expect(md).toContain('their live prices were protected');
+    expect(md).toContain('- Pieces priced from a competitor match: 0');
+    expect(md).toContain(`- Live prices protected from a drop: 1 (${HANDLE})`);
     expect(md).toContain('This is a warning, not an error.');
     expect(md).not.toContain('- FAILED:');
+  });
+
+  it('names the pinned handles under the catalog changes too', async () => {
+    state.competitor = async () => CAPPED;
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    expect(report().md).toContain(`  - Pinned: ${HANDLE}`);
   });
 });
 
@@ -353,13 +417,22 @@ describe('the Done line names the competitor state', () => {
   });
 
   it('says PARTIAL, with how far it got and why, on a capped read', async () => {
-    state.competitor = async () => pagination_capped([{ handle: 'x' }]);
+    state.competitor = async () => CAPPED;
     await run(['--dry-run']);
     const line = doneLine();
-    expect(line).toContain('competitor=PARTIAL(1 rows over 100 pages');
+    expect(line).toContain('competitor=PARTIAL(25000 rows over 100 pages');
     expect(line).toContain('page 101 returned HTTP 400');
-    expect(line).toContain('matches used, rest price-pinned');
+    // The count, not a claim: price_pinned=0 alone cannot tell "nothing needed
+    // protecting" from "nothing matched".
+    expect(line).toContain('competitor_matched=0');
+    expect(line).toContain('price_pinned=1');
     expect(line).toContain('errors=0');
+  });
+
+  it('carries the match count on a partial run that did match', async () => {
+    state.competitor = async () => CAPPED_WITH_MATCH;
+    await run(['--dry-run']);
+    expect(doneLine()).toContain('competitor_matched=1');
   });
 
   it('says failed when the fetch threw', async () => {

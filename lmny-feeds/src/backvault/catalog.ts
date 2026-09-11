@@ -71,6 +71,15 @@ export interface BackVaultCatalogEntry {
    * from one that was never in question, so the warning counts the real ones.
    */
   firstVariantPrice: number | null;
+  /**
+   * Cost per item already recorded on the product (`inventoryItem.unitCost`),
+   * null when it cannot be read. The price pin uses it to tell a live ticket
+   * that came from a competitor midpoint (price > cost + markup) from one that
+   * was flat-priced (price == cost + markup): only the first is worth
+   * protecting, because on the second a fall in the computed price is a
+   * genuine supplier markdown that must be written.
+   */
+  storedCost: number | null;
 }
 
 /**
@@ -101,7 +110,7 @@ export async function fetchBackVaultCatalog(
             nodes?: Array<{
               price?: string | null;
               inventoryQuantity?: number | null;
-              inventoryItem?: { id?: string; tracked?: boolean } | null;
+              inventoryItem?: { id?: string; tracked?: boolean; unitCost?: { amount?: string | null } | null } | null;
             }>;
           } | null;
         }>;
@@ -118,7 +127,7 @@ export async function fetchBackVaultCatalog(
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
             variantsCount { count }
-            variants(first: 1) { nodes { price inventoryQuantity inventoryItem { id tracked } } }
+            variants(first: 1) { nodes { price inventoryQuantity inventoryItem { id tracked unitCost { amount } } } }
           }
         }
       }`,
@@ -143,6 +152,11 @@ export async function fetchBackVaultCatalog(
       const rawPrice = variant?.price == null ? Number.NaN : Number(variant.price);
       const firstVariantPrice = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
       const price = variantCount > 1 ? Number.NaN : rawPrice;
+      // Same treatment as the price: `Number(null)` is 0, which would read as a
+      // real $0 cost and make every ticket look like a competitor midpoint.
+      const rawCost = variant?.inventoryItem?.unitCost?.amount == null
+        ? Number.NaN
+        : Number(variant.inventoryItem.unitCost.amount);
       entries.push({
         id: node.id,
         handle: node.handle,
@@ -157,6 +171,7 @@ export async function fetchBackVaultCatalog(
         price: Number.isFinite(price) && price > 0 ? price : null,
         variantCount,
         firstVariantPrice,
+        storedCost: Number.isFinite(rawCost) && rawCost > 0 ? rawCost : null,
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;
