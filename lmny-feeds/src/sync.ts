@@ -727,7 +727,7 @@ async function main() {
 
     // Tag watches held for pricing review; leave their existing price alone.
     let reviewTagged = 0;
-    for (const h of pricingReviewHolds) {
+    for (const h of pricingReviewHolds.filter((hold) => hold.reason === 'watch_no_cost')) {
       const existing = catalogByHandle.get(handleForRef(h.kind, h.stockRef));
       if (!existing) continue;
       if (existing.tags.includes(PRICING_REVIEW_TAG)) continue;
