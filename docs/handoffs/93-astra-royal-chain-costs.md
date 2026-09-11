@@ -14,7 +14,7 @@
 - Exact next action: Sol completes the independent normalized comparison; root reviews and merges PR #119 if approved. Then hand off the verified private cost file to the separate later Shopify draft-product worker.
 ## Current update (2026-09-11)
 
-- Cost intake is collected and verified. The private CSV `93-royal-chain-costs-2026-09-11.csv` was uploaded to the authorized merchant Drive folder `LMNY supplier costs`; root’s fresh cloud read verified 21 rows and 93 variants. The file contents and all wholesale values remain private.
+- Cost intake is collected and verified. The private CSV `93-royal-chain-costs-2026-09.csv` was uploaded to the authorized merchant Drive folder `LMNY supplier costs`; root’s fresh cloud read verified 21 rows and 93 variants. The file contents and all wholesale values remain private.
 - Root independently re-read all 21 Royal Chain source pages and verified 93 variants with 0 differences. The earlier five-item Cuban read was interim; the complete 21-item source verification is now current.
 - Root normalized the uploaded Drive CSV and the public companion for comparison: 21 rows and 93 variants, numeric values normalized to two decimals; 22 arrays / 6 cells, FNV1a64 `8362d686884797a1` with length 3937 matched Sol’s private-file fingerprint. Sol confirmation remains the final independent review gate.
 - Local validation passed for 21 rows and 93 variants, with no errors and matching item order/URLs. The public companion is staged on branch `codex/93-royal-chain-public-20260911`; [PR #119](https://github.com/milman1/Lauramilman.com/pull/119) is open and unmerged.
