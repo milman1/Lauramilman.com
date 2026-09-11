@@ -317,36 +317,44 @@ export function describeCompetitorStop(result: CompetitorCatalog): string {
 }
 
 /**
+ * What a re-read of page 1 says about the endpoint.
+ *
+ *  - 'alive'        page 1 still serves a full page: the 4xx past the cap is a
+ *                   real pagination boundary.
+ *  - 'dead'         page 1 gives an affirmative negative — a non-retryable
+ *                   status, or a 200 that is no longer a full page. The feed
+ *                   moved or was rebuilt, and the walk must throw.
+ *  - 'inconclusive' the probe could not get an answer at all (throttled to
+ *                   exhaustion, 5xx, network failure). It says NOTHING about
+ *                   the feed, so it must not be read as 'dead'.
+ */
+type ProbeResult = 'alive' | 'dead' | 'inconclusive';
+
+/**
  * Liveness probe: is the ENDPOINT still there, or has the feed gone?
  *
  * A 400/404 past the cap and a 400/404 from a feed that moved are the same
  * status on the same URL shape, and the page number alone cannot tell them
- * apart — so ask page 1 again. A full page back means the feed is alive and
- * the 4xx really is the far edge of pagination; anything else (an error, or a
- * page that is no longer full) means the feed itself is broken or gone, and
- * the walk must throw rather than hand back a partial index with a fabricated
- * diagnosis. Costs one extra request, once per run, only on this path.
+ * apart — so ask page 1 again. Costs one extra request, once per run, only on
+ * this path.
+ *
+ * The distinction between 'dead' and 'inconclusive' is the whole point: a
+ * probe that simply could not be answered — the retailer still throttling
+ * after the walk's own 429s, a 5xx, a dropped connection — is not evidence
+ * that the feed is gone, and treating it as such would throw away the 25,000
+ * rows this module exists to keep. A deadline is not caught here at all: it is
+ * left to propagate so the caller ends the walk as the partial it already is.
  */
-async function endpointStillAlive(cause: CompetitorHttpError, options: CompetitorFetchOptions): Promise<boolean> {
+async function probeEndpoint(options: CompetitorFetchOptions): Promise<ProbeResult> {
   let probe: unknown[];
   try {
     probe = await fetchCompetitorPage(1, options);
   } catch (probeErr) {
-    console.warn(
-      `Competitor feed: ${cause.message}, and re-reading page 1 failed too ` +
-        `(${probeErr instanceof Error ? probeErr.message : String(probeErr)}) — treating this as a broken feed, ` +
-        'not the pagination cap',
-    );
-    return false;
+    if (probeErr instanceof CompetitorDeadlineError) throw probeErr;
+    if (probeErr instanceof CompetitorHttpError && !isRetryableStatus(probeErr.status)) return 'dead';
+    return 'inconclusive';
   }
-  if (probe.length < PAGE_LIMIT) {
-    console.warn(
-      `Competitor feed: ${cause.message}, and page 1 now returns only ${probe.length} of ${PAGE_LIMIT} rows — ` +
-        'treating this as a broken feed, not the pagination cap',
-    );
-    return false;
-  }
-  return true;
+  return probe.length < PAGE_LIMIT ? 'dead' : 'alive';
 }
 
 /**
@@ -359,10 +367,12 @@ async function endpointStillAlive(cause: CompetitorHttpError, options: Competito
  * deadline — come back as a PARTIAL result naming how far it got, because
  * 25,000 rows that price most of the run are worth more than nothing.
  *
- * A 4xx is only read as the cap when BOTH guards agree: at least
- * CAP_PAGE_FLOOR pages are already in hand, and a re-read of page 1 still
- * serves a full page (endpointStillAlive). Either one alone would let a feed
- * that moved and 404s at page 2 pass itself off as a cap.
+ * A 4xx is only read as the cap when at least CAP_PAGE_FLOOR pages are already
+ * in hand AND a re-read of page 1 does not affirmatively say the feed is gone
+ * (probeEndpoint). Without the page floor a feed that moved and 404s at page 2
+ * could pass itself off as a cap; without the probe a rebuilt feed could. A
+ * probe that cannot be answered at all decides nothing and leaves the rows in
+ * hand alone.
  *
  * It still throws when there is nothing worth returning or the feed itself is
  * wrong: any failure on page 1, a network failure that never read a page, a
@@ -406,19 +416,30 @@ export async function fetchCompetitorCatalog(options: CompetitorFetchOptions = {
         throw err;
       }
       if (err instanceof CompetitorDeadlineError) return partial('deadline', deadlineDetail());
-      if (
-        err instanceof CompetitorHttpError &&
-        PAGINATION_CAP_STATUSES.has(err.status) &&
-        pagesRead >= CAP_PAGE_FLOOR &&
-        (await endpointStillAlive(err, { ...options, deadlineAt, onRetry }))
-      ) {
-        return partial(
-          'pagination-cap',
-          `page ${err.page} returned HTTP ${err.status} with page 1 still serving a full page: the retailer ` +
-            `caps page-based pagination at ${PAGINATION_CAP_PAGES} pages of ${PAGE_LIMIT} ` +
-            `(~${PAGINATION_CAP_PAGES * PAGE_LIMIT} products), so the rest of its catalogue cannot be read ` +
-            'through this endpoint',
-        );
+      if (err instanceof CompetitorHttpError && PAGINATION_CAP_STATUSES.has(err.status) && pagesRead >= CAP_PAGE_FLOOR) {
+        let probe: ProbeResult;
+        try {
+          probe = await probeEndpoint({ ...options, deadlineAt, onRetry });
+        } catch (probeErr) {
+          // Out of budget while probing: the walk is over either way, and the
+          // rows already read are the point. Never a throw.
+          if (probeErr instanceof CompetitorDeadlineError) return partial('deadline', deadlineDetail());
+          throw probeErr;
+        }
+        if (probe !== 'dead') {
+          const confirmation =
+            probe === 'alive'
+              ? 'with page 1 still serving a full page'
+              : 'and page 1 could not be re-read, so the cap is UNCONFIRMED — the rows already read are kept ' +
+                'rather than discarded on a probe that answered nothing';
+          return partial(
+            'pagination-cap',
+            `page ${err.page} returned HTTP ${err.status} ${confirmation}: the retailer caps page-based ` +
+              `pagination at ${PAGINATION_CAP_PAGES} pages of ${PAGE_LIMIT} ` +
+              `(~${PAGINATION_CAP_PAGES * PAGE_LIMIT} products), so the rest of its catalogue cannot be read ` +
+              'through this endpoint',
+          );
+        }
       }
       throw err;
     }

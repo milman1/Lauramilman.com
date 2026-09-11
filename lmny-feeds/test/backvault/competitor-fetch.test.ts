@@ -269,6 +269,48 @@ describe('fetchCompetitorCatalog pagination cap', () => {
     await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 101');
   });
 
+  it('keeps the rows when the probe is throttled to exhaustion: unanswered is not "gone"', async () => {
+    // The 2026-09-11 run had a mid-walk 429 AND the cap. A probe that the
+    // retailer simply refuses to answer says nothing about the feed, and
+    // reading it as "gone" would throw away all 25,000 rows — the exact bug
+    // this module exists to prevent.
+    cappedAt(PAGINATION_CAP_PAGES, 400, () => errorPage(429));
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.stoppedReason).toBe('pagination-cap');
+    expect(result.stoppedDetail).toContain('UNCONFIRMED');
+  });
+
+  it('keeps the rows when the probe fails on the network', async () => {
+    let served = 0;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1 && served++ > 0) throw new Error('ECONNRESET');
+      return page <= PAGINATION_CAP_PAGES ? jsonPage(FULL_PAGE) : errorPage(400);
+    });
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.stoppedReason).toBe('pagination-cap');
+  });
+
+  it('keeps the rows when the budget runs out during the probe', async () => {
+    // Every probe attempt burns clock until the deadline passes mid-probe.
+    // A deadline is the walk ending, not a verdict on the feed.
+    let served = 0;
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(String(url)).searchParams.get('page'));
+      if (page === 1 && served++ > 0) {
+        clock += FETCH_DEADLINE_MS;
+        throw new Error('This operation was aborted');
+      }
+      return page <= PAGINATION_CAP_PAGES ? jsonPage(FULL_PAGE) : errorPage(400);
+    });
+    const result = await fetchCompetitorCatalog({ sleep, now });
+    expect(result.rows).toHaveLength(25_000);
+    expect(result.complete).toBe(false);
+    expect(result.stoppedReason).toBe('deadline');
+  });
+
   it('still throws on a 400 on page 1 — a feed that is wrong or gone', async () => {
     cappedAt(0, 400);
     await expect(fetchCompetitorCatalog({ sleep, now })).rejects.toThrow('Competitor feed: HTTP 400 for page 1');

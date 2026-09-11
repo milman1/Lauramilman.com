@@ -122,19 +122,13 @@ describe('fetchBackVaultCatalog response parsing', () => {
       id: 'gid://shopify/Product/1',
       handle: 'bv-cartier-ring',
       status: 'ACTIVE',
-      metafield: { value: 'hash-1' },
+      contentHash: { value: 'hash-1' },
+      competitorPrice: { value: '72000.0' },
+      competitorPriceAt: { value: '2026-09-04T12:00:00Z' },
       media: { edges: [{ node: { status: 'READY', mediaContentType: 'IMAGE' } }] },
       resourcePublications: { nodes: [{ isPublished: true, publication: { name: 'Online Store' } }] },
       variantsCount: { count: 1 },
-      variants: {
-        nodes: [
-          {
-            price: '69800.00',
-            inventoryQuantity: 1,
-            inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true, unitCost: { amount: '67600.0' } },
-          },
-        ],
-      },
+      variants: { nodes: [{ price: '69800.00', inventoryQuantity: 1, inventoryItem: { id: 'gid://shopify/InventoryItem/1', tracked: true } }] },
       ...overrides,
     };
   }
@@ -164,9 +158,12 @@ describe('fetchBackVaultCatalog response parsing', () => {
     await fetchBackVaultCatalog(client, ['Online Store']);
     expect(asked).toMatch(/variants\(first: 1\) \{ nodes \{ price /);
     expect(asked).toContain('variantsCount { count }');
-    // Cost per item is what tells a midpoint ticket from a flat-priced one, so
-    // dropping it from the query would disarm the pin's flat-price exemption.
-    expect(asked).toContain('unitCost { amount }');
+    // The remembered comparison is what prices an unmatched piece on an
+    // incomplete index; dropping either metafield sends every such piece to
+    // the flat markup without anyone noticing.
+    expect(asked).toContain('key: "competitor_price"');
+    expect(asked).toContain('key: "competitor_price_at"');
+    expect(asked).toContain('key: "content_hash"');
   });
 
   it('reads a normal price string as a number', async () => {
@@ -177,22 +174,23 @@ describe('fetchBackVaultCatalog response parsing', () => {
     expect(entry.inventoryItemId).toBe('gid://shopify/InventoryItem/1');
   });
 
-  it('reads the cost already recorded on the product', async () => {
-    expect((await priceOf()).storedCost).toBe(67600);
+  it('reads the remembered competitor comparison and its date', async () => {
+    const entry = await priceOf();
+    expect(entry.rememberedCompetitorPrice).toBe(72000);
+    expect(entry.rememberedCompetitorPriceAt).toBe('2026-09-04T12:00:00Z');
+    expect(entry.contentHash).toBe('hash-1');
   });
 
-  it('is null for a missing, zero or non-numeric cost rather than reading it as $0', async () => {
-    // A $0 cost would make every ticket look like a competitor midpoint and
-    // pin the whole catalogue against genuine markdowns.
-    for (const inventoryItem of [
-      { id: 'x', tracked: true },
-      { id: 'x', tracked: true, unitCost: null },
-      { id: 'x', tracked: true, unitCost: { amount: null } },
-      { id: 'x', tracked: true, unitCost: { amount: '0.00' } },
-      { id: 'x', tracked: true, unitCost: { amount: 'n/a' } },
-    ]) {
-      expect((await priceOf({ variants: { nodes: [{ price: '69800.00', inventoryItem }] } })).storedCost).toBeNull();
+  it('is null for a missing, zero or non-numeric remembered price rather than reading it as $0', async () => {
+    // A remembered $0 would price every unmatched piece at half its cost.
+    for (const competitorPrice of [null, { value: null }, { value: '0.00' }, { value: '' }, { value: 'n/a' }]) {
+      const entry = await priceOf({ competitorPrice });
+      expect(entry.rememberedCompetitorPrice).toBeNull();
     }
+  });
+
+  it('is null for a missing read date', async () => {
+    expect((await priceOf({ competitorPriceAt: null })).rememberedCompetitorPriceAt).toBeNull();
   });
 
   it('reads a fractional price', async () => {
