@@ -87,11 +87,15 @@ because it cannot recover the richer physical specs from old Shopify HTML.
 
 ### Title
 ```
-{titleWord} {TitleCase(brand)} {TitleCase(model)} {reference}
+{titleWord} {TitleCase(brand)} {TitleCase(model)} {reference} [{caseSize}] [{year}]
 ```
-No length cap. A 70+ character title is normal and correct in this category —
-the alternative is cutting the reference number, which is the thing people
-search for.
+Condition, brand, and the complete reference are fixed. Preserve the full model
+when it fits; otherwise shorten only the model, at a whole-word boundary, until
+the fixed identity fits the 80-character limit. The full model remains in the
+description and metafields. Case size and year are appended in that order only
+while the title remains at or below 80 characters. If condition, brand,
+reference, and at least one whole model word cannot fit, hold that watch for
+review without blocking valid rows in the same sync. Never cut the reference.
 
 Examples:
 - `Pre-Owned Rolex Submariner Date 126610LN`
@@ -100,7 +104,10 @@ Examples:
 ### Description (HTML)
 
 ```html
-<p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{ boxPaperClause}.{linkSentence}{gradeClause}</p>
+<p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{boxPaperClause}.{gradeClause}</p>
+<p><strong>Case size:</strong> {caseSize or Not specified}<br>
+<strong>Year:</strong> {year or Not specified}<br>
+<strong>Bracelet links:</strong> {link disclosure or Not specified}</p>
 <p>{comment}</p>                                              <!-- see Comment rule above -->
 ```
 
@@ -137,12 +144,11 @@ Never "New with box and papers" and never "as a full set with box and papers":
 eBay treats that canned Features/Condition value as brand-new unworn stock.
 Omitted entirely if both are unstated (so the sentence reads
 `…is offered by Laura Milman New York.`).
-`linkSentence`: when the feed `Links` value is present and non-zero, a second
-sentence in the same opening paragraph:
-- positive `n` → ` It includes {n} additional bracelet link(s).`
-- negative `-n` → ` The bracelet is {n} link(s) short of a full set.`
-The raw value is still written to `custom.link` for the PDP specs grid.
-Omitted when `Links` is blank or zero.
+The bracelet-links label uses only integer source values: positive `n` means
+`n additional bracelet link(s) included`; negative `-n` means `n bracelet
+link(s) missing`. Zero, blank, fractional, or invalid values render `Not
+specified`; zero never implies a complete bracelet. The raw nonblank value is
+still written to `custom.link` for source traceability.
 `gradeClause`: ` It is in {grade} condition.` or empty. Grade is lowercased
 in the sentence (`excellent`, not `Excellent`).
 
@@ -151,27 +157,34 @@ schema — price lives on the variant, not in description text that would go
 stale the moment price moves.
 
 Year normalization: `2014` stays as-is. `FEB-2016` becomes `February 2016`.
-Anything not matching either pattern is passed through unchanged rather than
-mangled.
+Sentinels (`0`, `N/A`, `NA`, `-`, `unknown`) are omitted. Other source text,
+including approximate dates, is preserved as supplied and is not described as
+a manufacture year.
 
 No price anywhere in this HTML. Price lives on the variant and changes
 independently; hardcoding it here creates staleness the moment the price
 next moves.
 
-### SEO title (`seo.title`, ≤ 60 characters)
+### SEO title (`seo.title`, 60-character target; 80 maximum)
 
-Use `{Brand} {Model} {reference} – {titleWord} Watch`. If that exceeds 60
-characters, reserve the `– {titleWord} Watch` suffix and truncate the identity
-at the last full word that fits. Never cut mid-word. Keeping both the condition
-and product type gives search engines and answer engines explicit intent even
-when a long model or reference must be shortened.
+Keep the same full reference and whole-word-fitted model used by the product
+title. Add condition even when that takes the title above the 60-character
+target, up to 80. Add case size, year, and `Watch` only while the result stays
+at or below 60. Never cut the reference or promise a ranking outcome.
 
 ### SEO description (`seo.description`, ≤ 160 characters)
 
 ```
-Shop this {titleWord, lowercase} {Brand} {Model} {reference}{, gradeClause if present}. Authenticated by Laura Milman New York.
+Shop this {titleWord, lowercase} {Brand} {Model} {reference}{source facts when space permits}. Authenticated by Laura Milman New York.
 ```
-Truncated at a word boundary to 160 characters if needed.
+Case size, year, and a meaningful bracelet-link disclosure are included when
+space permits. The authentication suffix is retained and the lead is shortened
+at a word boundary to stay within 160 characters.
+
+The retired `scripts/lmny_watches_backfill.py` cannot recover API case size or
+link facts and must not overwrite this API-built copy. Watch listing content is
+already part of `contentHashFor`; changed watch output refreshes through the
+normal sync without a global schema-version bump.
 
 The SEO authenticated sentence is intentional and always present. It is
 separate from the optional in-body trust paragraph (`CONFIG.trustLine` /
@@ -201,12 +214,10 @@ tags the product already has, so existing operational tags are preserved.
 
 ## Idempotency
 
-Before writing, check whether the current title already starts with
-`Pre-Owned ` or `Unworn `. If so, skip — it's already been processed by this
-schema. This lets the backfill script be re-run safely and lets the ingest
-pipeline re-process a watch (e.g. after a price resync) without re-writing an
-already-correct title. The content-hash schema version is also bumped when
-the listing payload shape changes so live feed products refresh once.
+The normal API ingest computes a content hash from the title, description, SEO,
+and other product fields. A change to these watch fields therefore schedules an
+eligible watch update without a global schema-version bump. The retired legacy
+Python backfill must not overwrite structured-source copy.
 
 ## Explicitly out of scope for this pass
 

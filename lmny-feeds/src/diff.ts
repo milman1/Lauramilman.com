@@ -107,13 +107,13 @@ export function diffCatalog(
   return decisions;
 }
 
-/** Holds that must not archive or overwrite an existing Shopify price. */
-export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost']);
+/** Per-row review holds that must leave an existing Shopify listing unchanged. */
+export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost', 'watch_listing_review']);
 
 /**
- * `no_cost` watches stay buyable at their current price.
+ * Review-held watches stay at their current listing state.
  * Convert a would-be `held_in_feed` archive into a skip so sync can tag
- * `pricing-review` without touching the variant.
+ * review skip without touching the product or variant.
  */
 export function skipPricingReviewArchives(decisions: Decision[], reviewHandles: Set<string>): void {
   for (const d of decisions) {

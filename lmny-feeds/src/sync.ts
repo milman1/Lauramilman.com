@@ -244,9 +244,24 @@ async function main() {
       result = item.kind === 'natural' ? priceNatural(item) : priceLab(item);
     } else {
       result = priceWatch(item);
+      let watchTitle: string;
+      try {
+        watchTitle = titleFor(item);
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : String(err);
+        holds.push({ kind: 'watch', stockRef: item.stockRef, reason: 'watch_listing_review', detail });
+        watchLines.push({
+          stockRef: item.stockRef,
+          title: `${item.brand} ${item.reference}`.trim(),
+          costUsd: item.costUsd,
+          retailUsd: null,
+          holdReason: 'watch_listing_review',
+        });
+        continue;
+      }
       watchLines.push({
         stockRef: item.stockRef,
-        title: titleFor(item),
+        title: watchTitle,
         costUsd: item.costUsd,
         retailUsd: result.ok ? result.priced.retailUsd : null,
         holdReason: result.ok ? null : result.hold.reason,
@@ -319,8 +334,8 @@ async function main() {
     ...holds.filter((h) => h.stockRef !== '(unknown)').map((h) => handleForRef(h.kind, h.stockRef)),
   ]);
   const decisions: Decision[] = diffCatalog(desired, catalog, fetchedKinds, presentHandles);
-  // Pricing-review holds must NOT archive live watches or overwrite price —
-  // leave the existing variant price and tag for manual vetting.
+  // Per-row review holds must NOT archive or overwrite an existing watch.
+  // Valid rows in the same feed continue normally.
   const pricingReviewHolds = holds.filter((h) => PRICING_REVIEW_HOLD_REASONS.has(h.reason));
   const pricingReviewHandles = new Set(
     pricingReviewHolds.map((h) => handleForRef(h.kind, h.stockRef)),
