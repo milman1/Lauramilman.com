@@ -15,6 +15,7 @@ import {
 import {
   applyRememberedCompetitorPrices,
   COMPETITOR_MEMORY_DAYS,
+  flatFallbackCount,
   type CompetitorMemoryStats,
   diffBackVaultCatalog,
   promoteBackVaultCompetitorMemory,
@@ -102,12 +103,25 @@ interface RunSummary {
   channelsResolved: boolean;
   /** Pieces not published because they are not ACTIVE (DRAFT / ARCHIVED). */
   skippedDraft: number;
-  /** Unmatched pieces priced from a remembered competitor comparison. */
+  /**
+   * Pieces that matched the competitor in this run's rows, counted over the
+   * SAME set as the two below — everything this run will write, including
+   * pieces the availability check retained. `feedStats.competitorMatched` is
+   * the new-arrivals normalization and is a different basis.
+   */
+  competitorMatched: number;
+  /**
+   * Unmatched pieces whose remembered comparison actually set the price. A
+   * remembered midpoint that lost to the cost + markup floor is NOT counted
+   * here: that piece was written at the flat price.
+   */
   pricedFromMemory: number;
   /** Which ones, named so a person can check them rather than take the count on trust. */
   memoryHandles: string[];
-  /** Unmatched pieces with nothing remembered, or a memory past its expiry: flat-priced. */
+  /** Unmatched pieces written at the plain flat rule, for any of the four reasons. */
   flatFallback: number;
+  /** The four reasons, counted apart. */
+  flatFallbackReasons: { unremembered: number; expired: number; unusable: number; flooredToFlat: number };
   /** Pieces rewritten only to refresh a remembered comparison that was going stale. */
   memoryRefreshed: number;
   /**
@@ -305,9 +319,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   });
   const pricedFromMemory = memory.pricedFromMemory;
   const memoryHandles = memory.memoryHandles;
-  const flatFallback = memory.expired + memory.unremembered;
+  const flatFallback = flatFallbackCount(memory);
+  // Every competitor count on the Done line and in the report is taken over
+  // the SAME set — the pieces this run will write, retained ones included —
+  // so they can be read against each other. feedStats.competitorMatched is a
+  // different basis (new arrivals only) and stays under '## Feed'.
+  const competitorMatched = memory.matchedThisRun;
   if (competitorDegraded) {
-    warnings.push(competitorWarning(competitorStats, stats.competitorMatched, memory));
+    warnings.push(competitorWarning(competitorStats, memory));
     if (pricedFromMemory > 0) {
       const note =
         `${pricedFromMemory} piece${pricedFromMemory === 1 ? '' : 's'} priced from a remembered competitor ` +
@@ -426,9 +445,16 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     channels: channelNames,
     channelsResolved,
     skippedDraft,
+    competitorMatched,
     pricedFromMemory,
     memoryHandles,
     flatFallback,
+    flatFallbackReasons: {
+      unremembered: memory.unremembered,
+      expired: memory.expired,
+      unusable: memory.unusable,
+      flooredToFlat: memory.flooredToFlat,
+    },
     memoryRefreshed,
     warnings,
     errors,
@@ -445,7 +471,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
       `competitor=${competitorLabel(competitorStats)} ` +
-      `competitor_matched=${stats.competitorMatched} ` +
+      `competitor_matched=${competitorMatched} ` +
       `priced_from_memory=${pricedFromMemory} flat_fallback=${flatFallback} ` +
       `warnings=${warnings.length} errors=${errors.length}`,
   );
@@ -468,8 +494,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
  * a number this run measured: delete the memory lookup or its expiry and the
  * sentence changes with it.
  */
-function competitorWarning(stats: CompetitorStats, matched: number, memory: CompetitorMemoryStats): string {
-  const flat = memory.expired + memory.unremembered;
+function competitorWarning(stats: CompetitorStats, memory: CompetitorMemoryStats): string {
+  const matched = memory.matchedThisRun;
+  const flat = flatFallbackCount(memory);
   const memoryClause =
     memory.pricedFromMemory > 0
       ? `${memory.pricedFromMemory} unmatched piece${memory.pricedFromMemory === 1 ? '' : 's'} priced from a ` +
@@ -478,7 +505,8 @@ function competitorWarning(stats: CompetitorStats, matched: number, memory: Comp
   const flatClause =
     flat > 0
       ? `${flat} priced flat at cost + markup (${memory.unremembered} with nothing remembered, ` +
-        `${memory.expired} whose memory had expired)`
+        `${memory.expired} whose memory had expired, ${memory.unusable} whose memory had no readable date, ` +
+        `${memory.flooredToFlat} whose remembered midpoint lost to the floor)`
       : 'nothing fell back to the flat markup';
   if (stats.state === 'failed') {
     return (
@@ -501,13 +529,16 @@ function competitorWarning(stats: CompetitorStats, matched: number, memory: Comp
  */
 function competitorReportLines(summary: RunSummary): string[] {
   const stats = summary.competitor;
+  const reasons = summary.flatFallbackReasons;
   const aftermath = [
-    `- Pieces priced from a match in this run's rows: ${summary.feedStats.competitorMatched}`,
+    `- Pieces priced from a match in this run's rows: ${summary.competitorMatched}`,
     summary.pricedFromMemory > 0
       ? `- Priced from a remembered comparison (under ${COMPETITOR_MEMORY_DAYS} days old): ` +
         `${summary.pricedFromMemory} (${summary.memoryHandles.join(', ')})`
       : '- Priced from a remembered comparison: none',
-    `- Fell back to the flat markup, nothing remembered or the memory had expired: ${summary.flatFallback}`,
+    `- Fell back to the flat markup: ${summary.flatFallback} ` +
+      `(${reasons.unremembered} nothing remembered, ${reasons.expired} memory expired, ` +
+      `${reasons.unusable} memory with no readable date, ${reasons.flooredToFlat} remembered midpoint below the floor)`,
   ];
   if (stats.state === 'failed') {
     return [`- FAILED: ${stats.error} — no match was possible this run`, ...aftermath];
@@ -525,7 +556,7 @@ function competitorReportLines(summary: RunSummary): string[] {
   return [
     `- Rows fetched: ${stats.rowsFetched ?? 'skipped'} over ${stats.pagesRead} pages (complete)`,
     `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
-    `- Pieces priced from a competitor match: ${summary.feedStats.competitorMatched}`,
+    `- Pieces priced from a competitor match: ${summary.competitorMatched}`,
   ];
 }
 
@@ -583,7 +614,7 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Unchanged: ${counts.skip ?? 0}`,
     `- Priced from a remembered competitor comparison: ${summary.pricedFromMemory}`,
     ...(summary.memoryHandles.length > 0 ? [`  - From memory: ${summary.memoryHandles.join(', ')}`] : []),
-    `- Fell back to the flat markup (nothing remembered, or the memory had expired): ${summary.flatFallback}`,
+    `- Fell back to the flat markup (nothing remembered, expired, undated, or below the floor): ${summary.flatFallback}`,
     `- Rewritten only to refresh a remembered comparison: ${summary.memoryRefreshed}`,
     `- Published this run: ${summary.published}`,
     '',

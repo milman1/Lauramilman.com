@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyRememberedCompetitorPrices,
   COMPETITOR_MEMORY_DAYS,
+  flatFallbackCount,
   diffBackVaultCatalog,
   promoteBackVaultCompetitorMemory,
   promoteBackVaultInventoryUpdates,
@@ -164,7 +165,7 @@ describe('applyRememberedCompetitorPrices', () => {
   it('prices an unmatched piece from a fresh memory, against THIS run cost', () => {
     const one = item();
     const stats = applyRememberedCompetitorPrices([one], [live(FRESH)], { indexComplete: false, now: NOW });
-    expect(stats).toEqual({ pricedFromMemory: 1, memoryHandles: [HANDLE], expired: 0, unremembered: 0 });
+    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 1, memoryHandles: [HANDLE], expired: 0, unusable: 0, flooredToFlat: 0, unremembered: 0 });
     // (67,600 + 72,000) / 2 — the ordinary rule, no special case.
     expect(one.priceUsd).toBe(69800);
     expect(one.competitorPriceUsd).toBe(72000);
@@ -186,15 +187,6 @@ describe('applyRememberedCompetitorPrices', () => {
     expect(dearer.priceUsd).toBe(71000);
   });
 
-  it('keeps the flat floor when the remembered comparison is below it', () => {
-    const one = item();
-    applyRememberedCompetitorPrices([one], [live({ price: 60000, at: daysAgo(7) })], {
-      indexComplete: false,
-      now: NOW,
-    });
-    expect(one.priceUsd).toBe(68100); // max(midpoint 63,800, flat 68,100)
-  });
-
   it('expires a memory older than COMPETITOR_MEMORY_DAYS', () => {
     const one = item();
     const stats = applyRememberedCompetitorPrices(
@@ -202,7 +194,7 @@ describe('applyRememberedCompetitorPrices', () => {
       [live({ price: 72000, at: daysAgo(COMPETITOR_MEMORY_DAYS + 1) })],
       { indexComplete: false, now: NOW },
     );
-    expect(stats).toEqual({ pricedFromMemory: 0, memoryHandles: [], expired: 1, unremembered: 0 });
+    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 0, memoryHandles: [], expired: 1, unusable: 0, flooredToFlat: 0, unremembered: 0 });
     expect(one.priceUsd).toBe(68100); // flat, exactly as a piece that is not on the competitor
     expect(one.competitorPriceUsd).toBeUndefined();
   });
@@ -216,16 +208,51 @@ describe('applyRememberedCompetitorPrices', () => {
     expect(one.priceUsd).toBe(69800);
   });
 
-  it('treats a missing or unreadable read date as expired', () => {
+  it('counts a memory with no readable date as unusable, not expired', () => {
+    // It never expired — it was never usable: with no date there is nothing to
+    // age, and a comparison of unknown age cannot price a live listing.
     for (const at of [null, 'last tuesday', '']) {
       const one = item();
       const stats = applyRememberedCompetitorPrices([one], [live({ price: 72000, at })], {
         indexComplete: false,
         now: NOW,
       });
-      expect(stats.expired).toBe(1);
+      expect(stats.unusable).toBe(1);
+      expect(stats.expired).toBe(0);
+      expect(stats.unremembered).toBe(0);
       expect(one.priceUsd).toBe(68100);
     }
+  });
+
+  it('counts a remembered midpoint that lost to the floor as a flat fallback', () => {
+    // (67,600 + 60,000) / 2 = 63,800, under the flat 68,100 the piece is
+    // written at. The memory decided nothing, so claiming the piece was
+    // "priced from a remembered comparison" would be false.
+    const one = item();
+    const stats = applyRememberedCompetitorPrices([one], [live({ price: 60000, at: daysAgo(7) })], {
+      indexComplete: false,
+      now: NOW,
+    });
+    expect(stats.pricedFromMemory).toBe(0);
+    expect(stats.memoryHandles).toEqual([]);
+    expect(stats.flooredToFlat).toBe(1);
+    expect(flatFallbackCount(stats)).toBe(1);
+    expect(one.priceUsd).toBe(68100);
+    // Left untouched: nothing about this piece's price came from the memory.
+    expect(one.competitorPriceUsd).toBeUndefined();
+  });
+
+  it('counts a matched piece against the same set as everything else', () => {
+    const matched = item({ priceUsd: 68800, competitorPriceUsd: 70000 });
+    const fromMemory = item({ sourceHandle: 'rolex-datejust-rr9688' });
+    const stats = applyRememberedCompetitorPrices(
+      [matched, fromMemory],
+      [live(FRESH), { ...live(FRESH), handle: handleFor(fromMemory) }],
+      { indexComplete: false, now: NOW },
+    );
+    expect(stats.matchedThisRun).toBe(1);
+    expect(stats.pricedFromMemory).toBe(1);
+    expect(flatFallbackCount(stats)).toBe(0);
   });
 
   it('counts a piece with nothing remembered and leaves it flat', () => {
@@ -234,7 +261,7 @@ describe('applyRememberedCompetitorPrices', () => {
       indexComplete: false,
       now: NOW,
     });
-    expect(stats).toEqual({ pricedFromMemory: 0, memoryHandles: [], expired: 0, unremembered: 1 });
+    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 0, memoryHandles: [], expired: 0, unusable: 0, flooredToFlat: 0, unremembered: 1 });
     expect(one.priceUsd).toBe(68100);
   });
 
@@ -265,7 +292,7 @@ describe('applyRememberedCompetitorPrices', () => {
   it('ignores a piece that is not on the store yet', () => {
     const one = item();
     const stats = applyRememberedCompetitorPrices([one], [], { indexComplete: false, now: NOW });
-    expect(stats).toEqual({ pricedFromMemory: 0, memoryHandles: [], expired: 0, unremembered: 0 });
+    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 0, memoryHandles: [], expired: 0, unusable: 0, flooredToFlat: 0, unremembered: 0 });
     expect(one.priceUsd).toBe(68100);
   });
 
@@ -364,6 +391,32 @@ describe('promoteBackVaultCompetitorMemory', () => {
       );
       expect(decisions[0]!.action).toBe('update');
     }
+  });
+
+  it('compares the remembered value on the two decimals it is stored at', () => {
+    // The metafield round-trips through toFixed(2), so 72,000.004 and 72,000
+    // are the same stored price. Comparing raw floats here would leave the
+    // decision resting on where the subtraction happens to land.
+    const one = matched();
+    one.competitorPriceUsd = 72000.004;
+    const handle = handleFor(one);
+    const same = skipDecision(handle);
+    expect(
+      promoteBackVaultCompetitorMemory(same, [one], [entry(handle, 'hash', 'ACTIVE', true, [], { price: 72000, at: daysAgo(3) })], {
+        now: NOW,
+      }),
+    ).toBe(0);
+    expect(same[0]!.action).toBe('skip');
+
+    // A cent apart is a different price and must be rewritten.
+    one.competitorPriceUsd = 72000.01;
+    const differs = skipDecision(handle);
+    expect(
+      promoteBackVaultCompetitorMemory(differs, [one], [entry(handle, 'hash', 'ACTIVE', true, [], { price: 72000, at: daysAgo(3) })], {
+        now: NOW,
+      }),
+    ).toBe(1);
+    expect(differs[0]!.action).toBe('update');
   });
 
   it('leaves a fresh, matching memory alone', () => {

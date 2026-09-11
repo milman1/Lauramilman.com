@@ -1,5 +1,5 @@
 import type { BackVaultCatalogEntry } from './catalog.js';
-import { backVaultRetail } from './pricing.js';
+import { backVaultRetail, backVaultRetailFromCost } from './pricing.js';
 import { handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
 
@@ -30,15 +30,44 @@ export const COMPETITOR_MEMORY_REFRESH_DAYS = 30;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The two decimals a price survives as, once written to Shopify and read back. */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 export interface CompetitorMemoryStats {
-  /** Unmatched pieces priced from a remembered comparison instead of the flat rule. */
+  /**
+   * Pieces that matched the competitor in THIS run's rows. Counted here rather
+   * than taken from the feed normalization so it shares one basis with every
+   * other count below: the full desired set, retained pieces included.
+   */
+  matchedThisRun: number;
+  /**
+   * Unmatched pieces whose remembered comparison actually set the price — the
+   * midpoint beat the cost + markup floor. A remembered comparison that LOST to
+   * the floor is counted in `flooredToFlat`, because the piece was written at
+   * the flat price and saying otherwise would overstate what the memory did.
+   */
   pricedFromMemory: number;
   /** Which ones, so the report can name them instead of just counting them. */
   memoryHandles: string[];
-  /** Unmatched pieces whose remembered comparison was too old to use. */
+  /** Unmatched pieces whose remembered comparison was read too long ago to use. */
   expired: number;
+  /**
+   * Unmatched pieces carrying a remembered price with no readable date. Not
+   * expired — never usable: with no date there is nothing to age, and a
+   * comparison of unknown age cannot be trusted to price a live listing.
+   */
+  unusable: number;
+  /** Unmatched pieces whose remembered midpoint lost to the cost + markup floor. */
+  flooredToFlat: number;
   /** Unmatched pieces with no remembered comparison at all. */
   unremembered: number;
+}
+
+/** Everything that ended up at the plain flat rule, whatever the reason. */
+export function flatFallbackCount(stats: CompetitorMemoryStats): number {
+  return stats.expired + stats.unusable + stats.flooredToFlat + stats.unremembered;
 }
 
 /** Age of an ISO timestamp in days, or null when it cannot be read. */
@@ -69,9 +98,13 @@ function ageInDays(readAt: string | null, now: number): number | null {
  *    therefore still reaches the storefront, at the same midpoint premium, and
  *    the price is stable week to week because the content hash already carries
  *    `competitorPrice`.
- *  - Nothing remembered, or the memory has expired: flat, cost + markup —
+ *  - Nothing remembered, a memory with no readable date, one read too long
+ *    ago, or one whose midpoint loses to the floor: flat, cost + markup —
  *    exactly what the rule says for a piece that is not on the competitor.
- *    Nothing is protected and nothing is frozen.
+ *    Nothing is protected and nothing is frozen. The four are counted apart,
+ *    because "we never knew", "we have forgotten", "we cannot tell how old
+ *    this is" and "the comparison was too cheap to matter" are different
+ *    facts about the same price.
  *
  * A complete index always wins over memory: with the whole catalogue read, an
  * unmatched piece is genuinely unmatched. A fresh match always wins too, and
@@ -88,13 +121,22 @@ export function applyRememberedCompetitorPrices(
   const now = options.now ?? Date.now();
   const maxAgeDays = options.maxAgeDays ?? COMPETITOR_MEMORY_DAYS;
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
-  const stats: CompetitorMemoryStats = { pricedFromMemory: 0, memoryHandles: [], expired: 0, unremembered: 0 };
+  const stats: CompetitorMemoryStats = {
+    matchedThisRun: 0,
+    pricedFromMemory: 0,
+    memoryHandles: [],
+    expired: 0,
+    unusable: 0,
+    flooredToFlat: 0,
+    unremembered: 0,
+  };
   const nowIso = new Date(now).toISOString();
   for (const item of items) {
     // Matched this run: stamp today's date so the memory written to the
     // product is this comparison, not the one it replaces.
     if (typeof item.competitorPriceUsd === 'number') {
       item.competitorPriceReadAt = nowIso;
+      stats.matchedThisRun += 1;
       continue;
     }
     if (options.indexComplete) continue; // a whole catalogue was read: unmatched means unmatched
@@ -105,8 +147,19 @@ export function applyRememberedCompetitorPrices(
       continue;
     }
     const age = ageInDays(have?.rememberedCompetitorPriceAt ?? null, now);
-    if (age === null || age > maxAgeDays) {
+    if (age === null) {
+      stats.unusable += 1;
+      continue;
+    }
+    if (age > maxAgeDays) {
       stats.expired += 1;
+      continue;
+    }
+    // A midpoint that loses to the floor leaves the piece at the flat price it
+    // already had, so the memory decided nothing: say so, and leave the item
+    // untouched rather than recording a comparison that set no price.
+    if (backVaultRetail(item.costUsd, remembered) <= backVaultRetailFromCost(item.costUsd)) {
+      stats.flooredToFlat += 1;
       continue;
     }
     item.competitorPriceUsd = remembered;
@@ -155,9 +208,11 @@ export function promoteBackVaultCompetitorMemory(
     const have = catalogByHandle.get(decision.handle);
     if (!have) continue;
     const age = ageInDays(have.rememberedCompetitorPriceAt, now);
+    // The metafield is written with toFixed(2), so compare on that same
+    // two-decimal basis instead of guessing a tolerance around the round-trip.
     const sameValue =
       typeof have.rememberedCompetitorPrice === 'number' &&
-      Math.abs(have.rememberedCompetitorPrice - item.competitorPriceUsd) < 0.005;
+      round2(have.rememberedCompetitorPrice) === round2(item.competitorPriceUsd);
     if (sameValue && age !== null && age <= refreshAfterDays) continue;
     decision.action = 'update';
     decision.reason = 'competitor_memory_refresh';

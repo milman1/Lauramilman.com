@@ -403,12 +403,24 @@ npm run sync:backvault       # live (needs Shopify env vars)
    `backvault_feed.competitor_price_at` (`date_time`). On a run whose index is
    **not complete**, an unmatched piece is then priced by what is remembered:
 
-   - a comparison **no older than 90 days**: it becomes this run's competitor
-     price and the ordinary midpoint rule runs against the **current** cost, so
-     the ticket follows the supplier down or up and keeps the midpoint premium;
-   - **nothing remembered, or older than 90 days**: flat, cost + $500 — exactly
-     what the rule says for a piece that is not on the competitor. Nothing is
-     protected, nothing is frozen.
+   - a comparison **no older than 90 days**, whose midpoint beats the flat
+     floor: it becomes this run's competitor price and the ordinary midpoint
+     rule runs against the **current** cost, so the ticket follows the supplier
+     down or up and keeps the midpoint premium;
+   - **nothing remembered**, a comparison **older than 90 days**, one with **no
+     readable date** (never usable rather than expired — with no date there is
+     nothing to age), or one whose **midpoint loses to the floor**: flat,
+     cost + $500 — exactly what the rule says for a piece that is not on the
+     competitor. Nothing is protected, nothing is frozen. The four are counted
+     apart in the report, because a piece written at the flat price was not
+     "priced from a remembered comparison" whatever is stored on it.
+
+   A comparison is **never cleared** from the product: only a real match writes
+   a new one, so an expired or stale value can sit in
+   `backvault_feed.competitor_price` indefinitely. It cannot affect pricing —
+   past 90 days it is ignored, and an unmatched piece prices flat — but anyone
+   reading that metafield in Admin should treat it as a record of the last
+   match, not as today's competitor price. `competitor_price_at` says when.
 
    A complete index always wins over memory: with the whole catalogue read, an
    unmatched piece is genuinely unmatched and prices flat. A fresh match wins

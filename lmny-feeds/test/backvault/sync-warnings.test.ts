@@ -81,16 +81,38 @@ const COMPETITOR_ROW = {
   variants: [{ sku: 'J10605', price: '70000.00', available: true }],
 };
 const CAPPED_WITH_MATCH = await buildPaginationCapped(COMPETITOR_ROW);
+/** The same partial index, matching only the piece the availability check retains. */
+const CAPPED_MATCHING_RETAINED = await buildPaginationCapped({
+  handle: 'cartier-tank-watch-rr9688',
+  title: 'Cartier Tank Watch RR9688',
+  variants: [{ sku: 'RR9688', price: '60000.00', available: true }],
+});
 
 /** Set per test: the supplier row, what the competitor fetch does, and the catalog. */
 const state: {
   competitor: () => Promise<CompetitorCatalog>;
   catalog: unknown[];
   feedRow: Record<string, unknown>;
+  /** The supplier's FULL catalog, when a test needs a piece the availability check retains. */
+  allRows?: Record<string, unknown>[];
 } = {
   competitor: async () => complete(),
   catalog: [],
   feedRow: SUPPLIER_ROW,
+};
+
+/**
+ * A second piece, in the supplier's full catalog but NOT in new arrivals: the
+ * availability check retains it, so it is written by this run even though the
+ * feed normalization never saw it.
+ */
+const RETAINED_ROW = {
+  ...SUPPLIER_ROW,
+  id: 2,
+  handle: 'cartier-tank-watch-rr9688',
+  title: 'Cartier Tank Watch',
+  variants: [{ id: 20, title: 'Default Title', price: '50000.00', available: true, sku: 'RR9688' }],
+  images: [{ src: 'https://cdn.example.com/RR9688.jpg' }],
 };
 
 /** The supplier row with its listed price (LMNY's cost) changed. */
@@ -109,7 +131,7 @@ const writes = new Map<string, string>();
 
 vi.mock('../../src/backvault/feed.js', () => ({
   fetchBackVaultFeed: async () => [state.feedRow],
-  fetchBackVaultAllProducts: async () => [state.feedRow],
+  fetchBackVaultAllProducts: async () => state.allRows ?? [state.feedRow],
 }));
 
 vi.mock('../../src/backvault/competitor.js', async (importOriginal) => ({
@@ -173,6 +195,7 @@ const { run } = await import('../../src/backvault/sync.js');
 
 /** The handle the sync will compute for SUPPLIER_ROW. */
 const HANDLE = handleFor(normalizeBackVaultFeed([SUPPLIER_ROW]).items[0]!);
+const RETAINED_HANDLE = handleFor(normalizeBackVaultFeed([RETAINED_ROW]).items[0]!);
 
 function catalogEntry(overrides: Record<string, unknown> = {}) {
   return {
@@ -202,6 +225,7 @@ beforeEach(() => {
   state.competitor = async () => complete();
   state.catalog = [];
   state.feedRow = SUPPLIER_ROW;
+  state.allRows = undefined;
   exitCodeBefore = process.exitCode;
   process.exitCode = 0;
   process.env.SHOPIFY_STORE_DOMAIN = 'example.myshopify.com';
@@ -275,7 +299,8 @@ describe('a failed competitor fetch', () => {
     expect(json.pricedFromMemory).toBe(0);
     expect(json.flatFallback).toBe(1);
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
-    expect(md).toContain('- Fell back to the flat markup, nothing remembered or the memory had expired: 1');
+    expect(md).toContain('- Fell back to the flat markup: 1 (0 nothing remembered, 1 memory expired,');
+    expect(json.flatFallbackReasons).toEqual({ unremembered: 0, expired: 1, unusable: 0, flooredToFlat: 0 });
   });
 
   it('falls back to the flat markup when nothing was ever remembered', async () => {
@@ -284,7 +309,33 @@ describe('a failed competitor fetch', () => {
     const { json } = report();
     expect(json.pricedFromMemory).toBe(0);
     expect(json.flatFallback).toBe(1);
+    expect(json.flatFallbackReasons).toMatchObject({ unremembered: 1, expired: 0 });
     expect(json.warnings[0]).toContain('1 with nothing remembered');
+  });
+
+  it('separates a memory with no readable date from an expired one', async () => {
+    state.catalog = [catalogEntry({ rememberedCompetitorPriceAt: null })];
+    await run(['--dry-run']);
+    const { json, md } = report();
+    expect(json.flatFallbackReasons).toMatchObject({ unusable: 1, expired: 0, unremembered: 0 });
+    expect(json.warnings[0]).toContain('1 whose memory had no readable date');
+    expect(md).toContain('1 memory with no readable date');
+  });
+
+  it('does not claim a piece was priced from memory when the floor won', async () => {
+    // A remembered 60,000 against the 67,600 cost gives 63,800, under the flat
+    // 68,100 actually written. The memory decided nothing.
+    state.catalog = [catalogEntry({ rememberedCompetitorPrice: 60000 })];
+    await run([]);
+    const { json, md } = report();
+    expect(String(productSets[0]!.variants[0].price)).toBe('68100.00');
+    expect(json.pricedFromMemory).toBe(0);
+    expect(json.memoryHandles).toEqual([]);
+    expect(json.flatFallbackReasons).toMatchObject({ flooredToFlat: 1 });
+    expect(md).toContain('1 remembered midpoint below the floor');
+    // And nothing was written back as though it had matched.
+    const fields = productSets[0]!.metafields as Array<Record<string, string>>;
+    expect(fields.map((f) => f.key)).not.toContain('competitor_price');
   });
 
   it('still reaches the report when the fetch fails before a single page', async () => {
@@ -421,7 +472,7 @@ describe('a partial competitor index', () => {
     expect(md).toContain('caps page-based pagination at 100 pages of 250');
     expect(md).toContain("- Pieces priced from a match in this run's rows: 0");
     expect(md).toContain(`- Priced from a remembered comparison (under 90 days old): 1 (${HANDLE})`);
-    expect(md).toContain('- Fell back to the flat markup, nothing remembered or the memory had expired: 0');
+    expect(md).toContain('- Fell back to the flat markup: 0 (0 nothing remembered, 0 memory expired,');
     expect(md).toContain('This is a warning, not an error.');
     expect(md).not.toContain('- FAILED:');
   });
@@ -472,6 +523,36 @@ describe('a supplier markdown across two consecutive degraded runs', () => {
     // is not swallowed.
     expect(String(productSets[0]!.variants[0].price)).toBe('66000.00');
     expect(report().json.pricedFromMemory).toBe(1);
+  });
+});
+
+/**
+ * Every competitor count on the Done line is taken over the pieces this run
+ * will actually write — retained ones included — so they can be read against
+ * each other. The feed normalization is a narrower set and would not add up.
+ */
+describe('the competitor counts share one basis', () => {
+  it('counts a match on a retained piece the feed normalization never saw', async () => {
+    // J10605 is the new arrival and matches nothing; RR9688 is only in the
+    // supplier's full catalog, is already on the store, and IS in the
+    // competitor's rows.
+    state.competitor = async () => CAPPED_MATCHING_RETAINED;
+    state.allRows = [SUPPLIER_ROW, RETAINED_ROW];
+    state.catalog = [
+      catalogEntry({ rememberedCompetitorPrice: null, rememberedCompetitorPriceAt: null }),
+      catalogEntry({ handle: RETAINED_HANDLE, rememberedCompetitorPrice: null, rememberedCompetitorPriceAt: null }),
+    ];
+    await run(['--dry-run']);
+    const { json, md } = report();
+    expect(json.availability.retained).toBe(1);
+    // The narrower basis: new arrivals alone matched nothing.
+    expect(json.feedStats.competitorMatched).toBe(0);
+    // The run's basis: one of the two pieces it writes matched.
+    expect(json.competitorMatched).toBe(1);
+    expect(json.flatFallback).toBe(1);
+    expect(doneLine()).toContain('competitor_matched=1');
+    expect(doneLine()).toContain('flat_fallback=1');
+    expect(md).toContain("- Pieces priced from a match in this run's rows: 1");
   });
 });
 
