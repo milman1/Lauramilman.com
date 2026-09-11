@@ -297,6 +297,9 @@ Unworn. It fails closed to `3000`; the hourly API sync restores legitimate new
 conditions from authoritative source state and accessory fields.
 
 The Actions workflow **LMNY eBay pre-owned features** is the same path.
+Pull-request runs are always dry-run. A live repair runs only from a manual
+workflow dispatch where **Dry run (no writes to Shopify)** is explicitly
+turned off.
 
 ### Lab pricing backfill
 
