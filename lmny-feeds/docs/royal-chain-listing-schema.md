@@ -16,13 +16,21 @@ authentication, packaging, or provenance claims because the intake does not
 provide evidence for them.
 
 The intake accepts its original `image_url` plus an optional semicolon- or
-pipe-delimited `image_urls` column. It also requires `existing_handle`, the
-current live Necklace handle, so a split preserves that product and creates
-only `${existing_handle}-bracelet` for the new Bracelet. Every distinct source image becomes a
+pipe-delimited `image_urls` column. It accepts an `existing_handle` override;
+when omitted, the reviewed 21-item live-handle map is used. A split preserves
+that Necklace handle and creates only `${existing_handle}-bracelet` for the new
+Bracelet. Every distinct source image becomes a
 Shopify `files` input with descriptive alt text. Shopify imports those source
 URLs and serves completed media from its CDN; only the post-import Shopify CDN
-URLs are retained by a media verifier. Fewer than three unique images means
-the product stays DRAFT and carries `media-missing`.
+URLs are retained by a media verifier. Source URLs are proposed media only:
+eBay eligibility requires three successful Shopify CDN URLs supplied in
+`shopify_cdn_image_urls`. Fewer than three verified CDN images means the
+product stays DRAFT and carries `media-missing`.
+
+The reviewed width facts override the legacy shortlist only for `PCLIP095`
+(4.1mm) and `HSR018` (2.7mm). Any non-numeric unresolved width fails the plan.
+The current 93 variants split into 32 product plans; callers can pass explicit
+expected counts for another reviewed snapshot.
 
 They never carry `ebay` before a separate activation and channel-publication
 review. The private plan's `ebay` object is a readiness record, not a Shopify

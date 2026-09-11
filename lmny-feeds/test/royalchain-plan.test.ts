@@ -47,6 +47,11 @@ describe('Royal Chain listing builder', () => {
         'https://supplier.invalid/detail.jpg',
         'https://supplier.invalid/on-body.jpg',
       ],
+      shopifyCdnImageUrls: [
+        'https://cdn.shopify.com/s/files/1/1/files/hero.jpg',
+        'https://cdn.shopify.com/s/files/1/1/files/detail.jpg',
+        'https://cdn.shopify.com/s/files/1/1/files/onbody.jpg',
+      ],
       condition: { state: 'new', evidence: 'Source product record expressly states new.', originalPackagingEvidence: 'Source record expressly confirms original retail packaging.' },
       variants: [
         { label: '14K Yellow:18in', costUsd: 100, sku: 'CUBAN-4-18', weightGrams: 11.2, available: true },
@@ -115,7 +120,7 @@ describe('Royal Chain listing builder', () => {
       itemNumber: 'BASIC-2',
       style: 'Box',
       widthMm: '2',
-      imageUrls: ['https://supplier.invalid/one.jpg', 'https://supplier.invalid/two.jpg'],
+      imageUrls: ['https://supplier.invalid/one.jpg', 'https://supplier.invalid/two.jpg', 'https://supplier.invalid/three.jpg'],
       variants: [{ label: '14K Rose:18in', costUsd: 10 }],
     }) as Record<string, any>;
 
@@ -123,7 +128,7 @@ describe('Royal Chain listing builder', () => {
     expect(product.tags).toContain('media-missing');
     expect(product.ebay.eligible).toBe(false);
     expect(product.ebay.blockers).toEqual(expect.arrayContaining([
-      'requires at least 3 source images',
+      'requires 3 successfully imported Shopify CDN images',
       'requires source-backed condition evidence',
       'requires unique supplier child SKU for every variant',
       'requires exact positive gram weight for every variant',
@@ -138,6 +143,12 @@ describe('Royal Chain listing builder', () => {
       'https://cdn.shopify.com/s/files/1/123/files/hero.jpg?v=1',
       'https://cdn.shopify.com/s/files/1/123/files/hero.jpg?v=1',
     ])).toEqual(['https://cdn.shopify.com/s/files/1/123/files/hero.jpg?v=1']);
+  });
+
+  it('uses reviewed source width overrides and fails closed on an unresolved width', () => {
+    const corrected = buildRoyalChainProduct({ itemNumber: 'PCLIP095', style: 'Paperclip', widthMm: '4', variants: [{ label: '14K Yellow:18in', costUsd: 10 }] });
+    expect(corrected.title).toContain('4.1mm');
+    expect(() => buildRoyalChainProduct({ itemNumber: 'UNKNOWN', style: 'Box', widthMm: 'about four', variants: [{ label: '14K Yellow:18in', costUsd: 10 }] })).toThrow(/width mismatch/);
   });
 
   it('generates an idempotent reviewed-size plan without Shopify writes', async () => {
@@ -155,7 +166,7 @@ describe('Royal Chain listing builder', () => {
     expect((await readFile(path.join(dir, 'royalchain-products.csv'), 'utf8')).trim().split('\n')).toHaveLength(4);
     const firstProduct = JSON.parse(first.split('\n')[0]!);
     expect(firstProduct.files).toHaveLength(3);
-    expect(firstProduct.ebay.eligible).toBe(true);
+    expect(firstProduct.ebay.eligible).toBe(false);
     expect(firstProduct.tags).not.toContain('ebay');
   });
 

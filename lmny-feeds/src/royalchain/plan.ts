@@ -34,6 +34,9 @@ function collectedImageUrls(row: Record<string, string>): string[] {
     .map((url) => url.trim())
     .filter(Boolean);
 }
+function values(row: Record<string, string>, key: string): string[] {
+  return (row[key] ?? '').split(/[;|]/).map((value) => value.trim()).filter(Boolean);
+}
 function sourceCondition(row: Record<string, string>): RoyalChainSource['condition'] {
   const state = (row.condition ?? '').trim().toLowerCase();
   if (!state) return undefined;
@@ -51,7 +54,6 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
     const itemNumber = row.item_number ?? '';
     const url = row.url ?? '';
     const existingHandle = row.existing_handle ?? '';
-    if (!existingHandle.trim()) throw new Error(`${itemNumber}: existing_handle is required to prevent duplicate products`);
     const priv = privateByItem.get(itemNumber);
     if (!priv || priv.url !== url || priv.error) throw new Error(`${itemNumber}: private row missing, mismatched, or errored`);
     const variants = privateVariants(priv.lengths_karats ?? '');
@@ -68,15 +70,22 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
       construction: row.construction ?? '',
       imageUrl: row.image_url ?? '',
       imageUrls: collectedImageUrls(row),
+      shopifyCdnImageUrls: values(row, 'shopify_cdn_image_urls'),
       condition: sourceCondition(row),
       variants,
     };
     products.push(...buildRoyalChainProducts(source));
   }
+  const publicItems = new Set(shortlist.map((row) => row.item_number ?? ''));
+  if (publicItems.size !== shortlist.length || publicItems.size !== privateByItem.size || [...publicItems].some((item) => !privateByItem.has(item))) {
+    throw new Error('public/private item sets differ');
+  }
   const handles = products.map((product) => String(product.handle ?? ''));
   if (handles.some((handle) => !handle) || new Set(handles).size !== handles.length) throw new Error('planned Royal Chain handles are not unique');
+  const childSkus = products.flatMap((product) => (product.variants as Array<{ sku?: string }>).map((variant) => (variant.sku ?? '').trim())).filter(Boolean);
+  if (new Set(childSkus).size !== childSkus.length) throw new Error('planned Royal Chain child SKUs are not unique');
   const variantCount = products.reduce((n, p) => n + (p.variants as unknown[]).length, 0);
-  if (products.length !== (opts.expectedProducts ?? 21) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
+  if (products.length !== (opts.expectedProducts ?? 32) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
   await mkdir(opts.outputDir, { recursive: true });
   await writeFile(path.join(opts.outputDir, 'royalchain-products.jsonl'), products.map((p) => JSON.stringify(p)).join('\n') + '\n');
   const lines = ['handle,status,vendor,product_type,category,title,image_url,tags,variant_label,sku,retail,cost'];

@@ -8,6 +8,14 @@ export const ROYALCHAIN_BRACELET_PRODUCT_TYPE = 'Bracelets';
 export const ROYALCHAIN_MINIMUM_IMAGES = 3;
 export const EBAY_TITLE_MAX = 80;
 
+const EXISTING_HANDLES: Record<string, string> = {
+  NMC120: 'lmny-cuban-3-9-mm-nmc120', NHMC120: 'lmny-cuban-4-5-mm-nhmc120', NHMC150: 'lmny-cuban-5-mm-nhmc150', HMC150: 'lmny-cuban-5-5-mm-hmc150', MC180: 'lmny-cuban-6-mm-mc180',
+  PCLIP060: 'lmny-paperclip-2-5-mm-pclip060', PCLIP095: 'lmny-paperclip-4-mm-pclip095', CH014: 'lmny-rope-1-8-mm-ch014', PROY018: 'lmny-rope-2-3-mm-proy018', HSR018: 'lmny-rope-2-5-mm-hsr018', SLK023: 'lmny-rope-3-mm-slk023',
+  CC080: 'lmny-curb-3-2-mm-cc080', CC100: 'lmny-curb-3-6-mm-cc100', LCRB100: 'lmny-curb-4-4-mm-lcrb100', SF030: 'lmny-herringbone-2-8-mm-sf030', SF040: 'lmny-herringbone-3-8-mm-sf040', SF050: 'lmny-herringbone-4-6-mm-sf050',
+  BOX073: 'lmny-box-1-4-mm-box073', SRBX130: 'lmny-box-2-5-mm-srbx130', OVSN200: 'lmny-snake-2-mm-ovsn200', OVSN260: 'lmny-snake-2-6-mm-ovsn260',
+};
+const REVIEWED_WIDTH_OVERRIDES: Record<string, string> = { PCLIP095: '4.1', HSR018: '2.7' };
+
 export interface RoyalChainVariant {
   label: string;
   costUsd: number;
@@ -39,6 +47,8 @@ export interface RoyalChainSource {
   /** @deprecated Use imageUrls so every collected source image is retained. */
   imageUrl?: string;
   imageUrls?: string[];
+  /** Successfully imported Shopify CDN media, supplied only by post-import verification. */
+  shopifyCdnImageUrls?: string[];
   condition?: RoyalChainCondition;
   variants: RoyalChainVariant[];
 }
@@ -106,6 +116,19 @@ export function shopifyCdnMediaUrlsAfterImport(urls: string[]): string[] {
   return [...new Set(urls.map(clean).filter((url) => /^https:\/\/cdn\.shopify\.com\//i.test(url)))];
 }
 
+export function existingRoyalChainHandle(itemNumber: string, explicit?: string): string {
+  const handle = clean(explicit ?? '') || EXISTING_HANDLES[clean(itemNumber).toUpperCase()];
+  if (!handle) throw new Error(`${itemNumber}: no reviewed existing handle`);
+  return handle;
+}
+
+function reviewedWidth(itemNumber: string, rawWidth: string): string {
+  const override = REVIEWED_WIDTH_OVERRIDES[itemNumber.toUpperCase()];
+  if (override) return override;
+  if (!/^\d+(?:\.\d+)?$/.test(rawWidth)) throw new Error(`${itemNumber}: unresolved width mismatch`);
+  return rawWidth;
+}
+
 function conditionFacts(condition: RoyalChainCondition | undefined): { label: string; ebayCondition: string } | null {
   if (!condition || !clean(condition.evidence)) return null;
   if (condition.state !== 'new' && condition.state !== 'preowned') throw new Error('invalid condition state');
@@ -158,7 +181,7 @@ function buildRoyalChainProductForType(
 ): Record<string, unknown> {
   const itemNumber = clean(source.itemNumber);
   const style = clean(source.style);
-  const width = clean(source.widthMm);
+  const width = reviewedWidth(itemNumber, clean(source.widthMm));
   if (!itemNumber || !style || !width || parsed.length === 0) throw new Error('incomplete Royal Chain source row');
 
   const metal = assertSingleMetal(parsed, itemNumber);
@@ -181,10 +204,10 @@ function buildRoyalChainProductForType(
   const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
   const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
   const fallbackHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
-  const baseHandle = clean(source.existingHandle ?? '') || fallbackHandle;
+  const baseHandle = source.existingHandle || EXISTING_HANDLES[itemNumber] || fallbackHandle;
   const handle = splitByType && productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? `${baseHandle}-bracelet` : baseHandle;
   const imageUrls = dedupeRoyalChainImageUrls(source);
-  const mediaReady = imageUrls.length >= ROYALCHAIN_MINIMUM_IMAGES;
+  const mediaReady = shopifyCdnMediaUrlsAfterImport(source.shopifyCdnImageUrls ?? []).length >= ROYALCHAIN_MINIMUM_IMAGES;
   const tags = [ROYALCHAIN_VENDOR, productType, ...(mediaReady ? [] : ['media-missing'])];
   const metafields: MetafieldValue[] = [
     { namespace: 'custom', key: 'metal_type', type: 'single_line_text_field', value: metal },
@@ -205,7 +228,7 @@ function buildRoyalChainProductForType(
   const ebay = {
     eligible: mediaReady && contentReady && conditionReady && childSkuReady && weightReady && availabilityReady,
     blockers: [
-      ...(mediaReady ? [] : [`requires at least ${ROYALCHAIN_MINIMUM_IMAGES} source images`]),
+      ...(mediaReady ? [] : [`requires ${ROYALCHAIN_MINIMUM_IMAGES} successfully imported Shopify CDN images`]),
       ...(contentReady ? [] : ['requires complete public copy and item specifics']),
       ...(conditionReady ? [] : ['requires source-backed condition evidence']),
       ...(childSkuReady ? [] : ['requires unique supplier child SKU for every variant']),
