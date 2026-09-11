@@ -1,9 +1,11 @@
 # Issue #93 — Royal Chain public-cost companion draft
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/93
-- Status: prepared; pending root upload and fresh-read verification
+- Status: prepared; source and private upload verified; completion pending Sol confirmation and PR #119 review/merge
+- Canonical handoff: `docs/handoffs/93-astra-royal-chain-costs.md`
 - Public branch: `codex/93-royal-chain-public-20260911`
 - Public companion commit: `67aaf9e6957ba02ac3f612645e657e7c66f9e66d`
+- [PR #119](https://github.com/milman1/Lauramilman.com/pull/119) is open and unmerged.
 - Scope: 21 shortlist items, 93 displayed length variants
 - No credentials, customer data, or private wholesale costs are in this file.
 
@@ -30,4 +32,6 @@ Base-cost convention: each row’s top-level cost and retail use the first displ
 
 ## Verification and remaining work
 
-Local validation found 21 private rows, 21 public rows, 93 variants, zero errors, matching item order and URLs, and retail rounding consistent with the required formula. Root must upload or preserve the private file in the approved merchant location and perform a fresh read before this task can be called complete. No Shopify writes, product creation, or public rollout has occurred.
+Local validation found 21 private rows, 21 public rows, 93 variants, zero errors, matching item order and URLs, and retail rounding consistent with the required formula. Root’s fresh cloud read verified the uploaded private file at 21 rows / 93 variants, and root independently re-read all 21 source pages with 0 differences. Sol’s independent normalized comparison remains the final review gate. The normalized comparison used two-decimal numeric values and matched fingerprint FNV1a64 `8362d686884797a1` (length 3937); no private values are recorded here.
+
+Remaining work is limited to Sol confirmation and PR #119 review/merge. After merge, a separate later worker may create the 21 Shopify products as DRAFT and write Cost per item under recipe H. No Shopify writes or product creation are part of this handoff.
