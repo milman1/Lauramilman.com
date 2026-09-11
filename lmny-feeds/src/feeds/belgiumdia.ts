@@ -80,16 +80,40 @@ const REQUEST_HEADERS = {
  * one wasted request against the 1-per-15-minutes limit, which beats a dead
  * sync, and the whole cache layer becomes optional infrastructure.
  */
-async function fetchPage(kind: BelgiumDiaKind, page: number): Promise<Raw[]> {
+async function fetchPage(
+  kind: BelgiumDiaKind,
+  page: number,
+  forceDirect = false,
+): Promise<{ rows: Raw[]; direct: boolean }> {
+  if (forceDirect) {
+    return { rows: await fetchPageFrom(kind, page, DEFAULT_BASE_URL), direct: true };
+  }
   const usingCache = baseUrl() !== DEFAULT_BASE_URL;
   try {
-    return await fetchPageFrom(kind, page, baseUrl());
+    const rows = await fetchPageFrom(kind, page, baseUrl());
+    // The Worker reports a cold cache as HTTP 200 {data:[]}. On page 1 that
+    // means infrastructure is unavailable, not that an entire supplier feed
+    // is empty. Page 2 must stay empty because it is the cache's pagination
+    // terminator and should never spend an upstream request.
+    if (usingCache && page === 1 && rows.length === 0) {
+      console.error(`Feed cache empty for ${kind} — falling back to the supplier directly`);
+      return { rows: await fetchPageFrom(kind, page, DEFAULT_BASE_URL), direct: true };
+    }
+    return { rows, direct: !usingCache };
   } catch (err) {
     if (!usingCache) throw err;
+    // Once cache page 1 has contributed rows, switching only a later page to
+    // the supplier would mix snapshots and can silently omit or duplicate
+    // inventory. Fail the whole feed so the sync protects that segment.
+    if (page > 1) {
+      throw new Error(
+        `Belgium Dia ${kind} feed: cache failed after page 1 (${err instanceof Error ? err.message : String(err)})`,
+      );
+    }
     console.error(
       `Feed cache failed for ${kind} (${err instanceof Error ? err.message : String(err)}) — falling back to the supplier directly`,
     );
-    return fetchPageFrom(kind, page, DEFAULT_BASE_URL);
+    return { rows: await fetchPageFrom(kind, page, DEFAULT_BASE_URL), direct: true };
   }
 }
 
@@ -135,15 +159,18 @@ export async function fetchBelgiumDiaFeed(kind: BelgiumDiaKind): Promise<Raw[]> 
 
   // Watch: single request, no pagination.
   if (kind === 'watch') {
-    return fetchPage('watch', 1);
+    return (await fetchPage('watch', 1)).rows;
   }
 
   // Diamonds: page until an empty page, a repeated page, or the safety cap.
   const all: Raw[] = [];
   let prevSig = '';
   let page = 1;
+  let direct = false;
   for (; page <= MAX_PAGES; page++) {
-    const rows = await fetchPage(kind, page);
+    const fetched = await fetchPage(kind, page, direct);
+    const rows = fetched.rows;
+    direct = fetched.direct;
     if (rows.length === 0) break;
     const sig = pageSignature(rows);
     if (sig === prevSig) break; // provider ignored `page` / returned the same page again
