@@ -10,6 +10,9 @@ Products use vendor `Laura Milman New York`, product type `Necklaces`, Shopify
 category `Apparel & Accessories > Jewelry > Necklaces`, and one supplier image.
 They remain DRAFT and carry `media-missing` because the intake has fewer than
 three real images. They never carry `ebay` before human media/content review.
+Variants are inventory-tracked with no positive quantity in the plan and use
+the deny policy, so a draft cannot be sold. House-brand copy makes no
+authentication claim.
 Titles, body, SEO, alt, handles, tags, and metafields are scrubbed of the
 supplier name. Cost and retail appear only in the private execution plan; body,
 SEO, title, tags, and alt contain neither.

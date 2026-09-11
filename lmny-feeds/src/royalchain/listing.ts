@@ -34,6 +34,13 @@ function fitWithSuffix(lead: string, suffix: string, max: number): string {
   return `${(boundary > 0 ? cut.slice(0, boundary) : '').trim()} ${suffix}`.trim();
 }
 
+function truncateAtWord(value: string, max: number): string {
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max + 1);
+  const boundary = cut.lastIndexOf(' ');
+  return (boundary > 0 ? cut.slice(0, boundary) : '').trim();
+}
+
 function assertNoSupplierName(fields: Record<string, string>): void {
   for (const [field, value] of Object.entries(fields)) {
     if (/royal\s*chain/i.test(value)) throw new Error(`supplier name is forbidden in ${field}`);
@@ -51,7 +58,7 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
   const title = `${width}mm ${style} Chain in ${metal}`;
   const descriptionHtml = `<p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} chain in ${escapeHtml(metal)} is offered by Laura Milman New York.</p>`;
   const seoTitle = fitWithSuffix(`${width}mm ${style} Chain in ${metal}`, '| Laura Milman', 60);
-  const seoDescription = fitWithSuffix(`Shop this ${width}mm ${style.toLowerCase()} chain in ${metal}.`, 'Authenticated by Laura Milman New York.', 160);
+  const seoDescription = truncateAtWord(`Shop this ${width}mm ${style.toLowerCase()} chain in ${metal} from Laura Milman New York.`, 160);
   const handle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   const alt = title;
   assertNoSupplierName({ handle, title, descriptionHtml, seoTitle, seoDescription, alt, vendor: ROYALCHAIN_VENDOR });
@@ -65,7 +72,7 @@ export function buildRoyalChainProduct(source: RoyalChainSource): Record<string,
       sku: itemNumber,
       taxable: true,
       inventoryPolicy: 'DENY',
-      inventoryItem: { tracked: false, requiresShipping: true, cost: variant.costUsd.toFixed(2) },
+      inventoryItem: { tracked: true, requiresShipping: true, cost: variant.costUsd.toFixed(2) },
     };
   });
   return {

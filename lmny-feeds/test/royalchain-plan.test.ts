@@ -11,11 +11,13 @@ describe('Royal Chain listing builder', () => {
     expect(product).toMatchObject({ status: 'DRAFT', vendor: 'Laura Milman New York', productType: 'Necklaces', category: ROYALCHAIN_CATEGORY });
     expect(product.tags).toContain('media-missing');
     expect(product.tags).not.toContain('ebay');
-    expect(JSON.stringify({ title: product.title, body: product.descriptionHtml, seo: product.seo, tags: product.tags })).not.toMatch(/royal\s*chain/i);
+    const publicCopy = JSON.stringify({ title: product.title, body: product.descriptionHtml, seo: product.seo, tags: product.tags });
+    expect(publicCopy).not.toMatch(/royal\s*chain/i);
+    expect(JSON.stringify(product)).not.toMatch(/authenticated/i);
     expect(String((product.seo as { title: string }).title).length).toBeLessThanOrEqual(60);
     expect(String((product.seo as { description: string }).description).length).toBeLessThanOrEqual(160);
     expect(product.descriptionHtml).not.toMatch(/\$|price|cost/i);
-    expect(product.variants).toEqual([expect.objectContaining({ price: '305.00', sku: 'ABC1', inventoryItem: expect.objectContaining({ cost: '100.01' }) })]);
+    expect(product.variants).toEqual([expect.objectContaining({ price: '305.00', sku: 'ABC1', inventoryItem: expect.objectContaining({ tracked: true, cost: '100.01' }) })]);
   });
 
   it('escapes source text and rejects supplier names', () => {
