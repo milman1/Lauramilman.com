@@ -2,7 +2,7 @@
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/107
 - Updated (UTC): 2026-09-11
-- Status: **open; RW3096 delivery check resolved, full API-backed audit still pending**
+- Status: **open; watch source recovered, exact condition-repair dry run remains**
 - Source: remote `main` handoff fetched at the requested `75bc1c` state; GitHub file blob SHA `18ed93daa1c3ff21d0eacd067bcdb3c5237177db`
 - Scope: watch condition evidence and Marketplace Connect condition mapping only
 
@@ -32,10 +32,31 @@ The RW3096 package-weight and delivery blocker is resolved. This read does not e
 
 ## Remaining audit state
 
-The full API-backed watch audit remains open because the structured source returned zero rows. The exact source join, reviewed dry-run artifact, manual opt-in, and independent post-write read-back remain required. The optional title/SKU candidate classification remains incomplete and excluded from repair; no condition may be inferred from title, description, or SKU.
+The full API-backed watch audit remains open. The watch source now returns rows,
+but the exact source join, reviewed dry-run artifact, manual opt-in, and
+independent post-write read-back remain required. The optional title/SKU
+candidate classification remains incomplete and excluded from repair; no
+condition may be inferred from title, description, or SKU.
 
 ## Work log
 
 - 2026-09-11: PRs #108, #109, and #111 merged; automatic and source-backed repairs remain fail-closed without approved source evidence.
 - 2026-09-11: Merchant supplied 1 lb; Shopify saved and fresh-reload verified RW3096 at 1.0 lb/lb.
 - 2026-09-11: Fresh post-save Marketplace/eBay read verified RW3096 as Pre-owned - Good with Offer Listed and no current Error heading. Full API-backed condition audit remains open.
+- 2026-09-11: Diagnosed a cache/client boundary bug: the Worker represents a
+  cold feed as HTTP 200 `{"data":[]}`, which the client accepted as a valid
+  page and therefore never sent through its documented direct-supplier
+  fallback. Branch `codex/feed-empty-cache-fallback` treats an empty cached
+  page 1 as cache unavailable while preserving cached page 2 as the pagination
+  terminator. A later cache error fails the whole feed instead of mixing cache
+  and direct-source snapshots. This is code-level recovery only; no
+  source-backed condition repair plan has yet been generated from this change.
+- 2026-09-11: PR dry run `34634172621` read the supplier directly because
+  `BELGIUMDIA_API_URL` was unset. It fetched 596 watch rows, with 51 past the
+  existing gates, and performed zero writes. This confirms current watch-source
+  availability. The later lab request returned zero after the earlier direct
+  requests, consistent with the documented supplier rate limit. Next action:
+  run the source-backed watch-condition repair in dry-run mode.
+- 2026-09-11: Independent Sol and Terra reviews passed the final cache fallback
+  and late-page fail-closed behavior; the focused suite passed 11 tests and the
+  full suite passed 646 tests.

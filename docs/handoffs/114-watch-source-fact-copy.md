@@ -51,5 +51,12 @@ in the existing content hash, so no global schema-version bump is needed.
 - 2026-09-11: independent Terra fallback verification (Claude unavailable)
   found zero mismatches across all three illustrative fixtures and passed the
   same 105 focused tests.
-- Live catalog writes: none. API verification remains blocked while the source
-  endpoint is unavailable.
+- Live catalog writes: none. PR dry run `34634172621` later fetched 596 watch
+  rows, with 51 past existing gates, and made zero writes; watch-source
+  availability is restored for a bounded dry run.
+- 2026-09-11: The source outage investigation found that an empty cold-cache
+  page was accepted as a valid zero-row feed instead of invoking the existing
+  direct-source fallback. Branch `codex/feed-empty-cache-fallback` corrects
+  that page-1 behavior, keeps pagination on one source, fails the whole feed on
+  a later cache error, and leaves direct empty responses fail closed. The fix
+  has not itself produced or applied a live watch-copy plan.
