@@ -5,7 +5,13 @@ import { isUnavailableProductHandle } from '../../config/unavailable.js';
 import { exchangeClientCredentials, ShopifyClient } from '../shopify.js';
 import { mergeAvailability } from './availability.js';
 import { fetchBackVaultCatalog } from './catalog.js';
-import { fetchCompetitorCatalog, indexCompetitor, type CompetitorIndex } from './competitor.js';
+import {
+  describeCompetitorStop,
+  fetchCompetitorCatalog,
+  indexCompetitor,
+  type CompetitorIndex,
+  type CompetitorStopReason,
+} from './competitor.js';
 import {
   diffBackVaultCatalog,
   pinLivePricesWhenCompetitorUnavailable,
@@ -47,6 +53,16 @@ async function resolveToken(): Promise<{ domain: string; token: string }> {
 interface CompetitorStats {
   rowsFetched: number | null;
   stockRefsIndexed: number;
+  /**
+   * True only when the retailer's whole catalogue was read. False means the
+   * index is PARTIAL — matches in it are good, but a piece missing from it may
+   * be priced on a page that was never read, so the price pin stays armed.
+   */
+  complete: boolean;
+  pagesRead: number;
+  stoppedReason?: CompetitorStopReason;
+  /** How far the partial walk got and why it stopped. Absent on a complete read. */
+  partial?: string;
   error?: string;
 }
 
@@ -104,19 +120,48 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const rawRows = await fetchBackVaultFeed();
   console.log(`Fetched ${rawRows.length} rows from The Back Vault new-arrivals feed`);
 
-  // Competitor prices: a failed fetch means no matches this run (every piece
-  // falls back to the flat markup), a warning in the report, and the price pin
-  // below — never a crash, and never a failed run on its own.
+  // Competitor prices, in three states. COMPLETE: every match priced at the
+  // midpoint, nothing pinned. PARTIAL (the retailer's pagination cap, or the
+  // fetch deadline): the rows that came back are still indexed and matched,
+  // and the price pin is armed for everything else, because a piece missing
+  // from a partial index may have a match on a page that was never read.
+  // FAILED: no matches at all, flat markup, pin armed. None of the three is
+  // a crash or a failed run on its own.
   let competitor: CompetitorIndex | undefined;
-  const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0 };
+  const competitorStats: CompetitorStats = { rowsFetched: null, stockRefsIndexed: 0, complete: false, pagesRead: 0 };
+  // Set by a failed fetch AND by a partial one: in both cases a piece with no
+  // match may still have one we could not read, so the live price is protected.
+  let competitorDegraded = false;
   try {
-    const competitorRows = await fetchCompetitorCatalog();
-    competitor = indexCompetitor(competitorRows);
-    competitorStats.rowsFetched = competitorRows.length;
+    const result = await fetchCompetitorCatalog();
+    competitor = indexCompetitor(result.rows);
+    competitorStats.rowsFetched = result.rows.length;
     competitorStats.stockRefsIndexed = competitor.size;
-    console.log(`Competitor: ${competitorRows.length} rows, ${competitor.size} stock numbers indexed`);
+    competitorStats.complete = result.complete;
+    competitorStats.pagesRead = result.pagesRead;
+    competitorStats.stoppedReason = result.stoppedReason;
+    if (result.complete) {
+      console.log(
+        `Competitor: ${result.rows.length} rows over ${result.pagesRead} pages, ` +
+          `${competitor.size} stock numbers indexed (complete)`,
+      );
+    } else {
+      // Partial, not failed: the rows that came back are indexed and used, so
+      // a piece that IS found still gets its midpoint price.
+      competitorDegraded = true;
+      competitorStats.partial = describeCompetitorStop(result);
+      warnings.push(
+        `competitor index is PARTIAL: ${competitorStats.partial}. Matches found were used; ` +
+          'pieces with no match may have one on a page that was not read, so their live prices were protected',
+      );
+      console.warn(
+        `Competitor: PARTIAL index — ${competitorStats.partial}; ${competitor.size} stock numbers indexed, ` +
+          'matches used, unmatched pieces price-pinned',
+      );
+    }
   } catch (err) {
     competitorStats.error = err instanceof Error ? err.message : String(err);
+    competitorDegraded = true;
     warnings.push(`competitor fetch: ${competitorStats.error} — flat markup only, live prices pinned`);
     console.error(`Competitor fetch failed (${competitorStats.error}); pricing by flat markup only`);
   }
@@ -238,7 +283,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // otherwise updated, reactivated and published exactly as normal.
   let pricePinned = 0;
   let multiVariantUnchecked = 0;
-  if (competitorStats.error !== undefined) {
+  if (competitorDegraded) {
     const pins = pinLivePricesWhenCompetitorUnavailable(desiredItems, catalog);
     pricePinned = pins.pinned;
     multiVariantUnchecked = pins.multiVariant;
@@ -246,7 +291,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     if (pricePinned > 0) {
       notes.push(
         `${pricePinned} piece${pricePinned === 1 ? '' : 's'} updated with the price left as it stands ` +
-          '(the competitor comparison data was missing, so a lower flat price was not written)',
+          '(the competitor comparison data was missing or incomplete, so a lower flat price was not written)',
       );
     }
     if (multiVariantUnchecked > 0) {
@@ -379,6 +424,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     `Done: create=${counts.create ?? 0} update=${counts.update ?? 0} publish=${counts.publish ?? 0} ` +
       `archive=${counts.archive ?? 0} skip=${counts.skip ?? 0} ` +
       `published=${published} to ${channelLabel} not_active=${skippedDraft} ` +
+      `competitor=${competitorLabel(competitorStats)} ` +
       `price_pinned=${pricePinned} warnings=${warnings.length} errors=${errors.length}`,
   );
   if (warnings.length > 0) {
@@ -392,6 +438,43 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     for (const e of errors) console.error(`  - ${e}`);
     process.exitCode = 1;
   }
+}
+
+/**
+ * The competitor section of the report, in the same three states as the Done
+ * line. A partial read is a WARNING, not an error: it says how much was read
+ * and why it stopped, that the matches it did find were used, and that the
+ * pieces it could not match kept their live prices.
+ */
+function competitorReportLines(stats: CompetitorStats): string[] {
+  if (stats.error !== undefined) {
+    return [`- FAILED: ${stats.error} — flat markup only this run`];
+  }
+  if (!stats.complete) {
+    return [
+      `- PARTIAL: ${stats.partial ?? 'the walk stopped early'}`,
+      `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
+      '- Matches found in the partial index WERE used (midpoint pricing).',
+      '- Pieces with no match may have one on a page that was not read, so their live prices were protected ' +
+        '(see the price pin below). This is a warning, not an error.',
+    ];
+  }
+  return [
+    `- Rows fetched: ${stats.rowsFetched ?? 'skipped'} over ${stats.pagesRead} pages (complete)`,
+    `- Stock numbers indexed: ${stats.stockRefsIndexed}`,
+  ];
+}
+
+/**
+ * The competitor fetch in one token for the Done line: complete, partial (with
+ * how much was read and why it stopped), or failed. A partial index priced
+ * whatever it matched, so it must not read as a failure — and must not read as
+ * a clean run either.
+ */
+function competitorLabel(stats: CompetitorStats): string {
+  if (stats.error !== undefined) return 'failed';
+  if (!stats.complete) return `PARTIAL(${stats.partial ?? 'stopped early'}; matches used, rest price-pinned)`;
+  return `complete(${stats.rowsFetched ?? 0} rows/${stats.pagesRead} pages)`;
 }
 
 async function writeReport(summary: RunSummary): Promise<void> {
@@ -416,9 +499,7 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Priced from a competitor match: ${summary.feedStats.competitorMatched}`,
     '',
     `## Competitor prices (${BACKVAULT.competitor.name})`,
-    ...(summary.competitor.error
-      ? [`- FAILED: ${summary.competitor.error} — flat markup only this run`]
-      : [`- Rows fetched: ${summary.competitor.rowsFetched ?? 'skipped'}`, `- Stock numbers indexed: ${summary.competitor.stockRefsIndexed}`]),
+    ...competitorReportLines(summary.competitor),
     '',
     `## Availability check (full supplier catalog)`,
     ...(summary.availability.error

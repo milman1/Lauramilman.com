@@ -350,11 +350,34 @@ npm run sync:backvault       # live (needs Shopify env vars)
    reprices every listed piece because price and cost are in the content
    hash.
 
+   **The retailer's pagination cap.** Its public `/products.json` serves at
+   most **100 pages of 250** — roughly **25,000 products**. Observed
+   2026-09-11: page 101 answered HTTP 400 after 100 full pages. That 400 is
+   the end of available pagination, not a fault, so the walk stops there and
+   returns what it read as a **partial** index
+   (`{ rows, complete, pagesRead, stoppedReason }`), instead of discarding
+   25,000 rows. If the retailer's catalogue is ever larger than that, the rest
+   of it **cannot be read through this endpoint at all**; closing that gap
+   would need a different source (cursor pagination, a sitemap walk, or a feed
+   the retailer publishes) and **nothing here attempts one**. A 4xx on page 1
+   is still a hard failure — that means the feed is wrong or gone.
+
+   **If the competitor fetch is partial** — the pagination cap above, or the
+   fetch deadline below — the rows that did come back are **indexed and used**,
+   so a piece found in them still gets its midpoint price. Because a piece
+   *missing* from a partial index may have a match on a page that was never
+   read, the price pin below stays armed for everything unmatched. A partial
+   read is a **warning**, never an error, and the report and Done line say how
+   many rows over how many pages were read and why the walk stopped.
+
    **If the competitor fetch fails** — each page is retried up to 4 times on
    429/5xx honouring a strict `Retry-After`, pages are paced 250 ms apart, and
    the whole walk is bounded by a 10-minute wall clock so a throttled retailer
    can never run the job for hours (the competitor's catalogue is roughly 80
-   pages of 250; the job itself is capped at 60 minutes) — the run keeps going on the flat markup and
+   pages of 250; the job itself is capped at 60 minutes). Running out of clock
+   part-way through is a partial result, as above; a failure on page 1, a
+   network failure that never read a page, or a malformed response is a real
+   failure — the run keeps going on the flat markup and
    records a **warning** rather than an error, so a throttled competitor never
    fails the job. Any piece whose recomputed price would fall below the ticket
    already on the store is still updated in full (images, cost, tags, status,
@@ -363,7 +386,9 @@ npm run sync:backvault       # live (needs Shopify env vars)
    The consequence is that a genuine supplier markdown is also deferred for that
    week — the next successful run applies it. A piece with more than one variant
    has no readable live price and is written normally. Both counts are on the
-   Done line and in the report.
+   Done line and in the report, alongside the competitor state itself —
+   `competitor=complete(...)`, `competitor=PARTIAL(...)` or
+   `competitor=failed`.
 7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
    decides what gets *created*, but a piece already on the store stays
    listed for as long as the supplier's full `/products.json` still shows

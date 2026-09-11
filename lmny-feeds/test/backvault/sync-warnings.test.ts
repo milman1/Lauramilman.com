@@ -21,9 +21,29 @@ const SUPPLIER_ROW = {
   images: [{ src: 'https://cdn.example.com/J10605.jpg' }],
 };
 
+type CompetitorCatalog = import('../../src/backvault/competitor.js').CompetitorCatalog;
+
+/** A clean walk that read the retailer's whole catalogue. */
+function complete(rows: unknown[] = []): CompetitorCatalog {
+  return { rows, complete: true, pagesRead: Math.max(1, Math.ceil(rows.length / 250)), stoppedReason: 'exhausted' };
+}
+
+/** The 2026-09-11 shape: 100 full pages read, then the retailer's HTTP 400. */
+function pagination_capped(rows: unknown[] = []): CompetitorCatalog {
+  return {
+    rows,
+    complete: false,
+    pagesRead: 100,
+    stoppedReason: 'pagination-cap',
+    stoppedDetail:
+      'page 101 returned HTTP 400: the retailer caps page-based pagination at 100 pages of 250 ' +
+      '(~25000 products), so the rest of its catalogue cannot be read through this endpoint',
+  };
+}
+
 /** Set per test: what the competitor fetch does, and what the catalog holds. */
-const state: { competitor: () => Promise<unknown[]>; catalog: unknown[] } = {
-  competitor: async () => [],
+const state: { competitor: () => Promise<CompetitorCatalog>; catalog: unknown[] } = {
+  competitor: async () => complete(),
   catalog: [],
 };
 
@@ -120,7 +140,7 @@ let exitCodeBefore: number | string | null | undefined;
 beforeEach(() => {
   writes.clear();
   productSets.length = 0;
-  state.competitor = async () => [];
+  state.competitor = async () => complete();
   state.catalog = [];
   exitCodeBefore = process.exitCode;
   process.exitCode = 0;
@@ -135,6 +155,12 @@ afterEach(() => {
   process.exitCode = exitCodeBefore ?? 0;
   vi.restoreAllMocks();
 });
+
+/** The single `Done: ...` line the run logs. */
+function doneLine(): string {
+  const calls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+  return calls.map((c) => String(c[0])).find((l) => l.startsWith('Done:')) ?? '';
+}
 
 function report(): { md: string; json: Record<string, any> } {
   return {
@@ -204,10 +230,10 @@ describe('a failed competitor fetch', () => {
     expect(md).toContain('- Multi-variant pieces with no readable live price: 1');
   });
 
-  it('still reaches the report when the fetch runs out of wall clock', async () => {
+  it('still reaches the report when the fetch fails before a single page', async () => {
     state.competitor = async () => {
       throw new Error(
-        'Competitor feed: the 10-minute fetch deadline passed after 12 of up to 200 pages (3000 rows read), ' +
+        'Competitor feed: the 10-minute fetch deadline passed after 0 of up to 200 pages (0 rows read), ' +
           'after 9 retries — the competitor was throttling',
       );
     };
@@ -216,14 +242,14 @@ describe('a failed competitor fetch', () => {
     const { json, md } = report();
     expect(json.errors).toEqual([]);
     expect(process.exitCode).toBe(0);
-    expect(md).toContain('- FAILED: Competitor feed: the 10-minute fetch deadline passed after 12');
+    expect(md).toContain('- FAILED: Competitor feed: the 10-minute fetch deadline passed after 0');
     expect(json.pricePinned).toBe(1);
   });
 });
 
 describe('a successful competitor fetch', () => {
   it('writes the update, warns about nothing, and holds nothing', async () => {
-    state.competitor = async () => [];
+    state.competitor = async () => complete();
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json, md } = report();
@@ -232,6 +258,116 @@ describe('a successful competitor fetch', () => {
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
     expect(md).not.toContain('## Warnings');
     expect(process.exitCode).toBe(0);
+  });
+});
+
+/**
+ * The 2026-09-11 live run read 25,000 rows, hit the retailer's pagination cap
+ * at page 101, and threw all 25,000 away, so the price comparison had still
+ * never run. A partial index is now used for matching AND still arms the price
+ * pin, because a piece missing from it may have a match on a page nobody read.
+ */
+describe('a partial competitor index', () => {
+  /** Priced at 72,000 on the competitor: midpoint with the 67,600 cost is 69,800. */
+  const COMPETITOR_ROW = {
+    handle: 'cartier-dolphin-ring-j10605',
+    title: 'Cartier Dolphin Ring J10605',
+    variants: [{ sku: 'J10605', price: '72000.00', available: true }],
+  };
+
+  function wrotePrice(input: Record<string, any>): string {
+    return String(input.variants[0].price);
+  }
+
+  it('prices a piece that IS in it from the competitor match', async () => {
+    state.competitor = async () => pagination_capped([COMPETITOR_ROW]);
+    state.catalog = [catalogEntry()];
+    await run([]);
+    const { json } = report();
+    expect(json.feedStats.competitorMatched).toBe(1);
+    expect(json.competitor.stockRefsIndexed).toBe(1);
+    // The midpoint, not the flat 68,100 a discarded index would have written.
+    expect(wrotePrice(productSets[0]!)).toBe('69800.00');
+    expect(json.errors).toEqual([]);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it('still arms the price pin for a piece it could not match', async () => {
+    state.competitor = async () => pagination_capped([]);
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { json } = report();
+    expect(json.competitor.error).toBeUndefined();
+    expect(json.competitor.complete).toBe(false);
+    // Without the pin this piece would silently drop to the flat price on the
+    // strength of an index that never saw the page it might be priced on.
+    expect(json.pricePinned).toBe(1);
+  });
+
+  it('does not arm the pin when the index is complete', async () => {
+    state.competitor = async () => complete([]);
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { json } = report();
+    expect(json.competitor.complete).toBe(true);
+    expect(json.pricePinned).toBe(0);
+    expect(json.warnings).toEqual([]);
+  });
+
+  it('is a warning, not an error, and keeps the exit code at 0', async () => {
+    state.competitor = async () => pagination_capped([]);
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { json } = report();
+    expect(json.errors).toEqual([]);
+    expect(process.exitCode).toBe(0);
+    expect(json.warnings[0]).toContain('competitor index is PARTIAL');
+    expect(json.warnings[0]).toContain('Matches found were used');
+    expect(json.warnings[0]).toContain('live prices were protected');
+  });
+
+  it('says in the report how much it read, why it stopped, and what it did', async () => {
+    state.competitor = async () => pagination_capped([COMPETITOR_ROW]);
+    state.catalog = [catalogEntry()];
+    await run(['--dry-run']);
+    const { md } = report();
+    expect(md).toContain('## Competitor prices');
+    expect(md).toContain('- PARTIAL: 1 rows over 100 pages');
+    expect(md).toContain('caps page-based pagination at 100 pages of 250');
+    expect(md).toContain('- Matches found in the partial index WERE used (midpoint pricing).');
+    expect(md).toContain('their live prices were protected');
+    expect(md).toContain('This is a warning, not an error.');
+    expect(md).not.toContain('- FAILED:');
+  });
+});
+
+describe('the Done line names the competitor state', () => {
+  beforeEach(() => {
+    state.catalog = [catalogEntry()];
+  });
+
+  it('says complete, with rows and pages, on a clean read', async () => {
+    state.competitor = async () => complete([{ handle: 'x' }]);
+    await run(['--dry-run']);
+    expect(doneLine()).toContain('competitor=complete(1 rows/1 pages)');
+  });
+
+  it('says PARTIAL, with how far it got and why, on a capped read', async () => {
+    state.competitor = async () => pagination_capped([{ handle: 'x' }]);
+    await run(['--dry-run']);
+    const line = doneLine();
+    expect(line).toContain('competitor=PARTIAL(1 rows over 100 pages');
+    expect(line).toContain('page 101 returned HTTP 400');
+    expect(line).toContain('matches used, rest price-pinned');
+    expect(line).toContain('errors=0');
+  });
+
+  it('says failed when the fetch threw', async () => {
+    state.competitor = async () => {
+      throw new Error('Competitor feed: HTTP 400 for page 1');
+    };
+    await run(['--dry-run']);
+    expect(doneLine()).toContain('competitor=failed');
   });
 });
 
@@ -283,7 +419,7 @@ describe('the price pin runs before the content hash (two degraded runs)', () =>
   });
 
   it('writes the computed price when the competitor fetch succeeds', async () => {
-    state.competitor = async () => [];
+    state.competitor = async () => complete();
     state.catalog = [catalogEntry({ contentHash: 'stale-hash' })];
     await run([]);
     expect(report().json.pricePinned).toBe(0);
