@@ -1,20 +1,24 @@
 # Royal Chain DRAFT intake schema
 
-The generator joins the committed 21-row shortlist to the private merchant cost
-CSV by exact item number and URL. It validates the Royal Chain-only `cost × 3`,
-round-up-to-$5 rule and emits an idempotent private plan with 21 DRAFT products
-and 93 variants. The output directory must be outside the repository because it
-contains Cost per item.
+The generator joins a reviewed shortlist to the private merchant cost CSV by
+exact item number and URL. It validates the supplier-specific `cost × 3`,
+round-up-to-$5 rule and emits an idempotent private DRAFT plan. One source row
+may yield a Bracelet and a Necklace product when its available lengths cross
+the 14in boundary. The output directory must be outside the repository because
+it contains Cost per item.
 
-Products use vendor `Laura Milman New York`, product type `Necklaces`, and
-Shopify category `Apparel & Accessories > Jewelry > Necklaces`. The public
+Products use vendor `Laura Milman New York`, product type and Shopify category
+appropriate to their length: Bracelets below 14in and Necklaces from 14in.
+The public
 description has a factual overview followed by a Details list for material,
 style, width, and every available length. It does not make care, fulfillment,
 authentication, packaging, or provenance claims because the intake does not
 provide evidence for them.
 
 The intake accepts its original `image_url` plus an optional semicolon- or
-pipe-delimited `image_urls` column. Every distinct source image becomes a
+pipe-delimited `image_urls` column. It also requires `existing_handle`, the
+current live Necklace handle, so a split preserves that product and creates
+only `${existing_handle}-bracelet` for the new Bracelet. Every distinct source image becomes a
 Shopify `files` input with descriptive alt text. Shopify imports those source
 URLs and serves completed media from its CDN; only the post-import Shopify CDN
 URLs are retained by a media verifier. Fewer than three unique images means
@@ -23,7 +27,7 @@ the product stays DRAFT and carries `media-missing`.
 They never carry `ebay` before a separate activation and channel-publication
 review. The private plan's `ebay` object is a readiness record, not a Shopify
 `productSet` field and never an instruction to publish. It provides an eBay
-title (80 characters or fewer), explicit necklace item specifics, and the
+title (80 characters or fewer), category-correct bracelet or necklace item specifics, and the
 Marketplace Connect metafield mapping. It becomes eligible only when complete
 copy, at least three images, and source-backed condition evidence are present.
 An optional source `condition` (`new` or `preowned`) is accepted only with a

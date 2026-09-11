@@ -35,8 +35,12 @@ describe('Royal Chain listing builder', () => {
   it('builds structured copy, deduped media, and eBay item specifics from source facts', () => {
     const product = buildRoyalChainProduct({
       itemNumber: 'CUBAN-4',
+      existingHandle: 'lmny-cuban-4',
       style: 'Cuban',
       widthMm: '4',
+      closure: 'Lobster clasp',
+      finish: 'Polished',
+      construction: 'Semi-solid',
       imageUrl: 'https://supplier.invalid/hero.jpg',
       imageUrls: [
         'https://supplier.invalid/hero.jpg',
@@ -53,6 +57,7 @@ describe('Royal Chain listing builder', () => {
     expect(product.descriptionHtml).toContain('<h2>Details</h2>');
     expect(product.descriptionHtml).toContain('<strong>Available lengths:</strong> 18 in, 20 in');
     expect(product.descriptionHtml).toContain('<strong>Material:</strong> 14K Yellow Gold');
+    expect(product.descriptionHtml).toContain('<strong>Closure:</strong> Lobster clasp');
     expect(product.files).toHaveLength(3);
     expect(product.tags).not.toContain('media-missing');
     expect(product.tags).not.toContain('ebay'); // DRAFT plans never activate a sales channel.
@@ -66,6 +71,9 @@ describe('Royal Chain listing builder', () => {
         'Chain Type': 'Cuban',
         Length: '18 in, 20 in',
         'Condition ID': '1000',
+        Closure: 'Lobster clasp',
+        Finish: 'Polished',
+        Construction: 'Semi-solid',
       }),
       itemSpecificMapping: expect.objectContaining({ 'Condition ID': 'custom.ebay_condition' }),
     });
@@ -95,9 +103,11 @@ describe('Royal Chain listing builder', () => {
       ],
     }) as Array<Record<string, any>>;
     expect(products).toHaveLength(2);
-    expect(products.map((product) => product.handle)).toEqual(['lmny-mixed-bracelet', 'lmny-mixed-necklace']);
+    expect(products.map((product) => product.handle)).toEqual(['lmny-mixed-bracelet', 'lmny-mixed']);
     expect(products.map((product) => product.productType)).toEqual(['Bracelets', 'Necklaces']);
     expect(products.map((product) => product.ebay.itemSpecifics.Type)).toEqual(['Bracelet', 'Necklace']);
+    expect(products[0]!.descriptionHtml).toMatch(/curb bracelet/i);
+    expect(products[1]!.descriptionHtml).toMatch(/curb necklace/i);
   });
 
   it('fails closed for eBay until all image, content, and condition gates are met', () => {
@@ -134,7 +144,7 @@ describe('Royal Chain listing builder', () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'royal-plan-'));
     const shortlist = path.join(dir, 'shortlist.csv');
     const privateFile = path.join(dir, 'private.csv');
-    await writeFile(shortlist, 'style,item_number,width_mm,url,image_url,image_urls,condition,condition_evidence\nCuban,A1,4,https://example.test/a,https://supplier.invalid/a.jpg,https://supplier.invalid/a.jpg;https://supplier.invalid/a-detail.jpg;https://supplier.invalid/a-on-body.jpg,new,Source record states new.\nBox,B2,2,https://example.test/b,https://supplier.invalid/b.jpg,,,\n');
+    await writeFile(shortlist, 'style,item_number,existing_handle,width_mm,url,image_url,image_urls,condition,condition_evidence\nCuban,A1,lmny-a1,4,https://example.test/a,https://supplier.invalid/a.jpg,https://supplier.invalid/a.jpg;https://supplier.invalid/a-detail.jpg;https://supplier.invalid/a-on-body.jpg,new,Source record states new.\nBox,B2,lmny-b2,2,https://example.test/b,https://supplier.invalid/b.jpg,,,\n');
     await writeFile(privateFile, 'item_number,url,cost,retail,lengths_karats,error\nA1,https://example.test/a,10.00,30.00,14K Yellow:18in=$10.00|A1-18|5.1|yes;14K Yellow:20in=$11.00|A1-20|5.8|yes,\nB2,https://example.test/b,20.01,65.00,14K Rose:18in=$20.01|B2-18|4.2|yes,\n');
     const opts = { shortlistPath: shortlist, privatePath: privateFile, outputDir: dir, expectedProducts: 2, expectedVariants: 3 };
     await expect(generateRoyalChainPlan(opts)).resolves.toEqual({ products: 2, variants: 3 });
@@ -147,5 +157,17 @@ describe('Royal Chain listing builder', () => {
     expect(firstProduct.files).toHaveLength(3);
     expect(firstProduct.ebay.eligible).toBe(true);
     expect(firstProduct.tags).not.toContain('ebay');
+  });
+
+  it('keeps the live necklace handle and gives only its split bracelet a new handle', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'royal-handles-'));
+    const shortlist = path.join(dir, 'shortlist.csv');
+    const privateFile = path.join(dir, 'private.csv');
+    await writeFile(shortlist, 'style,item_number,existing_handle,width_mm,url\nSnake,OVSN260,lmny-snake-2-6-mm-ovsn260,2.6,https://example.test/a\n');
+    await writeFile(privateFile, 'item_number,url,cost,retail,lengths_karats,error\nOVSN260,https://example.test/a,10,30,14K Yellow:10in=$10|OVSN260-10|4|yes;14K Yellow:18in=$11|OVSN260-18|6|yes,\n');
+    await generateRoyalChainPlan({ shortlistPath: shortlist, privatePath: privateFile, outputDir: dir, expectedProducts: 2, expectedVariants: 2 });
+    const handles = (await readFile(path.join(dir, 'royalchain-products.jsonl'), 'utf8')).trim().split('\n').map((line) => JSON.parse(line).handle);
+    expect(handles).toEqual(['lmny-snake-2-6-mm-ovsn260-bracelet', 'lmny-snake-2-6-mm-ovsn260']);
+    expect(new Set(handles).size).toBe(handles.length);
   });
 });

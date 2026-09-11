@@ -50,6 +50,8 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
   for (const row of shortlist) {
     const itemNumber = row.item_number ?? '';
     const url = row.url ?? '';
+    const existingHandle = row.existing_handle ?? '';
+    if (!existingHandle.trim()) throw new Error(`${itemNumber}: existing_handle is required to prevent duplicate products`);
     const priv = privateByItem.get(itemNumber);
     if (!priv || priv.url !== url || priv.error) throw new Error(`${itemNumber}: private row missing, mismatched, or errored`);
     const variants = privateVariants(priv.lengths_karats ?? '');
@@ -58,8 +60,12 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
     if (money(priv.retail ?? '') !== supplierRetailFromCost(first.costUsd)) throw new Error(`${itemNumber}: top-level retail fails pricing rule`);
     const source: RoyalChainSource = {
       itemNumber,
+      existingHandle,
       style: row.style ?? '',
       widthMm: row.width_mm ?? '',
+      closure: row.closure ?? '',
+      finish: row.finish ?? '',
+      construction: row.construction ?? '',
       imageUrl: row.image_url ?? '',
       imageUrls: collectedImageUrls(row),
       condition: sourceCondition(row),
@@ -67,6 +73,8 @@ export async function generateRoyalChainPlan(opts: { shortlistPath: string; priv
     };
     products.push(...buildRoyalChainProducts(source));
   }
+  const handles = products.map((product) => String(product.handle ?? ''));
+  if (handles.some((handle) => !handle) || new Set(handles).size !== handles.length) throw new Error('planned Royal Chain handles are not unique');
   const variantCount = products.reduce((n, p) => n + (p.variants as unknown[]).length, 0);
   if (products.length !== (opts.expectedProducts ?? 21) || variantCount !== (opts.expectedVariants ?? 93)) throw new Error(`unexpected plan size: ${products.length} products / ${variantCount} variants`);
   await mkdir(opts.outputDir, { recursive: true });

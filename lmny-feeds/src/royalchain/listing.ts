@@ -29,8 +29,13 @@ export interface RoyalChainCondition {
 
 export interface RoyalChainSource {
   itemNumber: string;
+  /** Existing Shopify handle for the live necklace product; planner input requires it. */
+  existingHandle?: string;
   style: string;
   widthMm: string;
+  closure?: string;
+  finish?: string;
+  construction?: string;
   /** @deprecated Use imageUrls so every collected source image is retained. */
   imageUrl?: string;
   imageUrls?: string[];
@@ -167,13 +172,17 @@ function buildRoyalChainProductForType(
     ['Style', style],
     ['Width', `${width} mm`],
     ['Available lengths', lengths.join(', ')],
+    ...(clean(source.closure ?? '') ? [['Closure', clean(source.closure ?? '')] as [string, string]] : []),
+    ...(clean(source.finish ?? '') ? [['Finish', clean(source.finish ?? '')] as [string, string]] : []),
+    ...(clean(source.construction ?? '') ? [['Construction', clean(source.construction ?? '')] as [string, string]] : []),
     ...(condition ? [['Condition', condition.label] as [string, string]] : []),
   ];
-  const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} chain is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
+  const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} ${singularType.toLowerCase()} is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
   const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
   const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
-  const baseHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
-  const handle = splitByType ? `${baseHandle}-${singularType.toLowerCase()}` : baseHandle;
+  const fallbackHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+  const baseHandle = clean(source.existingHandle ?? '') || fallbackHandle;
+  const handle = splitByType && productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? `${baseHandle}-bracelet` : baseHandle;
   const imageUrls = dedupeRoyalChainImageUrls(source);
   const mediaReady = imageUrls.length >= ROYALCHAIN_MINIMUM_IMAGES;
   const tags = [ROYALCHAIN_VENDOR, productType, ...(mediaReady ? [] : ['media-missing'])];
@@ -213,6 +222,9 @@ function buildRoyalChainProductForType(
       'Chain Type': style,
       Width: `${width} mm`,
       Length: lengths.join(', '),
+      ...(clean(source.closure ?? '') ? { Closure: clean(source.closure ?? '') } : {}),
+      ...(clean(source.finish ?? '') ? { Finish: clean(source.finish ?? '') } : {}),
+      ...(clean(source.construction ?? '') ? { Construction: clean(source.construction ?? '') } : {}),
       ...(condition ? { Condition: condition.label, 'Condition ID': condition.ebayCondition } : {}),
     },
     itemSpecificMapping: {
@@ -221,6 +233,9 @@ function buildRoyalChainProductForType(
       Length: 'variant option: Metal / Length',
       Condition: 'custom.condition',
       'Condition ID': 'custom.ebay_condition',
+      Closure: 'source.closure',
+      Finish: 'source.finish',
+      Construction: 'source.construction',
     },
   };
   const product = {
@@ -255,6 +270,10 @@ function buildRoyalChainProductForType(
       contentType: 'IMAGE',
       alt: `${title}${index > 0 ? ` — view ${index + 1}` : ''}`,
       duplicateResolutionMode: 'APPEND_UUID',
+    })),
+    variantItemSpecifics: parsed.map(({ variant }) => ({
+      sku: clean(variant.sku ?? ''),
+      weightGrams: variant.weightGrams ?? null,
     })),
     ebay,
   };
