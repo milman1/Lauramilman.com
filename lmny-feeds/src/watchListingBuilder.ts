@@ -290,7 +290,11 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   pushCustom('condition_grade', grade);
   pushCustom('box', boxYesNo);
   pushCustom('papers', paperYesNo);
-  pushCustom('ebay_condition', ebayConditionForWatch({ title, state: mapping?.state ?? null }));
+  pushCustom('ebay_condition', ebayConditionForWatch({
+    state: mapping?.state ?? null,
+    box: record.box,
+    papers: record.paper,
+  }));
   pushCustom('features', ebayFeaturesFromBoxPapers(record.box, record.paper));
   pushCustom('original_tag', ogTagYesNo);
   pushCustom('link', linkValue);

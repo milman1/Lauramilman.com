@@ -120,7 +120,7 @@ escaped (`&`, `<`, `>`).
 | `dial` / `bezel` / `bracelet` | Title-cased |
 | `condition` / `condition_grade` | Title word / grade when mapped; otherwise the nonblank raw condition / omitted |
 | `box` / `papers` / `original_tag` | `Yes` / `No` when stated |
-| `ebay_condition` | eBay ConditionID `3000` (Used / Pre-owned) unless Unworn (`1000` New with tags). Never `1000` on used stock. |
+| `ebay_condition` | eBay ConditionID `3000` for source state pre-owned or unknown; `1000` only for source-confirmed Unworn with explicit box + papers; otherwise source-confirmed Unworn uses `1500`. Never infer this from title text. |
 | `features` | eBay accessory aspects only: `With Box`, `With Papers`, or both. Omit when unstated. |
 | `link` | Feed `Links` value as string |
 | `stock_number` | LMNY stock # |
@@ -195,7 +195,7 @@ tags the product already has, so existing operational tags are preserved.
 | Namespace.Key | Value |
 |---|---|
 | `mm-google-shopping.condition` | `new` if state = unworn, `used` if pre-owned; omitted when unclassified |
-| `custom.ebay_condition` | `3000` (Used / Pre-owned) or `1000` (Unworn / New with tags). Marketplace Connect maps this numeric ConditionID to eBay. |
+| `custom.ebay_condition` | `3000` for source state pre-owned or unknown; `1000` only for source-confirmed Unworn with explicit box + papers; otherwise source-confirmed Unworn uses `1500`. Marketplace Connect maps this numeric ConditionID to eBay. |
 | `custom.features` | `With Box` / `With Papers` when stated. Never `New with box and papers`. |
 | `global.MPN` | reference |
 

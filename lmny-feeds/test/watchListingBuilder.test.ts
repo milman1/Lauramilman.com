@@ -74,6 +74,13 @@ describe('buildWatchListing', () => {
     expect(listing.seoDescription).toContain(', excellent condition');
   });
 
+  it('uses eBay 1500 when the API says unworn but a complete box-and-papers set is not confirmed', () => {
+    const listing = buildWatchListing(base({ conditionRaw: 'UNWORN', box: true, paper: false }));
+    expect('needsReview' in listing).toBe(false);
+    if ('needsReview' in listing) return;
+    expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe('1500');
+  });
+
   it('maps UNWORN to new Google condition and Unworn title word', () => {
     const listing = buildWatchListing(base({ conditionRaw: 'UNWORN' }));
     expect('needsReview' in listing).toBe(false);

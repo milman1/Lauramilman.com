@@ -1,6 +1,6 @@
 import { contentHash } from '../hash.js';
 import { taxonomyGidForProductType } from '../taxonomy.js';
-import { ebayConditionForWatch, EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
+import { EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
 import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
@@ -86,10 +86,9 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
     namespace: c,
     key: 'ebay_condition',
     type: 'single_line_text_field',
-    value:
-      listing.productType === 'Watch'
-        ? ebayConditionForWatch({ title: listing.title })
-        : EBAY_CONDITION_PREOWNED,
+    // This feed has no authoritative structured watch state or accessories.
+    // Free-text titles/descriptions must never upgrade estate stock to new.
+    value: EBAY_CONDITION_PREOWNED,
   });
   if (listing.productType === 'Watch') {
     const ebay = extractEbayWatchSpecifics({
