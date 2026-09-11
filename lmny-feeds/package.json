@@ -16,6 +16,7 @@
     "backfill:ebay-watch-specifics": "tsx scripts/backfill-ebay-watch-specifics.ts",
     "backfill:ebay-preowned-features": "tsx scripts/fix-ebay-preowned-features.ts",
     "repair:source-watch-conditions": "tsx scripts/repair-source-watch-conditions.ts",
+    "plan:royalchain-products": "tsx scripts/generate-royalchain-product-plan.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
