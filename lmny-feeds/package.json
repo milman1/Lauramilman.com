@@ -18,6 +18,7 @@
     "repair:source-watch-conditions": "tsx scripts/repair-source-watch-conditions.ts",
     "plan:royalchain-products": "tsx scripts/generate-royalchain-product-plan.ts",
     "plan:royalchain-activation": "tsx scripts/royalchain-activation-plan.ts",
+    "validate:royalchain-input": "tsx scripts/validate-royalchain-input.ts",
     "upload:royalchain-media": "tsx scripts/upload-royalchain-generated-media.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",

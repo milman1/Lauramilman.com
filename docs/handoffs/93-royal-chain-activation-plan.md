@@ -42,6 +42,50 @@ defaults to dry-run, requires a private input artifact, and never contains an
 apply path. It supports a final independent verification after a person has
 completed the Shopify review.
 
+## Temporary private input staging
+
+`.github/workflows/royalchain-stage-activation-input.yml` is the only workflow
+that stages the private plan. It is manual-only, accepts a validated
+`bundle_ref`, and sparse-checks out only this fixed encrypted path from that
+ref:
+
+```text
+.private/royalchain/activation-bundle.enc
+```
+
+The Actions secret `LMNY_CHAIN_PLAN_KEY` is used only in the decrypt step. The
+workflow keeps decrypted material under `$RUNNER_TEMP`, requires an encrypted
+gzip tar payload containing exactly these two regular root files, and validates
+the 32-product / 93-SKU plan plus exact per-SKU availability keys before
+uploading the one-day artifact
+`royalchain-activation-input-${GITHUB_RUN_ID}`. It never prints file contents,
+costs, source URLs, or plan rows and does not receive Shopify secrets.
+
+The exact bundle format is a gzip tar with only
+`royalchain-products.jsonl` and `availability.csv` at its root. Create it
+locally, outside the repository, with a temporary key file containing the
+random secret value:
+
+```sh
+tmp_dir="$(mktemp -d)"
+cp /private/path/royalchain-products.jsonl "$tmp_dir/royalchain-products.jsonl"
+cp /private/path/availability.csv "$tmp_dir/availability.csv"
+tar --format=ustar --owner=0 --group=0 --numeric-owner \
+  -czf "$tmp_dir/royalchain-activation-input.tar.gz" \
+  -C "$tmp_dir" royalchain-products.jsonl availability.csv
+openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -salt \
+  -in "$tmp_dir/royalchain-activation-input.tar.gz" \
+  -out /private/path/activation-bundle.enc \
+  -pass file:/private/path/lmny-chain-plan-key
+rm -rf "$tmp_dir"
+```
+
+Commit only `activation-bundle.enc` at the fixed path on the selected bundle
+ref. After the staging run and review, delete the temporary encrypted bundle
+ref and rotate or remove `LMNY_CHAIN_PLAN_KEY`; the short artifact retention
+does not replace that cleanup. Never paste the key, plan, cost data, or source
+URLs into workflow inputs or repository files.
+
 Known gates from the existing handoff are retained: the live draft handoff
 reported 21 products while the reviewed enriched plan is 32 products, so the
 fresh read must resolve that scope difference; and the source availability
