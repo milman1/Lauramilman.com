@@ -238,6 +238,28 @@ export function assertRoyalChainMediaProductDraft(handle: string, status: string
   if (status !== 'DRAFT') throw new Error(`${handle}: refusing non-DRAFT product (${status})`);
 }
 
+/**
+ * Keep the reviewed attachment list fixed while putting a fresh DRAFT check at
+ * each mutation boundary. `assertDraftNow` must fetch current Shopify state;
+ * this helper deliberately never derives a new attachment decision from it.
+ */
+export async function executeReviewedMediaAttachments<K extends string>(opts: {
+  kinds: readonly K[];
+  needsStaging: (kind: K) => boolean;
+  assertDraftNow: (phase: 'before-stage' | 'before-attach', kind: K) => Promise<void>;
+  stage: (kind: K) => Promise<void>;
+  attach: (kind: K) => Promise<void>;
+}): Promise<void> {
+  for (const kind of opts.kinds) {
+    if (opts.needsStaging(kind)) {
+      await opts.assertDraftNow('before-stage', kind);
+      await opts.stage(kind);
+    }
+    await opts.assertDraftNow('before-attach', kind);
+    await opts.attach(kind);
+  }
+}
+
 export function readyImageCount(media: ShopifyImageMedia[]): number {
   return media.filter((entry) => entry.status === 'READY' && Boolean(entry.url)).length;
 }

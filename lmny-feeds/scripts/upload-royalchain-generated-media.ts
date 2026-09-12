@@ -20,6 +20,7 @@ import {
   assertSafeRoyalChainPublicFilename,
   baseHandleForMedia,
   buildRoyalChainMediaTargets,
+  executeReviewedMediaAttachments,
   hasMediaIdentity,
   mayClearRoyalChainMediaMissing,
   parseGeneratedRoyalChainImages,
@@ -273,25 +274,37 @@ async function applyTarget(
   staged: Map<string, string>,
 ): Promise<ProductSnapshot> {
   assertDraft(target, reviewed.expected);
-  // A fresh status read immediately precedes every product's attachments.
-  assertDraft(target, await fetchProduct(shopify, target.handle));
   // The reviewed snapshot fixes the attachment decisions. Apply never uses a
   // newer catalog read to decide whether an image should be attached.
-  for (const kind of reviewed.addKinds) {
-    const image = target.images[kind];
-    const alt = target.alt[kind];
-    const expectedImage = reviewed.images[kind];
-    if (!image || !alt || !expectedImage) throw new Error(`${target.handle}: missing reviewed ${kind} media`);
-    let resourceUrl = staged.get(image.path);
-    if (!resourceUrl) {
+  await executeReviewedMediaAttachments({
+    kinds: reviewed.addKinds,
+    needsStaging: (kind) => {
+      const image = target.images[kind];
+      if (!image) throw new Error(`${target.handle}: missing reviewed ${kind} media`);
+      return !staged.has(image.path);
+    },
+    assertDraftNow: async () => {
+      const current = await fetchProduct(shopify, target.handle);
+      assertDraft(target, current);
+      if (current.id !== reviewed.expected.id) throw new Error(`${target.handle}: Shopify product identity drifted; refusing mutation`);
+    },
+    stage: async (kind) => {
+      const image = target.images[kind];
+      const expectedImage = reviewed.images[kind];
+      if (!image || !expectedImage) throw new Error(`${target.handle}: missing reviewed ${kind} media`);
       assertSafeRoyalChainPublicFilename(image.filename);
       await assertGeneratedImageStillMatches(image, expectedImage);
-      resourceUrl = await shopify.stageLocalImage(image.path, image.filename);
-      staged.set(image.path, resourceUrl);
-    }
-    const errors = await shopify.attachMedia(reviewed.expected.id, resourceUrl, alt, 'IMAGE');
-    if (errors.length) throw new Error(`${target.handle}: ${kind} media attach failed: ${errors.join('; ')}`);
-  }
+      staged.set(image.path, await shopify.stageLocalImage(image.path, image.filename));
+    },
+    attach: async (kind) => {
+      const image = target.images[kind];
+      const alt = target.alt[kind];
+      const resourceUrl = image ? staged.get(image.path) : undefined;
+      if (!image || !alt || !resourceUrl) throw new Error(`${target.handle}: missing staged ${kind} media`);
+      const errors = await shopify.attachMedia(reviewed.expected.id, resourceUrl, alt, 'IMAGE');
+      if (errors.length) throw new Error(`${target.handle}: ${kind} media attach failed: ${errors.join('; ')}`);
+    },
+  });
   const ready = await waitForMediaGate(shopify, target);
   if (reviewed.expected.tags.includes('media-missing')) {
     // A fresh DRAFT assertion immediately precedes the sole tag mutation.

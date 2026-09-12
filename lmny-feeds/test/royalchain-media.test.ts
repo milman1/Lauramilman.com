@@ -8,6 +8,7 @@ import {
   assertSafeRoyalChainPublicFilename,
   baseHandleForMedia,
   buildRoyalChainMediaTargets,
+  executeReviewedMediaAttachments,
   hasMediaIdentity,
   mayClearRoyalChainMediaMissing,
   parseGeneratedRoyalChainImages,
@@ -129,5 +130,24 @@ describe('Royal Chain generated media plan', () => {
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
+  });
+
+  it('checks Draft state before each stage and attachment, stopping when status drifts before the second attachment', async () => {
+    const calls: string[] = [];
+    const statuses = ['DRAFT', 'DRAFT', 'DRAFT', 'ACTIVE'];
+    await expect(executeReviewedMediaAttachments({
+      kinds: ['detail', 'wrist'] as const,
+      needsStaging: () => true,
+      assertDraftNow: async (phase, kind) => {
+        calls.push(`${phase}:${kind}`);
+        assertRoyalChainMediaProductDraft('lmny-chain-01', statuses.shift()!);
+      },
+      stage: async (kind) => { calls.push(`stage:${kind}`); },
+      attach: async (kind) => { calls.push(`attach:${kind}`); },
+    })).rejects.toThrow(/non-DRAFT/);
+    expect(calls).toEqual([
+      'before-stage:detail', 'stage:detail', 'before-attach:detail', 'attach:detail',
+      'before-stage:wrist', 'stage:wrist', 'before-attach:wrist',
+    ]);
   });
 });
