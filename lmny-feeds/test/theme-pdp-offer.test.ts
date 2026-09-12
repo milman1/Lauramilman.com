@@ -51,6 +51,19 @@ describe('product-page inquiry pills', () => {
     expect(themeFile('snippets/jacob-co-name.liquid')).toContain('Jacob & Co.');
   });
 
+  it('renders chain specs from custom.width, custom.clasp, and custom.finish', () => {
+    const specDefs = /assign spec_defs = '([^']+)'/.exec(mainProduct)?.[1] ?? '';
+    expect(specDefs).toContain('width:Width');
+    expect(specDefs).toContain('clasp:Clasp');
+    expect(specDefs).toContain('finish:Finish');
+    expect(specDefs).toContain('metal:Metal');
+    expect(specDefs).toContain('link:Link');
+    expect(specDefs).toContain('length:Length');
+    // Chain listings put specs here, never in the body; empty keys never render a row.
+    expect(specDefs).not.toContain('metal_type');
+    expect(specDefs).not.toContain('measurements');
+  });
+
   it('treats designer-jewelry tags as maison/vintage', () => {
     const vintage = themeFile('snippets/product-is-vintage.liquid');
     expect(vintage).toContain("tags_l contains 'designer-jewelry'");

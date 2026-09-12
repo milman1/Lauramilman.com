@@ -38,7 +38,7 @@ describe('Royal Chain listing builder', () => {
       existingHandle: 'lmny-cuban-4',
       style: 'Cuban',
       widthMm: '4',
-      closure: 'Lobster clasp',
+      closure: 'Lobster',
       finish: 'Polished',
       construction: 'Semi-solid',
       imageUrl: 'https://supplier.invalid/hero.jpg',
@@ -59,10 +59,25 @@ describe('Royal Chain listing builder', () => {
       ],
     }) as Record<string, any>;
 
-    expect(product.descriptionHtml).toContain('<h2>Details</h2>');
-    expect(product.descriptionHtml).toContain('<strong>Available lengths:</strong> 18 in, 20 in');
-    expect(product.descriptionHtml).toContain('<strong>Material:</strong> 14K Yellow Gold');
-    expect(product.descriptionHtml).toContain('<strong>Closure:</strong> Lobster clasp');
+    // One prose paragraph; every spec lives in the theme's Specifications grid instead.
+    expect(product.descriptionHtml).toBe(
+      '<p>This 4mm cuban chain necklace is crafted in 14K Yellow Gold and offered by Laura Milman New York. Finished polished and closed with a lobster clasp.</p>',
+    );
+    expect(product.descriptionHtml).not.toMatch(/<h2>|<ul>|<li>|Details/i);
+    expect(product.metafields).toEqual([
+      { namespace: 'custom', key: 'metal', type: 'single_line_text_field', value: '14K Yellow Gold' },
+      { namespace: 'custom', key: 'link', type: 'single_line_text_field', value: 'Cuban' },
+      { namespace: 'custom', key: 'width', type: 'single_line_text_field', value: '4 mm' },
+      { namespace: 'custom', key: 'length', type: 'single_line_text_field', value: '18, 20 in' },
+      { namespace: 'custom', key: 'clasp', type: 'single_line_text_field', value: 'Lobster' },
+      { namespace: 'custom', key: 'finish', type: 'single_line_text_field', value: 'Polished' },
+      { namespace: 'custom', key: 'condition', type: 'single_line_text_field', value: 'New' },
+      { namespace: 'custom', key: 'ebay_condition', type: 'single_line_text_field', value: '1000' },
+    ]);
+    expect(JSON.stringify(product.metafields)).not.toMatch(/metal_type|measurements/);
+    expect(product.seo.description).toBe(
+      'Shop the 4mm cuban chain necklace in 14K Yellow Gold, available in 18 to 20 in, from Laura Milman New York.',
+    );
     expect(product.files).toHaveLength(3);
     expect(product.tags).not.toContain('media-missing');
     expect(product.tags).not.toContain('ebay'); // DRAFT plans never activate a sales channel.
@@ -76,7 +91,7 @@ describe('Royal Chain listing builder', () => {
         'Chain Type': 'Cuban',
         Length: '18 in, 20 in',
         'Condition ID': '1000',
-        Closure: 'Lobster clasp',
+        Closure: 'Lobster',
         Finish: 'Polished',
         Construction: 'Semi-solid',
       }),
@@ -111,8 +126,8 @@ describe('Royal Chain listing builder', () => {
     expect(products.map((product) => product.handle)).toEqual(['lmny-mixed-bracelet', 'lmny-mixed']);
     expect(products.map((product) => product.productType)).toEqual(['Bracelets', 'Necklaces']);
     expect(products.map((product) => product.ebay.itemSpecifics.Type)).toEqual(['Bracelet', 'Necklace']);
-    expect(products[0]!.descriptionHtml).toMatch(/curb bracelet/i);
-    expect(products[1]!.descriptionHtml).toMatch(/curb necklace/i);
+    expect(products[0]!.descriptionHtml).toMatch(/curb chain bracelet/i);
+    expect(products[1]!.descriptionHtml).toMatch(/curb chain necklace/i);
   });
 
   it('fails closed for eBay until all image, content, and condition gates are met', () => {

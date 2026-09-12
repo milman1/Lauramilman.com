@@ -169,9 +169,114 @@ function assertSingleMetal(parsed: ParsedVariant[], itemNumber: string): string 
   return metals[0]!;
 }
 
-function detailsHtml(details: Array<[string, string]>): string {
-  return `<h2>Details</h2><ul>${details.map(([label, value]) => `<li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</li>`).join('')}</ul>`;
+function titleCase(value: string): string {
+  return clean(value).replace(/\S+/g, (word) => `${word[0]!.toUpperCase()}${word.slice(1).toLowerCase()}`);
 }
+
+/** Every spec fact a chain listing can state. Unknown facts stay empty; the theme hides empty rows. */
+export interface RoyalChainListingFacts {
+  /** Chain style, Title Case: `Cuban`. */
+  style: string;
+  /** Width in millimetres, numeric only: `3.9`. */
+  widthMm: string;
+  metal: string;
+  singularType: 'Necklace' | 'Bracelet';
+  /** Available lengths in source order, each `18 in` or `8.5 in`. */
+  lengths: string[];
+  clasp?: string;
+  finish?: string;
+  condition?: { label: string; ebayCondition: string } | null;
+}
+
+export interface RoyalChainListingCopy {
+  title: string;
+  descriptionHtml: string;
+  seo: { title: string; description: string };
+  metafields: MetafieldValue[];
+}
+
+function lengthNumbers(lengths: string[]): string[] {
+  return [...new Set(lengths.map((length) => clean(length).replace(/\s*in\.?$/i, '')).filter(Boolean))];
+}
+
+/** `custom.length` carries every available length, comma-joined, with the unit stated once. */
+export function royalChainLengthValue(lengths: string[]): string {
+  const numbers = lengthNumbers(lengths);
+  return numbers.length ? `${numbers.join(', ')} in` : '';
+}
+
+/** SEO copy states a span (`18 to 26 in`) rather than every length. */
+function lengthSpan(lengths: string[]): string {
+  const numbers = lengthNumbers(lengths).map(Number).filter((value) => Number.isFinite(value));
+  if (numbers.length === 0) return '';
+  const low = Math.min(...numbers);
+  const high = Math.max(...numbers);
+  return low === high ? `${low} in` : `${low} to ${high} in`;
+}
+
+export function royalChainTitle(facts: RoyalChainListingFacts): string {
+  return `${clean(facts.widthMm)}mm ${clean(facts.style)} Chain ${facts.singularType} in ${clean(facts.metal)}`;
+}
+
+/**
+ * One prose paragraph. Specs never go in the body: the theme renders them from
+ * `product.metafields.custom.*` in its Specifications grid.
+ */
+export function royalChainBodyHtml(facts: RoyalChainListingFacts): string {
+  const finish = clean(facts.finish ?? '');
+  const clasp = clean(facts.clasp ?? '');
+  let closing = '';
+  if (finish && clasp) closing = ` Finished ${finish.toLowerCase()} and closed with a ${clasp.toLowerCase()} clasp.`;
+  else if (finish) closing = ` Finished ${finish.toLowerCase()}.`;
+  else if (clasp) closing = ` Closed with a ${clasp.toLowerCase()} clasp.`;
+  const lead = `This ${clean(facts.widthMm)}mm ${clean(facts.style).toLowerCase()} chain ${facts.singularType.toLowerCase()} is crafted in ${clean(facts.metal)} and offered by Laura Milman New York.`;
+  return `<p>${escapeHtml(`${lead}${closing}`)}</p>`;
+}
+
+export function royalChainSeoDescription(facts: RoyalChainListingFacts): string {
+  const span = lengthSpan(facts.lengths);
+  return truncateAtWord(
+    `Shop the ${clean(facts.widthMm)}mm ${clean(facts.style).toLowerCase()} chain ${facts.singularType.toLowerCase()} in ${clean(facts.metal)}${span ? `, available in ${span}` : ''}, from Laura Milman New York.`,
+    160,
+  );
+}
+
+/** Written only where the fact is known; an unknown spec is omitted, never invented. */
+export function royalChainSpecMetafields(facts: RoyalChainListingFacts): MetafieldValue[] {
+  const pairs: Array<[string, string]> = [
+    ['metal', clean(facts.metal)],
+    ['link', titleCase(facts.style)],
+    ['width', clean(facts.widthMm) ? `${clean(facts.widthMm)} mm` : ''],
+    ['length', royalChainLengthValue(facts.lengths)],
+    ['clasp', clean(facts.clasp ?? '')],
+    ['finish', clean(facts.finish ?? '')],
+    ...(facts.condition
+      ? ([
+          ['condition', clean(facts.condition.label)],
+          ['ebay_condition', clean(facts.condition.ebayCondition)],
+        ] as Array<[string, string]>)
+      : []),
+  ];
+  return pairs
+    .filter(([, value]) => Boolean(value))
+    .map(([key, value]) => ({ namespace: 'custom' as const, key, type: 'single_line_text_field' as const, value }));
+}
+
+/** Single source of the public chain listing: title, body, SEO, and Specifications-grid metafields. */
+export function royalChainListingCopy(facts: RoyalChainListingFacts): RoyalChainListingCopy {
+  const title = royalChainTitle(facts);
+  const copy: RoyalChainListingCopy = {
+    title,
+    descriptionHtml: royalChainBodyHtml(facts),
+    seo: { title: fitWithSuffix(title, '| Laura Milman', 60), description: royalChainSeoDescription(facts) },
+    metafields: royalChainSpecMetafields(facts),
+  };
+  assertRoyalChainPublicScrubbed(copy, 'royal chain listing copy');
+  return copy;
+}
+
+/** The grid keys a complete chain listing must carry before it is publishable copy. */
+export const ROYALCHAIN_REQUIRED_SPEC_KEYS = ['metal', 'link', 'width', 'length'] as const;
 
 function buildRoyalChainProductForType(
   source: RoyalChainSource,
@@ -188,38 +293,32 @@ function buildRoyalChainProductForType(
   const lengths = [...new Set(parsed.map((variant) => variant.length))];
   const condition = conditionFacts(source.condition);
   const singularType = productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? 'Bracelet' : 'Necklace';
-  const title = `${width}mm ${style} Chain ${singularType} in ${metal}`;
+  const listing = royalChainListingCopy({
+    style,
+    widthMm: width,
+    metal,
+    singularType,
+    lengths,
+    clasp: source.closure,
+    finish: source.finish,
+    condition,
+  });
+  const title = listing.title;
   const ebayTitle = truncateAtWord(title, EBAY_TITLE_MAX);
-  const descriptionDetails: Array<[string, string]> = [
-    ['Material', metal],
-    ['Style', style],
-    ['Width', `${width} mm`],
-    ['Available lengths', lengths.join(', ')],
-    ...(clean(source.closure ?? '') ? [['Closure', clean(source.closure ?? '')] as [string, string]] : []),
-    ...(clean(source.finish ?? '') ? [['Finish', clean(source.finish ?? '')] as [string, string]] : []),
-    ...(clean(source.construction ?? '') ? [['Construction', clean(source.construction ?? '')] as [string, string]] : []),
-    ...(condition ? [['Condition', condition.label] as [string, string]] : []),
-  ];
-  const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} ${singularType.toLowerCase()} is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
-  const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
-  const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
+  const descriptionHtml = listing.descriptionHtml;
+  const seoTitle = listing.seo.title;
+  const seoDescription = listing.seo.description;
   const fallbackHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
   const baseHandle = source.existingHandle || EXISTING_HANDLES[itemNumber] || fallbackHandle;
   const handle = splitByType && productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? `${baseHandle}-bracelet` : baseHandle;
   const imageUrls = dedupeRoyalChainImageUrls(source);
   const mediaReady = shopifyCdnMediaUrlsAfterImport(source.shopifyCdnImageUrls ?? []).length >= ROYALCHAIN_MINIMUM_IMAGES;
   const tags = [ROYALCHAIN_VENDOR, productType, ...(mediaReady ? [] : ['media-missing'])];
-  const metafields: MetafieldValue[] = [
-    { namespace: 'custom', key: 'metal_type', type: 'single_line_text_field', value: metal },
-    { namespace: 'custom', key: 'measurements', type: 'single_line_text_field', value: `${width} mm wide; available in ${lengths.join(', ')}` },
-    ...(condition
-      ? [
-          { namespace: 'custom' as const, key: 'condition', type: 'single_line_text_field' as const, value: condition.label },
-          { namespace: 'custom' as const, key: 'ebay_condition', type: 'single_line_text_field' as const, value: condition.ebayCondition },
-        ]
-      : []),
-  ];
-  const contentReady = Boolean(title && descriptionHtml && seoTitle && seoDescription && metafields.length >= 2);
+  const metafields: MetafieldValue[] = listing.metafields;
+  const specKeys = new Set(metafields.map((metafield) => metafield.key));
+  const contentReady = Boolean(
+    title && descriptionHtml && seoTitle && seoDescription && ROYALCHAIN_REQUIRED_SPEC_KEYS.every((key) => specKeys.has(key)),
+  );
   const conditionReady = Boolean(condition);
   const childSkus = parsed.map(({ variant }) => clean(variant.sku ?? ''));
   const childSkuReady = childSkus.every(Boolean) && new Set(childSkus).size === childSkus.length;
@@ -251,13 +350,14 @@ function buildRoyalChainProductForType(
       ...(condition ? { Condition: condition.label, 'Condition ID': condition.ebayCondition } : {}),
     },
     itemSpecificMapping: {
-      Metal: 'custom.metal_type',
-      Width: 'custom.measurements',
-      Length: 'variant option: Metal / Length',
+      Metal: 'custom.metal',
+      Style: 'custom.link',
+      Width: 'custom.width',
+      Length: 'custom.length',
       Condition: 'custom.condition',
       'Condition ID': 'custom.ebay_condition',
-      Closure: 'source.closure',
-      Finish: 'source.finish',
+      Closure: 'custom.clasp',
+      Finish: 'custom.finish',
       Construction: 'source.construction',
     },
   };
