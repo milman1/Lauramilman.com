@@ -5,6 +5,7 @@ import {
   ROYALCHAIN_CATALOG_QUERY,
   activationChecklist,
   buildActivationSnapshot,
+  finalVerificationExitCode,
   parseAvailabilityCsv,
   parsePlanJsonl,
   type ActivationSnapshot,
@@ -95,13 +96,13 @@ async function verify(): Promise<void> {
   await writeFile(path.join(outputDir, 'royal-chain-activation-verification.md'), [
     '# Royal Chain independent final verification', '', `Reviewed snapshot SHA-256: ${snapshot.snapshotSha256}`,
     `Checked: ${result.checkedProducts} products / ${result.checkedVariants} variants`, '',
-    result.blockers.length ? '## FAIL' : '## PASS', '',
+    result.blockers.length || result.activationGaps.length ? '## FAIL' : '## PASS', '',
     ...(result.blockers.length ? result.blockers.map((blocker) => `- [${blocker.code}] ${blocker.handle ? `${blocker.handle}: ` : ''}${blocker.sku ? `${blocker.sku}: ` : ''}${blocker.message}`) : ['All final state checks passed.']), '',
     '## Activation-only person gaps', '',
     ...(result.activationGaps.length ? result.activationGaps.map((gap) => `- [${gap.code}] ${gap.handle ? `${gap.handle}: ` : ''}${gap.sku ? `${gap.sku}: ` : ''}${gap.message}`) : ['- none']), '',
   ].join('\n'));
   console.log(JSON.stringify({ mode: 'verify-final', blockers: result.blockers.length, activationGaps: result.activationGaps.length, products: result.checkedProducts, variants: result.checkedVariants }, null, 2));
-  if (result.blockers.length) process.exitCode = 2;
+  process.exitCode = finalVerificationExitCode(result.blockers, result.activationGaps);
 }
 
 async function main(): Promise<void> {

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildActivationSnapshot,
   canonicalJson,
+  finalVerificationExitCode,
   parseAvailabilityCsv,
+  sha256Text,
   supplierScrubViolations,
   validatePlan,
   validateReviewedSnapshot,
@@ -40,6 +42,11 @@ function reviewedFixture() {
   const planText = plan.map((item) => JSON.stringify(item)).join('\n');
   const availabilityText = `child_sku,available\n${[...availability].map(([sku, value]) => `${sku},${value}`).join('\n')}\n`;
   return { plan, liveProducts: live, availability, planText, availabilityText };
+}
+
+function resign<T extends { snapshotSha256: string }>(snapshot: T): T {
+  const { snapshotSha256: _old, ...unsigned } = snapshot;
+  return { ...snapshot, snapshotSha256: sha256Text(canonicalJson(unsigned)) };
 }
 
 describe('Royal Chain activation plan gates', () => {
@@ -82,6 +89,15 @@ describe('Royal Chain activation plan gates', () => {
     expect(snapshot.availabilitySha256).toBeTruthy();
   });
 
+  it('fails final verification for untouched Draft, unpublished, untagged, zero-quantity products', () => {
+    const fixture = reviewedFixture();
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    const result = verifyFinalState(snapshot, fixture.liveProducts);
+    expect(result.blockers).toEqual([]);
+    expect(result.activationGaps.map((gap) => gap.code)).toEqual(expect.arrayContaining(['status', 'online-store', 'ebay-tag', 'inventory-quantity']));
+    expect(finalVerificationExitCode(result.blockers, result.activationGaps)).toBe(2);
+  });
+
   it('blocks exact cost, weight unit, variant set, and media URL/alt drift during dry-run', () => {
     const fixture = reviewedFixture();
     const changed = fixture.liveProducts[0]!;
@@ -103,6 +119,22 @@ describe('Royal Chain activation plan gates', () => {
     expect(validateReviewedSnapshot(missingAvailability).map((blocker) => blocker.code)).toContain('snapshot-availability');
   });
 
+  it('rejects swapped, missing, extra, and non-boolean per-target availability maps', () => {
+    const fixture = reviewedFixture();
+    const cases = [
+      (snapshot: ReturnType<typeof buildActivationSnapshot>) => { snapshot.targets[0]!.sourceAvailable = { ...snapshot.targets[1]!.sourceAvailable }; },
+      (snapshot: ReturnType<typeof buildActivationSnapshot>) => { delete snapshot.targets[0]!.sourceAvailable[snapshot.targets[0]!.publicExpected.variants[0]!.sku]; },
+      (snapshot: ReturnType<typeof buildActivationSnapshot>) => { snapshot.targets[0]!.sourceAvailable.EXTRA = true; },
+      (snapshot: ReturnType<typeof buildActivationSnapshot>) => { (snapshot.targets[0]!.sourceAvailable as Record<string, unknown>)[snapshot.targets[0]!.publicExpected.variants[0]!.sku] = 'yes'; },
+    ];
+    for (const mutate of cases) {
+      const snapshot = buildActivationSnapshot({ ...fixture });
+      mutate(snapshot);
+      const codes = validateReviewedSnapshot(resign(snapshot)).map((blocker) => blocker.code);
+      expect(codes).toContain('snapshot-target-availability');
+    }
+  });
+
   it('passes final verification only after the person-run activation fields are complete', () => {
     const fixture = reviewedFixture();
     const snapshot = buildActivationSnapshot({ ...fixture });
@@ -116,5 +148,13 @@ describe('Royal Chain activation plan gates', () => {
     const result = verifyFinalState(snapshot, finalLive);
     expect(result.blockers).toEqual([]);
     expect(result.activationGaps).toEqual([]);
+    expect(finalVerificationExitCode(result.blockers, result.activationGaps)).toBe(0);
+  });
+
+  it('rejects a final read whose Shopify product ID differs from the reviewed snapshot', () => {
+    const fixture = reviewedFixture();
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    const finalLive = fixture.liveProducts.map((item) => ({ ...item, id: item.id === snapshot.targets[0]!.productId ? 'gid://shopify/Product/drifted' : item.id }));
+    expect(verifyFinalState(snapshot, finalLive).blockers.map((blocker) => blocker.code)).toContain('product-id');
   });
 });

@@ -76,6 +76,10 @@ export interface Blocker {
 
 export interface ActivationGap extends Blocker {}
 
+export function finalVerificationExitCode(blockers: readonly Blocker[], activationGaps: readonly ActivationGap[]): 0 | 2 {
+  return blockers.length === 0 && activationGaps.length === 0 ? 0 : 2;
+}
+
 export function sha256Text(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');
 }
@@ -296,10 +300,15 @@ function activationGapsForTarget(target: ActivationSnapshot['targets'][number], 
   const published = live.resourcePublications?.nodes?.some((p) => p.isPublished && p.publication?.name === ROYALCHAIN_ONLINE_STORE) === true;
   if (!published) gaps.push({ code: 'online-store', message: 'person must publish product to Online Store', handle });
   if (!(live.tags ?? []).includes('ebay')) gaps.push({ code: 'ebay-tag', message: 'person must add ebay tag after review', handle });
+  if ((live.tags ?? []).includes('media-missing')) gaps.push({ code: 'media-missing', message: 'person must remove media-missing after media review', handle });
   const bySku = new Map(liveVariants(live).map((variant) => [variant.sku ?? '', variant]));
   for (const expected of target.publicExpected.variants) {
     const variant = bySku.get(expected.sku);
     if (!variant) continue;
+    if (!(expected.sku in target.sourceAvailable)) {
+      gaps.push({ code: 'availability-missing', message: 'person cannot set inventory until this child SKU has explicit source availability', handle, sku: expected.sku });
+      continue;
+    }
     const quantity = target.sourceAvailable[expected.sku] === true ? 1 : 0;
     if (variant.inventoryQuantity !== quantity) gaps.push({ code: 'inventory-quantity', message: `person must set inventory quantity ${quantity} for this source availability state`, handle, sku: expected.sku });
   }
@@ -339,6 +348,7 @@ export function buildActivationSnapshot(args: { plan: PlanProduct[]; planText: s
     if (!live) blockers.push({ code: 'live-missing', message: 'fresh Shopify read did not find planned handle', handle: product.handle });
     else {
       const target = { handle: product.handle ?? '', productId: live.id ?? null, publicExpected: planPublicExpected(product), sourceAvailable: available, live: livePublicExpected(live) };
+      if (!live.id) blockers.push({ code: 'live-product-id', message: 'fresh Shopify read returned no product ID', handle: target.handle });
       blockers.push(...compareLiveContent(target, live));
       if (canonicalJson(target.live?.tags ?? []) !== canonicalJson(target.publicExpected.tags)) blockers.push({ code: 'tags', message: 'tags differ from the reviewed pre-activation plan', handle: target.handle });
       activationGaps.push(...activationGapsForTarget(target, live));
@@ -368,8 +378,8 @@ export function validateReviewedSnapshot(snapshot: ActivationSnapshot): Blocker[
   const expectedVariants = snapshot.targets.flatMap((target) => target.publicExpected.variants);
   const skus = expectedVariants.map((variant) => variant.sku);
   if (skus.length !== ROYALCHAIN_EXPECTED_VARIANTS || skus.some((sku) => !sku) || new Set(skus).size !== skus.length) blockers.push({ code: 'snapshot-sku-set', message: 'reviewed snapshot must contain exactly 93 unique nonempty child SKUs' });
-  const expectedSkuSet = new Set(skus);
   for (const target of snapshot.targets) {
+    if (!target.productId) blockers.push({ code: 'snapshot-product-id', message: 'reviewed target must bind a nonempty Shopify product ID', handle: target.handle });
     if (target.publicExpected.handle !== target.handle || target.publicExpected.vendor !== ROYALCHAIN_VENDOR || !['Necklaces', 'Bracelets'].includes(target.publicExpected.productType) || target.publicExpected.category !== categoryFor(target.publicExpected.productType)) blockers.push({ code: 'snapshot-target-invariants', message: 'reviewed target has invalid handle, vendor, type, or category', handle: target.handle });
     if (!target.publicExpected.tags.includes('media-missing') || target.publicExpected.tags.includes('ebay')) blockers.push({ code: 'snapshot-tags', message: 'reviewed pre-activation target must retain media-missing and exclude ebay', handle: target.handle });
     for (const path of supplierScrubViolations(target.publicExpected)) blockers.push({ code: 'snapshot-supplier-scrub', message: `supplier name found at ${path}`, handle: target.handle });
@@ -377,8 +387,9 @@ export function validateReviewedSnapshot(snapshot: ActivationSnapshot): Blocker[
     const expectedEbayCondition = target.publicExpected.metafields.find((field) => field.key === 'ebay_condition')?.value;
     if (expectedCondition !== 'New' || expectedEbayCondition !== '1500') blockers.push({ code: 'snapshot-condition', message: 'reviewed target must bind New / 1500 condition values', handle: target.handle });
     const targetSkus = target.publicExpected.variants.map((variant) => variant.sku);
+    const targetSkuSet = new Set(targetSkus);
     if (new Set(targetSkus).size !== targetSkus.length || targetSkus.some((sku) => !sku)) blockers.push({ code: 'snapshot-target-variants', message: 'reviewed target has blank or duplicate child SKUs', handle: target.handle });
-    if (Object.keys(target.sourceAvailable).length !== targetSkus.length || Object.keys(target.sourceAvailable).some((sku) => !expectedSkuSet.has(sku))) blockers.push({ code: 'snapshot-target-availability', message: 'reviewed target availability keys do not exactly match its variants', handle: target.handle });
+    if (Object.keys(target.sourceAvailable).length !== targetSkus.length || Object.keys(target.sourceAvailable).some((sku) => !targetSkuSet.has(sku)) || targetSkus.some((sku) => !(sku in target.sourceAvailable)) || Object.values(target.sourceAvailable).some((value) => typeof value !== 'boolean')) blockers.push({ code: 'snapshot-target-availability', message: 'reviewed target availability keys and boolean values must exactly match its variants', handle: target.handle });
     for (const variant of target.publicExpected.variants) if (!variant.price || !variant.cost || !exactWeight(variant.weight, variant.weightUnit)) blockers.push({ code: 'snapshot-variant-facts', message: 'reviewed target lacks exact price, cost, or GRAMS weight', handle: target.handle, sku: variant.sku });
   }
   return blockers;
@@ -393,10 +404,14 @@ export function verifyFinalState(snapshot: ActivationSnapshot, liveProducts: Liv
   for (const target of snapshot.targets) {
     const live = byHandle.get(target.handle);
     if (!live) { blockers.push({ code: 'live-missing', message: 'final verification read did not find handle', handle: target.handle }); continue; }
+    if (!target.productId || live.id !== target.productId) blockers.push({ code: 'product-id', message: 'final Shopify product ID differs from the reviewed snapshot', handle: target.handle });
     blockers.push(...compareLiveContent(target, live));
     const contentTags = target.publicExpected.tags;
-    const expectedTags = [...contentTags.filter((tag) => tag !== 'media-missing'), 'ebay'].sort();
-    if (canonicalJson([...(live.tags ?? [])].sort()) !== canonicalJson(expectedTags)) blockers.push({ code: 'tags', message: 'final tags do not match the reviewed tag set plus ebay', handle: target.handle });
+    const requiredTags = contentTags.filter((tag) => tag !== 'media-missing');
+    const actualTags = live.tags ?? [];
+    const hasAllRequiredTags = requiredTags.every((tag) => actualTags.includes(tag));
+    const allowedTags = new Set([...requiredTags, 'ebay', 'media-missing']);
+    if (!hasAllRequiredTags || actualTags.some((tag) => !allowedTags.has(tag))) blockers.push({ code: 'tags', message: 'final tags contain unexpected or missing required values', handle: target.handle });
     activationOnly.push(...activationGapsForTarget(target, live));
     checkedVariants += target.publicExpected.variants.length;
   }
