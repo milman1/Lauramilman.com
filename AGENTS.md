@@ -439,7 +439,10 @@ own row in section 2a); cost comes from the merchant's trade account.
    supplier), product type from the store's list (`Necklaces`), lengths
    as variants, supplier item number as SKU, images copied from the
    supplier page, then a human reviews and sets ACTIVE. Supplier names
-   never appear on the storefront.
+   never appear on the storefront. Listing copy follows
+   `lmny-feeds/docs/royal-chain-listing-schema.md`: one prose paragraph in the
+   body, with every chain spec in `custom.metal/link/width/length/clasp/finish`
+   for the theme's Specifications grid and never in the body.
 5. **Refresh.** Gold-weight chains reprice with the metal market. A
    monthly rerun of the cost job plus the same × 3 rule keeps them
    current; that job never touches products it did not create.
@@ -579,7 +582,11 @@ the intent suffix change.
    the table in `SHOPIFY_SETUP.md` section 11. Haiku 4.5 may assign type,
    category, and tags at volume from the fact JSON; a low-confidence row goes
    to a review file, never a guess.
-8. Populate the seven `custom.*` metafields where known (`metal_type`,
+8. Chains follow `lmny-feeds/docs/royal-chain-listing-schema.md`: their specs go
+   to `custom.metal`, `custom.link`, `custom.width`, `custom.length`,
+   `custom.clasp`, and `custom.finish`, which the theme's Specifications grid
+   reads, and never into the body.
+   Populate the seven `custom.*` metafields where known (`metal_type`,
    `metal_weight`, `diamond_weight`, `measurements`, `gemstones`, `era`,
    `condition`, `SHOPIFY_SETUP.md` section 1) plus `custom.ebay_condition` for
    anything tagged `ebay`.

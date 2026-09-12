@@ -34,6 +34,17 @@ Metafield: custom.era [single_line_text_field]
 Metafield: custom.condition [single_line_text_field]
 ```
 
+**What the product page actually renders.** `sections/main-product.liquid`
+builds its Specifications grid from a fixed `custom.*` key list (`spec_defs`:
+brand, model, reference, year, diamond_shape, carat_weight, case_size, metal,
+dial, bezel, bracelet, clarity, color, condition, condition_grade,
+setting_style, length, box, papers, original_tag, link, width, clasp, finish,
+stock_number), skipping every empty key. `custom.metal_type` and
+`custom.measurements` are in the table above but have **no live metafield
+definition in the store and are not in `spec_defs`**, so values written there
+never appear on a product page; use `custom.metal` and the dimension keys
+instead. Chains follow `lmny-feeds/docs/royal-chain-listing-schema.md`.
+
 Also include the Shopify standard columns in §11 (Status, Variant SKU,
 inventory, Product Category). Marketplace apps will not keep a listing
 without them.
