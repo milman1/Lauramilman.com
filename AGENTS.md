@@ -65,6 +65,7 @@ old CSV import are hidden and untouched.
 11. **Work lands on `main`.** Every task ends with its branch merged to `main` through a pull request (merchant decision 2026-09-09). Scheduled jobs run `main` only, so an unmerged branch is work that does not exist. Restart the working branch from `main` after each merge.
 12. **Never tag a draft or a loose stone for eBay.** The Back Vault sync strips the `ebay` tag from any piece it writes as DRAFT; CSV imports carry the tag only on ACTIVE rows (`SHOPIFY_SETUP.md` section 11).
 13. **The orchestrator briefs and verifies; it does not do the work.** Fable 5.1 (or Astra on the OpenAI side) plans, writes the brief, adjudicates the review, and merges. It never writes code, docs, or copy itself and never runs bulk mutations itself. Doing the work in the orchestrator model is the most expensive way to do it and burns the session limit (merchant decision 2026-09-09). The only exception is the one-line fix or single query allowed in section 5a, and even then the orchestrator merges nothing without the tests passing and the diff read back.
+14. **The simplest path that produces the requested outcome wins.** Before planning agents, writing code, adding an automation, or wiring an integration, find the simplest thing that delivers what was asked. Check first for a manual export, a browser extraction, a native Shopify import (CSV, bulk editor, admin screen), an API or workflow that already exists in this repo, and a one-time deliverable. Compare the candidates on time, cost, risk, and repeatability, say which one was chosen and why, and then build only that. Never build recurring infrastructure for a one-time task: no new workflow file, no new script in `lmny-feeds/scripts/`, no new agent fan-out for work that runs once. If a manual handoff is faster, the deliverable is the handoff artifact — a CSV, a plan file, a list of steps for the merchant — not a program that produces it. Recurring infrastructure is justified only by a recurring need, and the rules above (dry-run first, pricing by pull request, verify before reporting done) still apply to whichever path is chosen.
 
 ### 2a. Pricing matrix: wholesale cost to retail, by source
 
@@ -174,6 +175,14 @@ written brief; a reviewer
 (Opus 5 or Sol) reviews blind; the orchestrator adjudicates the review and
 sends the work back for repairs or accepts it. Nothing lands on `main` or in
 Shopify without passing through all four steps.
+
+The loop opens with rule 14: before the brief is written, the orchestrator
+names the simplest path that produces the outcome and says why the other
+candidates lost. A brief that describes code, an automation, or an agent
+fan-out for something a manual export or a native Shopify import would do
+is a defect in the plan, not a scope question for the worker. When the
+simplest path is a manual handoff, the loop still runs, with the handoff
+artifact as the deliverable the reviewer checks.
 
 | Step | Who | Gets | Produces | Never does |
 |---|---|---|---|---|
