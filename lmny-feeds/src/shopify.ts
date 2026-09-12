@@ -1,4 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { publicationMatchesChannel } from '../config/channels.js';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
@@ -1154,6 +1156,46 @@ export class ShopifyClient {
   }
 
   /**
+   * Stage a local, validated image for product media. The caller owns the
+   * subsequent product attachment, which keeps this primitive usable by
+   * dry-run-first bulk jobs that must de-duplicate per product.
+   */
+  async stageLocalImage(filePath: string, publicFilename = path.basename(filePath)): Promise<string> {
+    const bytes = new Uint8Array(await readFile(filePath));
+    const mime = sniffImageMime(bytes);
+    if (!mime) throw new Error(`${filePath}: not a recognised image file`);
+    const filename = path.basename(publicFilename);
+    if (!filename || filename !== publicFilename || /royal[\s._-]*chain/i.test(filename)) {
+      throw new Error(`${filePath}: unsafe public staged filename`);
+    }
+    const data = await this.gql<{
+      stagedUploadsCreate: {
+        stagedTargets: Array<{ url: string; resourceUrl: string; parameters: Array<{ name: string; value: string }> }>;
+        userErrors: Array<{ message: string }>;
+      };
+    }>(
+      `mutation($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets { url resourceUrl parameters { name value } }
+          userErrors { message }
+        }
+      }`,
+      { input: [{ resource: 'IMAGE', filename, mimeType: mime, httpMethod: 'POST', fileSize: String(bytes.byteLength) }] },
+    );
+    if (data.stagedUploadsCreate.userErrors.length) {
+      throw new Error(`stagedUploadsCreate: ${data.stagedUploadsCreate.userErrors.map((e) => e.message).join('; ')}`);
+    }
+    const target = data.stagedUploadsCreate.stagedTargets[0];
+    if (!target) throw new Error('stagedUploadsCreate returned no target');
+    const form = new FormData();
+    for (const parameter of target.parameters) form.append(parameter.name, parameter.value);
+    form.append('file', new Blob([bytes as BlobPart], { type: mime }), filename);
+    const upload = await fetch(target.url, { method: 'POST', body: form });
+    if (!upload.ok) throw new Error(`staged image upload failed: HTTP ${upload.status}`);
+    return target.resourceUrl;
+  }
+
+  /**
    * Attach already-staged media to a product. Video processing is async, so
    * this returning cleanly means Shopify accepted the upload, not that the
    * video is playable yet — the next run's catalog read confirms that.
@@ -1207,6 +1249,18 @@ export class ShopifyClient {
       { product: { id, tags: [...new Set(tags)] } },
     );
     return data.productUpdate.userErrors.map((e) => e.message);
+  }
+
+  /** Remove only the named tags, preserving concurrent tags added by other apps. */
+  async removeProductTags(id: string, tags: string[]): Promise<string[]> {
+    if (tags.length === 0) return [];
+    const data = await this.gql<{ tagsRemove: { userErrors: Array<{ message: string }> } }>(
+      `mutation($id: ID!, $tags: [String!]!) {
+        tagsRemove(id: $id, tags: $tags) { userErrors { message } }
+      }`,
+      { id, tags: [...new Set(tags)] },
+    );
+    return data.tagsRemove.userErrors.map((e) => e.message);
   }
 }
 
