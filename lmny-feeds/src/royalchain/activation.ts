@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { parseCsv } from '../jewelryCsv.js';
+import { shopifyCdnMediaUrlsAfterImport } from './listing.js';
 
 export const ROYALCHAIN_EXPECTED_PRODUCTS = 32;
 export const ROYALCHAIN_EXPECTED_VARIANTS = 93;
@@ -72,6 +73,8 @@ export interface Blocker {
   handle?: string;
   sku?: string;
 }
+
+export interface ActivationGap extends Blocker {}
 
 export function sha256Text(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');
@@ -160,6 +163,10 @@ function money(value: string | number | null | undefined): string {
   return value == null ? '' : Number(value).toFixed(2);
 }
 
+function exactWeight(value: number | null | undefined, unit: string | null | undefined): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 && unit === 'GRAMS';
+}
+
 function planPublicExpected(product: PlanProduct) {
   return {
     handle: product.handle ?? '',
@@ -175,7 +182,7 @@ function planPublicExpected(product: PlanProduct) {
       sku: variant.sku ?? '', price: money(variant.price), inventoryPolicy: variant.inventoryPolicy ?? '', tracked: variant.inventoryItem?.tracked === true,
       weight: variant.inventoryItem?.measurement?.weight?.value ?? null,
       weightUnit: variant.inventoryItem?.measurement?.weight?.unit ?? '',
-      costPresent: variant.inventoryItem?.cost != null && String(variant.inventoryItem.cost).trim() !== '',
+      cost: money(variant.inventoryItem?.cost),
     })).sort((a, b) => a.sku.localeCompare(b.sku)),
   };
 }
@@ -206,7 +213,7 @@ export function validatePlan(products: PlanProduct[], availability?: Availabilit
       const sku = String(variant.sku ?? '').trim();
       if (!sku || seenSkus.has(sku)) blockers.push({ code: 'sku', message: 'missing or duplicate child SKU', handle, sku: sku || undefined });
       seenSkus.add(sku);
-      if (!variant.price || !variant.inventoryItem?.cost || variant.inventoryItem.measurement?.weight?.value == null) blockers.push({ code: 'variant-facts', message: 'variant is missing price, private cost, or gram weight', handle, sku });
+      if (!variant.price || !variant.inventoryItem?.cost || !Number.isFinite(Number(variant.inventoryItem.cost)) || !exactWeight(variant.inventoryItem.measurement?.weight?.value, variant.inventoryItem.measurement?.weight?.unit)) blockers.push({ code: 'variant-facts', message: 'variant is missing exact price, private cost, or positive gram weight in GRAMS', handle, sku });
       if (variant.inventoryPolicy !== 'DENY' || variant.inventoryItem?.tracked !== true) blockers.push({ code: 'inventory-policy', message: 'variant must be tracked with DENY policy', handle, sku });
     }
   }
@@ -224,8 +231,79 @@ function livePublicExpected(product: LiveProduct) {
     handle: product.handle ?? '', title: product.title ?? '', descriptionHtml: product.descriptionHtml ?? '', vendor: product.vendor ?? '',
     productType: product.productType ?? '', category: product.category?.id ?? '', seo: product.seo ?? { title: '', description: '' },
     tags: [...(product.tags ?? [])].sort(), metafields: (product.metafields?.nodes ?? []).filter((m) => m.namespace === 'custom').map((m) => ({ key: m.key ?? '', value: m.value ?? '' })).sort((a, b) => a.key.localeCompare(b.key)),
-    variants: liveVariants(product).map((variant) => ({ sku: variant.sku ?? '', price: money(variant.price), inventoryPolicy: variant.inventoryPolicy ?? '', tracked: variant.inventoryItem?.tracked === true, weight: variant.inventoryItem?.measurement?.weight?.value ?? null, weightUnit: variant.inventoryItem?.measurement?.weight?.unit ?? '', costPresent: variant.inventoryItem?.unitCost?.amount != null })).sort((a, b) => a.sku.localeCompare(b.sku)),
+    variants: liveVariants(product).map((variant) => ({ sku: variant.sku ?? '', price: money(variant.price), inventoryPolicy: variant.inventoryPolicy ?? '', tracked: variant.inventoryItem?.tracked === true, weight: variant.inventoryItem?.measurement?.weight?.value ?? null, weightUnit: variant.inventoryItem?.measurement?.weight?.unit ?? '', cost: money(variant.inventoryItem?.unitCost?.amount) })).sort((a, b) => a.sku.localeCompare(b.sku)),
   };
+}
+
+function compareExactVariants(
+  expected: ReturnType<typeof planPublicExpected>,
+  live: ReturnType<typeof livePublicExpected>,
+  handle: string,
+): Blocker[] {
+  const blockers: Blocker[] = [];
+  const expectedSkus = expected.variants.map((variant) => variant.sku);
+  const liveSkus = live.variants.map((variant) => variant.sku);
+  if (expected.variants.length !== live.variants.length) blockers.push({ code: 'variant-count', message: `expected ${expected.variants.length} variants but Shopify has ${live.variants.length}`, handle });
+  if (new Set(expectedSkus).size !== expectedSkus.length || expectedSkus.some((sku) => !sku)) blockers.push({ code: 'plan-variant-duplicates', message: 'reviewed plan has blank or duplicate child SKUs', handle });
+  if (new Set(liveSkus).size !== liveSkus.length || liveSkus.some((sku) => !sku)) blockers.push({ code: 'live-variant-duplicates', message: 'Shopify has blank or duplicate child SKUs', handle });
+  const expectedBySku = new Map(expected.variants.map((variant) => [variant.sku, variant]));
+  const liveBySku = new Map(live.variants.map((variant) => [variant.sku, variant]));
+  for (const sku of new Set([...expectedSkus, ...liveSkus])) {
+    const want = expectedBySku.get(sku);
+    const got = liveBySku.get(sku);
+    if (!want || !got) { blockers.push({ code: 'variant-set', message: want ? 'reviewed child SKU is missing from Shopify' : 'Shopify has an unreviewed child SKU', handle, sku }); continue; }
+    if (got.price !== want.price || got.cost !== want.cost || got.inventoryPolicy !== want.inventoryPolicy || got.tracked !== want.tracked || got.weight !== want.weight || got.weightUnit !== 'GRAMS' || want.weightUnit !== 'GRAMS') {
+      blockers.push({ code: 'variant-facts', message: 'SKU price, cost, policy, tracking, gram weight, or weight unit differs from the reviewed plan', handle, sku });
+    }
+  }
+  return blockers;
+}
+
+function readyMediaBlockers(product: LiveProduct, handle: string): Blocker[] {
+  const readyImages = (product.media?.nodes ?? []).filter((media) => media.mediaContentType === 'IMAGE' && media.status === 'READY');
+  const urls = readyImages.map((media) => media.image?.url ?? '');
+  const cdnUrls = shopifyCdnMediaUrlsAfterImport(urls);
+  const blockers: Blocker[] = [];
+  if (cdnUrls.length < ROYALCHAIN_MINIMUM_IMAGES) blockers.push({ code: 'media-count', message: `requires at least ${ROYALCHAIN_MINIMUM_IMAGES} READY images with Shopify CDN URLs`, handle });
+  readyImages.forEach((media, index) => {
+    const url = urls[index] ?? '';
+    if (!/^https:\/\/cdn\.shopify\.com\//i.test(url)) blockers.push({ code: 'media-url', message: 'READY image must have a nonempty https://cdn.shopify.com URL', handle });
+    if (!media.alt?.trim()) blockers.push({ code: 'media-alt', message: 'READY image must have nonempty alt text', handle });
+  });
+  return blockers;
+}
+
+function compareLiveContent(target: ActivationSnapshot['targets'][number], live: LiveProduct): Blocker[] {
+  const handle = target.handle;
+  const observed = livePublicExpected(live);
+  const blockers: Blocker[] = [];
+  if (live.vendor !== target.publicExpected.vendor || live.productType !== target.publicExpected.productType || live.category?.id !== target.publicExpected.category || live.title !== target.publicExpected.title || live.descriptionHtml !== target.publicExpected.descriptionHtml) blockers.push({ code: 'public-copy', message: 'vendor, type, category, title, or body differs from reviewed plan', handle });
+  if (live.seo?.title !== target.publicExpected.seo.title || live.seo?.description !== target.publicExpected.seo.description) blockers.push({ code: 'seo', message: 'SEO differs from reviewed plan', handle });
+  const expectedMetafields = target.publicExpected.metafields;
+  const observedMetafields = observed.metafields;
+  if (expectedMetafields.some((expected) => !observedMetafields.some((actual) => actual.key === expected.key && actual.value === expected.value))) blockers.push({ code: 'metafields', message: 'expected custom metafield values differ from Shopify', handle });
+  if (metafield(live, 'condition') !== 'New' || metafield(live, 'ebay_condition') !== '1500') blockers.push({ code: 'condition', message: 'condition metafields differ from reviewed plan', handle });
+  blockers.push(...compareExactVariants(target.publicExpected, observed, handle));
+  blockers.push(...readyMediaBlockers(live, handle));
+  for (const path of supplierScrubViolations(live)) blockers.push({ code: 'supplier-scrub', message: `supplier name found at ${path}`, handle });
+  return blockers;
+}
+
+function activationGapsForTarget(target: ActivationSnapshot['targets'][number], live: LiveProduct): ActivationGap[] {
+  const gaps: ActivationGap[] = [];
+  const handle = target.handle;
+  if (live.status !== 'ACTIVE') gaps.push({ code: 'status', message: 'person must set product ACTIVE after review', handle });
+  const published = live.resourcePublications?.nodes?.some((p) => p.isPublished && p.publication?.name === ROYALCHAIN_ONLINE_STORE) === true;
+  if (!published) gaps.push({ code: 'online-store', message: 'person must publish product to Online Store', handle });
+  if (!(live.tags ?? []).includes('ebay')) gaps.push({ code: 'ebay-tag', message: 'person must add ebay tag after review', handle });
+  const bySku = new Map(liveVariants(live).map((variant) => [variant.sku ?? '', variant]));
+  for (const expected of target.publicExpected.variants) {
+    const variant = bySku.get(expected.sku);
+    if (!variant) continue;
+    const quantity = target.sourceAvailable[expected.sku] === true ? 1 : 0;
+    if (variant.inventoryQuantity !== quantity) gaps.push({ code: 'inventory-quantity', message: `person must set inventory quantity ${quantity} for this source availability state`, handle, sku: expected.sku });
+  }
+  return gaps;
 }
 
 export interface ActivationSnapshot {
@@ -240,6 +318,7 @@ export interface ActivationSnapshot {
   targetVariants: number;
   activationReady: false;
   blockers: Blocker[];
+  activationGaps: ActivationGap[];
   targets: Array<{ handle: string; productId: string | null; publicExpected: ReturnType<typeof planPublicExpected>; sourceAvailable: Record<string, boolean>; live: ReturnType<typeof livePublicExpected> | null }>;
 }
 
@@ -248,6 +327,7 @@ export function buildActivationSnapshot(args: { plan: PlanProduct[]; planText: s
   const byHandle = new Map((args.liveProducts ?? []).map((product) => [product.handle ?? '', product]));
   const liveRelevant = args.liveProducts.filter((product) => check.skus.some((sku) => liveVariants(product).some((variant) => variant.sku === sku)) || args.plan.some((planned) => planned.handle === product.handle));
   const blockers = [...check.blockers];
+  const activationGaps: ActivationGap[] = [];
   if (liveRelevant.length !== args.plan.length) blockers.push({ code: 'live-scope', message: `fresh Shopify read found ${liveRelevant.length} matching products; expected ${args.plan.length}` });
   const targets = args.plan.map((product) => {
     const live = byHandle.get(product.handle ?? '') ?? null;
@@ -257,9 +337,15 @@ export function buildActivationSnapshot(args: { plan: PlanProduct[]; planText: s
       if (sku && args.availability?.has(sku)) available[sku] = args.availability.get(sku) === true;
     }
     if (!live) blockers.push({ code: 'live-missing', message: 'fresh Shopify read did not find planned handle', handle: product.handle });
+    else {
+      const target = { handle: product.handle ?? '', productId: live.id ?? null, publicExpected: planPublicExpected(product), sourceAvailable: available, live: livePublicExpected(live) };
+      blockers.push(...compareLiveContent(target, live));
+      if (canonicalJson(target.live?.tags ?? []) !== canonicalJson(target.publicExpected.tags)) blockers.push({ code: 'tags', message: 'tags differ from the reviewed pre-activation plan', handle: target.handle });
+      activationGaps.push(...activationGapsForTarget(target, live));
+    }
     return { handle: product.handle ?? '', productId: live?.id ?? null, publicExpected: planPublicExpected(product), sourceAvailable: available, live: live ? livePublicExpected(live) : null };
   });
-  const unsigned = { schemaVersion: 1 as const, mode: 'plan-only' as const, generatedAt: args.generatedAt ?? new Date().toISOString(), sourcePlanSha256: sha256Text(args.planText), availabilitySha256: args.availabilityText == null ? null : sha256Text(args.availabilityText), liveReadSha256: sha256Text(canonicalJson(liveRelevant)), targetProducts: args.plan.length, targetVariants: check.skus.length, activationReady: false as const, blockers, targets };
+  const unsigned = { schemaVersion: 1 as const, mode: 'plan-only' as const, generatedAt: args.generatedAt ?? new Date().toISOString(), sourcePlanSha256: sha256Text(args.planText), availabilitySha256: args.availabilityText == null ? null : sha256Text(args.availabilityText), liveReadSha256: sha256Text(canonicalJson(liveRelevant)), targetProducts: args.plan.length, targetVariants: check.skus.length, activationReady: false as const, blockers, activationGaps, targets };
   return { ...unsigned, snapshotSha256: sha256Text(canonicalJson(unsigned)) };
 }
 
@@ -268,41 +354,52 @@ export function verifySnapshotChecksum(snapshot: ActivationSnapshot): boolean {
   return snapshotSha256 === sha256Text(canonicalJson(unsigned));
 }
 
-export function verifyFinalState(snapshot: ActivationSnapshot, liveProducts: LiveProduct[]): { blockers: Blocker[]; checkedProducts: number; checkedVariants: number } {
+/** Validate the reviewed artifact before a verifier is allowed to query Shopify. */
+export function validateReviewedSnapshot(snapshot: ActivationSnapshot): Blocker[] {
   const blockers: Blocker[] = [];
   if (!verifySnapshotChecksum(snapshot)) blockers.push({ code: 'snapshot-checksum', message: 'reviewed snapshot checksum does not match its contents' });
+  if (snapshot.targetProducts !== ROYALCHAIN_EXPECTED_PRODUCTS || snapshot.targets.length !== ROYALCHAIN_EXPECTED_PRODUCTS) blockers.push({ code: 'snapshot-product-scope', message: `reviewed snapshot must contain exactly ${ROYALCHAIN_EXPECTED_PRODUCTS} target products` });
+  if (snapshot.targetVariants !== ROYALCHAIN_EXPECTED_VARIANTS) blockers.push({ code: 'snapshot-variant-scope', message: `reviewed snapshot must declare exactly ${ROYALCHAIN_EXPECTED_VARIANTS} variants` });
+  if (!snapshot.availabilitySha256) blockers.push({ code: 'snapshot-availability', message: 'reviewed snapshot must bind a source availability manifest' });
+  if (snapshot.blockers.length !== 0) blockers.push({ code: 'snapshot-original-blockers', message: 'reviewed snapshot contains unresolved original blockers' });
+  if (snapshot.activationReady !== false || snapshot.mode !== 'plan-only' || snapshot.schemaVersion !== 1) blockers.push({ code: 'snapshot-invariants', message: 'reviewed snapshot has invalid mode, schema, or activation state' });
+  const handles = snapshot.targets.map((target) => target.handle);
+  if (handles.some((handle) => !handle) || new Set(handles).size !== handles.length) blockers.push({ code: 'snapshot-handle-set', message: 'reviewed snapshot handles must be nonempty and unique' });
+  const expectedVariants = snapshot.targets.flatMap((target) => target.publicExpected.variants);
+  const skus = expectedVariants.map((variant) => variant.sku);
+  if (skus.length !== ROYALCHAIN_EXPECTED_VARIANTS || skus.some((sku) => !sku) || new Set(skus).size !== skus.length) blockers.push({ code: 'snapshot-sku-set', message: 'reviewed snapshot must contain exactly 93 unique nonempty child SKUs' });
+  const expectedSkuSet = new Set(skus);
+  for (const target of snapshot.targets) {
+    if (target.publicExpected.handle !== target.handle || target.publicExpected.vendor !== ROYALCHAIN_VENDOR || !['Necklaces', 'Bracelets'].includes(target.publicExpected.productType) || target.publicExpected.category !== categoryFor(target.publicExpected.productType)) blockers.push({ code: 'snapshot-target-invariants', message: 'reviewed target has invalid handle, vendor, type, or category', handle: target.handle });
+    const expectedCondition = target.publicExpected.metafields.find((field) => field.key === 'condition')?.value;
+    const expectedEbayCondition = target.publicExpected.metafields.find((field) => field.key === 'ebay_condition')?.value;
+    if (expectedCondition !== 'New' || expectedEbayCondition !== '1500') blockers.push({ code: 'snapshot-condition', message: 'reviewed target must bind New / 1500 condition values', handle: target.handle });
+    const targetSkus = target.publicExpected.variants.map((variant) => variant.sku);
+    if (new Set(targetSkus).size !== targetSkus.length || targetSkus.some((sku) => !sku)) blockers.push({ code: 'snapshot-target-variants', message: 'reviewed target has blank or duplicate child SKUs', handle: target.handle });
+    if (Object.keys(target.sourceAvailable).length !== targetSkus.length || Object.keys(target.sourceAvailable).some((sku) => !expectedSkuSet.has(sku))) blockers.push({ code: 'snapshot-target-availability', message: 'reviewed target availability keys do not exactly match its variants', handle: target.handle });
+    for (const variant of target.publicExpected.variants) if (!variant.price || !variant.cost || !exactWeight(variant.weight, variant.weightUnit)) blockers.push({ code: 'snapshot-variant-facts', message: 'reviewed target lacks exact price, cost, or GRAMS weight', handle: target.handle, sku: variant.sku });
+  }
+  return blockers;
+}
+
+export function verifyFinalState(snapshot: ActivationSnapshot, liveProducts: LiveProduct[]): { blockers: Blocker[]; activationGaps: ActivationGap[]; checkedProducts: number; checkedVariants: number } {
+  const blockers: Blocker[] = [];
+  const activationOnly: ActivationGap[] = [];
+  blockers.push(...validateReviewedSnapshot(snapshot));
   const byHandle = new Map(liveProducts.map((product) => [product.handle ?? '', product]));
   let checkedVariants = 0;
   for (const target of snapshot.targets) {
     const live = byHandle.get(target.handle);
     if (!live) { blockers.push({ code: 'live-missing', message: 'final verification read did not find handle', handle: target.handle }); continue; }
-    if (live.status !== 'ACTIVE') blockers.push({ code: 'status', message: 'person must set product ACTIVE after review', handle: target.handle });
-    const published = live.resourcePublications?.nodes?.some((p) => p.isPublished && p.publication?.name === ROYALCHAIN_ONLINE_STORE) === true;
-    if (!published) blockers.push({ code: 'online-store', message: 'person must publish product to Online Store', handle: target.handle });
-    if (!(live.tags ?? []).includes('ebay')) blockers.push({ code: 'ebay-tag', message: 'person must add ebay tag after review', handle: target.handle });
-    if ((live.tags ?? []).includes('media-missing')) blockers.push({ code: 'media-missing', message: 'media-missing must be removed only after media verification', handle: target.handle });
-    const expectedTags = [...target.publicExpected.tags.filter((tag) => tag !== 'media-missing'), 'ebay'].sort();
+    blockers.push(...compareLiveContent(target, live));
+    const contentTags = target.publicExpected.tags;
+    const expectedTags = [...contentTags.filter((tag) => tag !== 'media-missing'), 'ebay'].sort();
     if (canonicalJson([...(live.tags ?? [])].sort()) !== canonicalJson(expectedTags)) blockers.push({ code: 'tags', message: 'final tags do not match the reviewed tag set plus ebay', handle: target.handle });
-    if (live.vendor !== target.publicExpected.vendor || live.productType !== target.publicExpected.productType || live.category?.id !== target.publicExpected.category || live.title !== target.publicExpected.title || live.descriptionHtml !== target.publicExpected.descriptionHtml) blockers.push({ code: 'public-copy', message: 'vendor, type, category, title, or body differs from reviewed plan', handle: target.handle });
-    if (live.seo?.title !== target.publicExpected.seo.title || live.seo?.description !== target.publicExpected.seo.description) blockers.push({ code: 'seo', message: 'SEO differs from reviewed plan', handle: target.handle });
-    if (metafield(live, 'condition') !== 'New' || metafield(live, 'ebay_condition') !== '1500') blockers.push({ code: 'condition', message: 'condition metafields differ from reviewed plan', handle: target.handle });
-    const images = (live.media?.nodes ?? []).filter((m) => m.mediaContentType === 'IMAGE' && m.status === 'READY');
-    if (images.length < ROYALCHAIN_MINIMUM_IMAGES) blockers.push({ code: 'media-count', message: `requires at least ${ROYALCHAIN_MINIMUM_IMAGES} READY images`, handle: target.handle });
-    for (const path of supplierScrubViolations(live)) blockers.push({ code: 'supplier-scrub', message: `supplier name found at ${path}`, handle: target.handle });
-    const bySku = new Map(liveVariants(live).map((variant) => [variant.sku ?? '', variant]));
-    for (const expected of target.publicExpected.variants) {
-      const variant = bySku.get(expected.sku);
-      checkedVariants += 1;
-      if (!variant) { blockers.push({ code: 'sku', message: 'final verification read did not find child SKU', handle: target.handle, sku: expected.sku }); continue; }
-      if (money(variant.price) !== expected.price || variant.inventoryPolicy !== expected.inventoryPolicy || variant.inventoryItem?.tracked !== expected.tracked || variant.inventoryItem?.measurement?.weight?.value !== expected.weight) blockers.push({ code: 'variant-facts', message: 'variant SKU, price, policy, tracking, or weight differs from reviewed plan', handle: target.handle, sku: expected.sku });
-      if (!(expected.sku in target.sourceAvailable)) { blockers.push({ code: 'availability-missing', message: 'no reviewed source availability exists for this child SKU', handle: target.handle, sku: expected.sku }); continue; }
-      const shouldBeOne = target.sourceAvailable[expected.sku] === true;
-      if (shouldBeOne && variant.inventoryQuantity !== 1) blockers.push({ code: 'inventory-quantity', message: 'available source variant must have quantity 1', handle: target.handle, sku: expected.sku });
-      if (!shouldBeOne && variant.inventoryQuantity !== 0) blockers.push({ code: 'inventory-quantity', message: 'unavailable source variant must have quantity 0', handle: target.handle, sku: expected.sku });
-    }
+    activationOnly.push(...activationGapsForTarget(target, live));
+    checkedVariants += target.publicExpected.variants.length;
   }
   if (liveProducts.length !== snapshot.targetProducts) blockers.push({ code: 'live-scope', message: `final verification read returned ${liveProducts.length} target products; expected ${snapshot.targetProducts}` });
-  return { blockers, checkedProducts: snapshot.targets.length, checkedVariants };
+  return { blockers, activationGaps: activationOnly, checkedProducts: snapshot.targets.length, checkedVariants };
 }
 
 export function activationChecklist(snapshot: ActivationSnapshot): string {

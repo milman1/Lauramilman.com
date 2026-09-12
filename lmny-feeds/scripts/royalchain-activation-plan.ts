@@ -9,8 +9,8 @@ import {
   parsePlanJsonl,
   type ActivationSnapshot,
   type LiveProduct,
+  validateReviewedSnapshot,
   verifyFinalState,
-  verifySnapshotChecksum,
 } from '../src/royalchain/activation.js';
 
 function arg(name: string): string | undefined {
@@ -51,6 +51,8 @@ async function writePlanOutputs(outputDir: string, snapshot: ActivationSnapshot,
     `Activation-ready: ${snapshot.activationReady ? 'yes' : 'no'}`, '',
     '## Blockers', '',
     ...(snapshot.blockers.length ? snapshot.blockers.map((blocker) => `- [${blocker.code}] ${blocker.handle ? `${blocker.handle}: ` : ''}${blocker.sku ? `${blocker.sku}: ` : ''}${blocker.message}`) : ['- none']),
+    '', '## Activation-only person gaps', '',
+    ...(snapshot.activationGaps.length ? snapshot.activationGaps.map((gap) => `- [${gap.code}] ${gap.handle ? `${gap.handle}: ` : ''}${gap.sku ? `${gap.sku}: ` : ''}${gap.message}`) : ['- none']),
     '', 'The worker performs no Shopify mutation. ACTIVE, Online Store publication, eBay tagging, and Marketplace Connect review remain person-run steps.', '',
   ].join('\n'));
 }
@@ -65,7 +67,7 @@ async function build(): Promise<void> {
   const availability = availabilityText == null ? undefined : parseAvailabilityCsv(availabilityText);
   const snapshot = buildActivationSnapshot({ plan, planText, availability, availabilityText, liveProducts: await readLive() });
   await writePlanOutputs(outputDir, snapshot, 'dry-run / plan-only');
-  console.log(JSON.stringify({ mode: 'plan-only', snapshot: path.join(outputDir, 'royal-chain-activation-snapshot.json'), blockers: snapshot.blockers.length, products: snapshot.targetProducts, variants: snapshot.targetVariants }, null, 2));
+  console.log(JSON.stringify({ mode: 'plan-only', snapshot: path.join(outputDir, 'royal-chain-activation-snapshot.json'), blockers: snapshot.blockers.length, activationGaps: snapshot.activationGaps.length, products: snapshot.targetProducts, variants: snapshot.targetVariants }, null, 2));
   // A plan is useful even when blocked, but CI must fail so no one mistakes it for approval.
   if (snapshot.blockers.length) process.exitCode = 2;
 }
@@ -74,7 +76,13 @@ async function verify(): Promise<void> {
   const snapshotPath = requiredArg('verify');
   const outputDir = requiredArg('output-dir');
   const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8')) as ActivationSnapshot;
-  if (!verifySnapshotChecksum(snapshot)) throw new Error('reviewed snapshot checksum is invalid; refusing verification');
+  const snapshotBlockers = validateReviewedSnapshot(snapshot);
+  if (snapshotBlockers.length) {
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(path.join(outputDir, 'royal-chain-activation-verification.json'), `${JSON.stringify({ snapshotSha256: snapshot.snapshotSha256 ?? null, checkedProducts: 0, checkedVariants: 0, blockers: snapshotBlockers, activationGaps: [] }, null, 2)}\n`);
+    await writeFile(path.join(outputDir, 'royal-chain-activation-verification.md'), ['# Royal Chain independent final verification', '', '## FAIL', '', ...snapshotBlockers.map((blocker) => `- [${blocker.code}] ${blocker.message}`), '', 'Shopify was not read because the reviewed snapshot failed its integrity gate.', ''].join('\n'));
+    throw new Error(`reviewed snapshot rejected before Shopify read: ${snapshotBlockers.map((blocker) => `[${blocker.code}] ${blocker.message}`).join('; ')}`);
+  }
   const live = await readLive();
   // The catalog query is intentionally broad enough to find scope drift. The
   // verifier compares only the exact reviewed handles; unrelated house-brand
@@ -83,14 +91,16 @@ async function verify(): Promise<void> {
   const liveTargets = live.filter((product) => targetHandles.has(product.handle ?? ''));
   const result = verifyFinalState(snapshot, liveTargets);
   await mkdir(outputDir, { recursive: true });
-  await writeFile(path.join(outputDir, 'royal-chain-activation-verification.json'), `${JSON.stringify({ snapshotSha256: snapshot.snapshotSha256, checkedProducts: result.checkedProducts, checkedVariants: result.checkedVariants, blockers: result.blockers }, null, 2)}\n`);
+  await writeFile(path.join(outputDir, 'royal-chain-activation-verification.json'), `${JSON.stringify({ snapshotSha256: snapshot.snapshotSha256, checkedProducts: result.checkedProducts, checkedVariants: result.checkedVariants, blockers: result.blockers, activationGaps: result.activationGaps }, null, 2)}\n`);
   await writeFile(path.join(outputDir, 'royal-chain-activation-verification.md'), [
     '# Royal Chain independent final verification', '', `Reviewed snapshot SHA-256: ${snapshot.snapshotSha256}`,
     `Checked: ${result.checkedProducts} products / ${result.checkedVariants} variants`, '',
     result.blockers.length ? '## FAIL' : '## PASS', '',
     ...(result.blockers.length ? result.blockers.map((blocker) => `- [${blocker.code}] ${blocker.handle ? `${blocker.handle}: ` : ''}${blocker.sku ? `${blocker.sku}: ` : ''}${blocker.message}`) : ['All final state checks passed.']), '',
+    '## Activation-only person gaps', '',
+    ...(result.activationGaps.length ? result.activationGaps.map((gap) => `- [${gap.code}] ${gap.handle ? `${gap.handle}: ` : ''}${gap.sku ? `${gap.sku}: ` : ''}${gap.message}`) : ['- none']), '',
   ].join('\n'));
-  console.log(JSON.stringify({ mode: 'verify-final', blockers: result.blockers.length, products: result.checkedProducts, variants: result.checkedVariants }, null, 2));
+  console.log(JSON.stringify({ mode: 'verify-final', blockers: result.blockers.length, activationGaps: result.activationGaps.length, products: result.checkedProducts, variants: result.checkedVariants }, null, 2));
   if (result.blockers.length) process.exitCode = 2;
 }
 

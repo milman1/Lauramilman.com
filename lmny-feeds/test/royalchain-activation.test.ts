@@ -5,6 +5,7 @@ import {
   parseAvailabilityCsv,
   supplierScrubViolations,
   validatePlan,
+  validateReviewedSnapshot,
   verifyFinalState,
   verifySnapshotChecksum,
 } from '../src/royalchain/activation.js';
@@ -14,6 +15,31 @@ function product(handle: string, sku: string) {
     handle, title: '2mm Snake Chain Necklace in 14K Yellow Gold', descriptionHtml: '<p>Gold chain</p>', vendor: 'Laura Milman New York', productType: 'Necklaces', category: 'gid://shopify/TaxonomyCategory/aa-6-8', status: 'DRAFT', tags: ['Laura Milman New York', 'Necklaces', 'media-missing'], seo: { title: 'Snake chain | Laura Milman', description: 'Gold snake chain.' },
     metafields: [{ namespace: 'custom', key: 'condition', value: 'New' }, { namespace: 'custom', key: 'ebay_condition', value: '1500' }], variants: [{ sku, price: '300.00', inventoryPolicy: 'DENY', inventoryItem: { tracked: true, cost: '100.00', measurement: { weight: { value: 4.2, unit: 'GRAMS' } } } }],
   };
+}
+
+function reviewedFixture() {
+  const plan = Array.from({ length: 32 }, (_, productIndex) => {
+    const item = product(`lmny-reviewed-${productIndex}`, `RC-${productIndex}-01`);
+    item.variants = Array.from({ length: productIndex < 29 ? 3 : 2 }, (_, variantIndex) => ({
+      sku: `RC-${productIndex}-${String(variantIndex + 1).padStart(2, '0')}`,
+      price: `${300 + variantIndex}.00`, inventoryPolicy: 'DENY',
+      inventoryItem: { tracked: true, cost: `${100 + variantIndex}.00`, measurement: { weight: { value: 4.2 + variantIndex, unit: 'GRAMS' } } },
+    }));
+    return item;
+  });
+  const availability = new Map(plan.flatMap((item) => item.variants.map((variant) => [variant.sku, true] as const)));
+  const live = plan.map((item) => ({
+    ...item,
+    id: `gid://shopify/Product/${item.handle}`,
+    category: { id: item.category },
+    metafields: { nodes: item.metafields },
+    media: { nodes: [1, 2, 3].map((n) => ({ status: 'READY', mediaContentType: 'IMAGE', alt: `${item.title} view ${n}`, image: { url: `https://cdn.shopify.com/s/files/1/${item.handle}-${n}.jpg` } })) },
+    variants: { nodes: item.variants.map((variant) => ({ sku: variant.sku, price: variant.price, inventoryQuantity: 0, inventoryPolicy: variant.inventoryPolicy, inventoryItem: { tracked: true, unitCost: { amount: variant.inventoryItem.cost }, measurement: variant.inventoryItem.measurement } })) },
+    resourcePublications: { nodes: [] },
+  }));
+  const planText = plan.map((item) => JSON.stringify(item)).join('\n');
+  const availabilityText = `child_sku,available\n${[...availability].map(([sku, value]) => `${sku},${value}`).join('\n')}\n`;
+  return { plan, liveProducts: live, availability, planText, availabilityText };
 }
 
 describe('Royal Chain activation plan gates', () => {
@@ -41,6 +67,54 @@ describe('Royal Chain activation plan gates', () => {
     const plan = [product('lmny-safe', 'SAFE-18')];
     const snapshot = buildActivationSnapshot({ plan, planText: JSON.stringify(plan[0]), availability: new Map([['SAFE-18', true]]), availabilityText: 'child_sku,available\nSAFE-18,true\n', liveProducts: [] });
     const result = verifyFinalState(snapshot, [{ ...plan[0], category: { id: 'gid://shopify/TaxonomyCategory/aa-6-8' }, metafields: { nodes: plan[0]!.metafields ?? [] }, id: 'gid://shopify/Product/1', status: 'DRAFT', resourcePublications: { nodes: [] }, media: { nodes: [] }, variants: { nodes: [{ sku: 'SAFE-18', price: '300.00', inventoryQuantity: 0, inventoryPolicy: 'DENY', inventoryItem: { tracked: true, measurement: { weight: { value: 4.2, unit: 'GRAMS' } } } }] } }]);
-    expect(result.blockers.map((b) => b.code)).toEqual(expect.arrayContaining(['status', 'online-store', 'ebay-tag', 'media-count', 'inventory-quantity']));
+    expect(result.activationGaps.map((b) => b.code)).toEqual(expect.arrayContaining(['status', 'online-store', 'ebay-tag', 'inventory-quantity']));
+    expect(result.blockers.map((b) => b.code)).toContain('media-count');
+  });
+
+  it('builds a clean 32-product snapshot while keeping human activation gaps separate', () => {
+    const fixture = reviewedFixture();
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    expect(snapshot.blockers).toEqual([]);
+    expect(snapshot.activationGaps.map((gap) => gap.code)).toEqual(expect.arrayContaining(['status', 'online-store', 'ebay-tag', 'inventory-quantity']));
+    expect(validateReviewedSnapshot(snapshot)).toEqual([]);
+    expect(snapshot.targetProducts).toBe(32);
+    expect(snapshot.targetVariants).toBe(93);
+    expect(snapshot.availabilitySha256).toBeTruthy();
+  });
+
+  it('blocks exact cost, weight unit, variant set, and media URL/alt drift during dry-run', () => {
+    const fixture = reviewedFixture();
+    const changed = fixture.liveProducts[0]!;
+    changed.media!.nodes![0]!.image!.url = 'https://supplier.invalid/image.jpg';
+    changed.media!.nodes![1]!.alt = '';
+    changed.variants!.nodes![0]!.inventoryItem!.unitCost!.amount = '999.00';
+    changed.variants!.nodes![1]!.inventoryItem!.measurement!.weight!.unit = 'KILOGRAMS';
+    changed.variants!.nodes!.push({ ...changed.variants!.nodes![2]!, sku: 'RC-extra' });
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    expect(snapshot.blockers.map((blocker) => blocker.code)).toEqual(expect.arrayContaining(['media-url', 'media-alt', 'variant-count', 'variant-set', 'variant-facts']));
+  });
+
+  it('rejects a tampered or incomplete reviewed snapshot before final verification', () => {
+    const fixture = reviewedFixture();
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    snapshot.targets[0]!.handle = snapshot.targets[1]!.handle;
+    expect(validateReviewedSnapshot(snapshot).map((blocker) => blocker.code)).toEqual(expect.arrayContaining(['snapshot-checksum', 'snapshot-handle-set']));
+    const missingAvailability = { ...buildActivationSnapshot({ ...fixture }), availabilitySha256: null };
+    expect(validateReviewedSnapshot(missingAvailability).map((blocker) => blocker.code)).toContain('snapshot-availability');
+  });
+
+  it('passes final verification only after the person-run activation fields are complete', () => {
+    const fixture = reviewedFixture();
+    const snapshot = buildActivationSnapshot({ ...fixture });
+    const finalLive = fixture.liveProducts.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+      tags: item.tags.filter((tag) => tag !== 'media-missing').concat('ebay'),
+      resourcePublications: { nodes: [{ isPublished: true, publication: { name: 'Online Store' } }] },
+      variants: { nodes: item.variants.nodes.map((variant) => ({ ...variant, inventoryQuantity: 1 })) },
+    }));
+    const result = verifyFinalState(snapshot, finalLive);
+    expect(result.blockers).toEqual([]);
+    expect(result.activationGaps).toEqual([]);
   });
 });
