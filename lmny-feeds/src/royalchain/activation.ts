@@ -371,6 +371,8 @@ export function validateReviewedSnapshot(snapshot: ActivationSnapshot): Blocker[
   const expectedSkuSet = new Set(skus);
   for (const target of snapshot.targets) {
     if (target.publicExpected.handle !== target.handle || target.publicExpected.vendor !== ROYALCHAIN_VENDOR || !['Necklaces', 'Bracelets'].includes(target.publicExpected.productType) || target.publicExpected.category !== categoryFor(target.publicExpected.productType)) blockers.push({ code: 'snapshot-target-invariants', message: 'reviewed target has invalid handle, vendor, type, or category', handle: target.handle });
+    if (!target.publicExpected.tags.includes('media-missing') || target.publicExpected.tags.includes('ebay')) blockers.push({ code: 'snapshot-tags', message: 'reviewed pre-activation target must retain media-missing and exclude ebay', handle: target.handle });
+    for (const path of supplierScrubViolations(target.publicExpected)) blockers.push({ code: 'snapshot-supplier-scrub', message: `supplier name found at ${path}`, handle: target.handle });
     const expectedCondition = target.publicExpected.metafields.find((field) => field.key === 'condition')?.value;
     const expectedEbayCondition = target.publicExpected.metafields.find((field) => field.key === 'ebay_condition')?.value;
     if (expectedCondition !== 'New' || expectedEbayCondition !== '1500') blockers.push({ code: 'snapshot-condition', message: 'reviewed target must bind New / 1500 condition values', handle: target.handle });
