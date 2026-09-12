@@ -1160,11 +1160,14 @@ export class ShopifyClient {
    * subsequent product attachment, which keeps this primitive usable by
    * dry-run-first bulk jobs that must de-duplicate per product.
    */
-  async stageLocalImage(filePath: string): Promise<string> {
+  async stageLocalImage(filePath: string, publicFilename = path.basename(filePath)): Promise<string> {
     const bytes = new Uint8Array(await readFile(filePath));
     const mime = sniffImageMime(bytes);
     if (!mime) throw new Error(`${filePath}: not a recognised image file`);
-    const filename = path.basename(filePath);
+    const filename = path.basename(publicFilename);
+    if (!filename || filename !== publicFilename || /royal[\s._-]*chain/i.test(filename)) {
+      throw new Error(`${filePath}: unsafe public staged filename`);
+    }
     const data = await this.gql<{
       stagedUploadsCreate: {
         stagedTargets: Array<{ url: string; resourceUrl: string; parameters: Array<{ name: string; value: string }> }>;
@@ -1246,6 +1249,18 @@ export class ShopifyClient {
       { product: { id, tags: [...new Set(tags)] } },
     );
     return data.productUpdate.userErrors.map((e) => e.message);
+  }
+
+  /** Remove only the named tags, preserving concurrent tags added by other apps. */
+  async removeProductTags(id: string, tags: string[]): Promise<string[]> {
+    if (tags.length === 0) return [];
+    const data = await this.gql<{ tagsRemove: { userErrors: Array<{ message: string }> } }>(
+      `mutation($id: ID!, $tags: [String!]!) {
+        tagsRemove(id: $id, tags: $tags) { userErrors { message } }
+      }`,
+      { id, tags: [...new Set(tags)] },
+    );
+    return data.tagsRemove.userErrors.map((e) => e.message);
   }
 }
 

@@ -1,5 +1,8 @@
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { assertRoyalChainPublicScrubbed, ROYALCHAIN_MINIMUM_IMAGES } from './listing.js';
+import { sniffImageMime } from '../shopify.js';
 
 export type GeneratedImageKind = 'detail' | 'onbody';
 
@@ -28,15 +31,29 @@ export interface ShopifyImageMedia {
   status: string;
 }
 
+export interface VerifiedGeneratedRoyalChainImage extends GeneratedRoyalChainImage {
+  bytes: number;
+  mimeType: string;
+  sha256: string;
+}
+
 const IMAGE_FILENAME = /^(.*)-(detail|onbody)\.(?:png|jpe?g|webp)$/i;
 
 function clean(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+/** Only this basename is sent to Shopify's staged upload endpoint. */
+export function assertSafeRoyalChainPublicFilename(filename: string): void {
+  if (!filename || path.basename(filename) !== filename) throw new Error('unsafe public staged filename');
+  assertRoyalChainPublicScrubbed({ filename });
+}
+
 /** The bracelet split reuses the approved pair for its matching chain. */
 export function baseHandleForMedia(handle: string): string {
-  return handle.endsWith('-bracelet') ? handle.slice(0, -'-bracelet'.length) : handle;
+  const base = handle.endsWith('-bracelet') ? handle.slice(0, -'-bracelet'.length) : handle;
+  assertRoyalChainPublicScrubbed({ handle, baseHandle: base });
+  return base;
 }
 
 /**
@@ -57,6 +74,8 @@ export function parseGeneratedRoyalChainImages(
     const baseHandle = clean(match[1] ?? '');
     const kind = match[2]?.toLowerCase() as GeneratedImageKind;
     if (!expected.has(baseHandle)) throw new Error(`generated image is not in the approved plan: ${filename}`);
+    assertSafeRoyalChainPublicFilename(filename);
+    assertRoyalChainPublicScrubbed({ baseHandle });
     return { baseHandle, kind, filename, path: imagePath };
   });
   if (images.length !== 42) throw new Error(`expected exactly 42 generated images, found ${images.length}`);
@@ -79,6 +98,49 @@ export function parseGeneratedRoyalChainImages(
   return complete;
 }
 
+const MIME_BY_EXTENSION: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
+
+/**
+ * Read every approved image before reaching Shopify. A filename extension is
+ * not trusted: the magic bytes must describe the same supported image type.
+ */
+export async function verifyGeneratedRoyalChainImages(
+  images: Map<string, Record<GeneratedImageKind, GeneratedRoyalChainImage>>,
+): Promise<Map<string, Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>> {
+  const verified = new Map<string, Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>();
+  for (const [baseHandle, pair] of images) {
+    const checked = {} as Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>;
+    for (const kind of ['detail', 'onbody'] as const) {
+      const image = pair[kind];
+      // The local directory may retain a private supplier label; only the
+      // filename is sent to Shopify, so that is the public boundary.
+      assertRoyalChainPublicScrubbed({ baseHandle, filename: image.filename });
+      const extension = path.extname(image.filename).toLowerCase();
+      const expectedMime = MIME_BY_EXTENSION[extension];
+      if (!expectedMime) throw new Error(`${image.filename}: unsupported image extension`);
+      let bytes: Uint8Array;
+      try {
+        bytes = new Uint8Array(await readFile(image.path));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`${image.filename}: cannot read generated image (${message})`);
+      }
+      const mimeType = sniffImageMime(bytes);
+      if (!mimeType) throw new Error(`${image.filename}: unsupported or corrupt image bytes`);
+      if (mimeType !== expectedMime) throw new Error(`${image.filename}: extension ${extension} does not match ${mimeType}`);
+      checked[kind] = { ...image, bytes: bytes.byteLength, mimeType, sha256: createHash('sha256').update(bytes).digest('hex') };
+    }
+    verified.set(baseHandle, checked);
+  }
+  if (verified.size !== 21) throw new Error(`expected 21 verified base image pairs, found ${verified.size}`);
+  return verified;
+}
+
 /** Convert the committed product plan plus generated files into the fixed upload work list. */
 export function buildRoyalChainMediaTargets(
   products: RoyalChainMediaPlanProduct[],
@@ -95,15 +157,16 @@ export function buildRoyalChainMediaTargets(
 
   return products.map((product) => {
     const title = clean(product.title);
-    const baseHandle = baseHandleForMedia(clean(product.handle));
+    const handle = clean(product.handle);
+    const baseHandle = baseHandleForMedia(handle);
     const pair = images.get(baseHandle);
-    if (!title || !pair) throw new Error(`${product.handle}: incomplete product media plan`);
+    if (!title || !pair) throw new Error(`${handle}: incomplete product media plan`);
     const alt = {
       detail: `${title} — detail view`,
       onbody: `${title} — on-body view`,
     };
-    assertRoyalChainPublicScrubbed({ title, alt });
-    return { ...product, baseHandle, images: pair, alt };
+    assertRoyalChainPublicScrubbed({ handle, baseHandle, title, filenames: [pair.detail.filename, pair.onbody.filename], alt });
+    return { ...product, handle, baseHandle, images: pair, alt };
   });
 }
 
