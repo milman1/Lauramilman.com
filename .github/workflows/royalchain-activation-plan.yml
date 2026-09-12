@@ -1,0 +1,92 @@
+name: Royal Chain activation plan and verifier
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only plan snapshot or final verification after person review
+        required: true
+        default: dry-run
+        type: choice
+        options: [dry-run, verify-final]
+      plan_run_id:
+        description: Workflow run containing the private reviewed plan artifact
+        required: true
+        type: string
+      plan_artifact:
+        description: Private artifact name containing royalchain-products.jsonl and optional availability.csv
+        required: true
+        default: royalchain-activation-input
+        type: string
+      snapshot_artifact:
+        description: Artifact name to download for verify-final mode
+        required: false
+        default: royalchain-activation-output
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  plan-or-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - name: Install dependencies
+        working-directory: lmny-feeds
+        run: npm ci
+      - name: Focused tests and strict compile
+        working-directory: lmny-feeds
+        run: |
+          npx vitest run test/royalchain-activation.test.ts test/royalchain-plan.test.ts test/royalchain-media.test.ts
+          npm run typecheck
+      - name: Download private input artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.plan_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ inputs.plan_artifact }}
+          path: private-input
+      - name: Build read-only activation plan
+        if: inputs.mode == 'dry-run'
+        working-directory: lmny-feeds
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+        run: |
+          PLAN="../private-input/royalchain-products.jsonl"
+          AVAIL="../private-input/availability.csv"
+          if [ ! -f "$PLAN" ]; then echo "private input artifact must contain royalchain-products.jsonl"; exit 1; fi
+          if [ -f "$AVAIL" ]; then npm run plan:royalchain-activation -- --plan="$PLAN" --availability="$AVAIL" --output-dir=../activation-output; else npm run plan:royalchain-activation -- --plan="$PLAN" --output-dir=../activation-output; fi
+      - name: Download reviewed snapshot artifact
+        if: inputs.mode == 'verify-final'
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.plan_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ inputs.snapshot_artifact }}
+          path: reviewed-snapshot
+      - name: Independently verify final state
+        if: inputs.mode == 'verify-final'
+        working-directory: lmny-feeds
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+        run: npm run plan:royalchain-activation -- --verify="../reviewed-snapshot/royal-chain-activation-snapshot.json" --output-dir=../activation-output
+      - name: Upload private report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: royalchain-activation-output
+          path: activation-output
+          if-no-files-found: error
