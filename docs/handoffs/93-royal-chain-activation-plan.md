@@ -62,9 +62,11 @@ uploading the one-day artifact
 costs, source URLs, or plan rows and does not receive Shopify secrets.
 
 The exact bundle format is a gzip tar with only
-`royalchain-products.jsonl` and `availability.csv` at its root. Create it
-locally, outside the repository, with a temporary key file containing the
-random secret value:
+`royalchain-products.jsonl` and `availability.csv` at its root. The tarball is
+wrapped by `lmny-feeds/scripts/royalchain-bundle-crypto.ts` in an authenticated
+AES-256-GCM envelope with a fresh random salt and IV, explicit scrypt
+parameters, and a fixed magic/version header. Create it locally, outside the
+repository, with a temporary key file containing the random secret value:
 
 ```sh
 tmp_dir="$(mktemp -d)"
@@ -73,12 +75,25 @@ cp /private/path/availability.csv "$tmp_dir/availability.csv"
 tar --format=ustar --owner=0 --group=0 --numeric-owner \
   -czf "$tmp_dir/royalchain-activation-input.tar.gz" \
   -C "$tmp_dir" royalchain-products.jsonl availability.csv
-openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -salt \
-  -in "$tmp_dir/royalchain-activation-input.tar.gz" \
-  -out /private/path/activation-bundle.enc \
-  -pass file:/private/path/lmny-chain-plan-key
+npx tsx lmny-feeds/scripts/royalchain-bundle-crypto.ts encrypt \
+  --input="$tmp_dir/royalchain-activation-input.tar.gz" \
+  --output=/private/path/activation-bundle.enc \
+  --key-file=/private/path/lmny-chain-plan-key
 rm -rf "$tmp_dir"
 ```
+
+The Actions workflow decrypts with the matching command:
+
+```sh
+npx tsx lmny-feeds/scripts/royalchain-bundle-crypto.ts decrypt \
+  --input="$GITHUB_WORKSPACE/bundle-ref/.private/royalchain/activation-bundle.enc" \
+  --output="$RUNNER_TEMP/lmny-chain-input.tar.gz" \
+  --key-file="$RUNNER_TEMP/lmny-chain-plan-key"
+```
+
+Authentication completes before the decrypted bytes are written; malformed,
+tampered, truncated, and wrong-key envelopes produce one generic failure and
+leave no plaintext output.
 
 Commit only `activation-bundle.enc` at the fixed path on the selected bundle
 ref. After the staging run and review, delete the temporary encrypted bundle

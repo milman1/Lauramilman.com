@@ -54,7 +54,7 @@ jobs:
 
       - name: Strict compile staging validator
         working-directory: lmny-feeds
-        run: npx tsc --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --types node src/royalchain/activation.ts scripts/royalchain-activation-plan.ts scripts/validate-royalchain-input.ts test/royalchain-activation.test.ts
+        run: npx tsc --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --types node src/royalchain/activation.ts scripts/royalchain-activation-plan.ts scripts/validate-royalchain-input.ts scripts/royalchain-bundle-crypto.ts test/royalchain-activation.test.ts test/royalchain-bundle-crypto.test.ts
 
       - name: Decrypt and extract approved two-file payload
         env:
@@ -72,7 +72,7 @@ jobs:
           test -n "$LMNY_CHAIN_PLAN_KEY"
           umask 077
           printf '%s' "$LMNY_CHAIN_PLAN_KEY" > "$key_file"
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -pass file:"$key_file" -in "$encrypted" -out "$payload"
+          npx tsx lmny-feeds/scripts/royalchain-bundle-crypto.ts decrypt --input="$encrypted" --output="$payload" --key-file="$key_file"
           python3 lmny-feeds/scripts/extract-royalchain-bundle.py --archive "$payload" --output "$staging"
           rm -f "$key_file" "$payload"
 
