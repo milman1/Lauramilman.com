@@ -75,20 +75,26 @@ cp /private/path/availability.csv "$tmp_dir/availability.csv"
 tar --format=ustar --owner=0 --group=0 --numeric-owner \
   -czf "$tmp_dir/royalchain-activation-input.tar.gz" \
   -C "$tmp_dir" royalchain-products.jsonl availability.csv
-npx tsx lmny-feeds/scripts/royalchain-bundle-crypto.ts encrypt \
-  --input="$tmp_dir/royalchain-activation-input.tar.gz" \
-  --output=/private/path/activation-bundle.enc \
-  --key-file=/private/path/lmny-chain-plan-key
+(
+  cd /private/path/repository/lmny-feeds
+  npx --no-install tsx scripts/royalchain-bundle-crypto.ts encrypt \
+    --input="$tmp_dir/royalchain-activation-input.tar.gz" \
+    --output=/private/path/activation-bundle.enc \
+    --key-file=/private/path/lmny-chain-plan-key
+)
 rm -rf "$tmp_dir"
 ```
 
 The Actions workflow decrypts with the matching command:
 
 ```sh
-npx tsx lmny-feeds/scripts/royalchain-bundle-crypto.ts decrypt \
-  --input="$GITHUB_WORKSPACE/bundle-ref/.private/royalchain/activation-bundle.enc" \
-  --output="$RUNNER_TEMP/lmny-chain-input.tar.gz" \
-  --key-file="$RUNNER_TEMP/lmny-chain-plan-key"
+(
+  cd "$GITHUB_WORKSPACE/lmny-feeds"
+  npx --no-install tsx scripts/royalchain-bundle-crypto.ts decrypt \
+    --input="$GITHUB_WORKSPACE/bundle-ref/.private/royalchain/activation-bundle.enc" \
+    --output="$RUNNER_TEMP/lmny-chain-input.tar.gz" \
+    --key-file="$RUNNER_TEMP/lmny-chain-plan-key"
+)
 ```
 
 Authentication completes before the decrypted bytes are written; malformed,
