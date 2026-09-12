@@ -1,0 +1,132 @@
+# Reviewed Royal Chain supplemental-media uploader. The default is a read-only
+# dry run that produces an immutable review artifact. Apply requires that exact
+# artifact from a named prior Actions run plus its SHA-256.
+name: Royal Chain generated media
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run only (default; no Shopify writes)'
+        type: boolean
+        default: true
+      assets_ref:
+        description: 'Temporary LMNY-safe Git ref containing approved media assets'
+        type: string
+        required: true
+      reviewed_run_id:
+        description: 'Prior dry-run Actions run ID (required for apply)'
+        type: string
+        required: false
+      reviewed_plan_artifact:
+        description: 'Exact prior dry-run artifact name (required for apply)'
+        type: string
+        required: false
+      reviewed_plan_sha256:
+        description: 'SHA-256 printed by the approved dry run (required for apply)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: royalchain-generated-media
+  cancel-in-progress: false
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate dispatch inputs
+        env:
+          ASSETS_REF: ${{ inputs.assets_ref }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          REVIEWED_RUN_ID: ${{ inputs.reviewed_run_id }}
+          REVIEWED_ARTIFACT: ${{ inputs.reviewed_plan_artifact }}
+          REVIEWED_SHA256: ${{ inputs.reviewed_plan_sha256 }}
+        run: |
+          test -n "$ASSETS_REF"
+          git check-ref-format --branch "$ASSETS_REF"
+          if [ "$DRY_RUN" = "false" ]; then
+            test -n "$REVIEWED_RUN_ID"
+            test -n "$REVIEWED_ARTIFACT"
+            printf '%s' "$REVIEWED_SHA256" | grep -Eq '^[a-f0-9]{64}$'
+          fi
+
+      # The asset branch is isolated from the workflow/code ref. It is never
+      # merged into main and only supplies the 53 reviewed images.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.assets_ref }}
+          path: approved-assets
+          lfs: true
+          sparse-checkout: |
+            work/priorities/93-royal-chain-generated-images
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - name: Run focused safeguards
+        run: npm test -- royalchain-media.test.ts royalchain-plan.test.ts
+
+      - name: Download explicitly reviewed dry-run plan
+        if: inputs.dry_run == false
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_RUN_ID: ${{ inputs.reviewed_run_id }}
+          REVIEWED_ARTIFACT: ${{ inputs.reviewed_plan_artifact }}
+        run: |
+          mkdir -p reviewed-plan
+          gh run download "$REVIEWED_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$REVIEWED_ARTIFACT" --dir reviewed-plan
+          test -f reviewed-plan/royal-chain-generated-media-plan.json
+
+      - name: Produce reviewed dry-run plan
+        if: inputs.dry_run != false
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+        run: |
+          npm run upload:royalchain-media -- \
+            --plan=../docs/suppliers/royal-chain-media-targets-2026-09.jsonl \
+            --image-dir=../approved-assets/work/priorities/93-royal-chain-generated-images
+
+      - name: Apply the explicitly reviewed plan
+        if: inputs.dry_run == false
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          REVIEWED_SHA256: ${{ inputs.reviewed_plan_sha256 }}
+        run: |
+          npm run upload:royalchain-media -- --apply \
+            --plan=../docs/suppliers/royal-chain-media-targets-2026-09.jsonl \
+            --image-dir=../approved-assets/work/priorities/93-royal-chain-generated-images \
+            --reviewed-plan=reviewed-plan/royal-chain-generated-media-plan.json \
+            --plan-sha256="$REVIEWED_SHA256"
+
+      - name: Upload media plan and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: royalchain-generated-media-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/royal-chain-generated-media-plan.json
+            lmny-feeds/out/royal-chain-generated-media-report.json
+            lmny-feeds/out/royal-chain-generated-media-errors.txt
+          if-no-files-found: ignore

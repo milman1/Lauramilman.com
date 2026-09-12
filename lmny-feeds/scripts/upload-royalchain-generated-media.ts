@@ -15,6 +15,8 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { exchangeClientCredentials, ShopifyClient } from '../src/shopify.js';
 import {
+  assertGeneratedImageStillMatches,
+  assertRoyalChainMediaProductDraft,
   assertSafeRoyalChainPublicFilename,
   baseHandleForMedia,
   buildRoyalChainMediaTargets,
@@ -48,8 +50,9 @@ interface SnapshotTarget {
   handle: string;
   baseHandle: string;
   title: string;
-  alt: Record<GeneratedImageKind, string>;
-  images: Record<GeneratedImageKind, Pick<VerifiedGeneratedRoyalChainImage, 'filename' | 'mimeType' | 'bytes' | 'sha256'>>;
+  alt: Partial<Record<GeneratedImageKind, string>>;
+  images: Partial<Record<GeneratedImageKind, Pick<VerifiedGeneratedRoyalChainImage, 'filename' | 'mimeType' | 'bytes' | 'sha256'>>>;
+  attachmentKinds: GeneratedImageKind[];
   /** Immutable dry-run decision: no apply-time reclassification from live media. */
   addKinds: GeneratedImageKind[];
   expected: ProductSnapshot;
@@ -128,7 +131,7 @@ async function fetchProduct(shopify: ShopifyClient, handle: string): Promise<Pro
 
 async function readPlan(planPath: string): Promise<RoyalChainMediaPlanProduct[]> {
   const rows = (await readFile(planPath, 'utf8')).trim().split('\n').filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>);
-  return rows.map((row) => ({ handle: String(row.handle ?? ''), title: String(row.title ?? '') }));
+  return rows.map((row) => ({ handle: String(row.handle ?? ''), title: String(row.title ?? ''), productType: String(row.productType ?? '') }));
 }
 
 async function generatedImagePaths(directory: string): Promise<string[]> {
@@ -149,21 +152,30 @@ function canonicalProduct(product: ProductSnapshot): ProductSnapshot {
 
 function snapshotTarget(
   target: RoyalChainMediaTarget,
-  verified: Map<string, Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>,
+  verified: Map<string, Partial<Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>>,
   product: ProductSnapshot,
 ): SnapshotTarget {
-  const images = verified.get(target.baseHandle);
-  if (!images) throw new Error(`${target.handle}: missing verified image pair`);
+  const verifiedImages = verified.get(target.baseHandle);
+  if (!verifiedImages) throw new Error(`${target.handle}: missing verified image pair`);
+  const images: SnapshotTarget['images'] = {};
+  for (const kind of target.attachmentKinds) {
+    const image = verifiedImages[kind];
+    if (!image) throw new Error(`${target.handle}: missing verified ${kind} image`);
+    images[kind] = { filename: image.filename, mimeType: image.mimeType, bytes: image.bytes, sha256: image.sha256 };
+  }
   return {
     handle: target.handle,
     baseHandle: target.baseHandle,
     title: target.title,
     alt: target.alt,
-    images: {
-      detail: { filename: images.detail.filename, mimeType: images.detail.mimeType, bytes: images.detail.bytes, sha256: images.detail.sha256 },
-      onbody: { filename: images.onbody.filename, mimeType: images.onbody.mimeType, bytes: images.onbody.bytes, sha256: images.onbody.sha256 },
-    },
-    addKinds: (['detail', 'onbody'] as const).filter((kind) => !hasMediaIdentity(product.media, target.images[kind], target.alt[kind])),
+    images,
+    attachmentKinds: target.attachmentKinds,
+    addKinds: target.attachmentKinds.filter((kind) => {
+      const image = target.images[kind];
+      const alt = target.alt[kind];
+      if (!image || !alt) throw new Error(`${target.handle}: incomplete approved ${kind} media`);
+      return !hasMediaIdentity(product.media, image, alt);
+    }),
     expected: canonicalProduct(product),
   };
 }
@@ -172,28 +184,38 @@ function assertReviewedSnapshot(
   raw: unknown,
   expectedPlanHash: string,
   targets: RoyalChainMediaTarget[],
-  verified: Map<string, Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>,
+  verified: Map<string, Partial<Record<GeneratedImageKind, VerifiedGeneratedRoyalChainImage>>>,
 ): asserts raw is ReviewedSnapshot {
   const snapshot = raw as Partial<ReviewedSnapshot>;
   if (snapshot.schemaVersion !== 1 || !Array.isArray(snapshot.targets) || snapshot.sourcePlanSha256 !== expectedPlanHash) {
     throw new Error('reviewed media snapshot is invalid or does not match the current product plan');
   }
-  if (snapshot.targets.length !== 32 || snapshot.generatedImages !== 42) throw new Error('reviewed media snapshot has an unexpected scope');
+  if (snapshot.targets.length !== 32 || snapshot.generatedImages !== 53) throw new Error('reviewed media snapshot has an unexpected scope');
   const byHandle = new Map(snapshot.targets.map((target) => [target.handle, target]));
   if (byHandle.size !== 32) throw new Error('reviewed media snapshot has duplicate product handles');
   for (const target of targets) {
     const saved = byHandle.get(target.handle);
     const checked = verified.get(target.baseHandle);
     if (!saved || !checked || saved.baseHandle !== target.baseHandle || saved.title !== target.title
-      || saved.alt.detail !== target.alt.detail || saved.alt.onbody !== target.alt.onbody
-      || saved.images.detail.filename !== checked.detail.filename || saved.images.detail.mimeType !== checked.detail.mimeType
-      || saved.images.detail.bytes !== checked.detail.bytes || saved.images.detail.sha256 !== checked.detail.sha256
-      || saved.images.onbody.filename !== checked.onbody.filename || saved.images.onbody.mimeType !== checked.onbody.mimeType
-      || saved.images.onbody.bytes !== checked.onbody.bytes || saved.images.onbody.sha256 !== checked.onbody.sha256
-      || !Array.isArray(saved.addKinds) || saved.addKinds.some((kind) => kind !== 'detail' && kind !== 'onbody')) {
+      || JSON.stringify(saved.attachmentKinds) !== JSON.stringify(target.attachmentKinds)
+      || !Array.isArray(saved.addKinds) || saved.addKinds.some((kind) => !target.attachmentKinds.includes(kind))) {
       throw new Error(`${target.handle}: reviewed media snapshot does not match the verified files and plan`);
     }
-    const expectedKinds = (['detail', 'onbody'] as const).filter((kind) => !hasMediaIdentity(saved.expected.media, target.images[kind], target.alt[kind]));
+    for (const kind of target.attachmentKinds) {
+      const image = target.images[kind];
+      const verifiedImage = checked[kind];
+      const savedImage = saved.images[kind];
+      if (!image || !verifiedImage || !savedImage || saved.alt[kind] !== target.alt[kind]
+        || savedImage.filename !== verifiedImage.filename || savedImage.mimeType !== verifiedImage.mimeType
+        || savedImage.bytes !== verifiedImage.bytes || savedImage.sha256 !== verifiedImage.sha256) {
+        throw new Error(`${target.handle}: reviewed media snapshot does not match approved ${kind} media`);
+      }
+    }
+    const expectedKinds = target.attachmentKinds.filter((kind) => {
+      const image = target.images[kind];
+      const alt = target.alt[kind];
+      return Boolean(image && alt && !hasMediaIdentity(saved.expected.media, image, alt));
+    });
     if (JSON.stringify([...saved.addKinds].sort()) !== JSON.stringify(expectedKinds)) {
       throw new Error(`${target.handle}: reviewed media snapshot attachment decision is invalid`);
     }
@@ -210,21 +232,25 @@ function assertNoCatalogDrift(snapshot: ReviewedSnapshot, live: Map<string, Prod
 }
 
 function reportRow(target: RoyalChainMediaTarget, product: ProductSnapshot, mode: 'dry-run' | 'apply') {
+  const attachmentState = Object.fromEntries(target.attachmentKinds.map((kind) => {
+    const image = target.images[kind];
+    const alt = target.alt[kind];
+    return [kind, Boolean(image && alt && hasMediaIdentity(product.media, image, alt))];
+  }));
   return {
     handle: target.handle,
     baseHandle: target.baseHandle,
     status: product.status,
     title: product.title,
     existingReadyImages: readyImageCount(product.media),
-    detailAlreadyAttached: hasMediaIdentity(product.media, target.images.detail, target.alt.detail),
-    onbodyAlreadyAttached: hasMediaIdentity(product.media, target.images.onbody, target.alt.onbody),
+    attachments: attachmentState,
     mediaMissing: product.tags.includes('media-missing'),
     mode,
   };
 }
 
 function assertDraft(target: RoyalChainMediaTarget, product: ProductSnapshot): void {
-  if (product.status !== 'DRAFT') throw new Error(`${target.handle}: refusing non-DRAFT product (${product.status})`);
+  assertRoyalChainMediaProductDraft(target.handle, product.status);
 }
 
 async function waitForMediaGate(shopify: ShopifyClient, target: RoyalChainMediaTarget): Promise<ProductSnapshot> {
@@ -247,14 +273,19 @@ async function applyTarget(
   staged: Map<string, string>,
 ): Promise<ProductSnapshot> {
   assertDraft(target, reviewed.expected);
+  // A fresh status read immediately precedes every product's attachments.
+  assertDraft(target, await fetchProduct(shopify, target.handle));
   // The reviewed snapshot fixes the attachment decisions. Apply never uses a
   // newer catalog read to decide whether an image should be attached.
   for (const kind of reviewed.addKinds) {
     const image = target.images[kind];
     const alt = target.alt[kind];
+    const expectedImage = reviewed.images[kind];
+    if (!image || !alt || !expectedImage) throw new Error(`${target.handle}: missing reviewed ${kind} media`);
     let resourceUrl = staged.get(image.path);
     if (!resourceUrl) {
       assertSafeRoyalChainPublicFilename(image.filename);
+      await assertGeneratedImageStillMatches(image, expectedImage);
       resourceUrl = await shopify.stageLocalImage(image.path, image.filename);
       staged.set(image.path, resourceUrl);
     }
@@ -263,7 +294,10 @@ async function applyTarget(
   }
   const ready = await waitForMediaGate(shopify, target);
   if (reviewed.expected.tags.includes('media-missing')) {
-    const errors = await shopify.removeProductTags(ready.id, ['media-missing']);
+    // A fresh DRAFT assertion immediately precedes the sole tag mutation.
+    const beforeTagRemove = await fetchProduct(shopify, target.handle);
+    assertDraft(target, beforeTagRemove);
+    const errors = await shopify.removeProductTags(beforeTagRemove.id, ['media-missing']);
     if (errors.length) throw new Error(`${target.handle}: removing media-missing failed: ${errors.join('; ')}`);
   }
   const after = await fetchProduct(shopify, target.handle);
@@ -282,7 +316,8 @@ async function main(): Promise<void> {
   const planHash = sha256(planBytes);
   const plan = (await readPlan(planPath));
   const baseHandles = new Set(plan.map((product) => baseHandleForMedia(product.handle)));
-  const images = parseGeneratedRoyalChainImages(await generatedImagePaths(imageDirectory), baseHandles);
+  const wristBaseHandles = new Set(plan.filter((product) => product.handle.endsWith('-bracelet')).map((product) => baseHandleForMedia(product.handle)));
+  const images = parseGeneratedRoyalChainImages(await generatedImagePaths(imageDirectory), baseHandles, wristBaseHandles);
   // Full byte-level preflight comes before authentication or any possible
   // Shopify mutation. The reviewed plan records these exact checksums.
   const verified = await verifyGeneratedRoyalChainImages(images);
@@ -316,7 +351,7 @@ async function main(): Promise<void> {
       schemaVersion: 1,
       generatedAt: new Date().toISOString(),
       sourcePlanSha256: planHash,
-      generatedImages: images.size * 2,
+      generatedImages: 53,
       targets: targets.map((target) => snapshotTarget(target, verified, before.get(target.handle)!)),
     };
     const snapshotBytes = `${JSON.stringify(snapshot, null, 2)}\n`;
@@ -326,12 +361,12 @@ async function main(): Promise<void> {
       mode,
       snapshotPath,
       snapshotSha256: sha256(snapshotBytes),
-      generatedImages: images.size * 2,
+      generatedImages: 53,
       targetProducts: targets.length,
       targetBaseHandles: baseHandles.size,
       before: targets.map((target) => reportRow(target, before.get(target.handle)!, mode)),
     }, null, 2)}\n`);
-    console.log(`DRY RUN: wrote reviewed snapshot for ${targets.length} DRAFT products and ${images.size * 2} verified images; no Shopify writes.`);
+    console.log(`DRY RUN: wrote reviewed snapshot for ${targets.length} DRAFT products and 53 verified images; no Shopify writes.`);
     return;
   }
 
@@ -347,7 +382,7 @@ async function main(): Promise<void> {
   await writeFile(path.join(OUT_DIR, 'royal-chain-generated-media-report.json'), `${JSON.stringify({
     mode,
     reviewedPlanSha256: arg('plan-sha256'),
-    generatedImages: images.size * 2,
+    generatedImages: 53,
     targetProducts: targets.length,
     stagedLocalFiles: staged.size,
     after,
