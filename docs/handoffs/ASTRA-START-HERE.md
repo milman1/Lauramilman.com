@@ -1,8 +1,21 @@
 # Astra start here
 
+**Superseded for process.** Read `ORCHESTRATION.md` first, then
+`AGENTS.md`. You are computer use only: do the screen work yourself.
+Do not spawn Terra, Luna, or Sol. Do not write a handoff instead of
+the live result. This file’s task list and cost/credential rules still
+apply; its “orchestrate cheaper models” loop does not.
+
 ## 1. Read this first
 
-You are Astra, the orchestrator for the OpenAI side of this repository's work. You plan, you do the browser and login steps nobody else can do, and you adjudicate; you do not do grunt work yourself. `AGENTS.md` is the playbook for this whole repository and it wins on any conflict with this file, with a handoff file, or with anything said in chat. The six open tasks are GitHub Issues #91 to #96, each with a handoff file in this same folder, `docs/handoffs/`. Nothing about any task lives only in chat: read and write handoffs, work logs, and committed files, not just this conversation. Cost and credentials never enter this repository, in a file, a commit, or a screenshot; they go only to Shopify Cost per item and the merchant's Google Drive folder named "LMNY supplier costs".
+You are Astra. Do the browser and login steps nobody else can do. You
+do not hire a committee. `ORCHESTRATION.md` wins on how work is done;
+`AGENTS.md` wins on safety, pricing, and catalog facts. The six open
+tasks are GitHub Issues #91 to #96, each with a handoff file in this
+same folder, `docs/handoffs/`. Cost and credentials never enter this
+repository, in a file, a commit, or a screenshot; they go only to
+Shopify Cost per item and the merchant's Google Drive folder named
+"LMNY supplier costs".
 
 ## 2. How to run cheaply
 

@@ -1,15 +1,22 @@
-# LMNY Orchestration Playbook
+# LMNY Facts Playbook
 
-Read this before starting any task in this repository. It applies to every
-model and tool that works here: Claude (Claude Code, Cowork, Managed Agents),
-OpenAI (ChatGPT, Codex, GPT-6 Astra), and any human-in-the-loop operator.
-`CLAUDE.md` points here so Claude tools load it automatically; OpenAI tools
-read `AGENTS.md` by convention.
+Read `ORCHESTRATION.md` first. That file is how work is chosen and
+finished. This file is the store encyclopedia: system map, rules that
+are never broken, pricing by source, environment facts, and existing
+pipelines.
 
-The playbook has four jobs: describe the system so nobody re-discovers it,
-state the rules that must never be broken, route each kind of work to the
-model that does it best, and define how work is split across agents and
-handed back.
+It applies to every model and tool that works here. `CLAUDE.md` loads
+both files. Keep edits vendor-neutral.
+
+If this file and `ORCHESTRATION.md` disagree on **how work is done**
+(spawning agents, writing handoffs, which model must lead),
+`ORCHESTRATION.md` wins. If they disagree on **safety, pricing, or
+catalog facts**, this file wins.
+
+Sections 3–5 below (model roster, operating loop, fan-out) are
+historical reference for jobs that already exist. They are not standing
+orders to create a committee. The selected model executes; see
+`ORCHESTRATION.md`.
 
 ---
 
@@ -64,7 +71,7 @@ old CSV import are hidden and untouched.
 10. **Never send customer data to an unrelated service.** Customer records stay in Shopify, Resend, and Supabase.
 11. **Work lands on `main`.** Every task ends with its branch merged to `main` through a pull request (merchant decision 2026-09-09). Scheduled jobs run `main` only, so an unmerged branch is work that does not exist. Restart the working branch from `main` after each merge.
 12. **Never tag a draft or a loose stone for eBay.** The Back Vault sync strips the `ebay` tag from any piece it writes as DRAFT; CSV imports carry the tag only on ACTIVE rows (`SHOPIFY_SETUP.md` section 11).
-13. **The orchestrator briefs and verifies; it does not do the work.** Fable 5.1 (or Astra on the OpenAI side) plans, writes the brief, adjudicates the review, and merges. It never writes code, docs, or copy itself and never runs bulk mutations itself. Doing the work in the orchestrator model is the most expensive way to do it and burns the session limit (merchant decision 2026-09-09). The only exception is the one-line fix or single query allowed in section 5a, and even then the orchestrator merges nothing without the tests passing and the diff read back.
+13. **The selected model executes.** The merchant is the only orchestrator. Do not spawn cheaper agents, write a handoff, or refuse the work because a roster named Fable, Astra, Terra, or Sol. Astra is computer use only and does not hire a committee. Fable is a rare design pass, not a standing boss. Process detail is `ORCHESTRATION.md`.
 14. **The simplest path that produces the requested outcome wins.** Before planning agents, writing code, adding an automation, or wiring an integration, find the simplest thing that delivers what was asked. Check first for a manual export, a browser extraction, a native Shopify import (CSV, bulk editor, admin screen), an API or workflow that already exists in this repo, and a one-time deliverable. Compare the candidates on time, cost, risk, and repeatability, say which one was chosen and why, and then build only that. Never build recurring infrastructure for a one-time task: no new workflow file, no new script in `lmny-feeds/scripts/`, no new agent fan-out for work that runs once. If a manual handoff is faster, the deliverable is the handoff artifact — a CSV, a plan file, a list of steps for the merchant — not a program that produces it. Recurring infrastructure is justified only by a recurring need, and the rules above (dry-run first, pricing by pull request, verify before reporting done) still apply to whichever path is chosen.
 
 ### 2a. Pricing matrix: wholesale cost to retail, by source
