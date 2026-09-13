@@ -1,5 +1,9 @@
 # Product SEO title formulas
 
+Listing voice, GEO rules, and video-first gallery order live in
+`docs/seo/listing-seo-geo.md`. This file is only the character budgets
+and per-source title strings.
+
 Shopify's theme adds the store name to the HTML `<title>`. The sync therefore
 uses the 60-character `seo.title` budget for product identity and search intent,
 without repeating “Laura Milman New York.”

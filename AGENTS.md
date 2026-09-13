@@ -35,7 +35,7 @@ orders to create a committee. The selected model executes; see
 | Supplier intake | `.github/workflows/royalchain-costs.yml`, `lmny-feeds/scripts/royalchain-costs.ts` | Reads wholesale cost from the Royal Chain trade account with Playwright (secrets `ROYALCHAIN_USERNAME` / `ROYALCHAIN_PASSWORD`) for a shortlist CSV; retail = cost x 3. Recipe H. |
 | Uploadify | Shopify app | Jewelry marketplace feed. Needs ACTIVE, SKU, qty > 0, Category. Loose diamonds are deliberately kept at qty 0 so it skips them. |
 | Journal (blog) | Shopify Online Store blog `journal` | Nine published articles as of 2026-09-08, linked from header and footer. No automated writer exists in this repo. |
-| Setup docs | `SHOPIFY_SETUP.md`, `lmny-feeds/README.md`, `lmny-feeds/docs/` | Metafield definitions, brand collections, listing schemas, SEO title formulas. Read the relevant one before touching that area. |
+| Setup docs | `SHOPIFY_SETUP.md`, `lmny-feeds/README.md`, `lmny-feeds/docs/`, `docs/seo/listing-seo-geo.md` | Metafield definitions, brand collections, listing schemas, SEO/GEO listing voice. Read the relevant one before touching that area. |
 
 Catalog shape (active products, 2026-09-08): about 10,000 loose diamonds,
 732 Back Vault estate pieces (tag `backvault-feed`, handle prefix `bv-`),
@@ -489,7 +489,8 @@ Current recurring jobs:
 Every product needs images, a title, a body, SEO fields, tags, a product type,
 and metafields before it can be sold anywhere. This recipe says who makes each
 piece and what is never invented. It reuses the formulas in
-`lmny-feeds/docs/seo-title-formulas.md` and
+`docs/seo/listing-seo-geo.md` (voice, GEO, video-first gallery),
+`lmny-feeds/docs/seo-title-formulas.md`, and
 `lmny-feeds/docs/watch-listing-schema.md`,
 implemented in `src/backvault/listing.ts` and `src/watchListingBuilder.ts`.
 
@@ -532,7 +533,9 @@ approves. Astra is not involved.
    approved product-shot job id, not the raw upload. Prompts end with "nothing
    added or changed from the reference piece"; product frames carry no hands.
 5. Four images are generated or collected: hero, one detail macro, one on-body
-   or scale frame, one lifestyle frame, hero first. For Peaceful Diamonds pieces
+   or scale frame, one lifestyle frame. If a product has a video, that video is
+   Shopify media and the first gallery item — never HTML inside the
+   description. Stills follow the video. For Peaceful Diamonds pieces
    the `peaceful-diamonds-higgsfield` skill's stack and background rules win
    (its product-shot prompt uses a black background); the cream `#FAF6F0` or
    warm white `#FDFAF6` hero applies to Laura Milman house pieces and chains.
