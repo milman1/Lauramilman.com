@@ -36,7 +36,8 @@ that SKU there (same path as the watch takedown). The `bv-` copy stays
 tagged.
 
 Plan: `docs/ebay/maison-duplicate-untag-plan.csv`  
-Twins: `docs/ebay/maison-csv-twins.csv`
+Twins: `docs/ebay/maison-csv-twins.csv`  
+Results (2026-09-14, independent re-read): `docs/ebay/maison-duplicate-untag-results.csv` — **33 OK / 0 error**. CSV copy `ebay` tag off; `bv-` copy still on.
 
 David Webb pairs that share a title but have **different** SKUs (RR9482 /
 RR7757, RR9123 / RR8156, RR7429 / RR6484, RR6486 / RR6485) are separate
