@@ -8,8 +8,10 @@ structure, and generative-engine (GEO) standard.
 Reference listing (lab-grown jewelry):
 https://www.lauramilman.com/products/lab-grown-round-diamond-station-bracelet-065-ct-14k-yellow-gold-bc2423
 
-Copy the **shape** of that page: identity-first title, short factual
-body, specs in `custom.*` metafields, video as the first gallery item.
+The storefront page contract (blocks, metafield grid, media, education)
+is `docs/product-page-standards.md`. Copy the **shape** of the reference
+page: identity-first title, short factual body, specs in `custom.*`
+metafields, video as the first gallery item.
 Do not copy its defects: hype (“stunning”), garbled spec fragments,
 video HTML inside the description, or a policy line that disagrees with
 the live store.
