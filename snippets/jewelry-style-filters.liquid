@@ -14,6 +14,7 @@
   assign jf_enabled = false
   assign jf_style_label = ''
   assign jf_styles = ''
+  assign jf_show_carat = true
   assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
 
   case jf_handle
@@ -45,6 +46,12 @@
       assign jf_style_label = 'Necklace Style'
       assign jf_styles = 'Station::Station||Tennis::Tennis||Riviera::Riviera||Statement::Statement||Lariat::Lariat||Pendant::Pendant'
       assign jf_carats = 'Under 3 Carats::Under 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10-20 Carats::10 - 20 ct||20+ Carats::20+ ct'
+
+    when 'chains'
+      assign jf_enabled = true
+      assign jf_show_carat = false
+      assign jf_style_label = 'Chain Style'
+      assign jf_styles = 'Necklaces::Necklaces||Bracelets::Bracelets||Cuban::Cuban||Paperclip::Paperclip||Rope::Rope||Curb::Curb||Herringbone::Herringbone||Box::Box||Snake::Snake'
 
     when 'pendants', 'pendants-1', 'lab-grown-pendants'
       assign jf_enabled = true
@@ -141,6 +148,7 @@
     </div>
   </div>
 
+  {%- if jf_show_carat -%}
   <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
     <button type="button" class="refine__group-head" aria-expanded="true">
       <span class="refine__group-label">
@@ -187,4 +195,5 @@
       color: var(--cream, #FAF6F0);
     }
   </style>
+  {%- endif -%}
 {%- endif -%}
