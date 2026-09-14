@@ -61,6 +61,18 @@
     endfor
   endif
 
+  # Gallery: native/external video first so a motion hero is never buried
+  # under stills. Description-embedded players are hoisted in JS.
+  assign pdp_videos = product.media | where: 'media_type', 'video'
+  assign pdp_ext_videos = product.media | where: 'media_type', 'external_video'
+  assign pdp_images = product.media | where: 'media_type', 'image'
+  assign pdp_models = product.media | where: 'media_type', 'model'
+  assign gallery_media = pdp_videos | concat: pdp_ext_videos | concat: pdp_images | concat: pdp_models
+  assign description_has_video = false
+  if product.description contains '<video' or product.description contains '<VIDEO' or product.description contains 'product-video' or product.description contains 'youtube.com' or product.description contains 'youtu.be' or product.description contains 'vimeo.com'
+    assign description_has_video = true
+  endif
+
   # ── Spec rows from custom.* metafields — empty rows never render ──
   # Jewelry + watch keys share this list. Blank values are skipped, so a
   # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
@@ -107,7 +119,7 @@
           <div class="product-gallery__badge">New Arrival</div>
         {%- endif -%}
 
-        {%- for media in product.media -%}
+        {%- for media in gallery_media -%}
           {%- liquid
             capture media_alt
               if media.alt != blank
@@ -167,16 +179,16 @@
           </div>
         {%- endfor -%}
 
-        {%- if product.media.size == 0 -%}
+        {%- if gallery_media.size == 0 -%}
           <div class="pdp-media is-active">
             {{ 'product-1' | placeholder_svg_tag: 'pdp-media__placeholder' }}
           </div>
         {%- endif -%}
       </div>
 
-      {%- if product.media.size > 1 -%}
+      {%- if gallery_media.size > 1 -%}
         <div class="product-gallery__thumbs" role="list">
-          {%- for media in product.media limit: 8 -%}
+          {%- for media in gallery_media limit: 8 -%}
             <button
               type="button"
               class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
@@ -348,7 +360,7 @@
 
       <!-- 9. Description (collapsible) -->
       {%- if product.description != blank -%}
-        <div class="pdp-desc">
+        <div class="pdp-desc{% if description_has_video %} is-pending-video-hoist{% endif %}" data-pdp-description>
           <div class="accordion-item" data-open>
             <button type="button" class="accordion-trigger" aria-expanded="true">
               Description
@@ -553,6 +565,13 @@
     margin-top: 1.5rem;
   }
 
+  /* Hide description-embedded players until JS moves them to the gallery */
+  .pdp-desc.is-pending-video-hoist #PdpDescription video,
+  .pdp-desc.is-pending-video-hoist #PdpDescription iframe,
+  .pdp-desc.is-pending-video-hoist #PdpDescription .product-video {
+    display: none;
+  }
+
   .pdp-desc .accordion-item[data-open] .accordion-body,
   .pdp-desc .accordion-item.open .accordion-body {
     max-height: none;
@@ -690,8 +709,137 @@
 
 <script>
   (function () {
+    function removeEmptyVideoWrappers(desc) {
+      Array.prototype.slice.call(desc.querySelectorAll('.product-video')).forEach(function (wrap) {
+        if (!wrap.querySelector('video, iframe') && wrap.parentNode) {
+          wrap.parentNode.removeChild(wrap);
+        }
+      });
+    }
+
+    function hideEmptyDescription(desc) {
+      var leftover = (desc.textContent || '')
+        .replace(/360°\s*View/gi, '')
+        .replace(/Your browser does not support the video tag\./gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (leftover.length < 40) {
+        var wrap = desc.closest('.pdp-desc');
+        if (wrap) wrap.hidden = true;
+      }
+    }
+
+    // Move a description-embedded video into the gallery as the first visual.
+    // Older imports (e.g. lab-grown station bracelets) stored the MP4 in
+    // descriptionHtml, which rendered under the Description accordion.
+    function hoistDescriptionVideo(gallery) {
+      var desc = document.getElementById('PdpDescription');
+      var descWrap = desc && desc.closest('.pdp-desc');
+      if (!desc) return;
+      var videoEl = desc.querySelector('video, iframe');
+      if (descWrap) descWrap.classList.remove('is-pending-video-hoist');
+      if (!videoEl) return;
+
+      var galleryHasVideo = gallery && gallery.querySelector(
+        '.pdp-media[data-media-type="video"], .pdp-media[data-media-type="external_video"]'
+      );
+      if (!gallery || galleryHasVideo) {
+        if (videoEl.parentNode) videoEl.parentNode.removeChild(videoEl);
+        removeEmptyVideoWrappers(desc);
+        hideEmptyDescription(desc);
+        return;
+      }
+
+      var main = gallery.querySelector('.product-gallery__main');
+      if (!main) return;
+
+      var placeholder = main.querySelector('.pdp-media__placeholder');
+      if (placeholder) {
+        var empty = placeholder.closest('.pdp-media');
+        if (empty && empty.parentNode) empty.parentNode.removeChild(empty);
+      }
+
+      Array.prototype.slice.call(main.querySelectorAll('.pdp-media')).forEach(function (slide, i) {
+        slide.classList.remove('is-active');
+        slide.hidden = true;
+        slide.setAttribute('data-media-index', String(i + 1));
+      });
+
+      var slide = document.createElement('div');
+      slide.className = 'pdp-media is-active';
+      slide.setAttribute('data-media-index', '0');
+      slide.setAttribute('data-media-type', videoEl.tagName === 'IFRAME' ? 'external_video' : 'video');
+      videoEl.classList.add('pdp-media__video');
+      videoEl.removeAttribute('width');
+      videoEl.setAttribute('playsinline', '');
+      videoEl.setAttribute('muted', '');
+      videoEl.muted = true;
+      videoEl.setAttribute('loop', '');
+      videoEl.loop = true;
+      videoEl.setAttribute('autoplay', '');
+      videoEl.autoplay = true;
+      slide.appendChild(videoEl);
+      main.insertBefore(slide, main.firstChild);
+      removeEmptyVideoWrappers(desc);
+      hideEmptyDescription(desc);
+
+      var thumbs = gallery.querySelector('.product-gallery__thumbs');
+      var existingSlides = main.querySelectorAll('.pdp-media');
+      if (!thumbs && existingSlides.length > 1) {
+        thumbs = document.createElement('div');
+        thumbs.className = 'product-gallery__thumbs';
+        thumbs.setAttribute('role', 'list');
+        gallery.appendChild(thumbs);
+        Array.prototype.slice.call(existingSlides, 1).forEach(function (other, i) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'product-gallery__thumb';
+          btn.setAttribute('data-thumb-index', String(i + 1));
+          btn.setAttribute('role', 'listitem');
+          var srcImg = other.querySelector('img');
+          if (srcImg) {
+            var thumbImg = document.createElement('img');
+            thumbImg.src = srcImg.currentSrc || srcImg.src;
+            thumbImg.alt = '';
+            thumbImg.width = 120;
+            thumbImg.height = 120;
+            btn.appendChild(thumbImg);
+          }
+          thumbs.appendChild(btn);
+        });
+      }
+      if (thumbs) {
+        Array.prototype.slice.call(thumbs.querySelectorAll('[data-thumb-index]')).forEach(function (thumb, i) {
+          thumb.setAttribute('data-thumb-index', String(i + 1));
+          thumb.classList.remove('active');
+        });
+        var videoThumb = document.createElement('button');
+        videoThumb.type = 'button';
+        videoThumb.className = 'product-gallery__thumb active';
+        videoThumb.setAttribute('data-thumb-index', '0');
+        videoThumb.setAttribute('aria-label', 'View product video');
+        videoThumb.setAttribute('role', 'listitem');
+        var poster = main.querySelector('.pdp-media img');
+        if (poster) {
+          var posterImg = document.createElement('img');
+          posterImg.src = poster.currentSrc || poster.src;
+          posterImg.alt = '';
+          posterImg.width = 120;
+          posterImg.height = 120;
+          videoThumb.appendChild(posterImg);
+        }
+        var play = document.createElement('span');
+        play.className = 'product-gallery__thumb-play';
+        play.setAttribute('aria-hidden', 'true');
+        play.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        videoThumb.appendChild(play);
+        thumbs.insertBefore(videoThumb, thumbs.firstChild);
+      }
+    }
+
     // Gallery: thumb switching + video autoplay management
     var gallery = document.getElementById('PdpGallery');
+    hoistDescriptionVideo(gallery);
     if (gallery) {
       var slides = gallery.querySelectorAll('.pdp-media');
       var thumbs = gallery.querySelectorAll('[data-thumb-index]');

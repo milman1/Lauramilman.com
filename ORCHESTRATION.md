@@ -184,7 +184,7 @@ Default deliverable: a Shopify-ready CSV, not a permanent integration.
 1. Extract exact product facts, SKU/reference, cost, inventory, and image URLs.
 2. Normalize to the existing LMNY product structure in `AGENTS.md`.
 3. Apply the correct source-specific pricing rule.
-4. Generate titles, descriptions, SEO fields, alt text, taxonomy, tags, and metafields from verified facts.
+4. Generate titles, descriptions, SEO fields, alt text, taxonomy, tags, and metafields from verified facts. Follow `docs/seo/listing-seo-geo.md` (voice, GEO, video-first gallery). Length formulas stay in `lmny-feeds/docs/seo-title-formulas.md`.
 5. Prepare 5 sample products for review.
 6. After approval, complete the CSV with products set to Draft.
 7. Validate row counts, required fields, image matches, and prices.
@@ -219,6 +219,14 @@ Do not scrape the portal again.
 3. Preview on mobile and desktop.
 4. Verify links, merchandising, accessibility, and performance affected by the change.
 5. Deploy only after authorization.
+
+### E. Product listing copy (SEO + GEO)
+
+1. Read `docs/seo/listing-seo-geo.md` before writing any title, body, or SEO field.
+2. Use only verified facts. Specs go in `custom.*` metafields, not an HTML table.
+3. Put any video in Shopify media, first in the gallery. Never embed a player in `descriptionHtml`.
+4. Keep SEO title ≤ 60 and SEO description ≤ 160. Use the store’s real policy closer, not a copied 30-day returns line.
+5. Run the supplier scrub. Do not invent provenance, ratings, or a sustainability hook.
 
 ---
 
