@@ -112,7 +112,7 @@ These 38 brands already have dropdown entries wired up in
 | Marina B              | marina-b                 |
 | Mikimoto              | mikimoto                 |
 | Patek Philippe        | patek-philippe           |
-| Tiffany & Co.         | tiffany-co               |
+| Tiffany & Co.         | tiffany                  |
 | Van Cleef & Arpels    | van-cleef-arpels         |
 
 ### 2d. Adding a new brand later
@@ -308,6 +308,20 @@ Required Shopify columns (in addition to §1 metafields):
 | `Type` | `Rings` / `Necklaces` / `Earrings` / `Bracelets` / `Watch` / … |
 
 When the piece sells, set qty to `0` or archive it so Uploadify delists.
+
+### eBay (Marketplace Connect) columns
+
+Marketplace Connect lists a product only when it is **ACTIVE**, published,
+and carries the `ebay` tag plus a condition metafield. Every jewelry CSV
+that should list on eBay includes:
+
+| Column | Value |
+|---|---|
+| `Tags` | include `ebay` (alongside the brand and type tags) |
+| `Metafield: custom.ebay_condition [single_line_text_field]` | `1000` new (fine, lab-grown) or `3000` pre-owned (estate) |
+
+Never tag a draft or a loose diamond. Feed products (Belgium Dia watches,
+Back Vault estate pieces) get these from the sync code, not the CSV.
 
 ### Product Category values
 

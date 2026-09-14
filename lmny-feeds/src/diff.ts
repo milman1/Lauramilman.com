@@ -1,3 +1,4 @@
+import { channelsFor } from '../config/channels.js';
 import { MEDIA_MISSING_TAG } from './product.js';
 import type { CatalogEntry, Decision, DesiredEntry, Kind } from './types.js';
 
@@ -6,6 +7,18 @@ const PREFIX_TO_KIND: Record<string, Kind> = { nd: 'natural', lg: 'lab', w: 'wat
 export function kindForHandle(handle: string): Kind | null {
   const prefix = handle.split('-', 1)[0] ?? '';
   return PREFIX_TO_KIND[prefix] ?? null;
+}
+
+/**
+ * Sales channels for a Belgium Dia product, by handle prefix
+ * (`config/channels.ts`). Watches take the full list; loose stones take the
+ * two-channel list, and so does anything whose handle is missing or
+ * unrecognized — the narrow list is the safe default, because a stone
+ * pushed to Merchant Center and Meta by accident is the failure mode the
+ * merchant asked to avoid.
+ */
+export function channelsForHandle(handle: string | null | undefined): readonly string[] {
+  return handle && kindForHandle(handle) === 'watch' ? channelsFor('watch') : channelsFor('diamond');
 }
 
 /**
@@ -94,13 +107,13 @@ export function diffCatalog(
   return decisions;
 }
 
-/** Holds that must not archive or overwrite an existing Shopify price. */
-export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost']);
+/** Per-row review holds that must leave an existing Shopify listing unchanged. */
+export const PRICING_REVIEW_HOLD_REASONS = new Set(['watch_no_cost', 'watch_listing_review']);
 
 /**
- * `no_cost` watches stay buyable at their current price.
+ * Review-held watches stay at their current listing state.
  * Convert a would-be `held_in_feed` archive into a skip so sync can tag
- * `pricing-review` without touching the variant.
+ * review skip without touching the product or variant.
  */
 export function skipPricingReviewArchives(decisions: Decision[], reviewHandles: Set<string>): void {
   for (const d of decisions) {

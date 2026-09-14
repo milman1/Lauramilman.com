@@ -4,3 +4,4 @@ theme_export__*/
 # lmny-feeds sync job
 lmny-feeds/node_modules/
 lmny-feeds/out/
+out/

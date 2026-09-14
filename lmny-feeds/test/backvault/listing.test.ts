@@ -15,6 +15,7 @@ function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
     vendor: 'Cartier',
     productType: 'BRACL',
     descriptionHtml: '<p>supplier copy that must not ship</p>',
+    costUsd: 4300,
     priceUsd: 4500,
     available: true,
     sku: 'CLV-001',

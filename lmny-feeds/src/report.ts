@@ -50,6 +50,16 @@ export interface SyncReport {
       marginPct: number;
     }>;
   };
+  /**
+   * Publish step: how many products were published to the channel list in
+   * `config/channels.ts`, how many were skipped for not being ACTIVE, and
+   * which configured channels resolved on the store.
+   */
+  publishing: {
+    published: number;
+    skippedDraft: number;
+    channels: string[];
+  };
   watchPricing: { lines: WatchLine[] };
   /**
    * Photo-count histogram after DNA fill. A growing `one` count is the
@@ -274,6 +284,11 @@ export function renderMarkdown(r: SyncReport): string {
       ` · still listed but held: **${held}**`,
   );
   lines.push(`- skip (unchanged): **${r.decisions.skipped}**`);
+  lines.push(
+    `- published to sales channels: **${r.publishing.published}**` +
+      ` (${r.publishing.channels.join(', ') || 'none resolved'})` +
+      (r.publishing.skippedDraft ? ` · not ACTIVE, not published: **${r.publishing.skippedDraft}**` : ''),
+  );
   if (r.collectionsCreated.length) lines.push(`- collections created: ${r.collectionsCreated.join(', ')}`);
   if (r.mediaQuarantined.length) lines.push(`- media-missing quarantined: ${r.mediaQuarantined.length}`);
   if (r.mediaVideosAttached) lines.push(`- videos attached: ${r.mediaVideosAttached}`);

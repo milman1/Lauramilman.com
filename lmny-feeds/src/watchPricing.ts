@@ -1,24 +1,16 @@
 /**
  * Watch retail from supplier unit cost only. No Hours / market mid.
  *
- * Chart (first matching band wins):
- *   Under $5,000          1.30×  round up to $100
- *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
- *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
- *   Above $40,000         1.08×  round up to $100, min $44,800
+ * Tier chart lives in `config/pricing.ts` (`WATCH_COST_TIERS`) — the single
+ * source of truth. This module applies the chart (round up to $100, band floors).
  *
  * Band mins are the previous band's ceiling so retail never drops as cost
  * crosses a boundary.
  */
 
-export const WATCH_COST_TIERS = [
-  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
-  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
-  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
-] as const;
+import { WATCH_COST_TIERS, type WatchCostTier } from '../config/pricing.js';
 
-export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+export { WATCH_COST_TIERS, type WatchCostTier };
 
 export type WatchPricingOutcome =
   | { status: 'priced'; retailUsd: number }

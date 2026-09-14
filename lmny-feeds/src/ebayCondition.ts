@@ -11,7 +11,9 @@
  * name. Wristwatch categories reject `Pre-owned` as a Condition ID
  * ("Condition ID Pre-owned is not supported for this category").
  *
- * 3000 = Used / Pre-owned on watches. 1000 = New with tags (Unworn only).
+ * 3000 = Used / Pre-owned. 1000 = New with box and papers. 1500 = New
+ * without a complete box-and-papers set. New conditions require an explicit
+ * source state; listing titles are never condition evidence.
  */
 
 export const EBAY_CONDITION_NAMESPACE = 'custom';
@@ -20,8 +22,10 @@ export const EBAY_FEATURES_KEY = 'features';
 
 /** eBay ConditionID for used / pre-owned watches. Never 1000 on used stock. */
 export const EBAY_CONDITION_PREOWNED = '3000';
-/** Unworn only. 1000 is New with tags — box/papers stay in Features. */
-export const EBAY_CONDITION_UNWORN = '1000';
+/** Explicitly unworn with both box and papers. */
+export const EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS = '1000';
+/** Explicitly unworn without positive evidence of both box and papers. */
+export const EBAY_CONDITION_NEW_OTHER = '1500';
 
 export const NEW_WITH_BOX_RE = /new\s+with\s+box(?:\s+and\s+papers)?/i;
 export const FULL_SET_BOX_PAPERS_RE = /as a full set with box and papers/gi;
@@ -39,14 +43,19 @@ export function titleLooksUnworn(title: string): boolean {
 }
 
 /**
- * LMNY watches are pre-owned estate / feed stock unless explicitly Unworn.
- * Unclassified titles (no Pre-Owned prefix) still must not ship as New.
+ * New conditions require the authoritative source state. Accessory facts then
+ * select the matching new condition; unknown state fails closed as pre-owned.
  */
 export function ebayConditionForWatch(opts: {
-  title: string;
   state?: WatchState | null;
+  box?: boolean | null;
+  papers?: boolean | null;
 }): string {
-  if (opts.state === 'unworn' || titleLooksUnworn(opts.title)) return EBAY_CONDITION_UNWORN;
+  if (opts.state === 'unworn') {
+    return opts.box === true && opts.papers === true
+      ? EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS
+      : EBAY_CONDITION_NEW_OTHER;
+  }
   return EBAY_CONDITION_PREOWNED;
 }
 
@@ -113,9 +122,13 @@ export function planEbayConditionFix(input: EbayConditionPlanInput): EbayConditi
   const reasons: string[] = [];
   const isWatch = /\bwatch/i.test(input.productType ?? '');
   const wantedCondition = isWatch
-    ? ebayConditionForWatch({ title: input.title, state: input.state })
+    ? ebayConditionForWatch({
+        state: input.state,
+        box: yesNoToBool(input.box),
+        papers: yesNoToBool(input.papers),
+      })
     : titleLooksUnworn(input.title)
-      ? EBAY_CONDITION_UNWORN
+      ? EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS
       : titleLooksPreowned(input.title)
         ? EBAY_CONDITION_PREOWNED
         : undefined;
@@ -158,6 +171,7 @@ export function planEbayConditionFix(input: EbayConditionPlanInput): EbayConditi
   }
 
   if (!ebayCondition && !features && !clearFeatures && !googleCondition && !descriptionHtml) return null;
+  if (isWatch && !input.state) reasons.push('unclassified watch source state; fail closed to pre-owned');
   return { ebayCondition, features, clearFeatures, googleCondition, descriptionHtml, reasons };
 }
 

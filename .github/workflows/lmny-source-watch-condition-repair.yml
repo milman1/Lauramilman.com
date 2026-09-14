@@ -1,0 +1,91 @@
+name: LMNY source-backed watch condition repair
+
+on:
+  pull_request:
+    paths:
+      - 'lmny-feeds/src/watchConditionRepair.ts'
+      - 'lmny-feeds/scripts/repair-source-watch-conditions.ts'
+      - '.github/workflows/lmny-source-watch-condition-repair.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no Shopify writes)'
+        type: boolean
+        default: true
+      reviewed_plan_run_id:
+        description: 'Dry-run workflow run ID whose plan was reviewed (required for apply)'
+        type: string
+        default: ''
+      plan_sha256:
+        description: 'Reviewed plan SHA-256 from the dry-run summary (required for apply)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  actions: read
+
+# Do not race the hourly feed sync, which owns the same condition metafields.
+concurrency:
+  group: lmny-feed-sync
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Build and optionally apply saved condition plan
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+          DRY_RUN_INPUT: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run }}
+          REVIEWED_RUN_ID: ${{ inputs.reviewed_plan_run_id }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            if [ -z "$REVIEWED_RUN_ID" ] || [ -z "$PLAN_SHA256" ]; then
+              echo "Apply requires reviewed_plan_run_id and plan_sha256" >&2
+              exit 1
+            fi
+            mkdir -p reviewed-plan
+            gh run download "$REVIEWED_RUN_ID" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name "source-watch-condition-$REVIEWED_RUN_ID" \
+              --dir reviewed-plan
+            npm run repair:source-watch-conditions -- \
+              --apply \
+              --reviewed-plan=reviewed-plan/source-watch-condition-plan.json \
+              --plan-sha256="$PLAN_SHA256"
+          else
+            npm run repair:source-watch-conditions
+          fi
+      - name: Publish summary
+        if: always()
+        run: cat out/source-watch-condition-report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload sanitized plan and verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-watch-condition-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/source-watch-condition-plan.json
+            lmny-feeds/out/source-watch-condition-report.md
+            lmny-feeds/out/source-watch-condition-errors.txt
+          if-no-files-found: ignore

@@ -15,6 +15,7 @@ function report(overrides: Partial<SyncReport> = {}): SyncReport {
     holdHistogram: {},
     naturalMargins: { p25: null, median: null, p75: null, rejectedByFloor: 0 },
     labPricing: { published: 0, held: 0, bands: [], sample: [] },
+    publishing: { published: 0, skippedDraft: 0, channels: [] },
     watchPricing: { lines: [] },
     watchGalleries: { none: 0, one: 3, two: 1, threePlus: 4, onePhotoRefs: ['RW3102', 'T3743'] },
     sampleNaturals: [],

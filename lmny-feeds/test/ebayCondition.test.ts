@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   EBAY_CONDITION_PREOWNED,
-  EBAY_CONDITION_UNWORN,
+  EBAY_CONDITION_NEW_OTHER,
+  EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS,
   boxPaperClause,
   ebayConditionForWatch,
   ebayFeaturesFromBoxPapers,
@@ -13,17 +14,22 @@ import {
 } from '../src/ebayCondition.js';
 
 describe('ebayConditionForWatch', () => {
-  it('uses ConditionID 3000 for Pre-Owned titles and feed preowned state', () => {
-    expect(ebayConditionForWatch({ title: 'Pre-Owned Rolex Submariner 126610LN', state: 'preowned' })).toBe(
+  it('uses ConditionID 3000 for preowned or unknown source state', () => {
+    expect(ebayConditionForWatch({ state: 'preowned', box: true, papers: true })).toBe(
       EBAY_CONDITION_PREOWNED,
     );
-    expect(ebayConditionForWatch({ title: 'Rolex Datejust 126334' })).toBe(EBAY_CONDITION_PREOWNED);
+    expect(ebayConditionForWatch({})).toBe(EBAY_CONDITION_PREOWNED);
   });
 
-  it('uses ConditionID 1000 only when the watch is Unworn', () => {
-    expect(ebayConditionForWatch({ title: 'Unworn Rolex Submariner Date 126610LN', state: 'unworn' })).toBe(
-      EBAY_CONDITION_UNWORN,
+  it('uses ConditionID 1000 only for source-confirmed unworn watches with box and papers', () => {
+    expect(ebayConditionForWatch({ state: 'unworn', box: true, papers: true })).toBe(
+      EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS,
     );
+  });
+
+  it('uses ConditionID 1500 for source-confirmed unworn watches without a complete accessory set', () => {
+    expect(ebayConditionForWatch({ state: 'unworn', box: true, papers: false })).toBe(EBAY_CONDITION_NEW_OTHER);
+    expect(ebayConditionForWatch({ state: 'unworn', box: null, papers: null })).toBe(EBAY_CONDITION_NEW_OTHER);
   });
 });
 
@@ -85,6 +91,7 @@ describe('planEbayConditionFix', () => {
       papers: 'Yes',
       features: 'New with box and papers',
       googleCondition: 'new',
+      state: 'preowned',
     });
     expect(plan).not.toBeNull();
     expect(plan?.ebayCondition).toBe('3000');
@@ -104,6 +111,7 @@ describe('planEbayConditionFix', () => {
       ebayCondition: 'New with tags',
       features: 'With Box, With Papers',
       googleCondition: 'new',
+      state: 'unworn',
     });
     expect(plan?.ebayCondition).toBe('1000');
   });
@@ -118,7 +126,39 @@ describe('planEbayConditionFix', () => {
       ebayCondition: '1000',
       features: 'With Box, With Papers',
       googleCondition: 'new',
+      state: 'unworn',
     });
     expect(plan).toBeNull();
+  });
+
+  it('keeps repair output pre-owned without source proof even if catalog copy says Unworn with box and papers', () => {
+    const plan = planEbayConditionFix({
+      title: 'Unworn Rolex Submariner Date 126610LN',
+      descriptionHtml: '',
+      productType: 'Watch',
+      box: 'Yes',
+      papers: 'Yes',
+      ebayCondition: '1000',
+      // A repair row may also carry custom.condition=Unworn, but mutable
+      // catalog data is deliberately not passed as authoritative state.
+      state: null,
+    });
+    expect(plan?.ebayCondition).toBe('3000');
+    expect(plan?.reasons).toContain('unclassified watch source state; fail closed to pre-owned');
+  });
+
+  it('repairs a source-confirmed unworn watch without papers to ConditionID 1500', () => {
+    const plan = planEbayConditionFix({
+      title: 'Rolex Submariner Date 126610LN',
+      descriptionHtml: '',
+      productType: 'Watch',
+      box: 'Yes',
+      papers: 'No',
+      state: 'unworn',
+      ebayCondition: '1000',
+      googleCondition: 'new',
+    });
+    expect(plan?.ebayCondition).toBe('1500');
+    expect(plan?.googleCondition).toBeUndefined();
   });
 });

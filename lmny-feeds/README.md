@@ -19,11 +19,14 @@ holds a stones table — Shopify products are the only live copy.
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
    stones. Watches are held out unless they have **papers**, are not
    aftermarket (Condition field), do not say **naked** or **iced out** in
-   Comment, and are not from **Power Watch LLC** or **Uncle Manny LLC**.
-   Dial-aftermarket notes in Comment still sell (`8114`). That book is 115
-   watches. Partner is matched on Branch when present, on `P`/`U`/`M` stock
-   prefixes, and on a live stock allowlist from Belgium Watch (ROMAN), TLV,
-   and Vivid. Brands outside the curated list still import and are tagged
+   Comment, and belong to **Belgium Watch (ROMAN)**. TLV Watches, Vivid
+   Watches, Power Watch LLC, Uncle Manny LLC, and every unclassified or future
+   partner book are held out. The developer feed often omits Branch, so the
+   sync fetches a live ROMAN stock allowlist before normalizing. If that lookup
+   fails or returns no stocks, the watch segment is protected and receives no
+   writes or archive decisions; stock-prefix inference is never used.
+   Dial-aftermarket notes in Comment still sell (`8114`). Brands outside the
+   curated list still import when their stock belongs to ROMAN and are tagged
    `other-watch-brand`. Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
@@ -40,10 +43,11 @@ holds a stones table — Shopify products are the only live copy.
      | ≤ $1,500 | 1.35× | ~26% |
      | ≤ $4,000 | 1.30× | ~23% |
      | above $4,000 | 1.25× | 20% |
-   - watches: supplier cost × chart (`src/watchPricing.ts`). **No Hours mid.**
-     Aftermarket, no-papers, iced-out, naked-comment, Power Watch, and
-     Uncle Manny are excluded at normalize. Missing cost is tagged
-     `pricing-review` and the existing Shopify price is left alone.
+   - watches: supplier cost × chart (`config/pricing.ts` `WATCH_COST_TIERS`,
+     applied in `src/watchPricing.ts`). **No Hours mid.** Aftermarket,
+     no-papers, iced-out, naked-comment, Power Watch, and Uncle Manny are
+     excluded at normalize. Missing cost is tagged `pricing-review` and the
+     existing Shopify price is left alone.
 
      | Supplier cost | Multiplier | Retail |
      |---|---|---|
@@ -51,6 +55,9 @@ holds a stones table — Shopify products are the only live copy.
      | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
      | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
+   - lab-grown jewelry (Peaceful Diamonds / finished pieces):
+     `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
+     Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    delete / archive / skip. Unchanged hashes are skipped entirely. Loose
    diamonds that leave a successfully fetched feed are permanently deleted
@@ -99,6 +106,36 @@ holds a stones table — Shopify products are the only live copy.
    keep theirs. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
+
+   **Sales channels.** Every product this step writes is published with one
+   `publishablePublish` call carrying the whole channel list from
+   `config/channels.ts` (merchant decision 2026-09-10), not Online Store
+   alone. Watches go to all five — Online Store, Shop, Google & YouTube,
+   Facebook & Instagram, Pinterest — because they are high-ticket and
+   searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
+   (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
+   swamp Merchant Center and Meta's catalog limits. The kind is read from
+   the handle prefix (`channelsForHandle` in `src/diff.ts`), so a product
+   whose handle did not come back from a bulk write takes the narrower stone
+   list. **Only ACTIVE products publish:** a product written as DRAFT —
+   including one quarantined mid-run because Shopify rejected its photo URLs
+   — is counted as `skippedDraft` in the report and sent to no channel at
+   all. Publication ids resolve once, *before* the first write: a configured
+   channel that does not resolve is a write error, and if Online Store
+   itself does not resolve the run refuses to write rather than creating
+   products that 404. Changing the list is a pull request against
+   `config/channels.ts` — eBay is not in it, because Marketplace Connect is
+   not a publication and selects by the `ebay` tag on its own side.
+
+   **This step only publishes what it writes.** Unlike the Back Vault sync,
+   the Belgium Dia path has no publish-only decision: a product that is
+   already correct (hash unchanged) is skipped entirely and never
+   re-examined for channel coverage, so only `create` and `update`
+   decisions ever reach `publishablePublish`. The 173 watches already on
+   the store were therefore backfilled onto the four new channels once by
+   hand on 2026-09-10; from then on the syncs keep new and changed pieces
+   in step. If the channel list in `config/channels.ts` grows again,
+   existing watches need another one-off backfill.
 6. **Dual-write (optional):** upsert priced stones into Supabase `public.stones`
    when configured — preparation for moving the diamond filter off Shopify
    facets (which hide on collections over 5,000 products).
@@ -234,13 +271,17 @@ worn). Marketplace Connect was matching "box and papers" copy onto that value.
 
 Live ingest now writes:
 
-- `custom.ebay_condition` = `3000` (Used / Pre-owned) or `1000` (Unworn / New with tags). Text `Pre-owned` is not a valid ConditionID.
+- `custom.ebay_condition` = `3000` for a source-confirmed pre-owned watch or
+  unknown source state; `1000` only when the source says Unworn and explicitly
+  confirms both box and papers; otherwise a source-confirmed Unworn watch uses
+  `1500` (New without a complete box-and-papers set). Titles never establish
+  condition. Text `Pre-owned` is not a valid ConditionID.
 - `custom.features` = `With Box` / `With Papers` (never "New with…")
 - Description clause `with its original box and papers` instead of
   `as a full set with box and papers`
 
 Map those two keys once in Marketplace Connect (Condition → `ebay_condition`,
-Features → `features`). Schema version 21 refreshes feed watches on the next
+Features → `features`). Schema version 24 refreshes feed watches on the next
 hourly sync.
 
 One-shot backfill of every Watch / `ebay`-tagged product (estate + feed):
@@ -250,7 +291,30 @@ npm run backfill:ebay-preowned-features            # counts + CSV, no writes
 npm run backfill:ebay-preowned-features -- --apply
 ```
 
+This repair reads mutable Shopify catalog data, not the supplier API, so it
+never upgrades a watch to `1000` or `1500`, even when `custom.condition` says
+Unworn. It fails closed to `3000`; the hourly API sync restores legitimate new
+conditions from authoritative source state and accessory fields.
+
 The Actions workflow **LMNY eBay pre-owned features** is the same path.
+Pull-request runs are always dry-run. A live repair runs only from a manual
+workflow dispatch where **Dry run (no writes to Shopify)** is explicitly
+turned off.
+
+For a source-backed condition-only correction, use **LMNY source-backed watch
+condition repair**. It joins active Watch products to the Belgium Dia watch
+API by exact variant SKU or deterministic watch handle, then intersects those
+matches with the live ROMAN allowlist. It never uses title, price, or mutable
+Shopify condition copy as source evidence. Duplicate or ambiguous identifiers,
+an empty API response, or an empty allowlist stop the run before writes.
+
+The dry run saves `out/source-watch-condition-plan.json` with exact SKU,
+product ID, and before/after values plus its SHA-256. Apply requires the reviewed
+dry-run workflow run ID and that exact hash, downloads that run's artifact, and
+rejects plans older than 24 hours. It fresh-reads status, SKU, handle, and both
+before-values and aborts all writes on drift. Only then can it write
+`custom.ebay_condition` and `mm-google-shopping.condition`; a second fresh read
+verifies both fields. Pull-request runs always remain dry-run.
 
 ### Lab pricing backfill
 
@@ -304,16 +368,140 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
-6. **Price**: listed price from The Back Vault is passed through unchanged
-   (no markup). Cost is not known, so `inventoryItem.cost` is omitted.
-7. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
+6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
+   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is the
+   **midpoint between cost and Robinson's Jewelers' price** when the same
+   supplier stock number is found in their public catalog
+   (`src/backvault/competitor.ts`; exact stock-number match only, ambiguous
+   numbers dropped), floored at the flat rule; otherwise a flat
+   **cost + $500**. The cost is written to Shopify **Cost per item**
+   (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
+   the markup is a pull request against `config/pricing.ts`; the next run
+   reprices every listed piece because price and cost are in the content
+   hash.
+
+   **The retailer's pagination cap.** Its public `/products.json` serves at
+   most **100 pages of 250** — roughly **25,000 products**. Observed
+   2026-09-11: page 101 answered HTTP 400 after 100 full pages. That 400 is
+   the end of available pagination, not a fault, so the walk stops there and
+   returns what it read as a **partial** index
+   (`{ rows, complete, pagesRead, stoppedReason }`), instead of discarding
+   25,000 rows. If the retailer's catalogue is ever larger than that, the rest
+   of it **cannot be read through this endpoint at all**; closing that gap
+   would need a different source (cursor pagination, a sitemap walk, or a feed
+   the retailer publishes) and **nothing here attempts one**. A 4xx on page 1
+   is still a hard failure — that means the feed is wrong or gone.
+
+   A 4xx is only read as the cap when **both** guards agree: at least 90 pages
+   are already in hand, and a re-read of page 1 still serves a full page. A
+   feed that moved and starts 404ing at page 2 therefore still fails loudly
+   instead of passing itself off as the cap.
+
+   **If the competitor fetch is partial** — the pagination cap above, or the
+   fetch deadline below — the rows that did come back are **indexed and used**,
+   so a piece found in them gets its midpoint price as normal. A piece that is
+   *not* found may still have a match on a page that was never read, so it is
+   priced from what the store already remembers about it (below) rather than
+   dropped straight to the flat markup. A partial read is a **warning**, never
+   an error, and the report and Done line say how many rows over how many pages
+   were read, why the walk stopped, how many pieces were priced from a match,
+   how many from a remembered comparison, and how many fell back to flat. One
+   further consequence: on a partial read the **ambiguous stock-number guard is
+   weaker**, because a second row carrying the same reference at a different
+   price may sit on a page that was never fetched, so a reference that would
+   have been dropped as ambiguous can survive as a match.
+
+   **If the competitor fetch fails outright** — each page is retried up to 4
+   times on 429/5xx honouring a strict `Retry-After`, pages are paced 250 ms
+   apart, and the whole walk is bounded by a 10-minute wall clock so a
+   throttled retailer can never run the job for hours (the 2026-09-11 run read
+   100 full pages of 250 and was still cut off by the cap, so the catalogue is
+   larger than that; the job itself is capped at 60 minutes). Running out of
+   clock part-way through is a partial result, as above; a failure on page 1, a
+   network failure that never read a page, or a malformed response is a real
+   failure. The run then keeps going, records a **warning** rather than an
+   error so a throttled competitor never fails the job, and prices every piece
+   from the remembered comparison below or flat. The piece itself is always
+   written in full either way (images, cost, tags, status, sales channels): a
+   piece is never held out of an update for a pricing reason. The competitor
+   state is on the Done line — `competitor=complete(...)`,
+   `competitor=PARTIAL(...)` or `competitor=failed`.
+
+   **The remembered comparison.** Every run that matches a piece writes the
+   competitor's price and the date it was read to that product, as
+   `backvault_feed.competitor_price` (`number_decimal`) and
+   `backvault_feed.competitor_price_at` (`date_time`). On a run whose index is
+   **not complete**, an unmatched piece is then priced by what is remembered:
+
+   - a comparison **no older than 90 days**, whose midpoint beats the flat
+     floor: it becomes this run's competitor price and the ordinary midpoint
+     rule runs against the **current** cost, so the ticket follows the supplier
+     down or up and keeps the midpoint premium;
+   - **nothing remembered**, a comparison **older than 90 days**, one with **no
+     readable date** (never usable rather than expired — with no date there is
+     nothing to age), or one whose **midpoint loses to the floor**: flat,
+     cost + $500 — exactly what the rule says for a piece that is not on the
+     competitor. Nothing is protected, nothing is frozen. The four are counted
+     apart in the report, because a piece written at the flat price was not
+     "priced from a remembered comparison" whatever is stored on it.
+
+   A comparison is **never cleared** from the product: only a real match writes
+   a new one, so an expired or stale value can sit in
+   `backvault_feed.competitor_price` indefinitely. It cannot affect pricing —
+   past 90 days it is ignored, and an unmatched piece prices flat — but anyone
+   reading that metafield in Admin should treat it as a record of the last
+   match, not as today's competitor price. `competitor_price_at` says when.
+
+   A complete index always wins over memory: with the whole catalogue read, an
+   unmatched piece is genuinely unmatched and prices flat. A fresh match wins
+   too, and refreshes both the value and the date. Because the content hash
+   already carries the competitor price, a piece priced from memory has a
+   stable hash and is not rewritten week after week; a piece that matched but
+   is otherwise unchanged is rewritten once every 30 days purely to keep its
+   remembered comparison from ageing out. Counts and handles for both are on
+   the Done line (`competitor_matched`, `priced_from_memory`, `flat_fallback`)
+   and in the report.
+
+7. **Availability check** (`src/backvault/availability.ts`): new-arrivals
+   decides what gets *created*, but a piece already on the store stays
+   listed for as long as the supplier's full `/products.json` still shows
+   it in stock, even after it rolls off new-arrivals. A piece missing from
+   both feeds (sold / withdrawn) or out of stock archives. If the
+   full-catalog fetch fails, the run archives by new-arrivals alone and
+   says so in the report.
+8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.
-   ACTIVE products that exist but are not on the Online Store channel
+   ACTIVE products that exist but are missing any configured sales channel
    get a `publish` decision (no rewrite) so a re-run can put them live.
-8. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
-   sync uses, then `publishablePublish` to the Online Store channel.
+9. **Write** via the same `ShopifyClient.productSet()` the Belgium Dia
+   sync uses, then `publishablePublish` to every sales channel.
    `productSet` alone leaves products in Admin but 404ing on the storefront.
+
+   **Sales channels.** Estate pieces are published to the full list in
+   `config/channels.ts` — Online Store, Shop, Google & YouTube, Facebook &
+   Instagram, Pinterest (merchant decision 2026-09-10; before it, the 732
+   estate pieces were on the Online Store alone and invisible on Google
+   Shopping, Meta, and Pinterest, per `docs/audits/2026-09-09-site-audit.md`
+   §6). One `publications` query runs before the catalog read and yields
+   both the ids to publish to and **the store's installed publication
+   list**; each piece is then published to all of them in one
+   `publishablePublish` call. The installed list has to come from the shop,
+   not from the product: `resourcePublications` returns a row only for a
+   channel the product is already on, so a channel it has never been
+   published to is indistinguishable from an uninstalled one. With that
+   list, the catalog read records which configured channels a piece is
+   missing (`missingChannels`), and a piece that is live on the storefront
+   but off Pinterest gets a `publish` decision on the next run without being
+   rewritten. Only ACTIVE pieces publish — a DRAFT (no photos yet) is
+   counted as `skippedDraft`. A configured channel that does not resolve is
+   a run error rather than a warning, and a live run whose Online Store
+   publication does not resolve refuses to write; a dry run keeps going,
+   assumes every configured channel is installed, and reports its channels
+   as `unresolved (dry run)`. The Done line says how many pieces were
+   published and to how many channels. Changing the list is a pull request
+   against `config/channels.ts`; eBay is not in it (Marketplace Connect is
+   an app, not a publication, and selects by the `ebay` tag).
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated
@@ -336,6 +524,45 @@ pair). Additional optional variables:
 `.github/workflows/backvault-feed-sync.yml` — weekly, Sunday 00:17 UTC.
 Always live on the schedule (user chose no dry-run gate). Use
 `workflow_dispatch` with `dry_run=true` to inspect a run without writes.
+
+---
+
+## Journal drafting job
+
+`scripts/journal-draft.ts` (`.github/workflows/journal-draft.yml`, Monday
+13:23 UTC = 09:23 New York) writes the Journal's queue and never publishes it.
+Each run gathers the week's hooks — red carpet and premiere jewelry, watch
+sightings on athletes and musicians, auction results, brand launches, and
+nightlife openings in New York, Miami, Los Angeles, and Las Vegas — with Claude
+Sonnet 5 and the Anthropic `web_search` server tool (available to the SDK from
+Actions; if the key cannot use it, if the turn keeps pausing, or if the answer
+comes back unparseable, the run falls back to the public RSS feeds in
+`FALLBACK_HOOK_FEEDS`, fetched with plain `fetch`, and says so in the report),
+shortlists ten into `out/journal-hooks.md`, reads the estate, watch, fine, and
+lab-grown products that are both ACTIVE and published to the online store plus
+every published collection, so a draft can only link to handles a reader can
+actually open, and has Claude Opus 5 write two drafts of 900–1,400 words in the
+Journal voice with an SEO title and description, at least three store links, a
+three-question FAQ, tags from the existing Journal set, and a featured product
+whose photo becomes the article image. Every draft is then checked in code, not
+just in the prompt — a celebrity ownership claim (checked both within a sentence
+and across the enclosing paragraph), a supplier name (the
+`src/backvault/scrub.ts` scrub, which also guards the featured image's alt
+text), a price in any currency or spelled out, markup outside the tag and
+attribute allow-list, an external or unknown handle, an over-length SEO field,
+or an invented tag fails the draft, which is regenerated once and then rejected
+— and only a clean draft is created through `articleCreate` with
+`isPublished: false`, author "Laura Milman New York", and the `journal-draft`
+tag. **The job never publishes and never deletes; a person does both from
+Shopify admin.** Housekeeping is report-only: unpublished articles on the
+`journal` blog that carry `journal-draft` and are older than 21 days are listed
+in `out/journal-report.md` under "Stale drafts for the merchant to delete" with
+their created date and an admin link, and nothing is removed. Run it with
+`npx tsx scripts/journal-draft.ts [--dry-run] [--count=2]` (a dry run does
+everything except `articleCreate`, and writes the drafts to
+`out/journal-draft-N.md`), or from the Actions tab with `dry_run` and `count`;
+`out/journal-report.md` and the hooks and drafts are uploaded as the run
+artifact. Needs `ANTHROPIC_API_KEY` alongside the usual Shopify secrets.
 
 ---
 

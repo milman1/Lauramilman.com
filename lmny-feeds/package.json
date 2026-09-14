@@ -15,6 +15,12 @@
     "backfill:watch-pricing": "tsx scripts/backfill-watch-pricing.ts",
     "backfill:ebay-watch-specifics": "tsx scripts/backfill-ebay-watch-specifics.ts",
     "backfill:ebay-preowned-features": "tsx scripts/fix-ebay-preowned-features.ts",
+    "repair:source-watch-conditions": "tsx scripts/repair-source-watch-conditions.ts",
+    "plan:royalchain-products": "tsx scripts/generate-royalchain-product-plan.ts",
+    "plan:royalchain-activation": "tsx scripts/royalchain-activation-plan.ts",
+    "validate:royalchain-input": "tsx scripts/validate-royalchain-input.ts",
+    "crypto:royalchain-bundle": "tsx scripts/royalchain-bundle-crypto.ts",
+    "upload:royalchain-media": "tsx scripts/upload-royalchain-generated-media.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
@@ -24,8 +30,12 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "playwright": "^1.55.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0"
   }
 }

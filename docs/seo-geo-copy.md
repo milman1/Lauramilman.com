@@ -6,6 +6,7 @@ Single reference for **search-engine optimization (SEO)** and **generative-engin
 
 | Doc | Scope |
 |---|---|
+| [`docs/seo/listing-seo-geo.md`](seo/listing-seo-geo.md) | Listing voice, GEO rules, video-first gallery |
 | [`lmny-feeds/docs/seo-title-formulas.md`](../lmny-feeds/docs/seo-title-formulas.md) | SEO title formulas only |
 | [`lmny-feeds/docs/watch-listing-schema.md`](../lmny-feeds/docs/watch-listing-schema.md) | Feed watch titles, body, SEO, metafields |
 | [`SHOPIFY_SETUP.md`](../SHOPIFY_SETUP.md) | Estate metafield definitions, import scrub rules |

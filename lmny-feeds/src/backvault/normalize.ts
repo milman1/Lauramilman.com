@@ -1,5 +1,7 @@
 import { matchDesigner } from './designers.js';
 import { canonicalProductType } from './listing.js';
+import { competitorPriceFor, type CompetitorIndex } from './competitor.js';
+import { backVaultRetail } from './pricing.js';
 import { extractSpecs } from './specs.js';
 import { scrubText } from './scrub.js';
 import type { BackVaultItem, RawBackVaultProduct } from './types.js';
@@ -31,6 +33,8 @@ function firstSku(product: RawBackVaultProduct): string | undefined {
 
 export interface NormalizeStats {
   totalFetched: number;
+  /** Accepted items priced from a competitor match rather than the flat markup. */
+  competitorMatched: number;
   malformed: number;
   outOfStock: number;
   notTopDesigner: number;
@@ -45,11 +49,11 @@ export interface NormalizeResult {
 /**
  * Filter the raw feed down to in-stock items whose vendor is one of the
  * curated top designers, then scrub and shape them for pricing/write.
- * Price is passed through as-is from the supplier's listed price — no
- * markup is applied.
+ * The supplier's listed price is the cost; retail is cost plus the flat
+ * markup in config/pricing.ts (BACKVAULT.markupUsd).
  */
-export function normalizeBackVaultFeed(rawRows: unknown[]): NormalizeResult {
-  const stats: NormalizeStats = { totalFetched: rawRows.length, malformed: 0, outOfStock: 0, notTopDesigner: 0, accepted: 0 };
+export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: CompetitorIndex): NormalizeResult {
+  const stats: NormalizeStats = { totalFetched: rawRows.length, competitorMatched: 0, malformed: 0, outOfStock: 0, notTopDesigner: 0, accepted: 0 };
   const items: BackVaultItem[] = [];
 
   for (const row of rawRows) {
@@ -67,8 +71,8 @@ export function normalizeBackVaultFeed(rawRows: unknown[]): NormalizeResult {
       stats.notTopDesigner += 1;
       continue;
     }
-    const price = firstPrice(product);
-    if (price === null) {
+    const cost = firstPrice(product);
+    if (cost === null) {
       stats.malformed += 1;
       continue;
     }
@@ -81,6 +85,10 @@ export function normalizeBackVaultFeed(rawRows: unknown[]): NormalizeResult {
       if (v) specs[key] = scrubText(v);
     }
 
+    const sku = firstSku(product);
+    const competitorPrice = competitor ? competitorPriceFor({ sku, sourceHandle: product.handle }, competitor) : null;
+    if (competitorPrice !== null) stats.competitorMatched += 1;
+
     items.push({
       sourceHandle: product.handle,
       title,
@@ -88,9 +96,11 @@ export function normalizeBackVaultFeed(rawRows: unknown[]): NormalizeResult {
       vendor: designer.name,
       productType: canonicalProductType(product.product_type || 'Jewelry'),
       descriptionHtml,
-      priceUsd: price,
+      costUsd: cost,
+      ...(competitorPrice !== null ? { competitorPriceUsd: competitorPrice } : {}),
+      priceUsd: backVaultRetail(cost, competitorPrice),
       available: true,
-      sku: firstSku(product),
+      sku,
       imageUrls: product.images.map((img) => img.src).filter(Boolean),
       specs,
     });

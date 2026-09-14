@@ -5,6 +5,10 @@
  * happen via pull request against this file — never via database pokes or
  * ad-hoc edits in Shopify admin.
  *
+ * Every source has its own rule and its own constant; there is no
+ * store-wide multiplier. The full matrix (including the sources that are
+ * merchant-set and deliberately not in code) is AGENTS.md section 2a.
+ *
  * Guards in markup.ts fail closed if the Belgium Dia cost mapping regresses
  * (e.g. treating $/ct as total).
  */
@@ -83,21 +87,59 @@ export const LAB_GUARDS = {
 } as const;
 
 /**
- * Watches: retail from supplier cost tiers (see src/watchPricing.ts).
- * Hours comps are not used. Aftermarket, no-papers, iced-out, naked-comment,
- * Power Watch LLC, and Uncle Manny LLC rows are excluded at normalize.
- * Missing cost → hold with tag `pricing-review`; existing Shopify price
- * is left alone.
+ * Watches from the Belgium Dia / deal API (product type `Watch`, handle `w-`).
+ * Retail from supplier unit cost only. Hours comps are not used.
+ * Aftermarket, no-papers, iced-out, naked-comment, Power Watch LLC, and
+ * Uncle Manny LLC rows are excluded at normalize. Missing cost → hold with
+ * tag `pricing-review`; existing Shopify price is left alone.
  *
+ * Chart (first matching band wins); applied in `src/watchPricing.ts`:
  *   Under $5,000          1.30×  round up to $100
  *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
  *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
  *   Above $40,000         1.08×  round up to $100, min $44,800
  */
+export const WATCH_COST_TIERS = [
+  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
+  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
+] as const;
+
+export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
+  costTiers: WATCH_COST_TIERS,
 } as const;
+
+/**
+ * Lab-grown jewelry (finished pieces — Peaceful Diamonds / lab-tagged SKUs).
+ * Distinct from loose Lab-Grown Diamond feed items priced by `STONE_TIERS`.
+ * Not sourced from the Belgium Dia diamond API.
+ *
+ *   retail = round(cost × 4)
+ *
+ * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
+ * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
+ * Royal Chain rules to these products.
+ */
+export const LAB_GROWN_JEWELRY = {
+  vendors: ['Peaceful Diamonds'] as const,
+  /** Common Peaceful Diamonds SKU prefixes observed on the store. */
+  skuPrefixes: ['BC14', 'NK14'] as const,
+  /** retail = cost × this. */
+  costMultiple: 4,
+} as const;
+
+/** Retail for lab-grown jewelry from recorded wholesale cost. */
+export function labGrownJewelryRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
+}
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
 export const STONE_GATES = {
@@ -135,3 +177,54 @@ export const WATCH_BRANDS: string[] = [
   'Zenith',
   'Ulysse Nardin',
 ];
+
+/**
+ * The Back Vault (estate / vintage designer jewelry, src/backvault/).
+ *
+ * The supplier's listed price is LMNY's cost. Retail is a flat markup over
+ * that cost, and the cost is written to Shopify **Cost per item**
+ * (`inventoryItem.cost`) so margin shows next to Price in Admin.
+ *
+ *   matched on a competitor:  retail = max((cost + competitor) / 2, cost + $500)
+ *   no competitor match:      retail = cost + $500
+ *
+ * The competitor is Robinson's Jewelers, which stocks the same supplier
+ * pieces; the match key is the supplier stock number
+ * (src/backvault/competitor.ts). Never a fuzzy title match.
+ */
+export const BACKVAULT = {
+  /** Flat dollar markup added to the supplier's listed (cost) price. */
+  markupUsd: 500,
+  competitor: {
+    name: "Robinson's Jewelers",
+    baseUrl: 'https://robinsonsjewelers.com',
+  },
+} as const;
+
+/**
+ * Royal Chain basic chains ONLY (AGENTS.md section 2a and recipe H).
+ * Retail is a straight multiple of the wholesale cost read from the
+ * merchant's Royal Chain trade account. Only trending items are imported,
+ * never a whole category.
+ *
+ *   retail = roundUpTo5(cost × 3)
+ *
+ * This multiple applies to no other source. Watches, loose stones, and
+ * Back Vault pieces have their own rules above; Laura Milman fine
+ * jewelry and hand-imported estate pieces are merchant-set and have no
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×4). A new
+ * supplier gets its own constant here, never this one.
+ */
+export const SUPPLIER_INTAKE = {
+  supplier: 'Royal Chain',
+  costMultiple: 3,
+  roundUpToUsd: 5,
+} as const;
+
+export function supplierRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Supplier pricing: invalid cost ${costUsd}`);
+  }
+  const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
+  return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+}

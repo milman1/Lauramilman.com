@@ -159,6 +159,10 @@ function planFor(row: CatalogRow): EbayConditionPlan | null {
     productType: row.productType,
     box: row.box,
     papers: row.papers,
+    // Shopify catalog fields, including custom.condition, are mutable and do
+    // not prove supplier state. This repair therefore never upgrades a watch
+    // to new; the normal API sync is the only authoritative new-state path.
+    state: null,
     ebayCondition: row.ebayCondition,
     features: row.features,
     googleCondition: row.googleCondition,

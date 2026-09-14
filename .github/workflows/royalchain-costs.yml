@@ -1,0 +1,75 @@
+# Royal Chain wholesale cost reader (AGENTS.md recipe H).
+#
+# Logs into the merchant's Royal Chain trade account with Playwright, reads
+# the cost for every item on a shortlist CSV, and uploads
+# out/supplier-costs.csv (cost and retail = cost x 3, rounded up to $5) as
+# an artifact. Never writes to Shopify. Credentials live only in repository
+# secrets and never appear in logs or artifacts (a failed login uploads a
+# screenshot of the login page, which shows no secret).
+#
+# Secrets: ROYALCHAIN_USERNAME, ROYALCHAIN_PASSWORD
+# Optional variable: ROYALCHAIN_BASE_URL
+name: Royal Chain costs
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (log in and read one item only)'
+        type: boolean
+        default: true
+      shortlist:
+        description: 'Shortlist CSV, relative to the repo root'
+        type: string
+        default: 'docs/suppliers/royal-chain-shortlist-2026-09.csv'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: royalchain-costs
+  cancel-in-progress: false
+
+jobs:
+  costs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Read costs
+        env:
+          ROYALCHAIN_USERNAME: ${{ secrets.ROYALCHAIN_USERNAME }}
+          ROYALCHAIN_PASSWORD: ${{ secrets.ROYALCHAIN_PASSWORD }}
+          ROYALCHAIN_BASE_URL: ${{ vars.ROYALCHAIN_BASE_URL }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          SHORTLIST: ${{ inputs.shortlist }}
+        run: |
+          if [ "$DRY_RUN_INPUT" = "false" ]; then
+            npx tsx scripts/royalchain-costs.ts --shortlist="../$SHORTLIST"
+          else
+            npx tsx scripts/royalchain-costs.ts --shortlist="../$SHORTLIST" --dry-run
+          fi
+
+      - name: Upload costs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: royalchain-costs-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/supplier-costs.csv
+            lmny-feeds/out/royalchain-*.png
+          if-no-files-found: ignore

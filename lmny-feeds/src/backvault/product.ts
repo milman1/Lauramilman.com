@@ -1,6 +1,6 @@
 import { contentHash } from '../hash.js';
 import { taxonomyGidForProductType } from '../taxonomy.js';
-import { ebayConditionForWatch, EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
+import { EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
 import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
@@ -12,7 +12,7 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const METAFIELD_NAMESPACE = 'backvault_feed';
 
 /** Bump when the payload shape changes, so an unchanged supplier row still refreshes once. */
-export const PRODUCT_SCHEMA_VERSION = 6;
+export const PRODUCT_SCHEMA_VERSION = 7;
 
 export function sanitizeHandle(ref: string): string {
   return ref
@@ -53,6 +53,20 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
       value: 'used',
     },
   ];
+  // The competitor comparison, remembered on the product so a run that cannot
+  // read the whole competitor catalogue can still price this piece against the
+  // CURRENT cost instead of dropping it to the flat markup (see
+  // applyRememberedCompetitorPrices in diff.ts). Written only when there is a
+  // price to remember; never cleared, because the read date is what expires it.
+  if (typeof item.competitorPriceUsd === 'number') {
+    fields.push({ namespace: ns, key: 'competitor_price', type: 'number_decimal', value: item.competitorPriceUsd.toFixed(2) });
+    fields.push({
+      namespace: ns,
+      key: 'competitor_price_at',
+      type: 'date_time',
+      value: item.competitorPriceReadAt ?? syncedAt,
+    });
+  }
   // The theme's product-card.liquid and main-product.liquid already read
   // these exact custom.* keys for existing estate jewelry (SHOPIFY_SETUP.md §1).
   if (item.specs.metalType) fields.push({ namespace: c, key: 'metal_type', type: 'single_line_text_field', value: item.specs.metalType });
@@ -72,10 +86,9 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
     namespace: c,
     key: 'ebay_condition',
     type: 'single_line_text_field',
-    value:
-      listing.productType === 'Watch'
-        ? ebayConditionForWatch({ title: listing.title })
-        : EBAY_CONDITION_PREOWNED,
+    // This feed has no authoritative structured watch state or accessories.
+    // Free-text titles/descriptions must never upgrade estate stock to new.
+    value: EBAY_CONDITION_PREOWNED,
   });
   if (listing.productType === 'Watch') {
     const ebay = extractEbayWatchSpecifics({
@@ -112,6 +125,8 @@ export function contentHashFor(item: BackVaultItem): string {
     seoTitle: listing.seoTitle,
     seoDescription: listing.seoDescription,
     price: item.priceUsd,
+    cost: item.costUsd,
+    competitorPrice: item.competitorPriceUsd ?? null,
     images: item.imageUrls,
     specs: item.specs,
   });
@@ -154,7 +169,9 @@ export function buildProductSetInput(
 
   const hash = contentHashFor(item);
   const hasImages = item.imageUrls.length > 0;
-  const finalTags = hasImages ? tags : [...tags, 'media-missing'].sort();
+  // A piece without photos is written DRAFT and must never reach a
+  // marketplace: drop the ebay tag along with adding media-missing.
+  const finalTags = hasImages ? tags : [...tags.filter((t) => t !== 'ebay'), 'media-missing'].sort();
 
   const input: Record<string, unknown> = {
     handle,
@@ -178,6 +195,9 @@ export function buildProductSetInput(
         inventoryItem: {
           tracked: Boolean(locationId),
           requiresShipping: true,
+          // Admin "Cost per item", next to Price. The supplier's listed
+          // price is what LMNY pays; retail is cost + BACKVAULT.markupUsd.
+          cost: item.costUsd.toFixed(2),
         },
         ...(locationId
           ? {

@@ -1,8 +1,8 @@
 # One-shot Shopify fix: eBay Pre-Owned titles must not ship
 # Condition/Features "New with box and papers".
 #
-# Dry-run by default on workflow_dispatch. Pull requests that touch this
-# workflow apply live so Marketplace Connect can re-list hidden watches.
+# Pull requests always dry-run. A live repair requires an explicit manual
+# workflow dispatch with "Dry run" turned off.
 # Uses paginated Admin GraphQL (not bulkOperationRunQuery) so it does not
 # race the hourly feed sync on currentBulkOperation.
 #
@@ -56,7 +56,7 @@ jobs:
           SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
           SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
           SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
-          DRY_RUN_INPUT: ${{ github.event_name == 'pull_request' && 'false' || inputs.dry_run }}
+          DRY_RUN_INPUT: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run }}
           LIMIT_INPUT: ${{ inputs.limit }}
         run: |
           extra=""

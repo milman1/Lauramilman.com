@@ -103,7 +103,7 @@ describe('diff decisions', () => {
     expect(diffCatalog([], catalog, ALL_KINDS)).toEqual([]);
   });
 
-  it('does not archive watches held for pricing review', () => {
+  it('does not archive watches held for per-row review', () => {
     const catalog = [entry({ handle: 'w-3613' }), entry({ handle: 'w-sold' })];
     const d = diffCatalog([], catalog, ALL_KINDS, new Set(['w-3613']));
     skipPricingReviewArchives(d, new Set(['w-3613']));

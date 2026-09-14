@@ -1,0 +1,96 @@
+name: Stage private Royal Chain activation input
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_ref:
+        description: Safe branch, tag, or commit containing the encrypted bundle at the fixed LMNY path
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate bundle ref syntax
+        env:
+          BUNDLE_REF: ${{ inputs.bundle_ref }}
+        shell: bash
+        run: |
+          if [ -z "$BUNDLE_REF" ] || [ "${#BUNDLE_REF}" -gt 128 ] || [[ "$BUNDLE_REF" == -* ]] || [[ "$BUNDLE_REF" == *..* ]] || [[ "$BUNDLE_REF" == *//* ]] || [[ "$BUNDLE_REF" == *[!A-Za-z0-9._/-]* ]]; then
+            echo "bundle_ref must be a short safe branch, tag, or commit name"
+            exit 1
+          fi
+
+      - name: Checkout validation code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Sparse checkout encrypted bundle only from safe ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.bundle_ref }}
+          path: bundle-ref
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            .private/royalchain/activation-bundle.enc
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - name: Install validation dependencies
+        working-directory: lmny-feeds
+        run: npm ci
+
+      - name: Strict compile staging validator
+        working-directory: lmny-feeds
+        run: npx tsc --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --types node src/royalchain/activation.ts scripts/royalchain-activation-plan.ts scripts/validate-royalchain-input.ts scripts/royalchain-bundle-crypto.ts test/royalchain-activation.test.ts test/royalchain-bundle-crypto.test.ts
+
+      - name: Decrypt and extract approved two-file payload
+        working-directory: lmny-feeds
+        env:
+          LMNY_CHAIN_PLAN_KEY: ${{ secrets.LMNY_CHAIN_PLAN_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          encrypted="$GITHUB_WORKSPACE/bundle-ref/.private/royalchain/activation-bundle.enc"
+          staging="$RUNNER_TEMP/lmny-chain-input"
+          key_file="$RUNNER_TEMP/lmny-chain-plan-key"
+          payload="$RUNNER_TEMP/lmny-chain-input.tar.gz"
+          rm -rf "$staging" "$key_file" "$payload"
+          mkdir -m 700 "$staging"
+          test -f "$encrypted"
+          test -n "$LMNY_CHAIN_PLAN_KEY"
+          umask 077
+          printf '%s' "$LMNY_CHAIN_PLAN_KEY" > "$key_file"
+          npx --no-install tsx scripts/royalchain-bundle-crypto.ts decrypt --input="$encrypted" --output="$payload" --key-file="$key_file"
+          python3 scripts/extract-royalchain-bundle.py --archive "$payload" --output "$staging"
+          rm -f "$key_file" "$payload"
+
+      - name: Validate exact private input scope without printing contents
+        working-directory: lmny-feeds
+        run: npm run validate:royalchain-input -- --input-dir="$RUNNER_TEMP/lmny-chain-input"
+
+      - name: Upload private activation input artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: royalchain-activation-input-${{ github.run_id }}
+          path: ${{ runner.temp }}/lmny-chain-input
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 1
+
+      - name: Remove temporary decrypted material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/lmny-chain-input" "$RUNNER_TEMP/lmny-chain-input.tar.gz" "$RUNNER_TEMP/lmny-chain-plan-key"

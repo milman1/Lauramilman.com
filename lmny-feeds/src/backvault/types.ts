@@ -47,6 +47,24 @@ export interface BackVaultItem {
   vendor: string;
   productType: string;
   descriptionHtml: string;
+  /** The supplier's listed price — LMNY's cost. Written to Shopify Cost per item. */
+  costUsd: number;
+  /**
+   * Competitor's price for the same stock number: read from the competitor
+   * feed this run, or remembered from the last run that did match it
+   * (src/backvault/competitor.ts, src/backvault/diff.ts).
+   */
+  competitorPriceUsd?: number;
+  /**
+   * When `competitorPriceUsd` was actually READ from the competitor, ISO
+   * 8601. Stamped fresh on a real match and carried through unchanged when the
+   * price comes from memory, so the 90-day expiry measures the age of the
+   * comparison and not the age of the last sync. Deliberately not part of the
+   * content hash: a date that moved every week would rewrite every matched
+   * piece every week.
+   */
+  competitorPriceReadAt?: string;
+  /** Retail on the store: midpoint with the competitor, else cost + BACKVAULT.markupUsd. */
   priceUsd: number;
   available: boolean;
   sku?: string;

@@ -1,5 +1,74 @@
 {defaultcss}
 
+<!--
+  Laura Milman New York brand styles for the Marketplace Connect (Codisto)
+  eBay description template. Tokens mirror config/settings_data.json
+  (espresso #1E1109, wine #4A1428, gold #C9A050, cream #FAF6F0, warm white
+  #FDFAF6, text #2C1810, muted #8A8070, rule #DDD5C5). eBay allows inline
+  <style>; no external stylesheets, no JavaScript, no @import.
+-->
+<style>
+  #ebay-description.lm-ebay { background: #FDFAF6; color: #2C1810; font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.6; }
+  #ebay-description.lm-ebay .container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  #ebay-description.lm-ebay a { color: #4A1428; }
+  #ebay-description.lm-ebay a:hover { color: #C9A050; }
+
+  #ebay-description .lm-announce { background: #1E1109; color: #E2C27A; text-align: center; font-family: Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 16px; }
+
+  #ebay-description .lm-header { background: #1E1109; border-bottom: 3px solid #C9A050; padding: 28px 16px 24px; text-align: center; }
+  #ebay-description .lm-header__inner { max-width: 960px; margin: 0 auto; }
+  #ebay-description .lm-header__crest { max-width: 140px; height: auto; margin-bottom: 10px; }
+  #ebay-description .lm-wordmark { font-family: Georgia, "Times New Roman", serif; font-size: 30px; letter-spacing: 0.08em; text-transform: uppercase; color: #FAF6F0; }
+  #ebay-description .lm-wordmark span { color: #C9A050; }
+  #ebay-description .lm-header__tag { color: #A9A090; font-family: Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin: 8px 0 0; }
+
+  #ebay-description .lm-card { background: #FFFFFF; border: 1px solid #DDD5C5; border-top: 3px solid #C9A050; padding: 28px; margin: 24px 0; }
+  #ebay-description .lm-card h2, #ebay-description .lm-card h3 { font-family: Georgia, "Times New Roman", serif; font-weight: normal; color: #1E1109; }
+  #ebay-description .lm-card h2 { font-size: 26px; margin: 0 0 12px; }
+  #ebay-description .lm-card h3, #ebay-description .lm-card h3.icon { font-size: 18px; color: #4A1428; margin: 16px 0 6px; }
+  #ebay-description .lm-card h4 { font-family: Georgia, "Times New Roman", serif; font-weight: normal; font-size: 15px; color: #2C1810; }
+
+  #ebay-description .lm-eyebrow { color: #C9A050; font-family: Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 6px; }
+  #ebay-description .lm-title { font-size: 28px; line-height: 1.25; color: #1E1109; margin: 0 0 12px; }
+  #ebay-description .lm-guarantee { color: #4A2018; font-style: italic; border-left: 3px solid #C9A050; padding-left: 14px; margin: 12px 0 20px; }
+  #ebay-description .lm-description { color: #2C1810; }
+  #ebay-description .lm-description p { margin: 0 0 12px; }
+  #ebay-description .lm-hero { max-width: 100%; height: auto; border: 1px solid #DDD5C5; background: #FAF6F0; padding: 6px; }
+  #ebay-description .lm-rule { border: 0; border-top: 1px solid #DDD5C5; margin: 20px 0; }
+  #ebay-description .image-row img { border: 1px solid #DDD5C5; background: #FAF6F0; padding: 4px; }
+
+  #ebay-description .lm-btn, #ebay-description .lm-btn:visited { display: inline-block; background: #1E1109; color: #FAF6F0 !important; border: 1px solid #1E1109; font-family: Helvetica, Arial, sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 14px 26px; border-radius: 0; text-shadow: none; box-shadow: none; }
+  #ebay-description .lm-btn:hover { background: #4A1428; border-color: #4A1428; color: #FAF6F0 !important; }
+  #ebay-description .lm-btn--ghost, #ebay-description .lm-btn--ghost:visited { background: transparent; color: #1E1109 !important; border-color: #C9A050; }
+  #ebay-description .lm-btn--ghost:hover { background: #F0DFB0; color: #1E1109 !important; }
+
+  #ebay-description .lm-trust { display: table; width: 100%; border: 1px solid #DDD5C5; background: #FAF6F0; margin: 0 0 8px; }
+  #ebay-description .lm-trust__item { display: table-cell; text-align: center; padding: 14px 8px; font-family: Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #4A2018; border-right: 1px solid #DDD5C5; }
+  #ebay-description .lm-trust__item:last-child { border-right: 0; }
+
+  #ebay-description .quote { background: #FAF6F0; border: 1px solid #DDD5C5; padding: 14px 16px; margin: 10px 0; }
+  #ebay-description .quote p { margin: 0 0 8px; }
+  #ebay-description .price strong { color: #1E1109; }
+  #ebay-description .muted { color: #8A8070; }
+
+  #ebay-description .tabs .tab label { font-family: Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #4A2018; background: #FAF6F0; border: 1px solid #DDD5C5; border-bottom: 0; }
+  #ebay-description .tabs .tab input:checked + label { background: #FFFFFF; color: #1E1109; border-top: 3px solid #C9A050; }
+  #ebay-description .tabs .content { background: #FFFFFF; border: 1px solid #DDD5C5; color: #2C1810; }
+
+  #ebay-description .lm-footer { background: #1E1109; border-top: 3px solid #C9A050; color: #FAF6F0; text-align: center; padding: 28px 16px; margin-top: 24px; }
+  #ebay-description .lm-wordmark--footer { font-size: 22px; }
+  #ebay-description .lm-footer__tag { color: #A9A090; font-family: Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin: 6px 0 12px; }
+  #ebay-description .lm-footer .logo { max-width: 120px; height: auto; opacity: 0.9; }
+  #ebay-description .lm-codisto { padding: 8px 0 16px; font-family: Helvetica, Arial, sans-serif; font-size: 11px; }
+
+  @media (max-width: 640px) {
+    #ebay-description .lm-card { padding: 18px; }
+    #ebay-description .lm-title { font-size: 22px; }
+    #ebay-description .lm-trust, #ebay-description .lm-trust__item { display: block; border-right: 0; border-bottom: 1px solid #DDD5C5; }
+    #ebay-description .lm-trust__item:last-child { border-bottom: 0; }
+  }
+</style>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <div id="ebay-description" class="nojs lm-ebay">

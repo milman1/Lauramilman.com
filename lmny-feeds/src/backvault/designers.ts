@@ -60,7 +60,7 @@ export const TOP_DESIGNERS: Designer[] = [
   { name: 'Marina B', handle: 'marina-b' },
   { name: 'Mikimoto', handle: 'mikimoto' },
   { name: 'Patek Philippe', handle: 'patek-philippe' },
-  { name: 'Tiffany & Co.', handle: 'tiffany-co' },
+  { name: 'Tiffany & Co.', handle: 'tiffany' },
   { name: 'Van Cleef & Arpels', handle: 'van-cleef-arpels' },
 ];
 

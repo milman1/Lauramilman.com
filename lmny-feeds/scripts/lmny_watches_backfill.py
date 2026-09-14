@@ -286,7 +286,11 @@ def build_listing(feed, handle=None):
         {
             "namespace": "custom",
             "key": "ebay_condition",
-            "value": "1000" if title_word == "Unworn" else "3000",
+            # Source condition establishes newness; accessories select the
+            # matching eBay new condition. Never infer condition from title.
+            "value": "1000" if mapping["state"] == "unworn" and box is True and paper is True
+            else "1500" if mapping["state"] == "unworn"
+            else "3000",
             "type": "single_line_text_field",
         },
     ]

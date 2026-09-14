@@ -46,8 +46,13 @@ function pageUrl(page: number): string {
   return `${baseUrl()}/collections/${collectionHandle()}/products.json?limit=${PAGE_LIMIT}&page=${page}`;
 }
 
-async function fetchPage(page: number): Promise<unknown[]> {
-  const url = pageUrl(page);
+/** The supplier's whole public catalog — every product, not just one collection. */
+function allProductsPageUrl(page: number): string {
+  return `${baseUrl()}/products.json?limit=${PAGE_LIMIT}&page=${page}`;
+}
+
+async function fetchPage(page: number, urlFor: (page: number) => string = pageUrl): Promise<unknown[]> {
+  const url = urlFor(page);
   let res: Response | undefined;
   let lastNetErr = '';
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -75,14 +80,27 @@ async function fetchPage(page: number): Promise<unknown[]> {
   return body.products;
 }
 
-/** Fetch every page of the configured collection's products.json until an empty page. */
-export async function fetchBackVaultFeed(): Promise<unknown[]> {
+async function fetchAllPages(urlFor: (page: number) => string): Promise<unknown[]> {
   const all: unknown[] = [];
   for (let page = 1; page <= MAX_PAGES; page++) {
-    const rows = await fetchPage(page);
+    const rows = await fetchPage(page, urlFor);
     if (rows.length === 0) break;
     all.push(...rows);
     if (rows.length < PAGE_LIMIT) break; // short page: this was the last one
   }
   return all;
+}
+
+/** Fetch every page of the configured collection's products.json until an empty page. */
+export async function fetchBackVaultFeed(): Promise<unknown[]> {
+  return fetchAllPages(pageUrl);
+}
+
+/**
+ * Fetch the supplier's entire public products.json (all collections).
+ * Used by the weekly availability check: a piece that rolled off
+ * new-arrivals but is still in stock here stays listed on the store.
+ */
+export async function fetchBackVaultAllProducts(): Promise<unknown[]> {
+  return fetchAllPages(allProductsPageUrl);
 }
