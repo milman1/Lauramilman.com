@@ -20,6 +20,9 @@
 
 ## Astra live work — 2026-09-14
 
+- PR: https://github.com/milman1/Lauramilman.com/pull/134 (draft; acceptance exceptions below remain unresolved).
+- Final evidence-upload check: the current Google Drive session reports that its Google Workspace subscription was cancelled and Drive/Docs are unavailable until re-subscription. No subscription, billing, or account changes were attempted. Drive upload is therefore blocked in that session; all batch evidence remains in this branch and the local outputs. No account identifiers or credentials were copied into the evidence.
+
 - User authorized exact-SKU screen work only and no agents. Fresh page verification was performed by Astra; no secondary agent was used. The user explicitly changed the save limit to 50 per batch during the run.
 - Source sets: 640 unique end SKUs, 155 unique keeper SKUs, zero overlap. No source scope files were changed.
 - eBay result: 49 listings ended in batches of 1 and 48; 590 end SKUs absent at baseline; R3006/item 366655894070 held because the latest issue update explicitly says to preserve it. Final fresh Seller Hub result: 133 active, only R3006 intersects the end CSV. All 115 baseline keeper item IDs remain active. Zero keepers touched. The baseline contained 89 distinct active keeper SKUs; the other 66 keeper SKUs were already absent and were not restored.
