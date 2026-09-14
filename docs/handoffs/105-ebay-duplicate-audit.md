@@ -22,3 +22,14 @@ The corrected fresh parse includes item 366650158493 with SKU 8821. It is a poli
 4. Do not use same-title matching, prefix matching, or inferred identity as a cleanup basis.
 
 No live changes were made for this audit.
+
+
+## Astra active-listing audit — 2026-09-14
+
+- Requested CSV audit status: **done**. Any duplicate cleanup or product-identity decision remains outside this audit and unapplied.
+- Following #92 and #107, refreshed Seller Hub for `lauramilman-newyork`. The screen showed Results 1–133 of 133 at 200 items per page. Native accessibility evidence was used after the page's DOM reader timed out; all 133 parsed item ID/SKU/title triples matched the earlier post-takedown active-table read.
+- Fresh result: **133 unique active item IDs; 119 nonblank SKU rows across 93 distinct SKUs; 14 blank-SKU rows; 26 exact-SKU duplicate groups covering 52 listings**. Every duplicate group contains two different item IDs. Blank values, similar titles, model references, and SKU prefixes were not treated as duplicate keys.
+- All 26 duplicate SKUs are in the keeper CSV and none are in the end CSV. All remain audit-only and untouched. Exact matching proves duplicate seller labels; it does not by itself prove that two listings represent the same physical item or authorize choosing a listing to retain.
+- Deliverable: [26-group CSV](../ebay/evidence/105-20260914/105-active-sku-duplicates.csv), with `sku,item_ids,titles,urls,count`. Multiple item IDs, titles, and URLs use ` | ` in corresponding order. Supporting [133-row active source](../ebay/evidence/105-20260914/105-active-listings-source.csv), [active count screenshot](../ebay/evidence/105-20260914/105-active-listings-evidence.png), and [RR7571 exact-filter screenshot](../ebay/evidence/105-20260914/105-duplicate-RR7571.png).
+- Verification: unique item IDs; exact nonblank SKU grouping; 26 × 2 = 52; all groups checked against both immutable scope CSVs; one group independently filtered in Seller Hub, showing its two recorded item IDs. No eBay endings, disables, condition edits, price changes, inventory changes, or template edits performed for this audit. No agents spawned.
+- Branch: `codex/105-active-sku-audit-20260914`.
