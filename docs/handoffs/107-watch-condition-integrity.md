@@ -60,3 +60,14 @@ condition may be inferred from title, description, or SKU.
 - 2026-09-11: Independent Sol and Terra reviews passed the final cache fallback
   and late-page fail-closed behavior; the focused suite passed 11 tests and the
   full suite passed 646 tests.
+
+
+## Astra spot-audit work log — 2026-09-14
+
+- Scoped audit status: **done**. The broader source-backed condition repair remains open and unapplied. The user's latest instructions authorize audit only, with at least 25 active watches and no condition edits.
+- After #92, a fresh Seller Hub read of account `lauramilman-newyork` contained 133 active listings. Selected 30 different nonblank SKUs with explicit Pre-Owned watch titles. Each public item page was opened individually and its main eBay condition was read and recorded. This is a targeted sample of potentially affected watches, not a random sample or a catalog-wide prevalence estimate.
+- Result: **30 listings audited; 25 contradictions flagged; 5 main conditions read Pre-owned - Good**. All 25 flags showed New with box and papers while the active listing title explicitly said Pre-Owned. These are review candidates; title evidence was not used to assign a replacement condition or upgrade source condition data. Shopify condition metafields were not inspected in this pass.
+- Control readings with Pre-owned - Good: 3863, RW3035, RW3064, RW3096, RW3047. The prior RW3096 condition resolution remains visible.
+- No listings ended and no condition, price, quantity, inventory, product, mapping, or template fields edited. No agents were spawned.
+- Deliverables: [25 mismatch rows](../ebay/evidence/107-20260914/107-condition-mismatches.csv), [all 30 checked rows with evidence and timestamps](../ebay/evidence/107-20260914/107-watch-audit-all-30.csv), and one screenshot per checked item in the same directory (`107-watch-<item_id>.png`). CSV item IDs, SKUs, conditions, and URLs were checked for completeness and uniqueness; 25 flagged plus 5 unflagged reconciles to 30.
+- Branch: `codex/107-watch-spot-audit-20260914`. This documentation-only PR records the completed spot audit; it does not close the source-backed repair issue.
