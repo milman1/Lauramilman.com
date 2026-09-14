@@ -97,6 +97,11 @@
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}
+      {%- if jf_drawer_handle == 'chains' -%}
+        {%- if flabel == 'product type' or flabel == 'type' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endif -%}
       {%- if fd_is_watch -%}
         {%- if flabel contains 'carat' or flabel contains 'diamond shape' or flabel contains 'clarity' or flabel contains 'cut grade' or flabel == 'cut' or flabel == 'colour' or flabel contains 'diamond weight' -%}
           {%- assign jf_skip_filter = true -%}

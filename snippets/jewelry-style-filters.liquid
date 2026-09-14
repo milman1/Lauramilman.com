@@ -15,7 +15,10 @@
   assign jf_style_label = ''
   assign jf_styles = ''
   assign jf_show_carat = true
+  assign jf_show_width = false
+  assign jf_show_product_type = false
   assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
+  assign jf_widths = 'Under 2mm::Under 2 mm||2-3mm::2–3 mm||3-4mm::3–4 mm||4-5mm::4–5 mm||5mm+::5 mm+'
 
   case jf_handle
     when 'earrings', 'lab-grown-earrings', 'chandelier-earrings'
@@ -50,8 +53,10 @@
     when 'chains'
       assign jf_enabled = true
       assign jf_show_carat = false
+      assign jf_show_width = true
+      assign jf_show_product_type = true
       assign jf_style_label = 'Chain Style'
-      assign jf_styles = 'Necklaces::Necklaces||Bracelets::Bracelets||Cuban::Cuban||Paperclip::Paperclip||Rope::Rope||Curb::Curb||Herringbone::Herringbone||Box::Box||Snake::Snake'
+      assign jf_styles = 'Cuban::Cuban||Paperclip::Paperclip||Rope::Rope||Curb::Curb||Herringbone::Herringbone||Box::Box||Snake::Snake'
 
     when 'pendants', 'pendants-1', 'lab-grown-pendants'
       assign jf_enabled = true
@@ -98,6 +103,40 @@
       </ul>
     </div>
   </div>
+
+  {%- if jf_show_product_type -%}
+  <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
+    <button type="button" class="refine__group-head" aria-expanded="true">
+      <span class="refine__group-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
+        Product Type
+      </span>
+      <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="refine__group-body">
+      <ul class="refine__checks">
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" class="js-jf-product-type" name="jf_product_type" value="Necklaces" data-client-filter="product-type">
+            <span class="refine-check__box" aria-hidden="true">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span class="refine-check__label">Necklaces</span>
+          </label>
+        </li>
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" class="js-jf-product-type" name="jf_product_type" value="Bracelets" data-client-filter="product-type">
+            <span class="refine-check__box" aria-hidden="true">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span class="refine-check__label">Bracelets</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>
+  {%- endif -%}
 
   <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
     <button type="button" class="refine__group-head" aria-expanded="true">
@@ -148,6 +187,27 @@
     </div>
   </div>
 
+  {%- if jf_show_width -%}
+  <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
+    <button type="button" class="refine__group-head" aria-expanded="true">
+      <span class="refine__group-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><path d="M7 8v8"/><path d="M17 8v8"/></svg>
+        Width
+      </span>
+      <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="refine__group-body">
+      <div class="refine__bands" data-jf-width-bands>
+        {%- assign jf_width_items = jf_widths | split: '||' -%}
+        {%- for item in jf_width_items -%}
+          {%- assign parts = item | split: '::' -%}
+          <button type="button" class="refine-band__chip js-jf-width-btn" data-width="{{ parts[0] | escape }}" aria-pressed="false">{{ parts[1] }}</button>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
   {%- if jf_show_carat -%}
   <div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters>
     <button type="button" class="refine__group-head" aria-expanded="true">
@@ -169,12 +229,14 @@
   </div>
 
   <style>
-    [data-jf-carat-bands] {
+    [data-jf-carat-bands],
+    [data-jf-width-bands] {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
     }
-    [data-jf-carat-bands] .refine-band__chip {
+    [data-jf-carat-bands] .refine-band__chip,
+    [data-jf-width-bands] .refine-band__chip {
       display: inline-block;
       padding: 0.55rem 1rem;
       border: 1px solid var(--border-medium, #CFC7B8);
@@ -186,10 +248,12 @@
       transition: all 0.2s ease;
       background: var(--warm-white, #FDFAF6);
     }
-    [data-jf-carat-bands] .refine-band__chip:hover {
+    [data-jf-carat-bands] .refine-band__chip:hover,
+    [data-jf-width-bands] .refine-band__chip:hover {
       border-color: var(--gold, #C9A050);
     }
-    [data-jf-carat-bands] .refine-band__chip.is-active {
+    [data-jf-carat-bands] .refine-band__chip.is-active,
+    [data-jf-width-bands] .refine-band__chip.is-active {
       background: var(--espresso, #1E1109);
       border-color: var(--espresso, #1E1109);
       color: var(--cream, #FAF6F0);

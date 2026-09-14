@@ -76,18 +76,25 @@
   # ── Spec rows from custom.* metafields — empty rows never render ──
   # Jewelry + watch keys share this list. Blank values are skipped, so a
   # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
-  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,metal_type:Metal,width:Width,clasp:Clasp,finish:Finish,construction:Construction,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
     assign mf = product.metafields.custom[def_parts[0]]
     if mf != blank
       assign v = mf.value | strip
+      if def_parts[0] == 'metal_type' and product.metafields.custom.metal.value != blank
+        continue
+      endif
       if v != blank and v != '—' and v != '-'
         capture spec_rows
           echo spec_rows
           echo '<div class="product-spec"><span class="product-spec__label">'
-          echo def_parts[1]
+          if def_parts[0] == 'link' and product.tags contains 'chains'
+            echo 'Chain Style'
+          else
+            echo def_parts[1]
+          endif
           echo '</span><span class="product-spec__value">'
           echo v | escape
           echo '</span></div>'
@@ -379,7 +386,7 @@
                   if (!desc) return;
                   Array.prototype.slice.call(desc.querySelectorAll('h2, h3, h4')).forEach(function (heading) {
                     var title = (heading.textContent || '').replace(/\s+/g, ' ').trim();
-                    if (!/specification/i.test(title) && !/^stone details$/i.test(title)) return;
+                    if (!/specification/i.test(title) && !/^stone details$/i.test(title) && !/^details$/i.test(title)) return;
                     var node = heading.nextElementSibling;
                     heading.parentNode.removeChild(heading);
                     while (node && !/^H[2-4]$/.test(node.tagName)) {
