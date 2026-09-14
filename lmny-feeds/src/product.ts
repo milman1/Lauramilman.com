@@ -35,7 +35,7 @@ export const CUSTOM_NAMESPACE = 'custom';
  * It feeds the content hash, so an existing catalogue is refreshed once
  * instead of being skipped as "unchanged".
  */
-export const PRODUCT_SCHEMA_VERSION = 24;
+export const PRODUCT_SCHEMA_VERSION = 25;
 
 /**
  * Unique watches are one-of-one. Uploadify (and other marketplace apps) keep
@@ -305,45 +305,26 @@ export function descriptionFor(item: FeedItem): string {
   if (item.kind === 'watch') {
     const listing = watchListingFor(item);
     if (listing) return listing.descriptionHtml;
-    const set = item.box && item.papers ? 'With original box and papers' : item.box ? 'With original box' : item.papers ? 'With papers' : 'Watch only';
-    const rows = [
-      ['Brand', item.brand],
-      ['Model', item.model],
-      ['Reference', item.reference],
-      ['Year', item.year],
-      ['Condition', item.condition],
-      ['Accessories', set],
-    ];
-    return renderRows(rows);
+    const accessories =
+      item.box && item.papers
+        ? ' with its original box and papers'
+        : item.box
+          ? ' with its original box'
+          : item.papers
+            ? ' with its papers'
+            : '';
+    return (
+      `<p>This ${escapeHtml(item.brand)} ${escapeHtml(item.model)} ${escapeHtml(item.reference)}` +
+      ` is offered by Laura Milman New York${accessories}.</p>`
+    );
   }
-  const origin = item.kind === 'lab' ? 'Lab-grown diamond' : 'Natural diamond';
+  const origin = item.kind === 'lab' ? 'lab-grown diamond' : 'natural diamond';
   const certification = item.certNumber ? `${item.lab} report ${item.certNumber}` : `${item.lab} certified`;
-  const lead =
+  return (
     `<p>This ${escapeHtml(formatCarat(item.carat))}ct ${escapeHtml(item.shape.toLowerCase())} ` +
-    `${escapeHtml(origin.toLowerCase())} is graded ${escapeHtml(item.color)} color and ` +
-    `${escapeHtml(item.clarity)} clarity, with ${escapeHtml(certification)}.</p>`;
-  const rows = [
-    ['Origin', origin],
-    ['Shape', item.shape],
-    ['Carat weight', `${formatCarat(item.carat)}ct`],
-    ['Color', item.color],
-    ['Clarity', item.clarity],
-    ['Cut', item.cut],
-    ['Polish', item.polish],
-    ['Symmetry', item.symmetry],
-    ['Fluorescence', item.fluorescence],
-    ['Measurements', item.measurements],
-    ['Certification', item.certNumber ? `${item.lab} ${item.certNumber}` : item.lab],
-  ];
-  return `${lead}${renderRows(rows)}`;
-}
-
-function renderRows(rows: (string | undefined)[][]): string {
-  const lis = rows
-    .filter((r): r is [string, string] => Boolean(r[1]))
-    .map(([k, v]) => `<li><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</li>`)
-    .join('');
-  return `<ul>${lis}</ul>`;
+    `${escapeHtml(origin)} is graded ${escapeHtml(item.color)} color and ` +
+    `${escapeHtml(item.clarity)} clarity, with ${escapeHtml(certification)}.</p>`
+  );
 }
 
 function escapeHtml(s: string): string {

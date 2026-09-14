@@ -247,7 +247,6 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
 
   // Specs render in the theme's `.product-specs` grid via custom.* metafields
   // (same PDP chrome as jewelry), and the description repeats the buyer-facing
-  // source facts as a compact labeled block rather than an HTML table.
   const dial = record.dial ? titleCase(record.dial) : null;
   const bezel = record.bezel ? titleCase(record.bezel) : null;
   const bracelet = record.bracelet ? titleCase(record.bracelet) : null;
@@ -276,9 +275,6 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   const descriptionHtml =
     `<p>This ${escapeHtml(descriptionIdentity)}` +
     `${yearClause}${openingClause}.${gradeClause}</p>` +
-    `<p><strong>Case size:</strong> ${escapeHtml(caseSize ?? 'Not specified')}<br>` +
-    `<strong>Year:</strong> ${escapeHtml(year ?? 'Not specified')}<br>` +
-    `<strong>Bracelet links:</strong> ${escapeHtml(linkText)}</p>` +
     notesParagraph +
     trustParagraph;
 

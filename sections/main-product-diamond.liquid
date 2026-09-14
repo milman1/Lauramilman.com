@@ -161,9 +161,10 @@
           Every purchase ships insured and fully certified.
         </p>
 
-        <!-- Full spec table -->
-        <h2 class="dpdp__specs-title">Specification</h2>
-        <dl class="dpdp__specs">
+        <!-- Full spec table — same 2-column chrome as jewelry PDPs -->
+        <div class="pdp-specs">
+          <h2 class="pdp-specs__title">Specifications</h2>
+          <div class="product-specs">
           {%- assign origin = 'Natural diamond' -%}
           {%- if is_lab -%}{%- assign origin = 'Lab-grown diamond' -%}{%- endif -%}
           {%- render 'diamond-spec-row', label: 'Origin', value: origin -%}
@@ -199,7 +200,36 @@
           {%- else -%}
             {%- render 'diamond-spec-row', label: 'Certificate', value: m.lab -%}
           {%- endif -%}
-        </dl>
+          </div>
+        </div>
+
+        {%- if product.description != blank -%}
+          <div class="pdp-desc" data-pdp-description>
+            <div class="accordion-item" data-open>
+              <button type="button" class="accordion-trigger" aria-expanded="true">
+                Description
+                <span class="accordion-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-content rte" id="PdpDescription" data-strip-duplicate-specs>{{ product.description }}</div>
+                <script>
+                  (function () {
+                    var desc = document.getElementById('PdpDescription');
+                    if (!desc) return;
+                    Array.prototype.slice.call(desc.querySelectorAll('ul')).forEach(function (ul) {
+                      if (ul.querySelector('strong')) ul.parentNode.removeChild(ul);
+                    });
+                    var leftover = (desc.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (leftover.length < 40) {
+                      var wrap = desc.closest('.pdp-desc');
+                      if (wrap) wrap.hidden = true;
+                    }
+                  })();
+                </script>
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
       </div>
     </div>
   </div>
@@ -490,51 +520,6 @@
     line-height: 1.7;
     color: var(--text-muted, #8A8070);
     margin: 1.25rem 0 0;
-  }
-
-  .dpdp__specs-title {
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-dark, #2C1810);
-    margin: 2.5rem 0 0.75rem;
-  }
-
-  .dpdp__specs {
-    margin: 0;
-    border-top: 1px solid var(--rule-light, #DDD5C5);
-  }
-
-  .dpdp__spec {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid var(--rule-light, #DDD5C5);
-  }
-
-  .dpdp__spec dt {
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.8rem;
-    color: var(--text-muted, #8A8070);
-    margin: 0;
-  }
-
-  .dpdp__spec dd {
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-dark, #2C1810);
-    margin: 0;
-    text-align: right;
-  }
-
-  .dpdp__spec dd.is-unknown {
-    font-weight: 400;
-    color: var(--text-muted, #8A8070);
   }
 
   /* ── Navy: lab-grown tier ── */

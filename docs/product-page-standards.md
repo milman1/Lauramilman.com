@@ -85,11 +85,14 @@ Examples:
 - Estate: first paragraph as in `lmny-feeds/src/backvault/listing.ts`, plus the second paragraph “Authenticated and hand-inspected by Laura Milman New York.” when the schema requires it.
 - New / house-made / boutique unworn: **omit** the authenticated paragraph.
 
-Feed watches follow `lmny-feeds/docs/watch-listing-schema.md` (no jewelry
-return promise; condition from source facts only).
+Loose diamonds use the diamond template (`sections/main-product-diamond.liquid`)
+with the same inquiry pills, **Specifications** heading, 2-column grid, and
+Description accordion. Gemology facts stay in `lmny_feed.*` / `custom.*`
+metafields; the body is one paragraph.
 
-Loose diamonds follow the diamond template and `lmny_feed.*` metafields,
-not this accordion pattern.
+Feed watches follow `lmny-feeds/docs/watch-listing-schema.md` (no jewelry
+return promise; condition from source facts only). The body is one prose
+paragraph; Case size, Year, and bracelet links belong in the spec grid.
 
 ---
 
@@ -139,6 +142,16 @@ ID (`custom.ebay_condition`) is for marketplaces, not a storefront prose
 claim. `1000` only for source-confirmed Unworn with box and papers.
 
 ### Estate jewelry
+
+| Metafield | Grid label | Example |
+|---|---|---|
+| `custom.metal_type` | Metal (when `custom.metal` is empty) | 18K Yellow Gold |
+| `custom.metal_weight` | Metal Weight | 32.5 g |
+| `custom.diamond_weight` | Diamond Weight | 2.10 ct |
+| `custom.measurements` | Measurements | 7 in |
+| `custom.gemstones` | Gemstones | Emerald |
+| `custom.era` | Era | Art Deco |
+| `custom.condition` | Condition | Pre-owned |
 
 Brand, metal, measurements, gemstones, era, condition as known. Empty
 cells stay empty.
