@@ -1,8 +1,9 @@
 # Product SEO title formulas
 
-Listing voice, GEO rules, and video-first gallery order live in
-`docs/seo/listing-seo-geo.md`. This file is only the character budgets
-and per-source title strings.
+This file is only the character budgets and per-source title strings.
+
+- Listing voice, GEO rules, and video-first gallery order: [`docs/seo/listing-seo-geo.md`](../../docs/seo/listing-seo-geo.md)
+- Feed / eBay / Connect copy rules: [`docs/seo-geo-copy.md`](../../docs/seo-geo-copy.md)
 
 Shopify's theme adds the store name to the HTML `<title>`. The sync therefore
 uses the 60-character `seo.title` budget for product identity and search intent,
