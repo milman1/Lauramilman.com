@@ -2,7 +2,7 @@
 - Issue: https://github.com/milman1/Lauramilman.com/issues/92
 - Updated (UTC): 2026-09-10
 - Owner / session: Astra (OpenAI GPT-6 Astra), browser session run by the merchant
-- Status: planned
+- Status: blocked — R3006 preserve exception requires resolution; all other scoped SKUs absent from final active/enabled checks
 - Goal and acceptance criteria: Remove the 640 archived-watch listings from eBay and stop Marketplace Connect from relisting them, without touching the 155 keeper SKUs. All 640 are already archived in Shopify (verified 2026-09-09); this task is eBay-side and Marketplace-Connect-side only, it does not touch Shopify product status. Acceptance: eBay Seller Hub's Active listings show none of the 640 SKUs in `docs/ebay/ebay_end_skus.csv` still active; all 155 SKUs in `docs/ebay/ebay_keeper_skus_unique.csv` are still active and untouched; the work log records a count of how many of the 640 were ended, how many were already gone, and confirms zero keeper SKUs were touched. Independent check: a Claude worker (Sonnet 5) re-reads the result with a fresh query or a fresh page load and records the count in the work log before Status changes to done.
 - Scope (files / live records): Read-only on `docs/ebay/CLAUDE_TAKEDOWN_HANDOFF.md`, `docs/ebay/batches/README.md`, `docs/ebay/batches/*`, `docs/ebay/ebay_end_skus.csv` (640 SKUs), and `docs/ebay/ebay_keeper_skus_unique.csv` (155 SKUs) in this repository. Live scope is eBay Seller Hub (Listings > Active, and Reports > Upload) for the merchant's eBay seller account, and the Marketplace Connect (Codisto) bulk eBay screen in Shopify admin for the `laura-milman` store. Do not touch Shopify product status, price, or any product outside these SKU lists.
 - Branch / commit / PR:
@@ -16,3 +16,41 @@
 
 ## Work log
 - 2026-09-10: Handoff file created. All 640 target SKUs are archived in Shopify already (verified 2026-09-09, per `docs/ebay/CLAUDE_TAKEDOWN_HANDOFF.md`); this task is eBay Seller Hub and Marketplace Connect only. No takedown work performed yet.
+
+
+## Astra live work — 2026-09-14
+
+- User authorized exact-SKU screen work only and no agents. Fresh page verification was performed by Astra; no secondary agent was used. The user explicitly changed the save limit to 50 per batch during the run.
+- Source sets: 640 unique end SKUs, 155 unique keeper SKUs, zero overlap. No source scope files were changed.
+- eBay result: 49 listings ended in batches of 1 and 48; 590 end SKUs absent at baseline; R3006/item 366655894070 held because the latest issue update explicitly says to preserve it. Final fresh Seller Hub result: 133 active, only R3006 intersects the end CSV. All 115 baseline keeper item IDs remain active. Zero keepers touched. The baseline contained 89 distinct active keeper SKUs; the other 66 keeper SKUs were already absent and were not restored.
+- Marketplace Connect result: 102 exact SKUs saved Disabled in the first pass; the next ten-SKU save stalled and was logged as unconfirmed. A fresh view still showed an affected SKU enabled. The subsequent user-authorized bulk run saved 315 exact SKUs in six batches of 50 and one of 15, including all ten previously unconfirmed SKUs. Total: 417 unique SKUs saved Disabled. The earlier uncertain batch is not double-counted.
+- Final fresh enabled-only scan reached the bottom of the grid. Only R3006 intersects the 640-SKU end set. The other 222 scoped SKUs had no disable action recorded and were absent from the final enabled view; this does not assert whether they were already disabled or absent from Connect. All 91 baseline enabled keeper SKUs (99 distinct SKU/title rows) remain enabled. Zero keepers touched.
+- No Shopify products were deleted, and no product price, inventory, theme, template, or condition fields were edited. Draft template PR #130 was not modified or merged.
+- Live work is complete for the 639 non-held SKUs. Full acceptance is blocked by the R3006 preserve exception and the pre-existing absence of 66 keeper SKUs. No change to those records is inferred or authorized.
+- Evidence is committed under [docs/ebay/evidence/92-20260914](../ebay/evidence/92-20260914). The per-SKU reconciliation is [92-final-sku-status.csv](../ebay/evidence/92-20260914/92-final-sku-status.csv). Screenshots and machine-readable per-batch logs contain the before/after evidence, exact SKU lists, counts, timestamps, and the stalled-save record. Evidence was retained locally and in this branch; the requested Drive folder upload has not been completed.
+
+### Saved batch log
+
+| System / batch | Result | Exact rows and screenshots |
+| --- | --- | --- |
+| eBay 01 / 02 | 1 + 48 ended; 0 keepers touched | [Batch log](../ebay/evidence/92-20260914/92-batch-log.jsonl) |
+| Connect original 01 | 1 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch01-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch01-after.png) |
+| Connect original 02 | 5 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch02-before-save.png) / [After](../ebay/evidence/92-20260914/92-connect-batch02-after.png) |
+| Connect original 03 | 8 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch03-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch03-after.png) |
+| Connect original 04 | 8 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch04-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch04-after.png) |
+| Connect original 05 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch05-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch05-after.png) |
+| Connect original 06 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch06-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch06-after.png) |
+| Connect original 07 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch07-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch07-after.png) |
+| Connect original 08 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch08-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch08-after.png) |
+| Connect original 09 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch09-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch09-after.png) |
+| Connect original 10 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch10-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch10-after.png) |
+| Connect original 11 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch11-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch11-after.png) |
+| Connect original 12 | 10 disabled | [Before](../ebay/evidence/92-20260914/92-connect-batch12-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch12-after.png) |
+| Connect original 13 | 10 unconfirmed; resolved in later bulk batch 07 | [Before](../ebay/evidence/92-20260914/92-connect-batch13-before.png) / [After](../ebay/evidence/92-20260914/92-connect-batch13-save-pending.png) |
+| Connect 50-row 01 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch01-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch01-after.png) |
+| Connect 50-row 02 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch02-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch02-after.png) |
+| Connect 50-row 03 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch03-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch03-after.png) |
+| Connect 50-row 04 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch04-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch04-after.png) |
+| Connect 50-row 05 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch05-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch05-after.png) |
+| Connect 50-row 06 | 50 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch06-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch06-after.png) |
+| Connect 50-row 07 | 15 disabled; 0 keepers touched | [Before](../ebay/evidence/92-20260914/92-connect-50-batch07-selected.png) / [After](../ebay/evidence/92-20260914/92-connect-50-batch07-after.png) |
