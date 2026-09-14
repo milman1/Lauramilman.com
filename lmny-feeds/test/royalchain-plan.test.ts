@@ -115,8 +115,8 @@ describe('Royal Chain listing builder', () => {
     expect(products.map((product) => product.handle)).toEqual(['lmny-mixed-bracelet', 'lmny-mixed']);
     expect(products.map((product) => product.productType)).toEqual(['Bracelets', 'Necklaces']);
     expect(products.map((product) => product.ebay.itemSpecifics.Type)).toEqual(['Bracelet', 'Necklace']);
-    expect(products[0]!.descriptionHtml).toMatch(/curb bracelet/i);
-    expect(products[1]!.descriptionHtml).toMatch(/curb necklace/i);
+    expect(products[0]!.descriptionHtml).toMatch(/curb chain bracelet/i);
+    expect(products[1]!.descriptionHtml).toMatch(/curb chain necklace/i);
   });
 
   it('fails closed for eBay until all image, content, and condition gates are met', () => {
