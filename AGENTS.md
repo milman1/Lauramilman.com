@@ -535,7 +535,10 @@ approves. Astra is not involved.
 5. Four images are generated or collected: hero, one detail macro, one on-body
    or scale frame, one lifestyle frame. If a product has a video, that video is
    Shopify media and the first gallery item — never HTML inside the
-   description. Stills follow the video. For Peaceful Diamonds pieces
+   description. Stills follow the video. For house chains, the on-model still
+   (on-body necklace or on-wrist bracelet) is Shopify featured media — position
+   0 — so collection cards and PDPs show the piece worn; remaining stills keep
+   their previous relative order. For Peaceful Diamonds pieces
    the `peaceful-diamonds-higgsfield` skill's stack and background rules win
    (its product-shot prompt uses a black background); the cream `#FAF6F0` or
    warm white `#FDFAF6` hero applies to Laura Milman house pieces and chains.
