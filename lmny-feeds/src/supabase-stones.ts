@@ -76,7 +76,10 @@ export function stoneRowFor(
     video_urls: item.videoUrls,
     content_hash: contentHash,
     synced_at: syncedAt,
-    available: true,
+    // Match Shopify: imageless stones are DRAFT / media-missing. The
+    // storefront grid reads this table, not Shopify, so listing them as
+    // available produced cream placeholder cards.
+    available: item.imageUrls.length > 0,
   };
 }
 
