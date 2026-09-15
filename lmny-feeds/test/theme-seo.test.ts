@@ -49,4 +49,19 @@ describe('theme SEO integration', () => {
     expect(article).toContain('"dateModified"');
     expect(article).toContain('"@id": {{ canonical_url | json }}');
   });
+
+  it('gives Chains its own column in the Fine Jewelry dropdown', () => {
+    const header = themeFile('sections/header.liquid');
+    const footer = themeFile('sections/footer.liquid');
+    const collection = themeFile('sections/main-collection.liquid');
+
+    expect(header).toContain('nav__dropdown--fine');
+    expect(header).toContain('nav__dropdown-heading">Chains');
+    expect(header).toContain('href="/collections/chains"');
+    expect(header).toContain('All Chains');
+    expect(header).toMatch(/nav__dropdown-heading">Jewelry[\s\S]*\/collections\/necklaces[\s\S]*\/collections\/pendants-1/);
+    expect(header).toMatch(/nav__dropdown-heading">Chains[\s\S]*All Chains[\s\S]*Cuban[\s\S]*Snake/);
+    expect(footer).toContain('href="/collections/chains"');
+    expect(collection).toContain('href="/collections/chains"');
+  });
 });
