@@ -1,0 +1,455 @@
+{
+  "result": "All 50 already % increase 7; bulk Update made no changes and did not expose Save",
+  "rows": [
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$25680.00",
+      "row": "0",
+      "safe": true,
+      "sku": "van-cleef-arpels-1940s-18k-yellow-gold-vintage-retro-diamond-wrist-watch-rr5823",
+      "title": "Pre-Owned Van Cleef & Arpels 1940's 18K Yellow Gold Vintage Retro Diamond Wrist Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$10500.00",
+      "row": "1",
+      "safe": true,
+      "sku": "RW3107",
+      "title": "Rolex Oyster Perpetual 114300 39mm June 2019"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$13800.00",
+      "row": "2",
+      "safe": true,
+      "sku": "RW3106",
+      "title": "Pre-Owned Rolex Submariner No Date 114060 40mm January 2019"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$10800.00",
+      "row": "3",
+      "safe": true,
+      "sku": "RW3105",
+      "title": "Unworn Rolex Oyster Perpetual 277200 31mm July 2026"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "4",
+      "safe": true,
+      "sku": "RW3104",
+      "title": "Pre-Owned Rolex Datejust 126334 41mm June 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RW3103",
+      "title": "Pre-Owned Rolex Submariner Date 116613LB 40mm June 2020"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3102",
+      "title": "Pre-Owned Rolex Deepsea 136660 44mm July 2025"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$30800.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3101",
+      "title": "Unworn Rolex Sky Dweller 336934 42mm August 2026"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$49200.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3100",
+      "title": "Pre-Owned Rolex Submariner Date 126618LB 41mm June 2025"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$35300.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3099",
+      "title": "Pre-Owned Rolex Daytona 116500LN 40mm October 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$12600.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3098",
+      "title": "Rolex Submariner Date 16610 40mm May 1996"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$13800.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3097",
+      "title": "Pre-Owned Rolex Submariner No Date 114060 40mm May 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16500.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3096",
+      "title": "Pre-Owned Rolex Datejust 126334 41mm March 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$14400.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3095",
+      "title": "Pre-Owned Rolex Submariner Date 116610LN 40mm February 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16800.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3094",
+      "title": "Pre-Owned Rolex Submariner Date 126610LN 41mm October 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$22400.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3092",
+      "title": "Pre-Owned Rolex Submariner Date 116610LV 40mm April 2019"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16800.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RW3088",
+      "title": "Pre-Owned Rolex Datejust 126333 41mm January 2017"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$9000.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3087",
+      "title": "Pre-Owned Rolex Oyster Perpetual 114200 34mm March 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3086",
+      "title": "Pre-Owned Rolex Datejust 126333 41mm May 2019"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$12600.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3085",
+      "title": "Rolex Milgauss 116400GV 40mm July 2014"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3084",
+      "title": "Rolex Submariner Date 116613LB 40mm December 2017"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18200.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3083",
+      "title": "Rolex Datejust 126333 41mm April 2016"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18500.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3082",
+      "title": "Rolex Datejust 126334"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$29700.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3076",
+      "title": "Unworn Rolex Land-Dweller 127334 40mm June 2026"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$15000.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3073",
+      "title": "Pre-Owned Rolex Sea Dweller 126660 44mm May 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$26900.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3067",
+      "title": "Pre-Owned Rolex GMT Master II 126710BLRO 40mm June 2021"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21900.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3066",
+      "title": "Rolex Submariner Date 116610LV 40mm March 2017"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$15000.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RW3065",
+      "title": "Pre-Owned Rolex Sea Dweller 126600 43mm November 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$14400.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3064",
+      "title": "Pre-Owned Rolex Explorer II 226570 42mm September 2024"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$20200.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3062",
+      "title": "Pre-Owned Rolex Datejust 126331 41mm October 2021"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$20800.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3060",
+      "title": "Rolex Datejust 126331 41mm September 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18500.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3059",
+      "title": "Pre-Owned Rolex Datejust 126231 36mm July 2023"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16800.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3056",
+      "title": "Pre-Owned Rolex Submariner Date 126610LN 41mm July 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21900.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RW3054",
+      "title": "Unworn Rolex Datejust 278271 31mm April 2025"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19400.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3047",
+      "title": "Pre-Owned Rolex Datejust 126333 41mm April 2023"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$20200.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3046",
+      "title": "Pre-Owned Rolex Datejust 126331 41mm January 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RW3043",
+      "title": "Pre-Owned Rolex Datejust 126333 41mm April 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RW3041",
+      "title": "Pre-Owned Rolex Datejust 126331 41mm January 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$20200.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RW3039",
+      "title": "Pre-Owned Rolex Sky Dweller 326933 42mm May 2020"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19100.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RW3036",
+      "title": "Pre-Owned Rolex Submariner Date 126613LB 41mm January 2021"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$20200.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RW3035",
+      "title": "Pre-Owned Rolex GMT Master II 126710BLNR 40mm October 2020"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$38520.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR9952",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold BB 19 1T Vintage Serpenti Black Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$70200.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RR9917",
+      "title": "Pre-Owned Cartier 18K Rose Gold Captive 55mm Diamond Bezel And Diamond Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$40080.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RR9758",
+      "title": "Pre-Owned Cartier Panthere 18K Yellow Gold Factory Diamond Mid Size Ref 1280/2 Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$14760.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RR9688",
+      "title": "Pre-Owned Chopard Platinum Deco Diamond And Green Emerald Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$31920.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR9533",
+      "title": "Pre-Owned Cartier 18K White Gold Captive 35mm Diamond Dial Ref 3120 Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$36600.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RR9406",
+      "title": "Pre-Owned Van Cleef & Arpels 18K Rose Gold Charms Carnelian Dial 38mm Double Row Diamond Bezel Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$31000.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RR9406",
+      "title": "Pre-Owned Van Cleef & Arpels 18K Rose Gold Charms Carnelian Dial 38mm Double Row Diamond Bezel Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16920.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RR9295",
+      "title": "Pre-Owned Chopard 18K White Gold Chopardissimo Mirror Dial 40mm Dial Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$10440.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR9291",
+      "title": "Pre-Owned Cartier Trinity 18K Tri Color Trinity Round Dial 27mm 1990's Diamond Women Watch"
+    }
+  ]
+}
