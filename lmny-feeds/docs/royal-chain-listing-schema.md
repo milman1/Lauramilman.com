@@ -9,11 +9,12 @@ it contains Cost per item.
 
 Products use vendor `Laura Milman New York`, product type and Shopify category
 appropriate to their length: Bracelets below 14in and Necklaces from 14in.
-The public
-description has a factual overview followed by a Details list for material,
-style, width, and every available length. It does not make care, fulfillment,
-authentication, packaging, or provenance claims because the intake does not
-provide evidence for them.
+The public description is one factual paragraph in the lab-grown jewelry
+shape: what it is, the metal, then verified finish, clasp, construction, and
+available lengths. Specs are written to `custom.*` metafields so the theme
+renders the grid. It does not inline a Details list, and it does not make
+care, fulfillment, authentication, packaging, or provenance claims because
+the intake does not provide evidence for them.
 
 The intake accepts its original `image_url` plus an optional semicolon- or
 pipe-delimited `image_urls` column. It accepts an `existing_handle` override;

@@ -9,8 +9,9 @@
 
 {%- liquid
   assign pc_tags = product.tags | join: '|||' | downcase
-  assign pc_metal = product.metafields.custom.metal_type.value | default: '' | downcase
+  assign pc_metal = product.metafields.custom.metal_type.value | default: product.metafields.custom.metal.value | default: '' | downcase
   assign pc_carat = product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value | default: ''
+  assign pc_width = product.metafields.custom.width.value | default: ''
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
 -%}
@@ -24,6 +25,7 @@
   data-price-cents="{{ product.price }}"
   data-metal="{{ pc_metal | escape }}"
   data-carat="{{ pc_carat | escape }}"
+  data-width="{{ pc_width | escape }}"
   data-vendor="{{ product.vendor | downcase | escape }}"
 >
   <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ display_title | escape }}">

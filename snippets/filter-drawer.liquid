@@ -21,7 +21,7 @@
   assign jf_drawer_handle = results.handle | downcase
   assign jf_drawer_enabled = false
   case jf_drawer_handle
-    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
+    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'chains', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
       assign jf_drawer_enabled = true
   endcase
 
@@ -94,6 +94,11 @@
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
         {%- if flabel contains 'metal' -%}
+          {%- assign jf_skip_filter = true -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- if jf_drawer_handle == 'chains' -%}
+        {%- if flabel == 'product type' or flabel == 'type' -%}
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}

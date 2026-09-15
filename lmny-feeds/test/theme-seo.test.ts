@@ -43,6 +43,9 @@ describe('theme SEO integration', () => {
     expect(layout).toContain('"@type": "SearchAction"');
     expect(layout).toContain('"sameAs"');
     expect(collection).toContain("render 'structured-data-collection'");
+    expect(collection).toContain('href="/collections/chains"');
+    expect(themeFile('sections/header.liquid')).toContain('href="/collections/chains"');
+    expect(themeFile('sections/footer.liquid')).toContain('href="/collections/chains"');
     expect(diamondCollection).toContain("render 'structured-data-collection'");
     expect(collectionSchema).toContain('"@type": "CollectionPage"');
     expect(collectionSchema).toContain('"@type": "ItemList"');

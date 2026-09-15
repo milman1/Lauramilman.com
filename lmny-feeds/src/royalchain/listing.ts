@@ -169,8 +169,46 @@ function assertSingleMetal(parsed: ParsedVariant[], itemNumber: string): string 
   return metals[0]!;
 }
 
-function detailsHtml(details: Array<[string, string]>): string {
-  return `<h2>Details</h2><ul>${details.map(([label, value]) => `<li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</li>`).join('')}</ul>`;
+function sentenceCase(value: string): string {
+  const trimmed = clean(value);
+  if (!trimmed) return '';
+  return trimmed[0]!.toUpperCase() + trimmed.slice(1);
+}
+
+function claspPhrase(closure: string): string {
+  const value = clean(closure);
+  if (!value) return '';
+  return /clasp/i.test(value) ? value.toLowerCase() : `${value.toLowerCase()} clasp`;
+}
+
+function joinOxford(values: string[]): string {
+  if (values.length <= 1) return values[0] ?? '';
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`;
+}
+
+/** One lab-grown-style paragraph. Specs belong in metafields, not a Details list. */
+export function royalChainDescriptionHtml(input: {
+  widthMm: string;
+  style: string;
+  singularType: string;
+  metal: string;
+  lengths: string[];
+  closure?: string;
+  finish?: string;
+  construction?: string;
+}): string {
+  const width = escapeHtml(clean(input.widthMm));
+  const style = escapeHtml(clean(input.style).toLowerCase());
+  const type = escapeHtml(clean(input.singularType).toLowerCase());
+  const metal = escapeHtml(clean(input.metal));
+  const extras: string[] = [];
+  if (clean(input.finish ?? '')) extras.push(`${escapeHtml(clean(input.finish ?? '').toLowerCase())} finish`);
+  if (clean(input.closure ?? '')) extras.push(escapeHtml(claspPhrase(input.closure ?? '')));
+  if (clean(input.construction ?? '')) extras.push(`${escapeHtml(clean(input.construction ?? '').toLowerCase())} construction`);
+  const second = extras.length ? ` ${sentenceCase(extras.join(', '))}.` : '';
+  const lengths = escapeHtml(joinOxford(input.lengths.map((length) => clean(length))));
+  return `<p>This ${width}mm ${style} chain ${type} is crafted in ${metal}.${second} Available in ${lengths}.</p>`;
 }
 
 function buildRoyalChainProductForType(
@@ -190,19 +228,21 @@ function buildRoyalChainProductForType(
   const singularType = productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? 'Bracelet' : 'Necklace';
   const title = `${width}mm ${style} Chain ${singularType} in ${metal}`;
   const ebayTitle = truncateAtWord(title, EBAY_TITLE_MAX);
-  const descriptionDetails: Array<[string, string]> = [
-    ['Material', metal],
-    ['Style', style],
-    ['Width', `${width} mm`],
-    ['Available lengths', lengths.join(', ')],
-    ...(clean(source.closure ?? '') ? [['Closure', clean(source.closure ?? '')] as [string, string]] : []),
-    ...(clean(source.finish ?? '') ? [['Finish', clean(source.finish ?? '')] as [string, string]] : []),
-    ...(clean(source.construction ?? '') ? [['Construction', clean(source.construction ?? '')] as [string, string]] : []),
-    ...(condition ? [['Condition', condition.label] as [string, string]] : []),
-  ];
-  const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} ${singularType.toLowerCase()} is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
+  const descriptionHtml = royalChainDescriptionHtml({
+    widthMm: width,
+    style,
+    singularType,
+    metal,
+    lengths,
+    closure: source.closure,
+    finish: source.finish,
+    construction: source.construction,
+  });
   const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
-  const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
+  const seoDescription = truncateAtWord(
+    `Shop this ${width}mm ${style.toLowerCase()} chain ${singularType.toLowerCase()} in ${metal}. Free insured shipping and 14-day returns.`,
+    160,
+  );
   const fallbackHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
   const baseHandle = source.existingHandle || EXISTING_HANDLES[itemNumber] || fallbackHandle;
   const handle = splitByType && productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? `${baseHandle}-bracelet` : baseHandle;
@@ -210,8 +250,15 @@ function buildRoyalChainProductForType(
   const mediaReady = shopifyCdnMediaUrlsAfterImport(source.shopifyCdnImageUrls ?? []).length >= ROYALCHAIN_MINIMUM_IMAGES;
   const tags = [ROYALCHAIN_VENDOR, productType, ...(mediaReady ? [] : ['media-missing'])];
   const metafields: MetafieldValue[] = [
+    { namespace: 'custom', key: 'metal', type: 'single_line_text_field', value: metal },
     { namespace: 'custom', key: 'metal_type', type: 'single_line_text_field', value: metal },
+    { namespace: 'custom', key: 'link', type: 'single_line_text_field', value: style },
+    { namespace: 'custom', key: 'width', type: 'single_line_text_field', value: `${width} mm` },
+    { namespace: 'custom', key: 'length', type: 'single_line_text_field', value: lengths.join(', ') },
     { namespace: 'custom', key: 'measurements', type: 'single_line_text_field', value: `${width} mm wide; available in ${lengths.join(', ')}` },
+    ...(clean(source.closure ?? '') ? [{ namespace: 'custom' as const, key: 'clasp', type: 'single_line_text_field' as const, value: clean(source.closure ?? '') }] : []),
+    ...(clean(source.finish ?? '') ? [{ namespace: 'custom' as const, key: 'finish', type: 'single_line_text_field' as const, value: clean(source.finish ?? '') }] : []),
+    ...(clean(source.construction ?? '') ? [{ namespace: 'custom' as const, key: 'construction', type: 'single_line_text_field' as const, value: clean(source.construction ?? '') }] : []),
     ...(condition
       ? [
           { namespace: 'custom' as const, key: 'condition', type: 'single_line_text_field' as const, value: condition.label },

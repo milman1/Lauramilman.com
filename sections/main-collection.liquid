@@ -16,7 +16,7 @@
     assign jewelry_only = true
     assign schema_include_products = false
   endif
-  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
+  assign jewelry_handles = 'rings,necklaces,chains,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
   assign has_active_filters = false
   for filter in collection.filters
@@ -54,6 +54,7 @@
         <span class="lm-collection__chips-label">Shop jewelry</span>
         <a href="/collections/rings" class="lm-collection__chip">Rings</a>
         <a href="/collections/necklaces" class="lm-collection__chip">Necklaces</a>
+        <a href="/collections/chains" class="lm-collection__chip">Chains</a>
         <a href="/collections/earrings" class="lm-collection__chip">Earrings</a>
         <a href="/collections/bracelets" class="lm-collection__chip">Bracelets</a>
         <a href="/collections/pendants-1" class="lm-collection__chip">Pendants</a>
@@ -690,6 +691,27 @@
       return normalize(haystack).indexOf(normalize(needle)) !== -1;
     }
 
+    function extractWidth(card) {
+      var raw = card.dataset.width || '';
+      var fromMeta = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
+      if (!isNaN(fromMeta) && fromMeta > 0) return fromMeta;
+      var title = card.dataset.title || '';
+      var match = title.match(/([\d.]+)\s*mm\b/i);
+      return match ? parseFloat(match[1]) : null;
+    }
+
+    function widthInRange(width, rangeKey) {
+      if (width === null || isNaN(width)) return false;
+      switch (rangeKey) {
+        case 'Under 2mm': return width < 2;
+        case '2-3mm': return width >= 2 && width < 3;
+        case '3-4mm': return width >= 3 && width < 4;
+        case '4-5mm': return width >= 4 && width < 5;
+        case '5mm+': return width >= 5;
+        default: return false;
+      }
+    }
+
     function extractCarat(card) {
       var raw = card.dataset.carat || '';
       var fromMeta = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
@@ -746,13 +768,15 @@
       });
     }
 
-    function syncURL(selectedTypes, selectedMetals, caratRange) {
+    function syncURL(selectedTypes, selectedMetals, caratRange, selectedProductTypes, widthRange) {
       try {
         var params = new URLSearchParams(window.location.search);
-        ['type', 'metal', 'carat'].forEach(function (k) { params.delete(k); });
+        ['type', 'metal', 'carat', 'product_type', 'width'].forEach(function (k) { params.delete(k); });
         if (selectedTypes.length) params.set('type', selectedTypes.join(','));
+        if (selectedProductTypes && selectedProductTypes.length) params.set('product_type', selectedProductTypes.join(','));
         if (selectedMetals.length) params.set('metal', selectedMetals.join(','));
         if (caratRange) params.set('carat', caratRange);
+        if (widthRange) params.set('width', widthRange);
         var qs = params.toString();
         var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
         window.history.replaceState({}, '', next);
@@ -773,12 +797,15 @@
       if (!hasJewelryFilters || !allCards.length) return;
 
       var selectedTypes = selectedValues('.js-jf-style');
+      var selectedProductTypes = selectedValues('.js-jf-product-type');
       var selectedMetals = selectedValues('.js-jf-metal');
       var caratBtn = document.querySelector('.js-jf-carat-btn.is-active');
       var caratRange = caratBtn ? caratBtn.getAttribute('data-carat') : null;
+      var widthBtn = document.querySelector('.js-jf-width-btn.is-active');
+      var widthRange = widthBtn ? widthBtn.getAttribute('data-width') : null;
 
       var visibleCount = 0;
-      var hasActive = selectedTypes.length > 0 || selectedMetals.length > 0 || !!caratRange;
+      var hasActive = selectedTypes.length > 0 || selectedProductTypes.length > 0 || selectedMetals.length > 0 || !!caratRange || !!widthRange;
 
       allCards.forEach(function (card) {
         var tags = card.dataset.tags || '';
@@ -789,9 +816,16 @@
 
         if (show && selectedTypes.length) {
           var typeMatch = selectedTypes.some(function (type) {
-            return containsValue(tags, type) || containsValue(titleLower, type) || containsValue(productType, type);
+            return containsValue(tags, type) || containsValue(titleLower, type);
           });
           if (!typeMatch) show = false;
+        }
+
+        if (show && selectedProductTypes.length) {
+          var productTypeMatch = selectedProductTypes.some(function (type) {
+            return containsValue(productType, type);
+          });
+          if (!productTypeMatch) show = false;
         }
 
         if (show && selectedMetals.length) {
@@ -803,6 +837,10 @@
 
         if (show && caratRange) {
           if (!caratInRange(extractCarat(card), caratRange)) show = false;
+        }
+
+        if (show && widthRange) {
+          if (!widthInRange(extractWidth(card), widthRange)) show = false;
         }
 
         card.style.display = show ? '' : 'none';
@@ -821,15 +859,15 @@
       }
 
       syncStyleBar(selectedTypes);
-      syncURL(selectedTypes, selectedMetals, caratRange);
-      updateFilterBadge(selectedTypes.length + selectedMetals.length + (caratRange ? 1 : 0));
+      syncURL(selectedTypes, selectedMetals, caratRange, selectedProductTypes, widthRange);
+      updateFilterBadge(selectedTypes.length + selectedProductTypes.length + selectedMetals.length + (caratRange ? 1 : 0) + (widthRange ? 1 : 0));
     }
 
     function clearJewelryFilters() {
-      document.querySelectorAll('.js-jf-style, .js-jf-metal').forEach(function (input) {
+      document.querySelectorAll('.js-jf-style, .js-jf-metal, .js-jf-product-type').forEach(function (input) {
         input.checked = false;
       });
-      document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
+      document.querySelectorAll('.js-jf-carat-btn, .js-jf-width-btn').forEach(function (btn) {
         btn.classList.remove('is-active');
         btn.setAttribute('aria-pressed', 'false');
       });
@@ -853,6 +891,7 @@
       }
 
       checkList('type', '.js-jf-style');
+      checkList('product_type', '.js-jf-product-type');
       checkList('metal', '.js-jf-metal');
 
       var caratParam = params.get('carat');
@@ -860,6 +899,18 @@
         var wantedCarat = normalize(caratParam);
         document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
           if (normalize(btn.getAttribute('data-carat')) === wantedCarat) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+            applied = true;
+          }
+        });
+      }
+
+      var widthParam = params.get('width');
+      if (widthParam) {
+        var wantedWidth = normalize(widthParam);
+        document.querySelectorAll('.js-jf-width-btn').forEach(function (btn) {
+          if (normalize(btn.getAttribute('data-width')) === wantedWidth) {
             btn.classList.add('is-active');
             btn.setAttribute('aria-pressed', 'true');
             applied = true;
@@ -907,6 +958,21 @@
         btn.addEventListener('click', function () {
           var wasActive = btn.classList.contains('is-active');
           document.querySelectorAll('.js-jf-carat-btn').forEach(function (b) {
+            b.classList.remove('is-active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          if (!wasActive) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+          }
+          applyJewelryFilters();
+        });
+      });
+
+      document.querySelectorAll('.js-jf-width-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var wasActive = btn.classList.contains('is-active');
+          document.querySelectorAll('.js-jf-width-btn').forEach(function (b) {
             b.classList.remove('is-active');
             b.setAttribute('aria-pressed', 'false');
           });
