@@ -1519,6 +1519,31 @@ p {
   color: var(--text-dark);
 }
 
+.product-spec__value--unknown {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.pdp-specs {
+  margin-top: 1.75rem;
+}
+
+.pdp-specs__title {
+  font-family: var(--font-heading, 'Cormorant Garamond', serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text-dark, #2C1810);
+  margin: 0 0 0.75rem;
+}
+
+.pdp-specs .product-specs {
+  margin: 0;
+}
+
+.pdp-desc {
+  margin-top: 1.5rem;
+}
+
 /* Gold divider */
 .gold-divider {
   height: 1px;

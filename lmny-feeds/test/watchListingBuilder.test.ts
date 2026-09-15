@@ -147,28 +147,35 @@ describe('buildWatchListing', () => {
       style: 'Submariner Date',
     });
     expect(listing.descriptionHtml).not.toContain('<table>');
+    expect(listing.descriptionHtml).not.toContain('<strong>Case size:</strong>');
+    expect(listing.descriptionHtml).not.toContain('<strong>Bracelet links:</strong>');
   });
 
-  it('writes human-readable link copy for extra and missing bracelet links', () => {
+  it('writes bracelet-link copy to metafields, not the description paragraph', () => {
     const extra = buildWatchListing(base({ link: 19 }));
     expect('needsReview' in extra).toBe(false);
     if ('needsReview' in extra) return;
-    expect(extra.descriptionHtml).toContain('<strong>Bracelet links:</strong> 19 additional bracelet links included');
+    expect(extra.descriptionHtml).not.toContain('<strong>Bracelet links:</strong>');
+    expect(extra.descriptionHtml).not.toContain('19 additional bracelet links included');
+    expect(extra.metafields.find((m) => m.key === 'link')?.value).toBe('19');
+    expect(linkClause(19)).toBe('19 additional bracelet links included');
 
     const missing = buildWatchListing(base({ link: '-5' }));
     expect('needsReview' in missing).toBe(false);
     if ('needsReview' in missing) return;
-    expect(missing.descriptionHtml).toContain('<strong>Bracelet links:</strong> 5 bracelet links missing');
+    expect(missing.metafields.find((m) => m.key === 'link')?.value).toBe('-5');
+    expect(linkClause('-5')).toBe('5 bracelet links missing');
 
     const oneMissing = buildWatchListing(base({ link: -1 }));
     expect('needsReview' in oneMissing).toBe(false);
     if ('needsReview' in oneMissing) return;
-    expect(oneMissing.descriptionHtml).toContain('<strong>Bracelet links:</strong> 1 bracelet link missing');
+    expect(linkClause(-1)).toBe('1 bracelet link missing');
 
     const none = buildWatchListing(base({ link: 0 }));
     expect('needsReview' in none).toBe(false);
     if ('needsReview' in none) return;
-    expect(none.descriptionHtml).toContain('<strong>Bracelet links:</strong> Not specified');
+    expect(none.descriptionHtml).not.toContain('<strong>Bracelet links:</strong>');
+    expect(linkClause(0)).toBe('Not specified');
   });
 
   it('drops redundant NAKED comments when box and paper are both No', () => {
@@ -241,9 +248,10 @@ describe('buildWatchListing', () => {
     const listing = buildWatchListing(base({ caseSizeMm: '40 MM', year: 'N/A', link: 0, comment: '<b>note</b>' }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
-    expect(listing.descriptionHtml).toContain('<strong>Case size:</strong> 40mm');
-    expect(listing.descriptionHtml).toContain('<strong>Year:</strong> Not specified');
-    expect(listing.descriptionHtml).toContain('<strong>Bracelet links:</strong> Not specified');
+    expect(listing.metafields.find((m) => m.key === 'case_size')?.value).toBe('40mm');
+    expect(listing.metafields.find((m) => m.key === 'link')?.value).toBe('0');
+    expect(listing.descriptionHtml).not.toContain('<strong>Case size:</strong>');
+    expect(listing.descriptionHtml).not.toContain('<strong>Year:</strong>');
     expect(listing.descriptionHtml).toContain('&lt;b&gt;note&lt;/b&gt;');
     expect(listing.descriptionHtml).not.toContain('40mmmm');
   });
