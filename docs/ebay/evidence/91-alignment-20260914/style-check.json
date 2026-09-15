@@ -1,0 +1,103 @@
+{
+  "unchanged": true,
+  "before": {
+    ".lm-card": {
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-description": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-footer": {
+      "background": "rgb(30, 17, 9)",
+      "color": "rgb(250, 246, 240)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-header": {
+      "background": "rgb(30, 17, 9)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-title": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(30, 17, 9)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "26px",
+      "fontWeight": "400",
+      "lineHeight": "32.5px"
+    },
+    ".lm-wordmark": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(250, 246, 240)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "30px",
+      "fontWeight": "500",
+      "lineHeight": "36px"
+    }
+  },
+  "after": {
+    ".lm-card": {
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-description": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-footer": {
+      "background": "rgb(30, 17, 9)",
+      "color": "rgb(250, 246, 240)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-header": {
+      "background": "rgb(30, 17, 9)",
+      "color": "rgb(44, 24, 16)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "25.6px"
+    },
+    ".lm-title": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(30, 17, 9)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "26px",
+      "fontWeight": "400",
+      "lineHeight": "32.5px"
+    },
+    ".lm-wordmark": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(250, 246, 240)",
+      "fontFamily": "Georgia, \"Times New Roman\", serif",
+      "fontSize": "30px",
+      "fontWeight": "500",
+      "lineHeight": "36px"
+    }
+  }
+}
