@@ -16,7 +16,30 @@
     assign jewelry_only = true
     assign schema_include_products = false
   endif
-  assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
+  assign jewelry_handles = 'rings,lab-grown-rings,necklaces,lab-grown-necklaces,pendants-1,lab-grown-pendants,bracelets,lab-grown-bracelets,earrings,lab-grown-earrings,engagement-rings,lab-grown-engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
+
+  assign mix_handle = blank
+  assign mix_type = blank
+  case collection.handle
+    when 'rings'
+      assign mix_handle = 'lab-grown-rings'
+      assign mix_type = 'ring'
+    when 'necklaces'
+      assign mix_handle = 'lab-grown-necklaces'
+      assign mix_type = 'necklace'
+    when 'pendants-1'
+      assign mix_handle = 'lab-grown-pendants'
+      assign mix_type = 'pendant'
+    when 'bracelets'
+      assign mix_handle = 'lab-grown-bracelets'
+      assign mix_type = 'bracelet'
+    when 'earrings'
+      assign mix_handle = 'lab-grown-earrings'
+      assign mix_type = 'earring'
+    when 'engagement-rings'
+      assign mix_handle = 'lab-grown-engagement-rings'
+      assign mix_type = 'engagement'
+  endcase
 
   assign has_active_filters = false
   for filter in collection.filters
@@ -42,7 +65,12 @@
       </h1>
       {%- if jewelry_only -%}
         <div class="lm-collection__desc">
-          <p>Rings, necklaces, earrings, bracelets, and estate jewels — not watches. Timepieces are listed separately.</p>
+          <p>Rings, necklaces, earrings, bracelets, and estate jewels — including lab-grown pieces. Timepieces are listed separately.</p>
+        </div>
+      {%- elsif mix_handle != blank -%}
+        <div class="lm-collection__desc">
+          {%- if collection.description != blank -%}{{ collection.description }}{%- endif -%}
+          <p>Lab-grown jewelry is included here with the rest of the collection. Peaceful Diamonds remains the dedicated lab-grown home.</p>
         </div>
       {%- elsif collection.description != blank -%}
         <div class="lm-collection__desc">{{ collection.description }}</div>
@@ -85,18 +113,8 @@
       </nav>
     {%- endif -%}
 
-    {%- if jewelry_only == false and collection.handle == 'time-pieces' -%}
-      <nav class="lm-collection__chips" aria-label="Shop by brand">
-        <span class="lm-collection__chips-label">Shop by brand</span>
-        <a href="/collections/rolex-watches" class="lm-collection__chip">Rolex</a>
-        <a href="/collections/cartier-watches" class="lm-collection__chip">Cartier</a>
-        <a href="/collections/jacob-co" class="lm-collection__chip">Jacob &amp; Co.</a>
-        <a href="/collections/audemars-piguet-watches" class="lm-collection__chip">Audemars Piguet</a>
-        <a href="/collections/bvlgari-watches" class="lm-collection__chip">Bvlgari</a>
-        <a href="/collections/van-cleef-arpels-watches" class="lm-collection__chip">Van Cleef &amp; Arpels</a>
-        <a href="/collections/chopard-watches" class="lm-collection__chip">Chopard</a>
-        <a href="/collections/other-watch-brands" class="lm-collection__chip">Other brands</a>
-      </nav>
+    {%- if jewelry_only == false -%}
+      {% render 'watch-brand-chips', collection: collection %}
     {%- endif -%}
 
     {%- comment -%} Style quick-filter bar (jewelry only; never on loose diamonds) {%- endcomment -%}
@@ -188,9 +206,17 @@
             {%- endif -%}
           {%- endfor -%}
         {%- else -%}
+          {%- assign seen_ids = ',' -%}
           {%- for product in collection.products -%}
-            {%- render 'product-card', product: product -%}
+            {%- assign pid = ',' | append: product.id | append: ',' -%}
+            {%- unless seen_ids contains pid -%}
+              {%- render 'product-card', product: product -%}
+              {%- assign seen_ids = seen_ids | append: product.id | append: ',' -%}
+            {%- endunless -%}
           {%- endfor -%}
+          {%- if mix_handle != blank and paginate.current_page == 1 and has_active_filters == false -%}
+            {% render 'collection-mix-lab', mix_handle: mix_handle, mix_type: mix_type, seen_ids: seen_ids %}
+          {%- endif -%}
         {%- endif -%}
       </div>
 
@@ -334,6 +360,46 @@
     border-color: var(--gold, #C9A050);
     color: var(--gold-dark, #A88340);
     background: rgba(201, 160, 80, 0.06);
+  }
+
+  .lm-collection__chip.is-active {
+    border-color: var(--espresso, #1E1109);
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-watch-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-collection__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 0 auto 0.85rem;
+    padding: 0.35rem 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted, #8A8070);
+  }
+
+  .lm-collection__back::before {
+    content: '←';
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .lm-collection__back:hover {
+    color: var(--gold-dark, #A88340);
   }
 
   /* Toolbar */
@@ -620,7 +686,21 @@
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding-bottom: 0.25rem;
+      padding: 0.55rem 0;
+      margin-left: calc(-1 * var(--container-padding));
+      margin-right: calc(-1 * var(--container-padding));
+      padding-left: var(--container-padding);
+      padding-right: var(--container-padding);
+    }
+    .lm-watch-nav {
+      position: sticky;
+      top: calc(var(--header-height, 64px) + 44px);
+      z-index: 30;
+      background: var(--warm-white, #FDFAF6);
+      margin-left: calc(-1 * var(--container-padding, 1rem));
+      margin-right: calc(-1 * var(--container-padding, 1rem));
+      padding: 0.35rem var(--container-padding, 1rem) 0.65rem;
+      border-bottom: 1px solid var(--rule-light, #DDD5C5);
     }
     .lm-collection__chips::-webkit-scrollbar {
       display: none;
