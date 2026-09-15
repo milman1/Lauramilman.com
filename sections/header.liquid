@@ -25,8 +25,9 @@
 }
 
 .header .container {
-  /* Nav has 7 top-level labels after Timepieces — use the full bar width
-     instead of the page container (1320) so logo / links / icons can breathe. */
+  /* Nav has 7 top-level labels — use the full bar width instead of the page
+     container (1320) so logo / links / icons can breathe. Chains lives inside
+     the Fine Jewelry panel rather than adding an eighth top-level label. */
   max-width: none;
   margin: 0 auto;
   padding: 0 clamp(1rem, 2.2vw, 2.5rem);
@@ -337,6 +338,39 @@
   padding-left: 1.75rem;
 }
 
+/* Fine Jewelry keeps jewelry types in one column and gives house chains
+   their own column, so Chains is not another row between Necklaces and Pendants. */
+.header .nav__dropdown--fine {
+  left: 0;
+  transform: translateX(0) translateY(10px);
+  min-width: 420px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0.65rem 0.4rem 0.75rem 0;
+}
+
+.header .nav__item:hover .nav__dropdown--fine {
+  transform: translateX(0) translateY(0);
+}
+
+.header .nav__dropdown-col {
+  min-width: 0;
+}
+
+.header .nav__dropdown-col + .nav__dropdown-col {
+  border-left: 1px solid rgba(201, 160, 80, 0.18);
+}
+
+.header .nav__dropdown-heading {
+  margin: 0;
+  padding: 0.45rem 1.5rem 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-light, #E2C27A);
+}
+
 .header .nav__dropdown-link:hover::before {
   height: 60%;
 }
@@ -507,6 +541,21 @@
     left: auto;
     transform: none;
     white-space: normal;
+  }
+
+  .header .nav__dropdown--fine,
+  .header .nav__item:hover .nav__dropdown--fine,
+  .header .nav__item.open .nav__dropdown--fine {
+    display: block;
+    min-width: 100%;
+    padding: 0;
+  }
+
+  .header .nav__dropdown-col + .nav__dropdown-col {
+    border-left: none;
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgba(201, 160, 80, 0.18);
   }
 
   .header .nav__item.open .nav__dropdown {
@@ -700,13 +749,31 @@
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
-          <div class="nav__dropdown">
-            <a href="/collections/all" class="nav__dropdown-link">All Fine Jewelry</a>
-            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
-            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
-            <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
-            <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
+          {%- comment -%}
+            House gold chains are a shop of their own. They get a dedicated
+            column in this panel instead of sitting between Necklaces and Pendants.
+          {%- endcomment -%}
+          <div class="nav__dropdown nav__dropdown--fine">
+            <div class="nav__dropdown-col">
+              <p class="nav__dropdown-heading">Jewelry</p>
+              <a href="/collections/all" class="nav__dropdown-link">All Fine Jewelry</a>
+              <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+              <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
+              <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
+              <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
+              <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
+            </div>
+            <div class="nav__dropdown-col">
+              <p class="nav__dropdown-heading">Chains</p>
+              <a href="/collections/chains" class="nav__dropdown-link">All Chains</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Cuban</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Paperclip</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Rope</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Curb</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Herringbone</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Box</a>
+              <a href="/collections/chains" class="nav__dropdown-link">Snake</a>
+            </div>
           </div>
         </div>
 
@@ -922,6 +989,7 @@
         <a href="/collections/vintage-jewelry" class="search-overlay__tag">Vintage & Estate</a>
         <a href="/collections/time-pieces" class="search-overlay__tag">Timepieces</a>
         <a href="{{ routes.search_url }}?q=engagement+ring&type=product" class="search-overlay__tag">Engagement Rings</a>
+        <a href="/collections/chains" class="search-overlay__tag">Chains</a>
         <a href="{{ routes.search_url }}?q=necklace&type=product" class="search-overlay__tag">Necklaces</a>
       </div>
     </div>
