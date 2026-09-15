@@ -49,4 +49,15 @@ describe('theme SEO integration', () => {
     expect(article).toContain('"dateModified"');
     expect(article).toContain('"@id": {{ canonical_url | json }}');
   });
+
+  it('links the Chains collection from Fine Jewelry nav, footer, and jewelry chips', () => {
+    const header = themeFile('sections/header.liquid');
+    const footer = themeFile('sections/footer.liquid');
+    const collection = themeFile('sections/main-collection.liquid');
+
+    expect(header).toContain('href="/collections/chains"');
+    expect(header).toMatch(/Fine Jewelry[\s\S]*\/collections\/chains/);
+    expect(footer).toContain('href="/collections/chains"');
+    expect(collection).toContain('href="/collections/chains"');
+  });
 });
