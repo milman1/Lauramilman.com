@@ -16,11 +16,9 @@
 /**
  * Belgium Dia Amount $ is LMNY's invoice cost for every natural and
  * lab-grown stone. Stock 350393 (5.01ct Emerald): Amount $106,463.
- *
- * Ticket follows the same cost chart for both kinds.
  */
 export const DIAMOND = {
-  /** Natural and lab retail floor above $4,000 Amount. 1.25× = 20% margin. */
+  /** Natural-diamond retail floor above $4,000 Amount. 1.25× = 20% margin. */
   amountMultiple: 1.25,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
@@ -31,7 +29,7 @@ export function lmnyStoneCost(amountUsd: number): number {
   return Math.round(amountUsd * 100) / 100;
 }
 
-/** Naturals use the same STONE_TIERS chart as lab. */
+/** Naturals use the tiered STONE_TIERS chart. */
 export const NATURAL = DIAMOND;
 
 export interface LabTier {
@@ -42,7 +40,7 @@ export interface LabTier {
 }
 
 /**
- * Lab and natural markup on **Amount** (invoice cost). First match wins.
+ * Natural-diamond markup on **Amount** (invoice cost). First match wins.
  *
  *   ≤ $500     1.40×  ~29% margin
  *   ≤ $1,500   1.35×  ~26% margin
@@ -56,8 +54,23 @@ export const STONE_TIERS: LabTier[] = [
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
 ];
 
-/** @deprecated Use STONE_TIERS — lab and natural share the chart. */
-export const LAB_TIERS = STONE_TIERS;
+/**
+ * Loose lab-grown diamonds use a flat 50% markup on invoice cost.
+ *
+ * The storefront's 10% welcome discount remains eligible for these products;
+ * when used, realized revenue is 1.35× cost (25.9% gross margin before fees).
+ * Keeping the same multiple at every carat weight avoids margin compression on
+ * larger stones while the existing cost and $/ct guards continue to fail closed.
+ */
+export const LOOSE_LAB_GROWN = {
+  costMultiple: 1.5,
+  welcomeDiscountPct: 0.1,
+} as const;
+
+/** @deprecated Use LOOSE_LAB_GROWN.costMultiple for loose lab stones. */
+export const LAB_TIERS: LabTier[] = [
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: LOOSE_LAB_GROWN.costMultiple },
+];
 
 /**
  * Fail-closed floors for lab stones. A mapping bug that treats $/ct as total
@@ -116,7 +129,8 @@ export const WATCH = {
 
 /**
  * Lab-grown jewelry (finished pieces — Peaceful Diamonds / lab-tagged SKUs).
- * Distinct from loose Lab-Grown Diamond feed items priced by `STONE_TIERS`.
+ * Distinct from loose Lab-Grown Diamond feed items priced by
+ * `LOOSE_LAB_GROWN`.
  * Not sourced from the Belgium Dia diamond API.
  *
  *   retail = round(cost × 4)
