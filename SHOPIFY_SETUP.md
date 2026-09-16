@@ -238,11 +238,19 @@ Do not Draft that automation — it is the only recovery email on Basic.
 **Account:** Settings → Notifications → Edit code for customer account
 welcome and invite.
 
+**Diamond → setting:** Marketing → Automations → Create automation
+(do not reuse cart/checkout). Trigger: order placed. Condition: product
+type Lab-Grown Diamond or Natural Diamond. Wait 1 day. Custom Liquid →
+`emails/diamond-setting.messaging-block.html`. From:
+`Laura Milman New York <hello@lauramilman.com>`. Subject:
+`Your diamond is ready for a setting`.
+
 | File | Use in |
 |------|--------|
 | `emails/welcome.messaging-block.html` | Messaging → Welcome → Custom Liquid |
 | `emails/abandoned-cart.messaging-block.html` | Messaging → You left items in your cart → Custom Liquid |
 | `emails/abandoned-checkout.messaging-block.html` | Messaging → Abandoned checkout → Custom Liquid (if that automation exists) |
+| `emails/diamond-setting.messaging-block.html` | Messaging → new post-purchase automation → Custom Liquid |
 | `emails/customer-account-welcome.html` | Settings → Notifications → Customer account welcome |
 | `emails/customer-account-invite.html` | Settings → Notifications → Customer account invite |
 | `emails/order-confirmation.html` | Already saved |

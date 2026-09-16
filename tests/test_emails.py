@@ -11,6 +11,7 @@ EMAILS = ROOT / "emails"
 
 MARKETING = (
     "welcome.html",
+    "diamond-setting.html",
 )
 RECOVERY = (
     "abandoned-checkout.html",
@@ -44,6 +45,8 @@ def test_paste_files_exist() -> None:
     assert (EMAILS / "welcome.messaging-block.html").is_file()
     assert (EMAILS / "abandoned-cart.messaging-block.html").is_file()
     assert (EMAILS / "abandoned-checkout.messaging-block.html").is_file()
+    assert (EMAILS / "diamond-setting.messaging-block.html").is_file()
+    assert (EMAILS / "diamond-setting.html").is_file()
 
 
 def test_accessibility_lang_dir_title_and_single_h1() -> None:
@@ -141,6 +144,35 @@ def test_welcome_messaging_block_is_inner_card_only() -> None:
     assert "LMNYWELCOME" in block
     assert "{{ unsubscribe_url }}" not in block
     assert "box-sizing:border-box" in block
+
+
+def test_diamond_setting_messaging_block_is_inner_card_only() -> None:
+    block = (EMAILS / "diamond-setting.messaging-block.html").read_text()
+    assert "<!DOCTYPE html>" not in block
+    assert "<html" not in block
+    assert "{{ unsubscribe_url }}" not in block
+    assert "box-sizing:border-box" in block
+    assert "Laura" in block and "Milman" in block
+    assert "collections/engagement-rings" in block
+    assert "pages/private-clients" in block
+    assert "pages/ring-builder" in block
+    assert "hello@lauramilman.com" in block
+    assert "customer.first_name" in block
+    assert "Lab-Grown Diamond" in block
+    assert "Natural Diamond" in block
+    assert "Wait 1 day" in block or "1 day" in block
+
+
+def test_diamond_setting_full_html_is_marketing_compliant() -> None:
+    html = read("diamond-setting.html")
+    assert "collections/engagement-rings" in html
+    assert "pages/private-clients" in html
+    assert "pages/ring-builder" in html
+    assert "LMNYWELCOME" not in html
+    readme = (EMAILS / "README.md").read_text()
+    assert "diamond-setting.messaging-block.html" in readme
+    assert "Wait 1 day" in readme
+    assert "Lab-Grown Diamond" in readme
 
 
 def test_account_templates_use_activation_and_account_url() -> None:

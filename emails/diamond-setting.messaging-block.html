@@ -1,0 +1,53 @@
+<!--
+  Shopify Messaging · Custom Liquid only
+  Marketing → Automations → Create automation (do not reuse cart/checkout)
+  Trigger: Customer places an order (or A product is purchased)
+  Delay: 1 day
+  Condition: order contains product type Lab-Grown Diamond OR Natural Diamond
+  Optional: skip if the same order already includes a ring / setting
+  From: Laura Milman New York <hello@lauramilman.com>
+  Subject: Your diamond is ready for a setting
+  Messaging cannot replace locked system blocks. Paste THIS inner card as a
+  Custom Liquid section. Leave Shopify's unsubscribe footer in the shell.
+-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
+  <tr>
+    <td align="center" style="padding:8px 0 24px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+        <tr>
+          <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></p>
+            <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York · Atelier</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 36px 8px;text-align:center;">
+            <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">The next step</p>
+            <p style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">Your diamond is ready for a setting</p>
+            <p style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+              {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} —
+              {% if product.title != blank %}your {{ product.title }} is with us.{% else %}your diamond is with us.{% endif %}
+              The stone is only half the story. Choose a setting — solitaire, hidden halo, three-stone, or a sketch we make together — and we will finish the ring with our goldsmiths in Italy.
+            </p>
+            <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 16px;">
+              <tr>
+                <td style="background:#C9A050;">
+                  <a href="https://www.lauramilman.com/collections/engagement-rings" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#1A140C;box-sizing:border-box;">Browse settings</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;">
+              Prefer to talk it through? <a href="https://www.lauramilman.com/pages/private-clients" style="color:#4A1428;">Book a consultation</a>
+              · <a href="https://www.lauramilman.com/pages/ring-builder" style="color:#4A1428;">Ring builder</a>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 36px 28px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;">
+            We match stone and setting, then confirm every detail before a single thing is made. Most commissions take 4–8 weeks. Write <a href="mailto:hello@lauramilman.com" style="color:#4A1428;">hello@lauramilman.com</a> any time.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
