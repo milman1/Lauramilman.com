@@ -53,7 +53,7 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
     expect(priced.ok && priced.priced.retailUsd).not.toBe(88_719);
   });
 
-  it('applies the $501–$1,500 band (1.35×) to a mid-priced lab', () => {
+  it('applies the flat 50% markup to a mid-priced lab', () => {
     const { items, holds } = normalizeStones(
       [
         {
@@ -79,6 +79,6 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
       costUsd: 900,
     });
     const priced = priceLab(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(1215); // 900 × 1.35
+    expect(priced.ok && priced.priced.retailUsd).toBe(1350); // 900 × 1.50
   });
 });
