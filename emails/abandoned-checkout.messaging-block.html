@@ -1,0 +1,45 @@
+<!--
+  Shopify Messaging · Custom Liquid only
+  Marketing → Automations → Abandoned checkout (if this automation exists)
+  Basic plan has no Settings → Notifications abandoned_checkout template.
+  Paste THIS inner card below the locked product block. Keep the automation
+  Active — it is the recovery email. Do not paste the full HTML document.
+-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F5F0E8;">
+  <tr>
+    <td align="center" style="padding:8px 0 24px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#FDFAF6;border:1px solid #DDD5C5;">
+        <tr>
+          <td style="background:#1E1109;padding:28px 32px;text-align:center;">
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#FDFAF6;">Laura <em style="color:#E2C27A;font-style:italic;">Milman</em></p>
+            <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#C9A050;">New York</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 36px 28px;text-align:center;">
+            <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A88340;">Still waiting</p>
+            <p style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.25;font-weight:400;color:#2C1810;">You left something behind</p>
+            <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#5A5248;">
+              {% if customer.first_name != blank %}{{ customer.first_name }}{% elsif first_name != blank %}{{ first_name }}{% else %}Hello{% endif %} — your checkout is saved. Finish when you are ready; we held the details.
+            </p>
+            {%- if abandoned_checkout.url != blank -%}
+              {%- assign recovery_href = abandoned_checkout.url -%}
+            {%- elsif abandoned_checkout_url != blank -%}
+              {%- assign recovery_href = abandoned_checkout_url -%}
+            {%- else -%}
+              {%- assign recovery_href = 'https://www.lauramilman.com/cart' -%}
+            {%- endif -%}
+            <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0">
+              <tr>
+                <td style="background:#1E1109;">
+                  <a href="{{ recovery_href }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;color:#FAF6F0;box-sizing:border-box;">Return to checkout</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#5A5248;">Jewelry: 14-day returns. Watches: exchanges only.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
