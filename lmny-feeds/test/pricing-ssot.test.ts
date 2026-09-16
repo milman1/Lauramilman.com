@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
+  LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
   STONE_TIERS,
   WATCH,
@@ -8,8 +9,14 @@ import {
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
-  it('keeps the live Amount chart for loose natural and lab diamonds', () => {
+  it('keeps the tiered Amount chart for loose natural diamonds', () => {
     expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.35, 1.3, 1.25]);
+  });
+
+  it('prices loose lab diamonds at 50% markup and retains welcome eligibility', () => {
+    expect(LOOSE_LAB_GROWN.costMultiple).toBe(1.5);
+    expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
+    expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(1.35);
   });
 
   it('exposes Belgium Dia watch cost tiers on pricing.ts', () => {
