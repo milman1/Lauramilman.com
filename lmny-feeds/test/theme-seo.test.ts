@@ -50,17 +50,16 @@ describe('theme SEO integration', () => {
     expect(article).toContain('"@id": {{ canonical_url | json }}');
   });
 
-  it('gives Chains its own column in the Fine Jewelry dropdown', () => {
+  it('lists Chains with the other Fine Jewelry types, not as a style column', () => {
     const header = themeFile('sections/header.liquid');
     const footer = themeFile('sections/footer.liquid');
     const collection = themeFile('sections/main-collection.liquid');
 
-    expect(header).toContain('nav__dropdown--fine');
-    expect(header).toContain('nav__dropdown-heading">Chains');
-    expect(header).toContain('href="/collections/chains"');
-    expect(header).toContain('All Chains');
-    expect(header).toMatch(/nav__dropdown-heading">Jewelry[\s\S]*\/collections\/necklaces[\s\S]*\/collections\/pendants-1/);
-    expect(header).toMatch(/nav__dropdown-heading">Chains[\s\S]*All Chains[\s\S]*Cuban[\s\S]*Snake/);
+    expect(header).not.toContain('nav__dropdown--fine');
+    expect(header).not.toContain('All Chains');
+    expect(header).not.toContain('nav__dropdown-heading">Chains');
+    expect(header).toMatch(/href="\/collections\/necklaces"[\s\S]*href="\/collections\/chains"[\s\S]*href="\/collections\/pendants-1"/);
+    expect(header).toContain('>Chains</a>');
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');
   });
