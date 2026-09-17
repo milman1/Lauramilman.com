@@ -3,20 +3,28 @@ import {
   LAB_GROWN_JEWELRY,
   LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
+  labRetailMultipleFromCost,
   STONE_TIERS,
   WATCH,
   WATCH_COST_TIERS,
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
-  it('keeps the tiered Amount chart for loose natural diamonds', () => {
-    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.35, 1.3, 1.25]);
+  it('keeps 1.40× through $4,000 Amount and 1.25× above', () => {
+    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.25]);
+    expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
   });
 
-  it('prices loose lab diamonds at 50% markup and retains welcome eligibility', () => {
+  it('prices cheap loose labs at 2.50× and the rest at 1.50×', () => {
+    expect(LOOSE_LAB_GROWN.smallCostMaxUsd).toBe(500);
+    expect(LOOSE_LAB_GROWN.smallCostMultiple).toBe(2.5);
     expect(LOOSE_LAB_GROWN.costMultiple).toBe(1.5);
+    expect(labRetailMultipleFromCost(182)).toBe(2.5);
+    expect(labRetailMultipleFromCost(500)).toBe(2.5);
+    expect(labRetailMultipleFromCost(501)).toBe(1.5);
     expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
     expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(1.35);
+    expect(LOOSE_LAB_GROWN.smallCostMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(2.25);
   });
 
   it('exposes Belgium Dia watch cost tiers on pricing.ts', () => {
