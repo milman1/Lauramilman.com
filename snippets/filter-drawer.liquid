@@ -8,7 +8,10 @@
 
   Search & Discovery groups still render when configured, but only when they
   match the collection and offer more than one useful choice:
-    · Timepieces hide gemological filters (carat, diamond shape, clarity, cut)
+    · Gemological 4Cs (diamond shape, color, clarity, cut) are loose-diamond
+      only — they live on natural-diamonds / lab-grown-diamonds via diamond-filter,
+      never in this drawer
+    · Timepieces also hide carat / diamond-weight lists
     · Estate/vintage hide diamond-grade lists that do not apply to signed jewelry
     · Jewelry collections keep Style / Metal / Carat bands and skip the raw lists
     · Price  → min/max inputs (native price filter)
@@ -97,13 +100,20 @@
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}
+      {%- comment -%}
+        Shape / color / clarity / cut belong on loose diamonds only.
+        This drawer is never used by natural-diamonds or lab-grown-diamonds.
+      {%- endcomment -%}
+      {%- if flabel contains 'clarity' or flabel contains 'diamond shape' or flabel == 'shape' or flabel contains 'cut grade' or flabel == 'cut' or flabel == 'colour' or flabel == 'color' or flabel contains 'diamond colour' or flabel contains 'diamond color' -%}
+        {%- assign jf_skip_filter = true -%}
+      {%- endif -%}
       {%- if fd_is_watch -%}
-        {%- if flabel contains 'carat' or flabel contains 'diamond shape' or flabel contains 'clarity' or flabel contains 'cut grade' or flabel == 'cut' or flabel == 'colour' or flabel contains 'diamond weight' -%}
+        {%- if flabel contains 'carat' or flabel contains 'diamond weight' -%}
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}
       {%- if fd_is_estate -%}
-        {%- if flabel contains 'clarity' or flabel contains 'diamond shape' or flabel contains 'cut grade' or flabel == 'cut' or flabel contains 'carat' -%}
+        {%- if flabel contains 'carat' or flabel contains 'diamond weight' -%}
           {%- assign jf_skip_filter = true -%}
         {%- endif -%}
       {%- endif -%}
