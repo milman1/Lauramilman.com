@@ -26,7 +26,7 @@
         "trust-2": {
           "type": "item",
           "settings": {
-            "text": "14-Day Returns"
+            "text": "7-Day Returns"
           }
         },
         "trust-3": {
@@ -38,7 +38,7 @@
         "trust-4": {
           "type": "item",
           "settings": {
-            "text": "Lifetime Warranty"
+            "text": "1-Year Warranty"
           }
         }
       },
@@ -367,7 +367,7 @@
         "primary_cta_url": "/pages/private-clients",
         "secondary_cta_text": "Email Us",
         "secondary_cta_url": "/pages/contact",
-        "trust_line": "Jewelry: 14-day returns · Watches: exchanges only"
+        "trust_line": "Jewelry: 7-day returns · Watches: exchanges only"
       }
     }
   },

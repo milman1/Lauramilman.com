@@ -12,7 +12,7 @@
         "h-budget": { "type": "heading", "settings": { "text": "Buying to a Budget" } },
         "t-budget": { "type": "text", "settings": { "text": "<p>A confident budget buys better jewelry than a stretched one. Under $2,500, look to stackable bands, pendants and huggie earrings. Between $2,500 and $10,000, tennis bracelets, statement earrings, and engagement rings open up. Above that, rare stones and signed estate pieces become investment territory — and worth a conversation with us first.</p>" } },
         "h-papers": { "type": "heading", "settings": { "text": "Papers, Provenance & Peace of Mind" } },
-        "t-papers": { "type": "text", "settings": { "text": "<p>Certified stones ship with their grading reports. Estate pieces ship with authentication documentation. Everything ships insured, and everything we make carries a lifetime warranty. If you're ever unsure, ask — no pressure, ever.</p>" } },
+        "t-papers": { "type": "text", "settings": { "text": "<p>Certified stones ship with their grading reports. Estate pieces ship with authentication documentation. Everything ships insured, and everything we make carries a 1-year warranty. If you're ever unsure, ask — no pressure, ever.</p>" } },
         "cta-consult": { "type": "cta", "settings": { "label": "Talk Through Your Purchase", "link": "/pages/private-clients" } }
       },
       "block_order": ["h-stones", "t-stones", "h-tiers", "p-natural", "p-estate", "p-peaceful", "h-budget", "t-budget", "h-papers", "t-papers", "cta-consult"],

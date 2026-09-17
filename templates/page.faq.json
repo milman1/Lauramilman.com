@@ -28,7 +28,7 @@
           "type": "qa",
           "settings": {
             "question": "What is your return policy?",
-            "answer": "<p>Unworn jewelry in original condition may be returned or exchanged within 14 days of delivery. Watches and timepieces are exchanges only — no refunds — within the same 14-day window, with box, papers, and tags. Bespoke commissions and specially sourced stones are final sale.</p>"
+            "answer": "<p>Unworn jewelry in original condition may be returned or exchanged within 7 days of delivery. Watches and timepieces are exchanges only — no refunds — within the same 7-day window, with box, papers, and tags. Bespoke commissions and specially sourced stones are final sale.</p>"
           }
         },
         "qa-sizing": {
@@ -49,7 +49,7 @@
           "type": "qa",
           "settings": {
             "question": "Is my purchase covered by a warranty?",
-            "answer": "<p>Yes — every Laura Milman New York piece carries a lifetime warranty against manufacturing defects, and we offer cleaning and inspection for the life of the piece.</p>"
+            "answer": "<p>Yes — every Laura Milman New York piece carries a 1-year warranty against manufacturing defects, and we offer complimentary cleaning and inspection.</p>"
           }
         }
       },

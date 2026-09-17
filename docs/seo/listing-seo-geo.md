@@ -105,7 +105,7 @@ reference bracelet is the lab-grown jewelry pattern:
 |---|---|---|
 | Product title | `{Lab Grown} {shape} Diamond {design} {type} – {carat} CT \| {metal}` | `Lab Grown Round Diamond Station Bracelet – 0.65 CT \| 14K Yellow Gold` |
 | SEO title | `{carat} CT {shape} Lab Grown Diamond {design} {type} \| {metal}` | `0.65 CT Round Lab Grown Diamond Station Bracelet \| 14K Yellow Gold` |
-| SEO description | `Shop this {identity}. {color}, {clarity}. {policy closer}.` | Shop this 0.65 CT round lab-grown diamond station bracelet in 14K yellow gold. E-F color, VS clarity. Free insured shipping and 14-day returns. |
+| SEO description | `Shop this {identity}. {color}, {clarity}. {policy closer}.` | Shop this 0.65 CT round lab-grown diamond station bracelet in 14K yellow gold. E-F color, VS clarity. Free insured shipping and 7-day returns. |
 
 If the SEO title would exceed 60 characters, truncate at a word boundary
 and keep the suffix. The live reference title is slightly over 60;
@@ -152,11 +152,11 @@ the source is messy — leave `custom.setting_style` empty.
 
 Use a closer that is true on the storefront:
 
-- Jewelry: end with “Free insured shipping and 14-day returns.” or, when
+- Jewelry: end with “Free insured shipping and 7-day returns.” or, when
   the source schema requires it, “Authenticated by Laura Milman New York.”
-- Watches: exchanges-only language from the theme, not 14-day returns.
-- Never write a 30-day return promise unless the merchant changes store
-  policy. The reference listing’s older “30-day returns” line is stale.
+- Watches: exchanges-only language from the theme, not 7-day returns.
+- Never write a 14-day or 30-day return promise unless the merchant changes store
+  policy. Older “14-day returns” and “30-day returns” lines are stale.
 
 ---
 
