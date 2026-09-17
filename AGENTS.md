@@ -82,8 +82,8 @@ its row; if the row says "merchant-set", ask, never assume.
 
 | Source (how to recognize it) | Cost comes from | Retail rule | Where it lives |
 |---|---|---|---|
-| Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | Tiered: ≤$500 ×1.40, ≤$1,500 ×1.35, ≤$4,000 ×1.30, above ×1.25; held under 20% margin | `config/pricing.ts` `STONE_TIERS`, `src/markup.ts` |
-| Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | **Cost × 1.50** at every carat weight, plus fail-closed guards against a $/ct read as a total. The 10% welcome discount remains eligible; discounted revenue is 1.35× cost (25.9% gross margin before fees). | `LOOSE_LAB_GROWN`, `LAB_GUARDS`, `src/markup.ts` |
+| Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | **Cost × 1.40** when Amount ≤ $4,000; **× 1.25** above $4,000; held under 20% margin | `config/pricing.ts` `STONE_TIERS`, `src/markup.ts` |
+| Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | **Cost × 2.50** when Amount ≤ $500; **× 1.50** above $500; plus fail-closed guards against a $/ct read as a total. The 10% welcome discount remains eligible; discounted revenue is 2.25× cost on the small band and 1.35× cost above $500. | `LOOSE_LAB_GROWN`, `labRetailMultipleFromCost`, `LAB_GUARDS`, `src/markup.ts` |
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `config/pricing.ts` `WATCH_COST_TIERS`, `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500. Their catalogue is larger than the 25,000 products their pagination allows, so a run often cannot see the whole of it: each match is remembered on the product (`backvault_feed.competitor_price` + `competitor_price_at`), and on a run whose index is incomplete an unmatched piece is priced from a remembered comparison **under 90 days old** — the same midpoint rule, against that run's cost, so a supplier markdown still reaches the storefront. Nothing remembered, or older than 90 days: cost + $500, as for any piece that is not on their site. A complete index always wins over memory. | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts`, `diff.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
@@ -98,14 +98,15 @@ borrowing a neighbour's multiplier. When the merchant states a rule for
 one of them, add the constant to `config/pricing.ts`, update this row,
 and only then reprice.
 
-Repo check, 2026-09-09 (updated): `config/pricing.ts` holds coded rules for
-loose diamonds (`STONE_TIERS`), watches (`WATCH_COST_TIERS`), Back Vault,
-Royal Chain, and lab-grown jewelry (`LAB_GROWN_JEWELRY`, cost × 4). Nothing
-in the repository defines a retail multiplier for fine jewelry,
-hand-imported estate, or Jacob & Co. One Royal Chain item already in the
-store (`MZ003379`, a 14K franco chain under the house vendor) was priced
-by hand at ×2.8 before the ×3 rule existed; the rule, not the precedent,
-applies from now on.
+Repo check, 2026-09-17 (updated): `config/pricing.ts` holds coded rules for
+loose naturals (`STONE_TIERS`: 1.40× through $4,000 Amount, 1.25× above),
+loose labs (`LOOSE_LAB_GROWN`: 2.50× at Amount ≤ $500, 1.50× above), watches
+(`WATCH_COST_TIERS`), Back Vault, Royal Chain, and lab-grown jewelry
+(`LAB_GROWN_JEWELRY`, cost × 4). Nothing in the repository defines a retail
+multiplier for fine jewelry, hand-imported estate, or Jacob & Co. One Royal
+Chain item already in the store (`MZ003379`, a 14K franco chain under the
+house vendor) was priced by hand at ×2.8 before the ×3 rule existed; the
+rule, not the precedent, applies from now on.
 
 ---
 

@@ -1,7 +1,7 @@
 import {
   DIAMOND,
   LAB_GUARDS,
-  LOOSE_LAB_GROWN,
+  labRetailMultipleFromCost,
   STONE_TIERS as FALLBACK_RULES,
 } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
@@ -82,7 +82,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: flat 50% markup on Amount, after fail-closed mapping guards.
+ * Lab-grown: 2.50× at cost ≤ $500, else 1.50×, after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -116,7 +116,7 @@ export function priceLab(item: StoneItem): PriceResult {
     }
   }
 
-  const priced = priceFromLmnyCost(item, LOOSE_LAB_GROWN.costMultiple);
+  const priced = priceFromLmnyCost(item, labRetailMultipleFromCost(item.costUsd));
   if (!priced.ok) return priced;
 
   if (

@@ -32,17 +32,23 @@ holds a stones table — Shopify products are the only live copy.
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
      confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per
      carat and is not the ticket.
-   - both kinds: retail = round(Amount × chart). Cheaper stones get a bit
-     more than 20%; stones above $4,000 stay at 1.25× (20%). Held under
-     the 20% floor. Lab mapping guards still catch a Buy_Price used as a
-     total.
+   - naturals: retail = round(Amount × chart). Amount ≤ $4,000 is 1.40×
+     (~29% margin); above $4,000 stays 1.25× (20%). Held under the 20%
+     floor.
 
      | Amount (cost) | Multiplier | Margin |
      |---|---|---|
-     | ≤ $500 | 1.40× | ~29% |
-     | ≤ $1,500 | 1.35× | ~26% |
-     | ≤ $4,000 | 1.30× | ~23% |
+     | ≤ $4,000 | 1.40× | ~29% |
      | above $4,000 | 1.25× | 20% |
+   - lab: retail = round(Amount × chart). Cheap labs (Amount ≤ $500) are
+     2.50×; everything above $500 stays 1.50×. Mapping guards still catch
+     a Buy_Price used as a total. The 10% welcome discount remains eligible
+     (realized 2.25× on the small band, 1.35× above $500).
+
+     | Amount (cost) | Multiplier | After 10% welcome |
+     |---|---|---|
+     | ≤ $500 | 2.50× | 2.25× |
+     | above $500 | 1.50× | 1.35× |
    - watches: supplier cost × chart (`config/pricing.ts` `WATCH_COST_TIERS`,
      applied in `src/watchPricing.ts`). **No Hours mid.** Aftermarket,
      no-papers, iced-out, naked-comment, Power Watch, and Uncle Manny are

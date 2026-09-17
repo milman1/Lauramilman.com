@@ -42,33 +42,47 @@ export interface LabTier {
 /**
  * Natural-diamond markup on **Amount** (invoice cost). First match wins.
  *
- *   ≤ $500     1.40×  ~29% margin
- *   ≤ $1,500   1.35×  ~26% margin
- *   ≤ $4,000   1.30×  ~23% margin
+ *   ≤ $4,000   1.40×  ~29% margin
  *   above      1.25×  20% margin
+ *
+ * Merchant decision 2026-09-17: collapse the old 1.35× / 1.30× bands into
+ * 1.40× through $4,000 (typical 1ct tickets). Stones above $4,000 stay at
+ * 1.25× so large-carat naturals do not jump with the small-stone lift.
  */
 export const STONE_TIERS: LabTier[] = [
-  { maxCostUsd: 500, multiplier: 1.4 },
-  { maxCostUsd: 1500, multiplier: 1.35 },
-  { maxCostUsd: 4000, multiplier: 1.3 },
+  { maxCostUsd: 4000, multiplier: 1.4 },
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
 ];
 
 /**
- * Loose lab-grown diamonds use a flat 50% markup on invoice cost.
+ * Loose lab-grown diamonds: 2.50× when invoice cost is ≤ $500, otherwise
+ * the 1.50× default. Fail-closed $/ct guards still apply.
  *
- * The storefront's 10% welcome discount remains eligible for these products;
- * when used, realized revenue is 1.35× cost (25.9% gross margin before fees).
- * Keeping the same multiple at every carat weight avoids margin compression on
- * larger stones while the existing cost and $/ct guards continue to fail closed.
+ * The storefront's 10% welcome discount remains eligible. Realized revenue
+ * is 2.25× cost on the small band (55.6% gross before fees) and 1.35× cost
+ * above $500 (25.9% gross before fees).
+ *
+ * Merchant decision 2026-09-17: raise only cheap labs (cost ≤ $500). Larger
+ * lab tickets stay at 1.50× so high-carat stones do not reprice with the
+ * small-stone lift.
  */
 export const LOOSE_LAB_GROWN = {
   costMultiple: 1.5,
+  smallCostMaxUsd: 500,
+  smallCostMultiple: 2.5,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** @deprecated Use LOOSE_LAB_GROWN.costMultiple for loose lab stones. */
+/** Invoice-cost multiple for a loose lab stone. First matching LAB_TIERS row. */
+export function labRetailMultipleFromCost(costUsd: number): number {
+  return costUsd <= LOOSE_LAB_GROWN.smallCostMaxUsd
+    ? LOOSE_LAB_GROWN.smallCostMultiple
+    : LOOSE_LAB_GROWN.costMultiple;
+}
+
+/** @deprecated Use labRetailMultipleFromCost for loose lab stones. */
 export const LAB_TIERS: LabTier[] = [
+  { maxCostUsd: LOOSE_LAB_GROWN.smallCostMaxUsd, multiplier: LOOSE_LAB_GROWN.smallCostMultiple },
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: LOOSE_LAB_GROWN.costMultiple },
 ];
 
@@ -80,7 +94,7 @@ export const LAB_GUARDS = {
   /**
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
-   * total). 1ct Amount $120 → $168 is held; Amount $130 → $182 publishes.
+   * total). 1ct Amount $70 → $175 is held; Amount $72 → $180 publishes.
    */
   minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
