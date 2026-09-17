@@ -279,6 +279,19 @@ def test_worlds_cards_use_category_images_and_theme_tones() -> None:
     assert "navy-deep" not in warm_css
 
 
+def test_loose_diamond_grid_skips_stones_without_photos() -> None:
+    """Imageless Belgium Dia rows must not paint cream placeholder cards."""
+    storefront = (ROOT / "assets/diamond-storefront.js").read_text()
+    schema = (ROOT / "lmny-feeds/supabase/schema.sql").read_text()
+    edge = (ROOT / "lmny-feeds/supabase/functions/diamonds/index.ts").read_text()
+    dual = (ROOT / "lmny-feeds/src/supabase-stones.ts").read_text()
+    assert "function hasStonePhoto" in storefront
+    assert "data.stones || []).filter(hasStonePhoto)" in storefront
+    assert "cardinality(image_urls) > 0" in schema
+    assert 'not("image_urls", "eq", "{}")' in edge
+    assert "available: item.imageUrls.length > 0" in dual
+
+
 def test_diamond_filter_offers_lab_and_natural_origin() -> None:
     liquid = (ROOT / "sections/diamond-filter.liquid").read_text()
     assert 'aria-label="Diamond origin"' in liquid

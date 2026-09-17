@@ -120,6 +120,10 @@
     return prefix + '-' + ref;
   }
 
+  function hasStonePhoto(stone) {
+    return !!(stone.image_urls && stone.image_urls[0]);
+  }
+
   function cardHtml(stone) {
     var img = (stone.image_urls && stone.image_urls[0]) || '';
     var img2 = (stone.image_urls && stone.image_urls[1]) || '';
@@ -250,14 +254,17 @@
           (data.total === 1 ? '' : 's');
       }
       if (resultsEl) {
-        if (!data.stones || !data.stones.length) {
+        // Belgium Dia often ships cert PDFs but no ImageLink. Those SKUs are
+        // Shopify drafts; skip cream placeholders rather than listing them.
+        var stones = (data.stones || []).filter(hasStonePhoto);
+        if (!stones.length) {
           resultsEl.innerHTML =
             '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">No stones match</p>' +
             '<p class="lm-dfilter__empty-copy">Widen a grade or carat range and try again.</p></div>';
         } else {
           resultsEl.innerHTML =
             '<div class="products-grid lm-dfilter__results">' +
-            data.stones.map(cardHtml).join('') +
+            stones.map(cardHtml).join('') +
             '</div>';
         }
       }
