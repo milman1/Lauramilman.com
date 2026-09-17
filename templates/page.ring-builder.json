@@ -18,9 +18,9 @@
       "type": "trust-strip",
       "blocks": {
         "trust-1": { "type": "item", "settings": { "text": "Free Insured Shipping" } },
-        "trust-2": { "type": "item", "settings": { "text": "14-Day Returns" } },
+        "trust-2": { "type": "item", "settings": { "text": "7-Day Returns" } },
         "trust-3": { "type": "item", "settings": { "text": "Authenticity Guaranteed" } },
-        "trust-4": { "type": "item", "settings": { "text": "Lifetime Warranty" } }
+        "trust-4": { "type": "item", "settings": { "text": "1-Year Warranty" } }
       },
       "block_order": ["trust-1", "trust-2", "trust-3", "trust-4"]
     }

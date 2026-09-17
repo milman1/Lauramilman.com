@@ -4,8 +4,8 @@
       "type": "main-product",
       "blocks": {
         "trust-shipping": { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
-        "trust-warranty": { "type": "trust_item", "settings": { "icon": "warranty", "label": "Lifetime Warranty" } },
-        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "14-Day Returns" } }
+        "trust-warranty": { "type": "trust_item", "settings": { "icon": "warranty", "label": "1-Year Warranty" } },
+        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Returns" } }
       },
       "block_order": ["trust-shipping", "trust-warranty", "trust-returns"],
       "settings": {
@@ -23,7 +23,7 @@
         "estate-3": { "type": "estate_point", "settings": { "title": "Condition, Honestly Graded", "text": "Every piece is condition-graded and photographed as it truly is — wear is described, never hidden." } },
         "heritage-1": { "type": "heritage_point", "settings": { "title": "Designed in New York", "text": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house." } },
         "heritage-2": { "type": "heritage_point", "settings": { "title": "Crafted in Italy", "text": "Master goldsmiths finish each piece by hand — old-world technique, modern precision." } },
-        "heritage-3": { "type": "heritage_point", "settings": { "title": "Made to Be Inherited", "text": "Built for decades of wear, with a lifetime warranty and service for the life of the piece." } }
+        "heritage-3": { "type": "heritage_point", "settings": { "title": "Made to Be Inherited", "text": "Built for decades of wear, with a 1-year warranty against manufacturing defects." } }
       },
       "block_order": ["lab-1", "lab-2", "lab-3", "estate-1", "estate-2", "estate-3", "heritage-1", "heritage-2", "heritage-3"],
       "settings": {}
