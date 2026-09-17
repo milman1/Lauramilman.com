@@ -6,7 +6,7 @@
 - Status: done (live-verified)
 - Goal and acceptance criteria: every in-scope watch whose list is more than $50 below `retailFromCost` is set to the chart ticket. Chart in `lmny-feeds/config/pricing.ts` is unchanged. No price is lowered. Jacob & Co. and estate (`backvault-feed`) are out of scope. Cost stays off this file and off the storefront.
 - Scope (files / live records): feed `Watch` / `Watches` variants with a recorded Cost per item; public plan `docs/pricing/watch-chart-lifts-2026-09-17.csv`
-- Branch / commit / PR: `cursor/watch-chart-mismatch-reprice-958d`
+- Branch / commit / PR: `cursor/watch-chart-mismatch-reprice-958d` / https://github.com/milman1/Lauramilman.com/pull/147
 
 ## Dry-run (2026-09-17)
 
