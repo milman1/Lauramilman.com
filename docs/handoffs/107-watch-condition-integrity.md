@@ -4,7 +4,7 @@
 - Updated (UTC): 2026-09-11
 - Status: **open; watch source recovered, exact condition-repair dry run remains**
 - Source: remote `main` handoff fetched at the requested `75bc1c` state; GitHub file blob SHA `18ed93daa1c3ff21d0eacd067bcdb3c5237177db`
-- Scope: watch condition evidence and Marketplace Connect condition mapping only
+- Scope: watch condition evidence and M2E condition mapping only
 
 ## Goal and acceptance criteria
 

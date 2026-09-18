@@ -26,7 +26,7 @@ describe('SALES_CHANNELS', () => {
     expect(new Set(SALES_CHANNELS).size).toBe(SALES_CHANNELS.length);
   });
 
-  it('does not list eBay — Marketplace Connect is not a publication', () => {
+  it('does not list eBay — M2E is not a publication', () => {
     expect(SALES_CHANNELS.some((c) => /ebay/i.test(c))).toBe(false);
   });
 });

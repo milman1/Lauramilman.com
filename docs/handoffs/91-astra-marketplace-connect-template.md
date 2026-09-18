@@ -1,4 +1,7 @@
 # Task: Paste the eBay description template into Marketplace Connect and confirm the listing rule
+
+> 2026-09-18: Shopify Marketplace Connect is uninstalled. eBay is M2E Multichannel Connect. Do not use Connect admin URLs. Remaining template work belongs in M2E's description policy (`AGENTS.md` recipe D).
+
 - Issue: https://github.com/milman1/Lauramilman.com/issues/91
 - Updated (UTC): 2026-09-11T05:38:21Z
 - Owner / session: Astra (OpenAI GPT-6 Astra), session 01a08b5a-6720-7b13-8cf4-75c014fad2c7

@@ -2,12 +2,12 @@
  * eBay condition vs accessories — LMNY
  *
  * eBay Wristwatch condition 1000 is the canned value "New with box and papers"
- * ("brand new and has never been worn"). Marketplace Connect / Uploadify maps
- * Shopify copy that says "box and papers" onto that condition even when the
- * title is Pre-Owned, and eBay then hides the listing.
+ * ("brand new and has never been worn"). A marketplace app that maps
+ * Shopify copy saying "box and papers" onto that condition will hide a
+ * Pre-Owned listing. M2E must map Condition to `custom.ebay_condition`.
  *
  * Accessories belong in Features (`With Box`, `With Papers`). Condition is
- * the numeric eBay ConditionID Marketplace Connect expects — not the display
+ * the numeric eBay ConditionID M2E should send — not the display
  * name. Wristwatch categories reject `Pre-owned` as a Condition ID
  * ("Condition ID Pre-owned is not supported for this category").
  *
@@ -176,7 +176,7 @@ export function planEbayConditionFix(input: EbayConditionPlanInput): EbayConditi
 }
 
 /**
- * Stop Marketplace Connect matching the eBay condition value
+ * Stop marketplace apps matching the eBay condition value
  * "New with box and papers". Accessories stay in the sentence without "New".
  */
 export function rewritePreownedBoxPapersCopy(html: string): string {

@@ -2,7 +2,7 @@
 
 ## Easiest way (do this if you have eBay Seller Hub access)
 
-**Fastest overall: bulk end on eBay, then sync Connect.**
+**Fastest overall: bulk end on eBay, then stop M2E from relisting.**
 
 1. **eBay Seller Hub** → Listings → Active → **Export** (CSV with Item ID + SKU).
 2. Keep only rows whose SKU is in **`ebay_end_skus.csv`** (640 codes).
@@ -13,13 +13,15 @@
    End,366652915364,NotAvailable
    ```
 5. **Seller Hub → Reports → Upload** → template **End listings**.
-6. **Marketplace Connect** → same SKUs → **Disabled** → Save (so they don’t relist).
+6. **M2E** → same SKUs → unlink or turn Inventory sync off (so they don’t relist). Shopify Marketplace Connect is uninstalled.
 
 **Time:** ~30–60 minutes. One upload ends hundreds of listings.
 
 ---
 
-## If using Marketplace Connect only (browser automation)
+## If using M2E only (browser automation)
+
+Shopify Marketplace Connect is gone. Do not open a Connect admin URL.
 
 **Do NOT** disable by prefix (`T`, `RW`, or numeric) — keepers share prefixes with takedown SKUs.
 
@@ -97,24 +99,16 @@ Add columns: **Code**, **Enabled** / **Listing enabled**.
 ## Copy-paste prompt for Claude
 
 ```
-Task: Disable non-keeper eBay watch listings in Shopify Marketplace Connect.
+Task: Stop non-keeper archived-watch eBay listings from staying live. Marketplace Connect is uninstalled; use Seller Hub + M2E.
 
 READ FIRST: docs/ebay/CLAUDE_TAKEDOWN_HANDOFF.md in the repo (or attached).
 
-Easiest path if you have eBay access: bulk End CSV (see handoff doc). Otherwise use Connect below.
+Easiest path if you have eBay access: bulk End CSV (see handoff doc). Then unlink / turn Inventory sync off for those SKUs in M2E.
 
 RULES:
-- NEVER disable SKUs in ebay_keeper_skus_unique.csv (155 keepers).
+- NEVER end or unsync SKUs in ebay_keeper_skus_unique.csv (155 keepers).
 - NEVER bulk-select by prefix for T, RW, or numeric codes.
-- Phase 1: disable all P and U codes from phase1_P_codes.txt and phase1_U_codes.txt.
-- Phase 2: work batch_01_codes.txt through batch_13_codes.txt — one exact Code per search.
-- Save every 8-10, wait for Listings Saved.
-- Do not select all 839 watch rows.
+- Do not open a Marketplace Connect admin URL.
 
-Connect URL:
-https://admin.shopify.com/store/laura-milman/apps/shopify-marketplace-connect/332651/ebay/bulk
-
-Login: Shopify admin email + password (provided separately)
-
-Start with batch_01 (or continue phase1 U if P done). Report after each batch.
+Start with the Seller Hub export vs ebay_end_skus.csv. Report after each batch.
 ```

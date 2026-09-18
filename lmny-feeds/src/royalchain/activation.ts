@@ -433,7 +433,7 @@ export function activationChecklist(snapshot: ActivationSnapshot): string {
     '3. After review, set each product ACTIVE, publish it to Online Store, remove `media-missing`, and add `ebay`.',
     '4. Confirm inventory is tracked with DENY policy; set quantity 1 only for source-available child SKUs and 0 for unavailable ones.',
     '5. Confirm `custom.condition=New` and `custom.ebay_condition=1500`.',
-    '6. Review Marketplace Connect mapping separately; this worker never configures or submits Marketplace Connect listings.',
+    '6. Review M2E linking and policies separately; this worker never configures or submits M2E listings.',
     '7. Run the final independent verifier against this exact snapshot and resolve every reported blocker before calling the batch complete.',
     '',
     'No job in this repository changes ACTIVE status, publication, or the eBay tag.',

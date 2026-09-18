@@ -285,7 +285,7 @@ async function main() {
     `- Description rewrites: ${descriptions.length}`,
     `- Mode: ${flags.apply ? 'APPLY' : 'dry-run'}`,
     '',
-    'Marketplace Connect should map **Condition** to `custom.ebay_condition` and **Features** to `custom.features`. Do not map box/papers onto eBay Condition.',
+    'M2E should map **Condition** to `custom.ebay_condition` and **Features** to `custom.features`. Do not map box/papers onto eBay Condition.',
     '',
   ].join('\n');
   await writeFile(path.join(OUT_DIR, 'ebay-preowned-features.md'), report);

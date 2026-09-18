@@ -54,7 +54,7 @@ async function writePlanOutputs(outputDir: string, snapshot: ActivationSnapshot,
     ...(snapshot.blockers.length ? snapshot.blockers.map((blocker) => `- [${blocker.code}] ${blocker.handle ? `${blocker.handle}: ` : ''}${blocker.sku ? `${blocker.sku}: ` : ''}${blocker.message}`) : ['- none']),
     '', '## Activation-only person gaps', '',
     ...(snapshot.activationGaps.length ? snapshot.activationGaps.map((gap) => `- [${gap.code}] ${gap.handle ? `${gap.handle}: ` : ''}${gap.sku ? `${gap.sku}: ` : ''}${gap.message}`) : ['- none']),
-    '', 'The worker performs no Shopify mutation. ACTIVE, Online Store publication, eBay tagging, and Marketplace Connect review remain person-run steps.', '',
+    '', 'The worker performs no Shopify mutation. ACTIVE, Online Store publication, eBay tagging, and M2E review remain person-run steps.', '',
   ].join('\n'));
 }
 

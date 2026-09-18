@@ -31,7 +31,7 @@ orders to create a committee. The selected model executes; see
 | Automations | `.github/workflows/*.yml` | Cron schedules and one-shot backfills. Secrets live in the repo's Actions settings. |
 | Feed cache | `lmny-feeds/cloudflare-worker/`, `wrangler.jsonc` | Cloudflare Worker + KV that caches the Belgium Dia feeds. |
 | Stones DB (in progress) | `lmny-feeds/supabase/` | Supabase `stones` table; dual-write target for moving diamonds off Shopify products. |
-| eBay | Shopify Marketplace Connect app | Lists ACTIVE products carrying the `ebay` tag plus `custom.ebay_condition`. Since 2026-09-09: watches, all 732 estate pieces, and 525 fine, lab-grown, and hand-imported estate pieces. Never loose stones or drafts. Description template is `snippets/ebay-default.liquid`, pasted into the app by hand. |
+| eBay | M2E Multichannel Connect (Shopify app) | Shopify is the source for price, qty, and product data. M2E lists a linked ACTIVE product when Inventory sync is on. Keep the `ebay` tag plus `custom.ebay_condition` on watches, estate, fine, and lab-grown jewelry (never loose stones or drafts). Map condition and item specifics in M2E policies, not in a Shopify publication. Shopify Marketplace Connect was uninstalled (merchant, 2026-09-18). `snippets/ebay-default.liquid` is brand HTML for an M2E description policy; the theme never renders it. |
 | Supplier intake | `.github/workflows/royalchain-costs.yml`, `lmny-feeds/scripts/royalchain-costs.ts` | Reads wholesale cost from the Royal Chain trade account with Playwright (secrets `ROYALCHAIN_USERNAME` / `ROYALCHAIN_PASSWORD`) for a shortlist CSV; retail = cost x 3. Recipe H. |
 | Uploadify | Shopify app | Jewelry marketplace feed. Needs ACTIVE, SKU, qty > 0, Category. Loose diamonds are deliberately kept at qty 0 so it skips them. |
 | Journal (blog) | Shopify Online Store blog `journal` | Nine published articles as of 2026-09-08, linked from header and footer. No automated writer exists in this repo. |
@@ -121,7 +121,7 @@ budgeting a large job.
 | Claude Opus 5 | `claude-opus-5` | $5 / $25 | Default for code changes, refactors, PR reviews, writing that must be exactly right. |
 | Claude Sonnet 5 | `claude-sonnet-5` | $2 / $10 | Bulk workers: paginated API scans, per-item mutations from a work file, scraping and normalizing, first-draft copy at volume. |
 | Claude Haiku 4.5 | `claude-haiku-4-5` | $1 / $5 | Classification, tagging, yes/no checks over thousands of rows, cheap judges. 200K context. |
-| OpenAI GPT-6 Astra | `gpt-6-astra` | $10 / $50 | Browser and computer use: operating admin UIs that have no API (Marketplace Connect template editor, eBay Seller Hub, Uploadify settings, Shopify admin screens). Independent second opinion on Claude-authored plans. |
+| OpenAI GPT-6 Astra | `gpt-6-astra` | $10 / $50 | Browser and computer use: operating admin UIs that have no API (M2E Multichannel Connect, eBay Seller Hub, Uploadify settings, Shopify admin screens). Independent second opinion on Claude-authored plans. |
 | OpenAI GPT-5.6 Sol | `gpt-5.6-sol` | $5 / $30 | OpenAI-side equivalent of Opus 5 when the operator is in ChatGPT or Codex. |
 | OpenAI GPT-5.6 Terra | `gpt-5.6-terra` | $2 / $12 | OpenAI-side bulk worker, equivalent of Sonnet 5. |
 | OpenAI GPT-5.6 Luna | `gpt-5.6-luna` | $0.20 / $1.20 | OpenAI-side cheap classifier, equivalent of Haiku 4.5. |
@@ -149,7 +149,7 @@ model make scope decisions.
 | Brand voice pieces (homepage, journal articles, campaign copy) | Build | Opus 5 / Sol | No | One author, one voice. |
 | Classify or tag thousands of rows | Classifier | Haiku 4.5 / Luna | Per 2,000 rows | Provide the label set and three examples per label. |
 | SEO program (strategy, build, audit, repairs) | Strategist and auditor: Astra; builder: Fable 5.1 orchestrating | Astra plans and audits; Sonnet 5 / Terra / Luna / Haiku 4.5 do the work; Opus 5 for customer-facing copy | Per plan item | Recipe E. Every stage writes a committed file under `docs/seo/`. |
-| Operate an admin UI with no API | UI operator | Astra | No | Marketplace Connect template editor, eBay Seller Hub, Uploadify. Take a screenshot before and after every save. Never enter credentials from a chat transcript. |
+| Operate an admin UI with no API | UI operator | Astra | No | M2E listings/policies, eBay Seller Hub, Uploadify. Take a screenshot before and after every save. Never enter credentials from a chat transcript. |
 | Second opinion on a plan or diff | Reviewer | Opus 5 / Sol (blind, fresh agent) | No | Step 3 of the operating loop (section 5a). Review-only; the reviewer does not edit. |
 | Recurring job (weekly, hourly) | Build | Opus 5 writes the workflow | No | GitHub Actions cron for anything that touches code or Shopify. n8n only for glue between SaaS tools. Every cron job has a dry-run input and a report artifact. |
 
@@ -157,8 +157,8 @@ model make scope decisions.
 
 Use Astra when the work is in a browser rather than an API:
 
-- Pasting and saving the eBay description template inside Marketplace Connect.
-- Mapping metafields to eBay item specifics in the Marketplace Connect UI.
+- Pasting and saving the eBay description template inside M2E (description / selling policy).
+- Mapping Shopify metafields to eBay item specifics in M2E.
 - Checking how a listing renders on eBay, Google Shopping, or the Shop app.
 - Reproducing a storefront bug that only appears with a real browser session.
 - Jacob & Co. sourcing. The merchant's two source sites (decision 2026-09-09) are Bucherer (https://www.bucherer.com/us/en/watches/jacob-co/, e.g. https://www.bucherer.com/us/en/watches/jacob-co/epic-x/1362-322-2.html) and Exquisite Timepieces (https://www.exquisitetimepieces.com/collections/jacob-co-epic-x). The routing is split and fixed: Exquisite Timepieces is a Shopify store, so a Claude Sonnet 5 worker reads its `/products.json` feed through Firecrawl and writes those rows into the sourcing CSV first; Astra then reads Bucherer in a browser session — the sandbox cannot reach bucherer.com (section 7; this is an egress restriction on this environment, not a claim that Bucherer's pages require client-side rendering) — fills in the Bucherer columns, and cross-references by reference number. Astra never creates the Shopify product; that is recipe G2, which prices each product at the lower of the two list prices.
@@ -314,25 +314,29 @@ merge. Scheduled runs execute `main`; an unmerged branch never runs on
 schedule.
 
 ### D. eBay listing and template work
-**How a product reaches eBay (verified 2026-09-09):** Marketplace Connect
-lists a product that is ACTIVE, published, carries the `ebay` tag, and has
-`custom.ebay_condition` (`1000` new, `3000` pre-owned) mapped to eBay's
-Condition ID in the app. Watches got this from the Belgium sync; the Back
-Vault sync now writes both for every estate piece; fine, lab-grown, and
-hand-imported estate pieces (525) were tagged by workers on 2026-09-09.
-Loose stones and drafts are never tagged. Blank product types (142 fine
-pieces) still need a type before eBay category mapping is clean.
+**How a product reaches eBay (merchant 2026-09-18):** M2E Multichannel
+Connect. Shopify Marketplace Connect is uninstalled. A product lists when
+it is ACTIVE in Shopify, linked to the marketplace item (SKU), and
+Inventory sync is on. Price and quantity follow Shopify when the M2E
+Synchronization Policy has those fields enabled; a Selling Policy modifier
+can still change the channel ticket. The store still writes the `ebay` tag
+and `custom.ebay_condition` (`1000` new with box and papers, `1500` new
+without a complete set, `3000` pre-owned) so M2E can map Condition ID.
+Watches get this from the Belgium sync; Back Vault writes both for every
+estate piece; fine, lab-grown, and hand-imported estate pieces were tagged
+on 2026-09-09. Loose stones and drafts are never tagged. A Shopify price
+change (including the 2026-09-17 watch chart lifts) does not write M2E
+directly — M2E pushes it on the next price sync for linked rows.
 
-**Template:** `snippets/ebay-default.liquid` is a Marketplace Connect
-(Codisto) template with `{placeholders}`; the theme never renders it. It
-now carries an inline `<style>` block with the brand tokens from
+**Template:** `snippets/ebay-default.liquid` is brand HTML for the eBay
+description (inline styles, no external CSS, no JavaScript). Tokens match
 `config/settings_data.json` (espresso `#1E1109`, wine `#4A1428`, gold
 `#C9A050`, cream `#FAF6F0`, warm white `#FDFAF6`, text `#2C1810`, rule
-`#DDD5C5`); before that the `lm-*` classes had no CSS at all, which is why
-the brand colors never rendered. eBay allows inline styles, no external
-stylesheets, no JavaScript. Saving it into the app is browser-only work:
-Astra (or a person) pastes it into Marketplace Connect's template editor,
-saves, previews one listing, and screenshots before and after.
+`#DDD5C5`). The theme never renders it. Codisto `{placeholders}` in that
+file are leftovers; paste equivalent markup into M2E's description policy
+and map Shopify fields there. Astra (or a person) saves in M2E, previews
+one listing, and screenshots before and after. Never open a Marketplace
+Connect admin URL — that app is gone.
 
 ### E. SEO program: Astra plans, Fable builds, Astra audits
 The merchant's SEO program (decision 2026-09-09) is a fixed pipeline.
@@ -359,8 +363,8 @@ writes nothing itself. Every stage's output is a committed file under
 - Astra and Fable never do those themselves.
 - Copy that a customer reads still follows recipe I (Opus 5 templates,
   Sonnet 5 volume).
-- Anything browser-only (Search Console, Merchant Center, Marketplace
-  Connect) is Astra's, per the routing table.
+- Anything browser-only (Search Console, Merchant Center, M2E) is Astra's,
+  per the routing table.
 
 **Fixed rules for this program**
 

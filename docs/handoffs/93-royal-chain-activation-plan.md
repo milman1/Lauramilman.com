@@ -3,7 +3,7 @@
 This change adds a read-only, checksum-bound plan and independent verifier for
 the reviewed Royal Chain scope: **32 products and 93 child SKUs**. It does not
 change Shopify, set a product ACTIVE, publish to Online Store, add the `ebay`
-tag, or configure Marketplace Connect. Those visibility decisions remain a
+tag, or configure M2E. Those visibility decisions remain a
 person-run review step under the repository playbook.
 
 The worker is `lmny-feeds/scripts/royalchain-activation-plan.ts` and the pure

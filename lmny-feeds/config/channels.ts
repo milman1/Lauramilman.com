@@ -19,8 +19,8 @@
  * hardcoded publication name in a sync, and never a one-off publish in
  * Shopify admin, the same discipline `config/pricing.ts` has for markup.
  *
- * Marketplace Connect (eBay) is NOT a publication and is not listed here.
- * That app selects products on its own side; the store's rule is the
+ * M2E (eBay) is NOT a Shopify publication and is not listed here.
+ * That app links products by SKU on its own side; the store's rule is the
  * `ebay` tag plus `custom.ebay_condition` (AGENTS.md section 2 rule 8).
  * Adding 'eBay' to this list would do nothing but log a missing channel.
  *

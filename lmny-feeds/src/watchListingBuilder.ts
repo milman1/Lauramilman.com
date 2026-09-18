@@ -326,7 +326,7 @@ export function buildWatchListing(record: WatchFeedRecord): WatchListing | Needs
   pushCustom('link', linkValue);
   pushCustom('stock_number', record.stockNumber ?? null);
 
-  // eBay item specifics (Marketplace Connect maps custom.* once). Model and
+  // eBay item specifics (M2E maps custom.*). Model and
   // case_size above are the PDP values — extractor fills the rest, never
   // overwriting those two.
   const ebay = extractEbayWatchSpecifics({
