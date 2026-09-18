@@ -3,13 +3,13 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "eyebrow": "A New York Jewelry House",
-        "heading": "Jewelry with a story.\nChosen for yours.",
-        "subheading": "Discover Italian-crafted fine jewelry, certified diamonds, and authenticated estate pieces — selected in New York for the moments you keep and the stories you pass on.",
-        "primary_cta_text": "Shop Fine Jewelry",
-        "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Explore Pre-Owned Maison",
-        "secondary_cta_url": "/collections/vintage-jewelry",
+        "eyebrow": "Laura Milman · New York",
+        "heading": "From a kitchen table\nin New York.",
+        "subheading": "Laura came to America with a dream of becoming an artist. More than thirty years later, her New York jewelry house is still guided by one belief: the right piece should hold a memory, not just a price.",
+        "primary_cta_text": "Discover Laura's Story",
+        "primary_cta_url": "/pages/lauras-story",
+        "secondary_cta_text": "Shop the Collection",
+        "secondary_cta_url": "/collections/all",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
