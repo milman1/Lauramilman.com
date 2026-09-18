@@ -37,6 +37,8 @@
         assign seo_meta_description = article.excerpt_or_content | strip_html | strip | truncatewords: 24, ''
       elsif request.page_type == 'blog' and seo_meta_description == blank
         assign seo_meta_description = 'Read expert jewelry, diamond, watch, styling, and estate-buying guidance from Laura Milman New York.'
+      elsif request.page_type == 'page' and page.handle == 'authentication'
+        assign seo_meta_description = 'Every pre-owned Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. piece is examined, verified, and documented before listing.'
       elsif request.page_type == 'page' and seo_meta_description == blank
         capture seo_meta_description
           echo 'Learn about '
