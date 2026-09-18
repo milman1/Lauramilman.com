@@ -5,6 +5,34 @@
 
 {%- paginate search.results by 24 -%}
 
+{%- liquid
+  assign search_words = search.terms | downcase | strip | split: ' '
+  assign matching_results = 0
+
+  if search.performed
+    for item in search.results
+      if item.object_type == 'product'
+        assign item_tags = item.tags | join: ' '
+        assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase
+        assign matches_search = true
+
+        for word in search_words
+          if word.size > 1
+            unless searchable_text contains word
+              assign matches_search = false
+              break
+            endunless
+          endif
+        endfor
+
+        if matches_search
+          assign matching_results = matching_results | plus: 1
+        endif
+      endif
+    endfor
+  endif
+-%}
+
 <section class="lm-search" aria-label="Search results">
   <div class="lm-search__container">
 
@@ -13,8 +41,8 @@
       {%- if search.performed -%}
         <h1 class="lm-search__title">&ldquo;{{ search.terms | escape }}&rdquo;</h1>
         <p class="lm-search__count">
-          {%- if search.results_count > 0 -%}
-            Showing {{ search.results_count }} {{ search.results_count | pluralize: 'result', 'results' }}
+          {%- if matching_results > 0 -%}
+            Showing {{ matching_results }} matching {{ matching_results | pluralize: 'result', 'results' }}
           {%- else -%}
             No results found
           {%- endif -%}
@@ -39,16 +67,26 @@
       </form>
     </header>
 
-    {%- if search.performed and search.results_count > 0 -%}
+    {%- if search.performed and matching_results > 0 -%}
       <div class="products-grid lm-search__grid">
         {%- for item in search.results -%}
           {%- if item.object_type == 'product' -%}
-            {%- render 'product-card', product: item -%}
-          {%- else -%}
-            <a href="{{ item.url }}" class="lm-search__page-result">
-              <span class="lm-search__page-type">{{ item.object_type | capitalize }}</span>
-              <span class="lm-search__page-title">{{ item.title }}</span>
-            </a>
+            {%- assign item_tags = item.tags | join: ' ' -%}
+            {%- assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase -%}
+            {%- assign matches_search = true -%}
+
+            {%- for word in search_words -%}
+              {%- if word.size > 1 -%}
+                {%- unless searchable_text contains word -%}
+                  {%- assign matches_search = false -%}
+                  {%- break -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if matches_search -%}
+              {%- render 'product-card', product: item -%}
+            {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
       </div>
