@@ -222,7 +222,7 @@ Do not scrape the portal again.
 
 ### E. Product listing copy (SEO + GEO)
 
-1. Read `docs/seo/listing-seo-geo.md` before writing any title, body, or SEO field.
+1. Read `docs/product-page-standards.md` and `docs/seo/listing-seo-geo.md` before writing any title, body, or SEO field.
 2. Use only verified facts. Specs go in `custom.*` metafields, not an HTML table.
 3. Put any video in Shopify media, first in the gallery. Never embed a player in `descriptionHtml`.
 4. Keep SEO title ≤ 60 and SEO description ≤ 160. Use the store’s real policy closer, not a copied 30-day returns line.
