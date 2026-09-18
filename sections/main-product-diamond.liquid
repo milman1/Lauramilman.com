@@ -147,6 +147,32 @@
           </div>
         {%- endform -%}
 
+        {%- comment -%}
+          The stone half of /pages/ring-builder. A loose stone is only half a
+          ring, so the pairing request lives on the stone's own page instead
+          of sending the customer back to the builder to start over. Opens the
+          same Inbox composer as the inquiry pills, with this stone named.
+        {%- endcomment -%}
+        {%- liquid
+          assign stone_image = ''
+          if product.featured_image
+            assign stone_image = product.featured_image | image_url: width: 240
+          endif
+        -%}
+        <button
+          type="button"
+          class="dpdp__setting-btn js-open-product-chat"
+          data-chat-intent="setting"
+          data-product-id="{{ product.id }}"
+          data-product-handle="{{ product.handle }}"
+          data-product-title="{{ product.title | escape }}"
+          data-product-url="{{ shop.url }}{{ product.url }}"
+          data-product-image="{{ stone_image | escape }}"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6.5"/><path d="m8.5 6.5 1.5-3h4l1.5 3"/><path d="m12 3.5-2.2 3 2.2 2.2L14.2 6.5z"/></svg>
+          Set this stone in a ring
+        </button>
+
         {% render 'product-inquiry', product: product %}
 
         {%- if m.cert_url -%}
@@ -477,6 +503,39 @@
     border: 1px solid var(--border-medium, #CFC7B8);
     border-radius: var(--radius-sm, 4px);
     transition: all 0.2s ease;
+  }
+
+  .dpdp__setting-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.95rem 1.5rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    background: transparent;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .dpdp__setting-btn:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+    background: rgba(201, 160, 80, 0.08);
+  }
+
+  .dpdp--navy .dpdp__setting-btn:hover {
+    border-color: var(--pd-blue, #5B7FBD);
+    color: var(--pd-blue, #5B7FBD);
+    background: rgba(91, 127, 189, 0.08);
   }
 
   .dpdp__cert-btn:hover {
