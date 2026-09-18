@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -47,7 +56,8 @@
         "trust-2",
         "trust-3",
         "trust-4"
-      ]
+      ],
+      "settings": {}
     },
     "shop-worlds": {
       "type": "shop-worlds",
@@ -331,20 +341,20 @@
       ],
       "settings": {
         "eyebrow": "Shop by Jewelry Type",
-        "view_all_link": "/collections/all",
-        "title": "Necklaces, Rings & More"
+        "title": "Necklaces, Rings & More",
+        "view_all_link": "/collections/all"
       }
     },
     "featured-products": {
       "type": "featured-products",
       "settings": {
         "eyebrow": "The Signature Edit",
+        "title": "Pieces to Wear Now",
         "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
         "collection": "bracelets",
         "product_count": 8,
         "cta_text": "View All Fine Jewelry",
-        "cta_url": "/collections/all",
-        "title": "Pieces to Wear Now"
+        "cta_url": "/collections/all"
       }
     },
     "reviews": {
