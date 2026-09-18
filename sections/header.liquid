@@ -1331,7 +1331,18 @@
           fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6')
             .then(function(r) { return r.json(); })
             .then(function(data) {
-              var products = (data.resources && data.resources.results && data.resources.results.products) || [];
+              if (searchInput.value.trim() !== q) return;
+
+              var products = ((data.resources && data.resources.results && data.resources.results.products) || []).filter(function(product) {
+                var searchableText = [product.title, product.vendor, product.type]
+                  .concat(product.tags || [])
+                  .join(' ')
+                  .toLowerCase();
+
+                return q.toLowerCase().split(/\s+/).every(function(word) {
+                  return word.length < 2 || searchableText.indexOf(word) !== -1;
+                });
+              });
               if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';
               if (products.length === 0) {
                 searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + q.replace(/</g, '&lt;') + '\u201d</p>';
