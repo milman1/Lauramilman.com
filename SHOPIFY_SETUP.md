@@ -311,11 +311,13 @@ Required Shopify columns (in addition to §1 metafields):
 
 When the piece sells, set qty to `0` or archive it so Uploadify delists.
 
-### eBay (Marketplace Connect) columns
+### eBay (M2E Multichannel Connect) columns
 
-Marketplace Connect lists a product only when it is **ACTIVE**, published,
-and carries the `ebay` tag plus a condition metafield. Every jewelry CSV
-that should list on eBay includes:
+M2E lists from Shopify. A product should be **ACTIVE**, have a unique SKU,
+carry the `ebay` tag, and have a condition metafield so M2E can map eBay
+Condition ID. Link the SKU in M2E and turn Inventory sync on (price + qty
+in the Synchronization Policy). Shopify Marketplace Connect was removed
+on 2026-09-18. Every jewelry CSV that should list on eBay includes:
 
 | Column | Value |
 |---|---|

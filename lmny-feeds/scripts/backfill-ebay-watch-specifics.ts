@@ -314,7 +314,7 @@ async function main() {
     '',
     'CSVs: `out/ebay-watch-specifics.csv`, `out/ebay-watch-flags.csv`, `out/ebay-watch-duplicates.csv`.',
     '',
-    'After a live run: Marketplace Connect → Mapping → Item specifics → set each of the seven keys from Inactive to **Use [key] from custom**. List Timepieces / `ebay` only — do not list both halves of a duplicate pair.',
+    'After a live run: M2E → eBay item specifics → map each of the seven keys from `custom.*`. List Timepieces / `ebay` only — do not list both halves of a duplicate pair.',
   ].join('\n');
   await writeFile(path.join(OUT_DIR, 'ebay-watch-report.md'), `${summary}\n`);
   console.log(summary);

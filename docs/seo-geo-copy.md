@@ -1,6 +1,6 @@
 # SEO & GEO Copy — Laura Milman New York
 
-Single reference for **search-engine optimization (SEO)** and **generative-engine optimization (GEO)** copy across lauramilman.com, Shopify Admin, and eBay (Marketplace Connect).
+Single reference for **search-engine optimization (SEO)** and **generative-engine optimization (GEO)** copy across lauramilman.com, Shopify Admin, and eBay (M2E Multichannel Connect).
 
 **Related docs (implementation detail):**
 
@@ -44,7 +44,7 @@ Single reference for **search-engine optimization (SEO)** and **generative-engin
 | Feed diamonds (`nd-*`, `lg-*`) | API sync | `lmny-feeds/src/product.ts` |
 | Back Vault estate (`bv-*`, `tag:backvault-feed`) | API sync | `lmny-feeds/src/backvault/listing.ts` |
 | Legacy estate / manual jewelry | Shopify Admin | Formulas below |
-| eBay listing body | Marketplace Connect | Syncs Shopify description + mapped metafields |
+| eBay listing body | M2E description policy | Syncs Shopify description + mapped metafields |
 
 After schema changes, bump `PRODUCT_SCHEMA_VERSION` in `lmny-feeds/src/product.ts` so the hourly feed refreshes active products once.
 
@@ -192,16 +192,16 @@ AI engines cite **complete sentences** in the body and **structured fields** in 
 
 ---
 
-## eBay & Marketplace Connect
+## eBay & M2E
 
 | Shopify field | eBay use |
 |---|---|
-| Product description HTML | Listing body (`{EbayDescription}` in `snippets/ebay-default.liquid`) |
-| `custom.ebay_condition` | Condition ID (`3000` pre-owned, `1000` unworn) |
+| Product description HTML | Listing body (M2E description policy; brand HTML in `snippets/ebay-default.liquid`) |
+| `custom.ebay_condition` | Condition ID (`3000` pre-owned, `1000` unworn with box and papers, `1500` otherwise new) |
 | `custom.features` | Features aspect — **not** body copy |
-| `custom.model`, `case_size`, `band_material`, etc. | Item specifics when mapped once in Connect |
+| `custom.model`, `case_size`, `band_material`, etc. | Item specifics when mapped once in M2E |
 
-**Branded eBay template:** `snippets/ebay-default.liquid` + `assets/ebay-styles.css` (LMNY espresso styling). Publish template `default` in Connect after Shopify theme deploy.
+**Branded eBay template:** `snippets/ebay-default.liquid` + `assets/ebay-styles.css` (LMNY espresso styling). Put equivalent markup in the M2E description policy. Shopify Marketplace Connect is uninstalled.
 
 ---
 
