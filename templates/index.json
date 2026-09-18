@@ -345,7 +345,8 @@
       "settings": {
         "eyebrow": "Shop by Jewelry Type",
         "title": "Find Your Next Piece",
-        "view_all_link": "/collections"
+        "view_all_link": "/collections",
+        "view_all_text": "All Collections"
       }
     },
     "featured-products": {

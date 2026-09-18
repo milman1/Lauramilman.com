@@ -11,7 +11,7 @@
         "pendants": { "type": "collection", "settings": { "collection": "pendants-1", "title": "Pendants" } }
       },
       "block_order": ["chains", "necklaces", "rings", "earrings", "bracelets", "pendants"],
-      "settings": { "eyebrow": "Shop the Collections", "title": "Find Your Next Piece", "heading_tag": "h1", "view_all_link": "/collections/all" }
+      "settings": { "eyebrow": "Shop the Collections", "title": "Find Your Next Piece", "heading_tag": "h1", "view_all_link": "/collections/all", "view_all_text": "Browse All Jewelry" }
     },
     "worlds": {
       "type": "collections-grid",

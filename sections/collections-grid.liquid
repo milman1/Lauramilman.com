@@ -9,7 +9,7 @@
     </div>
     {%- if section.settings.view_all_link != blank -%}
       <a href="{{ section.settings.view_all_link }}" class="view-all-link">
-        {{ 'products.general.view_all' | t }}
+        {{ section.settings.view_all_text | default: 'View All' | escape }}
       </a>
     {%- endif -%}
   </div>
@@ -66,6 +66,7 @@
   "tag": "section",
   "class": "section-collections-grid",
   "settings": [
+    { "type": "text", "id": "view_all_text", "label": "View all link text", "default": "View All" },
     {
       "type": "select",
       "id": "heading_tag",
