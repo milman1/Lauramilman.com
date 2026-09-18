@@ -1,1 +1,30 @@
-{"sections":{"main":{"type":"main-list-collections","settings":{"image_ratio":"square"}}},"order":["main"]}
+{
+  "sections": {
+    "categories": {
+      "type": "collections-grid",
+      "blocks": {
+        "chains": { "type": "collection", "settings": { "collection": "chains", "title": "Gold Chains" } },
+        "necklaces": { "type": "collection", "settings": { "collection": "necklaces" } },
+        "rings": { "type": "collection", "settings": { "collection": "rings" } },
+        "earrings": { "type": "collection", "settings": { "collection": "earrings" } },
+        "bracelets": { "type": "collection", "settings": { "collection": "bracelets" } },
+        "pendants": { "type": "collection", "settings": { "collection": "pendants-1", "title": "Pendants" } }
+      },
+      "block_order": ["chains", "necklaces", "rings", "earrings", "bracelets", "pendants"],
+      "settings": { "eyebrow": "Shop the Collections", "title": "Find Your Next Piece", "view_all_link": "/collections/all" }
+    },
+    "worlds": {
+      "type": "collections-grid",
+      "blocks": {
+        "peaceful": { "type": "collection", "settings": { "collection": "peaceful-diamonds-by-laura-milman-new-york", "title": "Lab-Grown Jewelry" } },
+        "natural": { "type": "collection", "settings": { "collection": "natural-diamonds", "title": "Natural Loose Diamonds" } },
+        "lab": { "type": "collection", "settings": { "collection": "lab-grown-diamonds", "title": "Lab-Grown Loose Diamonds" } },
+        "estate": { "type": "collection", "settings": { "collection": "vintage-jewelry", "title": "Pre-Owned Maison" } },
+        "watches": { "type": "collection", "settings": { "collection": "time-pieces", "title": "Pre-Owned Timepieces" } }
+      },
+      "block_order": ["peaceful", "natural", "lab", "estate", "watches"],
+      "settings": { "eyebrow": "Explore Laura Milman", "title": "Discover Our Worlds", "view_all_link": "" }
+    }
+  },
+  "order": ["categories", "worlds"]
+}

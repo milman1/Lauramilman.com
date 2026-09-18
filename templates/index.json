@@ -15,8 +15,8 @@
         "eyebrow": "Laura Milman · New York",
         "heading": "Thirty years of jewelry.\nA lifetime of stories.",
         "subheading": "From her earliest drawings to her Manhattan jewelry house, Laura has always believed the most beautiful pieces are the ones that mean something.",
-        "primary_cta_text": "Shop the Collection",
-        "primary_cta_url": "/collections/all",
+        "primary_cta_text": "Shop the Collections",
+        "primary_cta_url": "/collections",
         "secondary_cta_text": "Discover Laura's Story",
         "secondary_cta_url": "/pages/lauras-story",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
@@ -345,7 +345,7 @@
       "settings": {
         "eyebrow": "Shop by Jewelry Type",
         "title": "Find Your Next Piece",
-        "view_all_link": "/collections/all"
+        "view_all_link": "/collections"
       }
     },
     "featured-products": {
@@ -527,8 +527,8 @@
       "settings": {
         "title": "Begin Your Story",
         "description": "Exceptional stones, storied maison pieces, pre-owned timepieces, and jewelry made to be inherited — designed in New York, crafted in Italy.",
-        "primary_cta_text": "Shop the Collection",
-        "primary_cta_url": "/collections/all",
+        "primary_cta_text": "Shop the Collections",
+        "primary_cta_url": "/collections",
         "secondary_cta_text": "Book a Consultation",
         "secondary_cta_url": "/pages/private-clients",
         "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
