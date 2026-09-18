@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
   LOOSE_LAB_GROWN,
+  SKYLAB,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
+  skylabRetailFromCost,
   STONE_TIERS,
   WATCH,
   WATCH_COST_TIERS,
@@ -39,6 +41,12 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
     expect(labGrownJewelryRetailFromCost(250)).toBe(1000);
     expect(labGrownJewelryRetailFromCost(333.33)).toBe(1333);
+  });
+
+  it('prices Skylab bridal at cost × 3, not Peaceful Diamonds ×4', () => {
+    expect(SKYLAB.costMultiple).toBe(3);
+    expect(skylabRetailFromCost(250)).toBe(750);
+    expect(labGrownJewelryRetailFromCost(250)).toBe(1000);
   });
 
   it('rejects non-positive lab jewelry cost', () => {
