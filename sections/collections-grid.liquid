@@ -4,7 +4,8 @@
       {%- if section.settings.eyebrow != blank -%}
         <div class="eyebrow">{{ section.settings.eyebrow }}</div>
       {%- endif -%}
-      <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- assign heading_tag = section.settings.heading_tag | default: 'h2' -%}
+      <{{ heading_tag }} class="section-title">{{ section.settings.title }}</{{ heading_tag }}>
     </div>
     {%- if section.settings.view_all_link != blank -%}
       <a href="{{ section.settings.view_all_link }}" class="view-all-link">
@@ -65,6 +66,13 @@
   "tag": "section",
   "class": "section-collections-grid",
   "settings": [
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading level",
+      "options": [{ "value": "h1", "label": "Page heading" }, { "value": "h2", "label": "Section heading" }],
+      "default": "h2"
+    },
     {
       "type": "text",
       "id": "eyebrow",
