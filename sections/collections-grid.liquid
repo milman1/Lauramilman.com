@@ -16,7 +16,7 @@
   <div class="collections-grid">
     {%- for block in section.blocks -%}
       {%- assign collection = collections[block.settings.collection] -%}
-      {%- if collection != blank -%}
+      {%- if collection != blank and collection.products_count > 0 -%}
         <a href="{{ collection.url }}" class="collection-card" {{ block.shopify_attributes }}>
           <div class="collection-card__image-box">
             {%- if collection.image -%}
@@ -42,7 +42,7 @@
             <span class="collection-card__cta">Explore</span>
           </div>
         </a>
-      {%- else -%}
+      {%- elsif collection == blank -%}
         <!-- Placeholder when no collection is selected in the editor -->
         <div class="collection-card" {{ block.shopify_attributes }}>
           <div class="collection-card__image-box" style="background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(184,148,90,0.08) 10px,rgba(184,148,90,0.08) 11px);">
