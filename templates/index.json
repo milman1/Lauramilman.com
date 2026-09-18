@@ -228,13 +228,6 @@
             "title": "Cartier"
           }
         },
-        "watch-ap": {
-          "type": "maison",
-          "settings": {
-            "collection": "audemars-piguet-watches",
-            "title": "Audemars Piguet"
-          }
-        },
         "watch-bvlgari": {
           "type": "maison",
           "settings": {
@@ -246,13 +239,12 @@
       "block_order": [
         "watch-rolex",
         "watch-cartier",
-        "watch-ap",
         "watch-bvlgari"
       ],
       "settings": {
         "eyebrow": "Pre-Owned Timepieces",
         "title": "Watches, Authenticated",
-        "description": "Rolex, Cartier, Audemars Piguet, and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
+        "description": "Rolex, Cartier, Bvlgari, and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
         "trust_line": "Authenticated in New York · Watches: exchanges only",
         "cta_text": "Shop All Timepieces",
         "cta_url": "/collections/time-pieces"
