@@ -32,11 +32,12 @@
       "header": {
         "type": "header",
         "custom_css": [
-          "header img:first-of-type{width:105px!important;height:70px!important;object-fit:cover!important;object-position:center 30%!important}",
-          "header a:first-of-type{width:105px!important}"
+          ".logo {width: 185px !important; height: 60px; display: block; flex-shrink: 0; mix-blend-mode: lighten; background: url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=800\") center/260px auto no-repeat;}",
+          ".logo img {opacity: 0; width: 100% !important; height: 100% !important;}",
+          "@media (max-width: 600px) {.logo {width: 145px !important; height: 48px; background-size: 210px; }}"
         ],
         "settings": {
-          "logo": "shopify://shop_images/Untitled_design_23.png",
+          "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "estate_label": "Pre-Owned Maison",
           "peaceful_label": "Peaceful Diamonds",
           "peaceful_url": "",
@@ -46,11 +47,11 @@
       "footer": {
         "type": "footer",
         "custom_css": [
-          "footer img:first-of-type {width: 180px !important; height: 72px !important; object-fit: cover !important; object-position: center 30% !important;}",
-          "footer a:first-of-type {width: 180px !important;}"
+          ".footer__logo {display: inline-block; width: 240px; height: 80px; mix-blend-mode: lighten; background: url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=1000\") center/350px auto no-repeat;}",
+          ".footer__logo img {opacity: 0; width: 100% !important; height: 100% !important;}"
         ],
         "settings": {
-          "logo": "shopify://shop_images/Untitled_design_23.png",
+          "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "description": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.",
           "social_instagram": "",
           "social_pinterest": "",
