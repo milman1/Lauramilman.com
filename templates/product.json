@@ -28,15 +28,6 @@
       "block_order": ["lab-1", "lab-2", "lab-3", "estate-1", "estate-2", "estate-3", "heritage-1", "heritage-2", "heritage-3"],
       "settings": {}
     },
-    "reviews": {
-      "type": "product-reviews",
-      "settings": {
-        "eyebrow": "Client Words",
-        "title": "Reviews",
-        "cta_label": "Read Google Reviews",
-        "cta_url": "/pages/google-reviews"
-      }
-    },
     "recommendations": {
       "type": "product-recommendations",
       "settings": {
@@ -47,5 +38,5 @@
       }
     }
   },
-  "order": ["main", "education", "reviews", "recommendations"]
+  "order": ["main", "education", "recommendations"]
 }
