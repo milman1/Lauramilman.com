@@ -20,7 +20,7 @@
     <div class="lm-maison__grid">
       {%- for block in section.blocks -%}
         {%- assign maison_collection = block.settings.collection -%}
-        {%- if maison_collection != blank -%}
+        {%- if maison_collection != blank and maison_collection.products_count > 0 -%}
           <a href="{{ maison_collection.url }}" class="lm-maison__card" {{ block.shopify_attributes }}>
             <div class="lm-maison__card-image">
               {%- assign card_image = block.settings.image | default: maison_collection.image -%}
