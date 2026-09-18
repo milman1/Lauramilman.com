@@ -15,10 +15,10 @@
         "eyebrow": "Laura Milman · New York",
         "heading": "Thirty years of jewelry.\nA lifetime of stories.",
         "subheading": "From her earliest drawings to her Manhattan jewelry house, Laura has always believed the most beautiful pieces are the ones that mean something.",
-        "primary_cta_text": "Discover Laura's Story",
-        "primary_cta_url": "/pages/lauras-story",
-        "secondary_cta_text": "Shop the Collection",
-        "secondary_cta_url": "/collections/all",
+        "primary_cta_text": "Shop the Collection",
+        "primary_cta_url": "/collections/all",
+        "secondary_cta_text": "Discover Laura's Story",
+        "secondary_cta_url": "/pages/lauras-story",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
@@ -291,6 +291,13 @@
     "collections-grid": {
       "type": "collections-grid",
       "blocks": {
+        "cat-chains": {
+          "type": "collection",
+          "settings": {
+            "collection": "chains",
+            "title": "Gold Chains"
+          }
+        },
         "cat-engagement": {
           "type": "collection",
           "settings": {
@@ -328,28 +335,36 @@
         }
       },
       "block_order": [
+        "cat-chains",
         "cat-engagement",
         "cat-wedding",
+        "cat-earrings",
         "cat-bracelets",
-        "cat-pendants",
-        "cat-earrings"
+        "cat-pendants"
       ],
       "settings": {
         "eyebrow": "Shop by Jewelry Type",
-        "title": "Necklaces, Rings & More",
+        "title": "Find Your Next Piece",
         "view_all_link": "/collections/all"
       }
     },
     "featured-products": {
       "type": "featured-products",
+      "blocks": {
+        "chain-rope": { "type": "product", "settings": { "product": "lmny-rope-2-5-mm-hsr018" } },
+        "chain-paperclip": { "type": "product", "settings": { "product": "lmny-paperclip-2-5-mm-pclip060" } },
+        "chain-snake": { "type": "product", "settings": { "product": "lmny-snake-2-mm-ovsn200" } },
+        "chain-bracelet": { "type": "product", "settings": { "product": "lmny-paperclip-2-5-mm-pclip060-bracelet" } }
+      },
+      "block_order": ["chain-rope", "chain-paperclip", "chain-snake", "chain-bracelet"],
       "settings": {
-        "eyebrow": "The Signature Edit",
-        "title": "Pieces to Wear Now",
-        "description": "A rotating edit from the maison — jewelry designed in New York, chosen to be worn from morning to evening.",
-        "collection": "bracelets",
+        "eyebrow": "The Gold Chain Edit",
+        "title": "Gold Chains for Every Day",
+        "description": "Discover 14K gold necklaces and bracelets in rope, paperclip, and snake links — wear one on its own or find your next layer.",
+        "collection": "chains",
         "product_count": 4,
-        "cta_text": "View All",
-        "cta_url": "/collections/all"
+        "cta_text": "Shop All Gold Chains",
+        "cta_url": "/collections/chains"
       }
     },
     "shop-the-look": {
@@ -524,12 +539,12 @@
     "hero",
     "trust-strip",
     "shop-worlds",
+    "collections-grid",
+    "featured-products",
     "preowned-maison",
     "diamond-destination",
     "preowned-timepieces",
     "peaceful-diamonds",
-    "collections-grid",
-    "featured-products",
     "shop-the-look",
     "testimonials",
     "philosophy-quote",
