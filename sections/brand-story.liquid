@@ -14,7 +14,9 @@
                   {{ section.settings.portrait_image | image_url: width: 600 }} 600w,
                   {{ section.settings.portrait_image | image_url: width: 800 }} 800w"
           sizes="(max-width: 768px) 100vw, 50vw"
-          alt="{{ section.settings.title | default: 'Our Story' | escape }}"
+          alt="{{ section.settings.portrait_image.alt | default: 'Laura Milman, founder of Laura Milman New York' | escape }}"
+          width="{{ section.settings.portrait_image.width }}"
+          height="{{ section.settings.portrait_image.height }}"
           loading="lazy"
           decoding="async"
         >

@@ -350,7 +350,7 @@
       }
     },
     "featured-products": {
-      "type": "featured-products",
+      "type": "shop-the-look",
       "blocks": {
         "chain-rope": { "type": "product", "settings": { "product": "lmny-rope-2-5-mm-hsr018" } },
         "chain-paperclip": { "type": "product", "settings": { "product": "lmny-paperclip-2-5-mm-pclip060" } },
@@ -360,22 +360,14 @@
       "block_order": ["chain-rope", "chain-paperclip", "chain-snake", "chain-bracelet"],
       "settings": {
         "eyebrow": "The Gold Chain Edit",
-        "title": "Gold Chains for Every Day",
-        "description": "Discover 14K gold necklaces and bracelets in rope, paperclip, and snake links — wear one on its own or find your next layer.",
+        "title": "Worn Your Way",
+        "description": "One signature chain or a few layers that feel like you. Explore 14K gold rope, paperclip, and snake styles for your everyday wardrobe.",
         "collection": "chains",
-        "product_count": 4,
-        "cta_text": "Shop All Gold Chains",
-        "cta_url": "/collections/chains"
-      }
-    },
-    "shop-the-look": {
-      "type": "shop-the-look",
-      "settings": {
-        "eyebrow": "Shop the Look",
-        "title": "Stack & Style",
-        "collection": "bracelets",
-        "caption_title": "",
-        "cta_text": "View Full Collection"
+        "editorial_image": "shopify://shop_images/royal_chain_2019_by_sinem_yazici8896_2_6c51247b-98c5-4457-8cbd-ad7c839d52e3.jpg",
+        "editorial_alt": "Model wearing layered yellow gold chains over a black top",
+        "caption_title": "Layered, your way",
+        "caption_text": "Styling inspiration · Explore the chain edit",
+        "cta_text": "Shop All Gold Chains"
       }
     },
     "testimonials": {
@@ -456,6 +448,7 @@
       ],
       "settings": {
         "eyebrow": "The Beginning",
+        "portrait_image": "shopify://shop_images/laura-milman-portrait.jpg",
         "title": "Three Decades\nin the Making",
         "body_text": "<p>Laura Milman's story began in the heart of New York's Diamond District, where she spent thirty years learning what makes a jewel worth keeping. Today every Laura Milman New York piece is designed in the city that trained her eye — and brought to life by master goldsmiths in Italy.</p><p>Newly made or newly rediscovered, each piece is chosen the same way: it must be beautiful enough to buy once, and made well enough to hand down.</p>",
         "signature": "— Laura Milman",
@@ -546,7 +539,6 @@
     "diamond-destination",
     "preowned-timepieces",
     "peaceful-diamonds",
-    "shop-the-look",
     "testimonials",
     "philosophy-quote",
     "brand-story",
