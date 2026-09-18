@@ -1,0 +1,229 @@
+{
+  "fixture": "Conditional specifications rendered locally with visible pendant facts; no live writes",
+  "checks": [
+    {
+      "body": {
+        "left": 261.5,
+        "right": 1163.5,
+        "width": 902
+      },
+      "image": {
+        "left": 261.5,
+        "right": 1163.5,
+        "width": 902
+      },
+      "loaded": 720,
+      "paddings": [
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ]
+      ],
+      "scrollWidth": 1425,
+      "specifications": [
+        {
+          "left": 261.5,
+          "right": 1163.5
+        }
+      ],
+      "title": {
+        "left": 261.5,
+        "right": 1163.5,
+        "width": 902
+      },
+      "viewport": 1440
+    },
+    {
+      "body": {
+        "left": 45,
+        "right": 708,
+        "width": 663
+      },
+      "image": {
+        "left": 45,
+        "right": 708,
+        "width": 663
+      },
+      "loaded": 720,
+      "paddings": [
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ]
+      ],
+      "scrollWidth": 753,
+      "specifications": [
+        {
+          "left": 45,
+          "right": 708
+        }
+      ],
+      "title": {
+        "left": 45,
+        "right": 708,
+        "width": 663
+      },
+      "viewport": 768
+    },
+    {
+      "body": {
+        "left": 55,
+        "right": 320,
+        "width": 265
+      },
+      "image": {
+        "left": 55,
+        "right": 320,
+        "width": 265
+      },
+      "loaded": 720,
+      "paddings": [
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ]
+      ],
+      "scrollWidth": 375,
+      "specifications": [
+        {
+          "left": 55,
+          "right": 320
+        }
+      ],
+      "title": {
+        "left": 55,
+        "right": 320,
+        "width": 265
+      },
+      "viewport": 390
+    },
+    {
+      "body": {
+        "left": 55,
+        "right": 250,
+        "width": 195
+      },
+      "image": {
+        "left": 55,
+        "right": 250,
+        "width": 195
+      },
+      "loaded": 720,
+      "paddings": [
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ],
+        [
+          "16px",
+          "16px"
+        ]
+      ],
+      "scrollWidth": 305,
+      "specifications": [
+        {
+          "left": 55,
+          "right": 250
+        }
+      ],
+      "title": {
+        "left": 55,
+        "right": 250,
+        "width": 195
+      },
+      "viewport": 320
+    }
+  ]
+}
