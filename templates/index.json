@@ -173,6 +173,35 @@
         "cta_url": "/collections/vintage-jewelry"
       }
     },
+    "fine-jewelry-editorial": {
+      "type": "fine-jewelry-editorial",
+      "settings": {
+        "eyebrow": "The Fine Jewelry Edit",
+        "heading": "Jewelry, brought to life.",
+        "description": "The way a diamond catches the light. The way a necklace follows your neckline. Discover pieces worn close — and find the one that feels like you."
+      },
+      "blocks": {
+        "earrings": {
+          "type": "piece",
+          "settings": {
+            "product": "pear-and-emerald-cut-in-diamond-drop-earrings",
+            "image": "shopify://shop_images/pearandemeraldhalosimone.png",
+            "image_alt": "Close-up of pear and emerald-cut diamond halo drop earrings worn on an ear",
+            "caption": "A little movement. A lasting impression."
+          }
+        },
+        "necklace": {
+          "type": "piece",
+          "settings": {
+            "product": "tennis-choker-necklace",
+            "image": "shopify://shop_images/tennischokersimone.png",
+            "image_alt": "Diamond tennis choker necklace worn along the neckline",
+            "caption": "Brilliance, close to you."
+          }
+        }
+      },
+      "block_order": ["earrings", "necklace"]
+    },
     "diamond-destination": {
       "type": "diamond-destination",
       "blocks": {
@@ -536,6 +565,7 @@
     "collections-grid",
     "featured-products",
     "preowned-maison",
+    "fine-jewelry-editorial",
     "diamond-destination",
     "preowned-timepieces",
     "peaceful-diamonds",
