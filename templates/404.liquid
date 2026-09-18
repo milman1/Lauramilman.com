@@ -3,9 +3,12 @@
     <span class="page-404__eyebrow">404</span>
     <h1 class="page-404__title">Page Not Found</h1>
     <p class="page-404__description">
-      The page you were looking for doesn't exist. Let us guide you back to something beautiful.
+      This piece is no longer available. Explore our current fine jewelry or certified natural diamonds.
     </p>
-    <a href="/" class="btn btn--primary page-404__btn">Return Home</a>
+    <div class="page-404__actions">
+      <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary page-404__btn">Shop Fine Jewelry</a>
+      <a href="/collections/natural-diamonds" class="page-404__secondary-btn">Explore Natural Diamonds</a>
+    </div>
   </div>
 </section>
 
@@ -59,5 +62,33 @@
   }
   .page-404__btn:hover {
     background: var(--gold-light, #E2C27A);
+  }
+  .page-404__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .page-404__secondary-btn {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+  .page-404__secondary-btn:hover {
+    color: var(--gold, #C9A050);
+  }
+  @media screen and (max-width: 749px) {
+    .page-404 {
+      min-height: 65vh;
+      padding: 88px 24px;
+    }
+    .page-404__title {
+      font-size: 42px;
+    }
   }
 </style>
