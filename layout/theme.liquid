@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#1E1109">
     <link rel="canonical" href="{{ canonical_url }}">
+    {%- if request.page_type == 'collection' and collection.products_count == 0 -%}
+      <meta name="robots" content="noindex,follow">
+    {%- endif -%}
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
 
     {%- if settings.favicon != blank -%}
