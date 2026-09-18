@@ -1,7 +1,4 @@
 # Task: End the 640 archived-watch eBay listings and disable them in Marketplace Connect
-
-> 2026-09-18: Marketplace Connect is uninstalled. Stop relists in **M2E** (unlink / Inventory sync off) and end leftovers in Seller Hub. Ignore Connect bulk-disable links in this file.
-
 - Issue: https://github.com/milman1/Lauramilman.com/issues/92
 - Updated (UTC): 2026-09-10
 - Owner / session: Astra (OpenAI GPT-6 Astra), browser session run by the merchant
