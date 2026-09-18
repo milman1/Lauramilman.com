@@ -45,6 +45,15 @@
             loading="lazy"
             decoding="async"
           >
+        {%- elsif section.settings.editorial_asset != blank -%}
+          <img
+            src="{{ section.settings.editorial_asset | asset_url }}"
+            alt="{{ section.settings.editorial_alt | default: section.settings.title | escape }}"
+            width="1120"
+            height="1400"
+            loading="lazy"
+            decoding="async"
+          >
         {%- elsif look_collection != blank and look_collection.image -%}
           <img
             src="{{ look_collection.image | image_url: width: 1000 }}"
@@ -321,6 +330,12 @@
       "type": "text",
       "id": "editorial_alt",
       "label": "Editorial image description"
+    },
+    {
+      "type": "text",
+      "id": "editorial_asset",
+      "label": "Editorial theme asset filename",
+      "info": "Optional uploaded theme asset. An image selected above takes priority."
     },
     {
       "type": "text",

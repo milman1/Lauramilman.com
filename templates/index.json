@@ -174,33 +174,35 @@
       }
     },
     "fine-jewelry-editorial": {
-      "type": "fine-jewelry-editorial",
+      "type": "shop-the-look",
       "settings": {
         "eyebrow": "The Fine Jewelry Edit",
-        "heading": "Jewelry, brought to life.",
-        "description": "The way a diamond catches the light. The way a necklace follows your neckline. Discover pieces worn close — and find the one that feels like you."
+        "title": "Jewelry, brought to life.",
+        "description": "A little movement. A touch of brilliance. Explore diamond earrings, necklaces, and bracelets — pieces to make your own, every day or for a moment worth remembering.",
+        "collection": "earrings",
+        "editorial_asset": "fine-jewelry-model-earrings.jpg",
+        "editorial_alt": "AI-generated styling image inspired by the pear and emerald-cut diamond halo drop earrings",
+        "caption_title": "A lasting impression",
+        "caption_text": "AI-styled preview · Explore the jewelry edit",
+        "cta_text": "Explore All Earrings"
       },
       "blocks": {
         "earrings": {
-          "type": "piece",
+          "type": "product",
           "settings": {
-            "product": "pear-and-emerald-cut-in-diamond-drop-earrings",
-            "image": "shopify://shop_images/pearandemeraldhalosimone.png",
-            "image_alt": "Close-up of pear and emerald-cut diamond halo drop earrings worn on an ear",
-            "caption": "A little movement. A lasting impression."
+            "product": "pear-and-emerald-cut-in-diamond-drop-earrings"
           }
         },
         "necklace": {
-          "type": "piece",
+          "type": "product",
           "settings": {
-            "product": "tennis-choker-necklace",
-            "image": "shopify://shop_images/tennischokersimone.png",
-            "image_alt": "Diamond tennis choker necklace worn along the neckline",
-            "caption": "Brilliance, close to you."
+            "product": "tennis-choker-necklace"
           }
-        }
+        },
+        "huggies": { "type": "product", "settings": { "product": "diamond-pave-huggie-earrings-1" } },
+        "bracelet": { "type": "product", "settings": { "product": "paperclip-inspired-bracelet" } }
       },
-      "block_order": ["earrings", "necklace"]
+      "block_order": ["earrings", "necklace", "huggies", "bracelet"]
     },
     "diamond-destination": {
       "type": "diamond-destination",
