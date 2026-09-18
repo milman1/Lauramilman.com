@@ -3,7 +3,7 @@
   plus a Google reviews CTA so the page is never empty.
 {%- endcomment -%}
 
-<section class="pdp-reviews" aria-label="Client reviews">
+{%- comment -%}<section class="pdp-reviews" aria-label="Client reviews">
   <div class="pdp-reviews__inner">
     <header class="pdp-reviews__header">
       <p class="eyebrow">{{ section.settings.eyebrow }}</p>
@@ -58,7 +58,7 @@
     margin-bottom: 1.5rem;
   }
   .pdp-reviews .btn { margin-top: 1.25rem; }
-</style>
+</style>{%- endcomment -%}
 
 {% schema %}
 {
