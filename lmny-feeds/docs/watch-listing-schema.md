@@ -105,16 +105,15 @@ Examples:
 
 ```html
 <p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{boxPaperClause}.{gradeClause}</p>
-<p><strong>Case size:</strong> {caseSize or Not specified}<br>
-<strong>Year:</strong> {year or Not specified}<br>
-<strong>Bracelet links:</strong> {link disclosure or Not specified}</p>
 <p>{comment}</p>                                              <!-- see Comment rule above -->
 ```
 
-Specs are **not** inlined as an HTML table. They are written to storefront-readable
+Specs are **not** inlined in the description. They are written to storefront-readable
 `custom.*` metafields and rendered by the theme’s jewelry-style
 `.product-specs` grid in `sections/main-product.liquid` (same chrome as
-earrings / rings). All free-text values in the prose HTML must still be
+earrings / rings). The theme also strips leftover Case size / Year / Bracelet
+links paragraphs from older HTML so live listings match this layout before
+the next content-hash resync. All free-text values in the prose HTML must still be
 escaped (`&`, `<`, `>`).
 
 ### Spec metafields (PDP grid)

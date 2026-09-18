@@ -10,8 +10,9 @@ it contains Cost per item.
 Products use vendor `Laura Milman New York`, product type and Shopify category
 appropriate to their length: Bracelets below 14in and Necklaces from 14in.
 The public
-description has a factual overview followed by a Details list for material,
-style, width, and every available length. It does not make care, fulfillment,
+description is one factual paragraph (width, style, type, metal, finish,
+clasp, construction, and available lengths as prose). Specs also live on
+`custom.*` metafields for the storefront grid. It does not make care, fulfillment,
 authentication, packaging, or provenance claims because the intake does not
 provide evidence for them.
 

@@ -35,7 +35,7 @@ orders to create a committee. The selected model executes; see
 | Supplier intake | `.github/workflows/royalchain-costs.yml`, `lmny-feeds/scripts/royalchain-costs.ts` | Reads wholesale cost from the Royal Chain trade account with Playwright (secrets `ROYALCHAIN_USERNAME` / `ROYALCHAIN_PASSWORD`) for a shortlist CSV; retail = cost x 3. Recipe H. |
 | Uploadify | Shopify app | Jewelry marketplace feed. Needs ACTIVE, SKU, qty > 0, Category. Loose diamonds are deliberately kept at qty 0 so it skips them. |
 | Journal (blog) | Shopify Online Store blog `journal` | Nine published articles as of 2026-09-08, linked from header and footer. No automated writer exists in this repo. |
-| Setup docs | `SHOPIFY_SETUP.md`, `lmny-feeds/README.md`, `lmny-feeds/docs/`, `docs/seo/listing-seo-geo.md` | Metafield definitions, brand collections, listing schemas, SEO/GEO listing voice. Read the relevant one before touching that area. |
+| Setup docs | `SHOPIFY_SETUP.md`, `docs/product-page-standards.md`, `lmny-feeds/README.md`, `lmny-feeds/docs/`, `docs/seo/listing-seo-geo.md` | Metafield definitions, PDP contract, brand collections, listing schemas, SEO/GEO listing voice. Read the relevant one before touching that area. |
 
 Catalog shape (active products, 2026-09-08): about 10,000 loose diamonds,
 732 Back Vault estate pieces (tag `backvault-feed`, handle prefix `bv-`),

@@ -259,7 +259,7 @@ describe('storefront-readable facet metafields', () => {
 
 describe('content hash', () => {
   it('uses the schema version that refreshes existing products for Amount-as-cost pricing', () => {
-    expect(PRODUCT_SCHEMA_VERSION).toBe(24);
+    expect(PRODUCT_SCHEMA_VERSION).toBe(25);
   });
 
   it('is versioned, so a payload-shape change refreshes the live catalogue', () => {
@@ -455,6 +455,7 @@ describe('updates target the existing product by id', () => {
       description: expect.stringContaining('round brilliant natural diamond'),
     });
     expect(String(input.descriptionHtml)).toMatch(/^<p>This 2\.01ct round brilliant natural diamond/);
+    expect(String(input.descriptionHtml)).not.toContain('<ul>');
   });
 
   it('watch metafields include Dial/Bezel/Bracelet/Metal/MM/Link for the PDP specs grid', () => {
