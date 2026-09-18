@@ -32,6 +32,7 @@
       "header": {
         "type": "header",
         "settings": {
+          "logo": "shopify://shop_images/Untitled_design_23.png",
           "estate_label": "Pre-Owned Maison",
           "peaceful_label": "Peaceful Diamonds",
           "peaceful_url": "",
@@ -41,6 +42,7 @@
       "footer": {
         "type": "footer",
         "settings": {
+          "logo": "shopify://shop_images/Untitled_design_23.png",
           "description": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.",
           "social_instagram": "",
           "social_pinterest": "",
