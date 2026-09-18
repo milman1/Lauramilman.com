@@ -32,9 +32,10 @@
       "header": {
         "type": "header",
         "custom_css": [
-          ".logo {width: 185px !important; height: 60px; display: block; flex-shrink: 0; mix-blend-mode: lighten; background: url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=800\") center/260px auto no-repeat;}",
-          ".logo img {opacity: 0; width: 100% !important; height: 100% !important;}",
-          "@media (max-width: 600px) {.logo {width: 145px !important; height: 48px; background-size: 210px; }}"
+          ".header{background:#1e1109!important}",
+          ".logo{width:165px!important;height:60px;display:block;flex-shrink:0;background:#1e1109 url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=800\") center/235px auto no-repeat;background-blend-mode:lighten}",
+          ".logo img{opacity:0;width:100%!important;height:100%!important}",
+          "@media(max-width:600px){.logo{width:145px!important;height:48px;background-size:210px}}"
         ],
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
@@ -48,7 +49,9 @@
         "type": "footer",
         "custom_css": [
           ".footer__logo {display: inline-block; width: 240px; height: 80px; mix-blend-mode: lighten; background: url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=1000\") center/350px auto no-repeat;}",
-          ".footer__logo img {opacity: 0; width: 100% !important; height: 100% !important;}"
+          ".footer__logo img {opacity: 0; width: 100% !important; height: 100% !important;}",
+          ".footer__bottom > * {max-width: 100%; white-space: normal;}",
+          ".footer__legal {flex-wrap: wrap;}"
         ],
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
