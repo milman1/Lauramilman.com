@@ -3,13 +3,13 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "eyebrow": "Laura Milman · New York",
-        "heading": "Shop Laura Milman",
-        "subheading": "Fine jewelry, certified diamonds, authenticated maison pieces, and pre-owned timepieces — designed in New York, crafted in Italy.",
+        "eyebrow": "A New York Jewelry House",
+        "heading": "Jewelry with a story.\nChosen for yours.",
+        "subheading": "Discover Italian-crafted fine jewelry, certified diamonds, and authenticated estate pieces — selected in New York for the moments you keep and the stories you pass on.",
         "primary_cta_text": "Shop Fine Jewelry",
         "primary_cta_url": "/collections/all",
-        "secondary_cta_text": "Explore Diamonds",
-        "secondary_cta_url": "/collections/natural-diamonds",
+        "secondary_cta_text": "Explore Pre-Owned Maison",
+        "secondary_cta_url": "/collections/vintage-jewelry",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
