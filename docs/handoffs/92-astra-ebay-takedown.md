@@ -16,3 +16,7 @@
 
 ## Work log
 - 2026-09-10: Handoff file created. All 640 target SKUs are archived in Shopify already (verified 2026-09-09, per `docs/ebay/CLAUDE_TAKEDOWN_HANDOFF.md`); this task is eBay Seller Hub and Marketplace Connect only. No takedown work performed yet.
+
+
+### 2026-09-14 — merchant-requested keeper refresh
+Sea Dweller search contained only protected RW3065/RW3073. Zero ended/disabled. T3431 found Disabled, re-enabled and saved, then verified in Enabled filter. RW3085, 3370, RW3035 already Enabled. Delivered 155 keeper / 640 safe unlist SKU files, excluding four protected overlaps in historical unlist. See [work log](../ebay/evidence/keeper-refresh-20260914/keeper-refresh-work-log.md). Live synchronization/publication acceptance remains blocked.

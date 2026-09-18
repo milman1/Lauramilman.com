@@ -1,0 +1,446 @@
+{
+  "result": "49 keeper offers already 7%; Update no change",
+  "rows": [
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$25800.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RR9229",
+      "title": "Pre-Owned Van Cleef & Arpels 18K Yellow Gold 32mm Charm Diamond Bezel Alligator Blue Strap Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19800.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RR9026",
+      "title": "Pre-Owned Harry Winston 18K White Gold Avenue Automatic Diamond Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16680.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR8601",
+      "title": "Pre-Owned Cartier 18K Yellow Gold Tank Francaise 25,, Ref 1821 Women Diamond Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$42000.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RR8379",
+      "title": "Pre-Owned Chopard 18K Yellow Gold 1970's Bark Finish Lapis Dial 1970's Wrist Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$81120.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RR8272",
+      "title": "Pre-Owned Bvlgari 18K Rose Gold Black Enamel Diamond SP P 26G Ladies Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$36600.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RR7980",
+      "title": "Pre-Owned Cartier 18K White Gold Santos 100 Unisex White Gold Diamond Unisex Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21000.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RR7666",
+      "title": "Pre-Owned Van Cleef & Arpels 18K Yellow Gold Diamond Cover Open Link Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19440.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RR7571",
+      "title": "Pre-Owned Van Cleef & Arpels Façade 18K Yellow Gold Vintage Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19440.00",
+      "row": "7",
+      "safe": true,
+      "sku": "RR7039",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold SQ 22 2T Quadrato Tubogas Diamond Bezel Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16700.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR7039",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold Sq 22 2t Quadrato Tubogas Diamond Bezel Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21400.00",
+      "row": "9",
+      "safe": true,
+      "sku": "RR5823",
+      "title": "Pre-Owned Van Cleef & Arpels 1940's 18K Yellow Gold Vintage Retro Diamond Wrist Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$14748.00",
+      "row": "6",
+      "safe": true,
+      "sku": "RR5576",
+      "title": "Pre-Owned Bvlgari Quadrato Tubogas Gold Diamond Dial F078 Flex Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$23400.00",
+      "row": "8",
+      "safe": true,
+      "sku": "RR4616",
+      "title": "Pre-Owned Chopard 18K White Gold Classique Femme Secret Compartment Diamond Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$43000.00",
+      "row": "10",
+      "safe": true,
+      "sku": "RR4018",
+      "title": "Pre-Owned Chanel 18K Yellow Gold Premier Diamond Black Dial Women Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$7680.00",
+      "row": "5",
+      "safe": true,
+      "sku": "RR2128",
+      "title": "Pre-Owned Cartier Pasha Seatimer Stainless Steel 42mm Chronograph Black Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$14600.00",
+      "row": "6",
+      "safe": true,
+      "sku": "R3017",
+      "title": "Rolex Submariner Date 116610LN 40mm August 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$25200.00",
+      "row": "7",
+      "safe": true,
+      "sku": "R3014",
+      "title": "Pre-Owned Rolex Sky Dweller 326933 42mm October 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$48600.00",
+      "row": "9",
+      "safe": true,
+      "sku": "J10515",
+      "title": "Pre-Owned Bvlgari Serpenti 18K Yellow Gold Blackened Steel Circa 1965 Jaeger Lecoultre Manual Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$111000.00",
+      "row": "10",
+      "safe": true,
+      "sku": "J10501",
+      "title": "Pre-Owned Graff 18K White Gold Butterfly Green Emerald Limited Edition 32mm Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$26520.00",
+      "row": "5",
+      "safe": true,
+      "sku": "J10493",
+      "title": "Pre-Owned Cartier Tank Asymmetric 18K White Gold Diamond Ladies Ref 2786 Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$29640.00",
+      "row": "7",
+      "safe": true,
+      "sku": "J10492",
+      "title": "Pre-Owned Cartier Pasha 18K Yellow Gold 38mm Ref.1989 Leather Accents Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$12240.00",
+      "row": "9",
+      "safe": true,
+      "sku": "J10487",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold BB 19 2T Quartz Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$10700.00",
+      "row": "10",
+      "safe": true,
+      "sku": "J10487",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold Bb 19 2t Quartz Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$27240.00",
+      "row": "6",
+      "safe": true,
+      "sku": "J10484",
+      "title": "Pre-Owned Chopard 18K Yellow Gold Diamond Grid Ref 2044 Manual Wind Onyx Ladies Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$13560.00",
+      "row": "8",
+      "safe": true,
+      "sku": "J10461",
+      "title": "Pre-Owned Cartier Pasha 18K White Gold 32mm Dial Diamond Markers #2398 Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21840.00",
+      "row": "10",
+      "safe": true,
+      "sku": "J10444",
+      "title": "Pre-Owned Bvlgari 18K Yellow Gold Tubogas 30mm Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$33840.00",
+      "row": "6",
+      "safe": true,
+      "sku": "J10408",
+      "title": "Pre-Owned Verdura 18K Yellow Gold Twisted Rope Link Round Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$35400.00",
+      "row": "7",
+      "safe": true,
+      "sku": "J10355",
+      "title": "Pre-Owned Van Cleef & Arpels Cadenas 18K Yellow Gold Diamond Five Row Ladies Bracelet Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$29500.00",
+      "row": "8",
+      "safe": true,
+      "sku": "J10355",
+      "title": "Pre-Owned Van Cleef & Arpels Cadenas 18K Yellow Gold Diamond Five Row Bracelet Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$42120.00",
+      "row": "9",
+      "safe": true,
+      "sku": "J10326",
+      "title": "Pre-Owned Bvlgari Serpenti 18K Rose Gold SP P35G Black Dial Diamond Bezel Ladies Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$35600.00",
+      "row": "10",
+      "safe": true,
+      "sku": "J10326",
+      "title": "Pre-Owned Bvlgari Serpenti 18K Rose Gold Sp P35g Black Dial Diamond Bezel Ladies Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$13200.00",
+      "row": "5",
+      "safe": true,
+      "sku": "J10322",
+      "title": "Pre-Owned Bvlgari Quadrato Bvlgari Quadrato 22mm Square Dial F1218 SQ 22 2T Watch Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$11500.00",
+      "row": "6",
+      "safe": true,
+      "sku": "J10322",
+      "title": "Pre-Owned Bvlgari Quadrato Bvlgari Quadrato 22mm Square Dial F1218 Sq 22 2t Watch Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$21840.00",
+      "row": "7",
+      "safe": true,
+      "sku": "J10321",
+      "title": "Pre-Owned Bvlgari Circa 1990 18K Two Tone Bvlgari Circa 1990 18K Two Tone BB 26 2T 26mm Dial Quartz Watch Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18700.00",
+      "row": "8",
+      "safe": true,
+      "sku": "J10321",
+      "title": "Pre-Owned Bvlgari Circa 1990 18K Two Tone Bvlgari Circa 1990 18K Two Tone Bb 26 2t 26mm Dial Quartz Watch Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19440.00",
+      "row": "9",
+      "safe": true,
+      "sku": "J10267",
+      "title": "Pre-Owned Bvlgari Parentesi 18K Yellow Gold BJ 01 H54486 Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16700.00",
+      "row": "10",
+      "safe": true,
+      "sku": "J10267",
+      "title": "Pre-Owned Bvlgari Parentesi 18K Yellow Gold Bj 01 H54486 Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$10440.00",
+      "row": "6",
+      "safe": true,
+      "sku": "J10259",
+      "title": "Pre-Owned Bvlgari Serpenti 18K White Gold Quartz, White Dial Diamond Ladies Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$13200.00",
+      "row": "7",
+      "safe": true,
+      "sku": "J10141",
+      "title": "Pre-Owned Bvlgari 18K Two Tone BB 232T Tubogas Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$45240.00",
+      "row": "8",
+      "safe": true,
+      "sku": "J10077",
+      "title": "Pre-Owned Van Cleef & Arpels 18K Yellow Gold Bouton D'or Medium Model Diamond Dial Watch"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$58400.00",
+      "row": "10",
+      "safe": true,
+      "sku": "8500",
+      "title": "Pre-Owned Rolex Daytona 116505 40mm October 2023"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$43700.00",
+      "row": "5",
+      "safe": true,
+      "sku": "8114",
+      "title": "Rolex GMT Master II 116718LN 40mm 2010"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$183600.00",
+      "row": "6",
+      "safe": true,
+      "sku": "6190",
+      "title": "Unworn Patek Philippe Aquanaut 5968R-001"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$24700.00",
+      "row": "7",
+      "safe": true,
+      "sku": "3972",
+      "title": "Pre-Owned Rolex Sky Dweller 326933 42mm 2021"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19400.00",
+      "row": "8",
+      "safe": true,
+      "sku": "3863",
+      "title": "Pre-Owned Rolex Submariner Date 126613LB 41mm September 2021"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$19600.00",
+      "row": "9",
+      "safe": true,
+      "sku": "3810",
+      "title": "Pre-Owned Rolex Submariner Date 126613LB 41mm November 2022"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$24700.00",
+      "row": "10",
+      "safe": true,
+      "sku": "3721",
+      "title": "Pre-Owned Rolex GMT Master II 126713GRNR 40mm May 2025"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$16400.00",
+      "row": "5",
+      "safe": true,
+      "sku": "3371",
+      "title": "Pre-Owned Rolex Datejust 116233 36mm March 2018"
+    },
+    {
+      "adjust": "7",
+      "operator": "pincrease",
+      "price": "$18000.00",
+      "row": "6",
+      "safe": true,
+      "sku": "3370",
+      "title": "Pre-Owned Rolex Datejust 116233 36mm November 2017"
+    }
+  ]
+}
