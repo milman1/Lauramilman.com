@@ -4,10 +4,10 @@
  * Held watches are never created; already-live ones archive as
  * `held_in_feed` so they can return if the feed row later qualifies.
  *
- * Partner we publish: Belgium Watch (ROMAN).
- * All other partner books are held out, including TLV Watches and Vivid
- * Watches. The sync derives an allowlist from the ROMAN branch so the rule
- * also applies to future stock numbers without relying on SKU prefixes.
+ * Partners we publish: Belgium Watch (ROMAN) and TLV Watches.
+ * All other partner books are held out, including Vivid Watches. The sync
+ * derives an allowlist from those two branches so the rule also applies to
+ * future stock numbers without relying on SKU prefixes.
  *
  * Also required: papers (Paper = YES). Held out: aftermarket *condition*,
  * comment containing "naked", comment containing "iced out".
@@ -17,8 +17,6 @@
 
 /** Partner books that never publish. Match is case-insensitive / substring. */
 export const EXCLUDED_WATCH_PARTNERS = [
-  'tlv watches llc',
-  'tlv watches',
   'vivid watches llc',
   'vivid watches',
   'power watch llc',
@@ -34,6 +32,7 @@ export const EXCLUDED_WATCH_PARTNERS = [
  */
 export const ALLOWED_WATCH_PARTNER_BRANCHES = [
   'ROMAN',
+  'TLV WATCHES LLC',
 ] as const;
 
 /** Power Watch `P####`, Uncle Manny `U####` / `M####` (memo). */

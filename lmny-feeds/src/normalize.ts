@@ -318,8 +318,8 @@ function partnerBlob(raw: Raw): string {
 
 export interface WatchNormalizeOptions {
   /**
-   * Stock numbers fetched from the allowed ROMAN partner branch. Any other
-   * stock is held as `watch_excluded_partner`.
+   * Stock numbers fetched from the allowed partner branches (Belgium Watch
+   * and TLV Watches). Any other stock is held as `watch_excluded_partner`.
    */
   allowedStocks: ReadonlySet<string>;
 }
@@ -335,7 +335,7 @@ export function isExcludedWatchPartner(raw: Raw, stockRef: string): boolean {
 export function isAllowedWatchStock(stockRef: string, opts?: WatchNormalizeOptions): boolean {
   const stock = stockRef.trim();
   // Fail closed for every caller. Supplier attribution is not safe when the
-  // ROMAN stock allowlist is absent or empty, regardless of the SKU prefix.
+  // Partner stock allowlist is absent or empty, regardless of the SKU prefix.
   return Boolean(opts?.allowedStocks.size && opts.allowedStocks.has(stock));
 }
 

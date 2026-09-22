@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { ALLOWED_WATCH_PARTNER_BRANCHES, EXCLUDED_WATCH_STOCK_RE } from '../config/watchGates.js';
+import { ALLOWED_WATCH_PARTNER_BRANCHES, EXCLUDED_WATCH_PARTNERS, EXCLUDED_WATCH_STOCK_RE } from '../config/watchGates.js';
 
 describe('watch partner gates', () => {
-  it('fetches an allowlist from ROMAN only', () => {
-    expect(ALLOWED_WATCH_PARTNER_BRANCHES).toEqual(['ROMAN']);
+  it('fetches an allowlist from Belgium Watch and TLV Watches', () => {
+    expect(ALLOWED_WATCH_PARTNER_BRANCHES).toEqual(['ROMAN', 'TLV WATCHES LLC']);
+    expect(EXCLUDED_WATCH_PARTNERS).not.toContain('tlv watches llc');
+    expect(EXCLUDED_WATCH_PARTNERS).toContain('vivid watches llc');
   });
 
   it('flags Power Watch and Uncle Manny letter prefixes', () => {

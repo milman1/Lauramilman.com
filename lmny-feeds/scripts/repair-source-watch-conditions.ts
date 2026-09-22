@@ -91,7 +91,7 @@ async function writeReport(lines: string[]): Promise<void> { await writeFile(REP
 async function dryRun(shopify: ShopifyClient): Promise<void> {
   const [rawSource, allowedStocks, catalog] = await Promise.all([fetchBelgiumDiaFeed('watch'), fetchAllowedWatchStocks(), fetchCatalog(shopify)]);
   if (rawSource.length === 0) throw new Error('Belgium Dia watch feed returned 0 rows; refusing to create a plan');
-  if (allowedStocks.size === 0) throw new Error('ROMAN allowlist returned 0 rows; refusing to create a plan');
+  if (allowedStocks.size === 0) throw new Error('partner allowlist returned 0 rows; refusing to create a plan');
   const source = rawSource.flatMap((raw) => {
     const parsed = sourceWatchCondition(raw);
     return parsed && !isExcludedWatchPartner(raw, parsed.stockRef) ? [parsed] : [];
@@ -101,7 +101,7 @@ async function dryRun(shopify: ShopifyClient): Promise<void> {
   const snapshot: WatchConditionPlanSnapshot = { schemaVersion: 1, generatedAt: new Date().toISOString(), rows };
   const bytes = `${JSON.stringify(snapshot, null, 2)}\n`;
   await writeFile(PLAN_PATH, bytes);
-  await writeReport(['# Source-backed watch condition repair', '', '- Mode: dry-run (no writes)', `- Source rows fetched: ${rawSource.length}`, `- Allowed ROMAN stocks: ${allowedStocks.size}`, `- Active watch catalog rows: ${catalog.length}`, `- Planned condition changes: ${rows.length}`, `- Plan SHA-256: \`${sha256(bytes)}\``, '- Maximum review age: 24 hours']);
+  await writeReport(['# Source-backed watch condition repair', '', '- Mode: dry-run (no writes)', `- Source rows fetched: ${rawSource.length}`, `- Allowed partner stocks: ${allowedStocks.size}`, `- Active watch catalog rows: ${catalog.length}`, `- Planned condition changes: ${rows.length}`, `- Plan SHA-256: \`${sha256(bytes)}\``, '- Maximum review age: 24 hours']);
 }
 
 async function applyReviewed(shopify: ShopifyClient): Promise<void> {

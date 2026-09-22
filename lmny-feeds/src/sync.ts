@@ -161,7 +161,7 @@ async function resolveShopifyToken(domain: string): Promise<string> {
 
 async function normalizeWatchFeed(rows: Record<string, unknown>[]) {
   const allowedStocks = await fetchAllowedWatchStocks();
-  console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch / ROMAN only)`);
+  console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch / ROMAN and TLV Watches)`);
   return normalizeWatches(rows, { allowedStocks });
 }
 
