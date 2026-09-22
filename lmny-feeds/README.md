@@ -19,14 +19,14 @@ holds a stones table — Shopify products are the only live copy.
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
    stones. Watches are held out unless they have **papers**, are not
    aftermarket (Condition field), do not say **naked** or **iced out** in
-   Comment, and belong to **Belgium Watch (ROMAN)**. TLV Watches, Vivid
+   Comment, and belong to **Belgium Watch (ROMAN)** or **TLV Watches**. Vivid
    Watches, Power Watch LLC, Uncle Manny LLC, and every unclassified or future
    partner book are held out. The developer feed often omits Branch, so the
-   sync fetches a live ROMAN stock allowlist before normalizing. If that lookup
-   fails or returns no stocks, the watch segment is protected and receives no
-   writes or archive decisions; stock-prefix inference is never used.
+   sync fetches a live stock allowlist for those two branches before normalizing.
+   If that lookup fails or returns no stocks, the watch segment is protected and
+   receives no writes or archive decisions; stock-prefix inference is never used.
    Dial-aftermarket notes in Comment still sell (`8114`). Brands outside the
-   curated list still import when their stock belongs to ROMAN and are tagged
+   curated list still import when their stock belongs to an allowed branch and are tagged
    `other-watch-brand`. Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
@@ -310,7 +310,7 @@ turned off.
 For a source-backed condition-only correction, use **LMNY source-backed watch
 condition repair**. It joins active Watch products to the Belgium Dia watch
 API by exact variant SKU or deterministic watch handle, then intersects those
-matches with the live ROMAN allowlist. It never uses title, price, or mutable
+matches with the live Belgium Watch and TLV allowlist. It never uses title, price, or mutable
 Shopify condition copy as source evidence. Duplicate or ambiguous identifiers,
 an empty API response, or an empty allowlist stop the run before writes.
 

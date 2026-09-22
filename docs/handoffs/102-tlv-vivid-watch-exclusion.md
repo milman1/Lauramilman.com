@@ -1,6 +1,10 @@
 # Issue #102 — TLV + Vivid watch withdrawal and permanent sync exclusion
 
-Status: in progress. GitHub issue: https://github.com/milman1/Lauramilman.com/issues/102
+Status: TLV exclusion reversed by merchant request on 2026-09-22. Vivid stays excluded. GitHub issue: https://github.com/milman1/Lauramilman.com/issues/102
+
+## Reversal (2026-09-22)
+
+TLV Watches (`TLV WATCHES LLC`) is an allowed partner branch again, with Belgium Watch (`ROMAN`). A TLV row is created or reactivated only when its stock number is on that live allowlist and it still passes papers, aftermarket, naked, and iced-out gates. Vivid Watches, Power Watch, and Uncle Manny stay held out. The supplier name is not written onto the product; vendor stays the watch brand. The next hourly sync on `main` applies this. It does not by itself create an eBay listing in M2E.
 
 Documentation PRs: https://github.com/milman1/Lauramilman.com/pull/104 and https://github.com/milman1/Lauramilman.com/pull/106. Exact next action: observe the next scheduled main sync and verify no excluded supplier watch is recreated or reactivated. The earlier Rolex identity question is resolved by the corrected SKU 4159 evidence.
 

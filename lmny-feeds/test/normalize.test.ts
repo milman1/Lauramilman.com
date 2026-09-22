@@ -132,7 +132,7 @@ describe('watch normalization', () => {
     expect(items[0]?.stockRef).toBe('RW3085');
   });
 
-  it('fails closed without a non-empty ROMAN allowlist, regardless of stock prefix', () => {
+  it('fails closed without a non-empty partner allowlist, regardless of stock prefix', () => {
     for (const stock_no of ['T3717', 'RW3085', 'R3017', 'NEW-123']) {
       const missing = normalizeWatchesWithGate([{ ...watchRow, stock_no }]);
       expect(missing.items).toHaveLength(0);
@@ -144,7 +144,7 @@ describe('watch normalization', () => {
     }
   });
 
-  it('holds TLV and Vivid now and any future stocks not returned by ROMAN', () => {
+  it('holds Vivid and any stock the partner allowlist did not return', () => {
     const allowedStocks = new Set(['RW3085']);
     const excludedRows: Array<[stockNo: string, branch: string | undefined]> = [
       ['T3717', 'TLV WATCHES LLC'],
@@ -160,18 +160,20 @@ describe('watch normalization', () => {
     }
   });
 
-  it('holds TLV and Vivid by supplier name even if an upstream allowlist is polluted', () => {
-    const excludedRows: Array<[stockNo: string, branch: string]> = [
-      ['T3717', 'TLV WATCHES LLC'],
-      ['VIVID-1', 'VIVID WATCHES LLC'],
-    ];
-    for (const [stock_no, Branch] of excludedRows) {
-      const result = normalizeWatchesWithGate([{ ...watchRow, stock_no, Branch }], {
-        allowedStocks: new Set([stock_no]),
-      });
-      expect(result.items).toHaveLength(0);
-      expect(result.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: stock_no });
-    }
+  it('imports a TLV watch when that stock is on the allowlist', () => {
+    const result = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'T3717', Branch: 'TLV WATCHES LLC' }], {
+      allowedStocks: new Set(['T3717']),
+    });
+    expect(result.holds).toEqual([]);
+    expect(result.items[0]).toMatchObject({ stockRef: 'T3717', brand: 'Rolex' });
+  });
+
+  it('holds Vivid by supplier name even if an upstream allowlist is polluted', () => {
+    const result = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'VIVID-1', Branch: 'VIVID WATCHES LLC' }], {
+      allowedStocks: new Set(['VIVID-1']),
+    });
+    expect(result.items).toHaveLength(0);
+    expect(result.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: 'VIVID-1' });
   });
 
   it('imports non-curated brands (they land in Other Watch Brands)', () => {
