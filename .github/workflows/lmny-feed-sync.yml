@@ -60,6 +60,15 @@ jobs:
 
       - run: npm test
 
+      # Temporary probe (this PR only): inspect raw watch feed keys before deciding
+      # whether Dial/Bezel/Metal/etc. are discarded by normalize or absent upstream.
+      - name: Dump watch feed keys
+        if: github.event_name == 'pull_request'
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+        run: npx tsx scripts/dump-watch-feed-keys.ts
+
       - name: Run sync
         env:
           SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
