@@ -1,4 +1,4 @@
-import { ebayConditionForWatch } from './ebayCondition.js';
+import { classifyWatchCondition, ebayConditionForWatch } from './ebayCondition.js';
 
 export type RawWatchRow = Record<string, unknown>;
 
@@ -121,12 +121,7 @@ function explicitBoolean(raw: RawWatchRow, names: string[]): boolean | null {
 }
 
 function sourceState(condition: string | null): SourceWatchCondition['state'] {
-  const normalized = (condition ?? '').trim().toUpperCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
-  if (normalized === 'UNWORN') return 'unworn';
-  if (normalized === 'PRE OWNED' || ['MINT', 'EXCELLENT', 'VERY GOOD', 'GOOD', 'FAIR'].includes(normalized)) {
-    return 'preowned';
-  }
-  return null;
+  return classifyWatchCondition(condition ?? '')?.state ?? null;
 }
 
 export function sourceWatchCondition(raw: RawWatchRow): SourceWatchCondition | null {

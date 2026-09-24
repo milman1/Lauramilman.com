@@ -4,10 +4,11 @@
  * Held watches are never created; already-live ones archive as
  * `held_in_feed` so they can return if the feed row later qualifies.
  *
- * Partner we publish: Belgium Watch (ROMAN).
- * All other partner books are held out, including TLV Watches and Vivid
- * Watches. The sync derives an allowlist from the ROMAN branch so the rule
- * also applies to future stock numbers without relying on SKU prefixes.
+ * Partner we publish from the ROMAN allowlist: Belgium Watch.
+ * TLV Watches (`TLV WATCHES LLC`) are imported by a separate stock list in
+ * normalize: same papers and condition gates, no `ebay` tag. Vivid Watches
+ * and every other book stay held out. The ROMAN allowlist is not a SKU-prefix
+ * guess, so a future stock number from another book is not inferred in.
  *
  * Also required: papers (Paper = YES). Held out: aftermarket *condition*,
  * comment containing "naked", comment containing "iced out".
@@ -35,6 +36,14 @@ export const EXCLUDED_WATCH_PARTNERS = [
 export const ALLOWED_WATCH_PARTNER_BRANCHES = [
   'ROMAN',
 ] as const;
+
+/**
+ * Website branch for TLV Watches. Stocks on this branch are imported into
+ * Shopify and may carry `uploadify_active`. They are not added to
+ * `ALLOWED_WATCH_PARTNER_BRANCHES`, so Vivid and every other book stay out,
+ * and they are not given the `ebay` tag.
+ */
+export const TLV_WATCH_PARTNER_BRANCH = 'TLV WATCHES LLC';
 
 /** Power Watch `P####`, Uncle Manny `U####` / `M####` (memo). */
 export const EXCLUDED_WATCH_STOCK_RE = /^(?:P|U|M)\d+/i;

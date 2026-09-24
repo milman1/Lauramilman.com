@@ -66,17 +66,25 @@ table only, never the title:
 
 | `condition_raw` | grade |
 |---|---|
+| `ULTRA MINT` | Ultra Mint |
 | `MINT` | Mint |
+| `RETAIL READY` | Retail Ready |
 | `EXCELLENT` | Excellent |
 | `VERY GOOD` | Very Good |
 | `GOOD` | Good |
 | `FAIR` | Fair |
 
 A grade value implies state = preowned (grading only applies to something
-that's been owned).
+that's been owned). Retail Ready and Ultra Mint are grades. A full box and
+papers set does not change them to Unworn, and the eBay condition stays
+`3000`. Hyphenated spellings (`PRE-OWNED`, `RETAIL-READY`) normalize to the
+same row.
 
-**Anything else** (`SLIDER`, blank, unrecognized text) must stay unclassified.
-Do not infer Pre-Owned/Unworn state or a Google Shopping condition. On the live
+**Anything else** (`SLIDER`, `NEW`, blank, unrecognized text) must stay
+unclassified. Do not infer a Pre-Owned or Unworn title. The eBay condition
+still fails closed to `3000`. Those rows are not given `uploadify_active`,
+because a raw dealer word must not be what Uploadify reads as the condition.
+On the live
 ingest path, still build the neutral brand/model/reference title, prose, and
 physical-spec metafields so an active feed watch can use the current PDP
 layout. Preserve a nonblank raw value in `custom.condition` and as a tag; omit

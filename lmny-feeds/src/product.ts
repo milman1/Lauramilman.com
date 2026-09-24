@@ -3,6 +3,7 @@ import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
 import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
+import { classifyWatchCondition } from './ebayCondition.js';
 import {
   buildWatchListing,
   type WatchFeedRecord,
@@ -38,11 +39,12 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const PRODUCT_SCHEMA_VERSION = 24;
 
 /**
- * Unique watches are one-of-one. Uploadify (and other marketplace apps) keep
- * a listing only while Shopify status is ACTIVE, SKU is set, and available
- * quantity is > 0. The feed is the availability source: in stock while the
- * watch is publishable, 0 when it has no photo (DRAFT) or when we later
- * archive it.
+ * Unique watches are one-of-one. Uploadify lists a Belgium Watch or TLV
+ * watch when it is ACTIVE with a price, SKU, title, description, available
+ * quantity > 0, and `uploadify_product.uploadify_active` true. No other
+ * product keeps that metafield. The feed is the availability source: in
+ * stock while the watch is publishable, 0 when it has no photo (DRAFT) or
+ * when we later archive it.
  *
  * Loose diamonds are tracked qty 0 so Uploadify does not import them.
  * `CONTINUE` keeps them buyable on the Online Store.
@@ -196,7 +198,9 @@ export function caratBand(carat: number): string {
 export function tagsFor(item: FeedItem): string[] {
   const tags: string[] = [FEED_TAG];
   if (item.kind === 'watch') {
-    tags.push(EBAY_TAG);
+    // TLV is loaded for Uploadify. Marketplace Connect lists the `ebay` tag,
+    // so that tag stays off these watches.
+    if (item.book !== 'tlv') tags.push(EBAY_TAG);
     const listing = watchListingFor(item);
     if (listing) {
       // Schema marketing tags (TitleCase brand/model, "Pre-Owned Watches", …)
@@ -220,6 +224,25 @@ export function tagsFor(item: FeedItem): string[] {
 
 export function vendorFor(item: FeedItem): string {
   return item.kind === 'watch' ? item.brand : STONE_VENDOR;
+}
+
+/**
+ * Uploadify lists a Belgium Watch or TLV watch only when every gate is true:
+ * a retail price, a SKU, a title, a description, quantity above zero, and a
+ * source condition that maps to Pre-Owned or Unworn. Quantity is 1 only
+ * while the watch has a photo; an imageless watch is DRAFT at qty 0.
+ * Unrecognized conditions (SLIDER and anything else) stay off Uploadify so
+ * a raw dealer word cannot be read as new. Nothing else — loose diamonds,
+ * estate, fine jewelry, Vivid, other watches — qualifies.
+ */
+export function watchListsOnUploadify(item: FeedItem, priced: Priced): boolean {
+  if (item.kind !== 'watch') return false;
+  if (!classifyWatchCondition(item.condition ?? '')) return false;
+  if (!(priced.retailUsd > 0)) return false;
+  if (!item.stockRef.trim()) return false;
+  if (!titleFor(item).trim()) return false;
+  if (!descriptionFor(item).trim()) return false;
+  return uniqueStockQtyFor(item, item.imageUrls.length > 0) > 0;
 }
 
 interface MetafieldValue {

@@ -6,7 +6,10 @@ import {
   shopifyFileUrl,
 } from '../src/normalize.js';
 
-function normalizeWatches(rows: Record<string, unknown>[], opts?: { allowedStocks: ReadonlySet<string> }) {
+function normalizeWatches(
+  rows: Record<string, unknown>[],
+  opts?: { allowedStocks: ReadonlySet<string>; tlvStocks?: ReadonlySet<string> },
+) {
   if (opts) return normalizeWatchesWithGate(rows, opts);
   const allowedStocks = new Set(rows.map((row) => String(row.stock_no ?? row.Stock ?? '').trim()).filter(Boolean));
   return normalizeWatchesWithGate(rows, { allowedStocks });
@@ -129,7 +132,7 @@ describe('watch normalization', () => {
       allowedStocks: new Set(['RW3085']),
     });
     expect(holds).toEqual([]);
-    expect(items[0]?.stockRef).toBe('RW3085');
+    expect(items[0]).toMatchObject({ stockRef: 'RW3085', book: 'roman' });
   });
 
   it('fails closed without a non-empty ROMAN allowlist, regardless of stock prefix', () => {
@@ -144,14 +147,27 @@ describe('watch normalization', () => {
     }
   });
 
-  it('holds TLV and Vivid now and any future stocks not returned by ROMAN', () => {
+  it('imports TLV watches from the stock list or partner name, and holds Vivid and every other book', () => {
     const allowedStocks = new Set(['RW3085']);
+    const byName = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'T3717', Branch: 'TLV WATCHES LLC' }], {
+      allowedStocks,
+    });
+    expect(byName.holds).toEqual([]);
+    expect(byName.items[0]).toMatchObject({ stockRef: 'T3717', book: 'tlv' });
+
+    const byList = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'T3505' }], {
+      allowedStocks,
+      tlvStocks: new Set(['T3505']),
+    });
+    expect(byList.holds).toEqual([]);
+    expect(byList.items[0]).toMatchObject({ stockRef: 'T3505', book: 'tlv' });
+
     const excludedRows: Array<[stockNo: string, branch: string | undefined]> = [
-      ['T3717', 'TLV WATCHES LLC'],
       ['VIVID-FUTURE-1', 'VIVID WATCHES LLC'],
       ['UNKNOWN-FUTURE-1', 'NEW SUPPLIER LLC'],
       ['6197', undefined],
       ['6198', undefined],
+      ['T9999', undefined],
     ];
     for (const [stock_no, Branch] of excludedRows) {
       const result = normalizeWatchesWithGate([{ ...watchRow, stock_no, Branch }], { allowedStocks });
@@ -160,18 +176,27 @@ describe('watch normalization', () => {
     }
   });
 
-  it('holds TLV and Vivid by supplier name even if an upstream allowlist is polluted', () => {
-    const excludedRows: Array<[stockNo: string, branch: string]> = [
-      ['T3717', 'TLV WATCHES LLC'],
-      ['VIVID-1', 'VIVID WATCHES LLC'],
-    ];
-    for (const [stock_no, Branch] of excludedRows) {
-      const result = normalizeWatchesWithGate([{ ...watchRow, stock_no, Branch }], {
-        allowedStocks: new Set([stock_no]),
-      });
-      expect(result.items).toHaveLength(0);
-      expect(result.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: stock_no });
-    }
+  it('holds a TLV watch that fails the papers gate', () => {
+    const result = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'T3505', papers: 'no' }], {
+      allowedStocks: new Set(['RW3085']),
+      tlvStocks: new Set(['T3505']),
+    });
+    expect(result.items).toEqual([]);
+    expect(result.holds[0]).toMatchObject({ reason: 'watch_no_papers', stockRef: 'T3505' });
+  });
+
+  it('imports TLV by partner name even if the ROMAN allowlist is polluted, and still holds Vivid', () => {
+    const tlv = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'T3717', Branch: 'TLV WATCHES LLC' }], {
+      allowedStocks: new Set(['T3717']),
+    });
+    expect(tlv.holds).toEqual([]);
+    expect(tlv.items[0]).toMatchObject({ stockRef: 'T3717', book: 'tlv' });
+
+    const vivid = normalizeWatchesWithGate([{ ...watchRow, stock_no: 'VIVID-1', Branch: 'VIVID WATCHES LLC' }], {
+      allowedStocks: new Set(['VIVID-1']),
+    });
+    expect(vivid.items).toHaveLength(0);
+    expect(vivid.holds[0]).toMatchObject({ reason: 'watch_excluded_partner', stockRef: 'VIVID-1' });
   });
 
   it('imports non-curated brands (they land in Other Watch Brands)', () => {

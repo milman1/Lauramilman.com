@@ -16,6 +16,7 @@ import {
   titleFor,
   uniqueStockQtyFor,
   vendorFor,
+  watchListsOnUploadify,
   writeErrorsAreSystemic,
 } from '../src/product.js';
 import { labStone, naturalStone, priced, watch } from './fixtures.js';
@@ -49,6 +50,21 @@ describe('handle generation', () => {
 describe('uniqueStockQtyFor', () => {
   it('is 1 for watches so Uploadify keeps them listed', () => {
     expect(uniqueStockQtyFor(watch(), true)).toBe(1);
+  });
+
+  it('is true for a priced watch with sku, title, description, and a photo', () => {
+    expect(watchListsOnUploadify(watch(), priced())).toBe(true);
+  });
+
+  it('is false without a photo, without a price, or for a loose diamond', () => {
+    expect(watchListsOnUploadify(watch({ imageUrls: [] }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch(), priced({ retailUsd: 0 }))).toBe(false);
+    expect(watchListsOnUploadify(watch({ stockRef: '  ' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(naturalStone(), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'SLIDER' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'NEW' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'RETAIL READY' }), priced())).toBe(true);
+    expect(watchListsOnUploadify(watch({ condition: 'ULTRA MINT' }), priced())).toBe(true);
   });
 
   it('is 0 for every loose diamond so Uploadify does not import them', () => {
@@ -147,6 +163,8 @@ describe('tags', () => {
     expect(tagsFor(watch())).toContain('Pre-Owned Watches');
     expect(tagsFor(watch())).toContain('lmny-feed');
     expect(tagsFor(watch())).toContain('ebay');
+    expect(tagsFor(watch({ book: 'roman' }))).toContain('ebay');
+    expect(tagsFor(watch({ book: 'tlv' }))).not.toContain('ebay');
     expect(tagsFor(naturalStone())).not.toContain('ebay');
   });
 

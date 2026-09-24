@@ -13,7 +13,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
-import { fetchAllowedWatchStocks } from './feeds/watchPartners.js';
+import { fetchAllowedWatchStocks, fetchTlvWatchStocks } from './feeds/watchPartners.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { channelsFor } from '../config/channels.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
@@ -44,6 +44,7 @@ import {
   titleFor,
   UNIQUE_IN_STOCK_QTY,
   uniqueStockQtyFor,
+  watchListsOnUploadify,
   writeErrorsAreSystemic,
 } from './product.js';
 import {
@@ -61,7 +62,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyKeepHandles, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -159,10 +160,27 @@ async function resolveShopifyToken(domain: string): Promise<string> {
   return token;
 }
 
-async function normalizeWatchFeed(rows: Record<string, unknown>[]) {
+async function normalizeWatchFeed(rows: Record<string, unknown>[]): Promise<{
+  items: FeedItem[];
+  holds: Hold[];
+  tlvWatchListOk: boolean;
+}> {
   const allowedStocks = await fetchAllowedWatchStocks();
   console.log(`Watch partner allowlist: ${allowedStocks.size} stocks (Belgium Watch / ROMAN only)`);
-  return normalizeWatches(rows, { allowedStocks });
+  let tlvStocks = new Set<string>();
+  let tlvWatchListOk = false;
+  try {
+    tlvStocks = await fetchTlvWatchStocks();
+    tlvWatchListOk = true;
+    console.log(`TLV watch list: ${tlvStocks.size} stocks`);
+  } catch (err) {
+    console.warn(
+      `TLV watch list failed (${err instanceof Error ? err.message : String(err)}) — ` +
+        'TLV watches are not imported from the stock list this run; existing watch uploadify_active flags stay',
+    );
+  }
+  const normalized = normalizeWatches(rows, { allowedStocks, tlvStocks });
+  return { ...normalized, tlvWatchListOk };
 }
 
 async function main() {
@@ -193,6 +211,7 @@ async function main() {
   const items: FeedItem[] = [];
   const holds: Hold[] = [];
   const fetchedKinds = new Set<Kind>();
+  let tlvWatchListOk = false;
   const feeds: SyncReport['feeds'] = {
     natural: { fetched: 0, publishable: 0, held: 0 },
     lab: { fetched: 0, publishable: 0, held: 0 },
@@ -217,10 +236,12 @@ async function main() {
         console.error(`Feed ${kind}: 0 rows — treating as outage; catalog segment will NOT be archived`);
         continue;
       }
-      const result =
-        kind === 'watch'
-          ? await normalizeWatchFeed(rows)
-          : normalizeStones(rows, kind);
+      const result = await (async () => {
+        if (kind !== 'watch') return normalizeStones(rows, kind);
+        const watch = await normalizeWatchFeed(rows);
+        tlvWatchListOk = watch.tlvWatchListOk;
+        return watch;
+      })();
       feeds[kind].fetched = rows.length;
       items.push(...result.items);
       holds.push(...result.holds);
@@ -290,7 +311,6 @@ async function main() {
     notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
     console.log(msg);
   }
-
   // DNA fill runs AFTER the catalog read so a watch Shopify still shows with
   // one READY photo is filled even when the API listed three 404 `.jpg` extras.
   // Hash/diff see the merged gallery, so extras land as updates this hour.
@@ -318,6 +338,58 @@ async function main() {
     console.log(
       `Watch galleries: 0=${watchGalleries.none} 1=${watchGalleries.one} 2=${watchGalleries.two} 3+=${watchGalleries.threePlus}`,
     );
+  }
+
+  // After the DNA fill: a watch that gained its first photo is qty 1 and
+  // should carry the Uploadify listing switch. metafieldsSet is separate
+  // from productSet so a namespace rejection cannot fail the product write.
+  // Only watches that passed the gates and watchListsOnUploadify are flagged.
+  // A failed TLV stock list must not delete flags the run could not see.
+  const catalogByHandleForUploadify = new Map(catalog.map((c) => [c.handle, c]));
+  if (!tlvWatchListOk && fetchedKinds.has('watch')) {
+    const msg =
+      'TLV watch list was not read — TLV stocks without a partner name are not imported this run, and existing watch uploadify_active flags stay';
+    notes.push(msg);
+    console.warn(msg);
+  }
+  const uploadifyActiveOwners = await shopify.fetchUploadifyActiveOwners();
+  const uploadifyOwnerFromSweep = new Map(uploadifyActiveOwners.map((owner) => [owner.handle, owner.id]));
+  const uploadifyActiveRows = publishable
+    .filter((p) => p.item.kind === 'watch')
+    .map((p) => {
+      const handle = handleFor(p.item);
+      const existing = catalogByHandleForUploadify.get(handle);
+      return {
+        handle,
+        ownerId: existing?.id ?? uploadifyOwnerFromSweep.get(handle) ?? null,
+        current: existing?.uploadifyActive ?? null,
+        desired: watchListsOnUploadify(p.item, p.priced),
+      };
+    });
+  const qualifyingHandles = uploadifyActiveRows.filter((row) => row.desired).map((row) => row.handle);
+  let uploadifyKeep = uploadifyKeepHandles(qualifyingHandles, []);
+  if (!tlvWatchListOk) {
+    uploadifyKeep = uploadifyKeepHandles(
+      uploadifyActiveOwners.filter((owner) => kindForHandle(owner.handle) === 'watch').map((owner) => owner.handle),
+      qualifyingHandles,
+    );
+  }
+  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeep);
+  if (uploadifyActiveClears.length > 0) {
+    const msg =
+      `${uploadifyActiveClears.length} product(s) other than qualifying Belgium Watch and TLV watches have uploadify_active — removing it`;
+    notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
+    console.log(msg);
+  }
+  const uploadifyActivePlan = uploadifyActiveWrites(uploadifyActiveRows);
+  if (uploadifyActivePlan.writes.length > 0 || uploadifyActivePlan.missingOwner > 0) {
+    const msg =
+      `${uploadifyActivePlan.writes.length} watch(es) need uploadify_active updated` +
+      (uploadifyActivePlan.missingOwner > 0
+        ? `; ${uploadifyActivePlan.missingOwner} new watch(es) get it after create`
+        : '');
+    notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
+    console.log(msg);
   }
 
   const desired = publishable.map((p) => ({
@@ -451,13 +523,24 @@ async function main() {
     }
     console.log(`Sales channels: ${[...publicationsByName.keys()].join(', ')}`);
 
+    if (uploadifyActiveClears.length > 0) {
+      console.log(
+        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
+      );
+      const clearErrors = await shopify.deleteMetafields(uploadifyActiveClears);
+      writeErrors.push(...clearErrors.map((e) => `uploadify_active remove: ${e}`));
+      notes.push(
+        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
+      );
+    }
+
     const uploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
     if (uploadifyDeletes.length > 0) {
       console.log(`Deleting ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds`);
       const metafieldErrors = await shopify.deleteMetafields(uploadifyDeletes);
       writeErrors.push(...metafieldErrors.map((e) => `uploadify metafield: ${e}`));
       notes.push(
-        `deleted ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds (watches untouched)`,
+        `deleted ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds (watch uploadify_active is set separately)`,
       );
     }
 
@@ -636,6 +719,30 @@ async function main() {
           );
         }
       }
+    }
+
+    const uploadifyOwnerByHandle = new Map(
+      uploadifyActiveRows.map((row) => [row.handle, row.ownerId]),
+    );
+    for (const ref of createdRefs) {
+      if (ref.handle && ref.id) uploadifyOwnerByHandle.set(ref.handle, ref.id);
+    }
+    const uploadifyActiveLive = uploadifyActiveWrites(
+      uploadifyActiveRows.map((row) => ({
+        ...row,
+        ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+      })),
+    );
+    if (uploadifyActiveLive.writes.length > 0) {
+      console.log(`Setting uploadify_active on ${uploadifyActiveLive.writes.length} watch(es)`);
+      const metafieldErrors = await shopify.setMetafields(uploadifyActiveLive.writes);
+      writeErrors.push(...metafieldErrors.map((e) => `uploadify_active: ${e}`));
+      notes.push(`set uploadify_active on ${uploadifyActiveLive.writes.length} watch(es)`);
+    }
+    if (uploadifyActiveLive.missingOwner > 0) {
+      notes.push(
+        `${uploadifyActiveLive.missingOwner} watch(es) qualified for uploadify_active but had no Shopify id`,
+      );
     }
 
     if (createdRefs.length > 0) {

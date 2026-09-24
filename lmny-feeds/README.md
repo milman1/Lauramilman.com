@@ -19,14 +19,17 @@ holds a stones table — Shopify products are the only live copy.
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
    stones. Watches are held out unless they have **papers**, are not
    aftermarket (Condition field), do not say **naked** or **iced out** in
-   Comment, and belong to **Belgium Watch (ROMAN)**. TLV Watches, Vivid
-   Watches, Power Watch LLC, Uncle Manny LLC, and every unclassified or future
-   partner book are held out. The developer feed often omits Branch, so the
-   sync fetches a live ROMAN stock allowlist before normalizing. If that lookup
-   fails or returns no stocks, the watch segment is protected and receives no
-   writes or archive decisions; stock-prefix inference is never used.
+   Comment, and belong to **Belgium Watch (ROMAN)** or **TLV Watches**
+   (`TLV WATCHES LLC`). Vivid Watches, Power Watch LLC, Uncle Manny LLC, and
+   every unclassified or future partner book are held out. The developer feed
+   often omits Branch, so the sync fetches a live ROMAN stock allowlist and a
+   separate TLV stock list before normalizing. If the ROMAN lookup fails or
+   returns no stocks, the watch segment is protected and receives no writes
+   or archive decisions. If the TLV list fails, ROMAN still imports, TLV rows
+   that do not name the partner are held, and existing watch `uploadify_active`
+   flags are left in place. Stock-prefix inference is never used.
    Dial-aftermarket notes in Comment still sell (`8114`). Brands outside the
-   curated list still import when their stock belongs to ROMAN and are tagged
+   curated list still import when their stock belongs to ROMAN or TLV and are tagged
    `other-watch-brand`. Other failing rows are *held* (never created).
 3. **Price** (`src/markup.ts`, rules in `config/pricing.ts`):
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
@@ -108,8 +111,16 @@ holds a stones table — Shopify products are the only live copy.
    `inventoryActivate` once the item is already active at the location.
    Uploadify metafields
    (`uploadify` / `uploadify_product`, including `uploadify_active`) are
-   deleted on loose diamonds only so the app cannot keep them listed; watches
-   keep theirs. Archive sets qty `0`
+   deleted on loose diamonds only so the app cannot keep them listed. A Belgium
+   Watch or TLV watch (`w-` handle) with a price, SKU, title, description, and
+   qty > 0 is written `uploadify_product.uploadify_active` = true. TLV watches
+   that pass the same papers and condition gates are created or reactivated
+   through the normal watch write, priced with the watch cost tiers, and
+   published to the watch sales channels. They do not get the `ebay` tag.
+   Rows that fail those gates stay held and are not flagged. Every other
+   Shopify product that still has that metafield — Vivid, other partner
+   watches, jewelry, estate pieces, imageless watches, loose diamonds —
+   has it deleted on the same run. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 
@@ -152,6 +163,11 @@ holds a stones table — Shopify products are the only live copy.
 - Variant SKU = feed stock ref.
 - Unique inventory: tracked qty 1 while publishable for watches. Loose
   diamonds are tracked qty 0 (`CONTINUE`) so Uploadify does not import them.
+  Only qualifying Belgium Watch (ROMAN) and TLV watches get
+  `uploadify_product.uploadify_active` = true. The sync deletes that metafield
+  from every other product in Shopify. TLV watches are imported into the
+  catalog and published on the watch sales channels; they are not tagged for
+  eBay. Vivid stays out.
 - Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
@@ -218,8 +234,11 @@ Watch titles, descriptions, SEO, tags, and metafields follow
 live feed sync. Specs (Dial, Bezel, Metal, MM, …) write to `custom.*`
 metafields and render in the theme’s jewelry-style `.product-specs` grid on
 the default product template — not as an HTML table in the description.
-Condition values that do not map (`SLIDER`, blank, …) keep the legacy
-brand/model/reference title and bullet-list description.
+Condition values that do not map (`SLIDER`, `NEW`, blank, …) keep a neutral
+title and are not given `uploadify_active`. `RETAIL READY` and `ULTRA MINT`
+are pre-owned grades: the title says Pre-Owned, and eBay condition stays
+`3000` even when the watch has box and papers. `1000` is only source
+`UNWORN` with both box and papers.
 
 For the ~620 already-live watches still on the old bullet-list HTML:
 

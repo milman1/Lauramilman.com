@@ -126,10 +126,11 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
     if (typeof r.handle === 'string') {
       const id = r.id as string;
       const uploadifyMetafields: NonNullable<CatalogEntry['uploadifyMetafields']> = [];
-      const inline = r.uploadifyActive as { id?: string; namespace?: string; key?: string } | null | undefined;
+      const inline = r.uploadifyActive as { id?: string; namespace?: string; key?: string; value?: string } | null | undefined;
       if (inline?.id && inline.namespace && inline.key && isUploadifyNamespace(inline.namespace)) {
         uploadifyMetafields.push({ id: inline.id, namespace: inline.namespace, key: inline.key });
       }
+      const uploadifyActive = inline?.value === 'true' ? true : inline?.value === 'false' ? false : null;
       byId.set(id, {
         id,
         handle: r.handle,
@@ -140,6 +141,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         videoCount: 0,
         contentHash: (r.metafield as { value: string } | null)?.value ?? null,
         uploadifyMetafields,
+        uploadifyActive,
       });
       order.push(id);
       continue;
@@ -173,6 +175,26 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
     }
   }
   return order.map((id) => byId.get(id)!);
+}
+
+export interface UploadifyActiveOwner {
+  id: string;
+  handle: string;
+}
+
+/** Products whose `uploadify_product.uploadify_active` metafield exists. */
+export function parseUploadifyActiveOwnerRows(lines: unknown[]): UploadifyActiveOwner[] {
+  const out: UploadifyActiveOwner[] = [];
+  const seen = new Set<string>();
+  for (const row of lines) {
+    const r = row as Record<string, unknown>;
+    if (typeof r.id !== 'string' || typeof r.handle !== 'string') continue;
+    const mf = r.uploadifyActive as { id?: string } | null | undefined;
+    if (!mf?.id || seen.has(r.id)) continue;
+    seen.add(r.id);
+    out.push({ id: r.id, handle: r.handle });
+  }
+  return out;
 }
 
 interface ProductSetProduct {
@@ -554,7 +576,7 @@ export class ShopifyClient {
             status
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
-            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key }
+            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key value }
             metafields { edges { node { id namespace key } } }
             media { edges { node { status mediaContentType } } }
             variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }
@@ -566,6 +588,30 @@ export class ShopifyClient {
     if (!url) return []; // zero results → Shopify provides no file
     const lines = await downloadJsonl(url);
     return parseFeedCatalogRows(lines);
+  }
+
+  /**
+   * Every Shopify product that currently has `uploadify_active`, store-wide.
+   * Slim on purpose: the feed catalog query does not see jewelry, estate
+   * pieces, or other non-watch products, and those must not keep the flag.
+   * Call only after any other bulk query has finished.
+   */
+  async fetchUploadifyActiveOwners(): Promise<UploadifyActiveOwner[]> {
+    const query = `{
+      products {
+        edges {
+          node {
+            id
+            handle
+            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id }
+          }
+        }
+      }
+    }`;
+    const url = await this.runBulkQuery(query);
+    if (!url) return [];
+    const lines = await downloadJsonl(url);
+    return parseUploadifyActiveOwnerRows(lines);
   }
 
   private async runBulkQuery(query: string): Promise<string | null> {

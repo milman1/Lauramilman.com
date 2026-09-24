@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseFeedCatalogRows } from '../src/shopify.js';
+import { parseFeedCatalogRows, parseUploadifyActiveOwnerRows } from '../src/shopify.js';
 
 describe('parseFeedCatalogRows', () => {
   it('counts READY images and records untracked watch inventory', () => {
@@ -69,6 +69,7 @@ describe('parseFeedCatalogRows', () => {
           id: 'gid://shopify/Metafield/1',
           namespace: 'uploadify_product',
           key: 'uploadify_active',
+          value: 'true',
         },
       },
       {
@@ -84,6 +85,7 @@ describe('parseFeedCatalogRows', () => {
         key: 'color',
       },
     ]);
+    expect(catalog[0]?.uploadifyActive).toBe(true);
     expect(catalog[0]?.uploadifyMetafields).toEqual([
       {
         id: 'gid://shopify/Metafield/1',
@@ -95,6 +97,32 @@ describe('parseFeedCatalogRows', () => {
         namespace: 'uploadify',
         key: 'listing_id',
       },
+    ]);
+  });
+
+  it('lists only products that actually have uploadify_active', () => {
+    expect(
+      parseUploadifyActiveOwnerRows([
+        {
+          id: 'gid://shopify/Product/1',
+          handle: 'w-3194',
+          uploadifyActive: { id: 'gid://shopify/Metafield/1' },
+        },
+        { id: 'gid://shopify/Product/2', handle: 'bv-ring', uploadifyActive: null },
+        {
+          id: 'gid://shopify/Product/3',
+          handle: 'fine-necklace',
+          uploadifyActive: { id: 'gid://shopify/Metafield/3' },
+        },
+        {
+          id: 'gid://shopify/Product/3',
+          handle: 'fine-necklace',
+          uploadifyActive: { id: 'gid://shopify/Metafield/3' },
+        },
+      ]),
+    ).toEqual([
+      { id: 'gid://shopify/Product/1', handle: 'w-3194' },
+      { id: 'gid://shopify/Product/3', handle: 'fine-necklace' },
     ]);
   });
 });

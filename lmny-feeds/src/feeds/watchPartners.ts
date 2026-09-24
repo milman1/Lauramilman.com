@@ -9,7 +9,7 @@
  * API's 1-request-per-15-minutes limit.
  */
 
-import { ALLOWED_WATCH_PARTNER_BRANCHES } from '../../config/watchGates.js';
+import { ALLOWED_WATCH_PARTNER_BRANCHES, TLV_WATCH_PARTNER_BRANCH } from '../../config/watchGates.js';
 
 const TOKEN_URL = 'https://belgiumdia.com/get-token';
 const WATCH_URL = 'https://brainapis.com/api/belgium-dia/watch';
@@ -89,6 +89,21 @@ export async function fetchAllowedWatchStocks(): Promise<Set<string>> {
   }
   if (stocks.size === 0) {
     throw new Error('watch partner allowlist: 0 stocks');
+  }
+  return stocks;
+}
+
+/**
+ * Current TLV Watches stock numbers. Those stocks are imported with the
+ * watch feed and may carry `uploadify_active`. They are not added to the
+ * ROMAN allowlist. Throws when the branch cannot be read so the caller does
+ * not import a guessed list and does not strip TLV flags it failed to see.
+ */
+export async function fetchTlvWatchStocks(): Promise<Set<string>> {
+  const token = await guestToken();
+  const stocks = new Set(await fetchBranch(token, TLV_WATCH_PARTNER_BRANCH));
+  if (stocks.size === 0) {
+    throw new Error('TLV watch list: 0 stocks');
   }
   return stocks;
 }
