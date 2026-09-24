@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchAllowedWatchStocks } from '../src/feeds/watchPartners.js';
+import { fetchAllowedWatchStocks, fetchTlvWatchStocks } from '../src/feeds/watchPartners.js';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -27,5 +27,18 @@ describe('watch supplier allowlist fetch', () => {
     }));
 
     await expect(fetchAllowedWatchStocks()).rejects.toThrow('watch partner allowlist: 0 stocks');
+  });
+
+  it('reads only the TLV Watches branch for the Uploadify list', async () => {
+    const branches: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith('/get-token')) return new Response('a'.repeat(20));
+      branches.push(new URLSearchParams(String(init?.body ?? '')).get('branch') ?? '');
+      return Response.json({ record: [{ Stock: 'T3505' }, { Stock: 'T3489' }], total: 2 });
+    }));
+
+    await expect(fetchTlvWatchStocks()).resolves.toEqual(new Set(['T3505', 'T3489']));
+    expect(branches).toEqual(['TLV WATCHES LLC']);
   });
 });

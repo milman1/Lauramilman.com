@@ -13,7 +13,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
-import { fetchAllowedWatchStocks } from './feeds/watchPartners.js';
+import { fetchAllowedWatchStocks, fetchTlvWatchStocks } from './feeds/watchPartners.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
 import { channelsFor } from '../config/channels.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
@@ -62,7 +62,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyKeepHandles, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -324,6 +324,22 @@ async function main() {
   // should carry the Uploadify listing switch. metafieldsSet is separate
   // from productSet so a namespace rejection cannot fail the product write.
   const catalogByHandleForUploadify = new Map(catalog.map((c) => [c.handle, c]));
+  let tlvWatchListOk = false;
+  let tlvHandles = new Set<string>();
+  try {
+    const tlvStocks = await fetchTlvWatchStocks();
+    tlvHandles = new Set([...tlvStocks].map((stock) => handleForRef('watch', stock)));
+    tlvWatchListOk = true;
+    const msg = `TLV watches eligible for uploadify_active: ${tlvHandles.size}`;
+    notes.push(msg);
+    console.log(msg);
+  } catch (err) {
+    const msg =
+      `TLV watch list failed (${err instanceof Error ? err.message : String(err)}) — ` +
+      'existing watch uploadify_active flags are left in place this run';
+    notes.push(msg);
+    console.warn(msg);
+  }
   const uploadifyActiveOwners = await shopify.fetchUploadifyActiveOwners();
   const uploadifyOwnerFromSweep = new Map(uploadifyActiveOwners.map((owner) => [owner.handle, owner.id]));
   const uploadifyActiveRows = publishable
@@ -338,13 +354,28 @@ async function main() {
         desired: watchListsOnUploadify(p.item, p.priced),
       };
     });
-  const uploadifyKeepHandles = new Set(
-    uploadifyActiveRows.filter((row) => row.desired).map((row) => row.handle),
-  );
-  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeepHandles);
+  for (const handle of tlvHandles) {
+    if (uploadifyActiveRows.some((row) => row.handle === handle && row.desired)) continue;
+    const existing = catalogByHandleForUploadify.get(handle);
+    uploadifyActiveRows.push({
+      handle,
+      ownerId: existing?.id ?? uploadifyOwnerFromSweep.get(handle) ?? null,
+      current: existing?.uploadifyActive ?? null,
+      desired: true,
+    });
+  }
+  const belgiumQualifying = uploadifyActiveRows.filter((row) => row.desired && !tlvHandles.has(row.handle)).map((row) => row.handle);
+  let uploadifyKeep = uploadifyKeepHandles(belgiumQualifying, tlvHandles);
+  if (!tlvWatchListOk) {
+    uploadifyKeep = uploadifyKeepHandles(
+      uploadifyActiveOwners.filter((owner) => kindForHandle(owner.handle) === 'watch').map((owner) => owner.handle),
+      belgiumQualifying,
+    );
+  }
+  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeep);
   if (uploadifyActiveClears.length > 0) {
     const msg =
-      `${uploadifyActiveClears.length} product(s) other than qualifying Belgium Dia watches have uploadify_active — removing it`;
+      `${uploadifyActiveClears.length} product(s) other than Belgium Dia and TLV watches have uploadify_active — removing it`;
     notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
     console.log(msg);
   }
@@ -393,6 +424,15 @@ async function main() {
       `Inventory location lookup failed: ${err instanceof Error ? err.message : String(err)} — ` +
         'grant the app read_locations. Untracked products will keep reporting qty 0 to Uploadify.',
     );
+  }
+  if (flags.dryRun && locationId && tlvWatchListOk) {
+    const needQty = [...tlvHandles].filter((handle) => {
+      const existing = catalogByHandleForUploadify.get(handle);
+      return Boolean(existing?.inventoryItemId) && (existing?.inventoryQuantity ?? 0) !== UNIQUE_IN_STOCK_QTY;
+    }).length;
+    if (needQty > 0) {
+      notes.push(`${needQty} TLV watch(es) would be set to qty ${UNIQUE_IN_STOCK_QTY} for Uploadify (dry run — not written)`);
+    }
   }
   const marketplaceQtyByHandle = new Map(
     publishable.map((p) => [handleFor(p.item), uniqueStockQtyFor(p.item, p.item.imageUrls.length > 0)]),
@@ -492,12 +532,12 @@ async function main() {
 
     if (uploadifyActiveClears.length > 0) {
       console.log(
-        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying Belgium Dia watches`,
+        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
       );
       const clearErrors = await shopify.deleteMetafields(uploadifyActiveClears);
       writeErrors.push(...clearErrors.map((e) => `uploadify_active remove: ${e}`));
       notes.push(
-        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying Belgium Dia watches`,
+        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
       );
     }
 
@@ -798,6 +838,30 @@ async function main() {
       }
     }
     if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
+
+    if (locationId && tlvWatchListOk) {
+      let tlvQtyRestored = 0;
+      for (const handle of tlvHandles) {
+        const existing = catalogByHandleForUploadify.get(handle);
+        if (!existing?.inventoryItemId) continue;
+        if ((existing.inventoryQuantity ?? 0) === UNIQUE_IN_STOCK_QTY) continue;
+        const qtyErrors = await applyTrackedStock(
+          shopify,
+          locationId,
+          handle,
+          existing.inventoryItemId,
+          UNIQUE_IN_STOCK_QTY,
+          existing.inventoryQuantity ?? null,
+        );
+        writeErrors.push(...qtyErrors);
+        if (qtyErrors.length === 0) tlvQtyRestored += 1;
+      }
+      if (tlvQtyRestored > 0) {
+        notes.push(
+          `set qty ${UNIQUE_IN_STOCK_QTY} on ${tlvQtyRestored} TLV watch(es) so Uploadify can list them; storefront status is unchanged`,
+        );
+      }
+    }
 
     // Tag watches held for pricing review; leave their existing price alone.
     let reviewTagged = 0;

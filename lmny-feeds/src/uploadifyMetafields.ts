@@ -58,8 +58,24 @@ export function uploadifyActiveWrites(
 }
 
 /**
- * Delete `uploadify_active` from every product that is not a qualifying
- * Belgium Dia watch. `keepHandles` may only retain `w-` handles; any other
+ * Handles allowed to keep `uploadify_active`: qualifying Belgium Dia
+ * (ROMAN) watches, plus TLV Watches. Any handle that is not a `w-` watch
+ * is dropped even if it was passed in.
+ */
+export function uploadifyKeepHandles(
+  belgiumQualifying: Iterable<string>,
+  tlvHandles: Iterable<string>,
+): Set<string> {
+  const keep = new Set<string>();
+  for (const handle of [...belgiumQualifying, ...tlvHandles]) {
+    if (kindForHandle(handle) === 'watch') keep.add(handle);
+  }
+  return keep;
+}
+
+/**
+ * Delete `uploadify_active` from every product whose handle is not in
+ * `keepHandles`. `keepHandles` may only retain `w-` handles; any other
  * handle is removed even if it was listed by mistake.
  */
 export function uploadifyActiveDeletesExcept(

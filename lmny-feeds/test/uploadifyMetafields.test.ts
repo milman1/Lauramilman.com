@@ -4,6 +4,7 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
 } from '../src/uploadifyMetafields.js';
 
@@ -119,6 +120,14 @@ describe('uploadifyActiveWrites', () => {
     ]);
     expect(writes).toEqual([]);
     expect(missingOwner).toBe(1);
+  });
+});
+
+describe('uploadifyKeepHandles', () => {
+  it('keeps qualifying Belgium Dia watches and TLV watches only', () => {
+    expect(
+      [...uploadifyKeepHandles(['w-8117', 'estate-watch'], ['w-t3505', 'nd-stone'])].sort(),
+    ).toEqual(['w-8117', 'w-t3505']);
   });
 });
 

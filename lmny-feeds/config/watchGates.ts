@@ -36,5 +36,12 @@ export const ALLOWED_WATCH_PARTNER_BRANCHES = [
   'ROMAN',
 ] as const;
 
+/**
+ * TLV Watches stay off the storefront and eBay. Uploadify is the exception:
+ * this website branch filter is the stock list that may carry
+ * `uploadify_active`. Vivid and every other book are not included.
+ */
+export const TLV_WATCH_PARTNER_BRANCH = 'TLV WATCHES LLC';
+
 /** Power Watch `P####`, Uncle Manny `U####` / `M####` (memo). */
 export const EXCLUDED_WATCH_STOCK_RE = /^(?:P|U|M)\d+/i;

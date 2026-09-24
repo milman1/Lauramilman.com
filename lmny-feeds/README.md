@@ -109,11 +109,14 @@ holds a stones table — Shopify products are the only live copy.
    Uploadify metafields
    (`uploadify` / `uploadify_product`, including `uploadify_active`) are
    deleted on loose diamonds only so the app cannot keep them listed. A Belgium
-   Dia watch (`w-` handle) with a price, SKU, title, description, and qty > 0
-   is written `uploadify_product.uploadify_active` = true. Every other Shopify
-   product that still has that metafield — other watches, jewelry, estate
-   pieces, imageless feed watches, loose diamonds — has it deleted on the
-   same run. Archive sets qty `0`
+   Dia watch (`w-` handle, Belgium Watch / ROMAN) with a price, SKU, title,
+   description, and qty > 0 is written `uploadify_product.uploadify_active` =
+   true. Current TLV Watches stock (`TLV WATCHES LLC`) gets the same metafield
+   and qty 1 so Uploadify can list it; those pieces stay archived on the
+   storefront and are not given the eBay tag by this step. Every other
+   Shopify product that still has that metafield — Vivid, other partner
+   watches, jewelry, estate pieces, imageless ROMAN watches, loose diamonds —
+   has it deleted on the same run. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 
@@ -156,9 +159,9 @@ holds a stones table — Shopify products are the only live copy.
 - Variant SKU = feed stock ref.
 - Unique inventory: tracked qty 1 while publishable for watches. Loose
   diamonds are tracked qty 0 (`CONTINUE`) so Uploadify does not import them.
-  Only qualifying Belgium Dia watches (`w-` handles with a price, SKU, title,
-  description, and qty > 0) get `uploadify_product.uploadify_active` = true.
-  The sync deletes that metafield from every other product in Shopify.
+  Only qualifying Belgium Watch (ROMAN) pieces and current TLV Watches get
+  `uploadify_product.uploadify_active` = true. The sync deletes that metafield
+  from every other product in Shopify. TLV stays off the storefront.
 - Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
