@@ -24,9 +24,9 @@
       assign seo_meta_description = page_description
       assign seo_social_title = page_title
       if request.page_type == 'index'
-        assign seo_page_title = 'Fine Jewelry, Diamonds & Estate Pieces'
-        assign seo_social_title = 'Fine Jewelry, Diamonds & Estate Pieces | Laura Milman New York'
-        assign seo_meta_description = 'Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces. Free shipping, 7-day jewelry returns.'
+        assign seo_page_title = 'Lab-Grown & Estate Jewelry | Laura Milman New York'
+        assign seo_social_title = seo_page_title
+        assign seo_meta_description = 'Lab-grown jewelry for work and dinner, plus authenticated David Webb, Cartier, Van Cleef, and Tiffany. Free insured shipping. 7-day jewelry returns.'
       elsif request.page_type == 'collection' and seo_meta_description == blank
         capture seo_meta_description
           echo 'Explore '
@@ -38,7 +38,7 @@
       elsif request.page_type == 'blog' and seo_meta_description == blank
         assign seo_meta_description = 'Read expert jewelry, diamond, watch, styling, and estate-buying guidance from Laura Milman New York.'
       elsif page.handle == 'authentication'
-        assign seo_meta_description = 'Every pre-owned Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. piece is examined, verified, and documented before listing.'
+        assign seo_meta_description = 'Every pre-owned David Webb, Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. piece is examined, verified, and documented before listing.'
       elsif request.page_type == 'page' and seo_meta_description == blank
         capture seo_meta_description
           echo 'Learn about '
@@ -46,13 +46,42 @@
           echo ' at Laura Milman New York, backed by over 30 years of New York Diamond District expertise.'
         endcapture
       endif
+      if request.page_type == 'collection'
+        case collection.handle
+          when 'peaceful-diamonds-by-laura-milman-new-york'
+            assign seo_page_title = 'Lab-Grown Jewelry | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'david-webb'
+            assign seo_page_title = 'Pre-Owned David Webb Jewelry | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'cartier'
+            assign seo_page_title = 'Pre-Owned Cartier Jewelry | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'van-cleef-arpels'
+            assign seo_page_title = 'Pre-Owned Van Cleef & Arpels | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'tiffany'
+            assign seo_page_title = 'Pre-Owned Tiffany Jewelry | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'rolex-watches'
+            assign seo_page_title = 'Pre-Owned Rolex Watches | Laura Milman'
+            assign seo_social_title = seo_page_title
+          when 'lab-grown-bracelets'
+            assign seo_page_title = 'Lab-Grown Diamond Bracelets | Laura Milman'
+            assign seo_social_title = seo_page_title
+        endcase
+      endif
+      assign suppress_shop_suffix = false
+      if seo_page_title contains shop.name or seo_page_title contains 'Laura Milman' or seo_page_title contains '|'
+        assign suppress_shop_suffix = true
+      endif
     -%}
 
     <title>
       {{ seo_page_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless seo_page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      {%- unless suppress_shop_suffix %} &ndash; {{ shop.name }}{% endunless -%}
     </title>
 
     {% if seo_meta_description %}
@@ -119,7 +148,7 @@
       {%- if settings.favicon != blank -%}
       "logo": {{ settings.favicon | image_url: width: 512 | prepend: 'https:' | json }},
       {%- endif -%}
-      "description": "Fine jewelry designed in New York and crafted in Italy. Certified loose diamonds, Peaceful Diamonds lab-grown jewelry, authenticated pre-owned maison pieces, and pre-owned timepieces.",
+      "description": "Lab-grown diamond jewelry to wear from the office through dinner, and authenticated pre-owned jewelry and watches from the great houses.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "New York",

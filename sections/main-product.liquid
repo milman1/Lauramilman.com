@@ -13,6 +13,9 @@
   assign crumb_collection = collection | default: product.collections.first
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  if display_vendor == 'Peaceful Diamonds' or display_vendor == "Laura's Gems" or display_vendor == 'Milman New York'
+    assign display_vendor = 'Laura Milman New York'
+  endif
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid

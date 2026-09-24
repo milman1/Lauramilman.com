@@ -18,6 +18,24 @@
   endif
   assign jewelry_handles = 'rings,necklaces,pendants-1,bracelets,earrings,engagement-rings,wedding-bands,stackable-bands,vintage-jewelry,peaceful-diamonds-by-laura-milman-new-york' | split: ','
 
+  assign collection_heading = collection.title
+  case collection.handle
+    when 'peaceful-diamonds-by-laura-milman-new-york'
+      assign collection_heading = 'Lab-Grown Jewelry'
+    when 'david-webb'
+      assign collection_heading = 'Pre-Owned David Webb Jewelry'
+    when 'cartier'
+      assign collection_heading = 'Pre-Owned Cartier Jewelry'
+    when 'van-cleef-arpels'
+      assign collection_heading = 'Pre-Owned Van Cleef & Arpels'
+    when 'tiffany'
+      assign collection_heading = 'Pre-Owned Tiffany Jewelry'
+    when 'rolex-watches'
+      assign collection_heading = 'Pre-Owned Rolex Watches'
+    when 'lab-grown-bracelets'
+      assign collection_heading = 'Lab-Grown Diamond Bracelets'
+  endcase
+
   assign has_active_filters = false
   for filter in collection.filters
     if filter.type == 'price_range'
@@ -38,7 +56,7 @@
     <!-- SEO-loaded collection intro -->
     <header class="lm-collection__header">
       <h1 class="lm-collection__title">
-        {%- if jewelry_only -%}All Jewelry{%- else -%}{{ collection.title }}{%- endif -%}
+        {%- if jewelry_only -%}All Jewelry{%- else -%}{{ collection_heading }}{%- endif -%}
       </h1>
       {%- if jewelry_only -%}
         <div class="lm-collection__desc">

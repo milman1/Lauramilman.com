@@ -24,7 +24,10 @@ describe('theme SEO integration', () => {
     const layout = themeFile('layout/theme.liquid');
     const meta = themeFile('snippets/meta-tags.liquid');
 
-    expect(layout).toContain('Fine Jewelry, Diamonds & Estate Pieces');
+    expect(layout).toContain('Lab-Grown & Estate Jewelry | Laura Milman New York');
+    expect(layout).toContain('suppress_shop_suffix');
+    expect(layout).toContain("when 'david-webb'");
+    expect(layout).toContain('Lab-Grown Jewelry | Laura Milman');
     expect(layout).toContain("request.page_type == 'collection' and seo_meta_description == blank");
     expect(layout).toContain("request.page_type == 'article' and seo_meta_description.size > 180");
     expect(layout).toContain("render 'meta-tags', meta_title: seo_social_title, meta_description: seo_meta_description");

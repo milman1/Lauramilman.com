@@ -744,14 +744,13 @@
         <div class="nav__item nav__item--peaceful">
           <span class="nav__item-link nav__link--peaceful">
             <span class="nav__peaceful-dot" aria-hidden="true"></span>
-            {{ section.settings.peaceful_label | default: 'Peaceful Diamonds' }}
+            {{ section.settings.peaceful_label | default: 'Lab-Grown Jewelry' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
           <div class="nav__dropdown">
-            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Peaceful Diamonds</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Lab-Grown Jewelry</a>
             {%- comment -%}
               Category links mirror the peacefuldiamonds.com taxonomy so the
               sub-brand shops the same way on both sites. Ring Settings,
@@ -776,7 +775,8 @@
             </svg>
           </span>
           <div class="nav__dropdown">
-            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">All Vintage & Estate</a>
+            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">Vintage & Estate</a>
+            <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
             <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
             <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
             <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
@@ -914,7 +914,7 @@
     <div class="search-overlay__links">
       <p class="search-overlay__label">Popular Searches</p>
       <div class="search-overlay__tags">
-        <a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="search-overlay__tag">Peaceful Diamonds</a>
+        <a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="search-overlay__tag">Lab-Grown Jewelry</a>
         <a href="/collections/natural-diamonds" class="search-overlay__tag">Loose Diamonds</a>
         <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
         <a href="/collections/vintage-jewelry" class="search-overlay__tag">Vintage & Estate</a>
@@ -1386,8 +1386,8 @@
     {
       "type": "text",
       "id": "peaceful_label",
-      "label": "Peaceful Diamonds label",
-      "default": "Peaceful Diamonds"
+      "label": "Lab-grown jewelry label",
+      "default": "Lab-Grown Jewelry"
     },
     {
       "type": "url",

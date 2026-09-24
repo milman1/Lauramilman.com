@@ -13,12 +13,12 @@
       "type": "hero",
       "settings": {
         "eyebrow": "Laura Milman · New York",
-        "heading": "Thirty years of jewelry.\nA lifetime of stories.",
-        "subheading": "From her earliest drawings to her Manhattan jewelry house, Laura has always believed the most beautiful pieces are the ones that mean something.",
-        "primary_cta_text": "Discover Laura's Story",
-        "primary_cta_url": "/pages/lauras-story",
-        "secondary_cta_text": "Shop the Collection",
-        "secondary_cta_url": "/collections/all",
+        "heading": "Jewelry for the week\nyou actually live.",
+        "subheading": "Lab-grown diamond jewelry to wear from the office through dinner, and signed pre-owned pieces when you want a house name.",
+        "primary_cta_text": "Shop Lab-Grown Jewelry",
+        "primary_cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+        "secondary_cta_text": "Shop Pre-Owned Maison",
+        "secondary_cta_url": "/collections/vintage-jewelry",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
         "image_opacity": 55
       }
@@ -62,15 +62,6 @@
     "shop-worlds": {
       "type": "shop-worlds",
       "blocks": {
-        "world-peaceful": {
-          "type": "world",
-          "settings": {
-            "collection": "peaceful-diamonds-by-laura-milman-new-york",
-            "title": "Peaceful Diamonds",
-            "subtitle": "Certified lab-grown jewelry",
-            "tone": "navy"
-          }
-        },
         "world-diamonds": {
           "type": "world",
           "settings": {
@@ -78,15 +69,6 @@
             "title": "Loose Diamonds",
             "subtitle": "Natural and lab-grown stones",
             "link": "/collections/natural-diamonds",
-            "tone": "warm"
-          }
-        },
-        "world-maison": {
-          "type": "world",
-          "settings": {
-            "collection": "vintage-jewelry",
-            "title": "Pre-Owned Maison",
-            "subtitle": "Authenticated signed estate",
             "tone": "warm"
           }
         },
@@ -103,29 +85,34 @@
           "type": "world",
           "settings": {
             "collection": "all",
-            "title": "Fine Jewelry",
-            "subtitle": "Designed in New York, crafted in Italy",
+            "title": "All Jewelry",
+            "subtitle": "Rings, necklaces, earrings, and bracelets",
             "link": "/collections/all",
             "tone": "warm"
           }
         }
       },
       "block_order": [
-        "world-peaceful",
-        "world-diamonds",
-        "world-maison",
         "world-timepieces",
-        "world-jewelry"
+        "world-jewelry",
+        "world-diamonds"
       ],
       "settings": {
-        "eyebrow": "Explore Laura Milman",
-        "heading": "Shop Our Worlds",
-        "subheading": "Lab-grown jewelry, certified loose diamonds, authenticated maison pieces, pre-owned timepieces, and jewelry designed in New York."
+        "eyebrow": "Also in the house",
+        "heading": "More to explore",
+        "subheading": "Pre-owned watches, the full jewelry catalog, and loose diamonds."
       }
     },
     "preowned-maison": {
       "type": "preowned-maison",
       "blocks": {
+        "maison-webb": {
+          "type": "maison",
+          "settings": {
+            "collection": "david-webb",
+            "title": "David Webb"
+          }
+        },
         "maison-cartier": {
           "type": "maison",
           "settings": {
@@ -156,6 +143,7 @@
         }
       },
       "block_order": [
+        "maison-webb",
         "maison-cartier",
         "maison-vca",
         "maison-bvlgari",
@@ -267,13 +255,13 @@
         "pd-point-2": {
           "type": "point",
           "settings": {
-            "text": "Crafted to the same LMNY standard"
+            "text": "Studs, tennis, station, and pendants"
           }
         },
         "pd-point-3": {
           "type": "point",
           "settings": {
-            "text": "Exceptional carat weight, accessible price"
+            "text": "Worn from the office through dinner"
           }
         }
       },
@@ -284,11 +272,11 @@
       ],
       "settings": {
         "chip_text": "The Lab-Grown Collection",
-        "title": "Peaceful Diamonds",
+        "title": "For the week you work",
         "byline": "by Laura Milman New York",
-        "description": "Certified lab-grown diamonds, held to the same New York standards as everything we make. The modern way to begin your collection — brilliant, transparent, and priced to make exceptional possible.",
+        "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. Made to stay on from the morning through dinner.",
         "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Peaceful Diamonds",
+        "cta_text": "Shop Lab-Grown Jewelry",
         "secondary_cta_text": "",
         "secondary_cta_url": ""
       }
@@ -384,11 +372,11 @@
   "order": [
     "hero",
     "trust-strip",
-    "shop-worlds",
-    "preowned-maison",
-    "diamond-destination",
-    "preowned-timepieces",
     "peaceful-diamonds",
+    "preowned-maison",
+    "shop-worlds",
+    "preowned-timepieces",
+    "diamond-destination",
     "collections-grid",
     "featured-products",
     "reviews",

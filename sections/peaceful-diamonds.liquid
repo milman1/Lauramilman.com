@@ -8,7 +8,7 @@
 
 {%- assign pd_collection = section.settings.collection -%}
 
-<section class="lm-peaceful" aria-label="Peaceful Diamonds by Laura Milman New York">
+<section class="lm-peaceful" aria-label="Lab-grown jewelry by Laura Milman New York">
   <div class="lm-peaceful__glow" aria-hidden="true"></div>
   <div class="lm-peaceful__container">
 
@@ -36,7 +36,7 @@
       <div class="lm-peaceful__buttons">
         {%- if pd_collection != blank -%}
           <a href="{{ pd_collection.url }}" class="lm-peaceful__btn lm-peaceful__btn--solid">
-            {{ section.settings.cta_text | default: 'Shop Peaceful Diamonds' }}
+            {{ section.settings.cta_text | default: 'Shop Lab-Grown Jewelry' }}
           </a>
         {%- endif -%}
         {%- if section.settings.secondary_cta_text != blank and section.settings.secondary_cta_url != blank -%}
@@ -290,7 +290,7 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Peaceful Diamonds"
+      "default": "Lab-Grown Jewelry"
     },
     {
       "type": "text",
@@ -313,7 +313,7 @@
       "type": "text",
       "id": "cta_text",
       "label": "CTA text",
-      "default": "Shop Peaceful Diamonds"
+      "default": "Shop Lab-Grown Jewelry"
     },
     {
       "type": "text",
