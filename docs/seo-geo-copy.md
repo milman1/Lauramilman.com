@@ -85,12 +85,12 @@ Avoid: “Beautiful”, stock numbers, price, duplicate category words, promotio
 
 ## SEO description formulas
 
-All feed SEO descriptions end with **Authenticated by Laura Milman New York.** where the schema specifies it.
+Diamond and estate SEO descriptions end with **Authenticated by Laura Milman New York.** where that schema specifies it. Feed watches end with **Exchanges only within 7 days of delivery.**
 
 | Segment | Formula |
 |---|---|
-| **Watch (classified)** | `Shop this {pre-owned\|unworn} {Brand} {Model} {reference}{, grade if present}. Authenticated by Laura Milman New York.` |
-| **Watch (unclassified)** | `Explore this {Brand} {Model} {reference} watch from Laura Milman New York.` |
+| **Watch (classified)** | `Shop this {pre-owned\|unworn} {Brand} {Model} {reference}{, case size, year, grade when present}. Exchanges only within 7 days of delivery.` |
+| **Watch (unclassified)** | `Shop this {Brand} {Model} {reference} watch{, known facts}. Exchanges only within 7 days of delivery.` |
 | **Natural / lab diamond** | `Shop this {carat}ct {shape} {natural\|lab-grown} diamond, graded {color} {clarity}{, cut if present} and certified by {lab}.` |
 | **Estate jewelry** | `Shop this {Brand} estate {noun}{metal/era/grade clauses}. Authenticated by Laura Milman New York.` |
 
@@ -100,13 +100,12 @@ All feed SEO descriptions end with **Authenticated by Laura Milman New York.** w
 
 ### Feed watches
 
-Implemented in `watchListingBuilder.ts`. One opening `<p>` plus optional comment/trust paragraphs.
+Implemented in `watchListingBuilder.ts`. One `<p>`. The first sentence carries the source facts that exist: condition word, brand, model, reference, case size, metal, dial, bezel, bracelet, year, grade, and bracelet-link count. A full fact set is a 40–60 word answer. Missing facts are left out. A non-redundant supplier comment is a second sentence in the same paragraph. The hand-inspected trust paragraph stays off.
 
 **Template:**
 
 ```html
-<p>This {Pre-Owned|Unworn} {Brand} {Model} {reference}{ from Year} is offered by Laura Milman New York{ box/papers clause}.{ link sentence}{ grade sentence}</p>
-<p>{supplier comment — omitted when redundant, e.g. NAKED + no box/papers}</p>
+<p>This {pre-owned|unworn} {Brand} {Model} reference {reference} is a {case size} {metal} watch with a {dial} dial, a {bezel} bezel, and a {bracelet} bracelet from {year} in {grade} condition, including {n} additional bracelet links, offered by Laura Milman New York {box/papers clause}. {comment}</p>
 ```
 
 **Box/papers clauses (eBay-safe):**
@@ -118,14 +117,15 @@ Implemented in `watchListingBuilder.ts`. One opening `<p>` plus optional comment
 | No | Yes | with its papers, but without the original box |
 | No | No | on its own, without box or papers |
 
-**Link sentence** (feed `Links` field):
+**Link phrase** (feed `Links` field), inside the same sentence:
 
 | Value | Copy |
 |---|---|
-| `n` > 0 | It includes {n} additional bracelet link(s). |
-| `-n` | The bracelet is {n} link(s) short of a full set. |
+| `n` > 0 | including {n} additional bracelet link(s) |
+| `-n` | with {n} bracelet link(s) missing |
+| 0, blank, invalid | omitted |
 
-**Never in body:** price, “New with box and papers”, “full set with box and papers”, HTML spec tables (specs live in metafields + PDP grid).
+**Never in body:** price, “Not specified”, “New with box and papers”, “full set with box and papers”, labeled spec blocks, HTML spec tables (specs live in metafields + PDP grid).
 
 **Trust line (optional, off by default for feed):**  
 `Authenticated and hand-inspected by Laura Milman New York.`  
@@ -138,9 +138,9 @@ Enable in `watchListingBuilder.ts` `CONFIG.trustLine` only after confirming it a
 <p>Authenticated and hand-inspected by Laura Milman New York.</p>
 ```
 
-### Planned enrichment (feed watches)
+### Feed-watch factual sentence
 
-After eBay takedown, consider a second factual sentence weaving **case size, metal, dial, bezel, bracelet** when present — specs stay in the grid; prose aids GEO citations.
+Case size, metal, dial, bezel, and bracelet are in the opening sentence when the feed supplies them. Specs stay in the grid as well. The hand-inspected paragraph is still off for feed watches.
 
 ---
 
@@ -154,7 +154,7 @@ After eBay takedown, consider a second factual sentence weaving **case size, met
 | Condition | Opening / grade sentence | Yes | `itemCondition` |
 | Box / papers | Opening sentence | Yes | — |
 | Link count | Link sentence (feed) | Yes (`Link: -5`) | — |
-| Dial, bezel, bracelet, metal, MM | Optional future prose | Yes | `material` (metal) |
+| Dial, bezel, bracelet, metal, MM | Opening sentence when the feed supplies them | Yes | `material` (metal) |
 | Diamond 4Cs | SEO + diamond template | Yes (stones) | — |
 
 AI engines cite **complete sentences** in the body and **structured fields** in JSON-LD. Both matter for GEO.
@@ -208,7 +208,7 @@ AI engines cite **complete sentences** in the body and **structured fields** in 
 ## Manual checklist (new products)
 
 - [ ] SEO title ≤ 60 chars; intent suffix preserved (`| Estate Jewelry`, `| Pre-Owned Watch`, `| GIA`)
-- [ ] SEO description ≤ 160 chars; ends with authentication line where applicable
+- [ ] SEO description ≤ 160 chars; diamonds and estate end with the authentication line; feed watches end with the exchanges-only closer
 - [ ] Body: factual, no Back Vault references, no price
 - [ ] All relevant `custom.*` metafields filled (specs grid + JSON-LD)
 - [ ] Image alt text describes the piece (brand, type, metal/gem), not “image 1”
@@ -247,11 +247,11 @@ Spot-check live PDP: View Source → search for `application/ld+json`, `itemCond
 
 ## Roadmap (copy improvements)
 
-1. **Richer feed watch body** — weave dial / case / metal / bracelet when API provides them (post–eBay takedown).
+1. **Richer feed watch body** — done in `watchListingBuilder.ts`: one factual paragraph with dial, case, metal, and bracelet when the API provides them.
 2. **Unify feed + estate voice** — optional authentication paragraph for feed watches once confirmed.
 3. **eBay specs block** — map `custom.link`, `custom.dial`, etc. in Connect so eBay “Product specification” matches Shopify grid.
 4. **Blog / FAQ GEO** — entity pages for “authenticated pre-owned Rolex”, “estate Cartier”, etc. (content strategy, not sync).
 
 ---
 
-*Last updated: 2026-09-07. When formulas change, update this file and the implementing source files in the same PR.*
+*Last updated: 2026-09-24. When formulas change, update this file and the implementing source files in the same PR.*
