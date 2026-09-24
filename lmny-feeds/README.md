@@ -234,8 +234,11 @@ Watch titles, descriptions, SEO, tags, and metafields follow
 live feed sync. Specs (Dial, Bezel, Metal, MM, …) write to `custom.*`
 metafields and render in the theme’s jewelry-style `.product-specs` grid on
 the default product template — not as an HTML table in the description.
-Condition values that do not map (`SLIDER`, blank, …) keep the legacy
-brand/model/reference title and bullet-list description.
+Condition values that do not map (`SLIDER`, `NEW`, blank, …) keep a neutral
+title and are not given `uploadify_active`. `RETAIL READY` and `ULTRA MINT`
+are pre-owned grades: the title says Pre-Owned, and eBay condition stays
+`3000` even when the watch has box and papers. `1000` is only source
+`UNWORN` with both box and papers.
 
 For the ~620 already-live watches still on the old bullet-list HTML:
 

@@ -34,6 +34,53 @@ export const UNWORN_TITLE_RE = /\bunworn\b/i;
 
 export type WatchState = 'preowned' | 'unworn';
 
+export interface ClassifiedWatchCondition {
+  state: WatchState;
+  titleWord: 'Pre-Owned' | 'Unworn';
+  /** Wear grade for the spec table. Never a reason to call the watch new. */
+  grade: string | null;
+  googleShoppingCondition: 'new' | 'used';
+}
+
+/**
+ * Wear grades on the Belgium Dia condition column. They describe a watch
+ * that has been owned. Retail Ready and Ultra Mint are grades, not unworn:
+ * the TLV book labels a 2007 Datejust Retail Ready.
+ */
+const PREOWNED_GRADE_MAP: Record<string, string> = {
+  'ULTRA MINT': 'Ultra Mint',
+  MINT: 'Mint',
+  'RETAIL READY': 'Retail Ready',
+  EXCELLENT: 'Excellent',
+  'VERY GOOD': 'Very Good',
+  GOOD: 'Good',
+  FAIR: 'Fair',
+};
+
+/** Collapse hyphen and spacing variants so PRE-OWNED and PRE OWNED match. */
+export function normalizeWatchConditionKey(conditionRaw: string): string {
+  return conditionRaw.trim().toUpperCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
+}
+
+/**
+ * Known source states only. UNWORN is the only new state. Grades are
+ * pre-owned. SLIDER, blank, and anything else stay unclassified so a
+ * marketplace cannot be told the watch is new.
+ */
+export function classifyWatchCondition(conditionRaw: string): ClassifiedWatchCondition | null {
+  const key = normalizeWatchConditionKey(conditionRaw);
+  if (!key) return null;
+  if (key === 'UNWORN') {
+    return { state: 'unworn', titleWord: 'Unworn', grade: null, googleShoppingCondition: 'new' };
+  }
+  if (key === 'PRE OWNED') {
+    return { state: 'preowned', titleWord: 'Pre-Owned', grade: null, googleShoppingCondition: 'used' };
+  }
+  const grade = PREOWNED_GRADE_MAP[key];
+  if (!grade) return null;
+  return { state: 'preowned', titleWord: 'Pre-Owned', grade, googleShoppingCondition: 'used' };
+}
+
 export function titleLooksPreowned(title: string): boolean {
   return PREOWNED_TITLE_RE.test(title);
 }

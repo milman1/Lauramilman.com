@@ -61,6 +61,10 @@ describe('uniqueStockQtyFor', () => {
     expect(watchListsOnUploadify(watch(), priced({ retailUsd: 0 }))).toBe(false);
     expect(watchListsOnUploadify(watch({ stockRef: '  ' }), priced())).toBe(false);
     expect(watchListsOnUploadify(naturalStone(), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'SLIDER' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'NEW' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch({ condition: 'RETAIL READY' }), priced())).toBe(true);
+    expect(watchListsOnUploadify(watch({ condition: 'ULTRA MINT' }), priced())).toBe(true);
   });
 
   it('is 0 for every loose diamond so Uploadify does not import them', () => {

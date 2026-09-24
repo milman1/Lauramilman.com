@@ -61,6 +61,34 @@ describe('buildWatchListing', () => {
     expect(listing.descriptionHtml).not.toContain('as a full set');
   });
 
+  it('maps Retail Ready and Ultra Mint to Pre-Owned even with box and papers', () => {
+    for (const conditionRaw of ['RETAIL READY', 'ULTRA MINT', 'PRE-OWNED']) {
+      const listing = buildWatchListing(base({ conditionRaw, box: true, paper: true }));
+      expect('needsReview' in listing).toBe(false);
+      if ('needsReview' in listing) return;
+      expect(listing.title.startsWith('Pre-Owned ')).toBe(true);
+      expect(listing.descriptionHtml).not.toMatch(/new with box/i);
+      expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition')?.value).toBe(
+        'Pre-Owned',
+      );
+      expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'ebay_condition')?.value).toBe(
+        '3000',
+      );
+      expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'features')?.value).toBe(
+        'With Box, With Papers',
+      );
+      expect(
+        listing.metafields.find((m) => m.namespace === 'mm-google-shopping' && m.key === 'condition')?.value,
+      ).toBe('used');
+    }
+    const retail = buildWatchListing(base({ conditionRaw: 'RETAIL READY', box: false, paper: true }));
+    expect('needsReview' in retail).toBe(false);
+    if ('needsReview' in retail) return;
+    expect(retail.metafields.find((m) => m.key === 'condition_grade')?.value).toBe('Retail Ready');
+    expect(retail.descriptionHtml).toContain('with its papers, but without the original box');
+    expect(retail.descriptionHtml).not.toMatch(/box and papers/i);
+  });
+
   it('maps grade values to Pre-Owned and writes Condition Grade metafield', () => {
     const listing = buildWatchListing(base({ conditionRaw: 'EXCELLENT', box: false, paper: false }));
     expect('needsReview' in listing).toBe(false);

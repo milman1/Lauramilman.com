@@ -39,12 +39,7 @@ export interface WatchFeedRecord {
 
 export type ConditionState = 'preowned' | 'unworn';
 
-export interface ConditionMapping {
-  state: ConditionState;
-  titleWord: 'Pre-Owned' | 'Unworn';
-  grade: string | null; // e.g. "Excellent" — spec-table only, never in title
-  googleShoppingCondition: 'new' | 'used';
-}
+export type ConditionMapping = ClassifiedWatchCondition;
 
 export interface WatchListing {
   title: string;
@@ -70,8 +65,10 @@ export interface NeedsReview {
 
 import {
   boxPaperClause,
+  classifyWatchCondition,
   ebayConditionForWatch,
   ebayFeaturesFromBoxPapers,
+  type ClassifiedWatchCondition,
 } from './ebayCondition.js';
 import { extractEbayWatchSpecifics } from './ebayWatchSpecifics.js';
 
@@ -79,35 +76,8 @@ const CONFIG = {
   trustLine: '', // e.g. "Authenticated and hand-inspected by Laura Milman New York."
 };
 
-// ---------------------------------------------------------------------------
-// Condition mapping — the two known STATE values, plus known GRADE values
-// (which imply state = preowned). Anything else remains unclassified.
-
-const STATE_MAP: Record<string, ConditionMapping> = {
-  'PRE OWNED': { state: 'preowned', titleWord: 'Pre-Owned', grade: null, googleShoppingCondition: 'used' },
-  UNWORN: { state: 'unworn', titleWord: 'Unworn', grade: null, googleShoppingCondition: 'new' },
-};
-
-const GRADE_MAP: Record<string, string> = {
-  MINT: 'Mint',
-  EXCELLENT: 'Excellent',
-  'VERY GOOD': 'Very Good',
-  GOOD: 'Good',
-  FAIR: 'Fair',
-};
-
 function mapCondition(conditionRaw: string): ConditionMapping | null {
-  const key = (conditionRaw || '').trim().toUpperCase();
-  if (STATE_MAP[key]) return STATE_MAP[key];
-  if (GRADE_MAP[key]) {
-    return {
-      state: 'preowned',
-      titleWord: 'Pre-Owned',
-      grade: GRADE_MAP[key],
-      googleShoppingCondition: 'used',
-    };
-  }
-  return null; // SLIDER, blank, or anything unrecognized
+  return classifyWatchCondition(conditionRaw);
 }
 
 // ---------------------------------------------------------------------------

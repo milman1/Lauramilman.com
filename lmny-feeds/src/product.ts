@@ -3,6 +3,7 @@ import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
 import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
+import { classifyWatchCondition } from './ebayCondition.js';
 import {
   buildWatchListing,
   type WatchFeedRecord,
@@ -227,13 +228,16 @@ export function vendorFor(item: FeedItem): string {
 
 /**
  * Uploadify lists a Belgium Watch or TLV watch only when every gate is true:
- * a retail price, a SKU, a title, a description, and quantity above zero.
- * Quantity is 1 only while the watch has a photo; an imageless watch is
- * DRAFT at qty 0. Nothing else — loose diamonds, estate, fine jewelry, Vivid,
- * other watches — qualifies.
+ * a retail price, a SKU, a title, a description, quantity above zero, and a
+ * source condition that maps to Pre-Owned or Unworn. Quantity is 1 only
+ * while the watch has a photo; an imageless watch is DRAFT at qty 0.
+ * Unrecognized conditions (SLIDER and anything else) stay off Uploadify so
+ * a raw dealer word cannot be read as new. Nothing else — loose diamonds,
+ * estate, fine jewelry, Vivid, other watches — qualifies.
  */
 export function watchListsOnUploadify(item: FeedItem, priced: Priced): boolean {
   if (item.kind !== 'watch') return false;
+  if (!classifyWatchCondition(item.condition ?? '')) return false;
   if (!(priced.retailUsd > 0)) return false;
   if (!item.stockRef.trim()) return false;
   if (!titleFor(item).trim()) return false;

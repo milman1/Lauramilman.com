@@ -4,6 +4,7 @@ import {
   EBAY_CONDITION_NEW_OTHER,
   EBAY_CONDITION_NEW_WITH_BOX_AND_PAPERS,
   boxPaperClause,
+  classifyWatchCondition,
   ebayConditionForWatch,
   ebayFeaturesFromBoxPapers,
   ebayFeaturesFromYesNo,
@@ -30,6 +31,27 @@ describe('ebayConditionForWatch', () => {
   it('uses ConditionID 1500 for source-confirmed unworn watches without a complete accessory set', () => {
     expect(ebayConditionForWatch({ state: 'unworn', box: true, papers: false })).toBe(EBAY_CONDITION_NEW_OTHER);
     expect(ebayConditionForWatch({ state: 'unworn', box: null, papers: null })).toBe(EBAY_CONDITION_NEW_OTHER);
+  });
+});
+
+describe('classifyWatchCondition', () => {
+  it('treats Retail Ready and Ultra Mint as pre-owned grades, never as new', () => {
+    expect(classifyWatchCondition('RETAIL READY')).toMatchObject({
+      state: 'preowned',
+      titleWord: 'Pre-Owned',
+      grade: 'Retail Ready',
+      googleShoppingCondition: 'used',
+    });
+    expect(classifyWatchCondition('ULTRA MINT')).toMatchObject({
+      state: 'preowned',
+      grade: 'Ultra Mint',
+      googleShoppingCondition: 'used',
+    });
+    expect(classifyWatchCondition('PRE-OWNED')?.state).toBe('preowned');
+    expect(classifyWatchCondition('UNWORN')?.state).toBe('unworn');
+    expect(classifyWatchCondition('SLIDER')).toBeNull();
+    expect(classifyWatchCondition('NEW')).toBeNull();
+    expect(classifyWatchCondition('')).toBeNull();
   });
 });
 

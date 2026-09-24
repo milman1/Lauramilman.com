@@ -19,6 +19,10 @@ describe('source-backed watch condition repair', () => {
     expect(desiredConditions({ stockRef: '2', state: 'unworn', box: true, papers: true })).toEqual({ ebayCondition: '1000', googleCondition: 'new' });
     expect(desiredConditions({ stockRef: '3', state: 'unworn', box: true, papers: false })).toEqual({ ebayCondition: '1500', googleCondition: 'new' });
     expect(desiredConditions({ stockRef: '4', state: 'unworn', box: null, papers: true })).toEqual({ ebayCondition: '1500', googleCondition: 'new' });
+    const retailReady = sourceWatchCondition({ Stock_no: 'T3489', Condition: 'RETAIL READY', Box: 'NO', Paper: 'YES' })!;
+    expect(retailReady.state).toBe('preowned');
+    expect(desiredConditions(retailReady)).toEqual({ ebayCondition: '3000', googleCondition: 'used' });
+    expect(sourceWatchCondition({ Stock_no: 'T3753', Condition: 'SLIDER', Box: 'NO', Paper: 'YES' })?.state).toBeNull();
   });
 
   it('stops duplicate and ambiguous joins', () => {
