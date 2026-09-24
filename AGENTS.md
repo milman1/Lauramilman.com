@@ -584,7 +584,8 @@ the intent suffix change.
    direct, factual, price-forward, never led by a sustainability hook.
 5. SEO title at or below 60 characters, truncated at a word boundary with the
    intent suffix reserved. SEO description at or below 160 characters, word
-   boundary truncation, always ending "Authenticated by Laura Milman New York."
+   boundary truncation. Diamonds and estate end with "Authenticated by Laura Milman New York."
+   Feed watches end with "Exchanges only within 7 days of delivery."
 6. Tags come from the existing set only (`ebay`, `lab-grown`, `antique-estate`,
    `designer-jewelry`, `backvault-feed`, `lmny-feed`, `jacob-co-boutique`,
    `new-unworn`, brand, product type, era). No new tag without a reason in the

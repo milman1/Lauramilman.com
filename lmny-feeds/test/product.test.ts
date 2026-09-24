@@ -110,8 +110,9 @@ describe('SEO formulas', () => {
       'Rolex Submariner 126610LN Pre-Owned 41mm Watch',
     );
     expect(seoDescriptionFor(watch())).toContain(
-      'Authenticated by Laura Milman New York.',
+      'Exchanges only within 7 days of delivery.',
     );
+    expect(seoDescriptionFor(watch())).not.toMatch(/return/i);
   });
 
   it('keeps every generated SEO field within search-safe limits', () => {
@@ -449,11 +450,12 @@ describe('updates target the existing product by id', () => {
   it('watch creates carry schema SEO and prose description (specs are metafields)', () => {
     const input = buildProductSetInput(watch(), priced(), at);
     expect(input.title).toBe('Pre-Owned Rolex Submariner 126610LN 41mm');
-    expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
+    expect(String(input.descriptionHtml)).toContain('offered by Laura Milman New York');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
+    expect(String(input.descriptionHtml)).not.toContain('<strong>');
     expect(input.seo).toEqual({
       title: 'Rolex Submariner 126610LN Pre-Owned 41mm Watch',
-      description: expect.stringContaining('Authenticated by Laura Milman New York.'),
+      description: expect.stringContaining('Exchanges only within 7 days of delivery.'),
     });
   });
 
@@ -461,7 +463,7 @@ describe('updates target the existing product by id', () => {
     const input = buildProductSetInput(watch({ condition: 'SLIDER' }), priced(), at);
     expect(input.status).toBe('ACTIVE');
     expect(input.title).toBe('Rolex Submariner 126610LN 41mm');
-    expect(String(input.descriptionHtml)).toContain('This Rolex Submariner 126610LN');
+    expect(String(input.descriptionHtml)).toContain('This Rolex Submariner reference 126610LN');
     expect(String(input.descriptionHtml)).not.toContain('<ul>');
     expect(String(input.descriptionHtml)).not.toMatch(/Pre-Owned|Unworn/);
   });

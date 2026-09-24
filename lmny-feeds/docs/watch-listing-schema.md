@@ -1,12 +1,8 @@
 # Watch Listing Schema — LMNY
 
 The single source of truth for how a raw feed record becomes a Shopify listing.
-Both `src/watchListingBuilder.ts` (ingest pipeline) and
-`scripts/lmny_watches_backfill.py` (one-time backfill of already-live watches)
-implement this exact spec. If the rules change, both files must change
-together, or the two paths will drift and you'll get inconsistent titles
-depending on whether a watch came in through the live feed or through a
-backfill.
+`src/watchListingBuilder.ts` is the live ingest path. The retired
+`scripts/lmny_watches_backfill.py` must not overwrite this copy.
 
 ## Input
 
@@ -31,7 +27,7 @@ text):
 | `bezel` | Bezel | `OCTAGON` | Optional, free text, title-cased on output. |
 | `metal` | Metal | `18K YG & S/S` | Optional. Left as-given — these are industry shorthand (YG/WG/RG/S/S) that's more precise than a normalized version would be. |
 | `stockNumber` | Stock# | `P5276` | LMNY's internal stock number. Distinct from `reference`, which is the manufacturer's reference number — do not conflate the two. |
-| `comment` | Comment | `NAKED` | Optional, free text. Shown as a Notes paragraph UNLESS it's exactly "NAKED" and Box/Paper are both already shown as No — in that case it's redundant with those two rows and is dropped rather than repeating the same fact three ways. |
+| `comment` | Comment | `NAKED` | Optional, free text. Shown as a second sentence in the same body paragraph UNLESS it's exactly "NAKED" and Box/Paper are both already shown as No — in that case it's redundant and is dropped. |
 
 **Superseded field:** the old single `accessories` free-text field (e.g.
 "Full set (box and papers)") is replaced by the explicit `box` / `paper`
@@ -42,8 +38,9 @@ old string as a bridge.
 
 **Live ingest:** Dial, Bezel, Bracelet, Metal, MM, Links, Comment, and Year
 are on the Belgium Dia `developer-api/watch` payload and are mapped through
-`normalizeWatches` → `buildWatchListing`. A content-hash schema bump refreshes
-already-live `w-*` products in place on the next sync.
+`normalizeWatches` → `buildWatchListing`. Title, description, and SEO
+description are already inside `contentHashFor`, so a builder change refreshes
+already-live `w-*` products on the next sync without a schema-version bump.
 
 **Backfill script:** `scripts/lmny_watches_backfill.py` only sees what's in
 existing Shopify `descriptionHtml` and cannot recover those physical specs.
@@ -111,19 +108,27 @@ Examples:
 
 ### Description (HTML)
 
+One `<p>`. The first sentence states the known source facts in order. Missing
+case size, metal, dial, bezel, bracelet, year, grade, and link count are
+omitted. The body never prints `Not specified`, a labeled spec block, or an
+HTML table. When the known facts fill the sentence, it lands in the 40–60 word
+GEO answer range. A thinner source stays shorter. Do not pad.
+
 ```html
-<p>This {titleWord} {Brand} {Model} {reference}{yearClause} is offered by Laura Milman New York{boxPaperClause}.{gradeClause}</p>
-<p><strong>Case size:</strong> {caseSize or Not specified}<br>
-<strong>Year:</strong> {year or Not specified}<br>
-<strong>Bracelet links:</strong> {link disclosure or Not specified}</p>
-<p>{comment}</p>                                              <!-- see Comment rule above -->
+<p>This {pre-owned|unworn} {Brand} {Model} reference {reference} is a {case size} {metal} watch with a {dial} dial, a {bezel} bezel, and a {bracelet} bracelet from {year} in {grade} condition, including {n} additional bracelet links, offered by Laura Milman New York {boxPaperClause}. {comment}</p>
 ```
 
-Specs are **not** inlined as an HTML table. They are written to storefront-readable
-`custom.*` metafields and rendered by the theme’s jewelry-style
-`.product-specs` grid in `sections/main-product.liquid` (same chrome as
-earrings / rings). All free-text values in the prose HTML must still be
-escaped (`&`, `<`, `>`).
+An unclassified condition drops the condition word. Plain metals such as
+`STEEL` are lowercased in the sentence. Industry shorthand such as
+`18K YG & S/S` stays as given. Dial, bezel, and bracelet are lowercased. A
+source value that already says bracelet, strap, or band is not labeled twice.
+A supplier comment that is not a redundant `NAKED` is a second sentence in the
+same paragraph.
+
+Specs are written to storefront-readable `custom.*` metafields and rendered by
+the theme’s jewelry-style `.product-specs` grid in `sections/main-product.liquid`
+(same chrome as earrings / rings). All free-text values in the prose HTML must
+still be escaped (`&`, `<`, `>`).
 
 ### Spec metafields (PDP grid)
 
@@ -142,29 +147,29 @@ escaped (`&`, `<`, `>`).
 
 Empty values are omitted so the theme can hide those cells.
 
-`yearClause`: ` from {normalizedYear}` or empty.
-`boxPaperClause`: built from the `box`/`paper` booleans — when present, a
-leading space plus one of:
+`boxPaperClause`: built from the `box`/`paper` booleans — when present, one of:
 "with its original box and papers" (both true), "with its original box,
 but without papers" (box only), "with its papers, but without the
 original box" (paper only), "on its own, without box or papers" (neither).
 Never "New with box and papers" and never "as a full set with box and papers":
 eBay treats that canned Features/Condition value as brand-new unworn stock.
-Omitted entirely if both are unstated (so the sentence reads
-`…is offered by Laura Milman New York.`).
-The bracelet-links label uses only integer source values: positive `n` means
-`n additional bracelet link(s) included`; negative `-n` means `n bracelet
-link(s) missing`. Zero, blank, fractional, or invalid values render `Not
-specified`; zero never implies a complete bracelet. The raw nonblank value is
-still written to `custom.link` for source traceability.
-`gradeClause`: ` It is in {grade} condition.` or empty. Grade is lowercased
-in the sentence (`excellent`, not `Excellent`).
+Omitted entirely if both are unstated (so the sentence ends
+`…offered by Laura Milman New York.`).
+Bracelet links use only integer source values: positive `n` is
+`including n additional bracelet link(s)`; negative `-n` is
+`with n bracelet link(s) missing`. Zero, blank, fractional, or invalid values
+are omitted from the sentence; zero never implies a complete bracelet.
+`linkClause` still returns `Not specified` for those values so callers can
+tell them apart. The raw nonblank value is still written to `custom.link`.
+Grade, when mapped, is `in {grade} condition` inside the same sentence
+(`excellent`, `retail ready`). It does not change the eBay condition id.
 
 Price (the sheet's "Amount $" column) is deliberately excluded from this
 schema — price lives on the variant, not in description text that would go
 stale the moment price moves.
 
 Year normalization: `2014` stays as-is. `FEB-2016` becomes `February 2016`.
+`SEPT-2021` becomes `September 2021` (three- or four-letter month tokens).
 Sentinels (`0`, `N/A`, `NA`, `-`, `unknown`) are omitted. Other source text,
 including approximate dates, is preserved as supplied and is not described as
 a manufacture year.
@@ -183,20 +188,24 @@ at or below 60. Never cut the reference or promise a ranking outcome.
 ### SEO description (`seo.description`, ≤ 160 characters)
 
 ```
-Shop this {titleWord, lowercase} {Brand} {Model} {reference}{source facts when space permits}. Authenticated by Laura Milman New York.
+Shop this {pre-owned|unworn} {Brand} {Model} {reference}{, case size, year, grade when present}. Exchanges only within 7 days of delivery.
 ```
-Case size, year, and a meaningful bracelet-link disclosure are included when
-space permits. The authentication suffix is retained and the lead is shortened
-at a word boundary to stay within 160 characters.
+An unclassified watch leads with `Shop this {Brand} {Model} {reference} watch`
+and does not invent Pre-Owned or Unworn. Case size, year, and grade are
+included when present. The lead is shortened at a word boundary so the
+exchanges-only closer still fits inside 160 characters. Do not write “7-day
+returns” or `Authenticated by Laura Milman New York.` on a feed watch. Jewelry
+and estate listings keep their own closers.
 
 The retired `scripts/lmny_watches_backfill.py` cannot recover API case size or
 link facts and must not overwrite this API-built copy. Watch listing content is
 already part of `contentHashFor`; changed watch output refreshes through the
 normal sync without a global schema-version bump.
 
-The SEO authenticated sentence is intentional and always present. It is
-separate from the optional in-body trust paragraph (`CONFIG.trustLine` /
-`TRUST_LINE`), which stays off until confirmed for feed-sourced inventory.
+The exchanges-only SEO closer matches the theme shipping page: watches may be
+exchanged, not refunded, within 7 days of delivery. It is separate from the
+optional in-body trust paragraph (`CONFIG.trustLine` / `TRUST_LINE`), which
+stays off until confirmed for feed-sourced inventory.
 
 ### Tags
 
@@ -234,8 +243,8 @@ Python backfill must not overwrite structured-source copy.
   Milman New York." Whether that claim is true for the feed-sourced watches
   (Rolex, AP, Patek, etc.) hasn't been confirmed. Both implementations have
   a single config flag for this line, defaulted to *off*. Turn it on only
-  once it's confirmed true for this inventory. SEO description still uses
-  `Authenticated by Laura Milman New York.` as specified above.
+  once it's confirmed true for this inventory. The SEO description uses the
+  exchanges-only closer specified above.
 - **Theme-level `itemCondition` in JSON-LD.** Shopify's default Product
   structured data does not include `itemCondition`, which is a real,
   separate lever for AI/Shopping visibility beyond title and description.

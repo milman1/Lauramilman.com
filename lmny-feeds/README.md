@@ -623,8 +623,8 @@ Every run writes `out/report.json` (audit trail artifact) and renders
 ### Belgium Dia / watch / stone
 
 - Watch body trust line (`CONFIG.trustLine` / `TRUST_LINE`) stays off until
-  confirmed for feed inventory; SEO still says
-  `Authenticated by Laura Milman New York.`
+  confirmed for feed inventory. Watch SEO descriptions end with
+  `Exchanges only within 7 days of delivery.`
 - Watch `OG Tag` is not on the Belgium Dia developer API — omitted from
   listings until another source exists. Dial / Bezel / Bracelet / Metal / MM /
   Links come from the feed and refresh on schema-version bumps.

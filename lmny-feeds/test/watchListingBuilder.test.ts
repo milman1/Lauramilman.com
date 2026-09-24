@@ -28,7 +28,9 @@ describe('buildWatchListing', () => {
     if ('needsReview' in listing) return;
     expect(listing.title).toBe('Pre-Owned Rolex Submariner Date 126610LN 2014');
     expect(listing.seoTitle).toBe('Rolex Submariner Date 126610LN Pre-Owned 2014 Watch');
-    expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');
+    expect(listing.seoDescription).toContain('Exchanges only within 7 days of delivery.');
+    expect(listing.seoDescription).not.toMatch(/return/i);
+    expect(listing.seoDescription).not.toContain('Authenticated by Laura Milman New York.');
     expect(listing.tags).toEqual([
       'Rolex',
       'Pre-Owned Watches',
@@ -94,7 +96,7 @@ describe('buildWatchListing', () => {
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
     expect(listing.title).toBe('Pre-Owned Rolex Submariner Date 126610LN 2014');
-    expect(listing.descriptionHtml).toContain('It is in excellent condition.');
+    expect(listing.descriptionHtml).toContain('in excellent condition');
     expect(listing.descriptionHtml).toContain('on its own, without box or papers');
     expect(listing.descriptionHtml).not.toContain('<h3>Specifications</h3>');
     expect(listing.metafields.find((m) => m.namespace === 'custom' && m.key === 'condition_grade')?.value).toBe(
@@ -151,7 +153,7 @@ describe('buildWatchListing', () => {
     const listing = buildWatchListing(base({ box: undefined, paper: undefined }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
-    expect(listing.descriptionHtml).toContain('is offered by Laura Milman New York.');
+    expect(listing.descriptionHtml).toContain('offered by Laura Milman New York.');
     expect(listing.metafields.find((m) => m.key === 'box')).toBeUndefined();
     expect(listing.metafields.find((m) => m.key === 'papers')).toBeUndefined();
   });
@@ -181,22 +183,24 @@ describe('buildWatchListing', () => {
     const extra = buildWatchListing(base({ link: 19 }));
     expect('needsReview' in extra).toBe(false);
     if ('needsReview' in extra) return;
-    expect(extra.descriptionHtml).toContain('<strong>Bracelet links:</strong> 19 additional bracelet links included');
+    expect(extra.descriptionHtml).toContain('including 19 additional bracelet links');
+    expect(extra.descriptionHtml).not.toContain('<strong>');
 
     const missing = buildWatchListing(base({ link: '-5' }));
     expect('needsReview' in missing).toBe(false);
     if ('needsReview' in missing) return;
-    expect(missing.descriptionHtml).toContain('<strong>Bracelet links:</strong> 5 bracelet links missing');
+    expect(missing.descriptionHtml).toContain('with 5 bracelet links missing');
 
     const oneMissing = buildWatchListing(base({ link: -1 }));
     expect('needsReview' in oneMissing).toBe(false);
     if ('needsReview' in oneMissing) return;
-    expect(oneMissing.descriptionHtml).toContain('<strong>Bracelet links:</strong> 1 bracelet link missing');
+    expect(oneMissing.descriptionHtml).toContain('with 1 bracelet link missing');
 
     const none = buildWatchListing(base({ link: 0 }));
     expect('needsReview' in none).toBe(false);
     if ('needsReview' in none) return;
-    expect(none.descriptionHtml).toContain('<strong>Bracelet links:</strong> Not specified');
+    expect(none.descriptionHtml).not.toContain('Not specified');
+    expect(none.descriptionHtml).not.toContain('bracelet link');
   });
 
   it('drops redundant NAKED comments when box and paper are both No', () => {
@@ -214,7 +218,9 @@ describe('buildWatchListing', () => {
     if ('needsReview' in listing) return;
     expect(listing.title).toBe('Rolex Submariner Date 126610LN 2014');
     expect(listing.title).not.toMatch(/Pre-Owned|Unworn/);
-    expect(listing.descriptionHtml).toContain('This Rolex Submariner Date 126610LN');
+    expect(listing.descriptionHtml).toContain('This Rolex Submariner Date reference 126610LN');
+    expect(listing.seoDescription).not.toMatch(/Pre-Owned|Unworn/);
+    expect(listing.seoDescription).toContain('Exchanges only within 7 days of delivery.');
     expect(listing.descriptionHtml).not.toMatch(/Pre-Owned|Unworn/);
     expect(listing.seoTitle).toBe('Rolex Submariner Date 126610LN 2014 Watch');
     expect(listing.tags).toContain('SLIDER');
@@ -269,9 +275,10 @@ describe('buildWatchListing', () => {
     const listing = buildWatchListing(base({ caseSizeMm: '40 MM', year: 'N/A', link: 0, comment: '<b>note</b>' }));
     expect('needsReview' in listing).toBe(false);
     if ('needsReview' in listing) return;
-    expect(listing.descriptionHtml).toContain('<strong>Case size:</strong> 40mm');
-    expect(listing.descriptionHtml).toContain('<strong>Year:</strong> Not specified');
-    expect(listing.descriptionHtml).toContain('<strong>Bracelet links:</strong> Not specified');
+    expect(listing.descriptionHtml).toContain('a 40mm watch');
+    expect(listing.descriptionHtml).not.toContain('Not specified');
+    expect(listing.descriptionHtml).not.toContain('<strong>');
+    expect(listing.descriptionHtml).not.toContain('<br>');
     expect(listing.descriptionHtml).toContain('&lt;b&gt;note&lt;/b&gt;');
     expect(listing.descriptionHtml).not.toContain('40mmmm');
   });
@@ -302,6 +309,50 @@ describe('buildWatchListing', () => {
     expect(listing.metafields.find((m) => m.key === 'model')?.value).toBe(
       'Royal Oak Offshore Selfwinding Chronograph',
     );
+  });
+
+  it('normalizes SEPT-YYYY to September', () => {
+    const listing = buildWatchListing(base({ year: 'SEPT-2021' }));
+    expect('needsReview' in listing).toBe(false);
+    if ('needsReview' in listing) return;
+    expect(listing.descriptionHtml).toContain('from September 2021');
+    expect(listing.metafields.find((m) => m.key === 'year')?.value).toBe('September 2021');
+  });
+
+  it('writes one factual paragraph and an exchanges-only SEO description', () => {
+    const listing = buildWatchListing(
+      base({
+        conditionRaw: 'EXCELLENT',
+        caseSizeMm: 41,
+        metal: 'STEEL',
+        dial: 'BLACK',
+        bezel: 'CERACHROM',
+        bracelet: 'OYSTER',
+        link: 2,
+        box: true,
+        paper: true,
+      }),
+    );
+    expect('needsReview' in listing).toBe(false);
+    if ('needsReview' in listing) return;
+    expect(listing.descriptionHtml).toMatch(/^<p>[^<]+<\/p>$/);
+    expect(listing.descriptionHtml).not.toContain('<strong>');
+    expect(listing.descriptionHtml).not.toContain('<br>');
+    expect(listing.descriptionHtml).not.toContain('Not specified');
+    expect(listing.descriptionHtml).not.toMatch(/new with box/i);
+    expect(listing.descriptionHtml).toContain('41mm steel');
+    expect(listing.descriptionHtml).toContain('a black dial');
+    expect(listing.descriptionHtml).toContain('in excellent condition');
+    expect(listing.descriptionHtml).toContain('with its original box and papers');
+    const plain = listing.descriptionHtml.replace(/<[^>]+>/g, '');
+    const firstSentence = plain.split(/(?<=[.!?])\s/)[0] ?? plain;
+    const words = firstSentence.trim().split(/\s+/).filter(Boolean);
+    expect(words.length).toBeGreaterThanOrEqual(40);
+    expect(words.length).toBeLessThanOrEqual(60);
+    expect(listing.seoDescription.endsWith('Exchanges only within 7 days of delivery.')).toBe(true);
+    expect(listing.seoDescription.length).toBeLessThanOrEqual(160);
+    expect(listing.seoDescription).not.toMatch(/return/i);
+    expect(listing.seoDescription).not.toContain('Authenticated by Laura Milman New York.');
   });
 
   it('holds an identity that cannot fit condition, brand, reference, and one model word', () => {
