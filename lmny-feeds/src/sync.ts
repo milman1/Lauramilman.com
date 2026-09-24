@@ -62,7 +62,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyActiveWrites, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -324,6 +324,8 @@ async function main() {
   // should carry the Uploadify listing switch. metafieldsSet is separate
   // from productSet so a namespace rejection cannot fail the product write.
   const catalogByHandleForUploadify = new Map(catalog.map((c) => [c.handle, c]));
+  const uploadifyActiveOwners = await shopify.fetchUploadifyActiveOwners();
+  const uploadifyOwnerFromSweep = new Map(uploadifyActiveOwners.map((owner) => [owner.handle, owner.id]));
   const uploadifyActiveRows = publishable
     .filter((p) => p.item.kind === 'watch')
     .map((p) => {
@@ -331,11 +333,21 @@ async function main() {
       const existing = catalogByHandleForUploadify.get(handle);
       return {
         handle,
-        ownerId: existing?.id ?? null,
+        ownerId: existing?.id ?? uploadifyOwnerFromSweep.get(handle) ?? null,
         current: existing?.uploadifyActive ?? null,
         desired: watchListsOnUploadify(p.item, p.priced),
       };
     });
+  const uploadifyKeepHandles = new Set(
+    uploadifyActiveRows.filter((row) => row.desired).map((row) => row.handle),
+  );
+  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeepHandles);
+  if (uploadifyActiveClears.length > 0) {
+    const msg =
+      `${uploadifyActiveClears.length} product(s) other than qualifying Belgium Dia watches have uploadify_active — removing it`;
+    notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
+    console.log(msg);
+  }
   const uploadifyActivePlan = uploadifyActiveWrites(uploadifyActiveRows);
   if (uploadifyActivePlan.writes.length > 0 || uploadifyActivePlan.missingOwner > 0) {
     const msg =
@@ -477,6 +489,17 @@ async function main() {
       );
     }
     console.log(`Sales channels: ${[...publicationsByName.keys()].join(', ')}`);
+
+    if (uploadifyActiveClears.length > 0) {
+      console.log(
+        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying Belgium Dia watches`,
+      );
+      const clearErrors = await shopify.deleteMetafields(uploadifyActiveClears);
+      writeErrors.push(...clearErrors.map((e) => `uploadify_active remove: ${e}`));
+      notes.push(
+        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying Belgium Dia watches`,
+      );
+    }
 
     const uploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
     if (uploadifyDeletes.length > 0) {

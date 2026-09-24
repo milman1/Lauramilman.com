@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CatalogEntry } from '../src/types.js';
 import {
   isUploadifyNamespace,
+  uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
   uploadifyMetafieldDeletesForDiamonds,
 } from '../src/uploadifyMetafields.js';
@@ -101,21 +102,14 @@ describe('uploadifyActiveWrites', () => {
     ]);
   });
 
-  it('clears the flag only when a watch that has it no longer qualifies', () => {
-    const { writes } = uploadifyActiveWrites([
+  it('never writes the flag onto a watch that does not qualify', () => {
+    const { writes, missingOwner } = uploadifyActiveWrites([
       { handle: 'w-draft', ownerId: 'gid://shopify/Product/3', current: true, desired: false },
-      { handle: 'w-new-draft', ownerId: 'gid://shopify/Product/4', current: null, desired: false },
-      { handle: 'w-off', ownerId: 'gid://shopify/Product/5', current: false, desired: false },
+      { handle: 'w-new-draft', ownerId: null, current: null, desired: false },
+      { handle: 'bv-estate-watch', ownerId: 'gid://shopify/Product/8', current: null, desired: true },
     ]);
-    expect(writes).toEqual([
-      {
-        ownerId: 'gid://shopify/Product/3',
-        namespace: 'uploadify_product',
-        key: 'uploadify_active',
-        type: 'boolean',
-        value: 'false',
-      },
-    ]);
+    expect(writes).toEqual([]);
+    expect(missingOwner).toBe(0);
   });
 
   it('counts watches that qualify but have no Shopify id yet, and ignores diamonds', () => {
@@ -125,5 +119,40 @@ describe('uploadifyActiveWrites', () => {
     ]);
     expect(writes).toEqual([]);
     expect(missingOwner).toBe(1);
+  });
+});
+
+describe('uploadifyActiveDeletesExcept', () => {
+  const keep = new Set(['w-3194']);
+
+  it('removes the flag from everything except qualifying Belgium Dia watches', () => {
+    expect(
+      uploadifyActiveDeletesExcept(
+        [
+          { id: 'gid://shopify/Product/1', handle: 'w-3194' },
+          { id: 'gid://shopify/Product/2', handle: 'w-draft' },
+          { id: 'gid://shopify/Product/3', handle: 'bv-cartier-ring' },
+          { id: 'gid://shopify/Product/4', handle: 'nd-stone' },
+          { id: 'gid://shopify/Product/5', handle: 'rolex-submariner' },
+        ],
+        keep,
+      ),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'uploadify_active' },
+      { ownerId: 'gid://shopify/Product/3', namespace: 'uploadify_product', key: 'uploadify_active' },
+      { ownerId: 'gid://shopify/Product/4', namespace: 'uploadify_product', key: 'uploadify_active' },
+      { ownerId: 'gid://shopify/Product/5', namespace: 'uploadify_product', key: 'uploadify_active' },
+    ]);
+  });
+
+  it('does not keep a non-Belgium handle even if it was named by mistake', () => {
+    expect(
+      uploadifyActiveDeletesExcept(
+        [{ id: 'gid://shopify/Product/9', handle: 'estate-watch' }],
+        new Set(['estate-watch']),
+      ),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/9', namespace: 'uploadify_product', key: 'uploadify_active' },
+    ]);
   });
 });

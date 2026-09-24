@@ -31,10 +31,9 @@ export function uploadifyActiveMetafield(active: boolean): Omit<UploadifyActiveW
 }
 
 /**
- * Watches that should list get `uploadify_active` true. A product that
- * already holds the desired value is skipped. False is written only to
- * clear a flag that would keep an unqualified watch listed. Rows with no
- * Shopify id yet are counted and not written.
+ * Qualifying Belgium Dia watches (`w-` handles) get `uploadify_active` true.
+ * Anything else is not written here — `uploadifyActiveDeletesExcept` removes
+ * the metafield. Rows with no Shopify id yet are counted and not written.
  */
 export function uploadifyActiveWrites(
   rows: Array<{
@@ -47,16 +46,39 @@ export function uploadifyActiveWrites(
   const writes: UploadifyActiveWrite[] = [];
   let missingOwner = 0;
   for (const row of rows) {
-    if (kindForHandle(row.handle) !== 'watch') continue;
-    const needsWrite = row.desired ? row.current !== true : row.current === true;
-    if (!needsWrite) continue;
+    if (!row.desired || kindForHandle(row.handle) !== 'watch') continue;
+    if (row.current === true) continue;
     if (!row.ownerId) {
       missingOwner += 1;
       continue;
     }
-    writes.push({ ownerId: row.ownerId, ...uploadifyActiveMetafield(row.desired) });
+    writes.push({ ownerId: row.ownerId, ...uploadifyActiveMetafield(true) });
   }
   return { writes, missingOwner };
+}
+
+/**
+ * Delete `uploadify_active` from every product that is not a qualifying
+ * Belgium Dia watch. `keepHandles` may only retain `w-` handles; any other
+ * handle is removed even if it was listed by mistake.
+ */
+export function uploadifyActiveDeletesExcept(
+  owners: Array<{ id: string; handle: string }>,
+  keepHandles: ReadonlySet<string>,
+): MetafieldIdentifier[] {
+  const out: MetafieldIdentifier[] = [];
+  const seen = new Set<string>();
+  for (const owner of owners) {
+    if (keepHandles.has(owner.handle) && kindForHandle(owner.handle) === 'watch') continue;
+    if (seen.has(owner.id)) continue;
+    seen.add(owner.id);
+    out.push({
+      ownerId: owner.id,
+      namespace: UPLOADIFY_PRODUCT_NAMESPACE,
+      key: UPLOADIFY_ACTIVE_KEY,
+    });
+  }
+  return out;
 }
 
 export interface MetafieldIdentifier {

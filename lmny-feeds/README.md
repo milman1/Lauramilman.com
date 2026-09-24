@@ -108,11 +108,12 @@ holds a stones table — Shopify products are the only live copy.
    `inventoryActivate` once the item is already active at the location.
    Uploadify metafields
    (`uploadify` / `uploadify_product`, including `uploadify_active`) are
-   deleted on loose diamonds only so the app cannot keep them listed. A feed
-   watch with a price, SKU, title, description, and qty > 0 is written
-   `uploadify_product.uploadify_active` = true (boolean) in a separate
-   `metafieldsSet` pass, so Uploadify can list it. An imageless watch (qty 0)
-   has that flag cleared when it was previously true. Archive sets qty `0`
+   deleted on loose diamonds only so the app cannot keep them listed. A Belgium
+   Dia watch (`w-` handle) with a price, SKU, title, description, and qty > 0
+   is written `uploadify_product.uploadify_active` = true. Every other Shopify
+   product that still has that metafield — other watches, jewelry, estate
+   pieces, imageless feed watches, loose diamonds — has it deleted on the
+   same run. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 
@@ -155,8 +156,9 @@ holds a stones table — Shopify products are the only live copy.
 - Variant SKU = feed stock ref.
 - Unique inventory: tracked qty 1 while publishable for watches. Loose
   diamonds are tracked qty 0 (`CONTINUE`) so Uploadify does not import them.
-  Feed watches that also have a price, SKU, title, and description get
-  `uploadify_product.uploadify_active` = true so Uploadify lists them.
+  Only qualifying Belgium Dia watches (`w-` handles with a price, SKU, title,
+  description, and qty > 0) get `uploadify_product.uploadify_active` = true.
+  The sync deletes that metafield from every other product in Shopify.
 - Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.
 - Product types: `Natural Diamond` / `Lab-Grown Diamond` / `Watch`.
 - Vendor: `Laura Milman New York` for stones, the brand for watches.
