@@ -201,7 +201,7 @@
             >
               <img
                 src="{{ media.preview_image | image_url: width: 120 }}"
-                alt=""
+                alt="{{ display_title | escape }} view {{ forloop.index }}"
                 width="120"
                 height="120"
                 loading="lazy"

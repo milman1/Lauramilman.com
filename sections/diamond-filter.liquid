@@ -41,7 +41,7 @@
   endif
 -%}
 
-{% render 'structured-data-collection', collection: collection, include_products: false %}
+{% render 'structured-data-collection', collection: collection, include_products: true %}
 
 {%- if api_mode -%}
 
@@ -64,6 +64,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
         <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
@@ -146,7 +147,7 @@
     </form>
 
     <div class="lm-dfilter__toolbar">
-      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">Loading…</span>
+      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">{{ collection.products_count }} {{ collection.products_count | pluralize: 'diamond', 'diamonds' }}</span>
       <div class="lm-dfilter__sort">
         <label for="lm-diamond-sort">Sort by</label>
         <select id="lm-diamond-sort">
@@ -158,7 +159,16 @@
       </div>
     </div>
 
-    <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite"></div>
+    <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite">
+      {%- comment -%} server-rendered diamond links: the filter script replaces this node after load {%- endcomment -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="products-grid lm-dfilter__results">
+          {%- for product in collection.products limit: section.settings.products_per_page -%}
+            {%- render 'product-card', product: product -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
     <div id="lm-diamond-pager"></div>
   </div>
 </section>
@@ -232,6 +242,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
         <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>

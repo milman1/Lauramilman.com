@@ -37,6 +37,12 @@
         assign seo_meta_description = article.excerpt_or_content | strip_html | strip | truncatewords: 24, ''
       elsif request.page_type == 'blog' and seo_meta_description == blank
         assign seo_meta_description = 'Read expert jewelry, diamond, watch, styling, and estate-buying guidance from Laura Milman New York.'
+      elsif page.handle == 'google-reviews'
+        assign seo_meta_description = 'Client reviews of Laura Milman New York, published on Google and shown here unedited.'
+      elsif page.handle == 'about' and seo_meta_description == blank
+        assign seo_meta_description = 'Laura Milman on thirty years in the New York Diamond District, house jewelry, and authenticated pre-owned pieces.'
+      elsif page.handle == 'shop' and seo_meta_description == blank
+        assign seo_meta_description = 'Shop lab-grown jewelry for work and dinner, plus authenticated David Webb, Cartier, Van Cleef, and Tiffany.'
       elsif page.handle == 'authentication'
         assign seo_meta_description = 'Every pre-owned David Webb, Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. piece is examined, verified, and documented before listing.'
       elsif request.page_type == 'page' and seo_meta_description == blank
@@ -51,6 +57,7 @@
           when 'peaceful-diamonds-by-laura-milman-new-york'
             assign seo_page_title = 'Lab-Grown Jewelry | Laura Milman'
             assign seo_social_title = seo_page_title
+            assign seo_meta_description = 'Lab-grown diamond jewelry by Laura Milman New York. Certified studs, tennis bracelets, and pendants for the week you work.'
           when 'david-webb'
             assign seo_page_title = 'Pre-Owned David Webb Jewelry | Laura Milman'
             assign seo_social_title = seo_page_title
@@ -69,6 +76,21 @@
           when 'lab-grown-bracelets'
             assign seo_page_title = 'Lab-Grown Diamond Bracelets | Laura Milman'
             assign seo_social_title = seo_page_title
+            assign seo_meta_description = 'Lab-grown diamond tennis, station, and bangle bracelets in 14K and 18K gold by Laura Milman New York.'
+          when 'natural-diamonds'
+            assign seo_meta_description = 'Laboratory-graded natural diamonds, filtered by shape, carat, color, clarity, and cut.'
+          when 'lab-grown-diamonds'
+            assign seo_meta_description = 'Lab-grown diamonds filtered by shape, carat, color, clarity, and cut, priced per stone.'
+          when 'vintage-jewelry'
+            assign seo_meta_description = 'Signed pre-owned jewelry from David Webb, Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany, authenticated by Laura Milman New York.'
+          when 'rings'
+            assign seo_meta_description = 'Rings in natural diamonds, lab-grown diamonds, and signed estate pieces from Laura Milman New York.'
+          when 'hermes'
+            assign seo_meta_description = 'Pre-owned Hermès jewelry authenticated and hand-inspected by Laura Milman New York.'
+          when 'engagement-rings'
+            assign seo_meta_description = 'Engagement rings in natural and lab-grown diamonds. Compare shape and metal, or use the ring builder.'
+          when 'jacob-co'
+            assign seo_meta_description = 'Jacob & Co. watches listed with the reference. Unworn pieces are marked when the source confirms it.'
         endcase
       endif
       assign suppress_shop_suffix = false
@@ -200,6 +222,9 @@
     {% section 'popular-searches' %}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
+      {%- unless request.page_type == 'index' or request.page_type == 'product' -%}
+        {% render 'breadcrumbs' %}
+      {%- endunless -%}
       {{ content_for_layout }}
     </main>
 
@@ -240,5 +265,35 @@
     </script>
 
     {{ 'theme.js' | asset_url | script_tag }}
+    <script>
+      /* The Google reviews widget injects its own business schema, including a
+         wrong name and an aggregate rating the store does not author. Drop
+         only that markup. Visible reviews stay. */
+      (function () {
+        function unwanted(node) {
+          if (!node || node.nodeType !== 1 || node.tagName !== 'SCRIPT') return false;
+          if ((node.getAttribute('type') || '') !== 'application/ld+json') return false;
+          var text = node.textContent || '';
+          return text.indexOf('AggregateRating') !== -1 || text.indexOf("Laura's Gems") !== -1 || text.indexOf('Laura’s Gems') !== -1;
+        }
+        function sweep(root) {
+          var scope = root && root.querySelectorAll ? root : document;
+          var nodes = scope.querySelectorAll('script[type="application/ld+json"]');
+          for (var i = 0; i < nodes.length; i++) {
+            if (unwanted(nodes[i])) nodes[i].remove();
+          }
+        }
+        sweep(document);
+        if (!window.MutationObserver) return;
+        new MutationObserver(function (records) {
+          records.forEach(function (record) {
+            Array.prototype.forEach.call(record.addedNodes || [], function (node) {
+              if (unwanted(node)) node.remove();
+              else sweep(node);
+            });
+          });
+        }).observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
   </body>
 </html>

@@ -1925,6 +1925,17 @@ p {
   max-width: 300px;
 }
 
+.lm-collection__guide {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+}
+
+.lm-collection__guide a {
+  color: var(--text-dark, #2C1810);
+  text-underline-offset: 0.2em;
+}
+
 /* =============================================
    15. CART NOTIFICATION
    ============================================= */

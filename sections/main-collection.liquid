@@ -36,6 +36,24 @@
       assign collection_heading = 'Lab-Grown Diamond Bracelets'
   endcase
 
+  assign collection_intro = ''
+  case collection.handle
+    when 'peaceful-diamonds-by-laura-milman-new-york'
+      assign collection_intro = 'Lab-grown diamond jewelry by Laura Milman New York: certified studs, tennis and station bracelets, and pendants in 14K and 18K gold, made to be worn from the office through dinner.'
+    when 'lab-grown-bracelets'
+      assign collection_intro = 'Lab-grown diamond bracelets by Laura Milman New York: tennis, station, and bangle styles in 14K and 18K gold. Each listing states the total carat weight.'
+    when 'engagement-rings'
+      assign collection_intro = 'Engagement rings set with natural or lab-grown diamonds. Compare shape and metal, or start with the ring builder.'
+    when 'jacob-co'
+      assign collection_intro = 'Jacob & Co. watches, listed with the reference number.'
+    when 'vintage-jewelry'
+      assign collection_intro = 'A mixed edit of signed pre-owned jewelry. David Webb, Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. each have their own collection, and every piece is authenticated by Laura Milman New York.'
+    when 'rings'
+      assign collection_intro = 'Rings in natural diamonds, lab-grown diamonds, and signed estate pieces.'
+    when 'hermes'
+      assign collection_intro = 'Pre-owned Hermès jewelry, authenticated and hand-inspected by Laura Milman New York.'
+  endcase
+
   assign has_active_filters = false
   for filter in collection.filters
     if filter.type == 'price_range'
@@ -58,13 +76,18 @@
       <h1 class="lm-collection__title">
         {%- if jewelry_only -%}All Jewelry{%- else -%}{{ collection_heading }}{%- endif -%}
       </h1>
-      {%- if jewelry_only -%}
+      {%- if collection_intro != blank -%}
+        <div class="lm-collection__desc">
+          <p>{{ collection_intro }}</p>
+        </div>
+      {%- elsif jewelry_only -%}
         <div class="lm-collection__desc">
           <p>Rings, necklaces, earrings, bracelets, and estate jewels — not watches. Timepieces are listed separately.</p>
         </div>
       {%- elsif collection.description != blank -%}
         <div class="lm-collection__desc">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'collection-guide', collection: collection -%}
     </header>
 
     {%- if jewelry_only -%}
@@ -312,6 +335,17 @@
 
   .lm-collection__desc p:last-child {
     margin-bottom: 0;
+  }
+
+  .lm-collection__guide {
+    margin: 0.85rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+  }
+
+  .lm-collection__guide a {
+    color: var(--text-dark, #2C1810);
+    text-underline-offset: 0.2em;
   }
 
   /* Shop-by chips */

@@ -51,6 +51,16 @@ describe('theme SEO integration', () => {
     expect(collectionSchema).toContain('"@type": "ItemList"');
     expect(article).toContain('"dateModified"');
     expect(article).toContain('"@id": {{ canonical_url | json }}');
+    expect(layout).toContain("render 'breadcrumbs'");
+    expect(themeFile('snippets/breadcrumbs.liquid')).toContain('"@type": "BreadcrumbList"');
+    expect(themeFile('sections/faq.liquid')).toContain('"@type": "FAQPage"');
+    expect(themeFile('templates/page.google-reviews.liquid')).toContain('published on Google');
+    expect(layout).toContain('AggregateRating');
+    expect(diamondCollection).toContain('server-rendered diamond links');
+    expect(diamondCollection).toContain("render 'product-card'");
+    expect(collection).toContain("render 'collection-guide'");
+    expect(themeFile('sections/header.liquid')).toContain('>All Jewelry</a>');
+    expect(themeFile('sections/header.liquid')).not.toContain('All Fine Jewelry');
   });
 
   it('lists Chains with the other Fine Jewelry types, not as a style column', () => {

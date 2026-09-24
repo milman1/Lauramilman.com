@@ -104,7 +104,7 @@
             {%- for media in product.media -%}
               <button type="button" class="dpdp__thumb{% if forloop.first %} is-active{% endif %}"
                       data-full="{{ media | image_url: width: 1200 }}" aria-label="View {{ forloop.index }}">
-                <img src="{{ media | image_url: width: 160 }}" alt="" width="80" height="80" loading="lazy">
+                <img src="{{ media | image_url: width: 160 }}" alt="{{ product.title | escape }} view {{ forloop.index }}" width="80" height="80" loading="lazy">
               </button>
             {%- endfor -%}
           </div>
