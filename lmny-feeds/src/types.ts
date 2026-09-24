@@ -61,6 +61,11 @@ export interface WatchItem {
   costUsd: number;
   imageUrls: string[];
   videoUrls: string[];
+  /**
+   * Partner book. `tlv` is imported for Uploadify and the catalog, and is
+   * not tagged for eBay. Absent or `roman` is Belgium Watch.
+   */
+  book?: 'roman' | 'tlv';
 }
 
 export type FeedItem = StoneItem | WatchItem;

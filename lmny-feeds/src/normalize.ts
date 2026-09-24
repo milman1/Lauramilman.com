@@ -319,9 +319,22 @@ function partnerBlob(raw: Raw): string {
 export interface WatchNormalizeOptions {
   /**
    * Stock numbers fetched from the allowed ROMAN partner branch. Any other
-   * stock is held as `watch_excluded_partner`.
+   * stock is held as `watch_excluded_partner`, unless it is a TLV watch.
    */
   allowedStocks: ReadonlySet<string>;
+  /**
+   * Stock numbers from `TLV WATCHES LLC`. Those stocks pass the same quality
+   * gates and are marked `book: 'tlv'`. A missing or empty set does not
+   * import TLV rows that also omit the partner name.
+   */
+  tlvStocks?: ReadonlySet<string>;
+}
+
+/** True when this row is TLV Watches, by live stock list or partner name. */
+function isTlvWatch(raw: Raw, stockRef: string, opts?: WatchNormalizeOptions): boolean {
+  const stock = stockRef.trim();
+  if (opts?.tlvStocks?.has(stock)) return true;
+  return partnerBlob(raw).includes('tlv');
 }
 
 /** Power Watch (`P`) and Uncle Manny (`U`, `M`) stock prefixes, plus Branch. */
@@ -575,7 +588,8 @@ export function normalizeWatches(rows: Raw[], opts?: WatchNormalizeOptions): Nor
     }
     const condition = str(raw, ['condition', 'condition_grade', 'state']);
     const comment = str(raw, ['comment', 'notes', 'note']);
-    if (isExcludedWatchPartner(raw, stockRef) || !isAllowedWatchStock(stockRef, opts)) {
+    const tlv = isTlvWatch(raw, stockRef, opts);
+    if (!tlv && (isExcludedWatchPartner(raw, stockRef) || !isAllowedWatchStock(stockRef, opts))) {
       holds.push({
         kind,
         stockRef,
@@ -630,6 +644,7 @@ export function normalizeWatches(rows: Raw[], opts?: WatchNormalizeOptions): Nor
       costUsd,
       imageUrls: collectUrls(raw, IMAGE_KEYS),
       videoUrls: collectUrls(raw, VIDEO_KEYS),
+      book: tlv ? 'tlv' : 'roman',
     };
     items.push(item);
   }

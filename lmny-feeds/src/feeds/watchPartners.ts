@@ -94,9 +94,10 @@ export async function fetchAllowedWatchStocks(): Promise<Set<string>> {
 }
 
 /**
- * Current TLV Watches stock numbers. Used only to set `uploadify_active`.
- * Does not add them to the storefront allowlist. Throws when the branch
- * cannot be read so the caller does not strip TLV flags it failed to see.
+ * Current TLV Watches stock numbers. Those stocks are imported with the
+ * watch feed and may carry `uploadify_active`. They are not added to the
+ * ROMAN allowlist. Throws when the branch cannot be read so the caller does
+ * not import a guessed list and does not strip TLV flags it failed to see.
  */
 export async function fetchTlvWatchStocks(): Promise<Set<string>> {
   const token = await guestToken();

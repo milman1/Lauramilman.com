@@ -58,9 +58,9 @@ export function uploadifyActiveWrites(
 }
 
 /**
- * Handles allowed to keep `uploadify_active`: qualifying Belgium Dia
- * (ROMAN) watches, plus TLV Watches. Any handle that is not a `w-` watch
- * is dropped even if it was passed in.
+ * Handles allowed to keep `uploadify_active`: qualifying Belgium Watch and
+ * TLV watches. Any handle that is not a `w-` watch is dropped even if it
+ * was passed in. Pass TLV handles in either list.
  */
 export function uploadifyKeepHandles(
   belgiumQualifying: Iterable<string>,

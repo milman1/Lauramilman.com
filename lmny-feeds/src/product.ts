@@ -38,12 +38,12 @@ export const CUSTOM_NAMESPACE = 'custom';
 export const PRODUCT_SCHEMA_VERSION = 24;
 
 /**
- * Unique watches are one-of-one. Uploadify lists a Belgium Dia watch when it
- * is ACTIVE with a price, SKU, title, description, available quantity > 0,
- * and `uploadify_product.uploadify_active` true. No other product keeps that
- * metafield. The feed is the availability
- * source: in stock while the watch is publishable, 0 when it has no photo
- * (DRAFT) or when we later archive it.
+ * Unique watches are one-of-one. Uploadify lists a Belgium Watch or TLV
+ * watch when it is ACTIVE with a price, SKU, title, description, available
+ * quantity > 0, and `uploadify_product.uploadify_active` true. No other
+ * product keeps that metafield. The feed is the availability source: in
+ * stock while the watch is publishable, 0 when it has no photo (DRAFT) or
+ * when we later archive it.
  *
  * Loose diamonds are tracked qty 0 so Uploadify does not import them.
  * `CONTINUE` keeps them buyable on the Online Store.
@@ -197,7 +197,9 @@ export function caratBand(carat: number): string {
 export function tagsFor(item: FeedItem): string[] {
   const tags: string[] = [FEED_TAG];
   if (item.kind === 'watch') {
-    tags.push(EBAY_TAG);
+    // TLV is loaded for Uploadify. Marketplace Connect lists the `ebay` tag,
+    // so that tag stays off these watches.
+    if (item.book !== 'tlv') tags.push(EBAY_TAG);
     const listing = watchListingFor(item);
     if (listing) {
       // Schema marketing tags (TitleCase brand/model, "Pre-Owned Watches", …)
@@ -224,10 +226,11 @@ export function vendorFor(item: FeedItem): string {
 }
 
 /**
- * Uploadify lists a Belgium Dia watch only when every gate is true: a retail
- * price, a SKU, a title, a description, and quantity above zero. Quantity is
- * 1 only while the watch has a photo; an imageless watch is DRAFT at qty 0.
- * Nothing else — loose diamonds, estate, fine jewelry, other watches — qualifies.
+ * Uploadify lists a Belgium Watch or TLV watch only when every gate is true:
+ * a retail price, a SKU, a title, a description, and quantity above zero.
+ * Quantity is 1 only while the watch has a photo; an imageless watch is
+ * DRAFT at qty 0. Nothing else — loose diamonds, estate, fine jewelry, Vivid,
+ * other watches — qualifies.
  */
 export function watchListsOnUploadify(item: FeedItem, priced: Priced): boolean {
   if (item.kind !== 'watch') return false;

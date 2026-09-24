@@ -159,6 +159,8 @@ describe('tags', () => {
     expect(tagsFor(watch())).toContain('Pre-Owned Watches');
     expect(tagsFor(watch())).toContain('lmny-feed');
     expect(tagsFor(watch())).toContain('ebay');
+    expect(tagsFor(watch({ book: 'roman' }))).toContain('ebay');
+    expect(tagsFor(watch({ book: 'tlv' }))).not.toContain('ebay');
     expect(tagsFor(naturalStone())).not.toContain('ebay');
   });
 
