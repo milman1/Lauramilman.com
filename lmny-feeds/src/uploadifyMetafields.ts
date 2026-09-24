@@ -8,7 +8,56 @@ import type { CatalogEntry } from './types.js';
  */
 export const UPLOADIFY_METAFIELD_NAMESPACES = ['uploadify', 'uploadify_product'] as const;
 
+export const UPLOADIFY_PRODUCT_NAMESPACE = 'uploadify_product';
+
 export const UPLOADIFY_ACTIVE_KEY = 'uploadify_active';
+
+export interface UploadifyActiveWrite {
+  ownerId: string;
+  namespace: string;
+  key: string;
+  type: 'boolean';
+  value: 'true' | 'false';
+}
+
+/** Boolean metafield Uploadify reads as the listing switch. */
+export function uploadifyActiveMetafield(active: boolean): Omit<UploadifyActiveWrite, 'ownerId'> {
+  return {
+    namespace: UPLOADIFY_PRODUCT_NAMESPACE,
+    key: UPLOADIFY_ACTIVE_KEY,
+    type: 'boolean',
+    value: active ? 'true' : 'false',
+  };
+}
+
+/**
+ * Watches that should list get `uploadify_active` true. A product that
+ * already holds the desired value is skipped. False is written only to
+ * clear a flag that would keep an unqualified watch listed. Rows with no
+ * Shopify id yet are counted and not written.
+ */
+export function uploadifyActiveWrites(
+  rows: Array<{
+    handle: string;
+    ownerId: string | null;
+    current: boolean | null | undefined;
+    desired: boolean;
+  }>,
+): { writes: UploadifyActiveWrite[]; missingOwner: number } {
+  const writes: UploadifyActiveWrite[] = [];
+  let missingOwner = 0;
+  for (const row of rows) {
+    if (kindForHandle(row.handle) !== 'watch') continue;
+    const needsWrite = row.desired ? row.current !== true : row.current === true;
+    if (!needsWrite) continue;
+    if (!row.ownerId) {
+      missingOwner += 1;
+      continue;
+    }
+    writes.push({ ownerId: row.ownerId, ...uploadifyActiveMetafield(row.desired) });
+  }
+  return { writes, missingOwner };
+}
 
 export interface MetafieldIdentifier {
   ownerId: string;

@@ -44,6 +44,7 @@ import {
   titleFor,
   UNIQUE_IN_STOCK_QTY,
   uniqueStockQtyFor,
+  watchListsOnUploadify,
   writeErrorsAreSystemic,
 } from './product.js';
 import {
@@ -61,7 +62,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import { uploadifyActiveWrites, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -290,7 +291,6 @@ async function main() {
     notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
     console.log(msg);
   }
-
   // DNA fill runs AFTER the catalog read so a watch Shopify still shows with
   // one READY photo is filled even when the API listed three 404 `.jpg` extras.
   // Hash/diff see the merged gallery, so extras land as updates this hour.
@@ -318,6 +318,33 @@ async function main() {
     console.log(
       `Watch galleries: 0=${watchGalleries.none} 1=${watchGalleries.one} 2=${watchGalleries.two} 3+=${watchGalleries.threePlus}`,
     );
+  }
+
+  // After the DNA fill: a watch that gained its first photo is qty 1 and
+  // should carry the Uploadify listing switch. metafieldsSet is separate
+  // from productSet so a namespace rejection cannot fail the product write.
+  const catalogByHandleForUploadify = new Map(catalog.map((c) => [c.handle, c]));
+  const uploadifyActiveRows = publishable
+    .filter((p) => p.item.kind === 'watch')
+    .map((p) => {
+      const handle = handleFor(p.item);
+      const existing = catalogByHandleForUploadify.get(handle);
+      return {
+        handle,
+        ownerId: existing?.id ?? null,
+        current: existing?.uploadifyActive ?? null,
+        desired: watchListsOnUploadify(p.item, p.priced),
+      };
+    });
+  const uploadifyActivePlan = uploadifyActiveWrites(uploadifyActiveRows);
+  if (uploadifyActivePlan.writes.length > 0 || uploadifyActivePlan.missingOwner > 0) {
+    const msg =
+      `${uploadifyActivePlan.writes.length} watch(es) need uploadify_active updated` +
+      (uploadifyActivePlan.missingOwner > 0
+        ? `; ${uploadifyActivePlan.missingOwner} new watch(es) get it after create`
+        : '');
+    notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
+    console.log(msg);
   }
 
   const desired = publishable.map((p) => ({
@@ -457,7 +484,7 @@ async function main() {
       const metafieldErrors = await shopify.deleteMetafields(uploadifyDeletes);
       writeErrors.push(...metafieldErrors.map((e) => `uploadify metafield: ${e}`));
       notes.push(
-        `deleted ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds (watches untouched)`,
+        `deleted ${uploadifyDeletes.length} Uploadify metafield(s) on loose diamonds (watch uploadify_active is set separately)`,
       );
     }
 
@@ -636,6 +663,30 @@ async function main() {
           );
         }
       }
+    }
+
+    const uploadifyOwnerByHandle = new Map(
+      uploadifyActiveRows.map((row) => [row.handle, row.ownerId]),
+    );
+    for (const ref of createdRefs) {
+      if (ref.handle && ref.id) uploadifyOwnerByHandle.set(ref.handle, ref.id);
+    }
+    const uploadifyActiveLive = uploadifyActiveWrites(
+      uploadifyActiveRows.map((row) => ({
+        ...row,
+        ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+      })),
+    );
+    if (uploadifyActiveLive.writes.length > 0) {
+      console.log(`Setting uploadify_active on ${uploadifyActiveLive.writes.length} watch(es)`);
+      const metafieldErrors = await shopify.setMetafields(uploadifyActiveLive.writes);
+      writeErrors.push(...metafieldErrors.map((e) => `uploadify_active: ${e}`));
+      notes.push(`set uploadify_active on ${uploadifyActiveLive.writes.length} watch(es)`);
+    }
+    if (uploadifyActiveLive.missingOwner > 0) {
+      notes.push(
+        `${uploadifyActiveLive.missingOwner} watch(es) qualified for uploadify_active but had no Shopify id`,
+      );
     }
 
     if (createdRefs.length > 0) {

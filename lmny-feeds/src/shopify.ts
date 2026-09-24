@@ -126,10 +126,11 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
     if (typeof r.handle === 'string') {
       const id = r.id as string;
       const uploadifyMetafields: NonNullable<CatalogEntry['uploadifyMetafields']> = [];
-      const inline = r.uploadifyActive as { id?: string; namespace?: string; key?: string } | null | undefined;
+      const inline = r.uploadifyActive as { id?: string; namespace?: string; key?: string; value?: string } | null | undefined;
       if (inline?.id && inline.namespace && inline.key && isUploadifyNamespace(inline.namespace)) {
         uploadifyMetafields.push({ id: inline.id, namespace: inline.namespace, key: inline.key });
       }
+      const uploadifyActive = inline?.value === 'true' ? true : inline?.value === 'false' ? false : null;
       byId.set(id, {
         id,
         handle: r.handle,
@@ -140,6 +141,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         videoCount: 0,
         contentHash: (r.metafield as { value: string } | null)?.value ?? null,
         uploadifyMetafields,
+        uploadifyActive,
       });
       order.push(id);
       continue;
@@ -554,7 +556,7 @@ export class ShopifyClient {
             status
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
-            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key }
+            uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key value }
             metafields { edges { node { id namespace key } } }
             media { edges { node { status mediaContentType } } }
             variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }

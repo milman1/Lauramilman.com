@@ -16,6 +16,7 @@ import {
   titleFor,
   uniqueStockQtyFor,
   vendorFor,
+  watchListsOnUploadify,
   writeErrorsAreSystemic,
 } from '../src/product.js';
 import { labStone, naturalStone, priced, watch } from './fixtures.js';
@@ -49,6 +50,17 @@ describe('handle generation', () => {
 describe('uniqueStockQtyFor', () => {
   it('is 1 for watches so Uploadify keeps them listed', () => {
     expect(uniqueStockQtyFor(watch(), true)).toBe(1);
+  });
+
+  it('is true for a priced watch with sku, title, description, and a photo', () => {
+    expect(watchListsOnUploadify(watch(), priced())).toBe(true);
+  });
+
+  it('is false without a photo, without a price, or for a loose diamond', () => {
+    expect(watchListsOnUploadify(watch({ imageUrls: [] }), priced())).toBe(false);
+    expect(watchListsOnUploadify(watch(), priced({ retailUsd: 0 }))).toBe(false);
+    expect(watchListsOnUploadify(watch({ stockRef: '  ' }), priced())).toBe(false);
+    expect(watchListsOnUploadify(naturalStone(), priced())).toBe(false);
   });
 
   it('is 0 for every loose diamond so Uploadify does not import them', () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CatalogEntry } from '../src/types.js';
 import {
   isUploadifyNamespace,
+  uploadifyActiveWrites,
   uploadifyMetafieldDeletesForDiamonds,
 } from '../src/uploadifyMetafields.js';
 
@@ -79,5 +80,50 @@ describe('uploadifyMetafieldDeletesForDiamonds', () => {
       }),
     ];
     expect(uploadifyMetafieldDeletesForDiamonds(catalog)).toHaveLength(1);
+  });
+});
+
+describe('uploadifyActiveWrites', () => {
+  it('sets uploadify_active true on a watch that is not already on', () => {
+    const { writes, missingOwner } = uploadifyActiveWrites([
+      { handle: 'w-3194', ownerId: 'gid://shopify/Product/1', current: null, desired: true },
+      { handle: 'w-ok', ownerId: 'gid://shopify/Product/2', current: true, desired: true },
+    ]);
+    expect(missingOwner).toBe(0);
+    expect(writes).toEqual([
+      {
+        ownerId: 'gid://shopify/Product/1',
+        namespace: 'uploadify_product',
+        key: 'uploadify_active',
+        type: 'boolean',
+        value: 'true',
+      },
+    ]);
+  });
+
+  it('clears the flag only when a watch that has it no longer qualifies', () => {
+    const { writes } = uploadifyActiveWrites([
+      { handle: 'w-draft', ownerId: 'gid://shopify/Product/3', current: true, desired: false },
+      { handle: 'w-new-draft', ownerId: 'gid://shopify/Product/4', current: null, desired: false },
+      { handle: 'w-off', ownerId: 'gid://shopify/Product/5', current: false, desired: false },
+    ]);
+    expect(writes).toEqual([
+      {
+        ownerId: 'gid://shopify/Product/3',
+        namespace: 'uploadify_product',
+        key: 'uploadify_active',
+        type: 'boolean',
+        value: 'false',
+      },
+    ]);
+  });
+
+  it('counts watches that qualify but have no Shopify id yet, and ignores diamonds', () => {
+    const { writes, missingOwner } = uploadifyActiveWrites([
+      { handle: 'w-new', ownerId: null, current: null, desired: true },
+      { handle: 'nd-one', ownerId: 'gid://shopify/Product/9', current: null, desired: true },
+    ]);
+    expect(writes).toEqual([]);
+    expect(missingOwner).toBe(1);
   });
 });

@@ -69,6 +69,7 @@ describe('parseFeedCatalogRows', () => {
           id: 'gid://shopify/Metafield/1',
           namespace: 'uploadify_product',
           key: 'uploadify_active',
+          value: 'true',
         },
       },
       {
@@ -84,6 +85,7 @@ describe('parseFeedCatalogRows', () => {
         key: 'color',
       },
     ]);
+    expect(catalog[0]?.uploadifyActive).toBe(true);
     expect(catalog[0]?.uploadifyMetafields).toEqual([
       {
         id: 'gid://shopify/Metafield/1',
