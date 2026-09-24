@@ -86,7 +86,7 @@ Two choices. Do not mix them up.
 | Surface | Use it for |
 |---|---|
 | Cursor (this repo, git, APIs, tests, PRs) | Default for code, Shopify GraphQL, CSVs, copy, SaaS product work |
-| Astra / Codex computer use | Logged-in screens only: Shopify admin, Marketplace Connect, eBay Seller Hub, supplier portals, a short live visual check |
+| Astra / Codex computer use | Logged-in screens only: Shopify admin, M2E Multichannel Connect, eBay Seller Hub, supplier portals, a short live visual check |
 | Fable in a fresh Cursor chat | Rare design pass when a wrong architectural choice is expensive |
 
 **Model** is who thinks inside Cursor: Auto, Grok, Sonnet, Opus, Fable,
@@ -204,13 +204,14 @@ Do not scrape the portal again.
 4. Activate only approved products.
 5. Read the public pages and confirm collection, product pages, images, prices, and availability.
 
-### C. Small eBay batch through Marketplace Connect
+### C. Small eBay batch through M2E
 
-1. Confirm the Shopify products are correct and Active.
-2. Confirm the LMNY eBay description template and field mappings.
-3. Prepare one listing and verify its public result (Astra).
-4. Publish the remaining approved products as a controlled batch.
-5. Confirm inventory and order syncing remain connected to Shopify.
+1. Confirm the Shopify products are correct and Active (`ebay` tag, SKU, `custom.ebay_condition`).
+2. In M2E, link by SKU if needed, then enable Inventory sync with Selling + Synchronization policies (price and qty on).
+3. Confirm the LMNY eBay description policy and item-specific mappings in M2E.
+4. Prepare one listing and verify its public eBay result (Astra).
+5. Enable sync for the remaining approved products as a controlled batch.
+6. Confirm inventory and order syncing remain connected to Shopify. A Shopify price edit updates eBay only after M2E's price sync runs.
 
 ### D. Theme or storefront improvement
 

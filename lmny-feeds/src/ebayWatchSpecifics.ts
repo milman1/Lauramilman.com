@@ -1,8 +1,8 @@
 /**
  * eBay item-specifics for watch products, stored as custom.* metafields.
  *
- * Marketplace Connect maps these seven keys once (Mapping → Item specifics →
- * "Use [key] from custom"). Values are extracted from title + descriptionHtml
+ * M2E maps these seven keys from custom.* metafields in the eBay
+ * item-specifics policy. Values are extracted from title + descriptionHtml
  * when the copy actually states them. Department / Handedness / Type are
  * catalog-wide constants where the source does not say otherwise.
  *

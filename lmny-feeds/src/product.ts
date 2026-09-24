@@ -12,7 +12,7 @@ import {
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
-/** Marketplace Connect / eBay: watches only. Never tag loose diamonds. */
+/** eBay tag: watches and jewelry only. Never tag loose diamonds. */
 export const EBAY_TAG = 'ebay';
 /** Tag for watches held out of auto-pricing (missing supplier cost). */
 export const PRICING_REVIEW_TAG = WATCH.reviewTag;

@@ -96,9 +96,9 @@ holds a stones table — Shopify products are the only live copy.
    Watch videos are fetched, type-sniffed and staged-uploaded as real `VIDEO`
    media for every URL the feed supplies (not just the first), capped per run
    (`VIDEO_ATTACH_BUDGET`) because each one is a download plus an upload.
-   **Unique inventory + Category:** watches are written as tracked qty `1` at
+   **   Unique inventory + Category:** watches are written as tracked qty `1` at
    the primary location (SKU = stock ref, `inventoryPolicy: DENY`) so
-   Marketplace Connect can list them on eBay (`ebay` tag + Timepieces
+   M2E can list them on eBay (`ebay` tag + Timepieces
    collection). Loose diamonds (natural and lab) stay
    `ACTIVE` on the Online Store but are written **tracked qty `0`** with
    `CONTINUE` so Uploadify delists them while the site can still sell.
@@ -141,8 +141,8 @@ holds a stones table — Shopify products are the only live copy.
    channel that does not resolve is a write error, and if Online Store
    itself does not resolve the run refuses to write rather than creating
    products that 404. Changing the list is a pull request against
-   `config/channels.ts` — eBay is not in it, because Marketplace Connect is
-   not a publication and selects by the `ebay` tag on its own side.
+   `config/channels.ts` — eBay is not in it, because M2E is
+   not a Shopify publication and selects linked SKUs on its own side.
 
    **This step only publishes what it writes.** Unlike the Back Vault sync,
    the Belgium Dia path has no publish-only decision: a product that is
@@ -268,8 +268,8 @@ npm run backfill:watch-pricing -- --apply # after reviewing counts
 
 Fills `custom.band_material`, `custom.case_size`, `custom.department`,
 `custom.handedness`, `custom.model`, `custom.style`, and `custom.type` on every
-`product_type:Watch` product so Marketplace Connect can map those keys once
-(Mapping → Item specifics → Use [key] from custom).
+`product_type:Watch` product so M2E can map those keys once
+in the eBay item-specifics / description policy.
 
 Constants: `type` is `Wristwatch`, `handedness` is `Right`. Department is
 `Women's` / `Men's` / `Unisex` only when the title says so — Rolex feed titles
@@ -292,7 +292,9 @@ both on eBay.
 
 eBay hides a listing when the title says Pre-Owned but Condition/Features is
 the canned value **New with box and papers** (condition 1000: brand new, never
-worn). Marketplace Connect was matching "box and papers" copy onto that value.
+worn). Older Marketplace Connect listings used to match "box and papers"
+copy onto that value. M2E must map Condition to `custom.ebay_condition`,
+never to box/papers Features.
 
 Live ingest now writes:
 
@@ -305,7 +307,7 @@ Live ingest now writes:
 - Description clause `with its original box and papers` instead of
   `as a full set with box and papers`
 
-Map those two keys once in Marketplace Connect (Condition → `ebay_condition`,
+Map those two keys once in M2E (Condition → `ebay_condition`,
 Features → `features`). Schema version 24 refreshes feed watches on the next
 hourly sync.
 
@@ -525,8 +527,8 @@ npm run sync:backvault       # live (needs Shopify env vars)
    assumes every configured channel is installed, and reports its channels
    as `unresolved (dry run)`. The Done line says how many pieces were
    published and to how many channels. Changing the list is a pull request
-   against `config/channels.ts`; eBay is not in it (Marketplace Connect is
-   an app, not a publication, and selects by the `ebay` tag).
+   against `config/channels.ts`; eBay is not in it (M2E is
+   an app, not a publication, and lists linked SKUs).
 
 **Vendor / collection mapping:** every item's Shopify Vendor is set to the
 canonical designer name from `designers.ts`. Shopify's automated

@@ -216,7 +216,7 @@ tags the product already has, so existing operational tags are preserved.
 | Namespace.Key | Value |
 |---|---|
 | `mm-google-shopping.condition` | `new` if state = unworn, `used` if pre-owned; omitted when unclassified |
-| `custom.ebay_condition` | `3000` for source state pre-owned or unknown; `1000` only for source-confirmed Unworn with explicit box + papers; otherwise source-confirmed Unworn uses `1500`. Marketplace Connect maps this numeric ConditionID to eBay. |
+| `custom.ebay_condition` | `3000` for source state pre-owned or unknown; `1000` only for source-confirmed Unworn with explicit box + papers; otherwise source-confirmed Unworn uses `1500`. M2E maps this numeric ConditionID to eBay. |
 | `custom.features` | `With Box` / `With Papers` when stated. Never `New with box and papers`. |
 | `global.MPN` | reference |
 

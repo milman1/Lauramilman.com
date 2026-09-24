@@ -36,7 +36,7 @@ They never carry `ebay` before a separate activation and channel-publication
 review. The private plan's `ebay` object is a readiness record, not a Shopify
 `productSet` field and never an instruction to publish. It provides an eBay
 title (80 characters or fewer), category-correct bracelet or necklace item specifics, and the
-Marketplace Connect metafield mapping. It becomes eligible only when complete
+M2E metafield mapping. It becomes eligible only when complete
 copy, at least three images, and source-backed condition evidence are present.
 An optional source `condition` (`new` or `preowned`) is accepted only with a
 non-empty `condition_evidence` field; otherwise no condition metafield or eBay
