@@ -59,10 +59,14 @@ describe('Royal Chain listing builder', () => {
       ],
     }) as Record<string, any>;
 
-    expect(product.descriptionHtml).toContain('<h2>Details</h2>');
-    expect(product.descriptionHtml).toContain('<strong>Available lengths:</strong> 18 in, 20 in');
-    expect(product.descriptionHtml).toContain('<strong>Material:</strong> 14K Yellow Gold');
-    expect(product.descriptionHtml).toContain('<strong>Closure:</strong> Lobster clasp');
+    expect(product.descriptionHtml).not.toContain('<h2>Details</h2>');
+    expect(product.descriptionHtml).not.toContain('<ul>');
+    expect(product.descriptionHtml).toContain('This 4mm cuban chain necklace is crafted in 14K Yellow Gold.');
+    expect(product.descriptionHtml).toContain('Polished finish, lobster clasp, semi-solid construction.');
+    expect(product.metafields).toContainEqual(expect.objectContaining({ key: 'metal', value: '14K Yellow Gold' }));
+    expect(product.metafields).toContainEqual(expect.objectContaining({ key: 'width', value: '4 mm' }));
+    expect(product.metafields).toContainEqual(expect.objectContaining({ key: 'clasp', value: 'Lobster clasp' }));
+    expect(product.tags).toContain('chains');
     expect(product.files).toHaveLength(3);
     expect(product.tags).not.toContain('media-missing');
     expect(product.tags).not.toContain('ebay'); // DRAFT plans never activate a sales channel.
@@ -111,8 +115,8 @@ describe('Royal Chain listing builder', () => {
     expect(products.map((product) => product.handle)).toEqual(['lmny-mixed-bracelet', 'lmny-mixed']);
     expect(products.map((product) => product.productType)).toEqual(['Bracelets', 'Necklaces']);
     expect(products.map((product) => product.ebay.itemSpecifics.Type)).toEqual(['Bracelet', 'Necklace']);
-    expect(products[0]!.descriptionHtml).toMatch(/curb bracelet/i);
-    expect(products[1]!.descriptionHtml).toMatch(/curb necklace/i);
+    expect(products[0]!.descriptionHtml).toMatch(/curb chain bracelet/i);
+    expect(products[1]!.descriptionHtml).toMatch(/curb chain necklace/i);
   });
 
   it('fails closed for eBay until all image, content, and condition gates are met', () => {

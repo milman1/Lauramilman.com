@@ -76,18 +76,25 @@
   # ── Spec rows from custom.* metafields — empty rows never render ──
   # Jewelry + watch keys share this list. Blank values are skipped, so a
   # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
-  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,metal_type:Metal,metal_weight:Metal Weight,diamond_weight:Diamond Weight,width:Width,clasp:Clasp,finish:Finish,construction:Construction,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,measurements:Measurements,gemstones:Gemstones,era:Era,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
     assign mf = product.metafields.custom[def_parts[0]]
     if mf != blank
       assign v = mf.value | strip
+      if def_parts[0] == 'metal_type' and product.metafields.custom.metal.value != blank
+        continue
+      endif
       if v != blank and v != '—' and v != '-'
         capture spec_rows
           echo spec_rows
           echo '<div class="product-spec"><span class="product-spec__label">'
-          echo def_parts[1]
+          if def_parts[0] == 'link' and product.tags contains 'chains'
+            echo 'Chain Style'
+          else
+            echo def_parts[1]
+          endif
           echo '</span><span class="product-spec__value">'
           echo v | escape
           echo '</span></div>'
@@ -370,22 +377,34 @@
               <div
                 class="accordion-content rte"
                 id="PdpDescription"
-                {% if spec_rows != blank %}data-strip-duplicate-specs{% endif %}
+                data-strip-duplicate-specs
               >{{ product.description }}</div>
-              {%- if spec_rows != blank -%}
               <script>
                 (function () {
                   var desc = document.getElementById('PdpDescription');
                   if (!desc) return;
+                  function isDumpHeading(text) {
+                    var t = (text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                    return /specification/.test(t) || /^(stone )?details$/.test(t) || t === 'product details';
+                  }
                   Array.prototype.slice.call(desc.querySelectorAll('h2, h3, h4')).forEach(function (heading) {
-                    var title = (heading.textContent || '').replace(/\s+/g, ' ').trim();
-                    if (!/specification/i.test(title) && !/^stone details$/i.test(title)) return;
+                    if (!isDumpHeading(heading.textContent)) return;
                     var node = heading.nextElementSibling;
                     heading.parentNode.removeChild(heading);
                     while (node && !/^H[2-4]$/.test(node.tagName)) {
                       var next = node.nextElementSibling;
                       node.parentNode.removeChild(node);
                       node = next;
+                    }
+                  });
+                  Array.prototype.slice.call(desc.querySelectorAll('ul')).forEach(function (ul) {
+                    if (ul.querySelector('strong')) ul.parentNode.removeChild(ul);
+                  });
+                  Array.prototype.slice.call(desc.querySelectorAll('p')).forEach(function (p) {
+                    var html = (p.innerHTML || '').toLowerCase();
+                    if (!/<strong>/.test(html)) return;
+                    if (/case size:|bracelet links:|year:|metal:|width:|clasp:|finish:|carat:|clarity:/.test(html)) {
+                      p.parentNode.removeChild(p);
                     }
                   });
                   var leftover = (desc.textContent || '')
@@ -399,7 +418,6 @@
                   }
                 })();
               </script>
-              {%- endif -%}
             </div>
           </div>
         </div>

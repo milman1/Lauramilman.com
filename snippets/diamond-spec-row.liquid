@@ -1,19 +1,18 @@
 {%- comment -%}
-  One row of the diamond spec table.
+  One cell of the shared 2-column Specifications grid.
 
   A spec the feed didn't supply renders as an em dash rather than being
   dropped, so the table says "we don't know this" instead of quietly
-  implying the stone has fewer attributes than it does. PD's page did the
-  same thing with its "-" rows.
+  implying the stone has fewer attributes than it does.
 
   Accepts: label, value
 {%- endcomment -%}
 
-<div class="dpdp__spec">
-  <dt>{{ label }}</dt>
+<div class="product-spec">
+  <span class="product-spec__label">{{ label }}</span>
   {%- if value != blank -%}
-    <dd>{{ value }}</dd>
+    <span class="product-spec__value">{{ value }}</span>
   {%- else -%}
-    <dd class="is-unknown">&mdash;</dd>
+    <span class="product-spec__value product-spec__value--unknown">&mdash;</span>
   {%- endif -%}
 </div>
