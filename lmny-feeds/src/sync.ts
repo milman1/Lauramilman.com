@@ -62,7 +62,17 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyKeepHandles, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import {
+  uploadifyActiveDeletesExcept,
+  uploadifyActiveWrites,
+  uploadifyJewelryQualifies,
+  uploadifyKeepHandles,
+  uploadifyMetafieldDeletesForDiamonds,
+  uploadifyVendorSkuDeletesFor,
+  uploadifyVendorSkuForVariants,
+  uploadifyVendorSkuWrites,
+  type UploadifyJewelryCandidate,
+} from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -363,6 +373,8 @@ async function main() {
         handle,
         ownerId: existing?.id ?? uploadifyOwnerFromSweep.get(handle) ?? null,
         current: existing?.uploadifyActive ?? null,
+        currentVendorSku: existing?.uploadifyVendorSku ?? null,
+        stockRef: p.item.stockRef,
         desired: watchListsOnUploadify(p.item, p.priced),
       };
     });
@@ -374,10 +386,24 @@ async function main() {
       qualifyingHandles,
     );
   }
-  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeep);
+  let uploadifyJewelry: UploadifyJewelryCandidate[] = [];
+  let jewelryReadOk = true;
+  try {
+    uploadifyJewelry = await shopify.fetchUploadifyJewelry();
+  } catch (err) {
+    jewelryReadOk = false;
+    const msg = `Uploadify jewelry catalog was not read — existing flags on lab-grown jewelry and gold chains stay (${err instanceof Error ? err.message : String(err)})`;
+    notes.push(msg);
+    console.warn(msg);
+  }
+  const uploadifyJewelryRows = uploadifyJewelry.filter(uploadifyJewelryQualifies);
+  const jewelryKeep = jewelryReadOk
+    ? new Set(uploadifyJewelryRows.map((product) => product.handle))
+    : new Set(uploadifyActiveOwners.filter((owner) => kindForHandle(owner.handle) == null).map((owner) => owner.handle));
+  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeep, jewelryKeep);
   if (uploadifyActiveClears.length > 0) {
     const msg =
-      `${uploadifyActiveClears.length} product(s) other than qualifying Belgium Watch and TLV watches have uploadify_active — removing it`;
+      `${uploadifyActiveClears.length} product(s) other than qualifying watches, lab-grown jewelry, and gold chains have uploadify_active — removing it`;
     notes.push(flags.dryRun ? `${msg} (dry run — not deleted)` : msg);
     console.log(msg);
   }
@@ -390,6 +416,29 @@ async function main() {
         : '');
     notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
     console.log(msg);
+  }
+  const uploadifyVendorSkuPlan = uploadifyVendorSkuWrites(
+    uploadifyActiveRows.map((row) => ({
+      handle: row.handle,
+      ownerId: row.ownerId,
+      desired: row.desired,
+      stockRef: row.stockRef,
+      current: row.currentVendorSku,
+    })),
+  );
+  if (uploadifyVendorSkuPlan.writes.length > 0 || uploadifyVendorSkuPlan.missingOwner > 0) {
+    const msg =
+      `${uploadifyVendorSkuPlan.writes.length} watch(es) need uploadify vendor_sku set to the stock number` +
+      (uploadifyVendorSkuPlan.missingOwner > 0
+        ? `; ${uploadifyVendorSkuPlan.missingOwner} new watch(es) get it after create`
+        : '');
+    notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
+    console.log(msg);
+  }
+  if (jewelryReadOk) {
+    const jewelryMsg = `${uploadifyJewelryRows.length} active lab-grown jewelry piece(s) and gold chain(s) meet the Uploadify gates`;
+    notes.push(flags.dryRun ? `${jewelryMsg} (dry run — not written)` : jewelryMsg);
+    console.log(jewelryMsg);
   }
 
   const desired = publishable.map((p) => ({
@@ -525,12 +574,15 @@ async function main() {
 
     if (uploadifyActiveClears.length > 0) {
       console.log(
-        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
+        `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying watches, lab-grown jewelry, or gold chains`,
       );
-      const clearErrors = await shopify.deleteMetafields(uploadifyActiveClears);
+      const clearErrors = await shopify.deleteMetafields([
+        ...uploadifyActiveClears,
+        ...uploadifyVendorSkuDeletesFor(uploadifyActiveClears),
+      ]);
       writeErrors.push(...clearErrors.map((e) => `uploadify_active remove: ${e}`));
       notes.push(
-        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
+        `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not qualifying watches, lab-grown jewelry, or gold chains`,
       );
     }
 
@@ -743,6 +795,61 @@ async function main() {
       notes.push(
         `${uploadifyActiveLive.missingOwner} watch(es) qualified for uploadify_active but had no Shopify id`,
       );
+    }
+
+    const uploadifyVendorSkuLive = uploadifyVendorSkuWrites(
+      uploadifyActiveRows.map((row) => ({
+        handle: row.handle,
+        ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+        desired: row.desired,
+        stockRef: row.stockRef,
+        current: row.currentVendorSku,
+      })),
+    );
+    if (uploadifyVendorSkuLive.writes.length > 0) {
+      console.log(`Setting uploadify vendor_sku on ${uploadifyVendorSkuLive.writes.length} watch(es)`);
+      const metafieldErrors = await shopify.setMetafields(uploadifyVendorSkuLive.writes);
+      writeErrors.push(...metafieldErrors.map((e) => `uploadify vendor_sku: ${e}`));
+      notes.push(`set uploadify vendor_sku on ${uploadifyVendorSkuLive.writes.length} watch(es)`);
+    }
+    if (uploadifyVendorSkuLive.missingOwner > 0) {
+      notes.push(
+        `${uploadifyVendorSkuLive.missingOwner} watch(es) qualified for uploadify vendor_sku but had no Shopify id`,
+      );
+    }
+
+    if (jewelryReadOk) {
+      const jewelryActive = uploadifyActiveWrites(
+        uploadifyJewelryRows.map((product) => ({
+          handle: product.handle,
+          ownerId: product.id,
+          current: product.uploadifyActive,
+          desired: true,
+          audience: 'jewelry' as const,
+        })),
+      );
+      if (jewelryActive.writes.length > 0) {
+        console.log(`Setting uploadify_active on ${jewelryActive.writes.length} lab-grown jewelry piece(s) and gold chain(s)`);
+        const metafieldErrors = await shopify.setMetafields(jewelryActive.writes);
+        writeErrors.push(...metafieldErrors.map((e) => `uploadify jewelry: ${e}`));
+        notes.push(`set uploadify_active on ${jewelryActive.writes.length} lab-grown jewelry piece(s) and gold chain(s)`);
+      }
+      const jewelrySku = uploadifyVendorSkuWrites(
+        uploadifyJewelryRows.map((product) => ({
+          handle: product.handle,
+          ownerId: product.id,
+          desired: true,
+          audience: 'jewelry' as const,
+          stockRef: uploadifyVendorSkuForVariants(product.variants) ?? '',
+          current: product.uploadifyVendorSku,
+        })),
+      );
+      if (jewelrySku.writes.length > 0) {
+        console.log(`Setting uploadify vendor_sku on ${jewelrySku.writes.length} lab-grown jewelry piece(s) and gold chain(s)`);
+        const metafieldErrors = await shopify.setMetafields(jewelrySku.writes);
+        writeErrors.push(...metafieldErrors.map((e) => `uploadify jewelry vendor_sku: ${e}`));
+        notes.push(`set uploadify vendor_sku on ${jewelrySku.writes.length} single-SKU jewelry piece(s)`);
+      }
     }
 
     if (createdRefs.length > 0) {

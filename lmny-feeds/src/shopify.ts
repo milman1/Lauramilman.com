@@ -7,7 +7,9 @@ import type { BrokenMedia, CatalogEntry } from './types.js';
 import {
   isUploadifyNamespace,
   UPLOADIFY_ACTIVE_KEY,
+  UPLOADIFY_VENDOR_SKU_KEY,
   type MetafieldIdentifier,
+  type UploadifyJewelryCandidate,
 } from './uploadifyMetafields.js';
 
 const API_VERSION = '2026-01';
@@ -131,6 +133,8 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         uploadifyMetafields.push({ id: inline.id, namespace: inline.namespace, key: inline.key });
       }
       const uploadifyActive = inline?.value === 'true' ? true : inline?.value === 'false' ? false : null;
+      const vendorSkuInline = r.uploadifyVendorSku as { value?: string } | null | undefined;
+      const vendorSku = typeof vendorSkuInline?.value === 'string' ? vendorSkuInline.value.trim() : '';
       byId.set(id, {
         id,
         handle: r.handle,
@@ -142,6 +146,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         contentHash: (r.metafield as { value: string } | null)?.value ?? null,
         uploadifyMetafields,
         uploadifyActive,
+        uploadifyVendorSku: vendorSku || null,
       });
       order.push(id);
       continue;
@@ -172,6 +177,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
       if (typeof item?.tracked === 'boolean') parent.inventoryTracked = item.tracked;
       if (typeof item?.id === 'string') parent.inventoryItemId = item.id;
       if (typeof r.inventoryQuantity === 'number') parent.inventoryQuantity = r.inventoryQuantity;
+      if (typeof r.sku === 'string' && r.sku.trim() && !parent.variantSku) parent.variantSku = r.sku.trim();
     }
   }
   return order.map((id) => byId.get(id)!);
@@ -180,6 +186,52 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
 export interface UploadifyActiveOwner {
   id: string;
   handle: string;
+}
+
+interface UploadifyJewelryNode {
+  id: string;
+  handle: string;
+  title: string;
+  status: string;
+  vendor: string;
+  productType: string;
+  tags: string[];
+  descriptionHtml: string;
+  category: { id: string } | null;
+  uploadifyActive: { value: string } | null;
+  uploadifyVendorSku: { value: string } | null;
+  variants: {
+    nodes: Array<{
+      sku: string | null;
+      price: string | null;
+      inventoryQuantity: number | null;
+      inventoryItem: { tracked: boolean } | null;
+    }>;
+  };
+}
+
+function uploadifyJewelryFromNode(node: UploadifyJewelryNode, inChainsCollection: boolean): UploadifyJewelryCandidate {
+  const active = node.uploadifyActive?.value;
+  return {
+    id: node.id,
+    handle: node.handle,
+    status: node.status,
+    vendor: node.vendor ?? '',
+    productType: node.productType ?? '',
+    tags: node.tags ?? [],
+    title: node.title ?? '',
+    descriptionHtml: node.descriptionHtml ?? '',
+    categoryId: node.category?.id ?? null,
+    inChainsCollection,
+    uploadifyActive: active === 'true' ? true : active === 'false' ? false : null,
+    uploadifyVendorSku: node.uploadifyVendorSku?.value?.trim() || null,
+    variants: node.variants.nodes.map((variant) => ({
+      sku: variant.sku ?? '',
+      qty: variant.inventoryQuantity ?? 0,
+      tracked: variant.inventoryItem?.tracked === true,
+      priceUsd: Number(variant.price ?? '0'),
+    })),
+  };
 }
 
 /** Products whose `uploadify_product.uploadify_active` metafield exists. */
@@ -554,7 +606,9 @@ export class ShopifyClient {
    * would blow that). Child JSONL rows are filtered to `uploadify` /
    * `uploadify_product` in `parseFeedCatalogRows`. `uploadifyActive` is a
    * single-field alias, not a connection, so the listing switch is still
-   * captured if the connection is slow to page.
+   * captured if the connection is slow to page. `uploadifyVendorSku` is the
+   * same kind of alias for the stock number Uploadify sends as the eBay
+   * Custom Label.
    *
    * mediaCount deliberately counts only READY media. Shopify's own mediaCount
    * includes FAILED images, and a failed image is worse than none — the
@@ -577,6 +631,7 @@ export class ShopifyClient {
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key value }
+            uploadifyVendorSku: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_VENDOR_SKU_KEY}") { value }
             metafields { edges { node { id namespace key } } }
             media { edges { node { status mediaContentType } } }
             variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }
@@ -612,6 +667,85 @@ export class ShopifyClient {
     if (!url) return [];
     const lines = await downloadJsonl(url);
     return parseUploadifyActiveOwnerRows(lines);
+  }
+
+  /**
+   * Lab-grown finished jewelry and the gold-chains collection. Loose diamonds
+   * can appear in the lab-grown tag query; the caller drops them. Paginated
+   * on purpose so this does not start a second bulk operation.
+   */
+  async fetchUploadifyJewelry(): Promise<UploadifyJewelryCandidate[]> {
+    const chains = await this.pageUploadifyJewelry(`collection handle`, 'chains');
+    const chainIds = new Set(chains.map((product) => product.id));
+    const [peaceful, tagged] = await Promise.all([
+      this.pageUploadifyJewelry('vendor', `vendor:'Peaceful Diamonds'`),
+      this.pageUploadifyJewelry('tag', 'tag:lab-grown'),
+    ]);
+    const byId = new Map<string, UploadifyJewelryCandidate>();
+    for (const product of chains) byId.set(product.id, { ...product, inChainsCollection: true });
+    for (const product of [...peaceful, ...tagged]) {
+      const existing = byId.get(product.id);
+      if (existing) continue;
+      byId.set(product.id, { ...product, inChainsCollection: chainIds.has(product.id) });
+    }
+    return [...byId.values()];
+  }
+
+  private async pageUploadifyJewelry(mode: 'vendor' | 'tag' | 'collection handle', queryOrHandle: string): Promise<UploadifyJewelryCandidate[]> {
+    const out: UploadifyJewelryCandidate[] = [];
+    let cursor: string | null = null;
+    const fields = `
+      id handle title status vendor productType tags descriptionHtml
+      category { id }
+      uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { value }
+      uploadifyVendorSku: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_VENDOR_SKU_KEY}") { value }
+      variants(first: 100) {
+        nodes { sku price inventoryQuantity inventoryItem { tracked } }
+      }
+    `;
+    for (let page = 0; page < 40; page++) {
+      if (mode === 'collection handle') {
+        const data = await this.gql<{
+          collections: {
+            nodes: Array<{
+              handle: string;
+              products: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: UploadifyJewelryNode[] };
+            }>;
+          };
+        }>(
+          `query($cursor: String) {
+            collections(first: 1, query: "handle:${queryOrHandle}") {
+              nodes {
+                handle
+                products(first: 50, after: $cursor) { pageInfo { hasNextPage endCursor } nodes { ${fields} } }
+              }
+            }
+          }`,
+          { cursor },
+        );
+        const collection = data.collections.nodes.find((node) => node.handle === queryOrHandle);
+        if (!collection) break;
+        out.push(...collection.products.nodes.map((node) => uploadifyJewelryFromNode(node, true)));
+        if (!collection.products.pageInfo.hasNextPage) break;
+        cursor = collection.products.pageInfo.endCursor;
+        continue;
+      }
+      const data = await this.gql<{
+        products: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: UploadifyJewelryNode[] };
+      }>(
+        `query($q: String!, $cursor: String) {
+          products(first: 50, after: $cursor, query: $q) {
+            pageInfo { hasNextPage endCursor }
+            nodes { ${fields} }
+          }
+        }`,
+        { q: queryOrHandle, cursor },
+      );
+      out.push(...data.products.nodes.map((node) => uploadifyJewelryFromNode(node, false)));
+      if (!data.products.pageInfo.hasNextPage) break;
+      cursor = data.products.pageInfo.endCursor;
+    }
+    return out;
   }
 
   private async runBulkQuery(query: string): Promise<string | null> {
