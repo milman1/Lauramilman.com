@@ -436,6 +436,9 @@ function formatMoney(cents) {
     if (intent === 'message') {
       return "Hi — I'd like to message about " + piece + link + '.';
     }
+    if (intent === 'setting') {
+      return 'Hi — I would like ' + piece + link + ' set in a ring. Which settings suit this stone?';
+    }
     if (title) {
       return "Hi — I'm looking at " + title + link + '.';
     }
@@ -445,6 +448,7 @@ function formatMoney(cents) {
   function intentLabel(intent) {
     if (intent === 'offer') return 'Make an offer';
     if (intent === 'message') return 'Direct message';
+    if (intent === 'setting') return 'Set this stone in a ring';
     return 'Ask about this piece';
   }
 
@@ -633,7 +637,10 @@ function formatMoney(cents) {
   }
 
   function isGeneratedComposer(text) {
-    return /^Hi — I( would like to make an offer|'m looking at|'d like to message about)/.test(text);
+    // "would like" covers both the offer line and the set-in-a-ring line, so a
+    // message this script wrote is never mistaken for something the customer
+    // typed and left in the box.
+    return /^Hi — I( would like|'m looking at|'d like to message about)/.test(text);
   }
 
   function fillComposer(payload) {
