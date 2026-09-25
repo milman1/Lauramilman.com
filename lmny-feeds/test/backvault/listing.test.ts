@@ -65,6 +65,21 @@ describe('buildJewelryListing', () => {
     expect(listing.tags).toContain('designer-jewelry');
   });
 
+  it('uses brooch, not a clipped plural, for brooches', () => {
+    const listing = buildJewelryListing(
+      item({
+        vendor: 'David Webb',
+        title: 'David Webb Gemini Diamond Zodiac Pendant Brooch',
+        productType: 'BROCH',
+        specs: { metalType: 'Platinum & 18K Yellow Gold', diamondWeight: '5ct', condition: 'Excellent' },
+      }),
+    );
+    expect(listing.productType).toBe('Brooches');
+    expect(listing.descriptionHtml).toContain('estate brooch');
+    expect(listing.descriptionHtml).not.toContain('brooche');
+    expect(listing.seoDescription).not.toContain('brooche');
+  });
+
   it('prefixes canonical brand and strips a trailing stock number', () => {
     const listing = buildJewelryListing(
       item({

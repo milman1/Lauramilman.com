@@ -1,0 +1,109 @@
+{% doc %}
+  Visible breadcrumb and a matching BreadcrumbList.
+  The layout renders this on collections, the journal, articles, and pages.
+  Product pages keep the breadcrumb in the product section.
+
+  @example
+  {% render 'breadcrumbs' %}
+{% enddoc %}
+
+{%- liquid
+  assign crumb_current = ''
+  assign crumb_parent_title = ''
+  assign crumb_parent_url = ''
+
+  if request.page_type == 'collection'
+    assign crumb_current = collection.title
+    case collection.handle
+      when 'all' or 'all-jewelry'
+        assign crumb_current = 'All Jewelry'
+      when 'peaceful-diamonds-by-laura-milman-new-york'
+        assign crumb_current = 'Lab-Grown Jewelry'
+      when 'david-webb'
+        assign crumb_current = 'Pre-Owned David Webb Jewelry'
+      when 'cartier'
+        assign crumb_current = 'Pre-Owned Cartier Jewelry'
+      when 'van-cleef-arpels'
+        assign crumb_current = 'Pre-Owned Van Cleef & Arpels'
+      when 'tiffany'
+        assign crumb_current = 'Pre-Owned Tiffany Jewelry'
+      when 'rolex-watches'
+        assign crumb_current = 'Pre-Owned Rolex Watches'
+      when 'lab-grown-bracelets'
+        assign crumb_current = 'Lab-Grown Diamond Bracelets'
+    endcase
+
+    case collection.handle
+      when 'david-webb' or 'cartier' or 'van-cleef-arpels' or 'tiffany' or 'bvlgari' or 'hermes' or 'chopard'
+        assign crumb_parent_title = 'Vintage & Estate'
+        assign crumb_parent_url = '/collections/vintage-jewelry'
+      when 'lab-grown-bracelets' or 'lab-grown-necklaces' or 'lab-grown-pendants' or 'lab-grown-rings' or 'lab-grown-earrings' or 'lab-grown-engagement-rings'
+        assign crumb_parent_title = 'Lab-Grown Jewelry'
+        assign crumb_parent_url = '/collections/peaceful-diamonds-by-laura-milman-new-york'
+      when 'rolex-watches' or 'cartier-watches' or 'jacob-co' or 'bvlgari-watches' or 'van-cleef-arpels-watches' or 'chopard-watches'
+        assign crumb_parent_title = 'Timepieces'
+        assign crumb_parent_url = '/collections/time-pieces'
+      when 'rings' or 'necklaces' or 'chains' or 'pendants-1' or 'bracelets' or 'earrings' or 'engagement-rings' or 'wedding-bands' or 'mens-wedding-bands'
+        assign crumb_parent_title = 'All Jewelry'
+        assign crumb_parent_url = '/collections/all'
+    endcase
+  elsif request.page_type == 'list-collections'
+    assign crumb_current = 'Collections'
+  elsif request.page_type == 'blog'
+    assign crumb_current = blog.title
+  elsif request.page_type == 'article'
+    assign crumb_current = article.title
+    assign crumb_parent_title = blog.title
+    assign crumb_parent_url = blog.url
+  elsif request.page_type == 'page'
+    assign crumb_current = page.title
+    if page.handle == 'private-clients'
+      assign crumb_current = 'Private viewing'
+    endif
+  endif
+-%}
+
+{%- if crumb_current != blank -%}
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <ol class="breadcrumbs__list">
+      <li class="breadcrumbs__item">
+        <a class="breadcrumbs__link" href="{{ routes.root_url }}">Home</a>
+      </li>
+      {%- if crumb_parent_title != blank and crumb_parent_url != blank -%}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ crumb_parent_url }}">{{ crumb_parent_title }}</a>
+        </li>
+      {%- endif -%}
+      <li class="breadcrumbs__item breadcrumbs__item--current" aria-current="page">{{ crumb_current }}</li>
+    </ol>
+  </nav>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": {{ shop.url | append: routes.root_url | json }}
+      }
+      {%- if crumb_parent_title != blank and crumb_parent_url != blank -%}
+        ,{
+          "@type": "ListItem",
+          "position": 2,
+          "name": {{ crumb_parent_title | json }},
+          "item": {{ shop.url | append: crumb_parent_url | json }}
+        }
+      {%- endif -%}
+      ,{
+        "@type": "ListItem",
+        "position": {% if crumb_parent_title != blank and crumb_parent_url != blank %}3{% else %}2{% endif %},
+        "name": {{ crumb_current | json }},
+        "item": {{ canonical_url | json }}
+      }
+    ]
+  }
+  </script>
+{%- endif -%}

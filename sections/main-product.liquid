@@ -13,6 +13,9 @@
   assign crumb_collection = collection | default: product.collections.first
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  if display_vendor == 'Peaceful Diamonds' or display_vendor == "Laura's Gems" or display_vendor == 'Milman New York'
+    assign display_vendor = 'Laura Milman New York'
+  endif
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid
@@ -198,7 +201,7 @@
             >
               <img
                 src="{{ media.preview_image | image_url: width: 120 }}"
-                alt=""
+                alt="{{ display_title | escape }} view {{ forloop.index }}"
                 width="120"
                 height="120"
                 loading="lazy"
@@ -264,7 +267,7 @@
                     {%- if block.settings.icon == 'returns' and is_watch == 'true' -%}
                       Exchanges Only
                     {%- elsif block.settings.icon == 'returns' -%}
-                      7-Day Returns
+                      7-Day Jewelry Returns
                     {%- else -%}
                       {{ block.settings.label }}
                     {%- endif -%}
@@ -943,7 +946,7 @@
       "blocks": [
         { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
         { "type": "trust_item", "settings": { "icon": "warranty", "label": "1-Year Warranty" } },
-        { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Returns" } }
+        { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Jewelry Returns" } }
       ]
     }
   ]

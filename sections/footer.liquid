@@ -13,7 +13,7 @@
             <span class="footer__logo-text">Laura <em>Milman</em></span>
           {%- endif -%}
         </a>
-        <p class="footer__description">{{ section.settings.description | default: 'Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.' }}</p>
+        <p class="footer__description">{{ section.settings.description | default: 'House jewelry is designed in New York and crafted in Italy. Signed estate pieces and watches are authenticated in New York.' }}</p>
         <div class="footer__social">
           {%- if section.settings.social_instagram != blank -%}
             <a href="{{ section.settings.social_instagram }}" class="footer__social-link" aria-label="Instagram" target="_blank" rel="noopener">
@@ -57,8 +57,8 @@
           <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
         </h5>
         <ul class="footer__links footer__accordion-body">
-          <li><a href="/collections/all" class="footer__link">Fine Jewelry</a></li>
-          <li><a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="footer__link">Peaceful Diamonds</a></li>
+          <li><a href="/collections/all" class="footer__link">All Jewelry</a></li>
+          <li><a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="footer__link">Lab-Grown Jewelry</a></li>
           <li><a href="/collections/natural-diamonds" class="footer__link">Loose Diamonds</a></li>
           <li><a href="/collections/vintage-jewelry" class="footer__link">Pre-Owned Maison</a></li>
           <li><a href="/collections/time-pieces" class="footer__link">Timepieces</a></li>
@@ -76,9 +76,9 @@
           <li><a href="/pages/about" class="footer__link">About</a></li>
           <li><a href="/pages/lauras-story" class="footer__link">Our Story</a></li>
           <li><a href="/collections/vintage-jewelry" class="footer__link">Pre-Owned Maison</a></li>
+          <li><a href="/collections/david-webb" class="footer__link">David Webb</a></li>
           <li><a href="/pages/authentication" class="footer__link">Estate Authentication</a></li>
           <li><a href="/pages/private-clients" class="footer__link">Private Clients</a></li>
-          <li><a href="/pages/google-reviews" class="footer__link">Reviews</a></li>
           <li><a href="/blogs/journal" class="footer__link">Journal</a></li>
         </ul>
       </div>
@@ -100,7 +100,7 @@
     </div>
 
     <div class="footer__bottom">
-      <p class="footer__copyright">Crafted in New York &middot; &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
+      <p class="footer__copyright">Designed in New York &middot; Crafted in Italy &middot; &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
       <div class="footer__legal">
         <a href="/policies/privacy-policy" class="footer__legal-link">Privacy Policy</a>
         <a href="/policies/terms-of-service" class="footer__legal-link">Terms of Service</a>
@@ -251,7 +251,7 @@
       "type": "textarea",
       "id": "description",
       "label": "Brand description",
-      "default": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces."
+      "default": "House jewelry is designed in New York and crafted in Italy. Signed estate pieces and watches are authenticated in New York."
     },
     {
       "type": "header",

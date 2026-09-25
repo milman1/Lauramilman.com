@@ -1,0 +1,35 @@
+{% doc %}
+  One reading link for a collection, using a published journal article or the buying guide.
+  Renders nothing when this collection has no matching page.
+
+  @example
+  {% render 'collection-guide', collection: collection %}
+{% enddoc %}
+
+{%- liquid
+  assign guide_url = ''
+  assign guide_label = ''
+  case collection.handle
+    when 'cartier' or 'van-cleef-arpels' or 'tiffany'
+      assign guide_url = '/blogs/journal/how-to-buy-pre-owned-cartier-van-cleef-tiffany'
+      assign guide_label = 'How to buy pre-owned Cartier, Van Cleef, and Tiffany'
+    when 'vintage-jewelry'
+      assign guide_url = '/blogs/journal/how-to-wear-vintage-jewelry-in-2026'
+      assign guide_label = 'How to wear vintage jewelry'
+    when 'time-pieces' or 'rolex-watches'
+      assign guide_url = '/blogs/journal/how-to-buy-a-vintage-luxury-watch'
+      assign guide_label = 'How to buy a vintage luxury watch'
+    when 'peaceful-diamonds-by-laura-milman-new-york' or 'lab-grown-bracelets' or 'lab-grown-diamonds'
+      assign guide_url = '/blogs/journal/igi-vs-gia-certified-lab-diamonds'
+      assign guide_label = 'IGI vs GIA for lab-grown diamonds'
+    when 'natural-diamonds' or 'engagement-rings'
+      assign guide_url = '/pages/buying-guide'
+      assign guide_label = 'Fine jewelry buying guide'
+    when 'lab-grown-engagement-rings'
+      assign guide_url = '/blogs/journal/best-lab-grown-diamond-engagement-rings-under-3000'
+      assign guide_label = 'Lab-grown diamond engagement rings'
+  endcase
+-%}
+{%- if guide_url != blank -%}
+  <p class="lm-collection__guide"><a href="{{ guide_url }}">{{ guide_label }}</a></p>
+{%- endif -%}

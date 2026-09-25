@@ -40,7 +40,7 @@
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "estate_label": "Pre-Owned Maison",
-          "peaceful_label": "Peaceful Diamonds",
+          "peaceful_label": "Lab-Grown Jewelry",
           "peaceful_url": "",
           "enable_sticky": true
         }
@@ -55,7 +55,7 @@
         ],
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
-          "description": "Fine jewelry crafted in New York. Original designs, traceable diamonds, and individually authenticated antique & estate pieces.",
+          "description": "House jewelry is designed in New York and crafted in Italy. Signed estate pieces and watches are authenticated in New York.",
           "social_instagram": "",
           "social_pinterest": "",
           "social_facebook": ""
@@ -67,7 +67,7 @@
           "pop-peaceful": {
             "type": "link",
             "settings": {
-              "title": "Peaceful Diamonds",
+              "title": "Lab-Grown Jewelry",
               "link": "/collections/peaceful-diamonds-by-laura-milman-new-york"
             }
           },
