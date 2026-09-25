@@ -4,10 +4,13 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
   uploadifyVendorSkuDeletesFor,
+  uploadifyVendorSkuForVariants,
   uploadifyVendorSkuWrites,
+  type UploadifyJewelryCandidate,
 } from '../src/uploadifyMetafields.js';
 
 function entry(overrides: Partial<CatalogEntry> & { handle: string }): CatalogEntry {
@@ -184,6 +187,110 @@ describe('uploadifyVendorSkuDeletesFor', () => {
       ]),
     ).toEqual([
       { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'vendor_sku' },
+    ]);
+  });
+});
+
+function jewelry(overrides: Partial<UploadifyJewelryCandidate> & { handle: string }): UploadifyJewelryCandidate {
+  return {
+    id: `gid://shopify/Product/${overrides.handle}`,
+    status: 'ACTIVE',
+    vendor: 'Peaceful Diamonds',
+    productType: 'Bracelet',
+    tags: ['lab-grown'],
+    title: 'Lab diamond tennis bracelet',
+    descriptionHtml: '<p>Lab grown diamond tennis bracelet in 14k white gold.</p>',
+    categoryId: 'gid://shopify/TaxonomyCategory/aa-6-3',
+    inChainsCollection: false,
+    uploadifyActive: null,
+    uploadifyVendorSku: null,
+    variants: [{ sku: 'BC14WTSRD150P', qty: 1, tracked: true, priceUsd: 2500 }],
+    ...overrides,
+  };
+}
+
+describe('uploadifyJewelryQualifies', () => {
+  it('accepts an active lab-grown piece with sku, quantity, price, copy, and category', () => {
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-diamond-tennis-bracelet' }))).toBe(true);
+  });
+
+  it('accepts an active gold chain and rejects fine jewelry', () => {
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'lmny-cuban-3-9-mm-nmc120',
+          vendor: 'Laura Milman New York',
+          tags: [],
+          productType: 'Necklaces',
+          inChainsCollection: true,
+          variants: [
+            { sku: 'NMC120-18', qty: 1, tracked: true, priceUsd: 900 },
+            { sku: 'NMC120-20', qty: 1, tracked: true, priceUsd: 980 },
+          ],
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'cluster-diamond-studs',
+          vendor: 'Laura Milman New York',
+          tags: [],
+          inChainsCollection: false,
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('rejects drafts, loose stones, missing sku, zero quantity, and a blank category', () => {
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-draft', status: 'DRAFT' }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lg-stone', productType: 'Lab-Grown Diamond', tags: ['lab-grown'] }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-nosku', variants: [{ sku: '', qty: 1, tracked: true, priceUsd: 100 }] }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-zero', variants: [{ sku: 'BC1', qty: 0, tracked: true, priceUsd: 100 }] }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-nocat', categoryId: null }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-nobody', descriptionHtml: '' }))).toBe(false);
+  });
+});
+
+describe('uploadify jewelry writes', () => {
+  it('flags jewelry and copies a single variant SKU', () => {
+    const { writes } = uploadifyActiveWrites([
+      { handle: 'lab-diamond-tennis-bracelet', ownerId: 'gid://shopify/Product/1', current: null, desired: true, audience: 'jewelry' },
+      { handle: 'lg-stone', ownerId: 'gid://shopify/Product/2', current: null, desired: true, audience: 'jewelry' },
+      { handle: 'cluster-diamond-studs', ownerId: 'gid://shopify/Product/3', current: null, desired: true },
+    ]);
+    expect(writes.map((write) => write.ownerId)).toEqual(['gid://shopify/Product/1']);
+    expect(uploadifyVendorSkuForVariants([{ sku: 'BC14WTSRD150P' }])).toBe('BC14WTSRD150P');
+    expect(uploadifyVendorSkuForVariants([{ sku: 'NMC120-18' }, { sku: 'NMC120-20' }])).toBeNull();
+    const sku = uploadifyVendorSkuWrites([
+      {
+        handle: 'lab-diamond-tennis-bracelet',
+        ownerId: 'gid://shopify/Product/1',
+        desired: true,
+        audience: 'jewelry',
+        stockRef: 'BC14WTSRD150P',
+        current: null,
+      },
+    ]);
+    expect(sku.writes[0]?.value).toBe('BC14WTSRD150P');
+  });
+
+  it('keeps a qualifying jewelry handle and still removes everything else', () => {
+    expect(
+      uploadifyActiveDeletesExcept(
+        [
+          { id: 'gid://shopify/Product/1', handle: 'w-3194' },
+          { id: 'gid://shopify/Product/2', handle: 'lab-diamond-tennis-bracelet' },
+          { id: 'gid://shopify/Product/3', handle: 'lmny-cuban-3-9-mm-nmc120' },
+          { id: 'gid://shopify/Product/4', handle: 'cluster-diamond-studs' },
+          { id: 'gid://shopify/Product/5', handle: 'lg-stone' },
+        ],
+        new Set(['w-3194']),
+        new Set(['lab-diamond-tennis-bracelet', 'lmny-cuban-3-9-mm-nmc120', 'lg-stone']),
+      ),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/4', namespace: 'uploadify_product', key: 'uploadify_active' },
+      { ownerId: 'gid://shopify/Product/5', namespace: 'uploadify_product', key: 'uploadify_active' },
     ]);
   });
 });

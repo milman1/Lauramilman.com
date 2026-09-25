@@ -35,8 +35,8 @@ export function uploadifyActiveMetafield(active: boolean): Omit<UploadifyActiveW
 
 /**
  * Qualifying Belgium Dia watches (`w-` handles) get `uploadify_active` true.
- * Anything else is not written here — `uploadifyActiveDeletesExcept` removes
- * the metafield. Rows with no Shopify id yet are counted and not written.
+ * `audience: 'jewelry'` is the lab-grown jewelry and gold-chain path.
+ * Loose diamonds are never written. Rows with no Shopify id yet are counted.
  */
 export function uploadifyActiveWrites(
   rows: Array<{
@@ -44,12 +44,13 @@ export function uploadifyActiveWrites(
     ownerId: string | null;
     current: boolean | null | undefined;
     desired: boolean;
+    audience?: 'watch' | 'jewelry';
   }>,
 ): { writes: UploadifyActiveWrite[]; missingOwner: number } {
   const writes: UploadifyActiveWrite[] = [];
   let missingOwner = 0;
   for (const row of rows) {
-    if (!row.desired || kindForHandle(row.handle) !== 'watch') continue;
+    if (!row.desired || !uploadifyAudienceAllows(row.handle, row.audience ?? 'watch')) continue;
     if (row.current === true) continue;
     if (!row.ownerId) {
       missingOwner += 1;
@@ -58,6 +59,13 @@ export function uploadifyActiveWrites(
     writes.push({ ownerId: row.ownerId, ...uploadifyActiveMetafield(true) });
   }
   return { writes, missingOwner };
+}
+
+function uploadifyAudienceAllows(handle: string, audience: 'watch' | 'jewelry'): boolean {
+  const kind = kindForHandle(handle);
+  if (kind === 'natural' || kind === 'lab') return false;
+  if (audience === 'watch') return kind === 'watch';
+  return kind !== 'watch';
 }
 
 export interface UploadifyVendorSkuWrite {
@@ -81,12 +89,13 @@ export function uploadifyVendorSkuWrites(
     desired: boolean;
     stockRef: string;
     current: string | null | undefined;
+    audience?: 'watch' | 'jewelry';
   }>,
 ): { writes: UploadifyVendorSkuWrite[]; missingOwner: number } {
   const writes: UploadifyVendorSkuWrite[] = [];
   let missingOwner = 0;
   for (const row of rows) {
-    if (!row.desired || kindForHandle(row.handle) !== 'watch') continue;
+    if (!row.desired || !uploadifyAudienceAllows(row.handle, row.audience ?? 'watch')) continue;
     const stockRef = row.stockRef.trim();
     if (!stockRef) continue;
     if ((row.current ?? '').trim() === stockRef) continue;
@@ -133,17 +142,20 @@ export function uploadifyKeepHandles(
 }
 
 /**
- * Delete `uploadify_active` from every product whose handle is not in
- * `keepHandles`. `keepHandles` may only retain `w-` handles; any other
- * handle is removed even if it was listed by mistake.
+ * Delete `uploadify_active` from every product whose handle is not kept.
+ * `keepHandles` may only retain `w-` watches. `jewelryKeepHandles` retains
+ * active lab-grown jewelry and gold chains that still meet the Uploadify
+ * gates. Any other handle is removed even if it was listed by mistake.
  */
 export function uploadifyActiveDeletesExcept(
   owners: Array<{ id: string; handle: string }>,
   keepHandles: ReadonlySet<string>,
+  jewelryKeepHandles: ReadonlySet<string> = new Set(),
 ): MetafieldIdentifier[] {
   const out: MetafieldIdentifier[] = [];
   const seen = new Set<string>();
   for (const owner of owners) {
+    if (jewelryKeepHandles.has(owner.handle) && kindForHandle(owner.handle) == null) continue;
     if (keepHandles.has(owner.handle) && kindForHandle(owner.handle) === 'watch') continue;
     if (seen.has(owner.id)) continue;
     seen.add(owner.id);
@@ -182,4 +194,89 @@ export function uploadifyMetafieldDeletesForDiamonds(catalog: CatalogEntry[]): M
     }
   }
   return out;
+}
+
+export interface UploadifyJewelryVariant {
+  sku: string;
+  qty: number;
+  tracked: boolean;
+  /** Retail price in dollars. Zero or missing fails the Uploadify price gate. */
+  priceUsd: number;
+}
+
+/** A finished piece the sync may keep on Uploadify. Loose stones never qualify. */
+export interface UploadifyJewelryCandidate {
+  id: string;
+  handle: string;
+  status: string;
+  vendor: string;
+  productType: string;
+  tags: string[];
+  title: string;
+  descriptionHtml: string;
+  categoryId: string | null;
+  inChainsCollection: boolean;
+  uploadifyActive: boolean | null;
+  uploadifyVendorSku: string | null;
+  variants: UploadifyJewelryVariant[];
+}
+
+const LOOSE_DIAMOND_TYPES = new Set(['natural diamond', 'lab-grown diamond', 'lab grown diamond']);
+
+export function isLooseDiamondProduct(product: { handle: string; productType: string }): boolean {
+  const type = product.productType.trim().toLowerCase();
+  return LOOSE_DIAMOND_TYPES.has(type) || /^(?:nd|lg)-/i.test(product.handle);
+}
+
+/** Peaceful Diamonds pieces and other finished jewelry tagged lab-grown. */
+export function isLabGrownJewelry(product: {
+  handle: string;
+  productType: string;
+  vendor: string;
+  tags: string[];
+}): boolean {
+  if (isLooseDiamondProduct(product)) return false;
+  if (product.vendor.trim().toLowerCase() === 'peaceful diamonds') return true;
+  return product.tags.some((tag) => tag.toLowerCase() === 'lab-grown');
+}
+
+export function isGoldChainProduct(product: { inChainsCollection: boolean }): boolean {
+  return product.inChainsCollection;
+}
+
+function listingText(value: string): string {
+  return value.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Uploadify lists a piece only when it is active and has a title, a
+ * description, a price, a SKU on every variant, tracked quantity above zero,
+ * and a Shopify category.
+ */
+export function uploadifyListingReady(product: UploadifyJewelryCandidate): boolean {
+  if (product.status !== 'ACTIVE') return false;
+  if (!product.categoryId) return false;
+  if (!product.title.trim() || !listingText(product.descriptionHtml)) return false;
+  if (product.variants.length === 0) return false;
+  if (product.variants.some((variant) => !variant.sku.trim() || !variant.tracked)) return false;
+  const stocked = product.variants.filter((variant) => variant.qty > 0);
+  if (stocked.length === 0) return false;
+  return stocked.every((variant) => variant.priceUsd > 0);
+}
+
+/** Active lab-grown jewelry or a gold chain that meets the Uploadify gates. */
+export function uploadifyJewelryQualifies(product: UploadifyJewelryCandidate): boolean {
+  if (isLooseDiamondProduct(product)) return false;
+  if (!isLabGrownJewelry(product) && !isGoldChainProduct(product)) return false;
+  return uploadifyListingReady(product);
+}
+
+/**
+ * Product-level Vendor SKU. One value cannot stand in for several length
+ * SKUs, so a chain with more than one distinct SKU is left unset. The
+ * variant SKUs remain the marketplace identifiers.
+ */
+export function uploadifyVendorSkuForVariants(variants: Array<{ sku: string }>): string | null {
+  const skus = [...new Set(variants.map((variant) => variant.sku.trim()).filter(Boolean))];
+  return skus.length === 1 ? skus[0] : null;
 }
