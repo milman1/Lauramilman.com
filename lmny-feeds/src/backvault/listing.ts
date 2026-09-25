@@ -190,6 +190,8 @@ function proseNoun(productType: string): string {
       return 'watch';
     case 'Jewelry':
       return 'piece';
+    case 'Brooches':
+      return 'brooch';
     default:
       return productType.replace(/s$/i, '').toLowerCase();
   }
