@@ -12,6 +12,9 @@ export const UPLOADIFY_PRODUCT_NAMESPACE = 'uploadify_product';
 
 export const UPLOADIFY_ACTIVE_KEY = 'uploadify_active';
 
+/** Uploadify's Vendor SKU. The app sends this as the eBay Custom Label. */
+export const UPLOADIFY_VENDOR_SKU_KEY = 'vendor_sku';
+
 export interface UploadifyActiveWrite {
   ownerId: string;
   namespace: string;
@@ -55,6 +58,62 @@ export function uploadifyActiveWrites(
     writes.push({ ownerId: row.ownerId, ...uploadifyActiveMetafield(true) });
   }
   return { writes, missingOwner };
+}
+
+export interface UploadifyVendorSkuWrite {
+  ownerId: string;
+  namespace: string;
+  key: string;
+  type: 'single_line_text_field';
+  value: string;
+}
+
+/**
+ * Qualifying watches get `uploadify_product.vendor_sku` equal to the feed
+ * stock number (the same value written as the Shopify variant SKU). Uploadify
+ * matches an eBay listing by that Custom Label. A blank stock number is not
+ * written. A value that already matches is left alone.
+ */
+export function uploadifyVendorSkuWrites(
+  rows: Array<{
+    handle: string;
+    ownerId: string | null;
+    desired: boolean;
+    stockRef: string;
+    current: string | null | undefined;
+  }>,
+): { writes: UploadifyVendorSkuWrite[]; missingOwner: number } {
+  const writes: UploadifyVendorSkuWrite[] = [];
+  let missingOwner = 0;
+  for (const row of rows) {
+    if (!row.desired || kindForHandle(row.handle) !== 'watch') continue;
+    const stockRef = row.stockRef.trim();
+    if (!stockRef) continue;
+    if ((row.current ?? '').trim() === stockRef) continue;
+    if (!row.ownerId) {
+      missingOwner += 1;
+      continue;
+    }
+    writes.push({
+      ownerId: row.ownerId,
+      namespace: UPLOADIFY_PRODUCT_NAMESPACE,
+      key: UPLOADIFY_VENDOR_SKU_KEY,
+      type: 'single_line_text_field',
+      value: stockRef,
+    });
+  }
+  return { writes, missingOwner };
+}
+
+/**
+ * Same owners that lose `uploadify_active` also lose `vendor_sku`. A missing
+ * metafield delete is ignored by the client, so this is safe when the field
+ * was never set.
+ */
+export function uploadifyVendorSkuDeletesFor(clears: MetafieldIdentifier[]): MetafieldIdentifier[] {
+  return clears
+    .filter((id) => id.namespace === UPLOADIFY_PRODUCT_NAMESPACE && id.key === UPLOADIFY_ACTIVE_KEY)
+    .map((id) => ({ ...id, key: UPLOADIFY_VENDOR_SKU_KEY }));
 }
 
 /**

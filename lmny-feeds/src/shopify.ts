@@ -7,6 +7,7 @@ import type { BrokenMedia, CatalogEntry } from './types.js';
 import {
   isUploadifyNamespace,
   UPLOADIFY_ACTIVE_KEY,
+  UPLOADIFY_VENDOR_SKU_KEY,
   type MetafieldIdentifier,
 } from './uploadifyMetafields.js';
 
@@ -131,6 +132,8 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         uploadifyMetafields.push({ id: inline.id, namespace: inline.namespace, key: inline.key });
       }
       const uploadifyActive = inline?.value === 'true' ? true : inline?.value === 'false' ? false : null;
+      const vendorSkuInline = r.uploadifyVendorSku as { value?: string } | null | undefined;
+      const vendorSku = typeof vendorSkuInline?.value === 'string' ? vendorSkuInline.value.trim() : '';
       byId.set(id, {
         id,
         handle: r.handle,
@@ -142,6 +145,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
         contentHash: (r.metafield as { value: string } | null)?.value ?? null,
         uploadifyMetafields,
         uploadifyActive,
+        uploadifyVendorSku: vendorSku || null,
       });
       order.push(id);
       continue;
@@ -172,6 +176,7 @@ export function parseFeedCatalogRows(lines: unknown[]): CatalogEntry[] {
       if (typeof item?.tracked === 'boolean') parent.inventoryTracked = item.tracked;
       if (typeof item?.id === 'string') parent.inventoryItemId = item.id;
       if (typeof r.inventoryQuantity === 'number') parent.inventoryQuantity = r.inventoryQuantity;
+      if (typeof r.sku === 'string' && r.sku.trim() && !parent.variantSku) parent.variantSku = r.sku.trim();
     }
   }
   return order.map((id) => byId.get(id)!);
@@ -554,7 +559,9 @@ export class ShopifyClient {
    * would blow that). Child JSONL rows are filtered to `uploadify` /
    * `uploadify_product` in `parseFeedCatalogRows`. `uploadifyActive` is a
    * single-field alias, not a connection, so the listing switch is still
-   * captured if the connection is slow to page.
+   * captured if the connection is slow to page. `uploadifyVendorSku` is the
+   * same kind of alias for the stock number Uploadify sends as the eBay
+   * Custom Label.
    *
    * mediaCount deliberately counts only READY media. Shopify's own mediaCount
    * includes FAILED images, and a failed image is worse than none — the
@@ -577,6 +584,7 @@ export class ShopifyClient {
             tags
             metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             uploadifyActive: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_ACTIVE_KEY}") { id namespace key value }
+            uploadifyVendorSku: metafield(namespace: "uploadify_product", key: "${UPLOADIFY_VENDOR_SKU_KEY}") { value }
             metafields { edges { node { id namespace key } } }
             media { edges { node { status mediaContentType } } }
             variants { edges { node { sku inventoryQuantity inventoryItem { id tracked } } } }

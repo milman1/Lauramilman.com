@@ -113,7 +113,10 @@ holds a stones table — Shopify products are the only live copy.
    (`uploadify` / `uploadify_product`, including `uploadify_active`) are
    deleted on loose diamonds only so the app cannot keep them listed. A Belgium
    Watch or TLV watch (`w-` handle) with a price, SKU, title, description, and
-   qty > 0 is written `uploadify_product.uploadify_active` = true. TLV watches
+   qty > 0 is written `uploadify_product.uploadify_active` = true, and
+   `uploadify_product.vendor_sku` is set to the same stock number as the
+   variant SKU. That is the identifier Uploadify sends as the eBay Custom
+   Label. TLV watches
    that pass the same papers and condition gates are created or reactivated
    through the normal watch write, priced with the watch cost tiers, and
    published to the watch sales channels. They do not get the `ebay` tag.
@@ -164,8 +167,10 @@ holds a stones table — Shopify products are the only live copy.
 - Unique inventory: tracked qty 1 while publishable for watches. Loose
   diamonds are tracked qty 0 (`CONTINUE`) so Uploadify does not import them.
   Only qualifying Belgium Watch (ROMAN) and TLV watches get
-  `uploadify_product.uploadify_active` = true. The sync deletes that metafield
-  from every other product in Shopify. TLV watches are imported into the
+  `uploadify_product.uploadify_active` = true and `uploadify_product.vendor_sku`
+  equal to the variant SKU (the eBay Custom Label). The sync deletes that
+  listing switch, and the Vendor SKU with it, from every other product in
+  Shopify. TLV watches are imported into the
   catalog and published on the watch sales channels; they are not tagged for
   eBay. Vivid stays out.
 - Shopify Category: Watches `aa-6-11`; loose diamonds Jewelry `aa-6`.

@@ -62,7 +62,7 @@ import {
   markMissingStonesUnavailable,
   supabaseConfigured,
 } from './supabase-stones.js';
-import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyKeepHandles, uploadifyMetafieldDeletesForDiamonds } from './uploadifyMetafields.js';
+import { uploadifyActiveDeletesExcept, uploadifyActiveWrites, uploadifyKeepHandles, uploadifyMetafieldDeletesForDiamonds, uploadifyVendorSkuDeletesFor, uploadifyVendorSkuWrites } from './uploadifyMetafields.js';
 import type { CatalogEntry, Decision, FeedItem, Hold, Kind, Publishable } from './types.js';
 
 const BULK_THRESHOLD = 100;
@@ -363,6 +363,8 @@ async function main() {
         handle,
         ownerId: existing?.id ?? uploadifyOwnerFromSweep.get(handle) ?? null,
         current: existing?.uploadifyActive ?? null,
+        currentVendorSku: existing?.uploadifyVendorSku ?? null,
+        stockRef: p.item.stockRef,
         desired: watchListsOnUploadify(p.item, p.priced),
       };
     });
@@ -387,6 +389,24 @@ async function main() {
       `${uploadifyActivePlan.writes.length} watch(es) need uploadify_active updated` +
       (uploadifyActivePlan.missingOwner > 0
         ? `; ${uploadifyActivePlan.missingOwner} new watch(es) get it after create`
+        : '');
+    notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
+    console.log(msg);
+  }
+  const uploadifyVendorSkuPlan = uploadifyVendorSkuWrites(
+    uploadifyActiveRows.map((row) => ({
+      handle: row.handle,
+      ownerId: row.ownerId,
+      desired: row.desired,
+      stockRef: row.stockRef,
+      current: row.currentVendorSku,
+    })),
+  );
+  if (uploadifyVendorSkuPlan.writes.length > 0 || uploadifyVendorSkuPlan.missingOwner > 0) {
+    const msg =
+      `${uploadifyVendorSkuPlan.writes.length} watch(es) need uploadify vendor_sku set to the stock number` +
+      (uploadifyVendorSkuPlan.missingOwner > 0
+        ? `; ${uploadifyVendorSkuPlan.missingOwner} new watch(es) get it after create`
         : '');
     notes.push(flags.dryRun ? `${msg} (dry run — not written)` : msg);
     console.log(msg);
@@ -527,7 +547,10 @@ async function main() {
       console.log(
         `Removing uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
       );
-      const clearErrors = await shopify.deleteMetafields(uploadifyActiveClears);
+      const clearErrors = await shopify.deleteMetafields([
+        ...uploadifyActiveClears,
+        ...uploadifyVendorSkuDeletesFor(uploadifyActiveClears),
+      ]);
       writeErrors.push(...clearErrors.map((e) => `uploadify_active remove: ${e}`));
       notes.push(
         `removed uploadify_active from ${uploadifyActiveClears.length} product(s) that are not Belgium Dia or TLV watches`,
@@ -742,6 +765,27 @@ async function main() {
     if (uploadifyActiveLive.missingOwner > 0) {
       notes.push(
         `${uploadifyActiveLive.missingOwner} watch(es) qualified for uploadify_active but had no Shopify id`,
+      );
+    }
+
+    const uploadifyVendorSkuLive = uploadifyVendorSkuWrites(
+      uploadifyActiveRows.map((row) => ({
+        handle: row.handle,
+        ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+        desired: row.desired,
+        stockRef: row.stockRef,
+        current: row.currentVendorSku,
+      })),
+    );
+    if (uploadifyVendorSkuLive.writes.length > 0) {
+      console.log(`Setting uploadify vendor_sku on ${uploadifyVendorSkuLive.writes.length} watch(es)`);
+      const metafieldErrors = await shopify.setMetafields(uploadifyVendorSkuLive.writes);
+      writeErrors.push(...metafieldErrors.map((e) => `uploadify vendor_sku: ${e}`));
+      notes.push(`set uploadify vendor_sku on ${uploadifyVendorSkuLive.writes.length} watch(es)`);
+    }
+    if (uploadifyVendorSkuLive.missingOwner > 0) {
+      notes.push(
+        `${uploadifyVendorSkuLive.missingOwner} watch(es) qualified for uploadify vendor_sku but had no Shopify id`,
       );
     }
 

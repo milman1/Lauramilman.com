@@ -124,6 +124,13 @@ export interface CatalogEntry {
    * is present; null when the catalog row has no value.
    */
   uploadifyActive?: boolean | null;
+  /**
+   * `uploadify_product.vendor_sku`. The stock number Uploadify sends as the
+   * eBay Custom Label. Null when the metafield is absent or blank.
+   */
+  uploadifyVendorSku?: string | null;
+  /** First variant SKU from the catalog bulk file. */
+  variantSku?: string | null;
 }
 
 export interface DesiredEntry {

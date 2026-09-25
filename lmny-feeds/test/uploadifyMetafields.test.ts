@@ -6,6 +6,8 @@ import {
   uploadifyActiveWrites,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
+  uploadifyVendorSkuDeletesFor,
+  uploadifyVendorSkuWrites,
 } from '../src/uploadifyMetafields.js';
 
 function entry(overrides: Partial<CatalogEntry> & { handle: string }): CatalogEntry {
@@ -120,6 +122,69 @@ describe('uploadifyActiveWrites', () => {
     ]);
     expect(writes).toEqual([]);
     expect(missingOwner).toBe(1);
+  });
+});
+
+describe('uploadifyVendorSkuWrites', () => {
+  it('copies the stock number when Vendor SKU is blank', () => {
+    const { writes, missingOwner } = uploadifyVendorSkuWrites([
+      {
+        handle: 'w-rw3036',
+        ownerId: 'gid://shopify/Product/1',
+        desired: true,
+        stockRef: 'RW3036',
+        current: null,
+      },
+      {
+        handle: 'w-t3487',
+        ownerId: 'gid://shopify/Product/2',
+        desired: true,
+        stockRef: 'T3487',
+        current: 'T3487',
+      },
+    ]);
+    expect(missingOwner).toBe(0);
+    expect(writes).toEqual([
+      {
+        ownerId: 'gid://shopify/Product/1',
+        namespace: 'uploadify_product',
+        key: 'vendor_sku',
+        type: 'single_line_text_field',
+        value: 'RW3036',
+      },
+    ]);
+  });
+
+  it('skips watches that do not qualify, blank stock numbers, and non-watches', () => {
+    const { writes, missingOwner } = uploadifyVendorSkuWrites([
+      { handle: 'w-draft', ownerId: 'gid://shopify/Product/3', desired: false, stockRef: 'DRAFT', current: null },
+      { handle: 'w-blank', ownerId: 'gid://shopify/Product/4', desired: true, stockRef: '  ', current: null },
+      { handle: 'nd-one', ownerId: 'gid://shopify/Product/5', desired: true, stockRef: 'ND1', current: null },
+      { handle: 'bv-estate', ownerId: 'gid://shopify/Product/6', desired: true, stockRef: 'J1', current: null },
+    ]);
+    expect(writes).toEqual([]);
+    expect(missingOwner).toBe(0);
+  });
+
+  it('counts a qualifying watch that has no Shopify id yet', () => {
+    const { writes, missingOwner } = uploadifyVendorSkuWrites([
+      { handle: 'w-new', ownerId: null, desired: true, stockRef: 'NEW1', current: '' },
+    ]);
+    expect(writes).toEqual([]);
+    expect(missingOwner).toBe(1);
+  });
+});
+
+describe('uploadifyVendorSkuDeletesFor', () => {
+  it('adds a vendor_sku delete for each uploadify_active delete', () => {
+    expect(
+      uploadifyVendorSkuDeletesFor([
+        { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'uploadify_active' },
+        { ownerId: 'gid://shopify/Product/9', namespace: 'uploadify', key: 'listing_id' },
+      ]),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'vendor_sku' },
+    ]);
   });
 });
 

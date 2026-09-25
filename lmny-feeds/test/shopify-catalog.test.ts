@@ -32,6 +32,8 @@ describe('parseFeedCatalogRows', () => {
       inventoryItemId: 'gid://shopify/InventoryItem/9',
       inventoryQuantity: 0,
       contentHash: 'h1',
+      variantSku: '3194',
+      uploadifyVendorSku: null,
     });
   });
 
@@ -71,6 +73,7 @@ describe('parseFeedCatalogRows', () => {
           key: 'uploadify_active',
           value: 'true',
         },
+        uploadifyVendorSku: { value: '  ND1  ' },
       },
       {
         __parentId: 'gid://shopify/Product/3',
@@ -86,6 +89,7 @@ describe('parseFeedCatalogRows', () => {
       },
     ]);
     expect(catalog[0]?.uploadifyActive).toBe(true);
+    expect(catalog[0]?.uploadifyVendorSku).toBe('ND1');
     expect(catalog[0]?.uploadifyMetafields).toEqual([
       {
         id: 'gid://shopify/Metafield/1',
