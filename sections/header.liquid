@@ -120,7 +120,7 @@
   color: var(--gold-light, #E2C27A);
 }
 
-/* Peaceful Diamonds nav entry — cool navy signal dot marks the sub-brand tier */
+/* Lab-grown nav entry uses the house gold, same as the rest of the bar. */
 .header .nav__link--peaceful {
   display: inline-flex;
   align-items: center;
@@ -128,14 +128,13 @@
 }
 
 .header .nav__link--peaceful::after {
-  background: var(--pd-blue, #5B7FBD);
+  background: var(--gold, #C9A050);
 }
 
 .header .nav__link--peaceful:hover {
-  color: var(--pd-ice, #A9BEE3);
+  color: var(--gold-light, #E2C27A);
 }
 
-/* As a dropdown parent it keeps the tier colour rather than the gold. */
 .header .nav__item--peaceful .nav__item-link {
   display: inline-flex;
   align-items: center;
@@ -143,28 +142,28 @@
 }
 
 .header .nav__item--peaceful .nav__item-link::after {
-  background: var(--pd-blue, #5B7FBD);
+  background: var(--gold, #C9A050);
 }
 
 .header .nav__item--peaceful:hover .nav__item-link,
 .header .nav__item--peaceful .nav__item-link:hover {
-  color: var(--pd-ice, #A9BEE3);
+  color: var(--gold-light, #E2C27A);
 }
 
 .header .nav__item--peaceful .nav__dropdown-link:hover {
-  color: var(--pd-ice, #A9BEE3);
+  color: var(--gold-light, #E2C27A);
 }
 
 .header .nav__item--peaceful .nav__dropdown-link:hover::before {
-  background: var(--pd-blue, #5B7FBD);
+  background: var(--gold, #C9A050);
 }
 
 .header .nav__peaceful-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--pd-blue, #5B7FBD);
-  box-shadow: 0 0 6px rgba(91, 127, 189, 0.8);
+  background: var(--gold, #C9A050);
+  box-shadow: 0 0 6px rgba(201, 160, 80, 0.8);
   flex-shrink: 0;
 }
 

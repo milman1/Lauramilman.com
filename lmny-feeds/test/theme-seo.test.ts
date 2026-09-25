@@ -61,6 +61,11 @@ describe('theme SEO integration', () => {
     expect(collection).toContain("render 'collection-guide'");
     expect(themeFile('sections/header.liquid')).toContain('>All Jewelry</a>');
     expect(themeFile('sections/header.liquid')).not.toContain('All Fine Jewelry');
+    const labBlock = themeFile('sections/peaceful-diamonds.liquid');
+    expect(labBlock).toContain('var(--wine, #4A1428)');
+    expect(labBlock).toContain('var(--gold, #C9A050)');
+    expect(labBlock).not.toContain('--pd-blue');
+    expect(themeFile('assets/theme.css')).toContain('color: var(--wine, #4A1428)');
   });
 
   it('lists Chains with the other Fine Jewelry types, not as a style column', () => {
