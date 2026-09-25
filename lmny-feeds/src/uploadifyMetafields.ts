@@ -228,6 +228,11 @@ export function isLooseDiamondProduct(product: { handle: string; productType: st
   return LOOSE_DIAMOND_TYPES.has(type) || /^(?:nd|lg)-/i.test(product.handle);
 }
 
+function isLabGrownTag(tag: string): boolean {
+  const folded = tag.trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+  return folded === 'lab grown' || folded === 'lab grown diamond';
+}
+
 /** Peaceful Diamonds pieces and other finished jewelry tagged lab-grown. */
 export function isLabGrownJewelry(product: {
   handle: string;
@@ -237,7 +242,7 @@ export function isLabGrownJewelry(product: {
 }): boolean {
   if (isLooseDiamondProduct(product)) return false;
   if (product.vendor.trim().toLowerCase() === 'peaceful diamonds') return true;
-  return product.tags.some((tag) => tag.toLowerCase() === 'lab-grown');
+  return product.tags.some(isLabGrownTag);
 }
 
 export function isGoldChainProduct(product: { inChainsCollection: boolean }): boolean {

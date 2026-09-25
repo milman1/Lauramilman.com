@@ -242,6 +242,19 @@ describe('uploadifyJewelryQualifies', () => {
     ).toBe(false);
   });
 
+  it('treats a finished piece tagged Lab Grown Diamond as lab jewelry', () => {
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'lab-grown-heart-shaped-diamond-pendant-in-14k-white-gold-90ct',
+          vendor: 'Laura Milman New York',
+          tags: ['Lab Grown Diamond', 'Necklaces'],
+          productType: '',
+        }),
+      ),
+    ).toBe(true);
+  });
+
   it('rejects drafts, loose stones, missing sku, zero quantity, and a blank category', () => {
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-draft', status: 'DRAFT' }))).toBe(false);
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lg-stone', productType: 'Lab-Grown Diamond', tags: ['lab-grown'] }))).toBe(false);
