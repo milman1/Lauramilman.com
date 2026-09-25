@@ -35,7 +35,7 @@
         "trust-2": {
           "type": "item",
           "settings": {
-            "text": "7-Day Returns"
+            "text": "7-Day Jewelry Returns"
           }
         },
         "trust-3": {
@@ -49,11 +49,18 @@
           "settings": {
             "text": "1-Year Warranty"
           }
+        },
+        "trust-5": {
+          "type": "item",
+          "settings": {
+            "text": "Watches: Exchanges Only"
+          }
         }
       },
       "block_order": [
         "trust-1",
         "trust-2",
+        "trust-5",
         "trust-3",
         "trust-4"
       ],
@@ -273,7 +280,7 @@
         "eyebrow": "Pre-Owned Timepieces",
         "title": "Watches, Authenticated",
         "description": "Rolex, Cartier, Bvlgari, and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
-        "trust_line": "Authenticated in New York · Watches: exchanges only",
+        "trust_line": "Authenticated in New York · Watches: Exchanges Only",
         "cta_text": "Shop All Timepieces",
         "cta_url": "/collections/time-pieces"
       }
