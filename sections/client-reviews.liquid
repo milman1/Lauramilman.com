@@ -52,7 +52,7 @@
       {%- endif -%}
     </header>
 
-    <ul class="lm-cr__list" role="list">
+    <ul class="lm-cr__list" role="list" id="ClientReviewsList-{{ section.id }}" tabindex="0" aria-label="Client reviews, scroll for more">
       {%- for block in section.blocks -%}
         {%- if block.settings.quote != blank -%}
           {%- assign stars = block.settings.rating | default: 5 -%}
@@ -79,6 +79,12 @@
     </ul>
 
     <div class="lm-cr__actions">
+      {%- if cr_count > 3 -%}
+        <div class="lm-cr__nav" data-cr-nav hidden>
+          <button type="button" class="lm-cr__arrow" data-cr-dir="-1" aria-controls="ClientReviewsList-{{ section.id }}" aria-label="Previous reviews">&larr;</button>
+          <button type="button" class="lm-cr__arrow" data-cr-dir="1" aria-controls="ClientReviewsList-{{ section.id }}" aria-label="Next reviews">&rarr;</button>
+        </div>
+      {%- endif -%}
       <a class="lm-cr__link" href="{{ cr_all_url }}">{{ section.settings.all_text | default: 'Read all reviews' }} &rarr;</a>
       {%- if section.settings.google_url != blank -%}
         <a class="lm-cr__link lm-cr__link--quiet" href="{{ section.settings.google_url }}" target="_blank" rel="noopener">Leave a review on Google</a>
@@ -86,6 +92,31 @@
     </div>
   </div>
 </section>
+
+<script>
+  (function () {
+    var list = document.getElementById('ClientReviewsList-{{ section.id }}');
+    var nav = list && list.closest('.lm-cr').querySelector('[data-cr-nav]');
+    if (!nav) return;
+    nav.hidden = false;
+    var buttons = nav.querySelectorAll('[data-cr-dir]');
+    function update() {
+      var max = list.scrollWidth - list.clientWidth - 2;
+      buttons[0].disabled = list.scrollLeft <= 2;
+      buttons[1].disabled = list.scrollLeft >= max;
+    }
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var dir = Number(btn.getAttribute('data-cr-dir'));
+        list.scrollBy({ left: dir * list.clientWidth, behavior: 'smooth' });
+      });
+    });
+    list.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    window.addEventListener('load', update);
+    requestAnimationFrame(update);
+  })();
+</script>
 
 <style>
   .lm-cr {
@@ -160,13 +191,51 @@
   .lm-cr__stars .is-empty {
     opacity: 0.25;
   }
+  /* A rail of every review: three to a view on desktop, swipe on phones. */
   .lm-cr__list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 2.5rem) / 3);
     gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    outline-offset: 4px;
+  }
+  .lm-cr__list::-webkit-scrollbar {
+    display: none;
+  }
+  .lm-cr__card {
+    scroll-snap-align: start;
+  }
+  .lm-cr__nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: auto;
+  }
+  .lm-cr__nav[hidden] {
+    display: none;
+  }
+  .lm-cr__arrow {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(201, 160, 80, 0.45);
+    background: none;
+    color: var(--gold-light, #E2C27A);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.25s ease, opacity 0.25s ease;
+  }
+  .lm-cr__arrow:hover:not(:disabled),
+  .lm-cr__arrow:focus-visible {
+    background: rgba(201, 160, 80, 0.12);
+  }
+  .lm-cr__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
   .lm-cr__card {
     display: flex;
@@ -256,26 +325,18 @@
   }
   @media (max-width: 989px) {
     .lm-cr__list {
-      grid-auto-flow: column;
-      grid-template-columns: none;
-      grid-auto-columns: minmax(78%, 1fr);
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      grid-auto-columns: 82%;
       scroll-padding-inline: var(--container-padding, 1.5rem);
       margin: 0 calc(var(--container-padding, 1.5rem) * -1);
       padding: 0 var(--container-padding, 1.5rem) 0.5rem;
-      scrollbar-width: none;
     }
-    .lm-cr__list::-webkit-scrollbar {
+    .lm-cr__nav {
       display: none;
-    }
-    .lm-cr__card {
-      scroll-snap-align: start;
     }
   }
   @media (min-width: 600px) and (max-width: 989px) {
     .lm-cr__list {
-      grid-auto-columns: minmax(46%, 1fr);
+      grid-auto-columns: calc((100% - 1.25rem) / 2);
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -290,7 +351,7 @@
   "tag": "section",
   "class": "section-client-reviews",
   "settings": [
-    { "type": "paragraph", "content": "Copy each review word for word from Google, with the name and date as Google shows them. The section stays hidden until one review has text." },
+    { "type": "paragraph", "content": "Copy each review word for word from Google, with the name and date as Google shows them. Add as many as you like; they scroll three at a time. The section stays hidden until one review has text." },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "From Google" },
     { "type": "text", "id": "title", "label": "Heading", "default": "What clients" },
     { "type": "text", "id": "title_emphasis", "label": "Heading ending in italic gold", "default": "say" },
@@ -304,7 +365,7 @@
     {
       "type": "review",
       "name": "Review",
-      "limit": 6,
+      "limit": 50,
       "settings": [
         { "type": "textarea", "id": "quote", "label": "Review text (word for word)" },
         { "type": "text", "id": "name", "label": "Name as shown on Google", "info": "First name and last initial, e.g. Sarah M." },
