@@ -69,6 +69,16 @@
     "shop-worlds": {
       "type": "shop-worlds",
       "blocks": {
+        "world-lab": {
+          "type": "world",
+          "settings": {
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "title": "Lab-Grown Jewelry",
+            "subtitle": "The largest jewelry edit",
+            "link": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+            "tone": "navy"
+          }
+        },
         "world-chains": {
           "type": "world",
           "settings": {
@@ -111,6 +121,7 @@
         }
       },
       "block_order": [
+        "world-lab",
         "world-chains",
         "world-timepieces",
         "world-jewelry",
@@ -119,7 +130,7 @@
       "settings": {
         "eyebrow": "Also in the house",
         "heading": "More to explore",
-        "subheading": "Gold chains for every day, pre-owned watches, the full jewelry catalog, and loose diamonds."
+        "subheading": "Lab-grown jewelry, gold chains for every day, pre-owned watches, the full catalog, and loose diamonds."
       }
     },
     "preowned-maison": {
@@ -489,18 +500,54 @@
         "description": "For the pieces that matter most, work directly with Laura. Private viewings in New York, diamond and gemstone sourcing, and one-of-a-kind commissions crafted in Italy.",
         "cta_text": "Book a Consultation",
         "cta_url": "/pages/private-clients",
-        "note": "Complimentary · No obligation"
+        "note": "Complimentary · No obligation",
+        "compact": true
+      }
+    },
+    "lab-grown-edit": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "Lab-Grown Jewelry",
+        "title": "Pieces for the week",
+        "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. The largest jewelry edit in the house.",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "product_count": 8,
+        "cta_text": "Shop Lab-Grown Jewelry",
+        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
       }
     },
     "reviews": {
-      "type": "google-reviews-strip",
+      "type": "testimonials",
+      "blocks": {
+        "t1": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
+            "author": "Alexandra K.",
+            "product_name": "Private consultation"
+          }
+        },
+        "t2": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
+            "author": "Catherine M.",
+            "product_name": "Tennis bracelet"
+          }
+        },
+        "t3": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
+            "author": "Victoria S.",
+            "product_name": "Lab-grown jewelry"
+          }
+        }
+      },
+      "block_order": ["t1", "t2", "t3"],
       "settings": {
-        "eyebrow": "Client Words",
-        "title": "Loved in New York",
-        "intro": "Real appointments, real pieces — read what clients say after working with Laura.",
-        "embed_id": "25387276",
-        "cta_label": "See all reviews",
-        "cta_url": "/pages/google-reviews"
+        "eyebrow": "What Our Clients Say",
+        "title": "Testimonials"
       }
     },
     "newsletter": {
@@ -533,13 +580,14 @@
     "preowned-maison",
     "featured-products",
     "shop-worlds",
+    "lab-grown-edit",
+    "private-clients",
     "collections-grid",
     "preowned-timepieces",
     "fine-jewelry-editorial",
     "diamond-destination",
     "philosophy-quote",
     "brand-story",
-    "private-clients",
     "reviews",
     "newsletter",
     "closing-cta"
