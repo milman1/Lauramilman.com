@@ -356,7 +356,7 @@ Optional overrides: `BELGIUMDIA_API_URL` (repo Actions **variable**; defaults to
 `https://api.belgiumdia.com`), and `BELGIUMDIA_NATURAL_PATH` /
 `BELGIUMDIA_LAB_PATH` / `BELGIUMDIA_WATCH_PATH` for the endpoint paths.
 
-## The Back Vault weekly sync (`src/backvault/`)
+## The Back Vault sync (`src/backvault/`)
 
 A second, independent pipeline scraped from thebackvault.com's public
 Shopify `products.json` feed — no API key required.
@@ -546,7 +546,7 @@ pair). Additional optional variables:
 
 ### Schedule
 
-`.github/workflows/backvault-feed-sync.yml` — weekly, Sunday 00:17 UTC.
+`.github/workflows/backvault-feed-sync.yml` — Sunday, Tuesday, and Thursday at 00:17 UTC.
 Always live on the schedule (user chose no dry-run gate). Use
 `workflow_dispatch` with `dry_run=true` to inspect a run without writes.
 
