@@ -87,6 +87,7 @@ its row; if the row says "merchant-set", ask, never assume.
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Tiered: <$5,000 ×1.30; $5,000–$15,000 ×1.20 (min $6,500); $15,001–$40,000 ×1.12 (min $18,000); >$40,000 ×1.08 (min $44,800); rounded up to $100; no cost → tag `pricing-review`, price untouched | `config/pricing.ts` `WATCH_COST_TIERS`, `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500. Their catalogue is larger than the 25,000 products their pagination allows, so a run often cannot see the whole of it: each match is remembered on the product (`backvault_feed.competitor_price` + `competitor_price_at`), and on a run whose index is incomplete an unmatched piece is priced from a remembered comparison **under 90 days old** — the same midpoint rule, against that run's cost, so a supplier markdown still reaches the storefront. Nothing remembered, or older than 90 days: cost + $500, as for any piece that is not on their site. A complete index always wins over memory. | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts`, `diff.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
+| Skylab bridal (complete engagement rings and settings; house-brand vendor; SKU = supplier item number) | Trade-account / invoice wholesale cost (Shopify Cost per item) | **Cost × 3**, rounded to the nearest dollar. **Skylab only** — not Royal Chain's round-up-to-$5, not Peaceful Diamonds ×4. Skip pieces with no cost; never infer one. Origin is copied from the supplier listing: most complete rings are lab-grown and labeled that way on their site; a natural listing stays natural. Supplier name never appears on the store. | `config/pricing.ts` `SKYLAB`, `skylabRetailFromCost` |
 | Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; sourced from Bucherer and Exquisite Timepieces; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Retailer list price as scraped from Bucherer or Exquisite Timepieces (the lower when both list the reference) unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the retailer's list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
 | Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
 | Lab-grown jewelry (vendor Peaceful Diamonds, SKUs `BC14…` / `NK14…`, and lab-tagged pieces) | Merchant wholesale / Shopify Cost per item | **Cost × 4**, rounded to the nearest dollar. Different from loose lab stones and from fine jewelry. On 2026-09-09 no piece had a cost recorded (25 checked), so the rule cannot run until Cost per item is entered; a reprice job must skip pieces with no cost, never infer one. | `config/pricing.ts` `LAB_GROWN_JEWELRY`, `labGrownJewelryRetailFromCost` |
@@ -98,15 +99,17 @@ borrowing a neighbour's multiplier. When the merchant states a rule for
 one of them, add the constant to `config/pricing.ts`, update this row,
 and only then reprice.
 
-Repo check, 2026-09-17 (updated): `config/pricing.ts` holds coded rules for
+Repo check, 2026-09-18 (updated): `config/pricing.ts` holds coded rules for
 loose naturals (`STONE_TIERS`: 1.40× through $4,000 Amount, 1.25× above),
 loose labs (`LOOSE_LAB_GROWN`: 2.50× at Amount ≤ $500, 1.50× above), watches
-(`WATCH_COST_TIERS`), Back Vault, Royal Chain, and lab-grown jewelry
-(`LAB_GROWN_JEWELRY`, cost × 4). Nothing in the repository defines a retail
-multiplier for fine jewelry, hand-imported estate, or Jacob & Co. One Royal
-Chain item already in the store (`MZ003379`, a 14K franco chain under the
-house vendor) was priced by hand at ×2.8 before the ×3 rule existed; the
-rule, not the precedent, applies from now on.
+(`WATCH_COST_TIERS`), Back Vault, Royal Chain, Skylab bridal (`SKYLAB`,
+cost × 3, nearest dollar), and lab-grown jewelry (`LAB_GROWN_JEWELRY`,
+cost × 4). Nothing in the repository defines a retail multiplier for fine
+jewelry, hand-imported estate, or Jacob & Co. One Royal Chain item already
+in the store (`MZ003379`, a 14K franco chain under the house vendor) was
+priced by hand at ×2.8 before the ×3 rule existed; the rule, not the
+precedent, applies from now on. Skylab lab rings still use `SKYLAB` ×3,
+never the Peaceful Diamonds ×4 row.
 
 ---
 
@@ -564,12 +567,17 @@ the intent suffix change.
 | Estate jewelry (Back Vault) | `{brand} {normalized identifying details}`, watches `Pre-Owned {brand} {remainder}` | `… \| Estate Jewelry` or `… \| Pre-Owned Watch` |
 | Jacob & Co. (recipe G2) | `Unworn Jacob & Co {Collection} {Dial} {Reference}` | `… – Unworn Watch` |
 | Fine jewelry, Royal Chain chains, Peaceful Diamonds | `{prefix}{distinctive design/model} {primary gemstone} {product type} in {metal}` | `… \| Laura Milman` |
+| Skylab complete rings and settings | `{prefix}{distinctive design/model} {primary gemstone} {product type} in {metal}` | `… \| Laura Milman` |
 
 1. Per-source prefix rule: the prefix is empty for house fine jewelry and
-   chains, `Lab Grown` for Peaceful Diamonds pieces, and the condition word
+   chains, `Lab Grown` for Peaceful Diamonds pieces and for Skylab pieces
+   whose supplier listing states lab-grown, and the condition word
    (`Pre-Owned` or `Unworn`) for anything owned before or boutique-unworn. An
    unrecognized condition stays unclassified and gets no prefix, as
    `watchListingBuilder.ts` handles it. Never invent a condition word.
+   Most Skylab complete rings are lab-grown and labeled on the supplier
+   site; copy that fact per SKU. Do not label a piece lab-grown unless the
+   source listing says so.
 2. Body follows `listing.ts`: one prose paragraph, "This {brand} estate
    {noun}{era}{metal}{stones} is offered by Laura Milman New York." plus a
    grade sentence when a grade is known. Specs are never inlined as a table;

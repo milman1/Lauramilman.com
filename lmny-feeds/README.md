@@ -67,6 +67,11 @@ holds a stones table — Shopify products are the only live copy.
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
      `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
+   - Skylab bridal (complete engagement rings and settings):
+     `retail = round(cost × 3)` via `config/pricing.ts` `SKYLAB`. House
+     vendor; origin copied from the supplier listing (most complete rings
+     are lab-grown and labeled there). Never Royal Chain round-up or
+     Peaceful Diamonds ×4. Skip rows with no cost.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    delete / archive / skip. Unchanged hashes are skipped entirely. Loose
    diamonds that leave a successfully fetched feed are permanently deleted

@@ -48,3 +48,16 @@ Use this formula in Shopify Admin:
 Avoid generic openings such as “Beautiful,” stock numbers, promotional claims,
 price, and repeated category words. Keep the Shopify SEO title at or below 60
 characters and the description at or below 160 characters.
+
+## Skylab bridal (complete rings and settings)
+
+House-brand listings. Retail is `skylabRetailFromCost` (cost × 3, nearest
+dollar) in `config/pricing.ts`. The supplier name never appears on the store.
+
+- Product title: `{prefix}{distinctive design/model} {primary gemstone} {product type} in {metal}`
+- SEO title: `{design/model} {gemstone} {product type} | Laura Milman`
+
+`prefix` is `Lab Grown ` only when that SKU’s supplier listing states
+lab-grown. Most complete rings are lab and labeled on their site; a natural
+listing stays natural. Do not apply the Peaceful Diamonds ×4 rule.
+

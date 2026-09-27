@@ -150,8 +150,8 @@ export const WATCH = {
  *   retail = round(cost × 4)
  *
  * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
- * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
- * Royal Chain rules to these products.
+ * Cost per item when recorded). Do not apply stone, watch, Back Vault,
+ * Royal Chain, or Skylab rules to these products.
  */
 export const LAB_GROWN_JEWELRY = {
   vendors: ['Peaceful Diamonds'] as const,
@@ -167,6 +167,33 @@ export function labGrownJewelryRetailFromCost(costUsd: number): number {
     throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
   }
   return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
+}
+
+/**
+ * Skylab bridal intake (complete engagement rings and the smaller settings
+ * book). Merchant decision 2026-09-18.
+ *
+ *   retail = round(cost × 3)
+ *
+ * Own constant: do not call `supplierRetailFromCost` (Royal Chain, round up
+ * to $5) or `labGrownJewelryRetailFromCost` (Peaceful Diamonds, ×4).
+ * Storefront vendor is the house brand. Origin (lab-grown vs natural) is a
+ * listing fact copied from the supplier page — most complete rings are lab
+ * and labeled there; never assume every SKU is lab. Skip any piece with no
+ * recorded cost. Supplier name never appears on the store.
+ */
+export const SKYLAB = {
+  supplier: 'Skylab',
+  houseVendor: 'Laura Milman New York',
+  costMultiple: 3,
+} as const;
+
+/** Retail for a Skylab complete ring or setting from recorded wholesale cost. */
+export function skylabRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Skylab pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * SKYLAB.costMultiple);
 }
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
@@ -240,8 +267,9 @@ export const BACKVAULT = {
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
  * jewelry and hand-imported estate pieces are merchant-set and have no
- * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×4). A new
- * supplier gets its own constant here, never this one.
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×4). Skylab
+ * bridal uses `SKYLAB` (×3, nearest dollar). A new supplier gets its own
+ * constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
