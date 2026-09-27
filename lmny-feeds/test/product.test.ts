@@ -227,6 +227,9 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, 'custom', 'dial')?.value).toBe('Black');
     expect(find(fields, 'custom', 'metal')?.value).toBe('STEEL');
     expect(find(fields, 'mm-google-shopping', 'condition')?.value).toBe('used');
+    expect(find(fields, 'mm-google-shopping', 'custom_product')?.value).toBe('true');
+    expect(find(fields, 'mm-google-shopping', 'age_group')?.value).toBe('adult');
+    expect(find(fields, 'mm-google-shopping', 'gender')?.value).toBe('unisex');
     expect(find(fields, 'global', 'MPN')?.value).toBe('126610LN');
     // Diamond-only facets stay off watches.
     expect(find(fields, 'custom', 'diamond_shape')).toBeUndefined();
@@ -239,6 +242,14 @@ describe('storefront-readable facet metafields', () => {
     expect(find(fields, 'custom', 'dial')?.value).toBe('Black');
     expect(find(fields, 'custom', 'reference')?.value).toBe('126610LN');
     expect(find(fields, 'mm-google-shopping', 'condition')).toBeUndefined();
+    expect(find(fields, 'mm-google-shopping', 'custom_product')?.value).toBe('true');
+    expect(find(fields, 'mm-google-shopping', 'gender')?.value).toBe('unisex');
+  });
+
+  it('does not put Google Shopping attributes on loose diamonds', () => {
+    const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
+    expect(find(fields, 'mm-google-shopping', 'custom_product')).toBeUndefined();
+    expect(find(fields, 'mm-google-shopping', 'gender')).toBeUndefined();
   });
 
   it('carries every feed video, not just the first', () => {

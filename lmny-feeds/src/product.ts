@@ -1,6 +1,7 @@
 import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
+import { googleShoppingMetafields } from './googleShopping.js';
 import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
 import { classifyWatchCondition } from './ebayCondition.js';
@@ -320,8 +321,29 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
         });
       }
     }
+    // productSet deletes metafields omitted from this list. These Google
+    // keys are not in the content hash; they ride along so a later watch
+    // update does not strip them. Loose stones never get them.
+    appendGoogleShopping(fields, {
+      title: titleFor(item),
+      productType: 'Watch',
+      metal: item.metal,
+    });
   }
   return fields;
+}
+
+function appendGoogleShopping(
+  fields: MetafieldValue[],
+  input: { title: string; productType: string; metal?: string | null },
+): void {
+  const have = new Set(fields.map((field) => `${field.namespace}.${field.key}`));
+  for (const field of googleShoppingMetafields(input)) {
+    const id = `${field.namespace}.${field.key}`;
+    if (have.has(id)) continue;
+    fields.push(field);
+    have.add(id);
+  }
 }
 
 export function descriptionFor(item: FeedItem): string {
