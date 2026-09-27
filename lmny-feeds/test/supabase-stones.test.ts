@@ -5,6 +5,7 @@ import {
   stoneRowFor,
   supabaseConfigured,
   dualWriteStones,
+  markMissingStonesUnavailable,
 } from '../src/supabase-stones.js';
 
 describe('supabaseConfigured', () => {
@@ -85,5 +86,36 @@ describe('dualWriteStones', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]!.url).toContain('/rest/v1/stones?on_conflict=stock_ref');
     expect(calls[0]!.body).toHaveLength(2);
+  });
+});
+
+describe('markMissingStonesUnavailable', () => {
+  it('pages past the first 1000 available rows before deciding who is gone', async () => {
+    const pages: string[][] = [
+      Array.from({ length: 1000 }, (_, i) => `live-${i}`),
+      ['gone-on-page-2', 'live-tail'],
+    ];
+    const patches: string[] = [];
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      const headers = new Headers(init?.headers);
+      if ((init?.method ?? 'GET') === 'GET') {
+        const range = headers.get('Range') ?? '';
+        const page = range.startsWith('1000-') ? 1 : 0;
+        if (!range) throw new Error('unpaged read');
+        return new Response(JSON.stringify(pages[page]!.map((stock_ref) => ({ stock_ref }))), { status: 200 });
+      }
+      const match = String(url).match(/stock_ref=in\.\(([^)]*)\)/);
+      patches.push(decodeURIComponent(match?.[1] ?? ''));
+      return new Response('', { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const live = new Set<string>([...pages[0]!, 'live-tail']);
+    const gone = await markMissingStonesUnavailable(live, {
+      url: 'https://example.supabase.co',
+      key: 'service',
+      fetchImpl,
+    });
+    expect(gone).toBe(1);
+    expect(patches).toEqual(['gone-on-page-2']);
   });
 });
