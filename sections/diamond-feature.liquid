@@ -1,0 +1,264 @@
+{%- comment -%}
+  Laura Milman New York — Loose Diamond Feature
+  Dark navy feature with a lab-grown / natural switch and shape shortcuts.
+  Each shape links to the diamond search with that shape pre-selected
+  (?shape=Oval), which assets/diamond-storefront.js reads on load.
+{%- endcomment -%}
+
+{%- liquid
+  assign lab_url = section.settings.lab_collection.url | default: '/collections/lab-grown-diamonds'
+  assign natural_url = section.settings.natural_collection.url | default: '/collections/natural-diamonds'
+  assign shapes = 'Round,Oval,Emerald,Pear,Cushion,Princess,Marquise,Radiant' | split: ','
+-%}
+
+<section class="lm-dfeature" aria-labelledby="DFeatureTitle-{{ section.id }}" data-dfeature data-lab-url="{{ lab_url }}" data-natural-url="{{ natural_url }}">
+  <div class="lm-dfeature__copy">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="lm-dfeature__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    <h2 class="lm-dfeature__title" id="DFeatureTitle-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}
+      <p class="lm-dfeature__text">{{ section.settings.text }}</p>
+    {%- endif -%}
+
+    <div class="lm-dfeature__toggle" role="group" aria-label="Diamond origin">
+      <button type="button" aria-pressed="true" data-origin="lab">Lab-grown</button>
+      <button type="button" aria-pressed="false" data-origin="natural">Natural</button>
+    </div>
+
+    <nav class="lm-dfeature__shapes" aria-label="Shop diamonds by shape">
+      {%- for shape in shapes -%}
+        {%- assign shape_key = shape | downcase -%}
+        <a class="lm-dfeature__shape" href="{{ lab_url }}?shape={{ shape }}" data-shape="{{ shape }}">
+          {%- render 'diamond-shape-icon', shape: shape_key -%}
+          <span>{{ shape }}</span>
+        </a>
+      {%- endfor -%}
+    </nav>
+
+    <a class="btn btn--gold lm-dfeature__cta" href="{{ lab_url }}" data-origin-link>{{ section.settings.cta_text | default: 'Search diamonds' }}</a>
+  </div>
+
+  <div class="lm-dfeature__media">
+    {%- if section.settings.image != blank -%}
+      <img src="{{ section.settings.image | image_url: width: 1400 }}" alt="{{ section.settings.image.alt | default: section.settings.image_alt | escape }}" loading="lazy" width="{{ section.settings.image.width }}" height="{{ section.settings.image.height }}">
+    {%- elsif section.settings.image_asset != blank -%}
+      <img src="{{ section.settings.image_asset | asset_url }}" alt="{{ section.settings.image_alt | escape }}" loading="lazy">
+    {%- endif -%}
+    {%- if section.settings.show_example -%}
+      <div class="lm-dfeature__card" aria-label="What each diamond listing states">
+        <p class="lm-dfeature__card-title">Every listing states</p>
+        <dl>
+          <dt>Shape</dt><dd>and carat weight</dd>
+          <dt>Color</dt><dd>and clarity grade</dd>
+          <dt>Cut</dt><dd>polish and symmetry</dd>
+          <dt>Report</dt><dd>grading lab and certificate number</dd>
+        </dl>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (function () {
+    var root = document.currentScript && document.currentScript.previousElementSibling;
+    if (!root || !root.hasAttribute('data-dfeature')) return;
+    var urls = { lab: root.getAttribute('data-lab-url'), natural: root.getAttribute('data-natural-url') };
+    var buttons = root.querySelectorAll('[data-origin]');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var origin = btn.getAttribute('data-origin');
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+        root.querySelectorAll('[data-shape]').forEach(function (a) {
+          a.href = urls[origin] + '?shape=' + encodeURIComponent(a.getAttribute('data-shape'));
+        });
+        var cta = root.querySelector('[data-origin-link]');
+        if (cta) cta.href = urls[origin];
+      });
+    });
+  })();
+</script>
+
+<style>
+  .lm-dfeature {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: radial-gradient(120% 90% at 85% 10%, #1D2547 0%, var(--navy, #141A33) 55%, #0C1022 100%);
+    color: var(--cream, #FAF6F0);
+  }
+  .lm-dfeature__copy {
+    display: grid;
+    gap: 1.35rem;
+    align-content: center;
+    padding: clamp(3.5rem, 7vw, 6.5rem) clamp(1.25rem, 5vw, 4.5rem);
+  }
+  .lm-dfeature__eyebrow {
+    margin: 0;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+  .lm-dfeature__title {
+    margin: 0;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+    line-height: 1.04;
+    color: var(--cream, #FAF6F0);
+  }
+  .lm-dfeature__title em {
+    font-style: italic;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-dfeature__text {
+    margin: 0;
+    max-width: 30rem;
+    line-height: 1.75;
+    color: rgba(250, 246, 240, 0.74);
+  }
+  .lm-dfeature__toggle {
+    display: inline-flex;
+    width: max-content;
+    border: 1px solid rgba(201, 160, 80, 0.4);
+  }
+  .lm-dfeature__toggle button {
+    background: none;
+    border: 0;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(250, 246, 240, 0.7);
+    cursor: pointer;
+  }
+  .lm-dfeature__toggle button[aria-pressed="true"] {
+    background: var(--gold, #C9A050);
+    color: var(--navy, #141A33);
+  }
+  .lm-dfeature__shapes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+    max-width: 30rem;
+  }
+  .lm-dfeature__shape {
+    display: grid;
+    justify-items: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.3rem 0.75rem;
+    border: 1px solid rgba(250, 246, 240, 0.14);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(250, 246, 240, 0.82);
+    text-decoration: none;
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .lm-dfeature__shape:hover,
+  .lm-dfeature__shape:focus-visible {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.06);
+  }
+  .lm-dfeature__shape svg {
+    width: 34px;
+    height: 34px;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-dfeature__cta {
+    justify-self: start;
+  }
+  .lm-dfeature__media {
+    position: relative;
+    min-height: 520px;
+  }
+  .lm-dfeature__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .lm-dfeature__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--navy, #141A33) 0%, rgba(20, 26, 51, 0) 30%);
+  }
+  .lm-dfeature__card {
+    position: absolute;
+    right: 1.4rem;
+    bottom: 1.4rem;
+    z-index: 1;
+    min-width: 15rem;
+    padding: 1rem 1.2rem;
+    background: rgba(12, 16, 34, 0.84);
+    border: 1px solid rgba(201, 160, 80, 0.35);
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+  .lm-dfeature__card-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.15rem;
+  }
+  .lm-dfeature__card dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.15rem 0.9rem;
+    margin: 0;
+  }
+  .lm-dfeature__card dt {
+    color: var(--gold, #C9A050);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-top: 0.15rem;
+  }
+  .lm-dfeature__card dd {
+    margin: 0;
+    color: rgba(250, 246, 240, 0.85);
+  }
+  @media (max-width: 768px) {
+    .lm-dfeature {
+      grid-template-columns: 1fr;
+    }
+    .lm-dfeature__media {
+      order: -1;
+      min-height: 0;
+      aspect-ratio: 4 / 3.2;
+    }
+    .lm-dfeature__media::after {
+      background: linear-gradient(0deg, var(--navy, #141A33) 0%, rgba(20, 26, 51, 0) 40%);
+    }
+    .lm-dfeature__card {
+      display: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Loose Diamond Feature",
+  "tag": "section",
+  "class": "section-diamond-feature",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose diamonds" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Choose the stone," },
+    { "type": "text", "id": "title_emphasis", "label": "Heading ending in italic gold", "default": "then the setting" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "collection", "id": "lab_collection", "label": "Lab-grown diamonds collection" },
+    { "type": "collection", "id": "natural_collection", "label": "Natural diamonds collection" },
+    { "type": "text", "id": "cta_text", "label": "Button text", "default": "Search diamonds" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_asset", "label": "Theme image file", "info": "Used when no image is picked, e.g. peaceful-hero-diamonds.jpg" },
+    { "type": "text", "id": "image_alt", "label": "Image description" },
+    { "type": "checkbox", "id": "show_example", "label": "Show what each listing states", "default": true }
+  ],
+  "presets": [{ "name": "Loose Diamond Feature" }]
+}
+{% endschema %}

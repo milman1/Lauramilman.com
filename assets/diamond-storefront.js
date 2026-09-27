@@ -322,6 +322,21 @@
     });
   }
 
+  /** Links such as ?shape=Oval (or ?shape=Oval,Pear) pre-select shapes. */
+  function hydrateShapesFromURL() {
+    var raw;
+    try {
+      raw = new URLSearchParams(window.location.search).get('shape');
+    } catch (e) {
+      return;
+    }
+    if (!raw) return;
+    var wanted = raw.split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
+    form.querySelectorAll('.lm-shape input').forEach(function (input) {
+      if (wanted.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+    });
+  }
+
   function wireShapes() {
     form.querySelectorAll('.lm-shape').forEach(function (label) {
       var input = label.querySelector('input');
@@ -446,6 +461,7 @@
       });
     }
     wireScales();
+    hydrateShapesFromURL();
     wireShapes();
     wireRanges();
   }

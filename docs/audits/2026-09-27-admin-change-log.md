@@ -222,3 +222,24 @@ drop out of search, instead of sending shoppers to the homepage.
 - Method: `urlRedirectBulkDeleteBySearch` with `path:/products/* AND
   target:/` (job 5165c91f-4caa-4d83-a353-e08a5a3c19d9) and
   `path:/collections/* AND target:/` (job 7b227fae-a2f5-4312-93c5-ca597d3da365).
+
+## Part 5 — collections for the v2 homepage (gold chains, gold jewelry)
+
+Before: none of these handles existed. All three are smart collections, so
+only active, published products show on the storefront. No product status,
+tag or listing was changed.
+
+| Handle | Id | Rule | Sort |
+| --- | --- | --- | --- |
+| `gold-jewelry` | 349102145607 | tag = `gold-jewelry` | newest first |
+| `chain-bracelets` | 349102178375 | tag = `chains` AND type = `Bracelets` | price, low to high |
+| `chain-necklaces` | 349102211143 | tag = `chains` AND type = `Necklaces` | price, low to high |
+
+Each has an answer-first description and an SEO title and description, and
+is published to the Online Store.
+
+- `gold-jewelry` is empty until products are tagged `gold-jewelry`. The theme
+  hides its homepage section and its menu item while it is empty. Which
+  pieces to tag is the merchant's call; nothing has been tagged yet.
+- Undo: delete the collection in Products → Collections. The theme falls
+  back cleanly (the homepage section and menu item hide themselves).

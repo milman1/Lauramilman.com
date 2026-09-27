@@ -12,18 +12,20 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "eyebrow": "Gold & diamonds · New York",
-        "heading": "The fine jewelry you buy\nfor yourself.",
-        "subheading": "14K gold chains, lab-grown diamonds and house pieces to wear every day, chosen by Laura Milman after thirty years in New York's Diamond District.",
-        "primary_cta_text": "Shop Under $2,500",
-        "primary_cta_url": "/collections/under-2500",
-        "secondary_cta_text": "Meet Laura",
-        "secondary_cta_url": "/pages/about",
+        "layout": "editorial",
+        "eyebrow": "Laura Milman · New York",
+        "heading": "Gold and diamonds,",
+        "heading_emphasis": "chosen by you.",
+        "subheading": "14K gold, lab-grown diamond jewelry and certified loose diamonds, selected by Laura Milman after thirty years in New York's Diamond District.",
+        "primary_cta_text": "Shop Gold",
+        "primary_cta_url": "/collections/chains",
+        "secondary_cta_text": "Find Your Diamond",
+        "secondary_cta_url": "/collections/lab-grown-diamonds",
         "image_opacity": 55,
-        "layout": "split",
         "image_asset": "fine-jewelry-model-earrings.jpg",
         "image_alt": "Woman wearing long diamond drop earrings",
-        "note": "Free insured shipping · 7-day jewelry returns · 1-year warranty"
+        "caption_title": "Diamond drop earrings",
+        "caption_text": ""
       }
     },
     "trust-strip": {
@@ -38,7 +40,7 @@
         "item-2": {
           "type": "item",
           "settings": {
-            "text": "Certified Lab-Grown Diamonds"
+            "text": "Certified Loose Diamonds"
           }
         },
         "item-3": {
@@ -52,34 +54,15 @@
           "settings": {
             "text": "7-Day Jewelry Returns"
           }
-        },
-        "item-5": {
-          "type": "item",
-          "settings": {
-            "text": "1-Year Warranty"
-          }
         }
       },
       "block_order": [
         "item-1",
         "item-2",
         "item-3",
-        "item-4",
-        "item-5"
+        "item-4"
       ],
       "settings": {}
-    },
-    "first-piece": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Your first piece",
-        "title": "Under $2,500",
-        "description": "Gold chains, lab-grown diamonds and house pieces for every day. Metal, width or carat weight are on every listing.",
-        "collection": "under-2500",
-        "product_count": 8,
-        "cta_text": "Shop All Under $2,500",
-        "cta_url": "/collections/under-2500"
-      }
     },
     "build-the-stack": {
       "type": "shop-the-look",
@@ -109,15 +92,15 @@
         "p3"
       ],
       "settings": {
-        "eyebrow": "Build the Stack",
-        "title": "One chain, one line of diamonds, one pair",
+        "eyebrow": "Wear them together",
+        "title": "Gold, then diamonds",
         "description": "A 1.8 mm rope chain bracelet, a 0.54 ct lab-grown tennis bracelet and 1 ct lab-grown huggies, made to be worn together every day.",
-        "collection": "under-2500",
+        "collection": "chains",
         "editorial_asset": "shop-channel-cover.jpg",
         "editorial_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
         "caption_title": "The everyday stack",
         "caption_text": "Gold and diamonds, worn together",
-        "cta_text": "Shop Under $2,500"
+        "cta_text": "Start With a Chain"
       }
     },
     "brand-story": {
@@ -160,67 +143,6 @@
         "cta_url": "/pages/about"
       }
     },
-    "collections-grid": {
-      "type": "collections-grid",
-      "blocks": {
-        "col-1": {
-          "type": "collection",
-          "settings": {
-            "collection": "chains",
-            "title": "Gold Chains"
-          }
-        },
-        "col-2": {
-          "type": "collection",
-          "settings": {
-            "collection": "all-earrings",
-            "title": "Earrings"
-          }
-        },
-        "col-3": {
-          "type": "collection",
-          "settings": {
-            "collection": "all-bracelets",
-            "title": ""
-          }
-        },
-        "col-4": {
-          "type": "collection",
-          "settings": {
-            "collection": "necklaces",
-            "title": ""
-          }
-        },
-        "col-5": {
-          "type": "collection",
-          "settings": {
-            "collection": "rings",
-            "title": ""
-          }
-        },
-        "col-6": {
-          "type": "collection",
-          "settings": {
-            "collection": "all-pendants",
-            "title": "Pendants"
-          }
-        }
-      },
-      "block_order": [
-        "col-1",
-        "col-2",
-        "col-3",
-        "col-4",
-        "col-5",
-        "col-6"
-      ],
-      "settings": {
-        "eyebrow": "Gold and Diamonds",
-        "title": "Shop by Piece",
-        "view_all_link": "/collections/all",
-        "view_all_text": "All Jewelry"
-      }
-    },
     "estate": {
       "type": "preowned-maison",
       "blocks": {
@@ -260,9 +182,9 @@
         "m-4"
       ],
       "settings": {
-        "eyebrow": "The Next Step",
-        "title": "Your First Signed Piece",
-        "description": "Pre-owned Cartier, Van Cleef & Arpels, David Webb and Tiffany & Co., examined in New York before it is listed. Condition and measurements are on every listing.",
+        "eyebrow": "Pre-owned & estate",
+        "title": "Signed pieces, authenticated",
+        "description": "Cartier, Van Cleef & Arpels, David Webb and Tiffany & Co., examined in New York before they are listed. Condition, measurements and signature are on every listing.",
         "trust_line": "Every estate piece is individually authenticated and documented",
         "cta_text": "Shop Pre-Owned & Estate",
         "cta_url": "/collections/estate-jewelry"
@@ -282,7 +204,7 @@
       "type": "newsletter",
       "settings": {
         "title": "10% Off Your First Piece",
-        "description": "Join the list for 10% off your first jewelry purchase, sent to your inbox, plus new pieces and private appointments. Watches excluded.",
+        "description": "New gold, new diamonds and private appointments in Midtown, plus 10% off your first jewelry purchase, sent to your inbox. Watches excluded.",
         "placeholder": "Your email address",
         "button_text": "Send My Code",
         "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
@@ -291,16 +213,6 @@
     "also-from-the-house": {
       "type": "shop-worlds",
       "blocks": {
-        "w-1": {
-          "type": "world",
-          "settings": {
-            "collection": "natural-diamonds",
-            "title": "Loose Diamonds",
-            "subtitle": "Natural and lab-grown, certified",
-            "link": "/collections/natural-diamonds",
-            "tone": "warm"
-          }
-        },
         "w-2": {
           "type": "world",
           "settings": {
@@ -323,14 +235,13 @@
         }
       },
       "block_order": [
-        "w-1",
         "w-2",
         "w-3"
       ],
       "settings": {
         "eyebrow": "Also From the House",
-        "heading": "Diamonds, Watches and Bridal",
-        "subheading": "Certified loose diamonds, pre-owned watches, and engagement rings, all from Laura Milman New York."
+        "heading": "Watches and Bridal",
+        "subheading": "Pre-owned watches and engagement rings, natural and lab-grown, from Laura Milman New York."
       }
     },
     "private-clients": {
@@ -372,15 +283,293 @@
         "note": "Complimentary · No obligation",
         "compact": true
       }
+    },
+    "worlds": {
+      "type": "worlds-mosaic",
+      "settings": {
+        "eyebrow": "The house",
+        "title": "Four ways",
+        "title_emphasis": "in"
+      },
+      "blocks": {
+        "t-gold": {
+          "type": "tile",
+          "settings": {
+            "collection": "chains",
+            "link": "/collections/chains",
+            "title": "Gold Chains & Jewelry",
+            "eyebrow": "14K gold",
+            "subtitle": "Chains and everyday gold",
+            "image_asset": "shop-world-fine-jewelry.webp",
+            "image_alt": "Gold chain necklace on silk",
+            "size": "tall"
+          }
+        },
+        "t-lab": {
+          "type": "tile",
+          "settings": {
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "title": "Lab-Grown Jewelry",
+            "eyebrow": "Lab-grown",
+            "subtitle": "Tennis, huggies, stations",
+            "image_asset": "shop-channel-cover.jpg",
+            "image_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
+            "size": "square"
+          }
+        },
+        "t-loose": {
+          "type": "tile",
+          "settings": {
+            "collection": "lab-grown-diamonds",
+            "title": "Loose Diamonds",
+            "eyebrow": "Graded",
+            "subtitle": "Lab-grown and natural",
+            "image_asset": "diamond-destination-lab.webp",
+            "image_alt": "Loose lab-grown diamond",
+            "size": "square"
+          }
+        },
+        "t-estate": {
+          "type": "tile",
+          "settings": {
+            "collection": "estate-jewelry",
+            "title": "Pre-Owned & Estate",
+            "eyebrow": "Signed",
+            "subtitle": "Cartier, Van Cleef & Arpels, David Webb",
+            "image_asset": "shop-world-preowned-maison.webp",
+            "image_alt": "Signed estate jewelry",
+            "size": "wide"
+          }
+        }
+      },
+      "block_order": [
+        "t-gold",
+        "t-lab",
+        "t-loose",
+        "t-estate"
+      ]
+    },
+    "gold-chains": {
+      "type": "featured-products",
+      "blocks": {
+        "c-1": {
+          "type": "chip",
+          "settings": {
+            "label": "Cuban",
+            "link": "/collections/chains?type=Cuban"
+          }
+        },
+        "c-2": {
+          "type": "chip",
+          "settings": {
+            "label": "Rope",
+            "link": "/collections/chains?type=Rope"
+          }
+        },
+        "c-3": {
+          "type": "chip",
+          "settings": {
+            "label": "Paperclip",
+            "link": "/collections/chains?type=Paperclip"
+          }
+        },
+        "c-4": {
+          "type": "chip",
+          "settings": {
+            "label": "Herringbone",
+            "link": "/collections/chains?type=Herringbone"
+          }
+        },
+        "c-5": {
+          "type": "chip",
+          "settings": {
+            "label": "Curb",
+            "link": "/collections/chains?type=Curb"
+          }
+        },
+        "c-6": {
+          "type": "chip",
+          "settings": {
+            "label": "Snake",
+            "link": "/collections/chains?type=Snake"
+          }
+        },
+        "c-7": {
+          "type": "chip",
+          "settings": {
+            "label": "Chain bracelets",
+            "link": "/collections/chain-bracelets"
+          }
+        }
+      },
+      "block_order": [
+        "c-1",
+        "c-2",
+        "c-3",
+        "c-4",
+        "c-5",
+        "c-6",
+        "c-7"
+      ],
+      "settings": {
+        "eyebrow": "Gold chains",
+        "title": "Chains, by the millimeter",
+        "description": "Rope, paperclip, herringbone, curb, snake and Cuban links in 14K gold. Every listing gives the width and the lengths available.",
+        "collection": "chains",
+        "product_count": 4,
+        "tone": "warm",
+        "header_align": "left",
+        "chips_label": "Popular",
+        "hide_when_empty": true,
+        "cta_text": "Shop All Chains",
+        "cta_url": "/collections/chains"
+      }
+    },
+    "gold-jewelry": {
+      "type": "featured-products",
+      "blocks": {
+        "g-1": {
+          "type": "chip",
+          "settings": {
+            "label": "Necklaces",
+            "link": "/collections/gold-jewelry?type=Necklace"
+          }
+        },
+        "g-2": {
+          "type": "chip",
+          "settings": {
+            "label": "Rings",
+            "link": "/collections/gold-jewelry?type=Ring"
+          }
+        },
+        "g-3": {
+          "type": "chip",
+          "settings": {
+            "label": "Bracelets",
+            "link": "/collections/gold-jewelry?type=Bracelet"
+          }
+        },
+        "g-4": {
+          "type": "chip",
+          "settings": {
+            "label": "Earrings",
+            "link": "/collections/gold-jewelry?type=Earring"
+          }
+        },
+        "g-5": {
+          "type": "chip",
+          "settings": {
+            "label": "Charms",
+            "link": "/collections/gold-jewelry?type=Charm,Pendant"
+          }
+        }
+      },
+      "block_order": [
+        "g-1",
+        "g-2",
+        "g-3",
+        "g-4",
+        "g-5"
+      ],
+      "settings": {
+        "eyebrow": "Gold jewelry · new arrivals",
+        "title": "Everyday gold",
+        "description": "Necklaces, rings, bracelets and charms in 14K gold, made to wear every day and to stack with your chains.",
+        "collection": "gold-jewelry",
+        "product_count": 4,
+        "tone": "cream",
+        "header_align": "left",
+        "chips_label": "Popular",
+        "hide_when_empty": true,
+        "cta_text": "Shop Gold Jewelry",
+        "cta_url": "/collections/gold-jewelry"
+      }
+    },
+    "loose-diamonds": {
+      "type": "diamond-feature",
+      "settings": {
+        "eyebrow": "Loose diamonds",
+        "title": "Choose the stone,",
+        "title_emphasis": "then the setting",
+        "text": "Search lab-grown and natural diamonds by shape, carat, color and clarity. Every stone is listed with its grading lab and certificate.",
+        "lab_collection": "lab-grown-diamonds",
+        "natural_collection": "natural-diamonds",
+        "cta_text": "Search Diamonds",
+        "image_asset": "peaceful-hero-diamonds.jpg",
+        "image_alt": "Loose diamonds of several shapes",
+        "show_example": true
+      }
+    },
+    "lab-grown": {
+      "type": "featured-products",
+      "blocks": {
+        "l-1": {
+          "type": "chip",
+          "settings": {
+            "label": "Tennis bracelets",
+            "link": "/collections/lab-grown-bracelets?type=Tennis"
+          }
+        },
+        "l-2": {
+          "type": "chip",
+          "settings": {
+            "label": "Huggies & hoops",
+            "link": "/collections/lab-grown-earrings?type=Huggie,Hoop"
+          }
+        },
+        "l-3": {
+          "type": "chip",
+          "settings": {
+            "label": "Studs",
+            "link": "/collections/lab-grown-earrings?type=Stud"
+          }
+        },
+        "l-4": {
+          "type": "chip",
+          "settings": {
+            "label": "Station necklaces",
+            "link": "/collections/lab-grown-necklaces?type=Station"
+          }
+        },
+        "l-5": {
+          "type": "chip",
+          "settings": {
+            "label": "Engagement rings",
+            "link": "/collections/lab-grown-engagement-rings"
+          }
+        }
+      },
+      "block_order": [
+        "l-1",
+        "l-2",
+        "l-3",
+        "l-4",
+        "l-5"
+      ],
+      "settings": {
+        "eyebrow": "Lab-grown diamond jewelry",
+        "title": "Diamonds for every day",
+        "description": "Huggies, studs, tennis bracelets and station necklaces set with lab-grown diamonds, made to wear every day.",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "product_count": 4,
+        "tone": "warm",
+        "header_align": "left",
+        "chips_label": "Popular",
+        "cta_text": "Shop Lab-Grown Jewelry",
+        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
+      }
     }
   },
   "order": [
     "hero",
     "trust-strip",
-    "first-piece",
+    "worlds",
+    "gold-chains",
+    "gold-jewelry",
+    "loose-diamonds",
+    "lab-grown",
     "build-the-stack",
     "brand-story",
-    "collections-grid",
     "estate",
     "reviews",
     "newsletter",

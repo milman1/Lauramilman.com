@@ -18,7 +18,8 @@
       {%- endif -%}
     </div>
 
-    <div class="lm-worlds__rail">
+    {%- assign worlds_cols = section.blocks.size | at_most: 5 | at_least: 1 -%}
+    <div class="lm-worlds__rail" style="--worlds-cols: {{ worlds_cols }};">
       {%- for block in section.blocks -%}
         {%- assign world_collection = block.settings.collection -%}
         {%- assign world_title = block.settings.title -%}
@@ -141,10 +142,13 @@
     margin: 0;
   }
 
+  /* Cards keep a fifth of the row each; a shorter row is centred. */
   .lm-worlds__rail {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--worlds-cols, 5), minmax(0, 1fr));
     gap: 1.15rem;
+    max-width: calc(var(--worlds-cols, 5) * 20%);
+    margin: 0 auto;
   }
 
   .lm-worlds__card {
@@ -263,6 +267,7 @@
   @media (max-width: 1024px) {
     .lm-worlds__rail {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: none;
     }
   }
 

@@ -1,0 +1,202 @@
+{%- comment -%}
+  Laura Milman New York — Worlds Mosaic
+  Photo-led entry into the main lines of the house: one tall tile, two
+  square tiles and one wide tile. Each tile links to its collection and uses
+  the block image, a theme image file, or the collection's own image.
+{%- endcomment -%}
+
+<section class="lm-mosaic" aria-labelledby="MosaicTitle-{{ section.id }}">
+  <div class="lm-mosaic__container">
+    <header class="lm-mosaic__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="lm-mosaic__title" id="MosaicTitle-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h2>
+    </header>
+
+    <div class="lm-mosaic__grid">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign tile_collection = block.settings.collection
+          assign tile_url = block.settings.link
+          if tile_url == blank and tile_collection != blank
+            assign tile_url = tile_collection.url
+          endif
+          assign tile_title = block.settings.title
+          if tile_title == blank and tile_collection != blank
+            assign tile_title = tile_collection.title
+          endif
+        -%}
+        <a class="lm-mosaic__tile lm-mosaic__tile--{{ block.settings.size }}" href="{{ tile_url | default: '/collections/all' }}" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 1200 }}"
+              srcset="{{ block.settings.image | image_url: width: 600 }} 600w, {{ block.settings.image | image_url: width: 1200 }} 1200w"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              width="{{ block.settings.image.width }}"
+              height="{{ block.settings.image.height }}"
+              alt="{{ block.settings.image.alt | default: tile_title | escape }}"
+              loading="lazy"
+            >
+          {%- elsif block.settings.image_asset != blank -%}
+            <img src="{{ block.settings.image_asset | asset_url }}" alt="{{ block.settings.image_alt | default: tile_title | escape }}" loading="lazy">
+          {%- elsif tile_collection.image != blank -%}
+            <img src="{{ tile_collection.image | image_url: width: 1200 }}" alt="{{ tile_collection.image.alt | default: tile_title | escape }}" loading="lazy">
+          {%- endif -%}
+          <span class="lm-mosaic__label">
+            {%- if block.settings.eyebrow != blank -%}
+              <span class="lm-mosaic__eyebrow">{{ block.settings.eyebrow }}</span>
+            {%- endif -%}
+            <span class="lm-mosaic__name">{{ tile_title }}</span>
+            {%- if block.settings.subtitle != blank -%}
+              <span class="lm-mosaic__sub">{{ block.settings.subtitle }} &rarr;</span>
+            {%- endif -%}
+          </span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .lm-mosaic {
+    background: var(--warm-white, #FDFAF6);
+    padding: clamp(3.5rem, 7vw, 6.5rem) 0;
+  }
+  .lm-mosaic__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+  .lm-mosaic__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    line-height: 1.02;
+    margin: 0.6rem 0 0;
+  }
+  .lm-mosaic__title em {
+    font-style: italic;
+    color: var(--gold-deep, #A8813A);
+  }
+  .lm-mosaic__grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    grid-template-rows: 300px 300px;
+    gap: 14px;
+    margin-top: 2.25rem;
+  }
+  .lm-mosaic__tile {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--navy, #1A1F3A);
+    color: var(--cream, #FAF6F0);
+    text-decoration: none;
+  }
+  .lm-mosaic__tile--tall { grid-row: span 2; }
+  .lm-mosaic__tile--wide { grid-column: span 2; }
+  .lm-mosaic__tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .lm-mosaic__tile:hover img,
+  .lm-mosaic__tile:focus-visible img {
+    transform: scale(1.05);
+  }
+  .lm-mosaic__tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(18, 10, 5, 0.78) 0%, rgba(18, 10, 5, 0.1) 55%, rgba(18, 10, 5, 0) 100%);
+  }
+  .lm-mosaic__label {
+    position: absolute;
+    left: 1.4rem;
+    right: 1.4rem;
+    bottom: 1.25rem;
+    z-index: 1;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .lm-mosaic__eyebrow {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-mosaic__name {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(1.6rem, 2.6vw, 2.25rem);
+    line-height: 1.02;
+  }
+  .lm-mosaic__sub {
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-pale, #F0DFB0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lm-mosaic__tile img { transition: none; }
+  }
+  @media (max-width: 768px) {
+    .lm-mosaic__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 260px 200px 200px;
+      gap: 10px;
+    }
+    .lm-mosaic__tile--tall { grid-row: auto; grid-column: span 2; }
+    .lm-mosaic__tile--wide { grid-column: span 2; }
+    .lm-mosaic__label { left: 0.9rem; right: 0.9rem; bottom: 0.9rem; }
+    .lm-mosaic__name { font-size: 1.35rem; }
+    .lm-mosaic__tile--square .lm-mosaic__sub { display: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Worlds Mosaic",
+  "tag": "section",
+  "class": "section-worlds-mosaic",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The house" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Four ways" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading ending in italic gold", "default": "in" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "limit": 4,
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "url", "id": "link", "label": "Link (defaults to the collection)" },
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_asset", "label": "Theme image file", "info": "Used when no image is picked, e.g. shop-world-fine-jewelry.webp" },
+        { "type": "text", "id": "image_alt", "label": "Image description" },
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Size",
+          "options": [
+            { "value": "tall", "label": "Tall (left column)" },
+            { "value": "square", "label": "Square" },
+            { "value": "wide", "label": "Wide" }
+          ],
+          "default": "square"
+        }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Worlds Mosaic" }]
+}
+{% endschema %}

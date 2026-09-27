@@ -11,15 +11,30 @@
     assign view_all_url = featured_collection.url
   endif
   assign has_picked_products = false
+  assign has_chips = false
+  for block in section.blocks
+    if block.type == 'chip' and block.settings.label != blank
+      assign has_chips = true
+    endif
+  endfor
   for block in section.blocks
     if block.type == 'product' and block.settings.product != blank
       assign has_picked_products = true
       break
     endif
   endfor
+  # A section tied to a collection that has nothing to show yet can hide
+  # itself instead of falling back to the whole catalog.
+  assign fp_hidden = false
+  if section.settings.hide_when_empty and has_picked_products == false
+    if featured_collection == blank or featured_collection.products.size == 0
+      assign fp_hidden = true
+    endif
+  endif
 -%}
 
-<section class="lm-featured" aria-label="{{ section.settings.title | default: 'Featured Products' | escape }}">
+{%- unless fp_hidden -%}
+<section class="lm-featured lm-featured--{{ section.settings.tone | default: 'warm' }}{% if section.settings.header_align == 'left' %} lm-featured--left{% endif %}" aria-label="{{ section.settings.title | default: 'Featured Products' | escape }}">
   <div class="lm-featured__container">
 
     <div class="lm-featured__header">
@@ -31,6 +46,16 @@
       {%- endif -%}
       {%- if section.settings.description != blank -%}
         <p class="lm-featured__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+      {%- if has_chips -%}
+        <nav class="lm-featured__chips" aria-label="{{ section.settings.chips_label | default: 'Popular' | escape }} in {{ section.settings.title | escape }}">
+          <span class="lm-featured__chips-label">{{ section.settings.chips_label | default: 'Popular' }}</span>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'chip' and block.settings.label != blank -%}
+              <a class="lm-featured__chip" href="{{ block.settings.link | default: view_all_url }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
       {%- endif -%}
     </div>
 
@@ -64,6 +89,7 @@
 
   </div>
 </section>
+{%- endunless -%}
 
 <style>
   .lm-featured {
@@ -94,6 +120,63 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2rem;
+  }
+
+  .lm-featured--cream {
+    background: var(--off-white, #F5F0E8);
+  }
+
+  .lm-featured--left .lm-featured__header {
+    text-align: left;
+    max-width: none;
+    margin: 0 0 2.5rem;
+  }
+
+  .lm-featured--left .lm-featured__desc {
+    max-width: 560px;
+  }
+
+  .lm-featured__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .lm-featured:not(.lm-featured--left) .lm-featured__chips {
+    justify-content: center;
+  }
+
+  .lm-featured__chips-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+    margin-right: 0.35rem;
+  }
+
+  .lm-featured__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 1rem;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 999px;
+    background: var(--warm-white, #FDFAF6);
+    color: var(--text-dark, #2C1810);
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .lm-featured__chip:hover,
+  .lm-featured__chip:focus-visible {
+    background: var(--espresso, #1E1109);
+    border-color: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
   }
 
   .lm-featured__empty {
@@ -167,6 +250,38 @@
       "default": 8
     },
     {
+      "type": "select",
+      "id": "tone",
+      "label": "Background",
+      "options": [
+        { "value": "warm", "label": "Warm white" },
+        { "value": "cream", "label": "Cream" }
+      ],
+      "default": "warm"
+    },
+    {
+      "type": "select",
+      "id": "header_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "left", "label": "Left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "text",
+      "id": "chips_label",
+      "label": "Shortcut buttons label",
+      "default": "Popular"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_empty",
+      "label": "Hide when the collection is empty",
+      "default": false
+    },
+    {
       "type": "text",
       "id": "cta_text",
       "label": "View All text",
@@ -179,6 +294,14 @@
     }
   ],
   "blocks": [
+    {
+      "type": "chip",
+      "name": "Shortcut button",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    },
     {
       "type": "product",
       "name": "Product",
