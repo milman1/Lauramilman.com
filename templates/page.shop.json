@@ -376,38 +376,19 @@
       }
     },
     "reviews": {
-      "type": "testimonials",
-      "blocks": {
-        "t1": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
-            "author": "Alexandra K.",
-            "product_name": "Private consultation"
-          }
-        },
-        "t2": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
-            "author": "Catherine M.",
-            "product_name": "Tennis bracelet"
-          }
-        },
-        "t3": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
-            "author": "Victoria S.",
-            "product_name": "Lab-grown jewelry"
-          }
-        }
-      },
-      "block_order": ["t1", "t2", "t3"],
+      "type": "client-reviews",
       "settings": {
-        "eyebrow": "What Our Clients Say",
-        "title": "Testimonials"
-      }
+        "eyebrow": "From Google",
+        "title": "What clients",
+        "title_emphasis": "say",
+        "rating": "",
+        "review_count": "",
+        "all_url": "/pages/google-reviews",
+        "all_text": "Read all reviews",
+        "google_url": ""
+      },
+      "blocks": {},
+      "block_order": []
     },
     "closing-cta": {
       "type": "closing-cta",

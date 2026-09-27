@@ -191,14 +191,19 @@
       }
     },
     "reviews": {
-      "type": "google-reviews-strip",
+      "type": "client-reviews",
       "settings": {
         "eyebrow": "From Google",
-        "title": "What Clients Say",
-        "intro": "",
-        "cta_label": "Read All Reviews",
-        "cta_url": "/pages/google-reviews"
-      }
+        "title": "What clients",
+        "title_emphasis": "say",
+        "rating": "",
+        "review_count": "",
+        "all_url": "/pages/google-reviews",
+        "all_text": "Read all reviews",
+        "google_url": ""
+      },
+      "blocks": {},
+      "block_order": []
     },
     "newsletter": {
       "type": "newsletter",

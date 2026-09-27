@@ -341,3 +341,18 @@ def test_organization_schema_names_the_founder_and_address() -> None:
     assert "shop.brand.logo" in layout
     article = (ROOT / "sections/main-article.liquid").read_text()
     assert "article.author == shop.name" in article
+
+
+def test_reviews_are_branded_cards_of_real_reviews_only() -> None:
+    home = load_json(ROOT / "templates/index.json")["sections"]["reviews"]
+    assert home["type"] == "client-reviews"
+    assert "google-reviews-strip" not in (ROOT / "templates/index.json").read_text()
+    liquid = (ROOT / "sections/client-reviews.liquid").read_text()
+    # Hidden until a real review is entered; no third-party widget on the homepage.
+    assert "{%- if cr_count > 0 -%}" in liquid
+    assert "sociablekit" not in liquid
+    assert not (ROOT / "sections/testimonials.liquid").exists()
+    for path in ("templates/index.json", "templates/page.shop.json"):
+        text = (ROOT / path).read_text()
+        for invented in ("Alexandra K.", "Catherine M.", "Victoria S."):
+            assert invented not in text, (path, invented)
