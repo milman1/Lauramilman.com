@@ -38,6 +38,22 @@ describe('tagsFor', () => {
   });
 });
 
+describe('Google Shopping attributes', () => {
+  it('keeps the no-GTIN flag and apparel attributes on the productSet payload', () => {
+    const input = buildProductSetInput(item(), '2026-09-27T00:00:00.000Z');
+    const fields = input.metafields as Array<{ namespace: string; key: string; value: string }>;
+    const google = Object.fromEntries(
+      fields.filter((field) => field.namespace === 'mm-google-shopping').map((field) => [field.key, field.value]),
+    );
+    expect(google.condition).toBe('used');
+    expect(google.custom_product).toBe('true');
+    expect(google.age_group).toBe('adult');
+    expect(google.gender).toBe('female');
+    expect(google.color).toBe('Yellow Gold');
+    expect(google.material).toBe('Gold');
+  });
+});
+
 describe('contentHashFor', () => {
   it('is stable for identical items and changes with price', () => {
     const a = contentHashFor(item());

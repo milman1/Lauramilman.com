@@ -1,3 +1,4 @@
+import { googleShoppingMetafields } from '../googleShopping.js';
 import { contentHash } from '../hash.js';
 import { taxonomyGidForProductType } from '../taxonomy.js';
 import { EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
@@ -107,6 +108,20 @@ export function metafieldsFor(item: BackVaultItem, hash: string, syncedAt: strin
     pushEbay('model', ebay.values.model);
     pushEbay('style', ebay.values.style);
     pushEbay('type', ebay.values.type);
+  }
+  // productSet deletes omitted metafields. Condition stays the feed's "used"
+  // value above. These keys keep Google's required apparel attributes and the
+  // no-GTIN flag on the next estate rewrite.
+  const have = new Set(fields.map((field) => `${field.namespace}.${field.key}`));
+  for (const field of googleShoppingMetafields({
+    title: listing.title,
+    productType: listing.productType,
+    metal: item.specs.metalType,
+  })) {
+    const id = `${field.namespace}.${field.key}`;
+    if (have.has(id)) continue;
+    fields.push(field);
+    have.add(id);
   }
   return fields;
 }
