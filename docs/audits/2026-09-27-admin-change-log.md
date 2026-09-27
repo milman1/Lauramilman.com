@@ -55,3 +55,42 @@ change so it can be reversed by hand.
 
 No product status or product publication was changed. Non-active members of
 a smart collection are never shown on the storefront.
+
+## Part 2 — collections for the new homepage
+
+### 4. Create `under-2500`
+
+- After: automated "Under $2,500" (`gid://shopify/Collection/349097361479`),
+  all of: price < 2500; type not Natural Diamond, Lab-Grown Diamond, Watch,
+  Watches; tag not `backvault-feed`, `Estate Jewelry`, `Pre-Owned`,
+  `Vintage`; title not containing Wedding, Engagement, Kid's. Newest first.
+  Published to Online Store and Shop. Verified: 140 active members; draft
+  4,372 and archived 953 unchanged.
+
+### 5. Create `all-bracelets` and `all-pendants`
+
+- Before: `bracelets` and `pendants-1` are manual collections (29 bracelets
+  hand-picked; about 220 active bracelets exist). Manual collections cannot
+  take rules, so rule-based copies were created and left the originals
+  untouched.
+- After: "Bracelets" at `all-bracelets` (`gid://shopify/Collection/349097590855`),
+  any of type Bracelet, Bracelets, Bangle, Tennis Bracelet; "Pendants" at
+  `all-pendants` (`gid://shopify/Collection/349097623623`), any of type
+  Pendant, Pendants. Both newest first, published to Online Store and Shop.
+  Member counts not yet verified.
+
+### 6. `rings` matches by product type
+
+- Before: id `gid://shopify/Collection/168312406087`, all of: title contains
+  `ring`, title does not contain `ear`, title does not contain `engagement`.
+  This pulled in "Draw String" bracelets and dropped rings named Pear, Pearl
+  or Heart.
+- After: any of type Ring, Rings, Solitaire Ring. Member count not yet
+  verified.
+
+### Open question
+
+Rule-based collections list draft and archived products in the admin; the
+storefront and every sales channel show only active, published products.
+The merchant asked that inactive items not be included. Waiting on a
+decision: leave as is, add an active-only tag rule, or roll back.
