@@ -203,3 +203,22 @@ Pre-Owned & Estate hub). No errors. The theme's hard-coded intros for
 - Terms of service still list a personal email and an address as governing
   law; privacy policy names "Laura's Gems". Legal text left for the merchant
   to edit in Settings → Policies.
+
+### 11. Delete redirects from deleted pages to the homepage
+
+Merchant decision: delete them so the dead addresses return "not found" and
+drop out of search, instead of sending shoppers to the homepage.
+
+- Scope: every redirect whose path starts with `/products/` or
+  `/collections/` and whose target is exactly `/` — 937 product and 18
+  collection redirects, 955 in total. Every row was read back and checked
+  before deletion.
+- Snapshot for undo: `docs/audits/2026-09-27-deleted-redirects.csv`
+  (redirect id, path, target). Any row can be recreated in Online Store →
+  Navigation → URL Redirects, or pointed at a category instead.
+- Kept: marketing short links `/h`, `/challenge`, `/lander`; `/pages/shop`
+  → `/`; product redirects that point at other products; the new
+  `/collections/earrings`, `/pages/lauras-story` redirects.
+- Method: `urlRedirectBulkDeleteBySearch` with `path:/products/* AND
+  target:/` (job 5165c91f-4caa-4d83-a353-e08a5a3c19d9) and
+  `path:/collections/* AND target:/` (job 7b227fae-a2f5-4312-93c5-ca597d3da365).
