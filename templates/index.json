@@ -13,19 +13,19 @@
       "type": "hero",
       "settings": {
         "layout": "editorial",
-        "image_asset": "fine-jewelry-model-earrings.jpg",
-        "image_alt": "Woman wearing long diamond drop earrings",
-        "heading_emphasis": "chosen by you.",
-        "caption_title": "Diamond drop earrings",
-        "caption_text": "",
         "eyebrow": "Laura Milman · New York",
         "heading": "Gold and diamonds,",
+        "heading_emphasis": "chosen by you.",
         "subheading": "14K gold, lab-grown diamond jewelry and certified loose diamonds, selected by Laura Milman after thirty years in New York's Diamond District.",
         "primary_cta_text": "Shop Gold",
         "primary_cta_url": "/collections/chains",
         "secondary_cta_text": "Find Your Diamond",
         "secondary_cta_url": "/collections/lab-grown-diamonds",
-        "image_opacity": 55
+        "image_opacity": 55,
+        "image_asset": "fine-jewelry-model-earrings.jpg",
+        "image_alt": "Woman wearing long diamond drop earrings",
+        "caption_title": "Diamond drop earrings",
+        "caption_text": ""
       }
     },
     "trust-strip": {
@@ -94,12 +94,12 @@
       "settings": {
         "eyebrow": "Wear them together",
         "title": "Gold, then diamonds",
-        "collection": "chains",
         "description": "A 1.8 mm rope chain bracelet, a 0.54 ct lab-grown tennis bracelet and 1 ct lab-grown huggies, made to be worn together every day.",
-        "editorial_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
+        "collection": "chains",
         "editorial_asset": "shop-channel-cover.jpg",
-        "caption_text": "Gold and diamonds, worn together",
+        "editorial_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
         "caption_title": "The everyday stack",
+        "caption_text": "Gold and diamonds, worn together",
         "cta_text": "Start With a Chain"
       }
     },
@@ -135,12 +135,12 @@
       ],
       "settings": {
         "eyebrow": "The Woman Behind It",
+        "portrait_image": "shopify://shop_images/laura-milman-portrait.jpg",
         "title": "Thirty Years\nin the Making",
         "body_text": "<p>“I did the thing that women like me were not expected to do in that industry, in those years. I opened my own company.”</p><p>Laura Milman learned the diamond trade from the inside, working alongside her brother Jacob Arabo in the early years of what became Jacob &amp; Co. More than thirty years ago she opened her own company in New York's Diamond District, and she still sees clients in Midtown. Every Laura Milman New York piece is designed in the city that trained her eye and brought to life by master goldsmiths in Italy.</p>",
         "signature": "— Laura Milman",
         "cta_text": "Read Laura's Story",
-        "cta_url": "/pages/about",
-        "portrait_image": "shopify://shop_images/laura-milman-portrait.jpg"
+        "cta_url": "/pages/about"
       }
     },
     "estate": {
@@ -276,6 +276,11 @@
     },
     "worlds": {
       "type": "worlds-mosaic",
+      "settings": {
+        "eyebrow": "The house",
+        "title": "Four ways",
+        "title_emphasis": "in"
+      },
       "blocks": {
         "t-gold": {
           "type": "tile",
@@ -293,7 +298,7 @@
         "t-lab": {
           "type": "tile",
           "settings": {
-            "collection": "lab-grown-diamond-jewelry",
+            "collection": "peaceful-diamonds-by-laura-milman-new-york",
             "title": "Lab-Grown Jewelry",
             "eyebrow": "Lab-grown",
             "subtitle": "Tennis, huggies, stations",
@@ -332,12 +337,7 @@
         "t-lab",
         "t-loose",
         "t-estate"
-      ],
-      "settings": {
-        "eyebrow": "The house",
-        "title": "Four ways",
-        "title_emphasis": "in"
-      }
+      ]
     },
     "gold-chains": {
       "type": "featured-products",
@@ -575,15 +575,15 @@
         "eyebrow": "Lab-grown diamond jewelry",
         "title": "Diamonds for every day",
         "description": "Huggies, studs, tennis bracelets and station necklaces set with lab-grown diamonds, made to wear every day.",
-        "collection": "lab-grown-diamond-jewelry",
+        "collection": "peaceful-diamonds-by-laura-milman-new-york",
         "product_count": 4,
         "tone": "warm",
         "header_align": "left",
         "chips_label": "Popular",
-        "layout": "carousel",
-        "per_source": 3,
         "cta_text": "Shop Lab-Grown Jewelry",
-        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
+        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+        "layout": "carousel",
+        "per_source": 3
       }
     },
     "client-reviews": {
@@ -597,7 +597,9 @@
         "all_url": "/pages/google-reviews",
         "all_text": "Read all reviews",
         "google_url": ""
-      }
+      },
+      "blocks": {},
+      "block_order": []
     },
     "reviews": {
       "type": "google-reviews-strip",

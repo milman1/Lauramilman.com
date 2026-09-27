@@ -1,127 +1,30 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "categories": {
       "type": "collections-grid",
       "blocks": {
-        "chains": {
-          "type": "collection",
-          "settings": {
-            "collection": "chains",
-            "title": "Gold Chains"
-          }
-        },
-        "necklaces": {
-          "type": "collection",
-          "settings": {
-            "collection": "necklaces"
-          }
-        },
-        "rings": {
-          "type": "collection",
-          "settings": {
-            "collection": "rings"
-          }
-        },
-        "earrings": {
-          "type": "collection",
-          "settings": {
-            "collection": "earrings"
-          }
-        },
-        "bracelets": {
-          "type": "collection",
-          "settings": {
-            "collection": "all-bracelets"
-          }
-        },
-        "pendants": {
-          "type": "collection",
-          "settings": {
-            "collection": "all-pendants",
-            "title": "Pendants"
-          }
-        }
+        "chains": { "type": "collection", "settings": { "collection": "chains", "title": "Gold Chains" } },
+        "necklaces": { "type": "collection", "settings": { "collection": "necklaces" } },
+        "rings": { "type": "collection", "settings": { "collection": "rings" } },
+        "earrings": { "type": "collection", "settings": { "collection": "earrings" } },
+        "bracelets": { "type": "collection", "settings": { "collection": "all-bracelets" } },
+        "pendants": { "type": "collection", "settings": { "collection": "all-pendants", "title": "Pendants" } }
       },
-      "block_order": [
-        "chains",
-        "necklaces",
-        "rings",
-        "earrings",
-        "bracelets",
-        "pendants"
-      ],
-      "settings": {
-        "view_all_text": "Browse All Jewelry",
-        "heading_tag": "h1",
-        "eyebrow": "Shop the Collections",
-        "title": "Find Your Next Piece",
-        "view_all_link": "/collections/all"
-      }
+      "block_order": ["chains", "necklaces", "rings", "earrings", "bracelets", "pendants"],
+      "settings": { "eyebrow": "Shop the Collections", "title": "Find Your Next Piece", "heading_tag": "h1", "view_all_link": "/collections/all", "view_all_text": "Browse All Jewelry" }
     },
     "worlds": {
       "type": "collections-grid",
       "blocks": {
-        "peaceful": {
-          "type": "collection",
-          "settings": {
-            "collection": "lab-grown-diamond-jewelry",
-            "title": "Lab-Grown Jewelry"
-          }
-        },
-        "natural": {
-          "type": "collection",
-          "settings": {
-            "collection": "natural-diamonds",
-            "title": "Natural Loose Diamonds"
-          }
-        },
-        "lab": {
-          "type": "collection",
-          "settings": {
-            "collection": "lab-grown-diamonds",
-            "title": "Lab-Grown Loose Diamonds"
-          }
-        },
-        "estate": {
-          "type": "collection",
-          "settings": {
-            "collection": "estate-jewelry",
-            "title": "Pre-Owned & Estate"
-          }
-        },
-        "watches": {
-          "type": "collection",
-          "settings": {
-            "collection": "time-pieces",
-            "title": "Pre-Owned Timepieces"
-          }
-        }
+        "peaceful": { "type": "collection", "settings": { "collection": "peaceful-diamonds-by-laura-milman-new-york", "title": "Lab-Grown Jewelry" } },
+        "natural": { "type": "collection", "settings": { "collection": "natural-diamonds", "title": "Natural Loose Diamonds" } },
+        "lab": { "type": "collection", "settings": { "collection": "lab-grown-diamonds", "title": "Lab-Grown Loose Diamonds" } },
+        "estate": { "type": "collection", "settings": { "collection": "estate-jewelry", "title": "Pre-Owned & Estate" } },
+        "watches": { "type": "collection", "settings": { "collection": "time-pieces", "title": "Pre-Owned Timepieces" } }
       },
-      "block_order": [
-        "peaceful",
-        "natural",
-        "lab",
-        "estate",
-        "watches"
-      ],
-      "settings": {
-        "eyebrow": "Explore Laura Milman",
-        "title": "Discover Our Worlds",
-        "view_all_link": ""
-      }
+      "block_order": ["peaceful", "natural", "lab", "estate", "watches"],
+      "settings": { "eyebrow": "Explore Laura Milman", "title": "Discover Our Worlds", "view_all_link": "" }
     }
   },
-  "order": [
-    "categories",
-    "worlds"
-  ]
+  "order": ["categories", "worlds"]
 }
