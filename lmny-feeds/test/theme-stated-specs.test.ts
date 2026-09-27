@@ -34,6 +34,14 @@ describe('product specification layout', () => {
     expect(stated).toContain('ct tdw');
     expect(stated).toContain('plain_size < 160');
     expect(stated).toContain('Offered by Laura Milman New York.');
+    expect(stated).toContain("|copy={{ copy_flag }}|prose=");
+    expect(stated).toContain("plain_down contains '30-day'");
+    expect(stated).toContain("plain_down contains 'lifetime warranty'");
+    expect(stated).toContain("plain_down contains 'money back'");
+    expect(product).toContain("stated_copy == '1'");
+    expect(product).toContain('7 days of delivery');
+    expect(product).not.toContain('30-Day Money Back');
+    expect(product).not.toContain('Lifetime Warranty');
     expect(stated).not.toContain("default: 'gold'");
     expect(stated).toContain('14K Two-Tone Gold');
     expect(stated).toContain("' round diamond '");

@@ -190,17 +190,20 @@ def test_homepage_walks_gold_diamonds_then_estate() -> None:
     order = data["order"]
     sections = data["sections"]
     assert order[:3] == ["hero", "trust-strip", "worlds"]
-    assert order.index("gold-chains") < order.index("gold-jewelry") < order.index("loose-diamonds") < order.index("lab-grown")
-    assert order.index("lab-grown") < order.index("brand-story") < order.index("estate")
+    assert order.index("gold-chains") < order.index("loose-diamonds") < order.index("lab-grown") < order.index("watches")
+    assert order.index("watches") < order.index("brand-story") < order.index("client-reviews")
+    assert order.index("client-reviews") < order.index("private-clients") < order.index("newsletter")
+    assert order[-1] == "newsletter"
+    for removed in ("gold-jewelry", "build-the-stack", "estate", "reviews", "also-from-the-house"):
+        assert removed not in order
     assert sections["worlds"]["type"] == "worlds-mosaic"
     assert sections["loose-diamonds"]["type"] == "diamond-feature"
     assert sections["gold-chains"]["settings"]["collection"] == "chains"
-    gold = sections["gold-jewelry"]["settings"]
-    assert gold["collection"] == "gold-jewelry"
-    assert gold["hide_when_empty"] is True
+    mosaic = [sections["worlds"]["blocks"][i]["settings"]["title"] for i in sections["worlds"]["block_order"]]
+    assert "Pre-Owned & Estate" in mosaic
     # No price-capped edit on the homepage: the house is not sold as "under $2,500".
     assert "under-2500" not in (ROOT / "templates/index.json").read_text()
-    for key in ("gold-chains", "gold-jewelry", "lab-grown"):
+    for key in ("gold-chains", "lab-grown"):
         chips = [b for b in sections[key]["blocks"].values() if b["type"] == "chip"]
         assert len(chips) >= 4, key
     for removed in ("testimonials", "closing-cta", "philosophy-quote", "diamond-destination", "collections-grid"):
@@ -392,7 +395,9 @@ def test_homepage_has_a_watches_carousel_after_estate() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     watches = data["sections"]["watches"]
-    assert order.index("estate") < order.index("watches") < order.index("client-reviews")
+    # Estate is the mosaic tile. The watches carousel is the one watches block.
+    assert "estate" not in order
+    assert order.index("lab-grown") < order.index("watches") < order.index("client-reviews")
     assert watches["type"] == "featured-products"
     assert watches["settings"]["layout"] == "carousel"
     assert watches["settings"]["collection"] == "time-pieces"

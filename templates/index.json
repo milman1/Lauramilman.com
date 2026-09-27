@@ -64,45 +64,6 @@
       ],
       "settings": {}
     },
-    "build-the-stack": {
-      "type": "shop-the-look",
-      "blocks": {
-        "p1": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-rope-1-8-mm-ch014"
-          }
-        },
-        "p2": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a"
-          }
-        },
-        "p3": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-diamond-huggie-earrings-1-ct-14k-yellow-gold-er12395"
-          }
-        }
-      },
-      "block_order": [
-        "p1",
-        "p2",
-        "p3"
-      ],
-      "settings": {
-        "eyebrow": "Wear them together",
-        "title": "Gold, then diamonds",
-        "description": "A 1.8 mm rope chain bracelet, a 0.54 ct lab-grown tennis bracelet and 1 ct lab-grown huggies, made to be worn together every day.",
-        "collection": "chains",
-        "editorial_asset": "shop-channel-cover.jpg",
-        "editorial_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
-        "caption_title": "The everyday stack",
-        "caption_text": "Gold and diamonds, worn together",
-        "cta_text": "Start With a Chain"
-      }
-    },
     "brand-story": {
       "type": "brand-story",
       "blocks": {
@@ -143,53 +104,6 @@
         "cta_url": "/pages/about"
       }
     },
-    "estate": {
-      "type": "preowned-maison",
-      "blocks": {
-        "m-1": {
-          "type": "maison",
-          "settings": {
-            "collection": "cartier",
-            "title": "Cartier"
-          }
-        },
-        "m-2": {
-          "type": "maison",
-          "settings": {
-            "collection": "van-cleef-arpels",
-            "title": "Van Cleef & Arpels"
-          }
-        },
-        "m-3": {
-          "type": "maison",
-          "settings": {
-            "collection": "david-webb",
-            "title": "David Webb"
-          }
-        },
-        "m-4": {
-          "type": "maison",
-          "settings": {
-            "collection": "tiffany",
-            "title": "Tiffany & Co."
-          }
-        }
-      },
-      "block_order": [
-        "m-1",
-        "m-2",
-        "m-3",
-        "m-4"
-      ],
-      "settings": {
-        "eyebrow": "Pre-owned & estate",
-        "title": "Signed pieces, authenticated",
-        "description": "Cartier, Van Cleef & Arpels, David Webb and Tiffany & Co., examined in New York before they are listed. Condition, measurements and signature are on every listing.",
-        "trust_line": "Every estate piece is individually authenticated and documented",
-        "cta_text": "Shop Pre-Owned & Estate",
-        "cta_url": "/collections/estate-jewelry"
-      }
-    },
     "newsletter": {
       "type": "newsletter",
       "settings": {
@@ -198,40 +112,6 @@
         "placeholder": "Your email address",
         "button_text": "Send My Code",
         "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
-      }
-    },
-    "also-from-the-house": {
-      "type": "shop-worlds",
-      "blocks": {
-        "w-2": {
-          "type": "world",
-          "settings": {
-            "collection": "time-pieces",
-            "title": "Pre-Owned Watches",
-            "subtitle": "Rolex, Cartier, Patek Philippe",
-            "link": "/collections/time-pieces",
-            "tone": "warm"
-          }
-        },
-        "w-3": {
-          "type": "world",
-          "settings": {
-            "collection": "engagement-rings",
-            "title": "Engagement Rings",
-            "subtitle": "Natural and lab-grown",
-            "link": "/collections/engagement-rings",
-            "tone": "navy"
-          }
-        }
-      },
-      "block_order": [
-        "w-2",
-        "w-3"
-      ],
-      "settings": {
-        "eyebrow": "Also From the House",
-        "heading": "Watches and Bridal",
-        "subheading": "Pre-owned watches and engagement rings, natural and lab-grown, from Laura Milman New York."
       }
     },
     "private-clients": {
@@ -415,66 +295,6 @@
         "cta_url": "/collections/chains"
       }
     },
-    "gold-jewelry": {
-      "type": "featured-products",
-      "blocks": {
-        "g-1": {
-          "type": "chip",
-          "settings": {
-            "label": "Necklaces",
-            "link": "/collections/gold-jewelry?type=Necklace"
-          }
-        },
-        "g-2": {
-          "type": "chip",
-          "settings": {
-            "label": "Rings",
-            "link": "/collections/gold-jewelry?type=Ring"
-          }
-        },
-        "g-3": {
-          "type": "chip",
-          "settings": {
-            "label": "Bracelets",
-            "link": "/collections/gold-jewelry?type=Bracelet"
-          }
-        },
-        "g-4": {
-          "type": "chip",
-          "settings": {
-            "label": "Earrings",
-            "link": "/collections/gold-jewelry?type=Earring"
-          }
-        },
-        "g-5": {
-          "type": "chip",
-          "settings": {
-            "label": "Charms",
-            "link": "/collections/gold-jewelry?type=Charm,Pendant"
-          }
-        }
-      },
-      "block_order": [
-        "g-1",
-        "g-2",
-        "g-3",
-        "g-4",
-        "g-5"
-      ],
-      "settings": {
-        "eyebrow": "Gold jewelry · new arrivals",
-        "title": "Everyday gold",
-        "description": "Necklaces, rings, bracelets and charms in 14K gold, made to wear every day and to stack with your chains.",
-        "collection": "gold-jewelry",
-        "product_count": 4,
-        "tone": "cream",
-        "header_align": "left",
-        "chips_label": "Popular",
-        "hide_when_empty": true,
-        "cta_text": "Shop Gold Jewelry",
-        "cta_url": "/collections/gold-jewelry"
-      }
-    },
     "loose-diamonds": {
       "type": "diamond-feature",
       "settings": {
@@ -592,24 +412,46 @@
         "eyebrow": "From Google",
         "title": "What clients",
         "title_emphasis": "say",
-        "rating": "",
-        "review_count": "",
+        "rating": "4.8",
+        "review_count": "17",
         "all_url": "/pages/google-reviews",
         "all_text": "Read all reviews",
         "google_url": ""
       },
-      "blocks": {},
-      "block_order": []
-    },
-    "reviews": {
-      "type": "google-reviews-strip",
-      "settings": {
-        "eyebrow": "From Google",
-        "title": "What Clients Say",
-        "intro": "",
-        "cta_label": "Read All Reviews",
-        "cta_url": "/pages/google-reviews"
-      }
+      "blocks": {
+        "g1": {
+          "type": "review",
+          "settings": {
+            "quote": "Working with Laura is really great. She’s easy, personable and makes you feel comfortable, works within your budget. I highly recommend her for all your jewelry needs!",
+            "name": "Susan Finkelstein",
+            "date": "September 2026",
+            "rating": 5
+          }
+        },
+        "g2": {
+          "type": "review",
+          "settings": {
+            "quote": "Great experience! Michael is professional and patient when helping me with my inquiry. Thank you!",
+            "name": "Albert Yakubov",
+            "date": "August 2026",
+            "rating": 5
+          }
+        },
+        "g3": {
+          "type": "review",
+          "settings": {
+            "quote": "Loved working with Laura on my engagement ring . Very sweet and professional . I look forward to working with her again .",
+            "name": "Dianna Shimunova",
+            "date": "April 2026",
+            "rating": 5
+          }
+        }
+      },
+      "block_order": [
+        "g1",
+        "g2",
+        "g3"
+      ]
     },
     "watches": {
       "type": "featured-products",
@@ -677,17 +519,12 @@
     "trust-strip",
     "worlds",
     "gold-chains",
-    "gold-jewelry",
     "loose-diamonds",
     "lab-grown",
-    "build-the-stack",
-    "brand-story",
-    "estate",
     "watches",
+    "brand-story",
     "client-reviews",
-    "reviews",
-    "newsletter",
-    "also-from-the-house",
-    "private-clients"
+    "private-clients",
+    "newsletter"
   ]
 }

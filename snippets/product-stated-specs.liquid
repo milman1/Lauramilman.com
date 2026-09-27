@@ -45,6 +45,19 @@
   elsif fact_source contains 'platinum'
     assign metal = 'Platinum'
   endif
+  assign metal_kinds = 0
+  if fact_source contains 'white gold'
+    assign metal_kinds = metal_kinds | plus: 1
+  endif
+  if fact_source contains 'yellow gold'
+    assign metal_kinds = metal_kinds | plus: 1
+  endif
+  if fact_source contains 'rose gold'
+    assign metal_kinds = metal_kinds | plus: 1
+  endif
+  if metal_kinds > 1 and metal != '14K Two-Tone Gold' and metal != '18K Two-Tone Gold'
+    assign metal = ''
+  endif
 
   assign carat = ''
   assign carat_probe = ''
@@ -193,6 +206,15 @@
     endunless
   endif
 
+  assign replace_copy = false
+  if plain_down contains '30-day' or plain_down contains '30 day' or plain_down contains 'money back' or plain_down contains 'lifetime warranty' or plain_down contains 'lifetime guarantee' or plain_down contains 'styling tips' or plain_down contains 'why choose' or plain_down contains 'statement piece' or plain_down contains 'indulge in' or plain_down contains 'pure luxury' or plain_down contains 'perfect for formal'
+    assign replace_copy = true
+  endif
+  assign copy_flag = '0'
+  if replace_copy
+    assign copy_flag = '1'
+  endif
+
   assign noun = 'piece'
   assign plural = false
   assign type_down = product.type | downcase
@@ -210,8 +232,8 @@
   endif
 
   assign stated_sentence = ''
-  if fragment
-    if metal != blank or carat != blank
+  if fragment or replace_copy
+    if shape != blank or style != blank or metal != blank or carat != blank
       if plural
         assign stated_sentence = 'These'
       else
@@ -229,24 +251,26 @@
         assign stated_sentence = stated_sentence | append: ' ' | append: style_l
       endif
       assign stated_sentence = stated_sentence | append: ' ' | append: noun
-      if plural
-        assign stated_sentence = stated_sentence | append: ' are'
-      else
-        assign stated_sentence = stated_sentence | append: ' is'
-      endif
-      if metal != blank
-        assign stated_sentence = stated_sentence | append: ' set in ' | append: metal
-      endif
-      if carat != blank
-        if metal != blank
-          assign stated_sentence = stated_sentence | append: ', '
+      if metal != blank or carat != blank
+        if plural
+          assign stated_sentence = stated_sentence | append: ' are'
         else
-          assign stated_sentence = stated_sentence | append: ' '
+          assign stated_sentence = stated_sentence | append: ' is'
         endif
-        assign stated_sentence = stated_sentence | append: carat | append: ' carats total diamond weight'
+        if metal != blank
+          assign stated_sentence = stated_sentence | append: ' set in ' | append: metal
+        endif
+        if carat != blank
+          if metal != blank
+            assign stated_sentence = stated_sentence | append: ', '
+          else
+            assign stated_sentence = stated_sentence | append: ' '
+          endif
+          assign stated_sentence = stated_sentence | append: carat | append: ' carats total diamond weight'
+        endif
       endif
       assign stated_sentence = stated_sentence | append: '. Offered by Laura Milman New York.'
     endif
   endif
 -%}
-<!--FACTS:shape={{ shape }}|carat={{ carat }}|metal={{ metal }}|clarity={{ clarity }}|color={{ color }}|style={{ style }}|length={{ length }}|prose={{ stated_sentence }}-->
+<!--FACTS:shape={{ shape }}|carat={{ carat }}|metal={{ metal }}|clarity={{ clarity }}|color={{ color }}|style={{ style }}|length={{ length }}|copy={{ copy_flag }}|prose={{ stated_sentence }}-->
