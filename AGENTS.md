@@ -26,7 +26,7 @@ orders to create a committee. The selected model executes; see
 |---|---|---|
 | Storefront theme | repo root (`sections/`, `snippets/`, `templates/`, `config/`) | Shopify Online Store 2.0 theme for lauramilman.com. Git-connected; the live theme is deployed from `main`. |
 | Feed sync | `lmny-feeds/` (TypeScript, Node 22, vitest) | Belgium Dia diamonds + watches -> Shopify, hourly. `src/sync.ts`. |
-| Back Vault sync | `lmny-feeds/src/backvault/` | Estate designer jewelry from thebackvault.com -> Shopify, weekly (Sunday 00:17 UTC). Price and availability rules live here. |
+| Back Vault sync | `lmny-feeds/src/backvault/` | Estate designer jewelry from thebackvault.com -> Shopify, three times a week (Sunday, Tuesday, and Thursday at 00:17 UTC). Price and availability rules live here. |
 | Pricing rules | `lmny-feeds/config/pricing.ts` | Single source of truth for every markup. Changes happen only by pull request against this file. |
 | Automations | `.github/workflows/*.yml` | Cron schedules and one-shot backfills. Secrets live in the repo's Actions settings. |
 | Feed cache | `lmny-feeds/cloudflare-worker/`, `wrangler.jsonc` | Cloudflare Worker + KV that caches the Belgium Dia feeds. |
@@ -472,7 +472,7 @@ from repo settings, never from a file.
 Current recurring jobs:
 
 - Belgium Dia diamonds and watches sync, hourly (`lmny-feeds/src/sync.ts`).
-- Back Vault estate jewelry sync, weekly, Sunday 00:17 UTC
+- Back Vault estate jewelry sync, Sunday, Tuesday, and Thursday at 00:17 UTC
   (`lmny-feeds/src/backvault/`).
 - Royal Chain cost refresh, monthly (`.github/workflows/royalchain-costs.yml`,
   `lmny-feeds/scripts/royalchain-costs.ts`; recipe H).
@@ -498,7 +498,7 @@ implemented in `src/backvault/listing.ts` and `src/watchListingBuilder.ts`.
 **1. Trigger and scope.** Orchestrator tier (Fable 5.1) sizes the batch.
 
 1. The trigger is any path into the catalog: the hourly Belgium Dia sync, the
-   weekly Back Vault sync, a jewelry CSV import (`SHOPIFY_SETUP.md` section 11),
+   Back Vault sync, a jewelry CSV import (`SHOPIFY_SETUP.md` section 11),
    supplier intake (recipe H), the Jacob & Co. path (recipe G2), or a hand
    upload. Content is finished before ACTIVE, never after.
 2. Generated: title, body HTML, SEO title, SEO description, tags, product

@@ -1,14 +1,12 @@
 {%- comment -%}
-  Laura Milman New York — Peaceful Diamonds sub-brand block
-  The lab-grown tier, explicitly labeled as an endorsed sub-brand.
-  COOL NAVY treatment by design — parent brand stays warm (espresso/wine/gold),
-  this tier reads cool/navy so the two are never interchangeable.
-  Uses only --navy / --pd-blue / --pd-ice tokens; no gold or wine in here.
+  Laura Milman New York — lab-grown jewelry block.
+  Wine ground and gold accents, the house palette. The espresso maison
+  block below stays darker so the two sections still separate.
 {%- endcomment -%}
 
 {%- assign pd_collection = section.settings.collection -%}
 
-<section class="lm-peaceful" aria-label="Peaceful Diamonds by Laura Milman New York">
+<section class="lm-peaceful" aria-label="Lab-grown jewelry by Laura Milman New York">
   <div class="lm-peaceful__glow" aria-hidden="true"></div>
   <div class="lm-peaceful__container">
 
@@ -36,7 +34,7 @@
       <div class="lm-peaceful__buttons">
         {%- if pd_collection != blank -%}
           <a href="{{ pd_collection.url }}" class="lm-peaceful__btn lm-peaceful__btn--solid">
-            {{ section.settings.cta_text | default: 'Shop Peaceful Diamonds' }}
+            {{ section.settings.cta_text | default: 'Shop Lab-Grown Jewelry' }}
           </a>
         {%- endif -%}
         {%- if section.settings.secondary_cta_text != blank and section.settings.secondary_cta_url != blank -%}
@@ -81,7 +79,7 @@
 <style>
   .lm-peaceful {
     position: relative;
-    background: linear-gradient(165deg, var(--navy, #1A1F3A) 0%, var(--navy-deep, #12162B) 100%);
+    background: linear-gradient(165deg, var(--wine, #4A1428) 0%, #2E0C18 100%);
     padding: 6rem 0;
     overflow: hidden;
   }
@@ -90,8 +88,8 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 50% 60% at 78% 40%, rgba(91, 127, 189, 0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 40% 50% at 15% 80%, rgba(169, 190, 227, 0.07) 0%, transparent 60%);
+      radial-gradient(ellipse 50% 60% at 78% 40%, rgba(201, 160, 80, 0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 15% 80%, rgba(226, 194, 122, 0.1) 0%, transparent 60%);
     pointer-events: none;
   }
 
@@ -113,8 +111,8 @@
     font-weight: 600;
     letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: var(--pd-ice, #A9BEE3);
-    border: 1px solid rgba(169, 190, 227, 0.35);
+    color: var(--gold-light, #E2C27A);
+    border: 1px solid rgba(226, 194, 122, 0.45);
     border-radius: 100px;
     padding: 0.45rem 1.1rem;
     margin-bottom: 1.75rem;
@@ -134,7 +132,7 @@
     font-size: 0.42em;
     font-style: italic;
     letter-spacing: 0.04em;
-    color: var(--pd-ice, #A9BEE3);
+    color: var(--gold-light, #E2C27A);
     margin-top: 0.6rem;
   }
 
@@ -168,7 +166,7 @@
   }
 
   .lm-peaceful__point svg {
-    color: var(--pd-blue, #5B7FBD);
+    color: var(--gold, #C9A050);
     flex-shrink: 0;
   }
 
@@ -194,34 +192,34 @@
   }
 
   .lm-peaceful__btn--solid {
-    background: var(--pd-blue, #5B7FBD);
-    color: #FFFFFF;
+    background: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
   }
 
   .lm-peaceful__btn--solid:hover {
-    background: #6D91CF;
+    background: var(--gold-light, #E2C27A);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(91, 127, 189, 0.35);
+    box-shadow: 0 10px 30px rgba(201, 160, 80, 0.35);
   }
 
   .lm-peaceful__btn--ghost {
-    border: 1px solid rgba(169, 190, 227, 0.4);
-    color: var(--pd-ice, #A9BEE3);
+    border: 1px solid rgba(226, 194, 122, 0.55);
+    color: var(--gold-pale, #F0DFB0);
     background: transparent;
   }
 
   .lm-peaceful__btn--ghost:hover {
-    border-color: var(--pd-ice, #A9BEE3);
-    background: rgba(169, 190, 227, 0.08);
+    border-color: var(--gold-light, #E2C27A);
+    background: rgba(201, 160, 80, 0.12);
   }
 
   .lm-peaceful__visual {
     position: relative;
     border-radius: var(--radius-lg, 12px);
     overflow: hidden;
-    border: 1px solid rgba(169, 190, 227, 0.25);
+    border: 1px solid rgba(226, 194, 122, 0.35);
     aspect-ratio: 4 / 5;
-    background: var(--navy-deep, #12162B);
+    background: #2E0C18;
   }
 
   .lm-peaceful__visual img {
@@ -236,7 +234,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(169, 190, 227, 0.25);
+    color: rgba(226, 194, 122, 0.35);
   }
 
   .lm-peaceful__visual-count {
@@ -249,11 +247,11 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #FFFFFF;
-    background: rgba(18, 22, 43, 0.75);
+    background: rgba(46, 12, 24, 0.78);
     backdrop-filter: blur(8px);
     padding: 0.5rem 1rem;
     border-radius: 100px;
-    border: 1px solid rgba(169, 190, 227, 0.3);
+    border: 1px solid rgba(226, 194, 122, 0.35);
   }
 
   @media (max-width: 992px) {
@@ -290,7 +288,7 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Peaceful Diamonds"
+      "default": "Lab-Grown Jewelry"
     },
     {
       "type": "text",
@@ -313,7 +311,7 @@
       "type": "text",
       "id": "cta_text",
       "label": "CTA text",
-      "default": "Shop Peaceful Diamonds"
+      "default": "Shop Lab-Grown Jewelry"
     },
     {
       "type": "text",

@@ -24,7 +24,10 @@ describe('theme SEO integration', () => {
     const layout = themeFile('layout/theme.liquid');
     const meta = themeFile('snippets/meta-tags.liquid');
 
-    expect(layout).toContain('Fine Jewelry, Diamonds & Estate Pieces');
+    expect(layout).toContain('Lab-Grown & Estate Jewelry | Laura Milman New York');
+    expect(layout).toContain('suppress_shop_suffix');
+    expect(layout).toContain("when 'david-webb'");
+    expect(layout).toContain('Lab-Grown Jewelry | Laura Milman');
     expect(layout).toContain("request.page_type == 'collection' and seo_meta_description == blank");
     expect(layout).toContain("request.page_type == 'article' and seo_meta_description.size > 180");
     expect(layout).toContain("render 'meta-tags', meta_title: seo_social_title, meta_description: seo_meta_description");
@@ -48,6 +51,21 @@ describe('theme SEO integration', () => {
     expect(collectionSchema).toContain('"@type": "ItemList"');
     expect(article).toContain('"dateModified"');
     expect(article).toContain('"@id": {{ canonical_url | json }}');
+    expect(layout).toContain("render 'breadcrumbs'");
+    expect(themeFile('snippets/breadcrumbs.liquid')).toContain('"@type": "BreadcrumbList"');
+    expect(themeFile('sections/faq.liquid')).toContain('"@type": "FAQPage"');
+    expect(themeFile('templates/page.google-reviews.liquid')).toContain('published on Google');
+    expect(layout).toContain('AggregateRating');
+    expect(diamondCollection).toContain('server-rendered diamond links');
+    expect(diamondCollection).toContain("render 'product-card'");
+    expect(collection).toContain("render 'collection-guide'");
+    expect(themeFile('sections/header.liquid')).toContain('>All Jewelry</a>');
+    expect(themeFile('sections/header.liquid')).not.toContain('All Fine Jewelry');
+    const labBlock = themeFile('sections/peaceful-diamonds.liquid');
+    expect(labBlock).toContain('var(--wine, #4A1428)');
+    expect(labBlock).toContain('var(--gold, #C9A050)');
+    expect(labBlock).not.toContain('--pd-blue');
+    expect(themeFile('assets/theme.css')).toContain('color: var(--wine, #4A1428)');
   });
 
   it('lists Chains with the other Fine Jewelry types, not as a style column', () => {

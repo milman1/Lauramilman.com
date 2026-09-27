@@ -40,6 +40,39 @@
   </div>
 </section>
 
+{%- assign faq_has_pairs = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+    {%- assign faq_has_pairs = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if faq_has_pairs -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- assign faq_written = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+        {%- if faq_written -%},{%- endif -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.question | json }},
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": {{ block.settings.answer | strip_html | strip | json }}
+          }
+        }
+        {%- assign faq_written = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+{%- endif -%}
+
 <style>
   .lm-faq {
     background: var(--warm-white, #FDFAF6);

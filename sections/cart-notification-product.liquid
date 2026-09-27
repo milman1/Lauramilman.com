@@ -14,7 +14,7 @@
       {%- endif -%}
       <div>
         {%- if settings.show_vendor -%}
-          <p class="caption-with-letter-spacing light">{{ item.product.vendor }}</p>
+          <p class="caption-with-letter-spacing light">{{ item.product.vendor | replace: 'Peaceful Diamonds', 'Laura Milman New York' | replace: "Laura's Gems", 'Laura Milman New York' }}</p>
         {%- endif -%}
         <h3 class="cart-notification-product__name h4">{{ item.product.title | escape }}</h3>
         <dl>

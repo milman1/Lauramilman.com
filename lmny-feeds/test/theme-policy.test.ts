@@ -36,8 +36,24 @@ describe('storefront warranty and return policy', () => {
     expect(faq).toContain('within 7 days of delivery');
     expect(faq).toContain('same 7-day window');
     expect(faq).toContain('1-year warranty against manufacturing defects');
-    expect(pdp).toContain('7-Day Returns');
+    expect(pdp).toContain('7-Day Jewelry Returns');
+    expect(pdp).toContain('Exchanges Only');
     expect(pdp).toContain('1-Year Warranty');
+
+    for (const path of ['templates/index.json', 'templates/page.shop.json', 'templates/page.ring-builder.json', 'sections/trust-strip.liquid']) {
+      const text = themeFile(path);
+      expect(text, path).toContain('7-Day Jewelry Returns');
+      expect(text, path).toContain('Watches: Exchanges Only');
+    }
+
+    const footer = themeFile('sections/footer.liquid');
+    const settings = themeFile('config/settings_data.json');
+    expect(footer).toContain('designed in New York and crafted in Italy');
+    expect(footer).toContain('Designed in New York');
+    expect(footer).toContain('Crafted in Italy');
+    expect(footer).not.toMatch(/crafted in New York/i);
+    expect(settings).toContain('designed in New York and crafted in Italy');
+    expect(settings).not.toMatch(/crafted in New York/i);
   });
 
   it('does not promise a lifetime warranty or 14-day returns on the storefront or emails', () => {

@@ -3,7 +3,7 @@
     "main": {
       "type": "page-editorial",
       "blocks": {
-        "t-open": { "type": "text", "settings": { "text": "<p>A signed Cartier bracelet or Van Cleef pendant is more than jewelry — it's a piece of a house's history. It's also exactly what counterfeiters imitate most. That's why every pre-owned maison piece we sell passes through the same authentication process before it ever reaches the site.</p>" } },
+        "t-open": { "type": "text", "settings": { "text": "<p>A signed David Webb bracelet, Cartier piece, or Van Cleef pendant is more than jewelry — it's a piece of a house's history. It's also exactly what counterfeiters imitate most. That's why every pre-owned maison piece we sell passes through the same authentication process before it ever reaches the site.</p>" } },
         "h-process": { "type": "heading", "settings": { "text": "How We Authenticate" } },
         "p-hallmarks": { "type": "point", "settings": { "title": "Hallmarks & Serial Numbers", "text": "<p>Maker's marks, metal hallmarks and serial numbers are verified against each maison's known conventions for the period.</p>" } },
         "p-construction": { "type": "point", "settings": { "title": "Construction & Materials", "text": "<p>Our specialists examine clasps, hinges, settings and stone quality — the details houses never compromise on and imitations always do.</p>" } },

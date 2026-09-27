@@ -3,7 +3,7 @@
     "main": {
       "type": "main-collection",
       "blocks": {
-        "chip-all": { "type": "chip", "settings": { "label": "All Peaceful Diamonds", "link": "/collections/peaceful-diamonds-by-laura-milman-new-york" } },
+        "chip-all": { "type": "chip", "settings": { "label": "All Lab-Grown Jewelry", "link": "/collections/peaceful-diamonds-by-laura-milman-new-york" } },
         "chip-bracelets": { "type": "chip", "settings": { "label": "Bracelets", "link": "/collections/lab-grown-bracelets" } },
         "chip-necklaces": { "type": "chip", "settings": { "label": "Necklaces", "link": "/collections/lab-grown-necklaces" } },
         "chip-pendants": { "type": "chip", "settings": { "label": "Pendants", "link": "/collections/lab-grown-pendants" } },

@@ -5,7 +5,7 @@
       "blocks": {
         "trust-shipping": { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
         "trust-warranty": { "type": "trust_item", "settings": { "icon": "warranty", "label": "1-Year Warranty" } },
-        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Returns" } }
+        "trust-returns": { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Jewelry Returns" } }
       },
       "block_order": ["trust-shipping", "trust-warranty", "trust-returns"],
       "settings": {

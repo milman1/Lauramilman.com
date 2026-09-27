@@ -41,7 +41,7 @@
   endif
 -%}
 
-{% render 'structured-data-collection', collection: collection, include_products: false %}
+{% render 'structured-data-collection', collection: collection, include_products: true %}
 
 {%- if api_mode -%}
 
@@ -64,6 +64,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
         <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
@@ -146,7 +147,7 @@
     </form>
 
     <div class="lm-dfilter__toolbar">
-      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">Loading…</span>
+      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">{{ collection.products_count }} {{ collection.products_count | pluralize: 'diamond', 'diamonds' }}</span>
       <div class="lm-dfilter__sort">
         <label for="lm-diamond-sort">Sort by</label>
         <select id="lm-diamond-sort">
@@ -158,7 +159,16 @@
       </div>
     </div>
 
-    <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite"></div>
+    <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite">
+      {%- comment -%} server-rendered diamond links: the filter script replaces this node after load {%- endcomment -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="products-grid lm-dfilter__results">
+          {%- for product in collection.products limit: section.settings.products_per_page -%}
+            {%- render 'product-card', product: product -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
     <div id="lm-diamond-pager"></div>
   </div>
 </section>
@@ -232,6 +242,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
         <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
@@ -602,7 +613,7 @@
   }
 
   .lm-dfilter--navy .lm-dfilter__origin-btn.is-active {
-    background: var(--navy, #1A1F3A);
+    background: var(--wine, #4A1428);
   }
 
   .lm-dfilter__grid {
@@ -1143,13 +1154,13 @@
   }
 
   .lm-dfilter--navy .lm-pagination__page--current {
-    background: var(--navy, #1A1F3A);
+    background: var(--wine, #4A1428);
   }
 
   .lm-dfilter--navy .lm-pagination__page:hover,
   .lm-dfilter--navy .lm-pagination__arrow:hover {
-    border-color: var(--pd-blue, #5B7FBD);
-    color: var(--pd-blue, #5B7FBD);
+    border-color: var(--gold, #C9A050);
+    color: var(--wine, #4A1428);
   }
 
   .lm-dfilter__setup {
@@ -1170,47 +1181,47 @@
     border-radius: 3px;
   }
 
-  /* ── Navy mode: Peaceful Diamonds tier ── */
+  /* Lab-grown diamond filter: wine and gold on the warm page. */
   .lm-dfilter--navy {
-    background: linear-gradient(180deg, #F4F6FB 0%, var(--warm-white, #FDFAF6) 100%);
+    background: linear-gradient(180deg, #F8F1EA 0%, var(--warm-white, #FDFAF6) 100%);
   }
 
   .lm-dfilter--navy .lm-dfilter__title {
-    color: var(--navy, #1A1F3A);
+    color: var(--wine, #4A1428);
   }
 
   .lm-dfilter--navy .lm-shape:hover,
   .lm-dfilter--navy .lm-grade:hover {
-    border-color: var(--pd-blue, #5B7FBD);
-    background: rgba(91, 127, 189, 0.06);
+    border-color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.06);
   }
 
   .lm-dfilter--navy .lm-shape.is-active {
-    border-color: var(--pd-blue, #5B7FBD);
-    background: rgba(91, 127, 189, 0.14);
-    box-shadow: inset 0 0 0 1px var(--pd-blue, #5B7FBD);
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.16);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
   }
 
   .lm-dfilter--navy .lm-grade.is-in-range,
   .lm-dfilter--navy .lm-chip.is-active {
-    border-color: var(--pd-blue, #5B7FBD);
-    background: rgba(91, 127, 189, 0.14);
+    border-color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.08);
   }
 
   .lm-dfilter--navy .lm-range__fill {
-    background: var(--pd-blue, #5B7FBD);
+    background: var(--wine, #4A1428);
   }
 
   .lm-dfilter--navy .lm-dfilter__apply {
-    background: var(--navy, #1A1F3A);
+    background: var(--wine, #4A1428);
   }
 
   .lm-dfilter--navy .lm-dfilter__apply:hover {
-    background: var(--navy-deep, #12162B);
+    background: #2E0C18;
   }
 
   .lm-dfilter--navy .lm-dfilter__reset {
-    color: var(--pd-blue, #5B7FBD);
+    color: var(--wine, #4A1428);
   }
 
   @media (max-width: 1024px) {
@@ -1320,16 +1331,16 @@
     text-underline-offset: 0.2em;
   }
   .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__atc {
-    background: var(--navy, #1A1F3A);
-    border-color: var(--navy, #1A1F3A);
+    background: var(--wine, #4A1428);
+    border-color: var(--wine, #4A1428);
   }
   .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__buy {
-    background: var(--pd-blue, #5B7FBD);
-    border-color: var(--pd-blue, #5B7FBD);
-    color: #fff;
+    background: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
   }
   .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__reserve {
-    color: var(--pd-blue, #5B7FBD);
+    color: var(--wine, #4A1428);
   }
 
   .lm-reserve-modal[hidden] { display: none !important; }

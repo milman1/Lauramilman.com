@@ -12,6 +12,9 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
 
 {%- liquid
   assign schema_brand = product.metafields.custom.brand.value | default: product.vendor | default: shop.name | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  if schema_brand == 'Peaceful Diamonds' or schema_brand == "Laura's Gems" or schema_brand == 'Milman New York'
+    assign schema_brand = 'Laura Milman New York'
+  endif
   assign schema_name = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign schema_condition = product.metafields.custom.condition.value | downcase
   capture is_vintage

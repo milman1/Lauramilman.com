@@ -13,8 +13,8 @@
         "qa-natural-lab": {
           "type": "qa",
           "settings": {
-            "question": "What's the difference between your natural and Peaceful Diamonds pieces?",
-            "answer": "<p>Laura Milman New York collections feature natural diamonds and gemstones. Peaceful Diamonds by Laura Milman New York is our lab-grown line — certified stones that are chemically identical to mined diamonds, offered at a more accessible price. Both are held to the same design and craftsmanship standards; they are simply different stones for different chapters.</p>"
+            "question": "What's the difference between your natural and lab-grown pieces?",
+            "answer": "<p>Lab-grown jewelry is certified lab-grown diamond jewelry meant to be worn from the office through dinner. Natural diamond jewelry and signed pre-owned pieces are the other collections in the house. The stones differ. The design standard does not. Lab-grown is not a starter line you are expected to leave.</p>"
           }
         },
         "qa-shipping": {
