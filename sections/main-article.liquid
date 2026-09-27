@@ -298,10 +298,23 @@
     "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
     "dateCreated": {{ article.created_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
     "dateModified": {{ article.updated_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
+    {%- comment -%}
+      Journal posts are published under the store account, so an author
+      named after the business is the Organization, not a person.
+    {%- endcomment -%}
+    {%- if article.author == shop.name or article.author contains 'Laura Milman New York' -%}
+    "author": {
+      "@type": "Organization",
+      "@id": "{{ shop.url }}/#organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+    },
+    {%- else -%}
     "author": {
       "@type": "Person",
       "name": {{ article.author | json }}
     },
+    {%- endif -%}
     "publisher": {
       "@type": "Organization",
       "@id": "{{ shop.url }}/#organization",

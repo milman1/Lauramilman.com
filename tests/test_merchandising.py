@@ -275,3 +275,23 @@ def test_header_menus_work_with_a_keyboard() -> None:
     assert ".nav__item:focus-within .nav__dropdown" in header
     assert 'href="#MainContent"' in layout
 
+
+
+def test_product_schema_carries_offers_shipping_returns_and_specs() -> None:
+    snippet = (ROOT / "snippets/structured-data-product.liquid").read_text()
+    assert "for variant in product.variants" in snippet
+    assert '"shippingDetails"' in snippet
+    assert "MerchantReturnFiniteReturnWindow" in snippet
+    assert "MerchantReturnNotPermitted" in snippet  # watches: exchange only
+    assert '"additionalProperty"' in snippet
+    # Loose diamonds can be final sale, so they get no return policy.
+    assert "schema_is_loose == false" in snippet
+
+
+def test_organization_schema_names_the_founder_and_address() -> None:
+    layout = (ROOT / "layout/theme.liquid").read_text()
+    assert '"founder"' in layout and "Laura Milman" in layout
+    assert "1185 6th Avenue" in layout
+    assert "shop.brand.logo" in layout
+    article = (ROOT / "sections/main-article.liquid").read_text()
+    assert "article.author == shop.name" in article

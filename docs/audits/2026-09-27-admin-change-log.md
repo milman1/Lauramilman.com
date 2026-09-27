@@ -95,3 +95,22 @@ storefront, sitemap, search, and every sales channel and feed show only
 active, published products, so inactive members do not affect the website,
 Google or AI search. Merchant decision: leave as is. No tag rule, no
 rollback.
+
+## Part 3 — answer-first collection intros
+
+Body (`descriptionHtml`) only; SEO title and description unchanged. Copy uses
+facts already stated on the site and in the refund and shipping policies.
+
+| Collection | Before |
+|---|---|
+| `david-webb` | "Pre-owned David Webb jewelry, authenticated and hand-inspected by Laura Milman New York. Enamel, hammered gold, and other signed designs are listed with the measurements and condition on each product page. Missing facts stay blank." |
+| `cartier` | "Pre-owned Cartier jewelry and watches selected by Laura Milman New York. Love, Juste un Clou, Tank, and other documented models are listed with metal, size, and condition from the product record. Era and provenance are stated only when documented." |
+| `van-cleef-arpels` | "Pre-owned Van Cleef & Arpels jewelry offered by Laura Milman New York. Alhambra and other signed designs appear here when the piece is in hand. Stone, metal, and measurements stay on the product page; unknown facts are left empty." |
+| `tiffany` | "Pre-owned Tiffany & Co. jewelry authenticated by Laura Milman New York. Schlumberger, Paloma Picasso, and house designs are listed only when the attribution is on the piece or its paperwork." |
+| `rolex-watches` | "Pre-owned Rolex watches selected by Laura Milman New York. Reference, case size, year, and box-and-papers facts come from the source record. Condition is never inferred from the title." |
+| `chains` | "Gold chains at Laura Milman New York: 14K yellow, white, and rose gold in Franco, Cuban, rope, herringbone, and other classic links. Solid links and measured lengths for everyday wear.Each chain is authenticated by Laura Milman New York." |
+
+After: each body now opens by answering the buyer's first question
+(authenticated in New York; what the listing states; what is never guessed)
+and closes with the shipping and return terms from the refund policy.
+Applied 2026-09-27; all six updates returned no errors.
