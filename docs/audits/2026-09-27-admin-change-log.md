@@ -243,3 +243,33 @@ is published to the Online Store.
   pieces to tag is the merchant's call; nothing has been tagged yet.
 - Undo: delete the collection in Products → Collections. The theme falls
   back cleanly (the homepage section and menu item hide themselves).
+
+## Part 6 — admin menus follow the v2 site menu (2026-09-27)
+
+The theme hard-codes its header and footer; these Shopify menus are read by
+apps such as the Shop app.
+
+- `main-menu` (`gid://shopify/Menu/207127050`). Before: Under $2,500 →
+  /collections/under-2500; Jewelry (Gold Chains, Earrings, Bracelets,
+  Necklaces, Pendants, Rings, All Jewelry); Lab-Grown Jewelry (Bracelets,
+  Necklaces, Pendants, Rings, Earrings, Engagement Rings); Pre-Owned & Estate
+  (David Webb, Cartier, Van Cleef & Arpels, Bvlgari, Tiffany & Co., Hermès,
+  Chopard, Estate Authentication); Our Story; Loose Diamonds → natural-diamonds
+  (Natural, Lab-Grown); Watches (All, Rolex, Cartier, Jacob & Co., Patek
+  Philippe); Bridal (Engagement Rings, Wedding Bands, Men's Wedding Bands,
+  Ring Builder); Journal.
+  After: Gold Chains (Cuban, Rope, Paperclip, Herringbone, Curb via `?type=`;
+  Chain Necklaces; Chain Bracelets; All Chains); Lab-Grown Jewelry (Tennis
+  Bracelets, Huggies & Hoops, Stud Earrings, Station Necklaces, Engagement
+  Rings, then the five categories and All); Loose Diamonds →
+  lab-grown-diamonds (Round, Oval, Emerald, Pear via `?shape=`; Lab-Grown;
+  Natural); Pre-Owned & Estate (houses in the site's popularity order,
+  Estate Authentication, All); Our Story; Shop by Piece; Watches; Bridal;
+  Journal; Private Clients. Gold Jewelry is left out until the
+  `gold-jewelry` collection has pieces, as on the site.
+- `footer-shop` (`gid://shopify/Menu/220497150023`). Before: Under $2,500,
+  Rings, Necklaces, Bracelets, Earrings, All Jewelry. After: Gold Chains,
+  Lab-Grown Jewelry, Loose Diamonds, Pre-Owned & Estate, Rings, Necklaces,
+  Bracelets, Earrings, All Jewelry.
+
+Both `menuUpdate` calls returned no user errors.
