@@ -185,25 +185,54 @@ def strip_liquid_comments(text: str) -> str:
     return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
 
 
-def test_homepage_leads_with_the_self_purchase_edit() -> None:
+def test_homepage_walks_gold_diamonds_then_estate() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
-    assert order[:4] == ["hero", "trust-strip", "first-piece", "build-the-stack"]
-    assert order.index("brand-story") < order.index("estate")
-    assert order.index("estate") < order.index("also-from-the-house")
-    assert data["sections"]["first-piece"]["settings"]["collection"] == "under-2500"
-    for removed in ("testimonials", "closing-cta", "philosophy-quote", "diamond-destination"):
-        assert all(section["type"] != removed for section in data["sections"].values())
+    sections = data["sections"]
+    assert order[:3] == ["hero", "trust-strip", "worlds"]
+    assert order.index("gold-chains") < order.index("gold-jewelry") < order.index("loose-diamonds") < order.index("lab-grown")
+    assert order.index("lab-grown") < order.index("brand-story") < order.index("estate")
+    assert sections["worlds"]["type"] == "worlds-mosaic"
+    assert sections["loose-diamonds"]["type"] == "diamond-feature"
+    assert sections["gold-chains"]["settings"]["collection"] == "chains"
+    gold = sections["gold-jewelry"]["settings"]
+    assert gold["collection"] == "gold-jewelry"
+    assert gold["hide_when_empty"] is True
+    # No price-capped edit on the homepage: the house is not sold as "under $2,500".
+    assert "under-2500" not in (ROOT / "templates/index.json").read_text()
+    for key in ("gold-chains", "gold-jewelry", "lab-grown"):
+        chips = [b for b in sections[key]["blocks"].values() if b["type"] == "chip"]
+        assert len(chips) >= 4, key
+    for removed in ("testimonials", "closing-cta", "philosophy-quote", "diamond-destination", "collections-grid"):
+        assert all(section["type"] != removed for section in sections.values())
 
 
-def test_hero_speaks_to_women_buying_for_themselves() -> None:
+def test_hero_is_the_dark_editorial_layout() -> None:
     hero = load_json(ROOT / "templates/index.json")["sections"]["hero"]["settings"]
-    assert hero["layout"] == "split"
-    assert "for yourself" in hero["heading"]
-    assert hero["primary_cta_url"] == "/collections/under-2500"
+    assert hero["layout"] == "editorial"
+    assert hero["heading_emphasis"]
+    assert hero["secondary_cta_url"] == "/collections/lab-grown-diamonds"
     assert (ROOT / "assets" / hero["image_asset"]).exists()
     liquid = (ROOT / "sections/hero.liquid").read_text()
-    assert "lm-hero--split" in liquid
+    assert "lm-hero--editorial" in liquid
+
+
+def test_homepage_theme_images_exist() -> None:
+    data = load_json(ROOT / "templates/index.json")
+    for section in data["sections"].values():
+        assets = [section.get("settings", {}).get("image_asset"), section.get("settings", {}).get("editorial_asset")]
+        assets += [b.get("settings", {}).get("image_asset") for b in section.get("blocks", {}).values()]
+        for name in filter(None, assets):
+            assert (ROOT / "assets" / name).exists(), name
+
+
+def test_diamond_feature_shapes_deep_link_into_the_search() -> None:
+    liquid = (ROOT / "sections/diamond-feature.liquid").read_text()
+    assert "?shape={{ shape }}" in liquid
+    assert "render 'diamond-shape-icon'" in liquid
+    js = (ROOT / "assets/diamond-storefront.js").read_text()
+    assert "function hydrateShapesFromURL()" in js
+    assert js.index("hydrateShapesFromURL();") < js.index("wireShapes();")
 
 
 def test_estate_links_use_the_single_estate_hub() -> None:
@@ -226,18 +255,35 @@ def test_category_links_use_rule_based_collections() -> None:
         assert stale not in collection
 
 
-def test_header_nav_leads_with_price_and_keeps_watches_one_click_away() -> None:
+def test_header_nav_names_what_the_house_sells() -> None:
     header = strip_liquid_comments((ROOT / "sections/header.liquid").read_text())
-    under = header.index('href="/collections/under-2500" class="nav__item-link"')
-    jewelry = header.index("            Jewelry\n")
+    assert "/collections/under-2500" not in header
+    chains = header.index("            Gold Chains\n")
+    gold = header.index("              Gold Jewelry\n")
     lab = header.index("nav__item nav__item--peaceful")
+    loose = header.index("            Loose Diamonds\n")
     estate = header.index("estate_label")
     story = header.index('href="/pages/about" class="nav__item-link"')
-    more = header.index("nav__item nav__item--end")
-    assert under < jewelry < lab < estate < story < more
+    more = header.index("            More\n")
+    assert chains < gold < lab < loose < estate < story < more
+    # Everyday gold only shows once the collection has pieces in it.
+    assert "collections['gold-jewelry'].products_count > 0" in header
+    assert header.count('<span class="nav__dropdown-label">Most popular') >= 5
+    assert 'href="/collections/lab-grown-diamonds?shape=Oval"' in header
+    assert 'href="/collections/chains?type=Cuban"' in header
     more_panel = header[more:]
-    for href in ("/collections/natural-diamonds", "/collections/time-pieces", "/collections/jacob-co", "/collections/engagement-rings", "/blogs/journal"):
+    for href in ("/collections/all-earrings", "/collections/time-pieces", "/collections/jacob-co", "/collections/engagement-rings", "/blogs/journal"):
         assert f'href="{href}"' in more_panel
+
+
+def test_new_gold_collections_get_style_filters() -> None:
+    bar = (ROOT / "snippets/jewelry-style-bar.liquid").read_text()
+    filters = (ROOT / "snippets/jewelry-style-filters.liquid").read_text()
+    drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
+    for handle in ("gold-jewelry", "chain-bracelets", "chain-necklaces"):
+        assert f"'{handle}'" in bar, handle
+        assert f"'{handle}'" in filters, handle
+        assert f"'{handle}'" in drawer, handle
 
 
 def test_all_jewelry_is_a_real_paginated_collection() -> None:

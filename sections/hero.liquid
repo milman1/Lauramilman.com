@@ -6,12 +6,15 @@
 
 {%- liquid
   assign hero_split = false
+  assign hero_editorial = false
   if section.settings.layout == 'split'
     assign hero_split = true
+  elsif section.settings.layout == 'editorial'
+    assign hero_editorial = true
   endif
   assign hero_alt = section.settings.image_alt | default: section.settings.heading | strip_html | strip_newlines
 -%}
-<section class="lm-hero{% if hero_split %} lm-hero--split{% endif %}" aria-label="Hero">
+<section class="lm-hero{% if hero_split %} lm-hero--split{% endif %}{% if hero_editorial %} lm-hero--editorial{% endif %}" aria-label="Hero">
   {%- unless hero_split -%}
   <div class="lm-hero__bg" aria-hidden="true"></div>
   <div class="lm-hero__glow" aria-hidden="true"></div>
@@ -19,6 +22,29 @@
 
   {%- if hero_split -%}
     {%- comment -%} Split layout: the photo sits beside the copy, never under it. {%- endcomment -%}
+  {%- elsif hero_editorial -%}
+    {%- comment -%}
+      Editorial layout: the photo fills the right side and fades into the
+      espresso ground behind left-aligned copy.
+    {%- endcomment -%}
+    <div class="lm-hero__editorial-media">
+      {%- if section.settings.background_image != blank -%}
+        <img
+          src="{{ section.settings.background_image | image_url: width: 1600 }}"
+          srcset="{{ section.settings.background_image | image_url: width: 800 }} 800w,
+                  {{ section.settings.background_image | image_url: width: 1200 }} 1200w,
+                  {{ section.settings.background_image | image_url: width: 1600 }} 1600w"
+          sizes="(max-width: 768px) 100vw, 62vw"
+          width="{{ section.settings.background_image.width }}"
+          height="{{ section.settings.background_image.height }}"
+          alt="{{ hero_alt | escape }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      {%- elsif section.settings.image_asset != blank -%}
+        <img src="{{ section.settings.image_asset | asset_url }}" alt="{{ hero_alt | escape }}" loading="eager" fetchpriority="high">
+      {%- endif -%}
+    </div>
   {%- elsif section.settings.background_image != blank -%}
     <img
       class="lm-hero__image"
@@ -42,7 +68,10 @@
       <p class="lm-hero__eyebrow">{{ section.settings.eyebrow }}</p>
     {%- endif -%}
 
-    <h1 class="lm-hero__title">{{ section.settings.heading | newline_to_br }}</h1>
+    <h1 class="lm-hero__title">
+      {{- section.settings.heading | escape | newline_to_br -}}
+      {%- if section.settings.heading_emphasis != blank %} <em>{{ section.settings.heading_emphasis | escape }}</em>{% endif -%}
+    </h1>
 
     {%- if section.settings.subheading != blank -%}
       <p class="lm-hero__description">{{ section.settings.subheading }}</p>
@@ -64,6 +93,10 @@
       <p class="lm-hero__note">{{ section.settings.note }}</p>
     {%- endif -%}
   </div>
+
+  {%- if hero_editorial and section.settings.caption_title != blank -%}
+    <p class="lm-hero__caption"><span>{{ section.settings.caption_title }}</span>{{ section.settings.caption_text }}</p>
+  {%- endif -%}
 
   {%- if hero_split -%}
     <div class="lm-hero__media">
@@ -89,7 +122,7 @@
         >
       {%- endif -%}
     </div>
-  {%- else -%}
+  {%- elsif hero_editorial == false -%}
   <div class="lm-hero__scroll" aria-hidden="true">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="m6 9 6 6 6-6"/>
@@ -223,6 +256,81 @@
     animation: lmHeroBounce 2s ease-in-out infinite 1.5s;
   }
 
+  /* Editorial layout: dark ground, photo right, copy left. */
+  .lm-hero--editorial {
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 0;
+    min-height: min(640px, calc(100svh - var(--header-height, 84px) - 44px));
+    background: var(--espresso, #1E1109);
+  }
+  .lm-hero__editorial-media {
+    position: absolute;
+    inset: 0 0 0 38%;
+    z-index: 0;
+  }
+  .lm-hero__editorial-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 22%;
+  }
+  .lm-hero__editorial-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, var(--espresso, #1E1109) 0%, rgba(30, 17, 9, 0.85) 18%, rgba(30, 17, 9, 0.25) 48%, rgba(30, 17, 9, 0) 70%),
+      linear-gradient(0deg, rgba(30, 17, 9, 0.55), rgba(30, 17, 9, 0) 35%);
+  }
+  .lm-hero--editorial .lm-hero__content {
+    text-align: left;
+    align-self: center;
+    max-width: 640px;
+    padding: clamp(3.5rem, 8vw, 6rem) clamp(1.25rem, 5vw, 4.5rem);
+  }
+  .lm-hero--editorial .lm-hero__eyebrow {
+    margin-bottom: 1.25rem;
+  }
+  .lm-hero--editorial .lm-hero__title {
+    font-weight: 300;
+    font-size: clamp(2.9rem, 6.4vw, 5.75rem);
+    line-height: 0.98;
+  }
+  .lm-hero--editorial .lm-hero__title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-hero--editorial .lm-hero__description {
+    margin: 0 0 2rem;
+    max-width: 440px;
+  }
+  .lm-hero--editorial .lm-hero__buttons {
+    justify-content: flex-start;
+  }
+  .lm-hero__caption {
+    position: absolute;
+    right: clamp(1rem, 4vw, 3.5rem);
+    bottom: 1.75rem;
+    z-index: 2;
+    margin: 0;
+    text-align: right;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(250, 246, 240, 0.7);
+  }
+  .lm-hero__caption span {
+    display: block;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.25rem;
+    font-style: italic;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--cream, #FAF6F0);
+  }
+
   /* Split layout: copy on cream beside the photo. */
   .lm-hero--split {
     display: grid;
@@ -296,6 +404,28 @@
       grid-template-columns: 1fr;
       min-height: 0;
     }
+    .lm-hero--editorial {
+      flex-direction: column;
+      min-height: 0;
+    }
+    .lm-hero__editorial-media {
+      position: relative;
+      inset: auto;
+      aspect-ratio: 4 / 4.6;
+    }
+    .lm-hero__editorial-media::after {
+      background: linear-gradient(0deg, var(--espresso, #1E1109) 0%, rgba(30, 17, 9, 0.2) 40%, rgba(30, 17, 9, 0) 70%);
+    }
+    .lm-hero--editorial .lm-hero__content {
+      margin-top: -7rem;
+      padding: 0 1.25rem 2.75rem;
+    }
+    .lm-hero--editorial .lm-hero__buttons .btn {
+      flex: 1 1 100%;
+    }
+    .lm-hero__caption {
+      display: none;
+    }
     .lm-hero--split .lm-hero__media {
       order: -1;
       min-height: 0;
@@ -340,7 +470,8 @@
       "label": "Layout",
       "options": [
         { "value": "overlay", "label": "Text over image" },
-        { "value": "split", "label": "Text beside image" }
+        { "value": "split", "label": "Text beside image" },
+        { "value": "editorial", "label": "Dark, photo on the right" }
       ],
       "default": "overlay"
     },
@@ -354,6 +485,22 @@
       "type": "text",
       "id": "image_alt",
       "label": "Image description"
+    },
+    {
+      "type": "text",
+      "id": "heading_emphasis",
+      "label": "Heading ending in italic gold",
+      "info": "Shown after the heading, e.g. \"chosen by you.\""
+    },
+    {
+      "type": "text",
+      "id": "caption_title",
+      "label": "Photo caption (editorial layout)"
+    },
+    {
+      "type": "text",
+      "id": "caption_text",
+      "label": "Photo caption detail"
     },
     {
       "type": "text",

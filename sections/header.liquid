@@ -333,6 +333,16 @@
   color: var(--gold, #C9A050);
 }
 
+.header .nav__dropdown-label ~ .nav__dropdown-label {
+  margin-top: 0.4rem;
+}
+
+.header .nav__dropdown-link--all {
+  margin-top: 0.35rem;
+  border-top: 1px solid rgba(201, 160, 80, 0.25);
+  font-weight: 600;
+}
+
 /* The lab-grown category list is both longer and wider than the two links the
    tier used to carry. Centred under a nav item this close to the right edge it
    ran off a 1280px viewport, so this panel anchors to its right edge instead. */
@@ -708,15 +718,38 @@
   }
 }
 
+/* Seven top-level items have to clear the logo and icons on a laptop. */
 @media (min-width: 1200px) and (max-width: 1380px) {
   .header .nav {
-    gap: 0.55rem;
+    gap: 0.5rem;
   }
 
   .header .nav__link,
   .header .nav__item-link {
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+  }
+
+}
+
+/* Short labels on laptops so the logo, menu and icons never collide. The
+   full label stays in the accessibility tree; the short one is visual only. */
+.header .nav__label-short {
+  display: none;
+}
+
+@media (min-width: 1200px) and (max-width: 1440px) {
+  .header .nav__label-full {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .header .nav__label-short {
+    display: inline;
   }
 }
 </style>
@@ -745,91 +778,137 @@
         </div>
 
         {%- comment -%}
-          Price first: most women buying for themselves shop by budget, then
-          by piece. The edit is the under-2500 smart collection.
+          The menu names what the house sells, in the order a woman buying for
+          herself shops it: gold chains, everyday gold, lab-grown diamond
+          jewelry, loose diamonds, then signed estate. Each panel opens on a
+          "Most popular" list. Style links use ?type=, which the collection
+          page reads to pre-select its style chips; shape links use ?shape=,
+          which the diamond search reads the same way.
         {%- endcomment -%}
         <div class="nav__item">
-          <a href="/collections/under-2500" class="nav__item-link">Under $2,500</a>
-        </div>
-
-        <div class="nav__item">
           <button type="button" aria-expanded="false" class="nav__item-link">
-            Jewelry
+            Gold Chains
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="nav__dropdown">
-            <a href="/collections/chains" class="nav__dropdown-link">Gold Chains</a>
-            <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
-            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
-            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
-            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
+            <span class="nav__dropdown-label">Most popular</span>
+            <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
+            <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
+            <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
+            <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
+            <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
+            <span class="nav__dropdown-label">By type</span>
+            <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chain Necklaces</a>
+            <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
+            <a href="/collections/chains" class="nav__dropdown-link nav__dropdown-link--all">Shop All Chains</a>
           </div>
         </div>
 
         {%- comment -%}
-          Peaceful Diamonds carries its own tier styling — the navy signal dot
-          — and now opens rather than jumping straight to the collection, so
-          lab-grown can sit under it as a sub-category.
+          Everyday gold appears once the gold-jewelry collection has pieces in
+          it. An empty collection in the menu reads as a broken link.
+        {%- endcomment -%}
+        {%- if collections['gold-jewelry'].products_count > 0 -%}
+          <div class="nav__item">
+            <button type="button" aria-expanded="false" class="nav__item-link">
+              Gold Jewelry
+              <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            </button>
+            <div class="nav__dropdown">
+              <span class="nav__dropdown-label">Most popular</span>
+              <a href="/collections/gold-jewelry?type=Necklace" class="nav__dropdown-link">Necklaces</a>
+              <a href="/collections/gold-jewelry?type=Ring" class="nav__dropdown-link">Rings</a>
+              <a href="/collections/gold-jewelry?type=Bracelet" class="nav__dropdown-link">Bracelets</a>
+              <a href="/collections/gold-jewelry?type=Earring" class="nav__dropdown-link">Earrings</a>
+              <a href="/collections/gold-jewelry?type=Charm,Pendant" class="nav__dropdown-link">Charms &amp; Pendants</a>
+              <a href="/collections/gold-jewelry" class="nav__dropdown-link nav__dropdown-link--all">Shop All Gold Jewelry</a>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- comment -%}
+          Peaceful Diamonds carries its own tier styling — the navy signal dot.
+          Category links mirror the peacefuldiamonds.com taxonomy so the
+          sub-brand shops the same way on both sites. Ring Settings, Eternity
+          Bands and Wedding Bands are deliberately absent — LMNY holds no
+          lab-grown stock in those three.
         {%- endcomment -%}
         {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
         <div class="nav__item nav__item--peaceful">
           <button type="button" aria-expanded="false" class="nav__item-link nav__link--peaceful">
             <span class="nav__peaceful-dot" aria-hidden="true"></span>
-            {{ section.settings.peaceful_label | default: 'Lab-Grown Jewelry' }}
+            <span class="nav__label-full">{{ section.settings.peaceful_label | default: 'Lab-Grown Jewelry' }}</span><span class="nav__label-short" aria-hidden="true">Lab-Grown</span>
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="nav__dropdown">
-            <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Lab-Grown Jewelry</a>
-            {%- comment -%}
-              Category links mirror the peacefuldiamonds.com taxonomy so the
-              sub-brand shops the same way on both sites. Ring Settings,
-              Eternity Bands and Wedding Bands are deliberately absent — LMNY
-              holds no lab-grown stock in those three, and an empty collection
-              in the nav reads as a broken link.
-            {%- endcomment -%}
-            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Lab-Grown Bracelets</a>
-            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Lab-Grown Necklaces</a>
-            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Lab-Grown Pendants</a>
-            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-Grown Rings</a>
-            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Lab-Grown Earrings</a>
-            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-Grown Engagement Rings</a>
+            <span class="nav__dropdown-label">Most popular</span>
+            <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
+            <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
+            <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
+            <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
+            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+            <span class="nav__dropdown-label">By category</span>
+            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Bracelets</a>
+            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Necklaces</a>
+            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Earrings</a>
+            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop All Lab-Grown</a>
           </div>
         </div>
 
         <div class="nav__item">
           <button type="button" aria-expanded="false" class="nav__item-link">
-            {{ section.settings.estate_label | default: 'Pre-Owned & Estate' }}
+            Loose Diamonds
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="nav__dropdown">
-            <a href="/collections/estate-jewelry" class="nav__dropdown-link">All Pre-Owned &amp; Estate</a>
-            <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
-            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
-            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany & Co.</a>
-            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
-            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
-            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
+            <span class="nav__dropdown-label">Most popular shapes</span>
+            <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
+            <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
+            <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
+            <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+            <span class="nav__dropdown-label">Origin</span>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
           </div>
         </div>
 
+        <div class="nav__item nav__item--end">
+          <button type="button" aria-expanded="false" class="nav__item-link">
+            <span class="nav__label-full">{{ section.settings.estate_label | default: 'Pre-Owned & Estate' }}</span><span class="nav__label-short" aria-hidden="true">Estate</span>
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="nav__dropdown">
+            <span class="nav__dropdown-label">Most popular houses</span>
+            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
+            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
+            <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
+            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
+            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
+            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
+            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
+            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
+            <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">Shop All Estate</a>
+          </div>
+        </div>
 
         <div class="nav__item">
           <a href="/pages/about" class="nav__item-link">Our Story</a>
         </div>
 
         {%- comment -%}
-          Loose diamonds, watches, bridal and the journal stay one click away
-          under More. Watch brand links are watch-only smart collections
+          Watches, bridal and the journal stay one click away under More. Watch brand links are watch-only smart collections
           (TYPE = Watch AND VENDOR = x).
         {%- endcomment -%}
         <div class="nav__item nav__item--end">
@@ -840,9 +919,13 @@
             </svg>
           </button>
           <div class="nav__dropdown">
-            <span class="nav__dropdown-label">Loose Diamonds</span>
-            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <span class="nav__dropdown-label">Shop by piece</span>
+            <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
+            <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
+            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
+            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
             <span class="nav__dropdown-label">Watches</span>
             <a href="/collections/time-pieces" class="nav__dropdown-link">All Timepieces</a>
             <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
