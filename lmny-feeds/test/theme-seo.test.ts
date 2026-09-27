@@ -55,6 +55,7 @@ describe('theme SEO integration', () => {
     expect(themeFile('snippets/breadcrumbs.liquid')).toContain('"@type": "BreadcrumbList"');
     expect(themeFile('sections/faq.liquid')).toContain('"@type": "FAQPage"');
     expect(themeFile('templates/page.google-reviews.liquid')).toContain('published on Google');
+    expect(themeFile('templates/page.google-reviews.liquid')).toContain('data-embed-id="25717519"');
     expect(layout).toContain('AggregateRating');
     expect(diamondCollection).toContain('server-rendered diamond links');
     expect(diamondCollection).toContain("render 'product-card'");
