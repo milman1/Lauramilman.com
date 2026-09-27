@@ -371,3 +371,18 @@ def test_lab_grown_rail_mixes_categories_in_a_carousel() -> None:
     liquid = (ROOT / "sections/featured-products.liquid").read_text()
     assert "block.settings.collection.products[i]" in liquid
     assert "fp_seen contains fp_key" in liquid
+
+
+def test_section_schemas_pass_shopify_upload_rules() -> None:
+    # Shopify rejects a section on upload when a url setting defaults to
+    # anything but /collections or /collections/all, and then rejects every
+    # template that uses it.
+    for path in sorted((ROOT / "sections").glob("*.liquid")):
+        match = re.search(r"\{%-?\s*schema\s*-?%\}(.*?)\{%-?\s*endschema\s*-?%\}", path.read_text(), re.S)
+        if not match:
+            continue
+        schema = json.loads(match.group(1))
+        settings = list(schema.get("settings", [])) + [s for b in schema.get("blocks", []) for s in b.get("settings", [])]
+        for setting in settings:
+            if setting.get("type") == "url" and "default" in setting:
+                assert setting["default"] in ("/collections", "/collections/all"), (path.name, setting["id"])
