@@ -111,7 +111,7 @@
     endif
   endif
 
-  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,metal_weight:Metal Weight,measurements:Measurements,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
@@ -285,12 +285,10 @@
         <!-- 4. Price + Shop Pay installments -->
         <div class="product-price-row">
           <span class="product-price">{{ current_variant.price | money }}</span>
-          {%- if current_variant.compare_at_price > current_variant.price -%}
-            <s class="product-price--compare">{{ current_variant.compare_at_price | money }}</s>
-            <span class="product-price--save">
-              Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}
-            </span>
-          {%- endif -%}
+          <s class="product-price--compare" {% unless current_variant.compare_at_price > current_variant.price %}hidden{% endunless %}>{{ current_variant.compare_at_price | money }}</s>
+          <span class="product-price--save" {% unless current_variant.compare_at_price > current_variant.price %}hidden{% endunless %}>
+            {%- if current_variant.compare_at_price > current_variant.price -%}Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}{%- endif -%}
+          </span>
         </div>
 
         <div class="pdp-installments">
@@ -359,7 +357,7 @@
         {%- unless product.has_only_default_variant -%}
           {%- for option in product.options_with_values -%}
             <div class="product-option-label">
-              {{ option.name }} — <span>{{ current_variant.options[forloop.index0] }}</span>
+              {{ option.name }} — <span aria-live="polite">{{ current_variant.options[forloop.index0] }}</span>
             </div>
             <div class="product-option-row" data-option-group data-option-index="{{ forloop.index0 }}">
               {%- for value in option.values -%}
@@ -412,6 +410,19 @@
           <div class="product-specs">
             {{ spec_rows }}
           </div>
+        </div>
+      {%- endif -%}
+
+      {%- if product.tags contains 'backvault-feed' and is_watch != 'true' -%}
+        <div class="pdp-estate-clarity">
+          {%- if product.metafields.custom.box == blank or product.metafields.custom.papers == blank -%}
+            <p>
+              {%- if product.metafields.custom.box == blank -%}Original box: not confirmed. {% endif -%}
+              {%- if product.metafields.custom.papers == blank -%}Original papers: not confirmed. {% endif -%}
+              <a href="#PdpInquire">Ask us to verify what is included</a> and request a close-up condition report before purchasing.
+            </p>
+          {%- endif -%}
+          <p>In-stock pieces leave our workshop within 2–3 business days. <a href="/pages/shipping-returns">Shipping details</a>.</p>
         </div>
       {%- endif -%}
 
@@ -615,6 +626,23 @@
 
   .pdp-specs .product-specs {
     margin: 0;
+  }
+
+  .pdp-estate-clarity {
+    margin-top: 1rem;
+    color: var(--text-dark, #2C1810);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .pdp-estate-clarity p {
+    margin: 0 0 0.45rem;
+  }
+
+  .pdp-estate-clarity a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   /* Collapsible description — dark body text so spec values stay readable */

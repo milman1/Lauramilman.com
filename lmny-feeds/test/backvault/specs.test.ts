@@ -35,4 +35,12 @@ describe('extractSpecs', () => {
     const specs = extractSpecs('Art Deco diamond brooch', '<p>A vintage piece from the art deco period.</p>');
     expect(specs.era?.toLowerCase()).toContain('art deco');
   });
+
+  it('keeps a source-confirmed bracelet wrist size and metal weight', () => {
+    const html = '<p>Writs size 6.25 inches.</p><strong>Metal Weight:</strong> 146.0 gr.<strong>Condition:</strong> Excellent.';
+    const specs = extractSpecs('David Webb Elephant Bracelet', html);
+    expect(specs.measurements).toBe('Wrist size 6.25 inches');
+    expect(specs.metalWeight).toBe('146.0g');
+    expect(specs.condition).toBe('Excellent');
+  });
 });

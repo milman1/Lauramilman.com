@@ -45,7 +45,7 @@
 
 <div class="refine-overlay" id="RefineOverlay" hidden></div>
 
-<aside class="refine" id="RefineDrawer" role="dialog" aria-modal="true" aria-label="Filter and sort">
+<aside class="refine" id="RefineDrawer" role="dialog" aria-modal="true" aria-label="Filter and sort" aria-hidden="true" inert hidden>
   <div class="refine__top">
     <span class="refine__top-title">Filters</span>
     <button type="button" class="refine__close" id="RefineClose" aria-label="Close filters">
@@ -364,6 +364,10 @@
     overflow-x: hidden;
     overscroll-behavior: contain;
     box-shadow: -20px 0 60px rgba(30, 17, 9, 0.25);
+  }
+
+  .refine[hidden] {
+    display: none;
   }
 
   .refine.active {
