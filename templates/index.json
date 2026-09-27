@@ -190,21 +190,6 @@
         "cta_url": "/collections/estate-jewelry"
       }
     },
-    "reviews": {
-      "type": "client-reviews",
-      "settings": {
-        "eyebrow": "From Google",
-        "title": "What clients",
-        "title_emphasis": "say",
-        "rating": "",
-        "review_count": "",
-        "all_url": "/pages/google-reviews",
-        "all_text": "Read all reviews",
-        "google_url": ""
-      },
-      "blocks": {},
-      "block_order": []
-    },
     "newsletter": {
       "type": "newsletter",
       "settings": {
@@ -542,6 +527,36 @@
             "label": "Engagement rings",
             "link": "/collections/lab-grown-engagement-rings"
           }
+        },
+        "src-1": {
+          "type": "source",
+          "settings": {
+            "collection": "lab-grown-earrings"
+          }
+        },
+        "src-2": {
+          "type": "source",
+          "settings": {
+            "collection": "lab-grown-bracelets"
+          }
+        },
+        "src-3": {
+          "type": "source",
+          "settings": {
+            "collection": "lab-grown-necklaces"
+          }
+        },
+        "src-4": {
+          "type": "source",
+          "settings": {
+            "collection": "lab-grown-rings"
+          }
+        },
+        "src-5": {
+          "type": "source",
+          "settings": {
+            "collection": "lab-grown-pendants"
+          }
         }
       },
       "block_order": [
@@ -549,7 +564,12 @@
         "l-2",
         "l-3",
         "l-4",
-        "l-5"
+        "l-5",
+        "src-1",
+        "src-2",
+        "src-3",
+        "src-4",
+        "src-5"
       ],
       "settings": {
         "eyebrow": "Lab-grown diamond jewelry",
@@ -561,7 +581,34 @@
         "header_align": "left",
         "chips_label": "Popular",
         "cta_text": "Shop Lab-Grown Jewelry",
-        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
+        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+        "layout": "carousel",
+        "per_source": 3
+      }
+    },
+    "client-reviews": {
+      "type": "client-reviews",
+      "settings": {
+        "eyebrow": "From Google",
+        "title": "What clients",
+        "title_emphasis": "say",
+        "rating": "",
+        "review_count": "",
+        "all_url": "/pages/google-reviews",
+        "all_text": "Read all reviews",
+        "google_url": ""
+      },
+      "blocks": {},
+      "block_order": []
+    },
+    "reviews": {
+      "type": "google-reviews-strip",
+      "settings": {
+        "eyebrow": "From Google",
+        "title": "What Clients Say",
+        "intro": "",
+        "cta_label": "Read All Reviews",
+        "cta_url": "/pages/google-reviews"
       }
     }
   },
@@ -576,6 +623,7 @@
     "build-the-stack",
     "brand-story",
     "estate",
+    "client-reviews",
     "reviews",
     "newsletter",
     "also-from-the-house",

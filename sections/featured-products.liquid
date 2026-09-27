@@ -23,6 +23,22 @@
       break
     endif
   endfor
+  # Mixed rails take a few pieces from each source collection in turn, so a
+  # rail of lab-grown jewelry shows earrings, bracelets, necklaces and rings
+  # rather than whichever category happens to sort first.
+  assign has_sources = false
+  for block in section.blocks
+    if block.type == 'source' and block.settings.collection != blank
+      assign has_sources = true
+      break
+    endif
+  endfor
+  assign per_source = section.settings.per_source | default: 3
+  assign per_source_last = per_source | minus: 1
+  assign fp_carousel = false
+  if section.settings.layout == 'carousel'
+    assign fp_carousel = true
+  endif
   # A section tied to a collection that has nothing to show yet can hide
   # itself instead of falling back to the whole catalog.
   assign fp_hidden = false
@@ -59,12 +75,28 @@
       {%- endif -%}
     </div>
 
-    <div class="products-grid">
+    <div class="products-grid{% if fp_carousel %} products-grid--carousel{% endif %}"{% if fp_carousel %} id="FeaturedRail-{{ section.id }}" tabindex="0" aria-label="{{ section.settings.title | escape }}, scroll for more"{% endif %}>
       {%- if has_picked_products -%}
         {%- for block in section.blocks -%}
           {%- if block.type == 'product' and block.settings.product != blank -%}
             {%- render 'product-card', product: block.settings.product -%}
           {%- endif -%}
+        {%- endfor -%}
+      {%- elsif has_sources -%}
+        {%- assign fp_seen = ',' -%}
+        {%- for i in (0..per_source_last) -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'source' and block.settings.collection != blank -%}
+              {%- assign fp_product = block.settings.collection.products[i] -%}
+              {%- if fp_product != blank -%}
+                {%- assign fp_key = ',' | append: fp_product.id | append: ',' -%}
+                {%- unless fp_seen contains fp_key -%}
+                  {%- assign fp_seen = fp_seen | append: fp_product.id | append: ',' -%}
+                  {%- render 'product-card', product: fp_product -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
       {%- elsif featured_collection != blank and featured_collection.products.size > 0 -%}
         {%- for product in featured_collection.products limit: limit -%}
@@ -78,6 +110,36 @@
         <p class="lm-featured__empty">Add products to your store to see them here.</p>
       {%- endif -%}
     </div>
+
+    {%- if fp_carousel -%}
+      <div class="lm-featured__nav" data-fp-nav hidden>
+        <button type="button" class="lm-featured__arrow" data-fp-dir="-1" aria-controls="FeaturedRail-{{ section.id }}" aria-label="Previous pieces">&larr;</button>
+        <button type="button" class="lm-featured__arrow" data-fp-dir="1" aria-controls="FeaturedRail-{{ section.id }}" aria-label="Next pieces">&rarr;</button>
+      </div>
+      <script>
+        (function () {
+          var rail = document.getElementById('FeaturedRail-{{ section.id }}');
+          var nav = rail && rail.parentNode.querySelector('[data-fp-nav]');
+          if (!nav) return;
+          var buttons = nav.querySelectorAll('[data-fp-dir]');
+          function update() {
+            var overflow = rail.scrollWidth - rail.clientWidth > 2;
+            nav.hidden = !overflow;
+            buttons[0].disabled = rail.scrollLeft <= 2;
+            buttons[1].disabled = rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 2;
+          }
+          buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              rail.scrollBy({ left: Number(btn.getAttribute('data-fp-dir')) * rail.clientWidth, behavior: 'smooth' });
+            });
+          });
+          rail.addEventListener('scroll', update, { passive: true });
+          window.addEventListener('resize', update);
+          window.addEventListener('load', update);
+          requestAnimationFrame(update);
+        })();
+      </script>
+    {%- endif -%}
 
     {%- if section.settings.cta_text != blank -%}
       <div class="lm-featured__footer">
@@ -120,6 +182,63 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2rem;
+  }
+
+  /* Carousel: four to a view on desktop, then three, then two with a peek. */
+  .lm-featured .products-grid--carousel {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 6rem) / 4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    outline-offset: 4px;
+  }
+
+  .lm-featured .products-grid--carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lm-featured .products-grid--carousel > * {
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+
+  .lm-featured__nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .lm-featured--left .lm-featured__nav {
+    justify-content: flex-start;
+  }
+
+  .lm-featured__nav[hidden] {
+    display: none;
+  }
+
+  .lm-featured__arrow {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    background: var(--warm-white, #FDFAF6);
+    color: var(--text-dark, #2C1810);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .lm-featured__arrow:hover:not(:disabled),
+  .lm-featured__arrow:focus-visible {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+
+  .lm-featured__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   .lm-featured--cream {
@@ -195,6 +314,9 @@
     .lm-featured .products-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1.5rem;
+    }    .lm-featured .products-grid--carousel {
+      grid-template-columns: none;
+      grid-auto-columns: calc((100% - 3rem) / 3);
     }
   }
 
@@ -205,6 +327,16 @@
     .lm-featured .products-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 1rem;
+    }
+    .lm-featured .products-grid--carousel {
+      grid-template-columns: none;
+      grid-auto-columns: 44%;
+      margin: 0 calc(var(--container-padding, 1rem) * -1);
+      padding: 0 var(--container-padding, 1rem);
+      scroll-padding-inline: var(--container-padding, 1rem);
+    }
+    .lm-featured__nav {
+      display: none;
     }
     .lm-featured__header {
       margin-bottom: 2rem;
@@ -282,6 +414,26 @@
       "default": false
     },
     {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "per_source",
+      "label": "Pieces from each mixed collection",
+      "info": "Used when the section has Mix from collection blocks",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 3
+    },
+    {
       "type": "text",
       "id": "cta_text",
       "label": "View All text",
@@ -300,6 +452,13 @@
       "settings": [
         { "type": "text", "id": "label", "label": "Label" },
         { "type": "url", "id": "link", "label": "Link" }
+      ]
+    },
+    {
+      "type": "source",
+      "name": "Mix from collection",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" }
       ]
     },
     {
