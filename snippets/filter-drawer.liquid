@@ -21,7 +21,7 @@
   assign jf_drawer_handle = results.handle | downcase
   assign jf_drawer_enabled = false
   case jf_drawer_handle
-    when 'earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'chains', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
+    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'all-bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'chains', 'pendants', 'pendants-1', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'peaceful-diamonds-by-laura-milman-new-york'
       assign jf_drawer_enabled = true
   endcase
 
@@ -36,7 +36,7 @@
   endif
 
   assign fd_is_estate = false
-  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned' or fd_is_designer
+  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned' or fd_is_designer
     unless fd_is_watch
       assign fd_is_estate = true
     endunless

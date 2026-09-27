@@ -219,6 +219,15 @@
   position: relative;
 }
 
+.header button.nav__item-link {
+  background: none;
+  border: 0;
+  margin: 0;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .header .nav__item-link {
   font-size: 0.72rem;
   font-weight: 500;
@@ -288,10 +297,40 @@
   overflow: visible;
 }
 
-.header .nav__item:hover .nav__dropdown {
+.header .nav__item:hover .nav__dropdown,
+.header .nav__item:focus-within .nav__dropdown {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Escape closes a keyboard-opened menu until focus or the pointer leaves it. */
+.header .nav__item[data-dismissed] .nav__dropdown {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* "More" sits at the right edge: anchor its panel right so it stays on screen. */
+.header .nav__item--end .nav__dropdown {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(10px);
+  white-space: nowrap;
+}
+
+.header .nav__item--end:hover .nav__dropdown,
+.header .nav__item--end:focus-within .nav__dropdown {
+  transform: translateX(0) translateY(0);
+}
+
+.header .nav__dropdown-label {
+  display: block;
+  padding: 0.6rem 1.5rem 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold, #C9A050);
 }
 
 /* The lab-grown category list is both longer and wider than the two links the
@@ -304,7 +343,8 @@
   white-space: nowrap;
 }
 
-.header .nav__item--peaceful:hover .nav__dropdown {
+.header .nav__item--peaceful:hover .nav__dropdown,
+.header .nav__item--peaceful:focus-within .nav__dropdown {
   transform: translateX(0) translateY(0);
 }
 
@@ -498,6 +538,15 @@
     left: auto;
   }
 
+  .header .nav__item--end .nav__dropdown,
+  .header .nav__item--end:hover .nav__dropdown {
+    position: static;
+    right: auto;
+    left: auto;
+    transform: none;
+    white-space: normal;
+  }
+
   /* Undo the desktop right-anchoring for the Peaceful Diamonds panel — in the
      drawer it is a static full-width list, and nowrap would scroll it sideways. */
   .header .nav__item--peaceful .nav__dropdown,
@@ -520,12 +569,14 @@
     transition: max-height 0.2s ease-in, opacity 0.1s ease-in;
   }
 
-  .header .nav__item:hover .nav__dropdown {
+  .header .nav__item:hover .nav__dropdown,
+  .header .nav__item:focus-within .nav__dropdown {
     opacity: 0;
     visibility: hidden;
     max-height: 0;
   }
-  .header .nav__item.open:hover .nav__dropdown {
+  .header .nav__item.open:hover .nav__dropdown,
+  .header .nav__item.open:focus-within .nav__dropdown {
     opacity: 1;
     visibility: visible;
     max-height: 2000px;
@@ -676,7 +727,7 @@
     <div class="header__inner">
       <a href="{{ routes.root_url }}" class="logo">
         {%- if section.settings.logo != blank -%}
-          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="200" height="auto">
+          <img src="{{ section.settings.logo | image_url: width: 400 }}" alt="{{ shop.name }}" width="200" height="{{ 200 | divided_by: section.settings.logo.aspect_ratio | round }}">
         {%- else -%}
           Laura <span>Milman</span>
         {%- endif -%}
@@ -693,44 +744,29 @@
           </button>
         </div>
 
+        {%- comment -%}
+          Price first: most women buying for themselves shop by budget, then
+          by piece. The edit is the under-2500 smart collection.
+        {%- endcomment -%}
         <div class="nav__item">
-          <span class="nav__item-link">
+          <a href="/collections/under-2500" class="nav__item-link">Under $2,500</a>
+        </div>
+
+        <div class="nav__item">
+          <button type="button" aria-expanded="false" class="nav__item-link">
             Jewelry
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-          </span>
-          {%- comment -%}
-            House gold chains sit with the other jewelry types. Style names
-            (Cuban, Rope, etc.) live on the Chains collection filters, not here.
-          {%- endcomment -%}
+          </button>
           <div class="nav__dropdown">
-            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
-            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/chains" class="nav__dropdown-link">Gold Chains</a>
+            <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
+            <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
             <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/chains" class="nav__dropdown-link">Chains</a>
-            <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
-            <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
-            <a href="/collections/earrings" class="nav__dropdown-link">Earrings</a>
-          </div>
-        </div>
-
-        {%- comment -%}
-          Loose stones, separate from finished jewelry. Natural sits here;
-          lab-grown lives under Peaceful Diamonds, which is the sub-brand it
-          belongs to.
-        {%- endcomment -%}
-        <div class="nav__item">
-          <span class="nav__item-link">
-            Diamonds
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </span>
-          <div class="nav__dropdown">
-            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
-            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+            <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
           </div>
         </div>
 
@@ -741,13 +777,13 @@
         {%- endcomment -%}
         {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
         <div class="nav__item nav__item--peaceful">
-          <span class="nav__item-link nav__link--peaceful">
+          <button type="button" aria-expanded="false" class="nav__item-link nav__link--peaceful">
             <span class="nav__peaceful-dot" aria-hidden="true"></span>
             {{ section.settings.peaceful_label | default: 'Lab-Grown Jewelry' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-          </span>
+          </button>
           <div class="nav__dropdown">
             <a href="{{ peaceful_url }}" class="nav__dropdown-link">All Lab-Grown Jewelry</a>
             {%- comment -%}
@@ -767,14 +803,14 @@
         </div>
 
         <div class="nav__item">
-          <span class="nav__item-link">
-            {{ section.settings.estate_label | default: 'Pre-Owned Maison' }}
+          <button type="button" aria-expanded="false" class="nav__item-link">
+            {{ section.settings.estate_label | default: 'Pre-Owned & Estate' }}
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-          </span>
+          </button>
           <div class="nav__dropdown">
-            <a href="/collections/vintage-jewelry" class="nav__dropdown-link">Vintage & Estate</a>
+            <a href="/collections/estate-jewelry" class="nav__dropdown-link">All Pre-Owned &amp; Estate</a>
             <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
             <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
             <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef & Arpels</a>
@@ -786,60 +822,40 @@
           </div>
         </div>
 
-        {%- comment -%}
-          Timepieces promoted to top level. Brand links are watch-only smart
-          collections (TYPE = Watch AND VENDOR = x) — do not use the plain
-          vendor collections under Jewelry / Pre-Owned Maison, which mix in
-          jewelry.
-        {%- endcomment -%}
+
         <div class="nav__item">
-          <span class="nav__item-link">
-            Timepieces
+          <a href="/pages/about" class="nav__item-link">Our Story</a>
+        </div>
+
+        {%- comment -%}
+          Loose diamonds, watches, bridal and the journal stay one click away
+          under More. Watch brand links are watch-only smart collections
+          (TYPE = Watch AND VENDOR = x).
+        {%- endcomment -%}
+        <div class="nav__item nav__item--end">
+          <button type="button" aria-expanded="false" class="nav__item-link">
+            More
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-          </span>
+          </button>
           <div class="nav__dropdown">
+            <span class="nav__dropdown-label">Loose Diamonds</span>
+            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <span class="nav__dropdown-label">Watches</span>
             <a href="/collections/time-pieces" class="nav__dropdown-link">All Timepieces</a>
             <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
             <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
             <a href="/collections/jacob-co" class="nav__dropdown-link">Jacob &amp; Co.</a>
-            <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
-            <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
-          </div>
-        </div>
-
-        <div class="nav__item">
-          <span class="nav__item-link">
-            Wedding
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </span>
-          <div class="nav__dropdown">
+            <a href="/collections/patek-philippe" class="nav__dropdown-link">Patek Philippe</a>
+            <span class="nav__dropdown-label">Bridal</span>
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
             <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-            <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">Men's Wedding Bands</a>
             <a href="/pages/ring-builder" class="nav__dropdown-link">Ring Builder</a>
-          </div>
-        </div>
-
-        {%- comment -%}
-          Journal replaces About in the top-level row. Parent goes to the blog
-          index; caret / hover opens tagged topic links (existing tags).
-        {%- endcomment -%}
-        <div class="nav__item">
-          <a href="/blogs/journal" class="nav__item-link">
-            Journal
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </a>
-          <div class="nav__dropdown">
-            <a href="/blogs/journal/tagged/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
-            <a href="/blogs/journal/tagged/buying-guide" class="nav__dropdown-link">Buying Guides</a>
-            <a href="/blogs/journal/tagged/style" class="nav__dropdown-link">Style</a>
+            <span class="nav__dropdown-label">The House</span>
+            <a href="/blogs/journal" class="nav__dropdown-link">Journal</a>
+            <a href="/pages/private-clients" class="nav__dropdown-link">Private Clients</a>
           </div>
         </div>
 
@@ -871,7 +887,7 @@
         </a>
       </div>
 
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">
         <span></span>
         <span></span>
         <span></span>
@@ -916,7 +932,7 @@
         <a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="search-overlay__tag">Lab-Grown Jewelry</a>
         <a href="/collections/natural-diamonds" class="search-overlay__tag">Loose Diamonds</a>
         <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
-        <a href="/collections/vintage-jewelry" class="search-overlay__tag">Vintage & Estate</a>
+        <a href="/collections/estate-jewelry" class="search-overlay__tag">Pre-Owned &amp; Estate</a>
         <a href="/collections/time-pieces" class="search-overlay__tag">Timepieces</a>
         <a href="{{ routes.search_url }}?q=engagement+ring&type=product" class="search-overlay__tag">Engagement Rings</a>
         <a href="/collections/chains" class="search-overlay__tag">Chains</a>
@@ -1166,6 +1182,7 @@
       nav.classList.add('nav--open');
       header.classList.add('header--nav-open');
       mobileToggle.classList.add('active');
+      mobileToggle.setAttribute('aria-expanded', 'true');
       navOverlay.classList.add('active');
       document.body.style.overflow = 'hidden';
     }
@@ -1174,10 +1191,13 @@
       nav.classList.remove('nav--open');
       header.classList.remove('header--nav-open');
       mobileToggle.classList.remove('active');
+      mobileToggle.setAttribute('aria-expanded', 'false');
       navOverlay.classList.remove('active');
       document.body.style.overflow = '';
       nav.querySelectorAll('.nav__item.open').forEach(function(item) {
         item.classList.remove('open');
+        var link = item.querySelector('button.nav__item-link');
+        if (link) link.setAttribute('aria-expanded', 'false');
       });
     }
 
@@ -1206,14 +1226,48 @@
         var parentLink = item.querySelector('.nav__item-link');
 
         if (parentLink) {
+          function setExpanded(el, open) {
+            var btn = el.querySelector('button.nav__item-link');
+            if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          }
+
           function toggleDropdown() {
             nav.querySelectorAll('.nav__item.open').forEach(function(openItem) {
               if (openItem !== item) {
                 openItem.classList.remove('open');
+                setExpanded(openItem, false);
               }
             });
             item.classList.toggle('open');
+            setExpanded(item, item.classList.contains('open'));
           }
+
+          // Desktop: the menu opens on hover or keyboard focus; keep
+          // aria-expanded in step and let Escape close it.
+          item.addEventListener('mouseenter', function() { if (!isMobile()) setExpanded(item, true); });
+          item.addEventListener('mouseleave', function() {
+            if (isMobile()) return;
+            item.removeAttribute('data-dismissed');
+            if (!item.contains(document.activeElement)) setExpanded(item, false);
+          });
+          item.addEventListener('focusin', function() {
+            if (!isMobile() && !item.hasAttribute('data-dismissed')) setExpanded(item, true);
+          });
+          item.addEventListener('focusout', function(e) {
+            if (item.contains(e.relatedTarget)) return;
+            item.removeAttribute('data-dismissed');
+            if (!isMobile()) setExpanded(item, false);
+          });
+          item.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            if (isMobile()) {
+              item.classList.remove('open');
+            } else {
+              item.setAttribute('data-dismissed', '');
+            }
+            setExpanded(item, false);
+            parentLink.focus();
+          });
 
           parentLink.addEventListener('touchstart', function(e) {
             if (!isMobile()) return;
@@ -1227,7 +1281,15 @@
           }, { passive: false });
 
           parentLink.addEventListener('click', function(e) {
-            if (!isMobile()) return;
+            if (!isMobile()) {
+              // Mouse users open these menus by hovering; only a keyboard
+              // press (detail 0) toggles them.
+              if (parentLink.tagName !== 'BUTTON' || e.detail !== 0) return;
+              var closed = item.hasAttribute('data-dismissed');
+              if (closed) item.removeAttribute('data-dismissed'); else item.setAttribute('data-dismissed', '');
+              setExpanded(item, closed);
+              return;
+            }
             var isLinked = parentLink.tagName === 'A' && parentLink.getAttribute('href');
             var onCaret = e.target.closest('.dropdown-arrow');
             if (isLinked && !onCaret) {
@@ -1380,7 +1442,7 @@
       "type": "text",
       "id": "estate_label",
       "label": "Estate menu label",
-      "default": "Pre-Owned Maison"
+      "default": "Pre-Owned & Estate"
     },
     {
       "type": "text",

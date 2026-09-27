@@ -3,6 +3,7 @@
   Conditional on product tags:
     · "Lab Grown Diamond"                → lab-grown education
     · "Estate Jewelry" / "Pre-Owned" / "Vintage" → pre-owned maison education
+    · watches (product-is-watch)         → watch buying facts
     · otherwise                          → LMNY craftsmanship / heritage
   All copy is editable in the theme editor; blocks are typed per variant so
   each mode keeps its own three feature cards.
@@ -13,14 +14,23 @@
   # Title included because a handful of PD pieces carry only the hyphenated
   # "Lab-Grown Diamond" tag variant, and every lab piece states it in the title.
   assign hay = product.title | downcase | append: '||' | append: tag_str
+  capture edu_is_watch
+    render 'product-is-watch', product: product
+  endcapture
   assign edu_mode = 'heritage'
-  if hay contains 'lab grown' or hay contains 'lab-grown' or hay contains 'lab created'
+  if edu_is_watch == 'true'
+    assign edu_mode = 'watch'
+  elsif hay contains 'lab grown' or hay contains 'lab-grown' or hay contains 'lab created'
     assign edu_mode = 'lab'
   elsif tag_str contains 'estate' or tag_str contains 'pre-owned' or tag_str contains 'vintage'
     assign edu_mode = 'estate'
   endif
 
   case edu_mode
+    when 'watch'
+      assign edu_title = section.settings.watch_title
+      assign edu_intro = section.settings.watch_intro
+      assign edu_block_type = 'watch_point'
     when 'lab'
       assign edu_title = section.settings.lab_title
       assign edu_intro = section.settings.lab_intro
@@ -223,13 +233,29 @@
       "type": "text",
       "id": "estate_title",
       "label": "Heading",
-      "default": "The Pre-Owned Maison Standard"
+      "default": "How We Authenticate Estate Pieces"
     },
     {
       "type": "textarea",
       "id": "estate_intro",
       "label": "Intro",
       "default": "A signed estate piece carries a house's history on your hand. Ours arrive the same way every time: authenticated, documented, and honestly described."
+    },
+    {
+      "type": "header",
+      "content": "Watches"
+    },
+    {
+      "type": "text",
+      "id": "watch_title",
+      "label": "Heading",
+      "default": "Buying a Watch from Laura Milman New York"
+    },
+    {
+      "type": "textarea",
+      "id": "watch_intro",
+      "label": "Intro",
+      "default": "Every watch is listed with its reference and the condition its record states. Nothing is inferred from the title."
     },
     {
       "type": "header",
@@ -287,6 +313,14 @@
       "settings": [
         { "type": "text", "id": "title", "label": "Title", "default": "Designed in New York" },
         { "type": "textarea", "id": "text", "label": "Text", "default": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house." }
+      ]
+    },
+    {
+      "type": "watch_point",
+      "name": "Watch point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Reference on Every Listing" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Brand, model and reference number are stated on every watch." }
       ]
     }
   ],

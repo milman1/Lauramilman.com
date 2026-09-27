@@ -24,9 +24,9 @@
       assign seo_meta_description = page_description
       assign seo_social_title = page_title
       if request.page_type == 'index'
-        assign seo_page_title = 'Lab-Grown & Estate Jewelry | Laura Milman New York'
+        assign seo_page_title = 'Gold & Lab-Grown Diamond Jewelry | Laura Milman New York'
         assign seo_social_title = seo_page_title
-        assign seo_meta_description = 'Lab-grown jewelry for work and dinner, plus authenticated David Webb, Cartier, Van Cleef, and Tiffany. Free insured shipping. 7-day jewelry returns.'
+        assign seo_meta_description = '14K gold chains, lab-grown diamond jewelry and signed pre-owned Cartier, Van Cleef and David Webb from New York. Free insured shipping.'
       elsif request.page_type == 'collection' and seo_meta_description == blank
         capture seo_meta_description
           echo 'Explore '
@@ -138,6 +138,21 @@
     </script>
 
     {% style %}
+      .lm-skip-link {
+        position: absolute;
+        left: 1rem;
+        top: -100px;
+        z-index: 2000;
+        padding: 0.75rem 1.25rem;
+        background: var(--espresso);
+        color: var(--warm-white);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+      }
+      .lm-skip-link:focus {
+        top: 1rem;
+      }
       :root {
         --espresso: {{ settings.color_espresso | default: '#1E1109' }};
         --wine: {{ settings.color_wine | default: '#4A1428' }};
@@ -160,22 +175,44 @@
 
     <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
 
+    {%- liquid
+      assign org_logo = shop.brand.logo | default: settings.favicon
+      if org_logo == blank
+        assign org_logo = images['LMNY-header-lockup.png']
+      endif
+    -%}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": "OnlineStore",
       "@id": "{{ shop.url }}/#organization",
       "name": "Laura Milman New York",
       "url": "{{ shop.url }}",
-      {%- if settings.favicon != blank -%}
-      "logo": {{ settings.favicon | image_url: width: 512 | prepend: 'https:' | json }},
+      {%- if org_logo != blank -%}
+      "logo": {{ org_logo | image_url: width: 600 | prepend: 'https:' | json }},
       {%- endif -%}
-      "description": "Lab-grown diamond jewelry to wear from the office through dinner, and authenticated pre-owned jewelry and watches from the great houses.",
+      "description": "New York fine jeweler: 14K gold chains, lab-grown diamond jewelry, signed pre-owned and estate jewelry, certified loose diamonds and pre-owned watches.",
+      "founder": {
+        "@type": "Person",
+        "name": "Laura Milman",
+        "url": "{{ shop.url }}/pages/about"
+      },
+      "knowsAbout": ["Lab-grown diamond jewelry", "14K gold chains", "Pre-owned designer jewelry", "Estate jewelry authentication", "Loose diamonds", "Pre-owned luxury watches"],
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": "1185 6th Avenue, Floor 3",
         "addressLocality": "New York",
         "addressRegion": "NY",
+        "postalCode": "10036",
         "addressCountry": "US"
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "US",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 7,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "merchantReturnLink": "{{ shop.url }}/pages/shipping-returns"
       },
       "contactPoint": {
         "@type": "ContactPoint",
@@ -218,6 +255,7 @@
   </head>
 
   <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
+    <a class="lm-skip-link" href="#MainContent">Skip to content</a>
     {% section 'header' %}
     {% section 'popular-searches' %}
 

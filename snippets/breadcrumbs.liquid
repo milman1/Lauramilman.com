@@ -31,19 +31,21 @@
         assign crumb_current = 'Pre-Owned Rolex Watches'
       when 'lab-grown-bracelets'
         assign crumb_current = 'Lab-Grown Diamond Bracelets'
+      when 'estate-jewelry'
+        assign crumb_current = 'Pre-Owned & Estate'
     endcase
 
     case collection.handle
-      when 'david-webb' or 'cartier' or 'van-cleef-arpels' or 'tiffany' or 'bvlgari' or 'hermes' or 'chopard'
-        assign crumb_parent_title = 'Vintage & Estate'
-        assign crumb_parent_url = '/collections/vintage-jewelry'
+      when 'david-webb' or 'cartier' or 'van-cleef-arpels' or 'tiffany' or 'bvlgari' or 'hermes' or 'chopard' or 'vintage-jewelry' or 'graff' or 'buccellati' or 'boucheron' or 'marina-b' or 'angela-cummings' or 'harry-winston' or 'aletto-brothers' or 'chanel' or 'ilias-lalaounis' or 'chaumet' or 'asprey' or 'seaman-schepps' or 'verdura'
+        assign crumb_parent_title = 'Pre-Owned & Estate'
+        assign crumb_parent_url = '/collections/estate-jewelry'
       when 'lab-grown-bracelets' or 'lab-grown-necklaces' or 'lab-grown-pendants' or 'lab-grown-rings' or 'lab-grown-earrings' or 'lab-grown-engagement-rings'
         assign crumb_parent_title = 'Lab-Grown Jewelry'
         assign crumb_parent_url = '/collections/peaceful-diamonds-by-laura-milman-new-york'
       when 'rolex-watches' or 'cartier-watches' or 'jacob-co' or 'bvlgari-watches' or 'van-cleef-arpels-watches' or 'chopard-watches'
         assign crumb_parent_title = 'Timepieces'
         assign crumb_parent_url = '/collections/time-pieces'
-      when 'rings' or 'necklaces' or 'chains' or 'pendants-1' or 'bracelets' or 'earrings' or 'engagement-rings' or 'wedding-bands' or 'mens-wedding-bands'
+      when 'rings' or 'necklaces' or 'chains' or 'pendants-1' or 'all-pendants' or 'bracelets' or 'all-bracelets' or 'earrings' or 'all-earrings' or 'engagement-rings' or 'wedding-bands' or 'mens-wedding-bands'
         assign crumb_parent_title = 'All Jewelry'
         assign crumb_parent_url = '/collections/all'
     endcase

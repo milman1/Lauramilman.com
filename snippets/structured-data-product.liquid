@@ -1,6 +1,12 @@
 {% doc %}
 Renders Product and BreadcrumbList JSON-LD for a product detail page.
 
+Offers carry free insured US shipping and the return policy that matches the
+store's refund policy: jewelry 7 days unworn, watches exchange only. Loose
+diamonds get no return policy here, because specially sourced stones can be
+final sale. additionalProperty lists only facts stored in metafields, so
+nothing is parsed or inferred from the title.
+
 @param {product} product - Product represented by the current page.
 @param {variant} current_variant - Selected or first available variant.
 @param {string} [collection_title] - Optional parent collection title.
@@ -20,12 +26,53 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
   capture is_vintage
     render 'product-is-vintage', product: product
   endcapture
+  capture schema_is_watch
+    render 'product-is-watch', product: product
+  endcapture
+  assign schema_is_loose = false
+  if product.type == 'Natural Diamond' or product.type == 'Lab-Grown Diamond'
+    assign schema_is_loose = true
+  endif
   assign item_condition = 'https://schema.org/NewCondition'
   if is_vintage == 'true' or schema_condition contains 'pre-owned' or schema_condition contains 'preowned' or schema_condition contains 'used'
     assign item_condition = 'https://schema.org/UsedCondition'
   endif
   assign schema_material = product.metafields.custom.metal.value | default: product.metafields.custom.metal_type.value
+  assign schema_currency = cart.currency.iso_code | default: shop.currency
+  assign schema_mpn = product.metafields.global['MPN'].value | default: ''
+  if schema_mpn == '' and schema_is_watch == 'true'
+    assign schema_mpn = product.metafields.custom.reference.value | default: ''
+  endif
+
+  assign prop_defs = 'model:Model,reference:Reference,year:Year,diamond_shape:Diamond shape,carat_weight:Carat weight,case_size:Case size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,color:Color,clarity:Clarity,cut:Cut,condition:Condition,condition_grade:Condition grade,setting_style:Setting style,length:Length,box:Box,papers:Papers' | split: ','
+  assign feed_defs = 'lab:Grading lab,cert_number:Certificate number,polish:Polish,symmetry:Symmetry,fluorescence:Fluorescence,measurements:Measurements' | split: ','
 -%}
+
+{%- capture schema_shipping -%}
+  "shippingDetails": {
+    "@type": "OfferShippingDetails",
+    "shippingRate": { "@type": "MonetaryAmount", "value": 0, "currency": {{ schema_currency | json }} },
+    "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
+  }
+{%- endcapture -%}
+
+{%- capture schema_returns -%}
+  {%- if schema_is_watch == 'true' -%}
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "US",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted"
+    }
+  {%- elsif schema_is_loose == false -%}
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "US",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+      "merchantReturnDays": 7,
+      "returnMethod": "https://schema.org/ReturnByMail"
+    }
+  {%- endif -%}
+{%- endcapture -%}
 
 <script type="application/ld+json">
 {
@@ -47,23 +94,54 @@ Renders Product and BreadcrumbList JSON-LD for a product detail page.
   "sku": {{ current_variant.sku | json }},
   "category": {{ product.type | json }},
   "itemCondition": {{ item_condition | json }},
-  "offers": {
-    "@type": "Offer",
-    "url": {{ canonical_url | json }},
-    "price": {{ current_variant.price | divided_by: 100.0 | json }},
-    "priceCurrency": {{ cart.currency.iso_code | default: shop.currency | json }},
-    "availability": "https://schema.org/{% if current_variant.available %}InStock{% else %}OutOfStock{% endif %}",
-    "itemCondition": {{ item_condition | json }},
-    "seller": {
-      "@type": "Organization",
-      "name": {{ shop.name | json }}
-    }
-  }
+  "offers": [
+    {%- for variant in product.variants limit: 50 -%}
+      {
+        "@type": "Offer",
+        "url": {{ shop.url | append: variant.url | json }},
+        {%- if variant.sku != blank %}"sku": {{ variant.sku | json }},{% endif %}
+        {%- if product.variants.size > 1 %}"name": {{ schema_name | append: ' – ' | append: variant.title | json }},{% endif %}
+        "price": {{ variant.price | divided_by: 100.0 | json }},
+        "priceCurrency": {{ schema_currency | json }},
+        "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+        "itemCondition": {{ item_condition | json }},
+        "seller": { "@id": {{ shop.url | append: '/#organization' | json }} },
+        {{ schema_shipping }}
+        {%- if schema_returns != blank -%},{{ schema_returns }}{%- endif %}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
   {%- if schema_material != blank -%}
     ,"material": {{ schema_material | json }}
   {%- endif -%}
-  {%- if product.metafields.global['MPN'].value != blank -%}
-    ,"mpn": {{ product.metafields.global['MPN'].value | json }}
+  {%- if schema_mpn != '' -%}
+    ,"mpn": {{ schema_mpn | json }}
+  {%- endif -%}
+  {%- assign prop_written = false -%}
+  {%- capture schema_props -%}
+    {%- for def in prop_defs -%}
+      {%- assign def_parts = def | split: ':' -%}
+      {%- assign prop_value = product.metafields.custom[def_parts[0]].value | strip -%}
+      {%- if prop_value != blank and prop_value != '—' and prop_value != '-' -%}
+        {%- if prop_written %},{% endif -%}
+        { "@type": "PropertyValue", "name": {{ def_parts[1] | json }}, "value": {{ prop_value | json }} }
+        {%- assign prop_written = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if schema_is_loose -%}
+      {%- for def in feed_defs -%}
+        {%- assign def_parts = def | split: ':' -%}
+        {%- assign prop_value = product.metafields.lmny_feed[def_parts[0]].value | strip -%}
+        {%- if prop_value != blank -%}
+          {%- if prop_written %},{% endif -%}
+          { "@type": "PropertyValue", "name": {{ def_parts[1] | json }}, "value": {{ prop_value | json }} }
+          {%- assign prop_written = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endcapture -%}
+  {%- if prop_written -%}
+    ,"additionalProperty": [{{ schema_props }}]
   {%- endif -%}
 }
 </script>

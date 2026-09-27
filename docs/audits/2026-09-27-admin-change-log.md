@@ -1,0 +1,205 @@
+# Admin change log — 2026-09-27 audit fixes
+
+Shopify Admin changes made while implementing
+`2026-09-27-ux-seo-geo-audit.md`. Each entry lists the state before the
+change so it can be reversed by hand.
+
+## Part 1 — collections
+
+### 1. Create `earrings` (fixes sitewide 404)
+
+- Before: no collection with handle `earrings`; header, homepage grid,
+  collection chips and the earrings CTA all linked to it.
+- After: the `earrings` handle is held by a collection the Admin API cannot
+  see (create returned "handle has already been taken"; no collection, search
+  hit or redirect exists for it). Created automated collection "Earrings" at
+  `all-earrings` (`gid://shopify/Collection/349096902727`), any of: type =
+  `Earrings`, type = `Earring`; sort newest first; published to Online Store
+  and Shop. Added URL redirect `/collections/earrings` →
+  `/collections/all-earrings` (`gid://shopify/UrlRedirect/409735823431`).
+
+### 2. `estate-jewelry` becomes the single estate hub
+
+- Before: id `gid://shopify/Collection/276068401223`, title "Estate
+  (Pre-Owned) Jewelry", template suffix "", sort BEST_SELLING, rule any of:
+  tag = `Estate Jewelry`. SEO title "Estate Jewelry | Laura Milman", SEO
+  description "Signed pre-owned jewelry authenticated by Laura Milman New
+  York. David Webb, Cartier, Van Cleef, and Tiffany." Body: legacy
+  "Authenticated Luxury at Exceptional Value… at a fraction of the original
+  price…" copy.
+- After: title "Pre-Owned & Estate Jewelry", template `estate`, sort newest
+  first, rule any of: tag = `Estate Jewelry`, tag = `backvault-feed`, tag =
+  `Pre-Owned`. Feed Rolex listings carry `Pre-Owned Watches`, not
+  `Pre-Owned`, so they stay out. Fact-only body and SEO fields.
+
+### 3. `all` becomes All Jewelry
+
+- Before: id `gid://shopify/Collection/296441184327`, title "Shop All
+  Jewelry & Watches", sort BEST_SELLING, rules all of: type ≠ `Lab-Grown
+  Diamond`, type ≠ `Natural Diamond`. SEO title "Shop All Jewelry & Watches
+  | Laura Milman". Body "The complete Laura Milman New York collection —
+  fine jewelry, engagement rings, estate pieces, and timepieces."
+- After: title "All Jewelry", rules add type ≠ `Watch` and type ≠
+  `Watches`. The theme then paginates and filters it like any collection
+  instead of the 48-item hand-built grid.
+
+### Verification (fresh read after the changes)
+
+| Check | Before | After |
+|---|---|---|
+| Draft products (store) | 4,372 | 4,372 |
+| Archived products (store) | 953 | 953 |
+| `all-earrings` active / non-active members | — | 285 / 51 |
+| `estate-jewelry` active / non-active members | 84-tag rule | 808 / 282 (63 active signed watches) |
+| `all` active members / watches | 2,448 incl. watches | 1,259 / 0 |
+
+No product status or product publication was changed. Non-active members of
+a smart collection are never shown on the storefront.
+
+## Part 2 — collections for the new homepage
+
+### 4. Create `under-2500`
+
+- After: automated "Under $2,500" (`gid://shopify/Collection/349097361479`),
+  all of: price < 2500; type not Natural Diamond, Lab-Grown Diamond, Watch,
+  Watches; tag not `backvault-feed`, `Estate Jewelry`, `Pre-Owned`,
+  `Vintage`; title not containing Wedding, Engagement, Kid's. Newest first.
+  Published to Online Store and Shop. Verified: 140 active members; draft
+  4,372 and archived 953 unchanged.
+
+### 5. Create `all-bracelets` and `all-pendants`
+
+- Before: `bracelets` and `pendants-1` are manual collections (29 bracelets
+  hand-picked; about 220 active bracelets exist). Manual collections cannot
+  take rules, so rule-based copies were created and left the originals
+  untouched.
+- After: "Bracelets" at `all-bracelets` (`gid://shopify/Collection/349097590855`),
+  any of type Bracelet, Bracelets, Bangle, Tennis Bracelet; "Pendants" at
+  `all-pendants` (`gid://shopify/Collection/349097623623`), any of type
+  Pendant, Pendants. Both newest first, published to Online Store and Shop.
+  Member counts not yet verified.
+
+### 6. `rings` matches by product type
+
+- Before: id `gid://shopify/Collection/168312406087`, all of: title contains
+  `ring`, title does not contain `ear`, title does not contain `engagement`.
+  This pulled in "Draw String" bracelets and dropped rings named Pear, Pearl
+  or Heart.
+- After: any of type Ring, Rings, Solitaire Ring. Member count not yet
+  verified.
+
+### Decision: inactive products (2026-09-27)
+
+Rule-based collections list draft and archived products in the admin; the
+storefront, sitemap, search, and every sales channel and feed show only
+active, published products, so inactive members do not affect the website,
+Google or AI search. Merchant decision: leave as is. No tag rule, no
+rollback.
+
+## Part 3 — answer-first collection intros
+
+Body (`descriptionHtml`) only; SEO title and description unchanged. Copy uses
+facts already stated on the site and in the refund and shipping policies.
+
+| Collection | Before |
+|---|---|
+| `david-webb` | "Pre-owned David Webb jewelry, authenticated and hand-inspected by Laura Milman New York. Enamel, hammered gold, and other signed designs are listed with the measurements and condition on each product page. Missing facts stay blank." |
+| `cartier` | "Pre-owned Cartier jewelry and watches selected by Laura Milman New York. Love, Juste un Clou, Tank, and other documented models are listed with metal, size, and condition from the product record. Era and provenance are stated only when documented." |
+| `van-cleef-arpels` | "Pre-owned Van Cleef & Arpels jewelry offered by Laura Milman New York. Alhambra and other signed designs appear here when the piece is in hand. Stone, metal, and measurements stay on the product page; unknown facts are left empty." |
+| `tiffany` | "Pre-owned Tiffany & Co. jewelry authenticated by Laura Milman New York. Schlumberger, Paloma Picasso, and house designs are listed only when the attribution is on the piece or its paperwork." |
+| `rolex-watches` | "Pre-owned Rolex watches selected by Laura Milman New York. Reference, case size, year, and box-and-papers facts come from the source record. Condition is never inferred from the title." |
+| `chains` | "Gold chains at Laura Milman New York: 14K yellow, white, and rose gold in Franco, Cuban, rope, herringbone, and other classic links. Solid links and measured lengths for everyday wear.Each chain is authenticated by Laura Milman New York." |
+
+After: each body now opens by answering the buyer's first question
+(authenticated in New York; what the listing states; what is never guessed)
+and closes with the shipping and return terms from the refund policy.
+Applied 2026-09-27; all six updates returned no errors.
+
+## Part 4 — menus, legacy copy, pages, legal contact
+
+### 7. Shopify navigation menus
+
+The theme hard-codes its header and footer, so these menus are not on the
+storefront, but apps such as the Shop app can read them.
+
+Before:
+- `main-menu` (`gid://shopify/Menu/207127050`): Meet Laura → /pages/lauras-story;
+  Diamonds (Natural Diamonds); Peaceful Diamonds (Lab-Grown Diamonds, Lab
+  Grown Jewelry → /collections/lab-grown-jewelry); Timepieces (All, Rolex,
+  Cartier, Bvlgari, Van Cleef & Arpels, Chopard, Audemars Piguet, Hermès,
+  Patek Philippe, Jacob & Co.); Brands → /collections (Cartier, Tiffany & Co.,
+  Van Cleef & Arpels, Bvlgari, Chopard, Hermès, Seaman Schepps, Verdura);
+  Wedding (Engagement Rings, Wedding Bands, Men's Wedding Bands); Earrings →
+  deleted collection 157096149063 (Chandelier, Drop, Hoop, Huggie, Stud);
+  Bracelets → /collections/bracelets (Bangles); Rings (Stackable, Trendy,
+  Men's); Necklaces (Chokers, Pendants → pendants-1); Estate Jewelry (Cartier,
+  Chopard, Hermès, Tiffany & Co.); Vintage Jewelry; Journal.
+- `footer-shop` (`gid://shopify/Menu/220497150023`): Rings, Necklaces,
+  Bracelets → /collections/bracelets, Earrings → /collections/earrings,
+  New Arrivals → /collections/all.
+- `footer-about` (`gid://shopify/Menu/220497182791`): Our Story →
+  /pages/our-story (missing), Sustainability → /pages/sustainability
+  (missing), Press → /pages/press (missing), Contact.
+- `footer-help` (`gid://shopify/Menu/220497313863`): FAQ, Shipping & Returns,
+  Care Guide, Size Guide → /pages/size-guide (missing).
+- `footer` and `customer-account-main-menu`: unchanged.
+
+After (applied): `main-menu` mirrors the theme header (Under $2,500; Jewelry;
+Lab-Grown Jewelry; Pre-Owned & Estate; Our Story; Loose Diamonds; Watches;
+Bridal; Journal) with every link pointing at a live collection or page.
+`footer-shop` adds Under $2,500 and uses `all-bracelets`, `all-earrings` and
+"All Jewelry"; `footer-about` is Our Story → /pages/about, Estate
+Authentication, Private Clients, Contact; `footer-help` points Ring Size Guide
+at /pages/ring-size-guide. All four updates returned no errors.
+
+### 8. Legacy collection copy
+
+Before (exact `descriptionHtml`, editor `data-*` attributes omitted):
+- `omega` (`gid://shopify/Collection/279237623879`): h3 "Pre-Owned Omega
+  Collection – Legendary Swiss Timepieces"; "Explore pre-owned Omega watches
+  like the Speedmaster and Seamaster—precision-engineered and fully
+  authenticated for timeless style. **Keywords**: pre-owned Omega, Omega
+  Speedmaster, Seamaster, Omega watch, vintage Omega, Swiss watches,
+  authentic Omega."
+- `chopard` (`gid://shopify/Collection/279237460039`): h3 "Pre-Owned Chopard
+  Collection – Swiss Craftsmanship & Glamour"; "Discover our pre-owned Chopard
+  pieces, including Happy Diamonds and Mille Miglia watches. Authenticated and
+  expertly curated, these pieces offer classic luxury at unbeatable value."
+- `hermes` (`gid://shopify/Collection/279237558343`): h3 "Pre-Owned Hermès
+  Collection – Understated Luxury & Craftsmanship"; "From iconic bangles to
+  rare timepieces, our pre-owned Hermès collection offers elegance rooted in
+  French craftsmanship. Authenticated and curated with care."
+- `vintage-jewelry` (`gid://shopify/Collection/276068368455`): h3 "Timeless
+  Treasures from the Past"; "Discover our curated collection of vintage
+  jewelry, featuring rare and iconic designs from renowned houses like Van
+  Cleef & Arpels, Tiffany & Co., David Webb, and more. Each piece tells a
+  story—crafted in a bygone era with exceptional artistry, precious
+  gemstones, and enduring elegance. From Art Deco rings to bold mid-century
+  bracelets, our vintage collection offers collectible and investment-worthy
+  pieces with guaranteed authenticity and charm."
+
+After (applied): all four bodies replaced with fact-only copy (reference,
+condition, box and papers, shipping and return terms; vintage links to the
+Pre-Owned & Estate hub). No errors. The theme's hard-coded intros for
+`vintage-jewelry` and `hermes` were removed so this copy shows.
+
+### 9. One founder page, no duplicate homepage
+
+- Before: `/pages/lauras-story` (`gid://shopify/Page/253141396`) and
+  `/pages/about` (`gid://shopify/Page/129922662471`) both published with
+  different versions of Laura's story; `/pages/shop`
+  (`gid://shopify/Page/134196330567`) published with a copy of the homepage.
+- After: `lauras-story` and `shop` unpublished (not deleted; republish from
+  Online Store → Pages to undo). Redirects `/pages/lauras-story` →
+  `/pages/about` (`gid://shopify/UrlRedirect/409739722823`) and `/pages/shop`
+  → `/` (`gid://shopify/UrlRedirect/409739755591`). Theme links to Our Story
+  now go to /pages/about.
+
+### 10. Logo, favicon and legal contact
+
+- Organization logo in the theme falls back to the header file
+  `LMNY-header-lockup.png` when no brand logo or favicon is set.
+- Favicon: not set; needs a square image chosen by the merchant.
+- Terms of service still list a personal email and an address as governing
+  law; privacy policy names "Laura's Gems". Legal text left for the merchant
+  to edit in Settings → Policies.

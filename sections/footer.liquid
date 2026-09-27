@@ -53,14 +53,14 @@
       </div>
 
       <div class="footer__column footer__accordion">
-        <h5 class="footer__column-title footer__accordion-toggle">Shop
+        <h2 class="footer__column-title footer__accordion-toggle">Shop
           <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </h5>
+        </h2>
         <ul class="footer__links footer__accordion-body">
           <li><a href="/collections/all" class="footer__link">All Jewelry</a></li>
           <li><a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="footer__link">Lab-Grown Jewelry</a></li>
           <li><a href="/collections/natural-diamonds" class="footer__link">Loose Diamonds</a></li>
-          <li><a href="/collections/vintage-jewelry" class="footer__link">Pre-Owned Maison</a></li>
+          <li><a href="/collections/estate-jewelry" class="footer__link">Pre-Owned &amp; Estate</a></li>
           <li><a href="/collections/time-pieces" class="footer__link">Timepieces</a></li>
           <li><a href="/collections/engagement-rings" class="footer__link">Engagement Rings</a></li>
           <li><a href="/collections/necklaces" class="footer__link">Necklaces</a></li>
@@ -69,13 +69,12 @@
       </div>
 
       <div class="footer__column footer__accordion">
-        <h5 class="footer__column-title footer__accordion-toggle">The Maison
+        <h2 class="footer__column-title footer__accordion-toggle">The House
           <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </h5>
+        </h2>
         <ul class="footer__links footer__accordion-body">
-          <li><a href="/pages/about" class="footer__link">About</a></li>
-          <li><a href="/pages/lauras-story" class="footer__link">Our Story</a></li>
-          <li><a href="/collections/vintage-jewelry" class="footer__link">Pre-Owned Maison</a></li>
+          <li><a href="/pages/about" class="footer__link">Our Story</a></li>
+          <li><a href="/collections/estate-jewelry" class="footer__link">Pre-Owned &amp; Estate</a></li>
           <li><a href="/collections/david-webb" class="footer__link">David Webb</a></li>
           <li><a href="/pages/authentication" class="footer__link">Estate Authentication</a></li>
           <li><a href="/pages/private-clients" class="footer__link">Private Clients</a></li>
@@ -84,9 +83,9 @@
       </div>
 
       <div class="footer__column footer__accordion">
-        <h5 class="footer__column-title footer__accordion-toggle">Support
+        <h2 class="footer__column-title footer__accordion-toggle">Support
           <svg class="footer__accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </h5>
+        </h2>
         <ul class="footer__links footer__accordion-body">
           <li><a href="/pages/contact" class="footer__link">Contact Us</a></li>
           <li><a href="/pages/faq" class="footer__link">FAQ</a></li>
@@ -220,14 +219,29 @@
 <script>
   (function() {
     if (window.matchMedia('(max-width: 576px)').matches) {
-      document.querySelectorAll('.footer__accordion-toggle').forEach(function(toggle) {
-        toggle.addEventListener('click', function() {
-          var col = this.closest('.footer__accordion');
+      var toggles = document.querySelectorAll('.footer__accordion-toggle');
+      toggles.forEach(function(toggle) {
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('tabindex', '0');
+        toggle.setAttribute('aria-expanded', 'false');
+        function flip() {
+          var col = toggle.closest('.footer__accordion');
           var wasOpen = col.classList.contains('open');
           document.querySelectorAll('.footer__accordion.open').forEach(function(c) {
             c.classList.remove('open');
           });
-          if (!wasOpen) col.classList.add('open');
+          toggles.forEach(function(t) { t.setAttribute('aria-expanded', 'false'); });
+          if (!wasOpen) {
+            col.classList.add('open');
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+        }
+        toggle.addEventListener('click', flip);
+        toggle.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            flip();
+          }
         });
       });
     }

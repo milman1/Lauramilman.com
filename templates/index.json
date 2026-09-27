@@ -12,416 +12,112 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "eyebrow": "Laura Milman · New York",
-        "heading": "Jewelry for the week\nyou actually live.",
-        "subheading": "Lab-grown diamond jewelry to wear from the office through dinner, and signed pre-owned pieces when you want a house name.",
-        "primary_cta_text": "Shop Lab-Grown Jewelry",
-        "primary_cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
-        "secondary_cta_text": "Shop Pre-Owned Maison",
-        "secondary_cta_url": "/collections/vintage-jewelry",
-        "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
-        "image_opacity": 55
+        "eyebrow": "Gold & diamonds · New York",
+        "heading": "The fine jewelry you buy\nfor yourself.",
+        "subheading": "14K gold chains, lab-grown diamonds and house pieces to wear every day, chosen by Laura Milman after thirty years in New York's Diamond District.",
+        "primary_cta_text": "Shop Under $2,500",
+        "primary_cta_url": "/collections/under-2500",
+        "secondary_cta_text": "Meet Laura",
+        "secondary_cta_url": "/pages/about",
+        "image_opacity": 55,
+        "layout": "split",
+        "image_asset": "fine-jewelry-model-earrings.jpg",
+        "image_alt": "Woman wearing long diamond drop earrings",
+        "note": "Free insured shipping · 7-day jewelry returns · 1-year warranty"
       }
     },
     "trust-strip": {
       "type": "trust-strip",
       "blocks": {
-        "trust-1": {
+        "item-1": {
+          "type": "item",
+          "settings": {
+            "text": "14K Gold"
+          }
+        },
+        "item-2": {
+          "type": "item",
+          "settings": {
+            "text": "Certified Lab-Grown Diamonds"
+          }
+        },
+        "item-3": {
           "type": "item",
           "settings": {
             "text": "Free Insured Shipping"
           }
         },
-        "trust-2": {
+        "item-4": {
           "type": "item",
           "settings": {
             "text": "7-Day Jewelry Returns"
           }
         },
-        "trust-3": {
-          "type": "item",
-          "settings": {
-            "text": "Authenticity Guaranteed"
-          }
-        },
-        "trust-4": {
+        "item-5": {
           "type": "item",
           "settings": {
             "text": "1-Year Warranty"
           }
-        },
-        "trust-5": {
-          "type": "item",
-          "settings": {
-            "text": "Watches: Exchanges Only"
-          }
         }
       },
       "block_order": [
-        "trust-1",
-        "trust-2",
-        "trust-5",
-        "trust-3",
-        "trust-4"
+        "item-1",
+        "item-2",
+        "item-3",
+        "item-4",
+        "item-5"
       ],
       "settings": {}
     },
-    "shop-worlds": {
-      "type": "shop-worlds",
-      "blocks": {
-        "world-lab": {
-          "type": "world",
-          "settings": {
-            "collection": "peaceful-diamonds-by-laura-milman-new-york",
-            "title": "Lab-Grown Jewelry",
-            "subtitle": "The largest jewelry edit",
-            "link": "/collections/peaceful-diamonds-by-laura-milman-new-york",
-            "tone": "navy"
-          }
-        },
-        "world-chains": {
-          "type": "world",
-          "settings": {
-            "collection": "chains",
-            "title": "Gold Chains",
-            "subtitle": "14K, for every day",
-            "link": "/collections/chains",
-            "tone": "warm"
-          }
-        },
-        "world-diamonds": {
-          "type": "world",
-          "settings": {
-            "collection": "natural-diamonds",
-            "title": "Loose Diamonds",
-            "subtitle": "Natural and lab-grown stones",
-            "link": "/collections/natural-diamonds",
-            "tone": "warm"
-          }
-        },
-        "world-timepieces": {
-          "type": "world",
-          "settings": {
-            "collection": "time-pieces",
-            "title": "Pre-Owned Timepieces",
-            "subtitle": "Rolex, Cartier, and more",
-            "link": "",
-            "tone": "warm"
-          }
-        },
-        "world-jewelry": {
-          "type": "world",
-          "settings": {
-            "collection": "all",
-            "title": "All Jewelry",
-            "subtitle": "Rings, necklaces, earrings, and bracelets",
-            "link": "/collections/all",
-            "tone": "warm"
-          }
-        }
-      },
-      "block_order": [
-        "world-lab",
-        "world-chains",
-        "world-timepieces",
-        "world-jewelry",
-        "world-diamonds"
-      ],
+    "first-piece": {
+      "type": "featured-products",
       "settings": {
-        "eyebrow": "Also in the house",
-        "heading": "More to explore",
-        "subheading": "Lab-grown jewelry, gold chains for every day, pre-owned watches, the full catalog, and loose diamonds."
+        "eyebrow": "Your first piece",
+        "title": "Under $2,500",
+        "description": "Gold chains, lab-grown diamonds and house pieces for every day. Metal, width or carat weight are on every listing.",
+        "collection": "under-2500",
+        "product_count": 8,
+        "cta_text": "Shop All Under $2,500",
+        "cta_url": "/collections/under-2500"
       }
     },
-    "preowned-maison": {
-      "type": "preowned-maison",
-      "blocks": {
-        "maison-webb": {
-          "type": "maison",
-          "settings": {
-            "collection": "david-webb",
-            "title": "David Webb"
-          }
-        },
-        "maison-cartier": {
-          "type": "maison",
-          "settings": {
-            "collection": "cartier",
-            "title": "Cartier"
-          }
-        },
-        "maison-vca": {
-          "type": "maison",
-          "settings": {
-            "collection": "van-cleef-arpels",
-            "title": "Van Cleef & Arpels"
-          }
-        },
-        "maison-bvlgari": {
-          "type": "maison",
-          "settings": {
-            "collection": "bvlgari",
-            "title": "Bvlgari"
-          }
-        },
-        "maison-tiffany": {
-          "type": "maison",
-          "settings": {
-            "collection": "tiffany",
-            "title": "Tiffany & Co."
-          }
-        }
-      },
-      "block_order": [
-        "maison-webb",
-        "maison-cartier",
-        "maison-vca",
-        "maison-bvlgari",
-        "maison-tiffany"
-      ],
-      "settings": {
-        "eyebrow": "Authenticated Estate",
-        "title": "The Pre-Owned Maison",
-        "description": "Signed pieces from the great houses — sourced, examined and authenticated by our specialists in New York. Curated resale, with provenance you can trust.",
-        "trust_line": "Every estate piece is individually authenticated and documented",
-        "cta_text": "Explore the Maison Vault",
-        "cta_url": "/collections/vintage-jewelry"
-      }
-    },
-    "fine-jewelry-editorial": {
-      "type": "shop-the-look",
-      "settings": {
-        "eyebrow": "The Fine Jewelry Edit",
-        "title": "Jewelry, brought to life.",
-        "description": "A little movement. A touch of brilliance. Explore diamond earrings, necklaces, and bracelets — pieces to make your own, every day or for a moment worth remembering.",
-        "collection": "earrings",
-        "editorial_asset": "fine-jewelry-model-earrings.jpg",
-        "editorial_alt": "Diamond halo drop earrings styled for an evening",
-        "caption_title": "A lasting impression",
-        "caption_text": "Styling inspiration · Explore the jewelry edit",
-        "cta_text": "Explore All Earrings"
-      },
-      "blocks": {
-        "earrings": {
-          "type": "product",
-          "settings": {
-            "product": "pear-and-emerald-cut-in-diamond-drop-earrings"
-          }
-        },
-        "necklace": {
-          "type": "product",
-          "settings": {
-            "product": "tennis-choker-necklace"
-          }
-        },
-        "huggies": { "type": "product", "settings": { "product": "diamond-pave-huggie-earrings-1" } },
-        "bracelet": { "type": "product", "settings": { "product": "paperclip-inspired-bracelet" } }
-      },
-      "block_order": ["earrings", "necklace", "huggies", "bracelet"]
-    },
-    "diamond-destination": {
-      "type": "diamond-destination",
-      "blocks": {
-        "dest-natural": {
-          "type": "destination",
-          "settings": {
-            "collection": "natural-diamonds",
-            "title": "Natural Loose Diamonds",
-            "subtitle": "GIA-certified stones, priced against the live market.",
-            "cta_label": "Shop natural diamonds",
-            "link": "",
-            "tone": "warm"
-          }
-        },
-        "dest-lab": {
-          "type": "destination",
-          "settings": {
-            "collection": "lab-grown-diamonds",
-            "title": "Lab-Grown Loose Diamonds",
-            "subtitle": "Certified lab-grown stones with exceptional carat weight.",
-            "cta_label": "Shop lab-grown diamonds",
-            "link": "",
-            "tone": "navy"
-          }
-        }
-      },
-      "block_order": [
-        "dest-natural",
-        "dest-lab"
-      ],
-      "settings": {
-        "eyebrow": "Diamond Destination",
-        "heading": "Certified Loose Diamonds",
-        "description": "Search the way a gemologist would — shape, carat, color, and clarity — across natural and lab-grown stones.",
-        "consult_text": "Need help choosing? Book a diamond consultation",
-        "consult_url": "/pages/private-clients"
-      }
-    },
-    "preowned-timepieces": {
-      "type": "preowned-maison",
-      "blocks": {
-        "watch-rolex": {
-          "type": "maison",
-          "settings": {
-            "collection": "rolex-watches",
-            "title": "Rolex"
-          }
-        },
-        "watch-cartier": {
-          "type": "maison",
-          "settings": {
-            "collection": "cartier-watches",
-            "title": "Cartier"
-          }
-        },
-        "watch-bvlgari": {
-          "type": "maison",
-          "settings": {
-            "collection": "bvlgari-watches",
-            "title": "Bvlgari"
-          }
-        }
-      },
-      "block_order": [
-        "watch-rolex",
-        "watch-cartier",
-        "watch-bvlgari"
-      ],
-      "settings": {
-        "eyebrow": "Pre-Owned Timepieces",
-        "title": "Watches, Authenticated",
-        "description": "Rolex, Cartier, Bvlgari, and other houses — sourced and examined in New York. Pre-owned timepieces, with the same standard we hold for jewelry.",
-        "trust_line": "Authenticated in New York · Watches: Exchanges Only",
-        "cta_text": "Shop All Timepieces",
-        "cta_url": "/collections/time-pieces"
-      }
-    },
-    "peaceful-diamonds": {
-      "type": "peaceful-diamonds",
-      "blocks": {
-        "pd-point-1": {
-          "type": "point",
-          "settings": {
-            "text": "Certified lab-grown diamonds"
-          }
-        },
-        "pd-point-2": {
-          "type": "point",
-          "settings": {
-            "text": "Studs, tennis, station, and pendants"
-          }
-        },
-        "pd-point-3": {
-          "type": "point",
-          "settings": {
-            "text": "Worn from the office through dinner"
-          }
-        }
-      },
-      "block_order": [
-        "pd-point-1",
-        "pd-point-2",
-        "pd-point-3"
-      ],
-      "settings": {
-        "chip_text": "Lab-grown jewelry",
-        "title": "For the week you work",
-        "byline": "by Laura Milman New York",
-        "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. Made to stay on from the morning through dinner.",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "cta_text": "Shop Lab-Grown Jewelry",
-        "secondary_cta_text": "",
-        "secondary_cta_url": ""
-      }
-    },
-    "collections-grid": {
-      "type": "collections-grid",
-      "blocks": {
-        "cat-chains": {
-          "type": "collection",
-          "settings": {
-            "collection": "chains",
-            "title": "Gold Chains"
-          }
-        },
-        "cat-engagement": {
-          "type": "collection",
-          "settings": {
-            "collection": "necklaces",
-            "title": ""
-          }
-        },
-        "cat-wedding": {
-          "type": "collection",
-          "settings": {
-            "collection": "rings",
-            "title": ""
-          }
-        },
-        "cat-bracelets": {
-          "type": "collection",
-          "settings": {
-            "collection": "bracelets",
-            "title": ""
-          }
-        },
-        "cat-pendants": {
-          "type": "collection",
-          "settings": {
-            "collection": "pendants-1",
-            "title": "Pendants"
-          }
-        },
-        "cat-earrings": {
-          "type": "collection",
-          "settings": {
-            "collection": "earrings",
-            "title": ""
-          }
-        }
-      },
-      "block_order": [
-        "cat-chains",
-        "cat-engagement",
-        "cat-wedding",
-        "cat-earrings",
-        "cat-bracelets",
-        "cat-pendants"
-      ],
-      "settings": {
-        "eyebrow": "Shop by Jewelry Type",
-        "title": "Find Your Next Piece",
-        "view_all_link": "/collections",
-        "view_all_text": "All Collections"
-      }
-    },
-    "featured-products": {
+    "build-the-stack": {
       "type": "shop-the-look",
       "blocks": {
-        "chain-rope": { "type": "product", "settings": { "product": "lmny-rope-2-5-mm-hsr018" } },
-        "chain-paperclip": { "type": "product", "settings": { "product": "lmny-paperclip-2-5-mm-pclip060" } },
-        "chain-snake": { "type": "product", "settings": { "product": "lmny-snake-2-mm-ovsn200" } },
-        "chain-bracelet": { "type": "product", "settings": { "product": "lmny-paperclip-2-5-mm-pclip060-bracelet" } }
+        "p1": {
+          "type": "product",
+          "settings": {
+            "product": "lmny-rope-1-8-mm-ch014"
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a"
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-diamond-huggie-earrings-1-ct-14k-yellow-gold-er12395"
+          }
+        }
       },
-      "block_order": ["chain-rope", "chain-paperclip", "chain-snake", "chain-bracelet"],
+      "block_order": [
+        "p1",
+        "p2",
+        "p3"
+      ],
       "settings": {
-        "eyebrow": "The Gold Chain Edit",
-        "title": "Worn Your Way",
-        "description": "One signature chain or a few layers that feel like you. Explore 14K gold rope, paperclip, and snake styles for your everyday wardrobe.",
-        "collection": "chains",
-        "editorial_image": "shopify://shop_images/royal_chain_2019_by_sinem_yazici8896_2_6c51247b-98c5-4457-8cbd-ad7c839d52e3.jpg",
-        "editorial_alt": "Model wearing layered yellow gold chains over a black top",
-        "caption_title": "Layered, your way",
-        "caption_text": "Styling inspiration · Explore the chain edit",
-        "cta_text": "Shop All Gold Chains"
-      }
-    },
-    "philosophy-quote": {
-      "type": "philosophy-quote",
-      "settings": {
-        "eyebrow": "Our Philosophy",
-        "quote": "True luxury is never disposable. A jewel should outlast the moment it was bought for — carrying its story from one generation to the next.",
-        "attribution": "Laura Milman"
+        "eyebrow": "Build the Stack",
+        "title": "One chain, one line of diamonds, one pair",
+        "description": "A 1.8 mm rope chain bracelet, a 0.54 ct lab-grown tennis bracelet and 1 ct lab-grown huggies, made to be worn together every day.",
+        "collection": "under-2500",
+        "editorial_asset": "shop-channel-cover.jpg",
+        "editorial_alt": "Gold diamond tennis bracelet, diamond studs and a diamond band on navy velvet",
+        "caption_title": "The everyday stack",
+        "caption_text": "Gold and diamonds, worn together",
+        "cta_text": "Shop Under $2,500"
       }
     },
     "brand-story": {
@@ -455,13 +151,186 @@
         "stat-italy"
       ],
       "settings": {
-        "eyebrow": "The Beginning",
+        "eyebrow": "The Woman Behind It",
         "portrait_image": "shopify://shop_images/laura-milman-portrait.jpg",
-        "title": "Three Decades\nin the Making",
-        "body_text": "<p>Laura Milman's story began in the heart of New York's Diamond District, where she spent thirty years learning what makes a jewel worth keeping. Today every Laura Milman New York piece is designed in the city that trained her eye — and brought to life by master goldsmiths in Italy.</p><p>Newly made or newly rediscovered, each piece is chosen the same way: it must be beautiful enough to buy once, and made well enough to hand down.</p>",
+        "title": "Thirty Years\nin the Making",
+        "body_text": "<p>“I did the thing that women like me were not expected to do in that industry, in those years. I opened my own company.”</p><p>Laura Milman learned the diamond trade from the inside, working alongside her brother Jacob Arabo in the early years of what became Jacob &amp; Co. More than thirty years ago she opened her own company in New York's Diamond District, and she still sees clients in Midtown. Every Laura Milman New York piece is designed in the city that trained her eye and brought to life by master goldsmiths in Italy.</p>",
         "signature": "— Laura Milman",
         "cta_text": "Read Laura's Story",
-        "cta_url": "/pages/lauras-story"
+        "cta_url": "/pages/about"
+      }
+    },
+    "collections-grid": {
+      "type": "collections-grid",
+      "blocks": {
+        "col-1": {
+          "type": "collection",
+          "settings": {
+            "collection": "chains",
+            "title": "Gold Chains"
+          }
+        },
+        "col-2": {
+          "type": "collection",
+          "settings": {
+            "collection": "all-earrings",
+            "title": "Earrings"
+          }
+        },
+        "col-3": {
+          "type": "collection",
+          "settings": {
+            "collection": "all-bracelets",
+            "title": ""
+          }
+        },
+        "col-4": {
+          "type": "collection",
+          "settings": {
+            "collection": "necklaces",
+            "title": ""
+          }
+        },
+        "col-5": {
+          "type": "collection",
+          "settings": {
+            "collection": "rings",
+            "title": ""
+          }
+        },
+        "col-6": {
+          "type": "collection",
+          "settings": {
+            "collection": "all-pendants",
+            "title": "Pendants"
+          }
+        }
+      },
+      "block_order": [
+        "col-1",
+        "col-2",
+        "col-3",
+        "col-4",
+        "col-5",
+        "col-6"
+      ],
+      "settings": {
+        "eyebrow": "Gold and Diamonds",
+        "title": "Shop by Piece",
+        "view_all_link": "/collections/all",
+        "view_all_text": "All Jewelry"
+      }
+    },
+    "estate": {
+      "type": "preowned-maison",
+      "blocks": {
+        "m-1": {
+          "type": "maison",
+          "settings": {
+            "collection": "cartier",
+            "title": "Cartier"
+          }
+        },
+        "m-2": {
+          "type": "maison",
+          "settings": {
+            "collection": "van-cleef-arpels",
+            "title": "Van Cleef & Arpels"
+          }
+        },
+        "m-3": {
+          "type": "maison",
+          "settings": {
+            "collection": "david-webb",
+            "title": "David Webb"
+          }
+        },
+        "m-4": {
+          "type": "maison",
+          "settings": {
+            "collection": "tiffany",
+            "title": "Tiffany & Co."
+          }
+        }
+      },
+      "block_order": [
+        "m-1",
+        "m-2",
+        "m-3",
+        "m-4"
+      ],
+      "settings": {
+        "eyebrow": "The Next Step",
+        "title": "Your First Signed Piece",
+        "description": "Pre-owned Cartier, Van Cleef & Arpels, David Webb and Tiffany & Co., examined in New York before it is listed. Condition and measurements are on every listing.",
+        "trust_line": "Every estate piece is individually authenticated and documented",
+        "cta_text": "Shop Pre-Owned & Estate",
+        "cta_url": "/collections/estate-jewelry"
+      }
+    },
+    "reviews": {
+      "type": "google-reviews-strip",
+      "settings": {
+        "eyebrow": "From Google",
+        "title": "What Clients Say",
+        "intro": "",
+        "cta_label": "Read All Reviews",
+        "cta_url": "/pages/google-reviews"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "title": "10% Off Your First Piece",
+        "description": "Join the list for 10% off your first jewelry purchase, sent to your inbox, plus new pieces and private appointments. Watches excluded.",
+        "placeholder": "Your email address",
+        "button_text": "Send My Code",
+        "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
+      }
+    },
+    "also-from-the-house": {
+      "type": "shop-worlds",
+      "blocks": {
+        "w-1": {
+          "type": "world",
+          "settings": {
+            "collection": "natural-diamonds",
+            "title": "Loose Diamonds",
+            "subtitle": "Natural and lab-grown, certified",
+            "link": "/collections/natural-diamonds",
+            "tone": "warm"
+          }
+        },
+        "w-2": {
+          "type": "world",
+          "settings": {
+            "collection": "time-pieces",
+            "title": "Pre-Owned Watches",
+            "subtitle": "Rolex, Cartier, Patek Philippe",
+            "link": "/collections/time-pieces",
+            "tone": "warm"
+          }
+        },
+        "w-3": {
+          "type": "world",
+          "settings": {
+            "collection": "engagement-rings",
+            "title": "Engagement Rings",
+            "subtitle": "Natural and lab-grown",
+            "link": "/collections/engagement-rings",
+            "tone": "navy"
+          }
+        }
+      },
+      "block_order": [
+        "w-1",
+        "w-2",
+        "w-3"
+      ],
+      "settings": {
+        "eyebrow": "Also From the House",
+        "heading": "Diamonds, Watches and Bridal",
+        "subheading": "Certified loose diamonds, pre-owned watches, and engagement rings, all from Laura Milman New York."
       }
     },
     "private-clients": {
@@ -503,93 +372,19 @@
         "note": "Complimentary · No obligation",
         "compact": true
       }
-    },
-    "lab-grown-edit": {
-      "type": "featured-products",
-      "settings": {
-        "eyebrow": "Lab-Grown Jewelry",
-        "title": "Pieces for the week",
-        "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. The largest jewelry edit in the house.",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
-        "product_count": 8,
-        "cta_text": "Shop Lab-Grown Jewelry",
-        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
-      }
-    },
-    "reviews": {
-      "type": "testimonials",
-      "blocks": {
-        "t1": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "I came in after a brutal week of client dinners and left with studs I actually wear to the office. No pressure, just someone who understood the brief.",
-            "author": "Alexandra K.",
-            "product_name": "Private consultation"
-          }
-        },
-        "t2": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "Laura found a tennis bracelet I could wear from Midtown lunch to a 7pm reservation without looking like I was trying. That's the New York I live in.",
-            "author": "Catherine M.",
-            "product_name": "Tennis bracelet"
-          }
-        },
-        "t3": {
-          "type": "testimonial",
-          "settings": {
-            "quote": "The lab-grown stones were certified, beautiful, and priced so I didn't have to wait for a bonus. I send every friend here now.",
-            "author": "Victoria S.",
-            "product_name": "Lab-grown jewelry"
-          }
-        }
-      },
-      "block_order": ["t1", "t2", "t3"],
-      "settings": {
-        "eyebrow": "What Our Clients Say",
-        "title": "Testimonials"
-      }
-    },
-    "newsletter": {
-      "type": "newsletter",
-      "settings": {
-        "title": "Join the Inner Circle",
-        "description": "Sign up for 10% off your first jewelry purchase — code LMNYWELCOME, watches excluded — plus new arrivals and private viewings.",
-        "placeholder": "Your email address",
-        "button_text": "Unlock 10% off",
-        "success_message": "Welcome. Your code is LMNYWELCOME — jewelry only."
-      }
-    },
-    "closing-cta": {
-      "type": "closing-cta",
-      "settings": {
-        "title": "Wear it this week",
-        "description": "Lab-grown jewelry for the days you work, and a signed piece when you want a house name.",
-        "primary_cta_text": "Shop Lab-Grown Jewelry",
-        "primary_cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
-        "secondary_cta_text": "Book a Consultation",
-        "secondary_cta_url": "/pages/private-clients",
-        "trust_line": "Authenticity guaranteed · Complimentary insured shipping · No pressure, ever"
-      }
     }
   },
   "order": [
     "hero",
     "trust-strip",
-    "peaceful-diamonds",
-    "preowned-maison",
-    "featured-products",
-    "shop-worlds",
-    "lab-grown-edit",
-    "private-clients",
-    "collections-grid",
-    "preowned-timepieces",
-    "fine-jewelry-editorial",
-    "diamond-destination",
-    "philosophy-quote",
+    "first-piece",
+    "build-the-stack",
     "brand-story",
+    "collections-grid",
+    "estate",
     "reviews",
     "newsletter",
-    "closing-cta"
+    "also-from-the-house",
+    "private-clients"
   ]
 }
