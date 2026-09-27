@@ -87,6 +87,7 @@
   assign stated_style = ''
   assign stated_length = ''
   assign stated_prose = ''
+  assign stated_copy = '0'
   if is_watch != 'true'
     capture stated_pack
       render 'product-stated-specs', product: product
@@ -101,6 +102,7 @@
       assign stated_color = facts | split: 'color=' | last | split: '|' | first | strip
       assign stated_style = facts | split: 'style=' | last | split: '|' | first | strip
       assign stated_length = facts | split: 'length=' | last | split: '|' | first | strip
+      assign stated_copy = facts | split: 'copy=' | last | split: '|' | first | strip
       assign prose_parts = facts | split: 'prose='
       if prose_parts.size > 1
         assign stated_prose = prose_parts | last | strip
@@ -415,8 +417,32 @@
         </div>
       {%- endif -%}
 
-      <!-- 9. Description (collapsible) -->
-      {%- if product.description != blank -%}
+      <!-- 9. Description (collapsible). Jewelry with a supplier essay
+           keeps its video, then one factual paragraph and the 7-day policy.
+           30-day and lifetime-warranty lines are not shown. -->
+      {%- liquid
+        assign policy_line = ''
+        assign kept_video = ''
+        if is_watch != 'true'
+          assign policy_line = 'Unworn jewelry in original condition may be returned within 7 days of delivery.'
+          assign policy_source = product.description | downcase
+          if stated_copy != '1'
+            if policy_source contains '7-day' or policy_source contains '7 days'
+              assign policy_line = ''
+            endif
+          endif
+          if product.description contains 'class="product-video"'
+            assign video_rest = product.description | split: 'class="product-video"' | last
+            assign video_inner = video_rest | split: '</div>' | first
+            assign kept_video = '<div class="product-video"' | append: video_inner | append: '</div>'
+          endif
+        endif
+        assign show_description = false
+        if product.description != blank or stated_prose != blank or policy_line != blank
+          assign show_description = true
+        endif
+      -%}
+      {%- if show_description -%}
         <div class="pdp-desc{% if description_has_video %} is-pending-video-hoist{% endif %}" data-pdp-description>
           <div class="accordion-item" data-open>
             <button type="button" class="accordion-trigger" aria-expanded="true">
@@ -428,7 +454,17 @@
                 class="accordion-content rte"
                 id="PdpDescription"
                 {% if spec_rows != blank %}data-strip-duplicate-specs{% endif %}
-              >{%- if stated_prose != blank -%}<p>{{ stated_prose }}</p>{%- else -%}{{ product.description }}{%- endif -%}</div>
+              >{%- if is_watch != 'true' and stated_copy == '1' -%}
+                {%- if kept_video != blank -%}{{ kept_video }}{%- endif -%}
+                {%- if stated_prose != blank -%}<p>{{ stated_prose }}</p>{%- else -%}<p>Offered by Laura Milman New York.</p>{%- endif -%}
+                {%- if policy_line != blank -%}<p>{{ policy_line }}</p>{%- endif -%}
+              {%- elsif stated_prose != blank -%}
+                <p>{{ stated_prose }}</p>
+                {%- if policy_line != blank -%}<p>{{ policy_line }}</p>{%- endif -%}
+              {%- else -%}
+                {{ product.description }}
+                {%- if policy_line != blank -%}<p>{{ policy_line }}</p>{%- endif -%}
+              {%- endif -%}</div>
               {%- if spec_rows != blank -%}
               <script>
                 (function () {

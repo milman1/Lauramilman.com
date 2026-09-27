@@ -41,29 +41,37 @@ describe('lab-grown jewelry merchandising', () => {
     expect(peaceful.sections.hero.settings?.secondary_url).toBe('/collections/lab-grown-diamonds');
   });
 
-  it('gives More to explore a lab-grown card and a product section', () => {
+  it('keeps one lab-grown door and one lab-grown product rail', () => {
     const home = themeJson('templates/index.json');
-    const worlds = home.sections['shop-worlds'];
+    const worlds = home.sections.worlds;
     const titles = (worlds.block_order ?? []).map((id) => worlds.blocks?.[id]?.settings?.title);
-    expect(titles[0]).toBe('Lab-Grown Jewelry');
-    expect(home.sections['lab-grown-edit'].type).toBe('featured-products');
-    expect(home.sections['lab-grown-edit'].settings?.collection).toBe('peaceful-diamonds-by-laura-milman-new-york');
-    expect(home.order.indexOf('lab-grown-edit')).toBe(home.order.indexOf('shop-worlds') + 1);
+    expect(titles).toContain('Lab-Grown Jewelry');
+    expect(home.sections['lab-grown'].type).toBe('featured-products');
+    expect(home.sections['lab-grown'].settings?.collection).toBe('peaceful-diamonds-by-laura-milman-new-york');
+    expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('worlds'));
+    expect(home.order.filter((id) => id === 'lab-grown')).toHaveLength(1);
+    expect(home.order).not.toContain('build-the-stack');
+    expect(home.order).not.toContain('also-from-the-house');
+    expect(home.order).not.toContain('gold-jewelry');
   });
 });
 
 describe('homepage consultation and reviews', () => {
-  it('uses a compact consultation band above the story, and the testimonial cards', () => {
+  it('puts a compact consultation above the newsletter and real Google quotes on the homepage', () => {
     const home = themeJson('templates/index.json');
     const consult = themeFile('sections/private-clients.liquid');
+    const page = themeFile('templates/page.google-reviews.liquid');
 
     expect(home.sections['private-clients'].settings?.compact).toBe(true);
     expect(consult).toContain('lm-private--compact');
-    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('philosophy-quote'));
-    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('brand-story'));
-    expect(home.sections.reviews.type).toBe('testimonials');
-    expect(JSON.stringify(home.sections.reviews)).not.toContain('google-reviews-strip');
-    expect(JSON.stringify(home.sections.reviews)).toContain('What Our Clients Say');
-    expect(JSON.stringify(home.sections.reviews)).toContain('Alexandra K.');
+    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('newsletter'));
+    expect(home.order.indexOf('client-reviews')).toBeLessThan(home.order.indexOf('private-clients'));
+    expect(home.order.at(-1)).toBe('newsletter');
+    expect(home.sections['client-reviews'].type).toBe('client-reviews');
+    expect(JSON.stringify(home.sections)).not.toContain('google-reviews-strip');
+    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Susan Finkelstein');
+    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Dianna Shimunova');
+    expect(JSON.stringify(home.sections)).not.toContain('Alexandra K.');
+    expect(page).toContain('data-embed-id="25717519"');
   });
 });
