@@ -48,7 +48,7 @@
 
       {%- if section.settings.cta_text != blank -%}
         <div class="lm-story__cta">
-          <a href="{{ section.settings.cta_url | default: '/pages/lauras-story' }}" class="btn btn--outline">
+          <a href="{{ section.settings.cta_url | default: '/pages/about' }}" class="btn btn--outline">
             {{ section.settings.cta_text }}
           </a>
         </div>
@@ -254,7 +254,7 @@
       "type": "url",
       "id": "cta_url",
       "label": "CTA link",
-      "info": "Defaults to /pages/lauras-story"
+      "info": "Defaults to /pages/about"
     },
     {
       "type": "image_picker",

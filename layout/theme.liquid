@@ -177,6 +177,9 @@
 
     {%- liquid
       assign org_logo = shop.brand.logo | default: settings.favicon
+      if org_logo == blank
+        assign org_logo = images['LMNY-header-lockup.png']
+      endif
     -%}
     <script type="application/ld+json">
     {

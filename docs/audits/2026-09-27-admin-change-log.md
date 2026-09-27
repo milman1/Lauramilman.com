@@ -114,3 +114,92 @@ After: each body now opens by answering the buyer's first question
 (authenticated in New York; what the listing states; what is never guessed)
 and closes with the shipping and return terms from the refund policy.
 Applied 2026-09-27; all six updates returned no errors.
+
+## Part 4 — menus, legacy copy, pages, legal contact
+
+### 7. Shopify navigation menus
+
+The theme hard-codes its header and footer, so these menus are not on the
+storefront, but apps such as the Shop app can read them.
+
+Before:
+- `main-menu` (`gid://shopify/Menu/207127050`): Meet Laura → /pages/lauras-story;
+  Diamonds (Natural Diamonds); Peaceful Diamonds (Lab-Grown Diamonds, Lab
+  Grown Jewelry → /collections/lab-grown-jewelry); Timepieces (All, Rolex,
+  Cartier, Bvlgari, Van Cleef & Arpels, Chopard, Audemars Piguet, Hermès,
+  Patek Philippe, Jacob & Co.); Brands → /collections (Cartier, Tiffany & Co.,
+  Van Cleef & Arpels, Bvlgari, Chopard, Hermès, Seaman Schepps, Verdura);
+  Wedding (Engagement Rings, Wedding Bands, Men's Wedding Bands); Earrings →
+  deleted collection 157096149063 (Chandelier, Drop, Hoop, Huggie, Stud);
+  Bracelets → /collections/bracelets (Bangles); Rings (Stackable, Trendy,
+  Men's); Necklaces (Chokers, Pendants → pendants-1); Estate Jewelry (Cartier,
+  Chopard, Hermès, Tiffany & Co.); Vintage Jewelry; Journal.
+- `footer-shop` (`gid://shopify/Menu/220497150023`): Rings, Necklaces,
+  Bracelets → /collections/bracelets, Earrings → /collections/earrings,
+  New Arrivals → /collections/all.
+- `footer-about` (`gid://shopify/Menu/220497182791`): Our Story →
+  /pages/our-story (missing), Sustainability → /pages/sustainability
+  (missing), Press → /pages/press (missing), Contact.
+- `footer-help` (`gid://shopify/Menu/220497313863`): FAQ, Shipping & Returns,
+  Care Guide, Size Guide → /pages/size-guide (missing).
+- `footer` and `customer-account-main-menu`: unchanged.
+
+After (applied): `main-menu` mirrors the theme header (Under $2,500; Jewelry;
+Lab-Grown Jewelry; Pre-Owned & Estate; Our Story; Loose Diamonds; Watches;
+Bridal; Journal) with every link pointing at a live collection or page.
+`footer-shop` adds Under $2,500 and uses `all-bracelets`, `all-earrings` and
+"All Jewelry"; `footer-about` is Our Story → /pages/about, Estate
+Authentication, Private Clients, Contact; `footer-help` points Ring Size Guide
+at /pages/ring-size-guide. All four updates returned no errors.
+
+### 8. Legacy collection copy
+
+Before (exact `descriptionHtml`, editor `data-*` attributes omitted):
+- `omega` (`gid://shopify/Collection/279237623879`): h3 "Pre-Owned Omega
+  Collection – Legendary Swiss Timepieces"; "Explore pre-owned Omega watches
+  like the Speedmaster and Seamaster—precision-engineered and fully
+  authenticated for timeless style. **Keywords**: pre-owned Omega, Omega
+  Speedmaster, Seamaster, Omega watch, vintage Omega, Swiss watches,
+  authentic Omega."
+- `chopard` (`gid://shopify/Collection/279237460039`): h3 "Pre-Owned Chopard
+  Collection – Swiss Craftsmanship & Glamour"; "Discover our pre-owned Chopard
+  pieces, including Happy Diamonds and Mille Miglia watches. Authenticated and
+  expertly curated, these pieces offer classic luxury at unbeatable value."
+- `hermes` (`gid://shopify/Collection/279237558343`): h3 "Pre-Owned Hermès
+  Collection – Understated Luxury & Craftsmanship"; "From iconic bangles to
+  rare timepieces, our pre-owned Hermès collection offers elegance rooted in
+  French craftsmanship. Authenticated and curated with care."
+- `vintage-jewelry` (`gid://shopify/Collection/276068368455`): h3 "Timeless
+  Treasures from the Past"; "Discover our curated collection of vintage
+  jewelry, featuring rare and iconic designs from renowned houses like Van
+  Cleef & Arpels, Tiffany & Co., David Webb, and more. Each piece tells a
+  story—crafted in a bygone era with exceptional artistry, precious
+  gemstones, and enduring elegance. From Art Deco rings to bold mid-century
+  bracelets, our vintage collection offers collectible and investment-worthy
+  pieces with guaranteed authenticity and charm."
+
+After (applied): all four bodies replaced with fact-only copy (reference,
+condition, box and papers, shipping and return terms; vintage links to the
+Pre-Owned & Estate hub). No errors. The theme's hard-coded intros for
+`vintage-jewelry` and `hermes` were removed so this copy shows.
+
+### 9. One founder page, no duplicate homepage
+
+- Before: `/pages/lauras-story` (`gid://shopify/Page/253141396`) and
+  `/pages/about` (`gid://shopify/Page/129922662471`) both published with
+  different versions of Laura's story; `/pages/shop`
+  (`gid://shopify/Page/134196330567`) published with a copy of the homepage.
+- After: `lauras-story` and `shop` unpublished (not deleted; republish from
+  Online Store → Pages to undo). Redirects `/pages/lauras-story` →
+  `/pages/about` (`gid://shopify/UrlRedirect/409739722823`) and `/pages/shop`
+  → `/` (`gid://shopify/UrlRedirect/409739755591`). Theme links to Our Story
+  now go to /pages/about.
+
+### 10. Logo, favicon and legal contact
+
+- Organization logo in the theme falls back to the header file
+  `LMNY-header-lockup.png` when no brand logo or favicon is set.
+- Favicon: not set; needs a square image chosen by the merchant.
+- Terms of service still list a personal email and an address as governing
+  law; privacy policy names "Laura's Gems". Legal text left for the merchant
+  to edit in Settings → Policies.
