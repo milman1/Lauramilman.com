@@ -22,6 +22,9 @@ describe('product specification layout', () => {
     expect(product).toContain("when 'setting_style'");
     expect(product).toContain("when 'length'");
     expect(product).toContain('<p>{{ stated_prose }}</p>');
+    expect(product).toContain('prose_parts.size > 1');
+    expect(product).toContain("stated_prose contains 'shape='");
+    expect(product).toContain("stated_prose contains '|'");
 
     expect(stated).toContain('<!--FACTS:shape=');
     const pair = stated.indexOf("assign shape = 'Marquise and Pear'");

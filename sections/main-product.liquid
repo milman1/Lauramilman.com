@@ -101,7 +101,13 @@
       assign stated_color = facts | split: 'color=' | last | split: '|' | first | strip
       assign stated_style = facts | split: 'style=' | last | split: '|' | first | strip
       assign stated_length = facts | split: 'length=' | last | split: '|' | first | strip
-      assign stated_prose = facts | split: 'prose=' | last | strip
+      assign prose_parts = facts | split: 'prose='
+      if prose_parts.size > 1
+        assign stated_prose = prose_parts | last | strip
+      endif
+      if stated_prose contains 'shape=' or stated_prose contains '|'
+        assign stated_prose = ''
+      endif
     endif
   endif
 
