@@ -610,6 +610,66 @@
         "cta_label": "Read All Reviews",
         "cta_url": "/pages/google-reviews"
       }
+    },
+    "watches": {
+      "type": "featured-products",
+      "blocks": {
+        "w-1": {
+          "type": "chip",
+          "settings": {
+            "label": "Rolex",
+            "link": "/collections/rolex-watches"
+          }
+        },
+        "w-2": {
+          "type": "chip",
+          "settings": {
+            "label": "Cartier",
+            "link": "/collections/cartier-watches"
+          }
+        },
+        "w-3": {
+          "type": "chip",
+          "settings": {
+            "label": "Patek Philippe",
+            "link": "/collections/patek-philippe"
+          }
+        },
+        "w-4": {
+          "type": "chip",
+          "settings": {
+            "label": "Jacob & Co.",
+            "link": "/collections/jacob-co"
+          }
+        },
+        "w-5": {
+          "type": "chip",
+          "settings": {
+            "label": "Bvlgari",
+            "link": "/collections/bvlgari-watches"
+          }
+        }
+      },
+      "block_order": [
+        "w-1",
+        "w-2",
+        "w-3",
+        "w-4",
+        "w-5"
+      ],
+      "settings": {
+        "eyebrow": "Pre-owned watches",
+        "title": "Timepieces, authenticated",
+        "description": "Rolex, Cartier, Patek Philippe and other houses, sourced and examined in New York. Reference, case size and box and papers are stated on every listing.",
+        "collection": "time-pieces",
+        "product_count": 4,
+        "tone": "warm",
+        "header_align": "left",
+        "chips_label": "Popular",
+        "layout": "carousel",
+        "cta_text": "Shop All Watches",
+        "cta_url": "/collections/time-pieces"
+      }
     }
   },
   "order": [
@@ -623,6 +683,7 @@
     "build-the-stack",
     "brand-story",
     "estate",
+    "watches",
     "client-reviews",
     "reviews",
     "newsletter",

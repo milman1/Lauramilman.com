@@ -386,3 +386,16 @@ def test_section_schemas_pass_shopify_upload_rules() -> None:
         for setting in settings:
             if setting.get("type") == "url" and "default" in setting:
                 assert setting["default"] in ("/collections", "/collections/all"), (path.name, setting["id"])
+
+
+def test_homepage_has_a_watches_carousel_after_estate() -> None:
+    data = load_json(ROOT / "templates/index.json")
+    order = data["order"]
+    watches = data["sections"]["watches"]
+    assert order.index("estate") < order.index("watches") < order.index("client-reviews")
+    assert watches["type"] == "featured-products"
+    assert watches["settings"]["layout"] == "carousel"
+    assert watches["settings"]["collection"] == "time-pieces"
+    chips = [b["settings"]["label"] for b in watches["blocks"].values() if b["type"] == "chip"]
+    for brand in ("Rolex", "Cartier", "Patek Philippe"):
+        assert brand in chips
