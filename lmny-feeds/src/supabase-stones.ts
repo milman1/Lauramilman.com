@@ -131,21 +131,31 @@ export async function markMissingStonesUnavailable(
   opts: { url: string; key: string; fetchImpl?: typeof fetch } = supabaseConfigured()!,
 ): Promise<number> {
   const fetchFn = opts.fetchImpl ?? fetch;
-  // Fetch currently-available refs, then patch the ones missing from live.
-  const res = await fetchFn(
-    `${opts.url}/rest/v1/stones?select=stock_ref&available=eq.true`,
-    {
-      headers: {
-        apikey: opts.key,
-        Authorization: `Bearer ${opts.key}`,
+  // PostgREST returns at most 1000 rows unless the request pages with Range.
+  // A single unpaged read left every stone past that first page marked
+  // available, so the storefront kept offering stones Shopify no longer sells.
+  const pageSize = 1000;
+  const gone: string[] = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const res = await fetchFn(
+      `${opts.url}/rest/v1/stones?select=stock_ref&available=eq.true&order=stock_ref.asc`,
+      {
+        headers: {
+          apikey: opts.key,
+          Authorization: `Bearer ${opts.key}`,
+          Range: `${offset}-${offset + pageSize - 1}`,
+        },
       },
-    },
-  );
-  if (!res.ok) {
-    throw new Error(`stones list HTTP ${res.status}: ${(await res.text()).slice(0, 400)}`);
+    );
+    if (!res.ok) {
+      throw new Error(`stones list HTTP ${res.status}: ${(await res.text()).slice(0, 400)}`);
+    }
+    const existing = (await res.json()) as Array<{ stock_ref: string }>;
+    for (const row of existing) {
+      if (!liveStockRefs.has(row.stock_ref)) gone.push(row.stock_ref);
+    }
+    if (existing.length < pageSize) break;
   }
-  const existing = (await res.json()) as Array<{ stock_ref: string }>;
-  const gone = existing.map((r) => r.stock_ref).filter((ref) => !liveStockRefs.has(ref));
   if (gone.length === 0) return 0;
 
   const chunkSize = 200;
