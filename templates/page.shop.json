@@ -72,7 +72,7 @@
         "world-lab": {
           "type": "world",
           "settings": {
-            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "collection": "lab-grown-diamond-jewelry",
             "title": "Lab-Grown Jewelry",
             "subtitle": "The largest jewelry edit",
             "link": "/collections/peaceful-diamonds-by-laura-milman-new-york",
@@ -293,7 +293,7 @@
         "title": "For the week you work",
         "byline": "by Laura Milman New York",
         "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. Made to stay on from the morning through dinner.",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "collection": "lab-grown-diamond-jewelry",
         "cta_text": "Shop Lab-Grown Jewelry",
         "secondary_cta_text": "",
         "secondary_cta_url": ""
@@ -369,7 +369,7 @@
         "eyebrow": "Lab-Grown Jewelry",
         "title": "Pieces for the week",
         "description": "Certified lab-grown diamonds in studs, tennis and station lines, and pendants. The largest jewelry edit in the house.",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "collection": "lab-grown-diamond-jewelry",
         "product_count": 8,
         "cta_text": "Shop Lab-Grown Jewelry",
         "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
@@ -386,9 +386,7 @@
         "all_url": "/pages/google-reviews",
         "all_text": "Read all reviews",
         "google_url": ""
-      },
-      "blocks": {},
-      "block_order": []
+      }
     },
     "closing-cta": {
       "type": "closing-cta",
