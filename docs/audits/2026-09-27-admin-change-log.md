@@ -88,9 +88,10 @@ a smart collection are never shown on the storefront.
 - After: any of type Ring, Rings, Solitaire Ring. Member count not yet
   verified.
 
-### Open question
+### Decision: inactive products (2026-09-27)
 
 Rule-based collections list draft and archived products in the admin; the
-storefront and every sales channel show only active, published products.
-The merchant asked that inactive items not be included. Waiting on a
-decision: leave as is, add an active-only tag rule, or roll back.
+storefront, sitemap, search, and every sales channel and feed show only
+active, published products, so inactive members do not affect the website,
+Google or AI search. Merchant decision: leave as is. No tag rule, no
+rollback.

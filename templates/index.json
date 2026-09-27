@@ -180,7 +180,7 @@
         "col-3": {
           "type": "collection",
           "settings": {
-            "collection": "bracelets",
+            "collection": "all-bracelets",
             "title": ""
           }
         },
@@ -201,7 +201,7 @@
         "col-6": {
           "type": "collection",
           "settings": {
-            "collection": "pendants-1",
+            "collection": "all-pendants",
             "title": "Pendants"
           }
         }

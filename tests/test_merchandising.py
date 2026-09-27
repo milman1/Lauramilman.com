@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Guard the merchandising IA: worlds first, jewelry types second."""
+"""Guard the merchandising IA: women buying fine jewelry for themselves.
+
+The homepage leads with gold and lab-grown diamonds under $2,500, then
+Laura's story and signed estate as the next step. Loose diamonds, watches
+and bridal stay one click away.
+"""
 
 from __future__ import annotations
 
@@ -23,175 +28,13 @@ def extract_schema(path: Path) -> dict:
     return json.loads(match.group(1))
 
 
-def test_homepage_leads_with_worlds_not_jewelry_types() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    order = data["order"]
-    assert order[:6] == [
-        "hero",
-        "trust-strip",
-        "shop-worlds",
-        "preowned-maison",
-        "diamond-destination",
-        "preowned-timepieces",
-    ]
-    assert order.index("peaceful-diamonds") < order.index("collections-grid")
-    assert order.index("shop-worlds") < order.index("collections-grid")
 
 
-def test_shop_worlds_cover_the_five_business_lines() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    worlds = data["sections"]["shop-worlds"]
-    titles = [
-        worlds["blocks"][block_id]["settings"]["title"]
-        for block_id in worlds["block_order"]
-    ]
-    assert titles == [
-        "Peaceful Diamonds",
-        "Loose Diamonds",
-        "Pre-Owned Maison",
-        "Pre-Owned Timepieces",
-        "Fine Jewelry",
-    ]
 
 
-def test_diamond_destination_splits_natural_and_lab() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    dest = data["sections"]["diamond-destination"]
-    titles = [
-        dest["blocks"][block_id]["settings"]["title"]
-        for block_id in dest["block_order"]
-    ]
-    assert titles == ["Natural Loose Diamonds", "Lab-Grown Loose Diamonds"]
-    assert dest["blocks"]["dest-natural"]["settings"]["collection"] == "natural-diamonds"
-    assert dest["blocks"]["dest-lab"]["settings"]["collection"] == "lab-grown-diamonds"
 
 
-def test_timepieces_use_watch_only_collections() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    watches = data["sections"]["preowned-timepieces"]
-    handles = [
-        watches["blocks"][block_id]["settings"]["collection"]
-        for block_id in watches["block_order"]
-    ]
-    assert handles == [
-        "rolex-watches",
-        "cartier-watches",
-        "audemars-piguet-watches",
-        "bvlgari-watches",
-    ]
-    assert all(handle.endswith("-watches") for handle in handles)
 
-
-def test_jewelry_type_grid_is_secondary_and_uses_title_override() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    grid = data["sections"]["collections-grid"]
-    assert grid["settings"]["title"] == "Necklaces, Rings & More"
-    assert grid["settings"]["eyebrow"] == "Shop by Jewelry Type"
-    handles = [
-        grid["blocks"][block_id]["settings"]["collection"]
-        for block_id in grid["block_order"]
-    ]
-    assert handles == ["necklaces", "rings", "bracelets", "pendants-1", "earrings"]
-    assert grid["blocks"]["cat-pendants"]["settings"]["title"] == "Pendants"
-    liquid = (ROOT / "sections/collections-grid.liquid").read_text()
-    assert "block.settings.title | default: collection.title" in liquid
-
-
-def test_shop_page_mirrors_worlds_first() -> None:
-    data = load_json(ROOT / "templates/page.shop.json")
-    order = data["order"]
-    assert order[:8] == [
-        "hero",
-        "trust-strip",
-        "shop-worlds",
-        "preowned-maison",
-        "diamond-destination",
-        "preowned-timepieces",
-        "peaceful-diamonds",
-        "collections-grid",
-    ]
-    assert order.index("shop-worlds") < order.index("collections-grid")
-    titles = [
-        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["title"]
-        for block_id in data["sections"]["shop-worlds"]["block_order"]
-    ]
-    assert titles == [
-        "Peaceful Diamonds",
-        "Loose Diamonds",
-        "Pre-Owned Maison",
-        "Pre-Owned Timepieces",
-        "Fine Jewelry",
-    ]
-    tones = [
-        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
-        for block_id in data["sections"]["shop-worlds"]["block_order"]
-    ]
-    assert tones == ["navy", "warm", "warm", "warm", "warm"]
-    dest = data["sections"]["diamond-destination"]
-    assert dest["blocks"]["dest-natural"]["settings"]["collection"] == "natural-diamonds"
-    assert dest["blocks"]["dest-lab"]["settings"]["collection"] == "lab-grown-diamonds"
-    watches = [
-        data["sections"]["preowned-timepieces"]["blocks"][block_id]["settings"]["collection"]
-        for block_id in data["sections"]["preowned-timepieces"]["block_order"]
-    ]
-    assert "jacob-co" in watches
-    assert "rolex-watches" in watches
-    hero = data["sections"]["hero"]["settings"]
-    assert hero["primary_cta_text"] == "Shop Fine Jewelry"
-    assert hero["secondary_cta_url"] == "/collections/natural-diamonds"
-    grid = data["sections"]["collections-grid"]
-    assert grid["settings"]["title"] == "Necklaces, Rings & More"
-    handles = [
-        grid["blocks"][block_id]["settings"]["collection"]
-        for block_id in grid["block_order"]
-    ]
-    assert handles == ["necklaces", "rings", "bracelets", "pendants-1", "earrings"]
-    pd = data["sections"]["peaceful-diamonds"]
-    assert "Certified lab-grown diamonds" in pd["settings"]["description"]
-    assert "pd-point-1" in pd["block_order"]
-    liquid = (ROOT / "sections/collections-grid.liquid").read_text()
-    assert "collection-card__cta" in liquid
-    assert ">Explore<" in liquid
-
-
-def test_header_nav_order_puts_differentiators_early() -> None:
-    header = (ROOT / "sections/header.liquid").read_text()
-    fine = header.index("            Fine Jewelry")
-    diamonds = header.index("            Diamonds\n")
-    peaceful = header.index("nav__item nav__item--peaceful")
-    maison = header.index("estate_label")
-    timepieces = header.index("            Timepieces\n")
-    wedding = header.index("            Wedding\n")
-    assert fine < diamonds < peaceful < maison < timepieces < wedding
-
-
-def test_timepieces_navigation_includes_jacob_and_co() -> None:
-    header = (ROOT / "sections/header.liquid").read_text()
-    collection = (ROOT / "sections/main-collection.liquid").read_text()
-    jacob_link = 'href="/collections/jacob-co"'
-    assert jacob_link in header
-    assert "Jacob &amp; Co." in header
-    assert jacob_link in collection
-    assert "Jacob &amp; Co." in collection
-    # Keep Jacob with the lead brands so it is not clipped under Other Brands.
-    assert header.index('href="/collections/cartier-watches"') < header.index(jacob_link)
-    assert header.index(jacob_link) < header.index('href="/collections/other-watch-brands"')
-    assert "max-height: 500px" not in header
-    assert collection.index('href="/collections/cartier-watches"') < collection.index(jacob_link)
-
-
-def test_footer_and_search_surface_the_worlds() -> None:
-    footer = (ROOT / "sections/footer.liquid").read_text()
-    assert 'href="/collections/natural-diamonds"' in footer
-    assert 'href="/collections/time-pieces"' in footer
-    assert ">Fine Jewelry<" in footer
-    header = (ROOT / "sections/header.liquid").read_text()
-    assert ">Loose Diamonds<" in header
-    assert ">Peaceful Diamonds<" in header
-    popular = (ROOT / "sections/popular-searches.liquid").read_text()
-    assert "Peaceful Diamonds" in popular
-    assert "Loose Diamonds" in popular
-    assert "Timepieces" in popular
 
 
 def test_new_section_schemas_are_valid_json() -> None:
@@ -246,37 +89,6 @@ def test_related_merchandising_photos_fill_their_frames() -> None:
     assert "object-fit: cover" in image_css
 
 
-def test_hero_copy_names_the_full_assortment() -> None:
-    data = load_json(ROOT / "templates/index.json")
-    sub = data["sections"]["hero"]["settings"]["subheading"].lower()
-    assert "diamond" in sub
-    assert "maison" in sub
-    assert "timepiece" in sub
-    assert data["sections"]["hero"]["settings"]["primary_cta_text"] == "Shop Fine Jewelry"
-    assert data["sections"]["hero"]["settings"]["secondary_cta_url"] == "/collections/natural-diamonds"
-
-
-def test_worlds_cards_use_category_images_and_theme_tones() -> None:
-    worlds = (ROOT / "sections/shop-worlds.liquid").read_text()
-    generated_assets = [
-        "shop-world-loose-diamonds.webp",
-        "shop-world-preowned-maison.webp",
-        "shop-world-preowned-timepieces.webp",
-        "shop-world-fine-jewelry.webp",
-    ]
-    for asset in generated_assets:
-        assert asset in worlds
-        assert (ROOT / "assets" / asset).exists()
-
-    data = load_json(ROOT / "templates/index.json")
-    tones = [
-        data["sections"]["shop-worlds"]["blocks"][block_id]["settings"]["tone"]
-        for block_id in data["sections"]["shop-worlds"]["block_order"]
-    ]
-    assert tones == ["navy", "warm", "warm", "warm", "warm"]
-    warm_css = worlds.split(".lm-worlds__card {")[1].split("}")[0]
-    assert "cream" in warm_css
-    assert "navy-deep" not in warm_css
 
 
 def test_diamond_filter_offers_lab_and_natural_origin() -> None:
@@ -367,3 +179,99 @@ if __name__ == "__main__":
             failed += 1
             print(f"FAIL {test.__name__}: {exc}")
     raise SystemExit(failed)
+
+
+def strip_liquid_comments(text: str) -> str:
+    return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
+
+
+def test_homepage_leads_with_the_self_purchase_edit() -> None:
+    data = load_json(ROOT / "templates/index.json")
+    order = data["order"]
+    assert order[:4] == ["hero", "trust-strip", "first-piece", "build-the-stack"]
+    assert order.index("brand-story") < order.index("estate")
+    assert order.index("estate") < order.index("also-from-the-house")
+    assert data["sections"]["first-piece"]["settings"]["collection"] == "under-2500"
+    for removed in ("testimonials", "closing-cta", "philosophy-quote", "diamond-destination"):
+        assert all(section["type"] != removed for section in data["sections"].values())
+
+
+def test_hero_speaks_to_women_buying_for_themselves() -> None:
+    hero = load_json(ROOT / "templates/index.json")["sections"]["hero"]["settings"]
+    assert hero["layout"] == "split"
+    assert "for yourself" in hero["heading"]
+    assert hero["primary_cta_url"] == "/collections/under-2500"
+    assert (ROOT / "assets" / hero["image_asset"]).exists()
+    liquid = (ROOT / "sections/hero.liquid").read_text()
+    assert "lm-hero--split" in liquid
+
+
+def test_estate_links_use_the_single_estate_hub() -> None:
+    for path in ("sections/header.liquid", "sections/footer.liquid", "templates/index.json", "snippets/breadcrumbs.liquid"):
+        text = (ROOT / path).read_text()
+        assert "/collections/vintage-jewelry" not in text, path
+        assert "estate-jewelry" in text, path
+    for path in ("sections/header.liquid", "sections/footer.liquid", "templates/index.json"):
+        assert "Pre-Owned Maison" not in (ROOT / path).read_text(), path
+
+
+def test_category_links_use_rule_based_collections() -> None:
+    header = (ROOT / "sections/header.liquid").read_text()
+    collection = (ROOT / "sections/main-collection.liquid").read_text()
+    for handle in ("all-earrings", "all-bracelets", "all-pendants"):
+        assert f'href="/collections/{handle}"' in header
+        assert f'href="/collections/{handle}"' in collection
+    for stale in ('href="/collections/earrings"', 'href="/collections/bracelets"', 'href="/collections/pendants-1"'):
+        assert stale not in header
+        assert stale not in collection
+
+
+def test_header_nav_leads_with_price_and_keeps_watches_one_click_away() -> None:
+    header = strip_liquid_comments((ROOT / "sections/header.liquid").read_text())
+    under = header.index('href="/collections/under-2500" class="nav__item-link"')
+    jewelry = header.index("            Jewelry\n")
+    lab = header.index("nav__item nav__item--peaceful")
+    estate = header.index("estate_label")
+    story = header.index('href="/pages/about" class="nav__item-link"')
+    more = header.index("nav__item nav__item--end")
+    assert under < jewelry < lab < estate < story < more
+    more_panel = header[more:]
+    for href in ("/collections/natural-diamonds", "/collections/time-pieces", "/collections/jacob-co", "/collections/engagement-rings", "/blogs/journal"):
+        assert f'href="{href}"' in more_panel
+
+
+def test_all_jewelry_is_a_real_paginated_collection() -> None:
+    liquid = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "jewelry_handles" not in liquid
+    assert "shown_count" not in liquid
+    assert "{%- if paginate.pages > 1 -%}" in liquid
+
+
+def test_watch_pages_get_watch_education() -> None:
+    liquid = (ROOT / "sections/product-education.liquid").read_text()
+    assert "product-is-watch" in liquid
+    assert "watch_point" in liquid
+    template = load_json(ROOT / "templates/product.json")
+    types = [block["type"] for block in template["sections"]["education"]["blocks"].values()]
+    assert types.count("watch_point") == 3
+
+
+def test_storefront_never_names_suppliers() -> None:
+    pattern = re.compile(r"royal.?chain|back.?vault|belgium ?dia\b|robinson'?s jewel|bucherer|exquisite timepieces", re.I)
+    paths = list((ROOT / "sections").glob("*.liquid")) + list((ROOT / "snippets").glob("*.liquid"))
+    paths += list((ROOT / "templates").glob("*.json")) + [ROOT / "layout/theme.liquid", ROOT / "config/settings_data.json"]
+    for path in paths:
+        if path.name == "ebay-default.liquid":
+            continue
+        text = strip_liquid_comments(path.read_text())
+        assert not pattern.search(text), path.name
+
+
+def test_header_menus_work_with_a_keyboard() -> None:
+    header = (ROOT / "sections/header.liquid").read_text()
+    layout = (ROOT / "layout/theme.liquid").read_text()
+    assert '<span class="nav__item-link' not in header
+    assert 'aria-expanded="false" class="nav__item-link' in header
+    assert ".nav__item:focus-within .nav__dropdown" in header
+    assert 'href="#MainContent"' in layout
+

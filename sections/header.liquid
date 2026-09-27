@@ -310,6 +310,29 @@
   visibility: hidden;
 }
 
+/* "More" sits at the right edge: anchor its panel right so it stays on screen. */
+.header .nav__item--end .nav__dropdown {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(10px);
+  white-space: nowrap;
+}
+
+.header .nav__item--end:hover .nav__dropdown,
+.header .nav__item--end:focus-within .nav__dropdown {
+  transform: translateX(0) translateY(0);
+}
+
+.header .nav__dropdown-label {
+  display: block;
+  padding: 0.6rem 1.5rem 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold, #C9A050);
+}
+
 /* The lab-grown category list is both longer and wider than the two links the
    tier used to carry. Centred under a nav item this close to the right edge it
    ran off a 1280px viewport, so this panel anchors to its right edge instead. */
@@ -515,6 +538,15 @@
     left: auto;
   }
 
+  .header .nav__item--end .nav__dropdown,
+  .header .nav__item--end:hover .nav__dropdown {
+    position: static;
+    right: auto;
+    left: auto;
+    transform: none;
+    white-space: normal;
+  }
+
   /* Undo the desktop right-anchoring for the Peaceful Diamonds panel — in the
      drawer it is a static full-width list, and nowrap would scroll it sideways. */
   .header .nav__item--peaceful .nav__dropdown,
@@ -712,6 +744,14 @@
           </button>
         </div>
 
+        {%- comment -%}
+          Price first: most women buying for themselves shop by budget, then
+          by piece. The edit is the under-2500 smart collection.
+        {%- endcomment -%}
+        <div class="nav__item">
+          <a href="/collections/under-2500" class="nav__item-link">Under $2,500</a>
+        </div>
+
         <div class="nav__item">
           <button type="button" aria-expanded="false" class="nav__item-link">
             Jewelry
@@ -719,37 +759,14 @@
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          {%- comment -%}
-            House gold chains sit with the other jewelry types. Style names
-            (Cuban, Rope, etc.) live on the Chains collection filters, not here.
-          {%- endcomment -%}
           <div class="nav__dropdown">
-            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
-            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
-            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/chains" class="nav__dropdown-link">Chains</a>
-            <a href="/collections/pendants-1" class="nav__dropdown-link">Pendants</a>
-            <a href="/collections/bracelets" class="nav__dropdown-link">Bracelets</a>
+            <a href="/collections/chains" class="nav__dropdown-link">Gold Chains</a>
             <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
-          </div>
-        </div>
-
-        {%- comment -%}
-          Loose stones, separate from finished jewelry. Natural sits here;
-          lab-grown lives under Peaceful Diamonds, which is the sub-brand it
-          belongs to.
-        {%- endcomment -%}
-        <div class="nav__item">
-          <button type="button" aria-expanded="false" class="nav__item-link">
-            Diamonds
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown">
-            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
-            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+            <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
+            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
+            <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
+            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
           </div>
         </div>
 
@@ -805,60 +822,40 @@
           </div>
         </div>
 
-        {%- comment -%}
-          Timepieces promoted to top level. Brand links are watch-only smart
-          collections (TYPE = Watch AND VENDOR = x) — do not use the plain
-          vendor collections under Jewelry / Pre-Owned & Estate, which mix in
-          jewelry.
-        {%- endcomment -%}
+
         <div class="nav__item">
+          <a href="/pages/about" class="nav__item-link">Our Story</a>
+        </div>
+
+        {%- comment -%}
+          Loose diamonds, watches, bridal and the journal stay one click away
+          under More. Watch brand links are watch-only smart collections
+          (TYPE = Watch AND VENDOR = x).
+        {%- endcomment -%}
+        <div class="nav__item nav__item--end">
           <button type="button" aria-expanded="false" class="nav__item-link">
-            Timepieces
+            More
             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="nav__dropdown">
+            <span class="nav__dropdown-label">Loose Diamonds</span>
+            <a href="/collections/natural-diamonds" class="nav__dropdown-link">Natural Diamonds</a>
+            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
+            <span class="nav__dropdown-label">Watches</span>
             <a href="/collections/time-pieces" class="nav__dropdown-link">All Timepieces</a>
             <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
             <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
             <a href="/collections/jacob-co" class="nav__dropdown-link">Jacob &amp; Co.</a>
-            <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
-            <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
-          </div>
-        </div>
-
-        <div class="nav__item">
-          <button type="button" aria-expanded="false" class="nav__item-link">
-            Wedding
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown">
+            <a href="/collections/patek-philippe" class="nav__dropdown-link">Patek Philippe</a>
+            <span class="nav__dropdown-label">Bridal</span>
             <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
             <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-            <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">Men's Wedding Bands</a>
             <a href="/pages/ring-builder" class="nav__dropdown-link">Ring Builder</a>
-          </div>
-        </div>
-
-        {%- comment -%}
-          Journal replaces About in the top-level row. Parent goes to the blog
-          index; caret / hover opens tagged topic links (existing tags).
-        {%- endcomment -%}
-        <div class="nav__item">
-          <a href="/blogs/journal" class="nav__item-link">
-            Journal
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </a>
-          <div class="nav__dropdown">
-            <a href="/blogs/journal/tagged/lab-grown-diamonds" class="nav__dropdown-link">Lab-Grown Diamonds</a>
-            <a href="/blogs/journal/tagged/buying-guide" class="nav__dropdown-link">Buying Guides</a>
-            <a href="/blogs/journal/tagged/style" class="nav__dropdown-link">Style</a>
+            <span class="nav__dropdown-label">The House</span>
+            <a href="/blogs/journal" class="nav__dropdown-link">Journal</a>
+            <a href="/pages/private-clients" class="nav__dropdown-link">Private Clients</a>
           </div>
         </div>
 
