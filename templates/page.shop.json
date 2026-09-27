@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -47,7 +56,8 @@
         "trust-2",
         "trust-3",
         "trust-4"
-      ]
+      ],
+      "settings": {}
     },
     "shop-worlds": {
       "type": "shop-worlds",
@@ -55,7 +65,7 @@
         "world-peaceful": {
           "type": "world",
           "settings": {
-            "collection": "peaceful-diamonds-by-laura-milman-new-york",
+            "collection": "lab-grown-diamond-jewelry",
             "title": "Peaceful Diamonds",
             "subtitle": "Certified lab-grown jewelry",
             "tone": "navy"
@@ -156,8 +166,8 @@
       ],
       "settings": {
         "eyebrow": "Shop by Jewelry Type",
-        "view_all_link": "/collections/all",
-        "title": "Rings, Necklaces & More"
+        "title": "Rings, Necklaces & More",
+        "view_all_link": "/collections/all"
       }
     },
     "preowned-maison": {
@@ -211,12 +221,12 @@
       "type": "featured-products",
       "settings": {
         "eyebrow": "The Signature Edit",
+        "title": "Jewelry to Wear This Week",
         "description": "Pieces chosen for women who go from the office to dinner without changing a thing.",
         "collection": "rings",
         "product_count": 8,
         "cta_text": "View All Fine Jewelry",
-        "cta_url": "/collections/all",
-        "title": "Jewelry to Wear This Week"
+        "cta_url": "/collections/all"
       }
     },
     "reviews": {
@@ -236,7 +246,7 @@
         "chip_text": "The Lab-Grown Collection",
         "title": "Peaceful Diamonds",
         "byline": "by Laura Milman New York",
-        "collection": "peaceful-diamonds-by-laura-milman-new-york",
+        "collection": "lab-grown-diamond-jewelry",
         "cta_text": "Shop Lab-Grown"
       }
     },
