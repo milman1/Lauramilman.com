@@ -13,6 +13,84 @@ data was available.
 
 ---
 
+## Status update — 2026-09-27, later the same day
+
+This audit drove a series of theme PRs and admin changes on 2026-09-27,
+recorded in full in `docs/audits/2026-09-27-admin-change-log.md`. The
+findings below are left as originally written (this is a point-in-time
+audit, not a rewritten one); this section tracks what has since changed
+against each finding. ✅ done, 🟡 partly done, ⬜ still open.
+
+### Section 1 — Fix first
+
+| # | Status | What changed |
+|---|---|---|
+| 1 | ✅ | `all-earrings` created (285 active); every link, including the header, repointed; `/collections/earrings` redirects there. |
+| 2 | ✅ | `estate-jewelry` is the one estate hub (808 active), rule now `tag = Estate Jewelry OR backvault-feed OR Pre-Owned`. `vintage-jewelry` and its links are gone from nav, hero, footer and breadcrumbs. |
+| 3 | ✅ | `/collections/all` (1,259 active) uses the collection directly with normal pagination and filters; the 48-item hand-built grid is removed. |
+| 4 | ✅ | `sections/product-education.liquid` has a `watch` mode; Jacob & Co. and other watches no longer show the jewelry heritage claim. |
+| 5 | ✅ | The invented testimonials ("Alexandra K.", "Catherine M.", "Victoria S.") are deleted from every template. A new `client-reviews` section takes only reviews entered word for word from Google and stays hidden until at least one exists, so nothing invented or empty is live. It is currently empty (see GEO item 3 below); the homepage keeps the existing Google reviews widget until real reviews are entered. |
+| 6 | ✅ | Menu parents are `<button aria-expanded>`, open on `:focus-within`, close on Escape; a skip link is in `layout/theme.liquid`. |
+
+### Section 2 — Positioning and messaging
+
+| Finding | Status | What changed |
+|---|---|---|
+| 1. Lab-grown pushed 5x, estate once | 🟡 | The homepage was rebuilt around "gold, then diamonds, then estate": hero leads with gold and diamonds together, a four-tile mosaic gives gold, lab-grown, loose diamonds and estate equal billing, and estate and watches each have their own homepage section. Not literally "two doors in the hero," but the same imbalance is resolved. |
+| 2. Jacob Arabo credential missing from homepage | ✅ | The brand-story section now states it: "working alongside her brother Jacob Arabo in the early years of what became Jacob & Co." `Organization` schema carries Laura as founder (name only, no bio). |
+| 3. One concept, five names | ✅ | Every surface (nav, homepage, collection title) now says "Pre-Owned & Estate". |
+| 4. Peaceful Diamonds sub-brand ambiguity | ⬜ | Unchanged. The nav says "Lab-Grown Jewelry" consistently, but the collection handle and title still read `peaceful-diamonds-by-laura-milman-new-york`. Still needs a merchant decision. |
+| 5. Two competing founder stories | ✅ | `/pages/lauras-story` is unpublished and redirects to `/pages/about`, the one canonical page. |
+| 6. Watch policy used as a trust badge | ✅ | The rebuilt homepage trust strip is 14K Gold · Certified Loose Diamonds · Free Insured Shipping · 7-Day Jewelry Returns; the watch exchange line is gone from it. |
+| 7. `/pages/shop` duplicates the homepage | ✅ | Unpublished, redirects to `/`. |
+| 8. Legacy promotional copy | ✅ | Omega, Chopard, Hermès and Vintage all have fact-only copy now. |
+| 9. Boilerplate "Authenticated by…" suffix | ⬜ | Not reviewed this round. Still needs a pass over every collection's SEO description. |
+| Claims to verify table | ⬜ | Not reviewed this round; still needs the merchant's confirmation of each claim. |
+
+### Section 3 — Layout and UX
+
+| Finding | Status | What changed |
+|---|---|---|
+| Homepage section count and order | 🟡 | Rebuilt twice since this audit (once to the "10-section" shape, then again to the current gold-led v2). The duplicate lab-grown grid and the closing CTA are gone. The homepage is currently 16 sections, not ~10: **new since this audit**, adding the Watches carousel means "Also From the House" now also carries a Pre-Owned Watches tile pointing at the same `time-pieces` collection, a small duplication worth trimming (drop that one tile, or fold Bridal into the Watches section). |
+| Hero background | ✅ | The hero now shows a woman wearing diamond drop earrings, not an abstract texture. |
+| Nav: parents aren't links | 🟡 | Still true (`Gold Chains`, `Lab-Grown Jewelry` etc. are toggle buttons, not links), but every dropdown now ends in a "Shop All X" link, so the landing page is one click away instead of unreachable. |
+| Nav: no top-level route to Private Clients or About | ✅ | Our Story and Private Clients are both top-level items now. |
+| Shopify admin menus stale/unused | ✅ | `main-menu`, `footer-shop`, `footer-about` and `footer-help` all rewritten to match the live site; the broken `/pages/our-story`, `/pages/sustainability`, `/pages/press`, `/pages/size-guide` links are gone. |
+| `header-group.json` ignored settings | ⬜ | Unchanged; harmless but still confusing in the theme editor. |
+| Logo `height="auto"` | ✅ | The header logo now computes a numeric height from the image's aspect ratio. |
+| Collection rule risk (`bracelets`, `necklaces`, `rings`) | 🟡 | `all-bracelets` and `all-pendants` were added as rule-based collections; the legacy manual `bracelets`/`pendants-1` are untouched. `rings` was fixed to match by product type. `necklaces` was not reviewed. |
+| `wedding-bands` / `mens-wedding-bands` imbalance | ⬜ | Not reviewed this round. |
+| David Webb missing a buying-guide link | 🟡 | A "How to Authenticate a Pre-Owned David Webb Piece" Journal guide is drafted (unpublished) and links to `/collections/david-webb`, but `snippets/collection-guide.liquid` was not updated to surface it. |
+| Product handles/titles (`necklace-2`…, "Diamond Snack Pendant") | ⬜ | Not reviewed this round. |
+| Popup / footer accordion keyboard access | ⬜ | Not reviewed this round. |
+
+### Section 4 — Technical SEO
+
+| # | Status | What changed |
+|---|---|---|
+| 1 | ✅ | 955 redirects to `/` deleted; the stale `/collections` and `/collections/engagement-rings` rules removed. Undo list: `docs/audits/2026-09-27-deleted-redirects.csv`. |
+| 2 | ⬜ | Still no favicon. Waiting on the merchant to upload one. |
+| 3 | 🟡 | `Organization` now has founder, the 1185 6th Avenue address, the brand logo and `hasMerchantReturnPolicy`. Telephone, `foundingDate`, the Google Business Profile URL and a `JewelryStore` type are still not added. |
+| 4 | ⬜ | Still needs the merchant to confirm or rename the Google Business Profile. |
+| 5 | ✅ | Product JSON-LD now emits one `Offer` per variant (rather than a single `AggregateOffer`, but the same multi-variant intent), `shippingDetails`, `hasMerchantReturnPolicy` (7-day jewelry, exchange-only watches, none for loose diamonds), `additionalProperty` from the custom and feed metafields, and `mpn` from the reference on watches. |
+| 6 | 🟡 | Article `author` is now typed `Organization` when the byline is the store name, not a fake `Person`. Featured-image alt text is still 0 of 9 (now 0 of 13, counting the four new drafts, which also have no image yet). |
+| 7 | ⬜ | The new `client-reviews` section is crawlable server-rendered text, but it has no reviews in it yet (see GEO item 3). `/pages/google-reviews` itself is unchanged: still a JavaScript-only embed. |
+| 8 | ⬜ | Not reviewed this round. |
+| 9 | ⬜ | Not reviewed this round. |
+
+### Section 5 — GEO / AEO
+
+| # | Status | What changed |
+|---|---|---|
+| 1 | ⬜ | Not written this round. `/pages/about` is now the one canonical founder page, but its copy was not rewritten into short, quotable facts. |
+| 2 | ✅ | Answer-first intros written for the 6 priority collections (David Webb, Cartier, Van Cleef & Arpels, Tiffany, Rolex, Chains) plus 3 new ones (Gold Jewelry, Chain Bracelets, Chain Necklaces). Other collections still carry their prior copy. |
+| 3 | 🟡 | Four guides drafted and sitting **unpublished** in Shopify admin, covering David Webb authentication, Rolex box and papers, gold chain styles/widths, and lab-grown vs natural diamonds — the same ground as SEO plan P12's four guides. The weekly `journal-draft` GitHub Action has failed all 5 runs since 2026-09-11: its Shopify app is missing the `read_content`/`write_content` scopes, so it errors before calling the AI. That is a merchant-side fix (add the scopes in the Partner/Dev Dashboard, then approve). |
+| 4 | ✅ | Same change as section 4, item 5. |
+| 5 | 🟡 | Site nav and admin menus now use one name per line of business ("Pre-Owned & Estate", "Gold Chains", "Lab-Grown Jewelry"). The vendor merge (Laura's Gems / Milman New York), the Google Business Profile name, and the Peaceful Diamonds sub-brand decision are all still open. |
+| 6 | ⬜ | The four new Journal drafts are not yet linked from any collection or PDP education block, and neither are the five existing ones ("lab-grown vs natural", "IGI vs GIA", "box and papers"). Worth doing once the drafts are reviewed and published. |
+
+---
+
 ## 1. Fix first
 
 | # | Finding | Evidence | Impact | Fix |
