@@ -23,9 +23,12 @@
         "estate-3": { "type": "estate_point", "settings": { "title": "Condition, Honestly Graded", "text": "Every piece is condition-graded and photographed as it truly is — wear is described, never hidden." } },
         "heritage-1": { "type": "heritage_point", "settings": { "title": "Designed in New York", "text": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house." } },
         "heritage-2": { "type": "heritage_point", "settings": { "title": "Crafted in Italy", "text": "Master goldsmiths finish each piece by hand — old-world technique, modern precision." } },
-        "heritage-3": { "type": "heritage_point", "settings": { "title": "Made to Be Inherited", "text": "Built for decades of wear, with a 1-year warranty against manufacturing defects." } }
+        "heritage-3": { "type": "heritage_point", "settings": { "title": "Made to Be Inherited", "text": "Built for decades of wear, with a 1-year warranty against manufacturing defects." } },
+        "watch-1": { "type": "watch_point", "settings": { "title": "Reference on Every Listing", "text": "Brand, model and reference number are stated on every watch, with case size and year when the record includes them." } },
+        "watch-2": { "type": "watch_point", "settings": { "title": "Box and Papers, Stated Plainly", "text": "Each listing says whether the original box and papers are included. Missing items are never implied." } },
+        "watch-3": { "type": "watch_point", "settings": { "title": "Exchanges on Watches", "text": "Watches can be exchanged rather than returned for a refund. Every order ships free and fully insured." } }
       },
-      "block_order": ["lab-1", "lab-2", "lab-3", "estate-1", "estate-2", "estate-3", "heritage-1", "heritage-2", "heritage-3"],
+      "block_order": ["lab-1", "lab-2", "lab-3", "estate-1", "estate-2", "estate-3", "heritage-1", "heritage-2", "heritage-3", "watch-1", "watch-2", "watch-3"],
       "settings": {}
     },
     "recommendations": {

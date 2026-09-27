@@ -59,7 +59,7 @@
 
     {%- if section.settings.cta_text != blank -%}
       <div class="lm-maison__footer">
-        <a href="{{ section.settings.cta_url | default: '/collections/vintage-jewelry' }}" class="btn btn--gold">
+        <a href="{{ section.settings.cta_url | default: '/collections/estate-jewelry' }}" class="btn btn--gold">
           {{ section.settings.cta_text }}
         </a>
       </div>
@@ -241,7 +241,7 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "The Pre-Owned Maison"
+      "default": "Pre-Owned & Estate"
     },
     {
       "type": "textarea",
@@ -259,7 +259,7 @@
       "type": "text",
       "id": "cta_text",
       "label": "CTA text",
-      "default": "Explore the Maison Vault"
+      "default": "Shop Pre-Owned & Estate"
     },
     {
       "type": "url",
