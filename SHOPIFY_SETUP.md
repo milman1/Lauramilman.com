@@ -262,8 +262,9 @@ also appear at `/blogs/journal`.
 
 ## 9. Reviews
 
-The homepage and product pages embed the existing Google reviews widget
-(SociableKit id `25387276`) and Shopify Product Reviews (`spr`) when that
+The Google reviews page embeds the SociableKit widget
+(id `25717519`). Homepage testimonials are written in the theme and do not
+sync from Google. Shopify Product Reviews (`spr`) appears on product pages when that
 app is installed. To collect on-site reviews: Shopify Admin → Apps →
 Product Reviews (or Judge.me) → enable. The product template already
 renders `#shopify-product-reviews`.
