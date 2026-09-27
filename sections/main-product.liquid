@@ -76,26 +76,74 @@
     assign description_has_video = true
   endif
 
-  # ── Spec rows from custom.* metafields — empty rows never render ──
-  # Jewelry + watch keys share this list. Blank values are skipped, so a
-  # hoop earring won't show Dial/Bezel and a Rolex won't show Carat Weight.
+  # One Specifications grid for every jewelry product. custom.* wins.
+  # A blank row is filled from facts already written in the title,
+  # description, or tags. Watches stay on their own keys.
+  assign stated_shape = ''
+  assign stated_carat = ''
+  assign stated_metal = ''
+  assign stated_clarity = ''
+  assign stated_color = ''
+  assign stated_style = ''
+  assign stated_length = ''
+  assign stated_prose = ''
+  if is_watch != 'true'
+    capture stated_pack
+      render 'product-stated-specs', product: product
+    endcapture
+    assign stated_pack = stated_pack | strip
+    if stated_pack contains '<!--FACTS:'
+      assign facts = stated_pack | split: '<!--FACTS:' | last | split: '-->' | first
+      assign stated_shape = facts | split: 'shape=' | last | split: '|' | first | strip
+      assign stated_carat = facts | split: 'carat=' | last | split: '|' | first | strip
+      assign stated_metal = facts | split: 'metal=' | last | split: '|' | first | strip
+      assign stated_clarity = facts | split: 'clarity=' | last | split: '|' | first | strip
+      assign stated_color = facts | split: 'color=' | last | split: '|' | first | strip
+      assign stated_style = facts | split: 'style=' | last | split: '|' | first | strip
+      assign stated_length = facts | split: 'length=' | last | split: '|' | first | strip
+      assign stated_prose = facts | split: 'prose=' | last | strip
+    endif
+  endif
+
   assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
     assign mf = product.metafields.custom[def_parts[0]]
+    assign v = ''
     if mf != blank
       assign v = mf.value | strip
-      if v != blank and v != '—' and v != '-'
-        capture spec_rows
-          echo spec_rows
-          echo '<div class="product-spec"><span class="product-spec__label">'
-          echo def_parts[1]
-          echo '</span><span class="product-spec__value">'
-          echo v | escape
-          echo '</span></div>'
-        endcapture
+    endif
+    if v == blank or v == '—' or v == '-'
+      assign v = ''
+      if is_watch != 'true'
+        case def_parts[0]
+          when 'diamond_shape'
+            assign v = stated_shape
+          when 'carat_weight'
+            assign v = stated_carat
+          when 'metal'
+            assign v = stated_metal
+          when 'clarity'
+            assign v = stated_clarity
+          when 'color'
+            assign v = stated_color
+          when 'setting_style'
+            assign v = stated_style
+          when 'length'
+            assign v = stated_length
+        endcase
       endif
+    endif
+    if v != blank
+      capture spec_rows
+        echo spec_rows
+        echo '<div class="product-spec"><span class="product-spec__label">'
+        echo def_parts[1]
+        echo '</span><span class="product-spec__value">'
+        echo v | escape
+        echo '</span></div>'
+      endcapture
     endif
   endfor
 -%}
@@ -374,7 +422,7 @@
                 class="accordion-content rte"
                 id="PdpDescription"
                 {% if spec_rows != blank %}data-strip-duplicate-specs{% endif %}
-              >{{ product.description }}</div>
+              >{%- if stated_prose != blank -%}<p>{{ stated_prose }}</p>{%- else -%}{{ product.description }}{%- endif -%}</div>
               {%- if spec_rows != blank -%}
               <script>
                 (function () {

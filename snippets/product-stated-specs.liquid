@@ -1,0 +1,252 @@
+{%- comment -%}
+  Facts already written on a jewelry product, for the shared Specifications
+  grid. Reads the title, description, and tags. Does not invent a grade,
+  a metal, or a shape. A description that is only those facts
+  ("14K Yellow Gold. 19.07 CT TDW.") also returns a prose sentence.
+
+  One line, parsed by main-product:
+  <!--FACTS:shape=|carat=|metal=|clarity=|color=|style=|length=|prose=-->
+{%- endcomment -%}
+{%- liquid
+  assign nbsp = ' '
+  assign plain = product.description | default: '' | newline_to_br | replace: '<br />', ' ' | replace: '<br/>', ' ' | strip_html | replace: nbsp, ' ' | replace: '&nbsp;', ' ' | replace: '&amp;', '&' | replace: 'Your browser does not support the video tag.', '' | replace: '360° View', '' | strip
+  assign plain_down = plain | downcase | replace: '–', ' ' | replace: '—', ' ' | replace: '|', ' '
+  assign title_down = product.title | downcase | replace: '–', ' ' | replace: '—', ' ' | replace: '|', ' '
+  assign tags_down = product.tags | join: ' ' | downcase
+  assign fact_source = title_down | append: ' ' | append: plain_down | append: ' ' | append: tags_down
+  assign shape_source = ' ' | append: title_down | append: ' ' | append: plain_down | append: ' ' | replace: '-', ' '
+  assign title_style = ' ' | append: title_down | replace: '-', ' ' | append: ' '
+
+  assign lab_piece = false
+  assign lab_source = title_down | append: ' ' | append: tags_down | append: ' ' | append: plain_down
+  if lab_source contains 'lab grown' or lab_source contains 'lab-grown' or lab_source contains 'lab created' or lab_source contains 'lab-created'
+    assign lab_piece = true
+  endif
+
+  assign metal = ''
+  if fact_source contains '14k two-tone' or fact_source contains '14k two tone'
+    assign metal = '14K Two-Tone Gold'
+  elsif fact_source contains '18k two-tone' or fact_source contains '18k two tone'
+    assign metal = '18K Two-Tone Gold'
+  elsif fact_source contains '18k white gold'
+    assign metal = '18K White Gold'
+  elsif fact_source contains '18k yellow gold'
+    assign metal = '18K Yellow Gold'
+  elsif fact_source contains '18k rose gold'
+    assign metal = '18K Rose Gold'
+  elsif fact_source contains '14k white gold'
+    assign metal = '14K White Gold'
+  elsif fact_source contains '14k yellow gold'
+    assign metal = '14K Yellow Gold'
+  elsif fact_source contains '14k rose gold'
+    assign metal = '14K Rose Gold'
+  elsif fact_source contains 'sterling silver'
+    assign metal = 'Sterling Silver'
+  elsif fact_source contains 'platinum'
+    assign metal = 'Platinum'
+  endif
+
+  assign carat = ''
+  assign carat_probe = ''
+  if fact_source contains ' ct tdw'
+    assign carat_probe = fact_source | split: ' ct tdw' | first
+  elsif fact_source contains ' ct '
+    assign carat_probe = fact_source | split: ' ct ' | first
+  elsif fact_source contains ' ct.'
+    assign carat_probe = fact_source | split: ' ct.' | first
+  elsif fact_source contains ' carat'
+    assign carat_probe = fact_source | split: ' carat' | first
+  endif
+  if carat_probe != blank
+    assign carat_words = carat_probe | split: ' '
+    assign carat_raw = carat_words | last | remove: ','
+    assign carat_last = carat_raw | slice: -1, 1
+    if carat_last == '.'
+      assign carat_cut = carat_raw.size | minus: 1
+      assign carat_raw = carat_raw | slice: 0, carat_cut
+    endif
+    assign carat_rest = carat_raw | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9' | remove: '.'
+    if carat_raw != blank and carat_rest == blank
+      assign carat = carat_raw
+    endif
+  endif
+
+  assign shape = ''
+  if shape_source contains ' marquise and pear '
+    assign shape = 'Marquise and Pear'
+  elsif shape_source contains ' marquise shape ' or shape_source contains ' marquise diamond ' or shape_source contains ' marquise cut ' or shape_source contains ' marquise lab '
+    assign shape = 'Marquise'
+  elsif shape_source contains ' pear shape ' or shape_source contains ' pear diamond ' or shape_source contains ' pear cut ' or shape_source contains ' pear lab '
+    assign shape = 'Pear'
+  elsif shape_source contains ' emerald shape ' or shape_source contains ' emerald diamond ' or shape_source contains ' emerald cut ' or shape_source contains ' emerald lab '
+    assign shape = 'Emerald'
+  elsif shape_source contains ' cushion shape ' or shape_source contains ' cushion diamond ' or shape_source contains ' cushion cut ' or shape_source contains ' cushion lab '
+    assign shape = 'Cushion'
+  elsif shape_source contains ' oval shape ' or shape_source contains ' oval diamond ' or shape_source contains ' oval cut ' or shape_source contains ' oval lab '
+    assign shape = 'Oval'
+  elsif shape_source contains ' radiant shape ' or shape_source contains ' radiant diamond ' or shape_source contains ' radiant cut ' or shape_source contains ' radiant lab '
+    assign shape = 'Radiant'
+  elsif shape_source contains ' princess shape ' or shape_source contains ' princess diamond ' or shape_source contains ' princess cut ' or shape_source contains ' princess lab '
+    assign shape = 'Princess'
+  elsif shape_source contains ' asscher shape ' or shape_source contains ' asscher diamond ' or shape_source contains ' asscher cut ' or shape_source contains ' asscher lab '
+    assign shape = 'Asscher'
+  elsif shape_source contains ' round brilliant ' or shape_source contains ' round shape ' or shape_source contains ' round diamond ' or shape_source contains ' round cut ' or shape_source contains ' round lab '
+    assign shape = 'Round'
+  elsif shape_source contains ' heart shape ' or shape_source contains ' heart diamond ' or shape_source contains ' heart cut ' or shape_source contains ' heart lab '
+    assign shape = 'Heart'
+  endif
+
+  assign style = ''
+  if title_style contains ' three stone '
+    assign style = 'Three Stone'
+  elsif title_style contains ' toi et moi '
+    assign style = 'Toi et Moi'
+  elsif title_style contains ' chandelier '
+    assign style = 'Chandelier'
+  elsif title_style contains ' huggie '
+    assign style = 'Huggie'
+  elsif title_style contains ' station '
+    assign style = 'Station'
+  elsif title_style contains ' riviera '
+    assign style = 'Riviera'
+  elsif title_style contains ' tennis '
+    assign style = 'Tennis'
+  elsif title_style contains ' lariat '
+    assign style = 'Lariat'
+  elsif title_style contains ' bangle '
+    assign style = 'Bangle'
+  elsif title_style contains ' pendant '
+    assign style = 'Pendant'
+  elsif title_style contains ' drop '
+    assign style = 'Drop'
+  elsif title_style contains ' stud '
+    assign style = 'Stud'
+  elsif title_style contains ' hoop '
+    assign style = 'Hoop'
+  endif
+
+  assign length = ''
+  if plain_down contains ' inches'
+    assign inch_parts = plain_down | split: ' inches'
+    assign inch_count = inch_parts.size | minus: 1
+    assign length_segment = ''
+    if inch_count == 1
+      assign length_segment = inch_parts | first
+    else
+      for part in inch_parts
+        if part contains 'length'
+          assign length_segment = part
+        endif
+      endfor
+    endif
+    if length_segment != blank
+      assign length_words = length_segment | split: ' '
+      assign length_raw = length_words | last | remove: ','
+      assign length_last = length_raw | slice: -1, 1
+      if length_last == '.'
+        assign length_cut = length_raw.size | minus: 1
+        assign length_raw = length_raw | slice: 0, length_cut
+      endif
+      assign length_rest = length_raw | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9' | remove: '.'
+      if length_raw != blank and length_rest == blank
+        assign length = length_raw | append: ' inches'
+      endif
+    endif
+  endif
+
+  assign color_source = plain_down | append: ' ' | append: tags_down
+  assign color = ''
+  if color_source contains 'e-f color'
+    assign color = 'E-F'
+  elsif color_source contains 'f-g color'
+    assign color = 'F-G'
+  elsif color_source contains 'g-h color'
+    assign color = 'G-H'
+  elsif color_source contains 'd-e color'
+    assign color = 'D-E'
+  elsif color_source contains 'd-f color'
+    assign color = 'D-F'
+  endif
+
+  assign clarity = ''
+  assign clarity_source = ''
+  if plain_down contains ' clarity'
+    assign clarity_source = plain_down
+  elsif tags_down contains ' clarity'
+    assign clarity_source = tags_down
+  endif
+  if clarity_source != blank
+    assign clarity_before = clarity_source | split: ' clarity' | first
+    assign clarity_words = clarity_before | split: ' '
+    assign clarity_raw = clarity_words | last | remove: ',' | remove: '.' | remove: ';'
+    case clarity_raw
+      when 'fl', 'if', 'vvs1', 'vvs2', 'vvs', 'vs1', 'vs2', 'vs', 'si1', 'si2', 'si'
+        assign clarity = clarity_raw | upcase
+    endcase
+  endif
+
+  assign plain_size = plain | size
+  assign fragment = false
+  if plain_down contains 'ct tdw' and plain_size < 160
+    unless product.description contains '<h2' or product.description contains '<h3' or product.description contains 'product-description'
+      assign fragment = true
+    endunless
+  endif
+
+  assign noun = 'piece'
+  assign plural = false
+  assign type_down = product.type | downcase
+  if type_down contains 'earring'
+    assign noun = 'earrings'
+    assign plural = true
+  elsif type_down contains 'ring'
+    assign noun = 'ring'
+  elsif type_down contains 'bracelet'
+    assign noun = 'bracelet'
+  elsif type_down contains 'necklace'
+    assign noun = 'necklace'
+  elsif type_down contains 'pendant'
+    assign noun = 'pendant'
+  endif
+
+  assign stated_sentence = ''
+  if fragment
+    if metal != blank or carat != blank
+      if plural
+        assign stated_sentence = 'These'
+      else
+        assign stated_sentence = 'This'
+      endif
+      if shape != blank
+        assign shape_l = shape | downcase
+        assign stated_sentence = stated_sentence | append: ' ' | append: shape_l
+      endif
+      if lab_piece
+        assign stated_sentence = stated_sentence | append: ' lab-grown diamond'
+      endif
+      if style != blank
+        assign style_l = style | downcase
+        assign stated_sentence = stated_sentence | append: ' ' | append: style_l
+      endif
+      assign stated_sentence = stated_sentence | append: ' ' | append: noun
+      if plural
+        assign stated_sentence = stated_sentence | append: ' are'
+      else
+        assign stated_sentence = stated_sentence | append: ' is'
+      endif
+      if metal != blank
+        assign stated_sentence = stated_sentence | append: ' set in ' | append: metal
+      endif
+      if carat != blank
+        if metal != blank
+          assign stated_sentence = stated_sentence | append: ', '
+        else
+          assign stated_sentence = stated_sentence | append: ' '
+        endif
+        assign stated_sentence = stated_sentence | append: carat | append: ' carats total diamond weight'
+      endif
+      assign stated_sentence = stated_sentence | append: '. Offered by Laura Milman New York.'
+    endif
+  endif
+-%}
+<!--FACTS:shape={{ shape }}|carat={{ carat }}|metal={{ metal }}|clarity={{ clarity }}|color={{ color }}|style={{ style }}|length={{ length }}|prose={{ stated_sentence }}-->

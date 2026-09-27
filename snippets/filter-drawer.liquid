@@ -30,8 +30,13 @@
     assign fd_is_watch = true
   endif
 
+  assign fd_is_designer = false
+  if jf_drawer_handle == 'david-webb' or jf_drawer_handle == 'cartier' or jf_drawer_handle == 'van-cleef-arpels' or jf_drawer_handle == 'bvlgari' or jf_drawer_handle == 'bulgari' or jf_drawer_handle == 'tiffany' or jf_drawer_handle == 'hermes' or jf_drawer_handle == 'chopard'
+    assign fd_is_designer = true
+  endif
+
   assign fd_is_estate = false
-  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned'
+  if jf_drawer_handle == 'vintage-jewelry' or jf_drawer_handle == 'estate' or jf_drawer_handle contains 'pre-owned' or jf_drawer_handle contains 'preowned' or fd_is_designer
     unless fd_is_watch
       assign fd_is_estate = true
     endunless
@@ -81,6 +86,64 @@
 
     {%- comment -%} PD-style Style / Metal / Carat bands for jewelry collections {%- endcomment -%}
     {%- render 'jewelry-style-filters', collection: results -%}
+
+    {%- comment -%}
+      Signed estate and designer collections (Cartier and the other maisons)
+      were showing a thin Diamond Shape list. Offer the piece types actually
+      on the page instead. Client-side, so they never become Shopify params.
+    {%- endcomment -%}
+    {%- if fd_is_estate -%}
+      {%- assign fd_type_seen = '|' -%}
+      {%- capture fd_type_list -%}
+        {%- for product in results.products -%}
+          {%- assign fd_type = product.type | strip -%}
+          {%- if fd_type != blank -%}
+            {%- assign fd_token = fd_type | append: '|' -%}
+            {%- unless fd_type_seen contains fd_token -%}
+              {{- fd_type -}}||
+              {%- assign fd_type_seen = fd_type_seen | append: fd_token -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      {%- assign fd_types = fd_type_list | split: '||' -%}
+      {%- assign fd_type_count = 0 -%}
+      {%- for fd_type in fd_types -%}
+        {%- assign fd_type_clean = fd_type | strip -%}
+        {%- if fd_type_clean != blank -%}
+          {%- assign fd_type_count = fd_type_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if fd_type_count > 1 -%}
+        <div class="refine__group" data-refine-group data-jewelry-filters>
+          <button type="button" class="refine__group-head" aria-expanded="true">
+            <span class="refine__group-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
+              Jewelry Type
+            </span>
+            <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="refine__group-body">
+            <ul class="refine__checks">
+              {%- for fd_type in fd_types -%}
+                {%- assign fd_type_clean = fd_type | strip -%}
+                {%- if fd_type_clean != blank -%}
+                  <li>
+                    <label class="refine-check js-client-filter">
+                      <input type="checkbox" class="js-jf-style" name="jf_type" value="{{ fd_type_clean | escape }}" data-client-filter="type">
+                      <span class="refine-check__box" aria-hidden="true">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </span>
+                      <span class="refine-check__label">{{ fd_type_clean }}</span>
+                    </label>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
 
     {%- for filter in results.filters -%}
       {%- assign flabel = filter.label | downcase -%}
@@ -166,6 +229,8 @@
               </ul>
 
             {%- when 'price_range' -%}
+              {%- assign fd_price_max_display = filter.range_max | money_without_currency | replace: '.00', '' -%}
+              {%- assign fd_price_max_number = fd_price_max_display | remove: ',' -%}
               <div class="refine__price">
                 <div class="refine__price-field">
                   <span class="refine__price-currency">{{ cart.currency.symbol }}</span>
@@ -173,10 +238,10 @@
                     type="number"
                     name="{{ filter.min_value.param_name }}"
                     id="RefinePriceMin"
-                    {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | remove: ',' }}"{% endif %}
+                    {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | remove: ',' | split: '.' | first }}"{% endif %}
                     placeholder="0"
                     min="0"
-                    max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    max="{{ fd_price_max_number }}"
                     inputmode="numeric"
                     aria-label="Minimum price"
                   >
@@ -188,10 +253,10 @@
                     type="number"
                     name="{{ filter.max_value.param_name }}"
                     id="RefinePriceMax"
-                    {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | remove: ',' }}"{% endif %}
-                    placeholder="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | remove: ',' | split: '.' | first }}"{% endif %}
+                    placeholder="{{ fd_price_max_display }}"
                     min="0"
-                    max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                    max="{{ fd_price_max_number }}"
                     inputmode="numeric"
                     aria-label="Maximum price"
                   >
@@ -673,6 +738,11 @@
     margin: 0;
   }
 
+  .refine__price-field input::placeholder {
+    color: var(--text-muted, #8A8070);
+    opacity: 0.65;
+  }
+
   .refine__price-sep {
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.75rem;
@@ -732,5 +802,14 @@
   .refine__apply:hover {
     background: var(--text-dark, #2C1810);
     box-shadow: var(--shadow-md);
+  }
+
+  /* Shopify Inbox sits on the Apply button of this right-hand drawer. */
+  body.refine-open shopify-chat,
+  body.refine-open #dummy-chat-button-iframe,
+  body.refine-open inbox-online-store-chat,
+  body.refine-open #ShopifyChat {
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 </style>

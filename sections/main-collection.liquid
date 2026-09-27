@@ -34,6 +34,18 @@
       assign collection_heading = 'Pre-Owned Rolex Watches'
     when 'lab-grown-bracelets'
       assign collection_heading = 'Lab-Grown Diamond Bracelets'
+    when 'lab-grown-rings'
+      assign collection_heading = 'Lab-Grown Diamond Rings'
+    when 'lab-grown-necklaces'
+      assign collection_heading = 'Lab-Grown Diamond Necklaces'
+    when 'lab-grown-pendants'
+      assign collection_heading = 'Lab-Grown Diamond Pendants'
+    when 'lab-grown-earrings'
+      assign collection_heading = 'Lab-Grown Diamond Earrings'
+    when 'lab-grown-engagement-rings'
+      assign collection_heading = 'Lab-Grown Engagement Rings'
+    when 'lab-grown-diamonds'
+      assign collection_heading = 'Lab-Grown Loose Diamonds'
   endcase
 
   assign collection_intro = ''
@@ -705,6 +717,7 @@
         overlay.classList.add('active');
         drawer.classList.add('active');
       });
+      document.body.classList.add('refine-open');
       document.body.style.overflow = 'hidden';
     }
 
@@ -712,6 +725,7 @@
       if (!drawer) return;
       overlay.classList.remove('active');
       drawer.classList.remove('active');
+      document.body.classList.remove('refine-open');
       document.body.style.overflow = '';
       setTimeout(function () { overlay.hidden = true; }, 300);
     }

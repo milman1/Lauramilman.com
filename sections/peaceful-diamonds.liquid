@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <div class="lm-peaceful__visual">
+    <div class="lm-peaceful__visual" data-pd-slider>
       {%- if section.settings.image != blank -%}
         <img
           src="{{ section.settings.image | image_url: width: 900 }}"
@@ -56,13 +56,50 @@
           loading="lazy"
           decoding="async"
         >
-      {%- elsif pd_collection != blank and pd_collection.products.first.featured_image -%}
-        <img
-          src="{{ pd_collection.products.first.featured_image | image_url: width: 900 }}"
-          alt="{{ section.settings.title | escape }}"
-          loading="lazy"
-          decoding="async"
-        >
+      {%- elsif pd_collection != blank -%}
+        {%- assign pd_slide_count = 0 -%}
+        {%- for product in pd_collection.products limit: 8 -%}
+          {%- if product.featured_image -%}
+            {%- assign pd_slide_count = pd_slide_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- capture pd_slides -%}
+          {%- for product in pd_collection.products limit: 8 -%}
+            {%- if product.featured_image -%}
+              <a class="lm-peaceful__slide" data-pd-slide href="{{ product.url }}">
+                <img
+                  src="{{ product.featured_image | image_url: width: 900 }}"
+                  alt="{{ product.title | escape }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  decoding="async"
+                  draggable="false"
+                >
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if pd_slide_count > 0 -%}
+          <div class="lm-peaceful__track" data-pd-track>
+            {{ pd_slides }}
+          </div>
+          {%- if pd_slide_count > 1 -%}
+            <button type="button" class="lm-peaceful__nav lm-peaceful__nav--prev" data-pd-prev aria-label="Previous piece">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button type="button" class="lm-peaceful__nav lm-peaceful__nav--next" data-pd-next aria-label="Next piece">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="lm-peaceful__dots" role="tablist" aria-label="Lab-grown jewelry pieces">
+              {%- for i in (1..pd_slide_count) -%}
+                <button type="button" class="lm-peaceful__dot{% if forloop.first %} is-active{% endif %}" data-pd-dot aria-label="Show piece {{ i }}"{% if forloop.first %} aria-current="true"{% endif %}></button>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        {%- else -%}
+          <div class="lm-peaceful__visual-placeholder" aria-hidden="true">
+            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+          </div>
+        {%- endif -%}
       {%- else -%}
         <div class="lm-peaceful__visual-placeholder" aria-hidden="true">
           <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
@@ -222,10 +259,82 @@
     background: #2E0C18;
   }
 
+  .lm-peaceful__track {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    height: 100%;
+    transition: transform 0.45s ease;
+  }
+
+  .lm-peaceful__visual > img {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lm-peaceful__slide {
+    flex: 0 0 100%;
+    height: 100%;
+    min-width: 0;
+  }
+
   .lm-peaceful__visual img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    background: #000;
+    user-select: none;
+  }
+
+  .lm-peaceful__nav {
+    position: absolute;
+    top: 46%;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(226, 194, 122, 0.55);
+    background: rgba(30, 17, 9, 0.45);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .lm-peaceful__nav:hover {
+    background: rgba(30, 17, 9, 0.72);
+  }
+
+  .lm-peaceful__nav--prev { left: 0.85rem; }
+  .lm-peaceful__nav--next { right: 0.85rem; }
+
+  .lm-peaceful__dots {
+    position: absolute;
+    right: 1.15rem;
+    bottom: 1.35rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .lm-peaceful__dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+  }
+
+  .lm-peaceful__dot.is-active {
+    background: var(--gold-light, #E2C27A);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lm-peaceful__track { transition: none; }
   }
 
   .lm-peaceful__visual-placeholder {
@@ -271,6 +380,61 @@
     }
   }
 </style>
+
+<script>
+  (function () {
+    document.querySelectorAll('[data-pd-slider]').forEach(function (root) {
+      var track = root.querySelector('[data-pd-track]');
+      var slides = root.querySelectorAll('[data-pd-slide]');
+      if (!track || slides.length < 2) return;
+      var dots = root.querySelectorAll('[data-pd-dot]');
+      var index = 0;
+      var startX = 0;
+      var dragging = false;
+      var swiped = false;
+
+      function go(next) {
+        index = (next + slides.length) % slides.length;
+        track.style.transform = 'translateX(' + (-index * 100) + '%)';
+        dots.forEach(function (dot, i) {
+          var active = i === index;
+          dot.classList.toggle('is-active', active);
+          if (active) dot.setAttribute('aria-current', 'true');
+          else dot.removeAttribute('aria-current');
+        });
+      }
+
+      var prev = root.querySelector('[data-pd-prev]');
+      var nextBtn = root.querySelector('[data-pd-next]');
+      if (prev) prev.addEventListener('click', function () { go(index - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { go(index + 1); });
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () { go(i); });
+      });
+
+      root.addEventListener('pointerdown', function (event) {
+        if (event.target.closest('.lm-peaceful__nav, .lm-peaceful__dot, .lm-peaceful__visual-count')) return;
+        dragging = true;
+        startX = event.clientX;
+      });
+      root.addEventListener('pointerup', function (event) {
+        if (!dragging) return;
+        dragging = false;
+        var delta = event.clientX - startX;
+        if (Math.abs(delta) < 40) return;
+        swiped = true;
+        go(delta < 0 ? index + 1 : index - 1);
+      });
+      root.addEventListener('pointercancel', function () { dragging = false; });
+      root.addEventListener('click', function (event) {
+        if (!swiped) return;
+        swiped = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+    });
+  })();
+</script>
 
 {% schema %}
 {
