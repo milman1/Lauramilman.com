@@ -1,0 +1,379 @@
+{%- comment -%}
+  Laura Milman New York — Client Reviews
+  Branded, crawlable review cards. Each block is one real review copied
+  word for word from the store's Google Business Profile, with the name and
+  date exactly as Google shows them. Never paraphrase or invent a review:
+  the FTC's 2024 rule on fake reviews and testimonials applies.
+
+  The section renders nothing until at least one review has text, so an
+  empty section never shows on the storefront. No review structured data is
+  emitted: Google ignores self-published reviews of the business itself.
+{%- endcomment -%}
+
+{%- liquid
+  assign cr_count = 0
+  for block in section.blocks
+    if block.settings.quote != blank
+      assign cr_count = cr_count | plus: 1
+    endif
+  endfor
+  assign cr_all_url = section.settings.all_url | default: '/pages/google-reviews'
+-%}
+
+{%- if cr_count > 0 -%}
+<section class="lm-cr" aria-labelledby="ClientReviewsTitle-{{ section.id }}">
+  <div class="lm-cr__inner">
+    <header class="lm-cr__head">
+      <div class="lm-cr__intro">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="lm-cr__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="lm-cr__title" id="ClientReviewsTitle-{{ section.id }}">
+          {{- section.settings.title | escape -}}
+          {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+        </h2>
+      </div>
+
+      {%- if section.settings.rating != blank -%}
+        <div class="lm-cr__summary">
+          <span class="lm-cr__score">{{ section.settings.rating | escape }}</span>
+          <span class="lm-cr__summary-meta">
+            <span class="lm-cr__stars" aria-hidden="true">
+              {%- for i in (1..5) -%}
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 .5l2.47 5.01L16 6.26l-4 3.9.94 5.51L8 13.01l-4.94 2.66.94-5.51-4-3.9 5.53-.75z"/></svg>
+              {%- endfor -%}
+            </span>
+            <span class="lm-cr__summary-text">
+              {{ section.settings.rating | escape }} out of 5
+              {%- if section.settings.review_count != blank %} · {{ section.settings.review_count | escape }} reviews{% endif %} on Google
+            </span>
+          </span>
+        </div>
+      {%- endif -%}
+    </header>
+
+    <ul class="lm-cr__list" role="list" id="ClientReviewsList-{{ section.id }}" tabindex="0" aria-label="Client reviews, scroll for more">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.quote != blank -%}
+          {%- assign stars = block.settings.rating | default: 5 -%}
+          <li class="lm-cr__card" {{ block.shopify_attributes }}>
+            <figure>
+              <span class="lm-cr__stars lm-cr__stars--card" role="img" aria-label="{{ stars }} out of 5 stars">
+                {%- for i in (1..5) -%}
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"{% if i > stars %} class="is-empty"{% endif %} aria-hidden="true"><path d="M8 .5l2.47 5.01L16 6.26l-4 3.9.94 5.51L8 13.01l-4.94 2.66.94-5.51-4-3.9 5.53-.75z"/></svg>
+                {%- endfor -%}
+              </span>
+              <blockquote class="lm-cr__quote">{{ block.settings.quote | escape | newline_to_br }}</blockquote>
+              <figcaption class="lm-cr__by">
+                <span class="lm-cr__rule" aria-hidden="true"></span>
+                <span class="lm-cr__name">{{ block.settings.name | escape }}</span>
+                <span class="lm-cr__meta">
+                  {%- if block.settings.date != blank -%}{{ block.settings.date | escape }} · {% endif -%}
+                  Google review
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+    <div class="lm-cr__actions">
+      {%- if cr_count > 3 -%}
+        <div class="lm-cr__nav" data-cr-nav hidden>
+          <button type="button" class="lm-cr__arrow" data-cr-dir="-1" aria-controls="ClientReviewsList-{{ section.id }}" aria-label="Previous reviews">&larr;</button>
+          <button type="button" class="lm-cr__arrow" data-cr-dir="1" aria-controls="ClientReviewsList-{{ section.id }}" aria-label="Next reviews">&rarr;</button>
+        </div>
+      {%- endif -%}
+      <a class="lm-cr__link" href="{{ cr_all_url }}">{{ section.settings.all_text | default: 'Read all reviews' }} &rarr;</a>
+      {%- if section.settings.google_url != blank -%}
+        <a class="lm-cr__link lm-cr__link--quiet" href="{{ section.settings.google_url }}" target="_blank" rel="noopener">Leave a review on Google</a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var list = document.getElementById('ClientReviewsList-{{ section.id }}');
+    var nav = list && list.closest('.lm-cr').querySelector('[data-cr-nav]');
+    if (!nav) return;
+    nav.hidden = false;
+    var buttons = nav.querySelectorAll('[data-cr-dir]');
+    function update() {
+      var max = list.scrollWidth - list.clientWidth - 2;
+      buttons[0].disabled = list.scrollLeft <= 2;
+      buttons[1].disabled = list.scrollLeft >= max;
+    }
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var dir = Number(btn.getAttribute('data-cr-dir'));
+        list.scrollBy({ left: dir * list.clientWidth, behavior: 'smooth' });
+      });
+    });
+    list.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    window.addEventListener('load', update);
+    requestAnimationFrame(update);
+  })();
+</script>
+
+<style>
+  .lm-cr {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(70% 90% at 12% 0%, rgba(201, 160, 80, 0.12) 0%, rgba(201, 160, 80, 0) 60%),
+      var(--espresso, #2C1810);
+    color: var(--cream, #FAF6F0);
+    padding: clamp(4rem, 8vw, 7rem) 0;
+  }
+  .lm-cr__inner {
+    max-width: var(--container-max, 1200px);
+    margin: 0 auto;
+    padding: 0 var(--container-padding, 1.5rem);
+  }
+  .lm-cr__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: clamp(2.25rem, 4vw, 3.5rem);
+  }
+  .lm-cr__eyebrow {
+    margin: 0 0 0.9rem;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+  .lm-cr__title {
+    margin: 0;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+    line-height: 1.04;
+    color: var(--cream, #FAF6F0);
+  }
+  .lm-cr__title em {
+    font-style: italic;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-cr__summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.3rem;
+    border: 1px solid rgba(201, 160, 80, 0.3);
+  }
+  .lm-cr__score {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--gold-light, #E2C27A);
+  }
+  .lm-cr__summary-meta {
+    display: grid;
+    gap: 0.3rem;
+  }
+  .lm-cr__summary-text {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: rgba(250, 246, 240, 0.7);
+  }
+  .lm-cr__stars {
+    display: inline-flex;
+    gap: 3px;
+    color: var(--gold, #C9A050);
+  }
+  .lm-cr__stars .is-empty {
+    opacity: 0.25;
+  }
+  /* A rail of every review: three to a view on desktop, swipe on phones. */
+  .lm-cr__list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 2.5rem) / 3);
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    outline-offset: 4px;
+  }
+  .lm-cr__list::-webkit-scrollbar {
+    display: none;
+  }
+  .lm-cr__card {
+    scroll-snap-align: start;
+  }
+  .lm-cr__nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: auto;
+  }
+  .lm-cr__nav[hidden] {
+    display: none;
+  }
+  .lm-cr__arrow {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(201, 160, 80, 0.45);
+    background: none;
+    color: var(--gold-light, #E2C27A);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.25s ease, opacity 0.25s ease;
+  }
+  .lm-cr__arrow:hover:not(:disabled),
+  .lm-cr__arrow:focus-visible {
+    background: rgba(201, 160, 80, 0.12);
+  }
+  .lm-cr__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .lm-cr__card {
+    display: flex;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(201, 160, 80, 0.16);
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+  .lm-cr__card:hover {
+    border-color: rgba(201, 160, 80, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .lm-cr__card figure {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: clamp(1.75rem, 3vw, 2.4rem) clamp(1.5rem, 2.6vw, 2rem);
+  }
+  .lm-cr__stars--card {
+    margin-bottom: 1.4rem;
+  }
+  .lm-cr__quote {
+    flex: 1;
+    margin: 0 0 1.75rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--cream, #FAF6F0);
+  }
+  .lm-cr__quote::before {
+    content: "\201C";
+    display: block;
+    height: 1.6rem;
+    font-size: 3.4rem;
+    line-height: 1;
+    font-style: normal;
+    color: var(--gold, #C9A050);
+  }
+  .lm-cr__by {
+    display: grid;
+    gap: 0.3rem;
+  }
+  .lm-cr__rule {
+    width: 36px;
+    height: 1px;
+    margin-bottom: 0.9rem;
+    background: var(--gold, #C9A050);
+    opacity: 0.5;
+  }
+  .lm-cr__name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--cream, #FAF6F0);
+  }
+  .lm-cr__meta {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A050);
+  }
+  .lm-cr__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  .lm-cr__link {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-light, #E2C27A);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(226, 194, 122, 0.45);
+    padding-bottom: 0.3rem;
+  }
+  .lm-cr__link:hover,
+  .lm-cr__link:focus-visible {
+    border-bottom-color: var(--gold-light, #E2C27A);
+  }
+  .lm-cr__link--quiet {
+    color: rgba(250, 246, 240, 0.7);
+    border-bottom-color: rgba(250, 246, 240, 0.25);
+  }
+  @media (max-width: 989px) {
+    .lm-cr__list {
+      grid-auto-columns: 82%;
+      scroll-padding-inline: var(--container-padding, 1.5rem);
+      margin: 0 calc(var(--container-padding, 1.5rem) * -1);
+      padding: 0 var(--container-padding, 1.5rem) 0.5rem;
+    }
+    .lm-cr__nav {
+      display: none;
+    }
+  }
+  @media (min-width: 600px) and (max-width: 989px) {
+    .lm-cr__list {
+      grid-auto-columns: calc((100% - 1.25rem) / 2);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lm-cr__card { transition: none; }
+  }
+</style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Client Reviews",
+  "tag": "section",
+  "class": "section-client-reviews",
+  "settings": [
+    { "type": "paragraph", "content": "Copy each review word for word from Google, with the name and date as Google shows them. Add as many as you like; they scroll three at a time. The section stays hidden until one review has text." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "From Google" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "What clients" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading ending in italic gold", "default": "say" },
+    { "type": "text", "id": "rating", "label": "Google rating", "info": "As shown on your Google Business Profile, e.g. 4.9. Leave blank to hide the rating box." },
+    { "type": "text", "id": "review_count", "label": "Number of Google reviews", "info": "As shown on Google, e.g. 48" },
+    { "type": "url", "id": "all_url", "label": "All reviews link", "default": "/pages/google-reviews" },
+    { "type": "text", "id": "all_text", "label": "All reviews link text", "default": "Read all reviews" },
+    { "type": "url", "id": "google_url", "label": "Google review link", "info": "Your Google Business Profile \"Ask for reviews\" link" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "limit": 50,
+      "settings": [
+        { "type": "textarea", "id": "quote", "label": "Review text (word for word)" },
+        { "type": "text", "id": "name", "label": "Name as shown on Google", "info": "First name and last initial, e.g. Sarah M." },
+        { "type": "text", "id": "date", "label": "Date", "info": "e.g. March 2026" },
+        { "type": "range", "id": "rating", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Client Reviews" }]
+}
+{% endschema %}

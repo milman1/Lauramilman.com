@@ -341,3 +341,33 @@ def test_organization_schema_names_the_founder_and_address() -> None:
     assert "shop.brand.logo" in layout
     article = (ROOT / "sections/main-article.liquid").read_text()
     assert "article.author == shop.name" in article
+
+
+def test_reviews_are_branded_cards_of_real_reviews_only() -> None:
+    sections = load_json(ROOT / "templates/index.json")["sections"]
+    branded = sections["client-reviews"]
+    assert branded["type"] == "client-reviews"
+    has_widget = any(s["type"] == "google-reviews-strip" for s in sections.values())
+    # The Google widget stays until real reviews are entered, then goes: never
+    # both, never neither.
+    assert has_widget != bool(branded.get("block_order"))
+    liquid = (ROOT / "sections/client-reviews.liquid").read_text()
+    # Hidden until a real review is entered; no third-party widget on the homepage.
+    assert "{%- if cr_count > 0 -%}" in liquid
+    assert "sociablekit" not in liquid
+    assert not (ROOT / "sections/testimonials.liquid").exists()
+    for path in ("templates/index.json", "templates/page.shop.json"):
+        text = (ROOT / path).read_text()
+        for invented in ("Alexandra K.", "Catherine M.", "Victoria S."):
+            assert invented not in text, (path, invented)
+
+
+def test_lab_grown_rail_mixes_categories_in_a_carousel() -> None:
+    lab = load_json(ROOT / "templates/index.json")["sections"]["lab-grown"]
+    assert lab["settings"]["layout"] == "carousel"
+    sources = [b["settings"]["collection"] for b in lab["blocks"].values() if b["type"] == "source"]
+    for handle in ("lab-grown-earrings", "lab-grown-bracelets", "lab-grown-necklaces", "lab-grown-rings"):
+        assert handle in sources
+    liquid = (ROOT / "sections/featured-products.liquid").read_text()
+    assert "block.settings.collection.products[i]" in liquid
+    assert "fp_seen contains fp_key" in liquid
