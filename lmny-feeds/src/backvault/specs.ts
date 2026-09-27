@@ -17,6 +17,10 @@ const DIAMOND_WEIGHT_PATTERN = /\b(\d+(?:\.\d+)?)\s*(?:cttw|ctw|cts|ct|carats?)\
 
 const MEASUREMENTS_PATTERN = /\b(\d+(?:\.\d+)?\s?(?:x|×)\s?\d+(?:\.\d+)?(?:\s?(?:x|×)\s?\d+(?:\.\d+)?)?\s?mm)\b|\b(\d+(?:\.\d+)?\s?(?:inches|in\.|"))\b|\bsize\s+(\d+(?:\.\d+)?)\b/i;
 
+// Supplier prose sometimes misspells "wrist". Keep the fit qualifier so a
+// bracelet circumference is not displayed as an unlabeled dimension.
+const WRIST_SIZE_PATTERN = /\b(?:wrist|writs)\s+size\s*:?\s*(\d+(?:\.\d+)?\s*(?:inches|inch|in\.|"))/i;
+
 const ERA_PATTERN =
   /\b(art\s*deco|art\s*nouveau|victorian|edwardian|georgian|retro|mid[\s-]?century|belle\s*epoque|vintage|antique|contemporary|modern)\b|\bc(?:irca)?\.?\s*(19\d{2}|20\d{2})s?\b/i;
 
@@ -83,8 +87,13 @@ export function extractSpecs(title: string, bodyHtml: string | undefined): Extra
   }
 
   if (!specs.measurements) {
-    const measurements = text.match(MEASUREMENTS_PATTERN);
-    if (measurements) specs.measurements = (measurements[1] ?? measurements[2] ?? measurements[3])?.trim();
+    const wristSize = text.match(WRIST_SIZE_PATTERN);
+    if (wristSize) {
+      specs.measurements = `Wrist size ${wristSize[1]!.trim()}`;
+    } else {
+      const measurements = text.match(MEASUREMENTS_PATTERN);
+      if (measurements) specs.measurements = (measurements[1] ?? measurements[2] ?? measurements[3])?.trim();
+    }
   }
 
   if (!specs.era) {

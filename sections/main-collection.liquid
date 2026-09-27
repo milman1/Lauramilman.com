@@ -159,7 +159,7 @@
       </span>
 
       <div class="lm-collection__controls">
-        <button type="button" class="lm-collection__filter-btn" id="RefineOpen" aria-haspopup="dialog">
+        <button type="button" class="lm-collection__filter-btn" id="RefineOpen" aria-haspopup="dialog" aria-controls="RefineDrawer" aria-expanded="false">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter &amp; Sort
         </button>
@@ -300,10 +300,10 @@
 
   .lm-collection__desc {
     font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.92rem;
-    font-weight: 300;
+    font-size: 1rem;
+    font-weight: 400;
     line-height: 1.75;
-    color: var(--text-muted, #8A8070);
+    color: #6A5D50;
   }
 
   .lm-collection__desc p {
@@ -674,32 +674,71 @@
     var allCards = productsGrid ? Array.from(productsGrid.querySelectorAll('.product-card')) : [];
     var totalOnPage = allCards.length;
     var hasJewelryFilters = !!document.querySelector('[data-jewelry-filters]');
+    var drawerCloseTimer;
 
     function openDrawer() {
-      if (!drawer) return;
+      if (!drawer || !overlay) return;
+      clearTimeout(drawerCloseTimer);
+      drawer.hidden = false;
+      drawer.inert = false;
+      drawer.removeAttribute('aria-hidden');
       overlay.hidden = false;
       requestAnimationFrame(function () {
         overlay.classList.add('active');
         drawer.classList.add('active');
+        if (closeBtn) closeBtn.focus();
       });
+      if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
       document.body.classList.add('refine-open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeDrawer() {
-      if (!drawer) return;
+      if (!drawer || drawer.hidden) return;
+      if (openBtn) {
+        openBtn.setAttribute('aria-expanded', 'false');
+        openBtn.focus();
+      }
+      drawer.inert = true;
+      drawer.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('active');
       drawer.classList.remove('active');
       document.body.classList.remove('refine-open');
       document.body.style.overflow = '';
-      setTimeout(function () { overlay.hidden = true; }, 300);
+      clearTimeout(drawerCloseTimer);
+      drawerCloseTimer = setTimeout(function () {
+        if (!drawer.classList.contains('active')) {
+          drawer.hidden = true;
+          overlay.hidden = true;
+        }
+      }, 350);
     }
 
     if (openBtn) openBtn.addEventListener('click', openDrawer);
     if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
     if (overlay) overlay.addEventListener('click', closeDrawer);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && drawer && drawer.classList.contains('active')) closeDrawer();
+      if (!drawer || !drawer.classList.contains('active')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDrawer();
+      } else if (e.key === 'Tab') {
+        var focusable = Array.from(drawer.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+          .filter(function (el) { return !el.disabled && el.getClientRects().length > 0; });
+        if (!focusable.length) {
+          e.preventDefault();
+          return;
+        }
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     });
 
     // Collapsible groups
