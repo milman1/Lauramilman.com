@@ -1,0 +1,15 @@
+{%- comment -%}
+  Section image: an uploaded image when one is picked, otherwise a theme
+  asset by filename. Params: img, asset, alt, sizes, loading ('lazy' by
+  default), fetchpriority (optional).
+{%- endcomment -%}
+{%- assign lmh_loading = loading | default: 'lazy' -%}
+{%- if img != blank -%}
+  {%- if fetchpriority != blank -%}
+    {{ img | image_url: width: 1600 | image_tag: widths: '480, 720, 960, 1280, 1600', sizes: sizes, alt: alt, loading: lmh_loading, fetchpriority: fetchpriority }}
+  {%- else -%}
+    {{ img | image_url: width: 1600 | image_tag: widths: '480, 720, 960, 1280, 1600', sizes: sizes, alt: alt, loading: lmh_loading }}
+  {%- endif -%}
+{%- elsif asset != blank -%}
+  <img src="{{ asset | asset_url }}" alt="{{ alt | escape }}" loading="{{ lmh_loading }}"{% if fetchpriority != blank %} fetchpriority="{{ fetchpriority }}"{% endif %} decoding="async">
+{%- endif -%}

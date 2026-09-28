@@ -1,986 +1,727 @@
 {%- comment -%}
-  Laura Milman New York - Header Section
-  Dark glass effect header with dropdown mega menus
+  Laura Milman New York - Header
+  Built from the approved preview: an espresso announcement line, then a
+  cream bar with appointment links at left, the centered wordmark and the
+  icons at right, and the four pillars on a second row. Each pillar opens a
+  full-width panel. Below 1200px the bar is burger / wordmark / icons and
+  the pillars live in a full-screen cream drawer.
+
+  The header is fixed. The announcement line slides up once the page
+  scrolls, so only the bar stays on screen. --header-height is the visible
+  bar; the body reserves the bar plus the announcement line.
 {%- endcomment -%}
 
 <style>
+:root {
+  --lmhh-announce: {% if section.settings.announce_text != blank %}40px{% else %}0px{% endif %};
+  --header-height: 112px;
+}
+@media (max-width: 1199px) {
+  :root {
+    --lmhh-announce: {% if section.settings.announce_text != blank %}36px{% else %}0px{% endif %};
+    --header-height: 60px;
+  }
+}
+body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important; }
+
 .header {
+  --lmhh-cream: #FAF6F0;
+  --lmhh-ivory: #FDFAF6;
+  --lmhh-line: #DDD5C5;
+  --lmhh-espresso: #1E1109;
+  --lmhh-ink: #2C1810;
+  --lmhh-body: #4A3D30;
+  --lmhh-muted: #6B6152;
+  --lmhh-bronze: #7A5C22;
+  --lmhh-gold: #C9A050;
+  --lmhh-gold-light: #E2C27A;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  background: rgba(30, 17, 9, 0.98);
-  /* theme.css section 5 still sets a light 1px rule, which shows as a pale
-     hairline under the dark bar and makes the header 1px taller than the token. */
-  border-bottom: none;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--lmhh-cream);
+  border-bottom: 1px solid var(--lmhh-line);
+  font-family: Montserrat, 'Helvetica Neue', Helvetica, sans-serif;
+  color: var(--lmhh-ink);
+  transition: top 0.3s ease, box-shadow 0.3s ease;
 }
-
 .header--scrolled {
-  background: rgba(30, 17, 9, 0.98);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  top: calc(-1 * var(--lmhh-announce));
+  box-shadow: 0 6px 24px rgba(30, 17, 9, 0.08);
 }
+/* theme.css blurs the scrolled bar; a filter would trap the fixed drawer. */
+.header, .header--scrolled { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.header--nav-open { top: 0; }
+.header a { color: inherit; }
 
-.header .container {
-  /* Nav has 7 top-level labels — use the full bar width instead of the page
-     container (1320) so logo / links / icons can breathe. Chains lives inside
-     the Jewelry panel rather than adding an eighth top-level label. */
-  max-width: none;
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 2.2vw, 2.5rem);
-}
-
-/* --header-height is the single source of truth: body reserves exactly this
-   much, so the bar must be exactly this tall. Do not add vertical padding. */
-.header__inner {
+/* ---------- announcement line ---------- */
+.lmhh__announce {
+  height: var(--lmhh-announce);
+  background: var(--lmhh-espresso);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  height: var(--header-height);
-}
-
-.header .logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.75rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-weight: 500;
-  color: #ffffff;
-  text-decoration: none;
-  letter-spacing: 0.02em;
-  transition: opacity 0.3s ease;
-  position: relative;
-  z-index: 1;
-}
-
-.header .logo:hover {
-  opacity: 0.8;
-}
-
-.header .logo span {
-  color: var(--gold-light, #E2C27A);
-  font-style: italic;
-}
-
-.header .logo img {
-  height: 70px;
-  max-height: calc(var(--header-height) - 16px);
-  width: auto;
-  object-fit: contain;
-}
-
-.header .nav {
-  display: flex;
-  align-items: center;
-  /* Fluid gap: tight on mid desktops, roomier on wide screens. */
-  gap: clamp(0.55rem, 1.05vw, 1.35rem);
-  flex: 1 1 auto;
   justify-content: center;
-  min-width: 0;
-}
-
-.header .nav__link {
-  font-size: 0.72rem;
+  gap: 28px;
+  padding: 0 16px;
+  font-size: 11px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.5rem 0;
-  position: relative;
-  transition: color 0.3s ease;
+  color: var(--lmhh-cream);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.lmhh__announce a {
+  color: var(--lmhh-gold-light) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lmhh__announce-dot { width: 4px; height: 4px; background: var(--lmhh-gold); transform: rotate(45deg); flex-shrink: 0; }
+.lmhh__announce-short { display: none; }
+
+/* ---------- bar ---------- */
+.lmhh__bar {
+  height: 64px;
+  padding: 0 clamp(16px, 4.44vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+}
+.lmhh__util {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lmhh__util a { text-decoration: none; white-space: nowrap; }
+.lmhh__util a:hover { color: var(--lmhh-bronze); }
+
+.lmhh__logo {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
   white-space: nowrap;
 }
-
-.header .nav__link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--gold, #C9A050);
-  transition: width 0.3s ease;
+.lmhh__word {
+  font-family: 'Cormorant Garamond', Garamond, 'Times New Roman', serif;
+  font-size: 31px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--lmhh-espresso);
 }
-
-.header .nav__link:hover {
-  color: var(--gold-light, #E2C27A);
-}
-
-.header .nav__link:hover::after,
-.header .nav__link--active::after {
-  width: 100%;
-}
-
-.header .nav__link--active {
-  color: var(--gold-light, #E2C27A);
-}
-
-/* Lab-grown nav entry uses the house gold, same as the rest of the bar. */
-.header .nav__link--peaceful {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.header .nav__link--peaceful::after {
-  background: var(--gold, #C9A050);
-}
-
-.header .nav__link--peaceful:hover {
-  color: var(--gold-light, #E2C27A);
-}
-
-.header .nav__item--peaceful .nav__item-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.header .nav__item--peaceful .nav__item-link::after {
-  background: var(--gold, #C9A050);
-}
-
-.header .nav__item--peaceful:hover .nav__item-link,
-.header .nav__item--peaceful .nav__item-link:hover {
-  color: var(--gold-light, #E2C27A);
-}
-
-.header .nav__item--peaceful .nav__dropdown-link:hover {
-  color: var(--gold-light, #E2C27A);
-}
-
-.header .nav__item--peaceful .nav__dropdown-link:hover::before {
-  background: var(--gold, #C9A050);
-}
-
-.header .nav__peaceful-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold, #C9A050);
-  box-shadow: 0 0 6px rgba(201, 160, 80, 0.8);
-  flex-shrink: 0;
+.lmhh__word em { font-style: italic; color: var(--lmhh-bronze); }
+.lmhh__city {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  padding-left: 0.42em;
+  text-transform: uppercase;
+  color: var(--lmhh-muted);
 }
 
 .header .nav__icons {
+  justify-self: end;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
+  gap: 8px;
 }
-
 .header .nav__icon {
-  color: rgba(255, 255, 255, 0.9);
-  transition: color 0.3s ease, transform 0.3s ease;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.header .nav__icon:hover {
-  color: var(--gold-light, #E2C27A);
-  transform: translateY(-2px);
-}
-
-.header .nav__icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.header .cart-icon {
-  position: relative;
-}
-
-.header .cart-count {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  background: var(--gold, #C9A050);
-  color: #1E1109;
-  font-size: 0.65rem;
-  font-weight: 600;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Dropdown Menu */
-.header .nav__item {
-  position: relative;
-}
-
-.header button.nav__item-link {
   background: none;
   border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--lmhh-ink);
+  transition: color 0.2s ease;
+}
+.header .nav__icon:hover { color: var(--lmhh-bronze); }
+.header .nav__icon svg { width: 18px; height: 18px; }
+.header .cart-icon { position: relative; }
+.header .cart-count {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--lmhh-gold);
+  color: var(--lmhh-espresso);
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header .mobile-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--lmhh-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- pillars ---------- */
+.header .nav {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 3.05vw, 44px);
+}
+.header .nav__item { position: static; }
+.header .nav__item-link {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 2px 0 0;
   margin: 0;
   font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lmhh-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
-
-.header .nav__item-link {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.5rem 0;
-  position: relative;
-  transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  white-space: nowrap;
+.header .nav__item-link .dropdown-arrow { width: 9px; height: 6px; transition: transform 0.2s ease; }
+.header .nav__item:hover > .nav__item-link,
+.header .nav__item:focus-within > .nav__item-link,
+.header .nav__item-link[aria-expanded="true"] {
+  color: var(--lmhh-bronze);
+  border-bottom-color: var(--lmhh-gold);
+  font-weight: 600;
 }
+.header .nav__item:hover .dropdown-arrow { transform: rotate(180deg); }
+.header .nav__link--account,
+.header .lmhh__mextra,
+.header .lmhh__mnote,
+.header .lmhh__msearch,
+.header .nav__mobile-header { display: none; }
 
-.header .nav__item-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--gold, #C9A050);
-  transition: width 0.3s ease;
-}
-
-.header .nav__item:hover .nav__item-link,
-.header .nav__item-link:hover {
-  color: var(--gold-light, #E2C27A);
-}
-
-.header .nav__item:hover .nav__item-link::after {
-  width: 100%;
-}
-
-.header .nav__item-link .dropdown-arrow {
-  width: 10px;
-  height: 10px;
-  transition: transform 0.3s ease;
-}
-
-.header .nav__item:hover .dropdown-arrow {
-  transform: rotate(180deg);
-}
-
+/* ---------- full-width panel ---------- */
 .header .nav__dropdown {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  min-width: 220px;
-  background: rgba(30, 17, 9, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 160, 80, 0.15);
-  border-radius: 8px;
-  padding: 0.75rem 0;
+  left: 0;
+  right: 0;
+  padding: 44px clamp(24px, 8.33vw, 120px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 1.25fr 300px;
+  gap: 40px;
+  background: var(--lmhh-ivory);
+  border-top: 1px solid var(--lmhh-line);
+  border-bottom: 1px solid var(--lmhh-line);
+  box-shadow: 0 24px 40px rgba(30, 17, 9, 0.14);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
   z-index: 1001;
-  /* Keep every brand visible; do not cap height so Jacob & Co. is not
-     clipped below the fold on short laptops. */
-  overflow: visible;
 }
-
 .header .nav__item:hover .nav__dropdown,
 .header .nav__item:focus-within .nav__dropdown {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  transform: none;
 }
+.header .nav__item[data-dismissed] > .nav__dropdown { opacity: 0; visibility: hidden; }
 
-/* Escape closes a keyboard-opened menu until focus or the pointer leaves it. */
-.header .nav__item[data-dismissed] .nav__dropdown {
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* "More" sits at the right edge: anchor its panel right so it stays on screen. */
-.header .nav__item--end .nav__dropdown {
-  left: auto;
-  right: 0;
-  transform: translateX(0) translateY(10px);
-  white-space: nowrap;
-}
-
-.header .nav__item--end:hover .nav__dropdown,
-.header .nav__item--end:focus-within .nav__dropdown {
-  transform: translateX(0) translateY(0);
-}
-
+.header .nav__group { display: flex; flex-direction: column; gap: 13px; font-size: 14px; min-width: 0; }
 .header .nav__dropdown-label {
-  display: block;
-  padding: 0.6rem 1.5rem 0.2rem;
-  font-size: 0.6rem;
+  margin-bottom: 4px;
+  font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold, #C9A050);
+  color: var(--lmhh-bronze);
 }
+.header .nav__dropdown-link { color: var(--lmhh-ink); text-decoration: none; line-height: 1.3; }
+.header .nav__dropdown-link:hover { color: var(--lmhh-bronze); }
+.header .nav__dropdown-link--all { margin-top: 6px; color: var(--lmhh-espresso); font-weight: 600; }
 
-.header .nav__dropdown-label ~ .nav__dropdown-label {
-  margin-top: 0.4rem;
-}
-
-.header .nav__dropdown-link--all {
-  margin-top: 0.35rem;
-  border-top: 1px solid rgba(201, 160, 80, 0.25);
-  font-weight: 600;
-}
-
-/* The lab-grown category list is both longer and wider than the two links the
-   tier used to carry. Centred under a nav item this close to the right edge it
-   ran off a 1280px viewport, so this panel anchors to its right edge instead. */
-.header .nav__item--peaceful .nav__dropdown {
-  left: auto;
-  right: 0;
-  transform: translateX(0) translateY(10px);
-  white-space: nowrap;
-}
-
-.header .nav__item--peaceful:hover .nav__dropdown,
-.header .nav__item--peaceful:focus-within .nav__dropdown {
-  transform: translateX(0) translateY(0);
-}
-
-.header .nav__dropdown-link {
-  display: block;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.header .nav__dropdown-link::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  background: var(--gold, #C9A050);
-  transition: height 0.2s ease;
-}
-
-.header .nav__dropdown-link:hover {
-  color: var(--gold-light, #E2C27A);
-  background: rgba(201, 160, 80, 0.08);
-  padding-left: 1.75rem;
-}
-
-.header .nav__dropdown-link:hover::before {
-  height: 60%;
-}
-
-/* Mobile Toggle */
-.header .mobile-toggle {
-  display: none;
+.header .nav__intro {
+  display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 12px;
-  min-width: 48px;
-  min-height: 48px;
+  gap: 14px;
+  padding-left: 32px;
+  border-left: 1px solid var(--lmhh-line);
+}
+.header .nav__intro p.nav__intro-line {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Garamond, serif;
+  font-size: 21px;
+  line-height: 1.35;
+  color: var(--lmhh-espresso);
+}
+.header .nav__intro p { margin: 0; font-size: 13px; line-height: 1.65; color: var(--lmhh-body); }
+.header .nav__arrow {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1003;
-  position: relative;
-  -webkit-tap-highlight-color: transparent;
+  gap: 8px;
+  color: var(--lmhh-bronze) !important;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.header .nav__card { display: flex; flex-direction: column; gap: 14px; text-decoration: none; }
+.header .nav__card img { width: 100%; aspect-ratio: 300 / 236; object-fit: cover; display: block; }
+.header .nav__card-title { font-family: 'Cormorant Garamond', Garamond, serif; font-size: 22px; font-weight: 500; color: var(--lmhh-espresso); }
+.header .nav__card-text { font-size: 12.5px; line-height: 1.55; color: var(--lmhh-muted); }
+
+.header .nav-overlay { display: none; }
+
+/* Narrow desktops: drop the photo card so the link columns keep their width. */
+@media (min-width: 1200px) and (max-width: 1379px) {
+  .header .nav__dropdown { grid-template-columns: repeat(3, minmax(0, 1fr)) 1.3fr; gap: 32px; }
+  .header .nav__card { display: none; }
 }
 
-.header .mobile-toggle span {
-  width: 24px;
-  height: 2px;
-  background: #ffffff;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.header .mobile-toggle.active span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.header .mobile-toggle.active span:nth-child(2) {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-.header .mobile-toggle.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-/* Mobile Menu Overlay */
-.header .nav-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1001;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.header .nav-overlay.active {
-  display: block;
-  opacity: 1;
-}
-
-/* Desktop nav only when there is room for logo + 7 labels + icons.
-   Below this, use the drawer so items never collide with the wordmark. */
+/* =============================================================
+   Below 1200px: burger / wordmark / icons, full-screen drawer
+   ============================================================= */
 @media (max-width: 1199px) {
+  .lmhh__announce { gap: 10px; font-size: 9.5px; letter-spacing: 0.14em; }
+  .lmhh__announce-dot, .lmhh__announce-long { display: none; }
+  .lmhh__announce-short { display: inline; }
+
+  .lmhh__bar { height: 60px; padding: 0 8px; grid-template-columns: 88px minmax(0, 1fr) 88px; }
+  .lmhh__util { display: none; }
+  .header .mobile-toggle { display: flex; grid-column: 1; grid-row: 1; }
+  .lmhh__logo { grid-column: 2; grid-row: 1; gap: 2px; }
+  .lmhh__word { font-size: 24px; }
+  .lmhh__city { font-size: 7px; }
+  .header .nav__icons { grid-column: 3; grid-row: 1; gap: 0; }
+  .header .nav__icon--account { display: none; }
+
   .header .nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
+    inset: 0;
     height: 100vh;
     height: 100dvh;
-    background: rgba(30, 17, 9, 0.99);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    z-index: 1002;
+    display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding-top: 20px;
     gap: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    transform: translateX(100%);
-    opacity: 0;
-    padding-left: 24px;
-    padding-right: 24px;
-    padding-bottom: 2rem;
+    padding: 0 0 24px;
+    background: var(--lmhh-cream);
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    z-index: 1002;
-    display: flex;
-  }
-
-  .header .nav.nav--open {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  .header .nav__link {
-    font-size: 1.1rem;
-    font-weight: 500;
-    padding: 1rem 0;
-    width: 100%;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    letter-spacing: 0.05em;
-  }
-
-  .header .nav__item {
-    width: 100%;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .header .nav__item-link {
-    font-size: 1.1rem;
-    font-weight: 500;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    width: 100%;
-    letter-spacing: 0.05em;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .header .nav__dropdown {
-    position: static;
-    transform: none;
-    left: auto;
-    top: auto;
-    width: 100%;
-    min-width: 100%;
-    margin-top: 0;
-    background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    max-height: 0;
-    opacity: 0;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(-100%);
     visibility: hidden;
-    overflow: hidden;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    transition: max-height 0.15s ease-out, opacity 0.1s ease-out;
+    transition: transform 0.3s ease, visibility 0.3s;
   }
-
-  .header .nav__item:hover .nav__dropdown,
-  .header .nav__item.open .nav__dropdown {
-    position: static;
-    transform: none;
-    left: auto;
-  }
-
-  .header .nav__item--end .nav__dropdown,
-  .header .nav__item--end:hover .nav__dropdown {
-    position: static;
-    right: auto;
-    left: auto;
-    transform: none;
-    white-space: normal;
-  }
-
-  /* Undo the desktop right-anchoring for the lab-grown jewelry panel — in the
-     drawer it is a static full-width list, and nowrap would scroll it sideways. */
-  .header .nav__item--peaceful .nav__dropdown,
-  .header .nav__item--peaceful:hover .nav__dropdown {
-    position: static;
-    right: auto;
-    left: auto;
-    transform: none;
-    white-space: normal;
-  }
-
-  .header .nav__item.open .nav__dropdown {
-    /* Must be taller than the Timepieces brand list (10 links). The previous
-       500px cap clipped Jacob & Co. and Other Brands on tablet/mobile. */
-    max-height: 2000px;
-    overflow: visible;
-    opacity: 1;
-    visibility: visible;
-    padding: 0.5rem 0 0.75rem 0;
-    transition: max-height 0.2s ease-in, opacity 0.1s ease-in;
-  }
-
-  .header .nav__item:hover .nav__dropdown,
-  .header .nav__item:focus-within .nav__dropdown {
-    opacity: 0;
-    visibility: hidden;
-    max-height: 0;
-  }
-  .header .nav__item.open:hover .nav__dropdown,
-  .header .nav__item.open:focus-within .nav__dropdown {
-    opacity: 1;
-    visibility: visible;
-    max-height: 2000px;
-    overflow: visible;
-  }
-
-  .header .nav__item:hover .dropdown-arrow {
-    transform: none;
-  }
-
-  .header .nav__item.open .nav__item-link .dropdown-arrow,
-  .header .nav__item.open:hover .dropdown-arrow {
-    transform: rotate(180deg);
-  }
-
-  .header .nav__dropdown-link {
-    text-align: left;
-    padding: 0.75rem 0 0.75rem 1rem;
-    font-size: 0.95rem;
-    font-weight: 400;
-    display: block;
-    color: rgba(255, 255, 255, 0.65);
-    border-left: 2px solid transparent;
-    transition: all 0.2s ease;
-  }
-
-  .header .nav__dropdown-link:hover,
-  .header .nav__dropdown-link:active {
-    color: var(--gold-light, #E2C27A);
-    border-left-color: var(--gold, #C9A050);
-    background: transparent;
-    padding-left: 1.25rem;
-  }
-
-  .header .nav__dropdown-link::before {
-    display: none;
-  }
-
-  .header .mobile-toggle {
-    display: flex;
-  }
-
-  .header .nav__icons {
-    position: relative;
-    z-index: 1003;
-    gap: 0.5rem;
-  }
-
-  /* At 1.75rem the wordmark needs ~166px, but the icon row plus the burger
-     left only 68-138px on a phone, so it broke onto two lines. */
-  .header .logo {
-    font-size: 1.3rem;
-  }
-
-  .header .nav__icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .header .nav__icon svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .header .mobile-toggle {
-    padding: 10px;
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  /* The icon row and burger sit above the drawer (z-index 1003 vs 1002), so
-     with the menu open they landed on top of its "Menu" heading and stacked a
-     second X next to the drawer's own close button. */
-  .header--nav-open .nav__icons,
-  .header--nav-open .mobile-toggle {
-    visibility: hidden;
-    pointer-events: none;
-  }
+  .header .nav.nav--open { transform: none; visibility: visible; }
 
   .header .nav__mobile-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr) 88px;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 1rem 0 1.5rem 0;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 60px;
+    flex-shrink: 0;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--lmhh-line);
   }
-
-  .header .nav__mobile-title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: #fff;
-    letter-spacing: 0.02em;
-  }
-
   .header .nav__mobile-close {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    padding: 8px;
-    margin-right: -8px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s ease;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--lmhh-ink);
+    cursor: pointer;
+  }
+  .header .nav__mobile-header .nav__icon { justify-self: end; }
+
+  .header .lmhh__msearch { display: block; padding: 16px 20px 8px; }
+  .header .lmhh__msearch label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lmhh-muted);
+  }
+  .header .lmhh__msearch input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--lmhh-line);
+    border-radius: 0;
+    background: var(--lmhh-ivory);
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--lmhh-ink);
   }
 
-  .header .nav__mobile-close:hover {
-    color: var(--gold, #C9A050);
-  }
-}
-
-@media (max-width: 380px) {
-  .header .nav__icon--account {
-    display: none;
-  }
-}
-
-@media (min-width: 1200px) {
-  .header .nav__mobile-header {
-    display: none;
-  }
-
-  .header .nav__link--account {
-    display: none;
-  }
-}
-
-/* Tighter spacing on laptops so the menu clears the logo and icons. */
-@media (min-width: 1200px) and (max-width: 1380px) {
-  .header .nav {
-    gap: 0.5rem;
-  }
-
-  .header .nav__link,
+  .header .nav__item { margin: 0 20px; border-bottom: 1px solid var(--lmhh-line); }
+  .header .nav__item--story { display: none; }
   .header .nav__item-link {
-    font-size: 0.64rem;
-    letter-spacing: 0.04em;
+    width: 100%;
+    height: 58px;
+    padding: 0;
+    border-bottom: 0;
+    justify-content: space-between;
+    font-family: 'Cormorant Garamond', Garamond, serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--lmhh-espresso);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
+  .header .nav__item-link .dropdown-arrow { width: 12px; height: 8px; }
+  .header .nav__item:hover > .nav__item-link,
+  .header .nav__item:focus-within > .nav__item-link { color: var(--lmhh-espresso); font-weight: 500; }
+  .header .nav__item.open > .nav__item-link,
+  .header .nav__item-link[aria-expanded="true"] { color: var(--lmhh-bronze); font-weight: 500; }
+  .header .nav__item:hover .dropdown-arrow { transform: none; }
+  .header .nav__item.open .dropdown-arrow { transform: rotate(180deg); }
 
-}
+  .header .nav__dropdown,
+  .header .nav__item:hover .nav__dropdown,
+  .header .nav__item:focus-within .nav__dropdown {
+    position: static;
+    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 4px 0 20px;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: none;
+  }
+  .header .nav__item.open > .nav__dropdown { display: grid; }
+  .header .nav__group { gap: 0; font-size: 14px; }
+  .header .nav__dropdown-label { font-size: 10px; margin-bottom: 4px; }
+  .header .nav__dropdown-link { min-height: 40px; display: flex; align-items: center; }
+  .header .nav__dropdown-link--all { margin-top: 0; }
+  .header .nav__intro, .header .nav__card { display: none; }
 
-/* Short labels on laptops so the logo, menu and icons never collide. The
-   full label stays in the accessibility tree; the short one is visual only. */
-.header .nav__label-short {
-  display: none;
-}
-
-@media (min-width: 1200px) and (max-width: 1279px) {
-  .header .nav__label-full {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+  .header .lmhh__mextra { display: flex; flex-direction: column; gap: 2px; padding: 18px 20px 0; }
+  .header .lmhh__mextra a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
-
-  .header .nav__label-short {
-    display: inline;
+  .header .lmhh__mnote {
+    margin-top: auto;
+    padding: 16px 20px 0;
+    border-top: 1px solid var(--lmhh-line);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--lmhh-muted);
   }
-}
-/* Each pillar panel lays its groups side by side on desktop, one column per
-   group, so a long panel stays inside a laptop viewport. Left-anchored under
-   its item; the last pillar anchors right like the old "More" panel. */
-@media (min-width: 1200px) {
-  .header .nav__dropdown--cols {
-    column-count: 3;
-    column-gap: 0;
-    width: max-content;
-    white-space: nowrap;
-  }
-  .header .nav__dropdown--cols .nav__dropdown-label ~ .nav__dropdown-label {
-    break-before: column;
-    margin-top: 0;
-  }
-  .header .nav__item:not(.nav__item--end) > .nav__dropdown--cols {
-    left: 0;
-    right: auto;
-    transform: translateX(0) translateY(10px);
-  }
-  .header .nav__item:not(.nav__item--end):hover > .nav__dropdown--cols,
-  .header .nav__item:not(.nav__item--end):focus-within > .nav__dropdown--cols {
-    transform: translateX(0) translateY(0);
-  }
-}
-
-/* On the narrowest desktops the last pillar sits too far left to anchor right. */
-@media (min-width: 1200px) and (max-width: 1279px) {
-  .header .nav__item--end > .nav__dropdown--cols {
-    left: 0;
-    right: auto;
-  }
+  .header .lmhh__mextra + .lmhh__mnote { margin-top: 24px; }
+  .header--nav-open .nav__icons,
+  .header--nav-open .mobile-toggle { visibility: hidden; }
 }
 </style>
 
-<header class="header {% if section.settings.enable_sticky %}header--sticky{% endif %}" id="header">
+<header class="header" id="header">
+  {%- if section.settings.announce_text != blank -%}
+    <div class="lmhh__announce" role="region" aria-label="Announcement">
+      <span>{{ section.settings.announce_text | escape }}</span>
+      {%- if section.settings.announce_link_text != blank -%}
+        <span class="lmhh__announce-dot" aria-hidden="true"></span>
+        <a href="{{ section.settings.announce_url | default: '/pages/private-clients' }}">
+          <span class="lmhh__announce-long">{{ section.settings.announce_link_text | escape }}</span><span class="lmhh__announce-short">{{ section.settings.announce_link_short | default: section.settings.announce_link_text | escape }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
   <div class="nav-overlay" id="navOverlay"></div>
-  <div class="container">
-    <div class="header__inner">
-      <a href="{{ routes.root_url }}" class="logo">
-        {%- if section.settings.logo != blank -%}
-          <img src="{{ section.settings.logo | image_url: width: 400 }}" alt="{{ shop.name }}" width="200" height="{{ 200 | divided_by: section.settings.logo.aspect_ratio | round }}">
-        {%- else -%}
-          Laura <span>Milman</span>
-        {%- endif -%}
-      </a>
 
-      <nav class="nav" id="nav">
-        <div class="nav__mobile-header">
-          <span class="nav__mobile-title">Menu</span>
-          <button class="nav__mobile-close" id="navClose" aria-label="Close menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
+  <div class="lmhh__bar">
+    <button class="mobile-toggle" id="mobileToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20"/></svg>
+    </button>
 
-        {%- comment -%}
-          Four pillars, in the order the homepage walks them: gold for work,
-          pre-owned watches with signed jewelry, lab-grown diamonds, natural
-          diamonds. Style links use ?type=, which the collection page reads to
-          pre-select its style chips; shape links use ?shape=, which the
-          diamond search reads the same way. Gold links land on chains until
-          the gold-jewelry collection has pieces in it.
-        {%- endcomment -%}
-        {%- assign gold_all_url = '/collections/chains' -%}
-        {%- if collections['gold-jewelry'].products_count > 0 -%}
-          {%- assign gold_all_url = '/collections/gold-jewelry' -%}
-        {%- endif -%}
-        <div class="nav__item">
-          <button type="button" aria-expanded="false" class="nav__item-link">
-            Gold Jewelry
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown nav__dropdown--cols">
-            <span class="nav__dropdown-label">Most popular</span>
-            <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chains</a>
-            <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
-            <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking Rings</a>
-            <a href="/collections/huggie-earrings" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-            <a href="/collections/bangles" class="nav__dropdown-link">Bangles</a>
-            <span class="nav__dropdown-label">Chains by style</span>
-            <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
-            <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
-            <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
-            <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
-            <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
-            <span class="nav__dropdown-label">Shop by piece</span>
-            <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
-            <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
-            <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
-            <a href="/collections/all" class="nav__dropdown-link">All Jewelry</a>
-            <a href="{{ gold_all_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop All Gold</a>
-          </div>
-        </div>
+    <div class="lmhh__util">
+      <a href="/pages/private-clients">Book an Appointment</a>
+      <a href="/pages/about">Our Story</a>
+    </div>
 
-        <div class="nav__item">
-          <button type="button" aria-expanded="false" class="nav__item-link">
-            <span class="nav__label-full">{{ section.settings.estate_label | default: 'Pre-Owned Watches &amp; Jewelry' }}</span><span class="nav__label-short" aria-hidden="true">Pre-Owned</span>
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown nav__dropdown--cols">
-            <span class="nav__dropdown-label">Most popular watches</span>
-            <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
-            <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/time-pieces" class="nav__dropdown-link">All Pre-Owned Watches</a>
-            <span class="nav__dropdown-label">Signed jewelry</span>
-            <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
-            <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
-            <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
-            <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
-            <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-            <a href="/collections/chopard" class="nav__dropdown-link">Chopard</a>
-            <a href="/collections/hermes" class="nav__dropdown-link">Hermès</a>
-            <span class="nav__dropdown-label">Wear it with</span>
-            <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
-            <a href="/collections/chain-bracelets" class="nav__dropdown-link">Gold Chain Bracelets</a>
-            <a href="/pages/authentication" class="nav__dropdown-link">Estate Authentication</a>
-            <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">Shop All Pre-Owned &amp; Estate</a>
-          </div>
-        </div>
+    <a href="{{ routes.root_url }}" class="lmhh__logo" aria-label="{{ shop.name | escape }}, home">
+      <span class="lmhh__word">Laura <em>Milman</em></span>
+      <span class="lmhh__city">New York</span>
+    </a>
 
-        {%- comment -%}
-          Lab-grown carries its own tier styling — the navy signal dot. Ring
-          Settings, Eternity Bands and Wedding Bands are deliberately absent —
-          LMNY holds no lab-grown stock in those three.
-        {%- endcomment -%}
-        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/lab-grown-diamond-jewelry' -%}
-        <div class="nav__item nav__item--peaceful">
-          <button type="button" aria-expanded="false" class="nav__item-link nav__link--peaceful">
-            <span class="nav__peaceful-dot" aria-hidden="true"></span>
-            <span class="nav__label-full">{{ section.settings.peaceful_label | default: 'Lab-Grown Diamonds' }}</span><span class="nav__label-short" aria-hidden="true">Lab-Grown</span>
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown nav__dropdown--cols">
-            <span class="nav__dropdown-label">Most popular</span>
-            <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
-            <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-            <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
-            <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
-            <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
-            <span class="nav__dropdown-label">By category</span>
-            <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Bracelets</a>
-            <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Necklaces</a>
-            <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Earrings</a>
-            <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Rings</a>
-            <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Pendants</a>
-            <span class="nav__dropdown-label">Loose lab-grown diamonds</span>
-            <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-            <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-            <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-            <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
-            <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Search Loose Lab-Grown</a>
-            <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop All Lab-Grown Jewelry</a>
-          </div>
-        </div>
-
-        <div class="nav__item nav__item--end">
-          <button type="button" aria-expanded="false" class="nav__item-link">
-            <span class="nav__label-full">Natural Diamonds</span><span class="nav__label-short" aria-hidden="true">Natural</span>
-            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav__dropdown nav__dropdown--cols">
-            <span class="nav__dropdown-label">Most popular shapes</span>
-            <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-            <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-            <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-            <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
-            <span class="nav__dropdown-label">Engagement</span>
-            <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
-            <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
-            <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-            <span class="nav__dropdown-label">Before you choose</span>
-            <a href="/pages/buying-guide" class="nav__dropdown-link">Buying Guide</a>
-            <a href="/pages/private-clients" class="nav__dropdown-link">Book a Private Viewing</a>
-            <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search All Natural Diamonds</a>
-          </div>
-        </div>
-
-        <div class="nav__item">
-          <a href="/pages/about" class="nav__item-link">Our Story</a>
-        </div>
-
-        <a href="{{ routes.account_url }}" class="nav__link nav__link--account">Account</a>
-      </nav>
-
-      <div class="nav__icons">
-        <button type="button" class="nav__icon" id="searchToggle" aria-label="Search">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </svg>
-        </button>
-        <a href="{{ routes.account_url }}" class="nav__icon nav__icon--account" aria-label="Account">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </a>
-        <a href="{{ routes.cart_url }}" class="nav__icon cart-icon" aria-label="Cart">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-            <path d="M3 6h18"></path>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
-          {%- if cart.item_count > 0 -%}
-            <span class="cart-count">{{ cart.item_count }}</span>
-          {%- endif -%}
-        </a>
-      </div>
-
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">
-        <span></span>
-        <span></span>
-        <span></span>
+    <div class="nav__icons">
+      <button type="button" class="nav__icon" id="searchToggle" aria-label="Search">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M12.5 12.5L17 17"/></svg>
       </button>
+      <a href="{{ routes.account_url }}" class="nav__icon nav__icon--account" aria-label="Account">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="6" r="3.5"/><path d="M2 17c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/></svg>
+      </a>
+      <a href="{{ routes.cart_url }}" class="nav__icon cart-icon" aria-label="Bag{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 6h12l-1 11H4L3 6z"/><path d="M6 6V4.5a3 3 0 016 0V6"/></svg>
+        {%- if cart.item_count > 0 -%}<span class="cart-count" aria-hidden="true">{{ cart.item_count }}</span>{%- endif -%}
+      </a>
     </div>
   </div>
+
+  <nav class="nav" id="nav" aria-label="Main">
+    <div class="nav__mobile-header">
+      <button class="nav__mobile-close" id="navClose" type="button" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l14 14M16 2L2 16"/></svg>
+      </button>
+      <a href="{{ routes.root_url }}" class="lmhh__logo" aria-label="{{ shop.name | escape }}, home">
+        <span class="lmhh__word">Laura <em>Milman</em></span>
+        <span class="lmhh__city">New York</span>
+      </a>
+      <a href="{{ routes.cart_url }}" class="nav__icon" aria-label="Bag">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 6h12l-1 11H4L3 6z"/><path d="M6 6V4.5a3 3 0 016 0V6"/></svg>
+      </a>
+    </div>
+
+    <form class="lmhh__msearch" action="{{ routes.search_url }}" method="get" role="search">
+      <label for="lmhhMenuSearch">Search</label>
+      <input type="hidden" name="type" value="product">
+      <input id="lmhhMenuSearch" type="search" name="q" placeholder="Chains, Rolex, 1 ct oval…" autocomplete="off">
+    </form>
+
+    {%- comment -%}
+      Four pillars, in the order the homepage walks them. Style links use
+      ?type=, which the collection page reads to pre-select its style chips;
+      shape links use ?shape=, which the diamond search reads the same way.
+      Gold links land on chains until the gold-jewelry collection has pieces.
+    {%- endcomment -%}
+    {%- assign gold_all_url = '/collections/chains' -%}
+    {%- if collections['gold-jewelry'].products_count > 0 -%}
+      {%- assign gold_all_url = '/collections/gold-jewelry' -%}
+    {%- endif -%}
+    {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/lab-grown-diamond-jewelry' -%}
+    {%- capture caret -%}<svg class="dropdown-arrow" viewBox="0 0 9 6" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1"/></svg>{%- endcapture -%}
+    {%- capture arrow -%}{% render 'lmh-arrow' %}{%- endcapture -%}
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">Gold Jewelry {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Most popular</span>
+          <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chains</a>
+          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
+          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking Rings</a>
+          <a href="/collections/huggie-earrings" class="nav__dropdown-link">Huggies &amp; Hoops</a>
+          <a href="/collections/bangles" class="nav__dropdown-link">Bangles</a>
+          <a href="{{ gold_all_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop all gold</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Chains by style</span>
+          <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
+          <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
+          <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
+          <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
+          <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Shop by piece</span>
+          <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
+          <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
+          <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
+          <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
+          <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
+          <a href="/collections/all" class="nav__dropdown-link nav__dropdown-link--all">All jewelry</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">Gold for the office</span>
+          <p class="nav__intro-line">A weekday uniform that survives a noon lunch and a 7 p.m. drink.</p>
+          <p>Free insured shipping and 7-day jewelry returns.</p>
+          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="{{ gold_all_url }}">
+          <img src="{{ 'shop-world-fine-jewelry.webp' | asset_url }}" alt="Gold station necklace on ivory satin" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Gold for the office, and after</span>
+          <span class="nav__card-text">Chains, stacking rings, huggies and bangles in yellow gold.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.estate_label | default: 'Pre-Owned Watches &amp; Jewelry' }} {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Watches</span>
+          <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
+          <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
+          <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
+          <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
+          <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
+          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned watches</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Signed jewelry</span>
+          <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
+          <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
+          <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
+          <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
+          <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
+          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned &amp; estate</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Start here</span>
+          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis bracelets to wear with a watch</a>
+          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Gold chain bracelets</a>
+          <a href="/pages/authentication" class="nav__dropdown-link">Estate authentication</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">How pre-owned is listed</span>
+          <p class="nav__intro-line">Every watch listing states what its record confirms.</p>
+          <p>Reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
+          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="/collections/time-pieces">
+          <img src="{{ 'shop-world-preowned-timepieces.webp' | asset_url }}" alt="Steel watch on a suede display cushion" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Wear it together</span>
+          <span class="nav__card-text">A pre-owned watch, a tennis bracelet and a gold chain bracelet.</span>
+        </a>
+      </div>
+    </div>
+
+    {%- comment -%}
+      Ring settings, eternity bands and wedding bands are deliberately absent:
+      the house holds no lab-grown stock in those three.
+    {%- endcomment -%}
+    <div class="nav__item nav__item--peaceful">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.peaceful_label | default: 'Lab-Grown Diamonds' }} {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Most popular</span>
+          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
+          <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
+          <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
+          <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
+          <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+          <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">All lab-grown jewelry</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By category</span>
+          <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Bracelets</a>
+          <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Necklaces</a>
+          <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Earrings</a>
+          <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Rings</a>
+          <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Pendants</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Loose lab-grown</span>
+          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
+          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
+          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
+          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search loose lab-grown</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">How lab-grown is listed</span>
+          <p class="nav__intro-line">Every loose stone is listed with its grading lab and certificate.</p>
+          <p>Huggies, station pieces and tennis bracelets in 14K gold, set with lab-grown diamonds.</p>
+          <a class="nav__arrow" href="/pages/buying-guide">Buying guide {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="{{ peaceful_url }}">
+          <img src="{{ 'shop-channel-cover.jpg' | asset_url }}" alt="Gold tennis bracelet, diamond studs and an eternity band on navy velvet" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Diamonds for the week</span>
+          <span class="nav__card-text">Tennis bracelets, huggies and studs, plus loose lab-grown stones.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item nav__item--end">
+      <button type="button" aria-expanded="false" class="nav__item-link">Natural Diamonds {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Most popular shapes</span>
+          <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
+          <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
+          <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
+          <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Engagement</span>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
+          <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Before you choose</span>
+          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying Guide</a>
+          <a href="/pages/private-clients" class="nav__dropdown-link">Book a Private Viewing</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">How natural is listed</span>
+          <p class="nav__intro-line">Every natural diamond is listed with its grading lab.</p>
+          <p>GIA on nearly every stone. Book a private viewing in Midtown to compare stones side by side.</p>
+          <a class="nav__arrow" href="/pages/private-clients">Book a viewing {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="/pages/ring-builder">
+          <img src="{{ 'shop-world-loose-diamonds.webp' | asset_url }}" alt="Oval diamond resting on champagne satin" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Start with the stone</span>
+          <span class="nav__card-text">Choose a lab-grown or natural diamond, pick a setting, and our goldsmiths in Italy craft the ring.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item nav__item--story">
+      <a href="/pages/about" class="nav__item-link">Our Story</a>
+    </div>
+
+    <div class="lmhh__mextra">
+      <a href="/pages/about" class="nav__link">Our Story</a>
+      <a href="/pages/private-clients" class="nav__link">Book an Appointment</a>
+      <a href="{{ routes.account_url }}" class="nav__link">Account</a>
+    </div>
+    <div class="lmhh__mnote">
+      <span>Free insured U.S. shipping · 7-day jewelry returns</span>
+      <span>1185 6th Avenue, Floor 3 · By appointment</span>
+    </div>
+  </nav>
 </header>
 
 <!-- Search Overlay -->
@@ -1521,9 +1262,32 @@
   "name": "Header",
   "settings": [
     {
+      "type": "text",
+      "id": "announce_text",
+      "label": "Announcement line",
+      "default": "Private appointments in Midtown"
+    },
+    {
+      "type": "text",
+      "id": "announce_link_text",
+      "label": "Announcement link",
+      "default": "Book a viewing"
+    },
+    {
+      "type": "text",
+      "id": "announce_link_short",
+      "label": "Announcement link on phones",
+      "default": "Book"
+    },
+    {
+      "type": "url",
+      "id": "announce_url",
+      "label": "Announcement link URL"
+    },
+    {
       "type": "image_picker",
       "id": "logo",
-      "label": "Logo image"
+      "label": "Logo image (not shown; the header sets the wordmark in type)"
     },
     {
       "type": "text",

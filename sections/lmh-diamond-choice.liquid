@@ -1,0 +1,176 @@
+{%- comment -%}
+  "Choose your diamond": lab-grown and natural side by side, each with a
+  grading-lab line, selection size and a matched example whose price is
+  read live from the listing. Phones get the preview's comparison table.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign lab_ex = section.settings.lab_example_product
+  assign nat_ex = section.settings.natural_example_product
+-%}
+
+<section class="lmh lmh-loose" aria-labelledby="LmhLoose-{{ section.id }}">
+  <div class="lmh-loose__head">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhLoose-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+  </div>
+
+  <div class="lmh-loose__cards">
+    {%- for side in (1..2) -%}
+      {%- liquid
+        if side == 1
+          assign s_img = section.settings.lab_image
+          assign s_asset = section.settings.lab_image_asset
+          assign s_alt = section.settings.lab_image_alt
+          assign s_title = section.settings.lab_title
+          assign s_text = section.settings.lab_text
+          assign s_grading = section.settings.lab_grading
+          assign s_selection = section.settings.lab_selection
+          assign s_ex = lab_ex
+          assign s_ex_text = section.settings.lab_example_text
+          assign s_btn = section.settings.lab_button
+          assign s_url = section.settings.lab_url
+        else
+          assign s_img = section.settings.natural_image
+          assign s_asset = section.settings.natural_image_asset
+          assign s_alt = section.settings.natural_image_alt
+          assign s_title = section.settings.natural_title
+          assign s_text = section.settings.natural_text
+          assign s_grading = section.settings.natural_grading
+          assign s_selection = section.settings.natural_selection
+          assign s_ex = nat_ex
+          assign s_ex_text = section.settings.natural_example_text
+          assign s_btn = section.settings.natural_button
+          assign s_url = section.settings.natural_url
+        endif
+      -%}
+      <div class="lmh-lcard">
+        <span class="lmh-lcard__media">
+          {%- render 'lmh-img', img: s_img, asset: s_asset, alt: s_alt, sizes: '(max-width: 749px) 50vw, 45vw' -%}
+        </span>
+        <div class="lmh-lcard__body">
+          <h3 class="lmh-h3">{{ s_title | escape }}</h3>
+          {%- if s_text != blank -%}<p>{{ s_text | escape }}</p>{%- endif -%}
+          <dl class="lmh-specs">
+            {%- if s_grading != blank -%}<div><dt>Grading lab</dt><dd>{{ s_grading | escape }}</dd></div>{%- endif -%}
+            {%- if s_selection != blank -%}<div><dt>Selection</dt><dd>{{ s_selection | escape }}</dd></div>{%- endif -%}
+            {%- if s_ex != blank and s_ex.available -%}
+              <div><dt>Matched example</dt><dd><a href="{{ s_ex.url }}" style="text-decoration: none;">{{ s_ex_text | escape }} — {{ s_ex.price | money_without_trailing_zeros }}</a></dd></div>
+            {%- endif -%}
+          </dl>
+          <a class="lmh-btn lmh-btn--dark" href="{{ s_url }}">{{ s_btn | escape }}</a>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div class="lmh-compare" aria-label="Lab-grown and natural diamonds compared">
+    <div class="lmh-compare__media">
+      {%- render 'lmh-img', img: section.settings.lab_image, asset: section.settings.lab_image_asset, alt: section.settings.lab_image_alt, sizes: '50vw' -%}
+      {%- render 'lmh-img', img: section.settings.natural_image, asset: section.settings.natural_image_asset, alt: section.settings.natural_image_alt, sizes: '50vw' -%}
+    </div>
+    <div class="lmh-compare__names">
+      <h3 class="lmh-h3">{{ section.settings.lab_short | escape }}</h3>
+      <h3 class="lmh-h3">{{ section.settings.natural_short | escape }}</h3>
+    </div>
+    <div class="lmh-compare__row">
+      <span class="lmh-compare__label">Origin</span>
+      <div class="lmh-compare__cols"><span>{{ section.settings.lab_origin | escape }}</span><span>{{ section.settings.natural_origin | escape }}</span></div>
+    </div>
+    <div class="lmh-compare__row">
+      <span class="lmh-compare__label">Grading lab</span>
+      <div class="lmh-compare__cols"><span>{{ section.settings.lab_grading | escape }}</span><span>{{ section.settings.natural_grading | escape }}</span></div>
+    </div>
+    <div class="lmh-compare__row">
+      <span class="lmh-compare__label">Selection</span>
+      <div class="lmh-compare__cols"><span>{{ section.settings.lab_selection | escape }}</span><span>{{ section.settings.natural_selection | escape }}</span></div>
+    </div>
+    {%- if lab_ex != blank and lab_ex.available and nat_ex != blank and nat_ex.available -%}
+      <div class="lmh-compare__row">
+        <span class="lmh-compare__label">{{ section.settings.compare_example_label | escape }}</span>
+        <div class="lmh-compare__cols">
+          <a href="{{ lab_ex.url }}" style="text-decoration: none;">{{ section.settings.lab_example_short | escape }}<br>{{ lab_ex.price | money_without_trailing_zeros }}</a>
+          <a href="{{ nat_ex.url }}" style="text-decoration: none;">{{ section.settings.natural_example_short | escape }}<br>{{ nat_ex.price | money_without_trailing_zeros }}</a>
+        </div>
+      </div>
+    {%- endif -%}
+    <div class="lmh-compare__ctas">
+      <a class="lmh-btn lmh-btn--dark" href="{{ section.settings.lab_url }}">{{ section.settings.lab_button_short | escape }}</a>
+      <a class="lmh-btn lmh-btn--dark" href="{{ section.settings.natural_url }}">{{ section.settings.natural_button_short | escape }}</a>
+    </div>
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    <span class="lmh-shapes__label lmh-shapes__label--stacked">{{ section.settings.shapes_label | escape }}</span>
+    <div class="lmh-shapes">
+      <span class="lmh-shapes__label lmh-shapes__label--inline">{{ section.settings.shapes_label | escape }}</span>
+      {%- for block in section.blocks -%}
+        <a class="lmh-chip" href="{{ block.settings.url }}" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</a>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</section>
+
+<style>
+  .lmh-shapes__label--stacked { display: none; }
+  @media (max-width: 749px) {
+    .lmh-shapes__label--stacked { display: block; align-self: flex-start; margin: 0 0 -12px; }
+    .lmh-shapes__label--inline { display: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "LM choose your diamond",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose Diamonds" },
+    { "type": "text", "id": "title", "label": "Heading" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "header", "content": "Lab-grown" },
+    { "type": "image_picker", "id": "lab_image", "label": "Image" },
+    { "type": "text", "id": "lab_image_asset", "label": "Theme asset image" },
+    { "type": "text", "id": "lab_image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "lab_title", "label": "Name", "default": "Lab-Grown Diamonds" },
+    { "type": "text", "id": "lab_short", "label": "Name on phones", "default": "Lab-Grown" },
+    { "type": "text", "id": "lab_text", "label": "Line" },
+    { "type": "text", "id": "lab_origin", "label": "Origin (phones)" },
+    { "type": "text", "id": "lab_grading", "label": "Grading lab" },
+    { "type": "text", "id": "lab_selection", "label": "Selection" },
+    { "type": "product", "id": "lab_example_product", "label": "Matched example listing" },
+    { "type": "text", "id": "lab_example_text", "label": "Example description" },
+    { "type": "text", "id": "lab_example_short", "label": "Example description on phones" },
+    { "type": "text", "id": "lab_button", "label": "Button", "default": "Search Lab-Grown Diamonds" },
+    { "type": "text", "id": "lab_button_short", "label": "Button on phones", "default": "Search Lab-Grown" },
+    { "type": "url", "id": "lab_url", "label": "Button link" },
+    { "type": "header", "content": "Natural" },
+    { "type": "image_picker", "id": "natural_image", "label": "Image" },
+    { "type": "text", "id": "natural_image_asset", "label": "Theme asset image" },
+    { "type": "text", "id": "natural_image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "natural_title", "label": "Name", "default": "Natural Diamonds" },
+    { "type": "text", "id": "natural_short", "label": "Name on phones", "default": "Natural" },
+    { "type": "text", "id": "natural_text", "label": "Line" },
+    { "type": "text", "id": "natural_origin", "label": "Origin (phones)" },
+    { "type": "text", "id": "natural_grading", "label": "Grading lab" },
+    { "type": "text", "id": "natural_selection", "label": "Selection" },
+    { "type": "product", "id": "natural_example_product", "label": "Matched example listing" },
+    { "type": "text", "id": "natural_example_text", "label": "Example description" },
+    { "type": "text", "id": "natural_example_short", "label": "Example description on phones" },
+    { "type": "text", "id": "natural_button", "label": "Button", "default": "Search Natural Diamonds" },
+    { "type": "text", "id": "natural_button_short", "label": "Button on phones", "default": "Search Natural" },
+    { "type": "url", "id": "natural_url", "label": "Button link" },
+    { "type": "header", "content": "Phones" },
+    { "type": "text", "id": "compare_example_label", "label": "Example row label", "default": "Matched example · 1 ct round · E · VS2" },
+    { "type": "text", "id": "shapes_label", "label": "Shapes label", "default": "Shop by shape" }
+  ],
+  "blocks": [
+    { "type": "shape", "name": "Shape chip", "settings": [ { "type": "text", "id": "text", "label": "Text" }, { "type": "url", "id": "url", "label": "Link" } ] }
+  ],
+  "presets": [{ "name": "LM choose your diamond" }]
+}
+{% endschema %}

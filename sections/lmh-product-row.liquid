@@ -1,0 +1,116 @@
+{%- comment -%}
+  Titled product row. "Cream" is the gold row (chips at right, five cards);
+  "Navy" is the lab-grown row (buttons at right, four cards). On phones the
+  cards scroll sideways and a full-width button closes the row.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign navy = false
+  if section.settings.style == 'navy'
+    assign navy = true
+  endif
+  assign row_cols = section.settings.columns | default: 5
+  assign chip_count = 0
+  for block in section.blocks
+    if block.type == 'chip'
+      assign chip_count = chip_count | plus: 1
+    endif
+  endfor
+-%}
+
+<section class="lmh lmh-row{% if navy %} lmh-row--navy lmh-dark lmh-navy{% endif %}" aria-labelledby="LmhRow-{{ section.id }}" style="--lmh-card-ratio: {{ section.settings.ratio | default: 0.84 }};">
+  <div class="lmh-split-head">
+    <div class="lmh-split-head__l">
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhRow-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h2>
+    </div>
+    <div class="lmh-split-head__r">
+      {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+      {%- if chip_count > 0 -%}
+        <div class="lmh-chips lmh-chips--scroll">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'chip' -%}
+              <a class="lmh-chip" href="{{ block.settings.url }}" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</a>
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if section.settings.all_text != blank -%}
+            <a class="lmh-arrow" style="padding: 0 6px;" href="{{ section.settings.all_url }}">{{ section.settings.all_text | escape }} {% render 'lmh-arrow' %}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if section.settings.button_1_text != blank or section.settings.button_2_text != blank -%}
+        <div class="lmh-row__ctas">
+          {%- if section.settings.button_1_text != blank -%}
+            <a class="lmh-btn {% if navy %}lmh-btn--gold{% else %}lmh-btn--dark{% endif %}" href="{{ section.settings.button_1_url }}">{{ section.settings.button_1_text | escape }}</a>
+          {%- endif -%}
+          {%- if section.settings.button_2_text != blank -%}
+            <a class="lmh-btn {% if navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ section.settings.button_2_url }}">{{ section.settings.button_2_text | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <ul class="lmh-grid lmh-grid--{{ row_cols }} lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'product' and block.settings.product != blank -%}
+        <li {{ block.shopify_attributes }}>
+          {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 20vw' -%}
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  {%- if section.settings.mobile_button_text != blank -%}
+    <div class="lmh-row__more">
+      <a class="lmh-btn {% if navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ section.settings.mobile_button_url | default: section.settings.all_url }}">{{ section.settings.mobile_button_text | escape }}</a>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "LM product row",
+  "tag": "div",
+  "settings": [
+    { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
+    { "type": "select", "id": "columns", "label": "Cards per row (desktop)", "default": "5", "options": [ { "value": "4", "label": "4" }, { "value": "5", "label": "5" } ] },
+    { "type": "text", "id": "ratio", "label": "Photo shape (width / height)", "default": "0.84" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "title", "label": "Heading" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "all_text", "label": "Link after the chips" },
+    { "type": "url", "id": "all_url", "label": "Link after the chips, URL" },
+    { "type": "text", "id": "button_1_text", "label": "Button 1" },
+    { "type": "url", "id": "button_1_url", "label": "Button 1 link" },
+    { "type": "text", "id": "button_2_text", "label": "Button 2" },
+    { "type": "url", "id": "button_2_url", "label": "Button 2 link" },
+    { "type": "text", "id": "mobile_button_text", "label": "Phone button under the cards" },
+    { "type": "url", "id": "mobile_button_url", "label": "Phone button link" }
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Chip",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "title", "label": "Short name (optional)" },
+        { "type": "text", "id": "subtitle", "label": "Spec line" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "LM product row" }]
+}
+{% endschema %}

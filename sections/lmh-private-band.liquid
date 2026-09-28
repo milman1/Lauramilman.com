@@ -1,0 +1,45 @@
+{%- comment -%}
+  "Bespoke, by appointment": espresso band with the showroom address,
+  email and the consultation button.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-private lmh-dark" aria-labelledby="LmhPrivate-{{ section.id }}">
+  <div class="lmh-private__l">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhPrivate-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}<p>{{ section.settings.text | escape }}</p>{%- endif -%}
+  </div>
+  <div class="lmh-private__r">
+    {%- if section.settings.address != blank -%}<address>{{ section.settings.address | escape | newline_to_br }}</address>{%- endif -%}
+    {%- if section.settings.email != blank -%}<a class="lmh-private__mail" href="mailto:{{ section.settings.email }}">{{ section.settings.email | escape }}</a>{%- endif -%}
+    <div class="lmh-private__cta">
+      {%- if section.settings.button_text != blank -%}
+        <a class="lmh-btn lmh-btn--gold" href="{{ section.settings.button_url | default: '/pages/private-clients' }}">{{ section.settings.button_text | escape }}</a>
+      {%- endif -%}
+      {%- if section.settings.note != blank -%}<span>{{ section.settings.note | escape }}</span>{%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM private clients band",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Private Clients" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Bespoke," },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "by appointment." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "textarea", "id": "address", "label": "Address" },
+    { "type": "text", "id": "email", "label": "Email" },
+    { "type": "text", "id": "button_text", "label": "Button", "default": "Book a Consultation" },
+    { "type": "url", "id": "button_url", "label": "Button link" },
+    { "type": "text", "id": "note", "label": "Note beside button" }
+  ],
+  "presets": [{ "name": "LM private clients band" }]
+}
+{% endschema %}
