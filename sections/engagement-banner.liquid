@@ -1,0 +1,132 @@
+{%- liquid
+  assign eb_src = blank
+  if section.settings.image != blank
+    assign eb_src = section.settings.image | image_url: width: 2400
+  elsif section.settings.image_asset != blank
+    assign eb_src = section.settings.image_asset | asset_url
+  endif
+-%}
+
+<section class="lm-engage" aria-label="{{ section.settings.eyebrow | default: 'Engagement' | escape }}">
+  {%- if eb_src != blank -%}
+    <img class="lm-engage__img" src="{{ eb_src }}" alt="{{ section.settings.image_alt | escape }}" loading="lazy" width="1536" height="1024">
+  {%- endif -%}
+  <div class="lm-engage__scrim" aria-hidden="true"></div>
+  <div class="lm-engage__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="lm-engage__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    <h2 class="lm-engage__title">
+      {{- section.settings.title -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis }}</em>{%- endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}
+      <p class="lm-engage__text">{{ section.settings.text }}</p>
+    {%- endif -%}
+    <div class="lm-engage__ctas">
+      {%- if section.settings.primary_cta_text != blank -%}
+        <a href="{{ section.settings.primary_cta_url | default: '/collections/all' }}" class="btn btn--gold btn--lg">{{ section.settings.primary_cta_text }}</a>
+      {%- endif -%}
+      {%- if section.settings.secondary_cta_text != blank -%}
+        <a href="{{ section.settings.secondary_cta_url | default: '/collections/all' }}" class="btn btn--outline-light btn--lg">{{ section.settings.secondary_cta_text }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .lm-engage {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--navy-deep, #12162B);
+  }
+  .lm-engage__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .lm-engage__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(18, 22, 43, 0.38);
+  }
+  .lm-engage__content {
+    position: relative;
+    max-width: 800px;
+    padding: 64px var(--container-padding, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    color: #FAF6F0;
+  }
+  .lm-engage__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #E2C27A;
+  }
+  .lm-engage__title {
+    margin: 0;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.6rem, 5vw, 3.75rem);
+    font-weight: 500;
+    line-height: 1.02;
+    color: #FAF6F0;
+  }
+  .lm-engage__title em {
+    font-style: italic;
+    color: #E2C27A;
+  }
+  .lm-engage__text {
+    margin: 0;
+    max-width: 520px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #E6DFD3;
+  }
+  .lm-engage__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 6px;
+  }
+  @media (max-width: 749px) {
+    .lm-engage { min-height: 470px; }
+    .lm-engage__scrim { background: rgba(18, 22, 43, 0.62); }
+    .lm-engage__ctas { flex-direction: column; width: 100%; }
+    .lm-engage__ctas .btn { width: 100%; text-align: center; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Engagement banner",
+  "tag": "section",
+  "class": "section-engagement-banner",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_asset", "label": "Theme image file", "info": "Used when no image is picked" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Engagement" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Start with" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading ending in italic gold", "default": "the stone." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "primary_cta_text", "label": "Primary button" },
+    { "type": "url", "id": "primary_cta_url", "label": "Primary button link" },
+    { "type": "text", "id": "secondary_cta_text", "label": "Secondary button" },
+    { "type": "url", "id": "secondary_cta_url", "label": "Secondary button link" }
+  ],
+  "presets": [{ "name": "Engagement banner" }]
+}
+{% endschema %}

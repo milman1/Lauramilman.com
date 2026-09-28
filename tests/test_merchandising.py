@@ -185,15 +185,18 @@ def strip_liquid_comments(text: str) -> str:
     return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
 
 
-def test_homepage_walks_gold_diamonds_then_estate() -> None:
+def test_homepage_walks_gold_watches_then_diamonds() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     sections = data["sections"]
-    assert order[:3] == ["hero", "trust-strip", "worlds"]
-    assert order.index("gold-chains") < order.index("gold-jewelry") < order.index("loose-diamonds") < order.index("lab-grown")
-    assert order.index("lab-grown") < order.index("brand-story") < order.index("estate")
+    assert order[:3] == ["hero", "worlds", "trust-strip"]
+    assert order.index("gold-chains") < order.index("gold-jewelry") < order.index("build-the-stack")
+    assert order.index("build-the-stack") < order.index("watches") < order.index("estate") < order.index("lab-grown")
+    assert order.index("lab-grown") < order.index("loose-diamonds") < order.index("private-clients") < order.index("engagement")
+    assert order.index("engagement") < order.index("brand-story") < order.index("client-reviews")
     assert sections["worlds"]["type"] == "worlds-mosaic"
     assert sections["loose-diamonds"]["type"] == "diamond-feature"
+    assert sections["engagement"]["type"] == "engagement-banner"
     assert sections["gold-chains"]["settings"]["collection"] == "chains"
     gold = sections["gold-jewelry"]["settings"]
     assert gold["collection"] == "gold-jewelry"
@@ -205,7 +208,10 @@ def test_homepage_walks_gold_diamonds_then_estate() -> None:
         assert len(chips) >= 4, key
     for removed in ("testimonials", "closing-cta", "philosophy-quote", "diamond-destination", "collections-grid"):
         assert all(section["type"] != removed for section in sections.values())
-
+    # Watch copy states only what the listing record confirms.
+    text = (ROOT / "templates/index.json").read_text()
+    assert "Timepieces, authenticated" not in text
+    assert "lmny-rope-1-8-mm-ch014" not in text
 
 def test_hero_is_the_dark_editorial_layout() -> None:
     hero = load_json(ROOT / "templates/index.json")["sections"]["hero"]["settings"]
@@ -258,23 +264,27 @@ def test_category_links_use_rule_based_collections() -> None:
 def test_header_nav_names_what_the_house_sells() -> None:
     header = strip_liquid_comments((ROOT / "sections/header.liquid").read_text())
     assert "/collections/under-2500" not in header
-    chains = header.index("            Gold Chains\n")
-    gold = header.index("              Gold Jewelry\n")
+    gold = header.index("            Gold Jewelry\n")
+    preowned = header.index("estate_label")
     lab = header.index("nav__item nav__item--peaceful")
-    loose = header.index("            Loose Diamonds\n")
-    estate = header.index("estate_label")
+    natural = header.index('<span class="nav__label-full">Natural Diamonds</span>')
     story = header.index('href="/pages/about" class="nav__item-link"')
-    more = header.index("            More\n")
-    assert chains < gold < lab < loose < estate < story < more
-    # Everyday gold only shows once the collection has pieces in it.
+    assert gold < preowned < lab < natural < story
+    # Gold links fall back to chains until gold-jewelry has pieces in it.
     assert "collections['gold-jewelry'].products_count > 0" in header
-    assert header.count('<span class="nav__dropdown-label">Most popular') >= 5
-    assert 'href="/collections/lab-grown-diamonds?shape=Oval"' in header
-    assert 'href="/collections/chains?type=Cuban"' in header
-    more_panel = header[more:]
-    for href in ("/collections/all-earrings", "/collections/time-pieces", "/collections/jacob-co", "/collections/engagement-rings", "/blogs/journal"):
-        assert f'href="{href}"' in more_panel
-
+    assert header.count('<span class="nav__dropdown-label">Most popular') >= 4
+    for href in (
+        "/collections/chains?type=Cuban",
+        "/collections/stackable-rings",
+        "/collections/rolex-watches",
+        "/collections/time-pieces",
+        "/collections/estate-jewelry",
+        "/collections/lab-grown-diamonds?shape=Oval",
+        "/collections/natural-diamonds?shape=Round",
+        "/collections/engagement-rings",
+        "/pages/ring-builder",
+    ):
+        assert f'href="{href}"' in header, href
 
 def test_new_gold_collections_get_style_filters() -> None:
     bar = (ROOT / "snippets/jewelry-style-bar.liquid").read_text()
@@ -388,18 +398,17 @@ def test_section_schemas_pass_shopify_upload_rules() -> None:
                 assert setting["default"] in ("/collections", "/collections/all"), (path.name, setting["id"])
 
 
-def test_homepage_has_a_watches_carousel_after_estate() -> None:
+def test_homepage_pairs_watches_with_signed_jewelry() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     watches = data["sections"]["watches"]
-    assert order.index("estate") < order.index("watches") < order.index("client-reviews")
+    assert order.index("build-the-stack") < order.index("watches") < order.index("estate")
     assert watches["type"] == "featured-products"
     assert watches["settings"]["layout"] == "carousel"
     assert watches["settings"]["collection"] == "time-pieces"
     chips = [b["settings"]["label"] for b in watches["blocks"].values() if b["type"] == "chip"]
-    for brand in ("Rolex", "Cartier", "Patek Philippe"):
+    for brand in ("Rolex", "Cartier"):
         assert brand in chips
-
 
 def test_lab_grown_collection_uses_the_clean_handle() -> None:
     for path in (

@@ -256,6 +256,7 @@
 
   <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
     <a class="lm-skip-link" href="#MainContent">Skip to content</a>
+    {% section 'announcement-bar' %}
     {% section 'header' %}
     {% section 'popular-searches' %}
 
