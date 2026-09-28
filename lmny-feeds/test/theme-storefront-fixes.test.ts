@@ -69,8 +69,10 @@ describe('homepage consultation and reviews', () => {
     expect(home.order.at(-1)).toBe('newsletter');
     expect(home.sections['client-reviews'].type).toBe('client-reviews');
     expect(JSON.stringify(home.sections)).not.toContain('google-reviews-strip');
-    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Susan Finkelstein');
-    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Dianna Shimunova');
+    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Ilya Musheyev');
+    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Jennifer Seckler');
+    expect(JSON.stringify(home.sections['client-reviews'])).toContain('Marcel Fi');
+    expect(JSON.stringify(home.sections['client-reviews'])).not.toContain('Susan Finkelstein');
     expect(JSON.stringify(home.sections)).not.toContain('Alexandra K.');
     expect(page).toContain('data-embed-id="25717519"');
   });
