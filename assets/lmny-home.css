@@ -169,6 +169,18 @@
 .lmh-hero__ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; }
 .lmh-hero__note { font-size: 12px; color: var(--lmh-muted); }
 .lmh-hero__media { position: relative; min-height: 616px; }
+
+/* Espresso banner: the photo stays at the right, the copy sits on the dark ground. */
+.lmh-hero { background: var(--lmh-espresso); color: var(--lmh-cream); }
+.lmh-hero .lmh-eyebrow { color: var(--lmh-gold); }
+.lmh-hero .lmh-h1 { color: var(--lmh-cream); }
+.lmh-hero .lmh-h1 em { color: var(--lmh-gold-light); }
+.lmh-hero__text { color: var(--lmh-on-dark); }
+.lmh-hero__note { color: var(--lmh-on-dark-muted); }
+.lmh-hero .lmh-btn--dark { background: var(--lmh-gold); border-color: var(--lmh-gold); color: var(--lmh-espresso) !important; }
+.lmh-hero .lmh-btn--dark:hover { background: var(--lmh-gold-light); border-color: var(--lmh-gold-light); }
+.lmh-hero .lmh-btn--outline { border-color: rgba(250, 246, 240, 0.6); color: var(--lmh-cream) !important; }
+.lmh-hero .lmh-btn--outline:hover { background: rgba(250, 246, 240, 0.12); color: var(--lmh-cream) !important; }
 .lmh-hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 26%; }
 
 /* mobile pills under the header (phones only) */
