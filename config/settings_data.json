@@ -39,8 +39,8 @@
         ],
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
-          "estate_label": "Pre-Owned & Estate",
-          "peaceful_label": "Lab-Grown Jewelry",
+          "estate_label": "Pre-Owned Watches & Jewelry",
+          "peaceful_label": "Lab-Grown Diamonds",
           "peaceful_url": "",
           "enable_sticky": true
         }
@@ -126,6 +126,14 @@
         "settings": {
           "enabled": true,
           "label": "Popular Searches"
+        }
+      },
+      "announcement-bar": {
+        "type": "announcement-bar",
+        "settings": {
+          "enable": true,
+          "text": "Private appointments in Midtown · Book a viewing",
+          "link": "/pages/private-clients"
         }
       }
     },
