@@ -1,0 +1,45 @@
+{%- comment -%}
+  "Start with the stone": full-width navy photo band, centered copy.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-engage" aria-labelledby="LmhEngage-{{ section.id }}">
+  {%- if section.settings.image != blank -%}
+    {{ section.settings.image | image_url: width: 2000 | image_tag: class: 'lmh-engage__media', widths: '750, 1100, 1500, 2000', sizes: '100vw', loading: 'lazy', alt: section.settings.image_alt }}
+  {%- elsif section.settings.image_asset != blank -%}
+    <img class="lmh-engage__media" src="{{ section.settings.image_asset | asset_url }}" alt="{{ section.settings.image_alt | escape }}" loading="lazy" decoding="async">
+  {%- endif -%}
+  <div class="lmh-engage__copy">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhEngage-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}<p>{{ section.settings.text | escape }}</p>{%- endif -%}
+    <div class="lmh-engage__ctas">
+      {%- if section.settings.primary_text != blank -%}<a class="lmh-btn lmh-btn--gold" href="{{ section.settings.primary_url }}">{{ section.settings.primary_text | escape }}</a>{%- endif -%}
+      {%- if section.settings.secondary_text != blank -%}<a class="lmh-btn lmh-btn--light" href="{{ section.settings.secondary_url }}">{{ section.settings.secondary_text | escape }}</a>{%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM engagement band",
+  "tag": "div",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_asset", "label": "Theme asset image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Engagement" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Start with" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "the stone." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "primary_text", "label": "Primary button", "default": "Build Your Ring" },
+    { "type": "url", "id": "primary_url", "label": "Primary link" },
+    { "type": "text", "id": "secondary_text", "label": "Secondary button", "default": "Engagement Rings" },
+    { "type": "url", "id": "secondary_url", "label": "Secondary link" }
+  ],
+  "presets": [{ "name": "LM engagement band" }]
+}
+{% endschema %}

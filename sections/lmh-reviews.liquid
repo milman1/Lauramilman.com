@@ -1,0 +1,36 @@
+{%- comment -%}
+  "What clients say": heading at left, all-reviews link at right, and the
+  live Google reviews widget, so every review shown is verbatim.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-reviews" aria-labelledby="LmhReviews-{{ section.id }}">
+  <div class="lmh-reviews__head">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhReviews-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+    </div>
+    {%- if section.settings.link_text != blank -%}
+      <a class="lmh-arrow" href="{{ section.settings.link_url | default: '/pages/google-reviews' }}">{{ section.settings.link_text | escape }} {% render 'lmh-arrow' %}</a>
+    {%- endif -%}
+  </div>
+  <div class="lmh-reviews__widget">
+    <div class="sk-ww-google-reviews" data-embed-id="{{ section.settings.embed_id | default: '25717519' }}"></div>
+    <script src="https://widgets.sociablekit.com/google-reviews/widget.js" defer></script>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM Google reviews",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "From Google" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "What clients say" },
+    { "type": "text", "id": "link_text", "label": "Link", "default": "Read all reviews" },
+    { "type": "url", "id": "link_url", "label": "Link URL" },
+    { "type": "text", "id": "embed_id", "label": "SociableKit embed ID", "default": "25717519" }
+  ],
+  "presets": [{ "name": "LM Google reviews" }]
+}
+{% endschema %}

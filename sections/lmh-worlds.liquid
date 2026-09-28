@@ -1,0 +1,57 @@
+{%- comment -%}
+  "Shop the house": four equal tiles, photo over name, line and link.
+  Two by two on phones, where the line is dropped as in the preview.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-worlds" aria-label="{{ section.settings.heading | escape }}">
+  {%- if section.settings.heading != blank -%}
+    <div class="lmh-rule-head"><h2 class="lmh-eyebrow">{{ section.settings.heading | escape }}</h2></div>
+  {%- endif -%}
+  <div class="lmh-worlds__grid">
+    {%- for block in section.blocks -%}
+      <a class="lmh-world" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
+        <span class="lmh-world__media"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
+          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 50vw, 25vw' -%}
+        </span>
+        <span class="lmh-world__body">
+          <span class="lmh-world__title">{{ block.settings.title | escape }}</span>
+          {%- if block.settings.text != blank -%}<span class="lmh-world__text">{{ block.settings.text | escape }}</span>{%- endif -%}
+          {%- if block.settings.link_text != blank -%}<span class="lmh-arrow">{{ block.settings.link_text | escape }} {% render 'lmh-arrow' %}</span>{%- endif -%}
+        </span>
+      </a>
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+  .lmh-world__media[style] img { object-position: var(--pos); }
+</style>
+
+{% schema %}
+{
+  "name": "LM shop the house",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop the house" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Name" },
+        { "type": "text", "id": "text", "label": "Line" },
+        { "type": "text", "id": "link_text", "label": "Link text" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_asset", "label": "Theme asset image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        { "type": "text", "id": "position", "label": "Image focus (CSS object-position)" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [{ "name": "LM shop the house" }]
+}
+{% endschema %}

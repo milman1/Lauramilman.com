@@ -1,0 +1,102 @@
+{%- comment -%}
+  Pre-owned watches and signed jewelry in one section: a heading row, then
+  a watches group and a signed-jewelry group, each with brand chips at
+  left and four live listings at right.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-pre" aria-labelledby="LmhPre-{{ section.id }}">
+  <div class="lmh-split-head">
+    <div class="lmh-split-head__l">
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhPre-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h2>
+    </div>
+    {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+  </div>
+
+  {%- for group in (1..2) -%}
+    {%- liquid
+      if group == 1
+        assign g_title = section.settings.watch_title
+        assign g_all = section.settings.watch_all_text
+        assign g_all_short = section.settings.watch_all_short
+        assign g_url = section.settings.watch_all_url
+        assign chip_type = 'watch_chip'
+        assign product_type = 'watch_product'
+      else
+        assign g_title = section.settings.jewelry_title
+        assign g_all = section.settings.jewelry_all_text
+        assign g_all_short = section.settings.jewelry_all_short
+        assign g_url = section.settings.jewelry_all_url
+        assign chip_type = 'jewelry_chip'
+        assign product_type = 'jewelry_product'
+      endif
+    -%}
+    <div class="lmh-pre__group">
+      <div class="lmh-pre__aside">
+        <h3 class="lmh-h3">{{ g_title | escape }}</h3>
+        <ul class="lmh-chips lmh-chips--scroll" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == chip_type -%}
+              <li {{ block.shopify_attributes }}><a class="lmh-chip lmh-chip--sm" href="{{ block.settings.url }}">{{ block.settings.text | escape }}</a></li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        {%- if g_all != blank -%}
+          <a class="lmh-arrow" href="{{ g_url }}"><span class="lmh-pre__all-long">{{ g_all | escape }}</span><span class="lmh-pre__all-short">{{ g_all_short | default: g_all | escape }}</span> {% render 'lmh-arrow' %}</a>
+        {%- endif -%}
+      </div>
+      <ul class="lmh-pre__grid lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+        {%- for block in section.blocks -%}
+          {%- if block.type == product_type and block.settings.product != blank -%}
+            <li {{ block.shopify_attributes }}>
+              {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 16vw' -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endfor -%}
+</section>
+
+<style>
+  .lmh-pre__all-short { display: none; }
+  @media (max-width: 749px) {
+    .lmh-pre__all-long { display: none; }
+    .lmh-pre__all-short { display: inline; }
+    .lmh-pre__aside .lmh-arrow svg { display: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "LM pre-owned",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Pre-Owned" },
+    { "type": "text", "id": "title", "label": "Heading" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "header", "content": "Watches" },
+    { "type": "text", "id": "watch_title", "label": "Group name", "default": "Watches" },
+    { "type": "text", "id": "watch_all_text", "label": "All link", "default": "All watches" },
+    { "type": "text", "id": "watch_all_short", "label": "All link on phones", "default": "All watches" },
+    { "type": "url", "id": "watch_all_url", "label": "All link URL" },
+    { "type": "header", "content": "Signed jewelry" },
+    { "type": "text", "id": "jewelry_title", "label": "Group name", "default": "Signed jewelry" },
+    { "type": "text", "id": "jewelry_all_text", "label": "All link", "default": "All pre-owned & estate" },
+    { "type": "text", "id": "jewelry_all_short", "label": "All link on phones", "default": "All estate" },
+    { "type": "url", "id": "jewelry_all_url", "label": "All link URL" }
+  ],
+  "blocks": [
+    { "type": "watch_chip", "name": "Watch brand chip", "settings": [ { "type": "text", "id": "text", "label": "Text" }, { "type": "url", "id": "url", "label": "Link" } ] },
+    { "type": "watch_product", "name": "Watch", "settings": [ { "type": "product", "id": "product", "label": "Product" }, { "type": "text", "id": "title", "label": "Short name (optional)" }, { "type": "text", "id": "subtitle", "label": "Spec line" } ] },
+    { "type": "jewelry_chip", "name": "Jewelry brand chip", "settings": [ { "type": "text", "id": "text", "label": "Text" }, { "type": "url", "id": "url", "label": "Link" } ] },
+    { "type": "jewelry_product", "name": "Signed piece", "settings": [ { "type": "product", "id": "product", "label": "Product" }, { "type": "text", "id": "title", "label": "Short name (optional)" }, { "type": "text", "id": "subtitle", "label": "Spec line" } ] }
+  ],
+  "presets": [{ "name": "LM pre-owned" }]
+}
+{% endschema %}

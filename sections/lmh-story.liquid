@@ -1,0 +1,50 @@
+{%- comment -%}
+  "Thirty years in the making": Laura's portrait at left, her words, a
+  line about the house and three figures at right.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-story" aria-labelledby="LmhStory-{{ section.id }}">
+  <div class="lmh-story__media">
+    {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 440px' -%}
+  </div>
+  <div class="lmh-story__copy">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhStory-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+    {%- if section.settings.quote != blank -%}<blockquote>{{ section.settings.quote | escape }}</blockquote>{%- endif -%}
+    {%- if section.settings.text != blank -%}<p>{{ section.settings.text | escape }}</p>{%- endif -%}
+    {%- if section.blocks.size > 0 -%}
+      <dl class="lmh-stats">
+        {%- for block in section.blocks -%}
+          <div {{ block.shopify_attributes }}><dt>{{ block.settings.label | escape }}</dt><dd>{{ block.settings.value | escape }}</dd></div>
+        {%- endfor -%}
+      </dl>
+    {%- endif -%}
+    {%- if section.settings.link_text != blank -%}
+      <a class="lmh-arrow" href="{{ section.settings.link_url | default: '/pages/about' }}">{{ section.settings.link_text | escape }} {% render 'lmh-arrow' %}</a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM story",
+  "tag": "div",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Portrait" },
+    { "type": "text", "id": "image_asset", "label": "Theme asset image" },
+    { "type": "text", "id": "image_alt", "label": "Portrait alt text", "default": "Laura Milman" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Woman Behind It" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Thirty years in the making." },
+    { "type": "textarea", "id": "quote", "label": "Quote" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "link_text", "label": "Link", "default": "Read Laura's story" },
+    { "type": "url", "id": "link_url", "label": "Link URL" }
+  ],
+  "blocks": [
+    { "type": "stat", "name": "Figure", "settings": [ { "type": "text", "id": "value", "label": "Figure" }, { "type": "text", "id": "label", "label": "Label" } ] }
+  ],
+  "max_blocks": 3,
+  "presets": [{ "name": "LM story" }]
+}
+{% endschema %}

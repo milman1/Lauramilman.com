@@ -96,6 +96,29 @@
           <li><a href="/pages/google-reviews" class="footer__link">Google Reviews</a></li>
         </ul>
       </div>
+      {%- comment -%}
+        Signup sits in the footer, as in the approved homepage preview. Same
+        customer form, tags and welcome message as the newsletter section.
+      {%- endcomment -%}
+      <div class="footer__column footer__signup">
+        <h2 class="footer__column-title">{{ section.settings.signup_title | default: '10% off your first piece' }}</h2>
+        <p class="footer__signup-text">{{ section.settings.signup_text | default: 'New gold, new diamonds and private appointments in Midtown, sent to your inbox.' }}</p>
+        {%- form 'customer', id: 'FooterSignup', class: 'footer__signup-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter,welcome10">
+          <label for="FooterSignupEmail" class="footer__signup-label">Email address</label>
+          <div class="footer__signup-field">
+            <input id="FooterSignupEmail" type="email" name="contact[email]" placeholder="you@example.com" required autocomplete="email">
+            <button type="submit">Send My Code</button>
+          </div>
+          {%- if form.posted_successfully? -%}
+            <p class="footer__signup-msg" role="status">{{ section.settings.signup_success | default: 'Welcome. Your code is LMNYWELCOME — jewelry only.' }}</p>
+          {%- endif -%}
+          {%- if form.errors -%}
+            <p class="footer__signup-msg" role="alert">{{ form.errors.messages['email'] }}</p>
+          {%- endif -%}
+        {%- endform -%}
+        <span class="footer__signup-note">Jewelry only. Watches excluded.</span>
+      </div>
     </div>
 
     <div class="footer__bottom">
@@ -248,6 +271,39 @@
   })();
 </script>
 
+<style>
+  @media (min-width: 993px) {
+    .footer__grid { grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr)) 1.4fr; gap: 40px; }
+  }
+  .footer__signup { display: flex; flex-direction: column; gap: 12px; }
+  .footer__signup .footer__column-title { margin-bottom: 0; }
+  .footer__signup-text { margin: 0; font-size: 12.5px; line-height: 1.6; color: rgba(250, 246, 240, 0.6); }
+  .footer__signup-form { display: flex; flex-direction: column; gap: 8px; }
+  .footer__signup-label { font-size: 11px; font-weight: 500; color: #CFC6B4; }
+  .footer__signup-field { display: flex; }
+  .footer__signup-field input {
+    flex: 1; min-width: 0; height: 46px; padding: 0 14px;
+    background: transparent; border: 1px solid rgba(250, 246, 240, 0.45); border-right: 0; border-radius: 0;
+    color: #FAF6F0; font-family: inherit; font-size: 13px;
+  }
+  .footer__signup-field input::placeholder { color: rgba(250, 246, 240, 0.45); }
+  .footer__signup-field button {
+    height: 46px; padding: 0 18px; background: #C9A050; border: 0; color: #1E1109; cursor: pointer;
+    font-family: inherit; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  }
+  .footer__signup-field button:hover { background: #E2C27A; }
+  .footer__signup-msg { margin: 0; font-size: 12.5px; color: #E2C27A; }
+  .footer__signup-note { font-size: 11px; color: rgba(250, 246, 240, 0.55); }
+  @media (max-width: 992px) {
+    .footer__signup { grid-column: 1 / -1; }
+  }
+  @media (max-width: 576px) {
+    .footer__brand { order: -2; }
+    .footer__signup { order: -1; padding: 0.5rem 0 1.25rem; border-bottom: 1px solid rgba(250, 246, 240, 0.08); }
+    .footer__signup-field input { font-size: 16px; }
+  }
+</style>
+
 {% schema %}
 {
   "name": "Footer",
@@ -285,7 +341,12 @@
       "type": "url",
       "id": "social_facebook",
       "label": "Facebook URL"
-    }
+    },
+    { "type": "header", "content": "Signup" },
+    { "type": "text", "id": "signup_title", "label": "Signup heading", "default": "10% off your first piece" },
+    { "type": "textarea", "id": "signup_text", "label": "Signup text" },
+    { "type": "text", "id": "signup_success", "label": "Message after signing up", "default": "Welcome. Your code is LMNYWELCOME — jewelry only." }
+
   ]
 }
 {% endschema %}

@@ -1,0 +1,70 @@
+{%- comment -%}
+  Homepage hero from the approved preview: copy on cream at left, portrait
+  at right. On phones the photo sits above the copy.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+{%- if section.blocks.size > 0 -%}
+  <nav class="lmh" aria-label="Shop by world">
+    <ul class="lmh-pills" role="list">
+      {%- for block in section.blocks -%}
+        <li {{ block.shopify_attributes }}><a class="lmh-chip{% if forloop.first %} lmh-chip--on{% endif %}" href="{{ block.settings.url }}">{{ block.settings.text | escape }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+{%- endif -%}
+<section class="lmh lmh-hero" aria-labelledby="LmhHero-{{ section.id }}">
+  <div class="lmh-hero__copy">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h1 class="lmh-h1 lmh-em-bronze" id="LmhHero-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h1>
+    {%- if section.settings.text != blank -%}<p class="lmh-hero__text">{{ section.settings.text | escape }}</p>{%- endif -%}
+    <div class="lmh-hero__ctas">
+      {%- if section.settings.primary_text != blank -%}
+        <a class="lmh-btn lmh-btn--dark" href="{{ section.settings.primary_url | default: '/collections/chains' }}">{{ section.settings.primary_text | escape }}</a>
+      {%- endif -%}
+      {%- if section.settings.secondary_text != blank -%}
+        <a class="lmh-btn lmh-btn--outline" href="{{ section.settings.secondary_url | default: '/collections/lab-grown-diamonds' }}">{{ section.settings.secondary_text | escape }}</a>
+      {%- endif -%}
+    </div>
+    {%- if section.settings.note != blank -%}<span class="lmh-hero__note">{{ section.settings.note | escape }}</span>{%- endif -%}
+  </div>
+  <div class="lmh-hero__media">
+    {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw', loading: 'eager', fetchpriority: 'high' -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM hero (split)",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Fine jewelry · Pre-owned watches · Diamonds" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Jewelry for the week" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "you work." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "primary_text", "label": "Primary button", "default": "Shop Gold Jewelry" },
+    { "type": "url", "id": "primary_url", "label": "Primary link" },
+    { "type": "text", "id": "secondary_text", "label": "Secondary button", "default": "Search Loose Diamonds" },
+    { "type": "url", "id": "secondary_url", "label": "Secondary link" },
+    { "type": "text", "id": "note", "label": "Note under buttons" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_asset", "label": "Theme asset image (used when no image is picked)" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" }
+  ],
+  "blocks": [
+    {
+      "type": "pill",
+      "name": "Phone pill",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "LM hero (split)" }]
+}
+{% endschema %}

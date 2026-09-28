@@ -1,0 +1,43 @@
+{%- comment -%}
+  Sand-colored promise band under the tiles. Short labels on phones.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<div class="lmh">
+  <ul class="lmh-trust" role="list" aria-label="Our promise">
+    {%- for block in section.blocks -%}
+      <li {{ block.shopify_attributes }}>
+        <span class="lmh-diamond" aria-hidden="true"></span>
+        {%- if block.settings.short != blank and block.settings.short != block.settings.text -%}
+          <span class="lmh-trust__long">{{ block.settings.text | escape }}</span><span class="lmh-trust__short">{{ block.settings.short | escape }}</span>
+        {%- else -%}
+          <span>{{ block.settings.text | escape }}</span>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+<style>
+  .lmh-trust__short { display: none; }
+  @media (max-width: 749px) { .lmh-trust__short { display: inline; } }
+</style>
+
+{% schema %}
+{
+  "name": "LM promise band",
+  "tag": "div",
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Promise",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text" },
+        { "type": "text", "id": "short", "label": "Short text on phones" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "LM promise band" }]
+}
+{% endschema %}
