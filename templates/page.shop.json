@@ -16,7 +16,7 @@
         "heading": "Jewelry for the week\nyou actually live.",
         "subheading": "Lab-grown diamond jewelry to wear from the office through dinner, and signed pre-owned pieces when you want a house name.",
         "primary_cta_text": "Shop Lab-Grown Jewelry",
-        "primary_cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+        "primary_cta_url": "/collections/lab-grown-diamond-jewelry",
         "secondary_cta_text": "Shop Pre-Owned & Estate",
         "secondary_cta_url": "/collections/estate-jewelry",
         "background_image": "shopify://shop_images/lmny-hero-silk-espresso-wine.png",
@@ -75,7 +75,7 @@
             "collection": "lab-grown-diamond-jewelry",
             "title": "Lab-Grown Jewelry",
             "subtitle": "The largest jewelry edit",
-            "link": "/collections/peaceful-diamonds-by-laura-milman-new-york",
+            "link": "/collections/lab-grown-diamond-jewelry",
             "tone": "navy"
           }
         },
@@ -261,8 +261,8 @@
         "cta_url": "/collections/time-pieces"
       }
     },
-    "peaceful-diamonds": {
-      "type": "peaceful-diamonds",
+    "lab-grown-diamonds": {
+      "type": "lab-grown-diamonds-feature",
       "blocks": {
         "pd-point-1": {
           "type": "point",
@@ -372,7 +372,7 @@
         "collection": "lab-grown-diamond-jewelry",
         "product_count": 8,
         "cta_text": "Shop Lab-Grown Jewelry",
-        "cta_url": "/collections/peaceful-diamonds-by-laura-milman-new-york"
+        "cta_url": "/collections/lab-grown-diamond-jewelry"
       }
     },
     "reviews": {
@@ -404,7 +404,7 @@
   "order": [
     "hero",
     "trust-strip",
-    "peaceful-diamonds",
+    "lab-grown-diamonds",
     "preowned-maison",
     "shop-worlds",
     "lab-grown-edit",

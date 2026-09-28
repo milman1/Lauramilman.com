@@ -557,7 +557,7 @@
     white-space: normal;
   }
 
-  /* Undo the desktop right-anchoring for the Peaceful Diamonds panel — in the
+  /* Undo the desktop right-anchoring for the lab-grown jewelry panel — in the
      drawer it is a static full-width list, and nowrap would scroll it sideways. */
   .header .nav__item--peaceful .nav__dropdown,
   .header .nav__item--peaceful:hover .nav__dropdown {
@@ -831,13 +831,13 @@
         {%- endif -%}
 
         {%- comment -%}
-          Peaceful Diamonds carries its own tier styling — the navy signal dot.
-          Category links mirror the peacefuldiamonds.com taxonomy so the
-          sub-brand shops the same way on both sites. Ring Settings, Eternity
+          Lab-grown jewelry carries its own tier styling — the navy signal dot.
+          Category links mirror the same taxonomy the lab-grown jewelry line
+          uses elsewhere, so it shops the same way everywhere. Ring Settings, Eternity
           Bands and Wedding Bands are deliberately absent — LMNY holds no
           lab-grown stock in those three.
         {%- endcomment -%}
-        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/peaceful-diamonds-by-laura-milman-new-york' -%}
+        {%- assign peaceful_url = section.settings.peaceful_url | default: '/collections/lab-grown-diamond-jewelry' -%}
         <div class="nav__item nav__item--peaceful">
           <button type="button" aria-expanded="false" class="nav__item-link nav__link--peaceful">
             <span class="nav__peaceful-dot" aria-hidden="true"></span>
@@ -1012,7 +1012,7 @@
     <div class="search-overlay__links">
       <p class="search-overlay__label">Popular Searches</p>
       <div class="search-overlay__tags">
-        <a href="/collections/peaceful-diamonds-by-laura-milman-new-york" class="search-overlay__tag">Lab-Grown Jewelry</a>
+        <a href="/collections/lab-grown-diamond-jewelry" class="search-overlay__tag">Lab-Grown Jewelry</a>
         <a href="/collections/natural-diamonds" class="search-overlay__tag">Loose Diamonds</a>
         <a href="/collections/cartier" class="search-overlay__tag">Pre-Owned Cartier</a>
         <a href="/collections/estate-jewelry" class="search-overlay__tag">Pre-Owned &amp; Estate</a>
@@ -1536,8 +1536,8 @@
     {
       "type": "url",
       "id": "peaceful_url",
-      "label": "Peaceful Diamonds link",
-      "info": "Point at the Peaceful Diamonds collection. Defaults to /collections/peaceful-diamonds-by-laura-milman-new-york."
+      "label": "Lab-grown jewelry link",
+      "info": "Point at the lab-grown jewelry collection. Defaults to /collections/lab-grown-diamond-jewelry."
     },
     {
       "type": "checkbox",

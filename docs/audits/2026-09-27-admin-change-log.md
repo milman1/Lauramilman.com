@@ -273,3 +273,109 @@ apps such as the Shop app.
   Bracelets, Earrings, All Jewelry.
 
 Both `menuUpdate` calls returned no user errors.
+
+## Part 7 — remove "Peaceful Diamonds" mentions from the URL and site (2026-09-28)
+
+Scope: strip the sub-brand name "Peaceful Diamonds" from every customer-facing
+surface — the collection URL, page titles/descriptions, SEO metadata,
+navigation menus, theme section names, and 72 product descriptions that
+carried the phrase verbatim. The `vendor` field value `Peaceful Diamonds`
+itself was left untouched — it is a pricing-automation key (Cost×4 rule,
+Uploadify feed logic, documented in `AGENTS.md`) and renaming it is a
+separate, larger task, out of scope here. The theme's existing
+vendor-redaction logic (which replaces the literal string `Peaceful Diamonds`
+with `Laura Milman New York` wherever a vendor is displayed to a shopper —
+`sections/main-product.liquid`, `sections/main-cart-items.liquid`,
+`sections/cart-notification-product.liquid`, `sections/predictive-search.liquid`,
+`sections/featured-product.liquid`, `snippets/structured-data-product.liquid`,
+`snippets/lab-grown-tag.liquid`) still matches on that literal string by
+design and was not changed.
+
+### 1. Collection rename
+
+`gid://shopify/Collection/295877705799`. Before: handle
+`peaceful-diamonds-by-laura-milman-new-york`, title "Peaceful Diamonds by
+Laura Milman New York", `templateSuffix` `peaceful`, descriptionHtml
+mentioning "Peaceful Diamonds by Laura Milman New York". After: handle
+`lab-grown-diamond-jewelry`, title "Lab-Grown Diamond Jewelry",
+`templateSuffix` `lab-grown`, descriptionHtml rewritten to describe the
+line without the sub-brand name. SEO title/description were already clean
+and untouched. `lab-grown-jewelry` was not available as a handle — it is
+already used by an unrelated, much larger (24,416-product) collection — so
+`lab-grown-diamond-jewelry` was used instead.
+
+The 6 sub-collections (`lab-grown-bracelets` 296544075847,
+`lab-grown-necklaces` 296544108615, `lab-grown-pendants` 296544141383,
+`lab-grown-earrings` 296544174151, `lab-grown-rings` 296544206919,
+`lab-grown-engagement-rings` 296544239687) had `templateSuffix` changed from
+`peaceful-category` to `lab-grown-category` to match. Their handles were
+already clean and unchanged.
+
+- Undo: `collectionUpdate` back to the old handle/title/templateSuffix/
+  descriptionHtml above. Delete the redirect below first, or it will
+  conflict with the restored handle.
+
+### 2. Redirect
+
+Created `gid://shopify/UrlRedirect/409763250247`: path
+`/collections/peaceful-diamonds-by-laura-milman-new-york` → target
+`/collections/lab-grown-diamond-jewelry`. Undo: delete this redirect.
+
+### 3. Menus
+
+- `main-menu` (`gid://shopify/Menu/207127050`). The "Lab-Grown Jewelry" item
+  and its "All Lab-Grown Jewelry" sub-item pointed at
+  `/collections/peaceful-diamonds-by-laura-milman-new-york`; both now point
+  at `/collections/lab-grown-diamond-jewelry`. Every other item was
+  resubmitted unchanged.
+- `footer-shop` (`gid://shopify/Menu/220497150023`). Same fix on its
+  "Lab-Grown Jewelry" item.
+
+### 4. Collection content (descriptionHtml + SEO)
+
+These collections had "Peaceful Diamonds" in their live description and/or
+SEO title: `necklaces` (269851328583), `lab-grown-bracelets`,
+`lab-grown-necklaces`, `lab-grown-pendants`, `lab-grown-earrings`,
+`lab-grown-rings`, `lab-grown-engagement-rings` (ids above). Before: e.g.
+SEO title "Lab-Grown Diamond Bracelets | Peaceful Diamonds"; descriptionHtml
+naming "Peaceful Diamonds by Laura Milman New York". After: "Peaceful
+Diamonds" replaced with "Laura Milman New York" (or removed where redundant)
+in each. Undo: restore the old descriptionHtml/SEO text (not recorded
+verbatim here — re-derive from "Peaceful Diamonds" phrasing if reverting).
+
+### 5. Product descriptions (72 products)
+
+72 of the ~104 products with vendor `Peaceful Diamonds` had this sentence
+verbatim in `descriptionHtml`, inside a "Why Choose Lab Grown Diamonds?"
+paragraph: "Every Peaceful Diamonds piece is crafted with the same
+brilliance, fire, and scintillation you expect from the finest diamonds —
+because they are." Fixed with a straightforward, reversible string
+substitution: `descriptionHtml.replace('Peaceful Diamonds', 'Laura Milman
+New York')` (each description had exactly one occurrence). Verified via a
+follow-up `vendor:'Peaceful Diamonds'` product query: 0 of 104 products now
+contain the phrase. Undo: reverse the substitution per product id.
+
+Flagged, not fixed (out of scope — a business policy question, not a
+sub-brand-name issue): the same descriptions' "Our Promise" list advertises
+"30-Day Money Back Guarantee" and "Lifetime Warranty", which is inconsistent
+with the site's actual 7-day-returns policy. Left as-is pending a merchant
+decision.
+
+### 6. Theme files
+
+Renamed section/template files so no merchant-facing schema label or file
+name reads "Peaceful": `sections/peaceful-hero.liquid` →
+`sections/lab-grown-hero.liquid`; `sections/peaceful-diamonds.liquid` →
+`sections/lab-grown-diamonds-feature.liquid`;
+`templates/collection.peaceful.json` → `templates/collection.lab-grown.json`;
+`templates/collection.peaceful-category.json` →
+`templates/collection.lab-grown-category.json`. Updated every reference to
+the old collection handle and the old section/template names across the
+theme (header, footer, breadcrumbs, filters, style bar, popular searches,
+about page, google-reviews template, the shop page, `index.json`,
+`list-collections.json`, `settings_data.json`, `settings_schema.json`).
+CSS class names, setting `id`s (`peaceful_label`, `peaceful_url`,
+`color_pd_blue`, `color_pd_ice`, etc.), and the `pop-peaceful`/`p-peaceful`
+block keys were deliberately left unrenamed — they are invisible internal
+identifiers, and renaming them would orphan saved merchant configuration in
+`settings_data.json` for no visible benefit. Undo: `git revert`.
