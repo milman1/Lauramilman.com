@@ -126,15 +126,6 @@ These 38 brands already have dropdown entries wired up in
 "back-vault", "thebackvault") must not appear anywhere on a Laura Milman
 product. Scrub the CSV before import and re-audit post-import.
 
-> **Audit completed 2026-07-24.** A store-wide scan (bulk export of all 950
-> products across title, handle, vendor, tags, description, SEO title, SEO
-> description, and image alt text) found 307 estate imports carrying the
-> phrase in descriptions/SEO fields. All 307 were updated via the Admin API
-> ("The Back Vault" → "Laura Milman New York"), and a re-scan confirmed
-> **zero remaining references** across products, pages, blog articles, CDN
-> file names, and theme code. Rollback snapshot: `backvault-rollback.csv`
-> (delivered in the build session). Future imports must still run §3b first.
-
 ### 3a. Fields to check per product
 
 These live on the product row in Shopify and must all be clean:
@@ -186,3 +177,33 @@ Confirmed clean as of this commit — no references in any `.liquid`, `.json`,
 5. Run the post-import audit (§3c).
 6. Spot-check 3–5 products to confirm metafields populated and the
    product appears in the correct brand collection.
+
+---
+
+## 5. Theme auto-deploy (GitHub → Shopify)
+
+Shopify syncs **one Git branch ↔ one theme**. Every push to that branch
+updates the connected theme automatically (and admin edits commit back).
+
+### Why the live site lagged behind `main`
+
+The **Current** theme is connected to `claude/session-stdgfv`, not `main`.
+Commits on `main` do **not** reach the storefront until they land on that
+connected branch (or you reconnect the published theme).
+
+### Keep the live theme auto-updating
+
+**Option A — stay on `session-stdgfv` (current setup)**  
+Merge every storefront/theme change into `claude/session-stdgfv`. Pushes
+there update the live theme. Feed/sync code can stay on `main`.
+
+**Option B — publish from `main` (simplest long-term)**  
+1. Merge theme work into `main` (including diamond filter + header).  
+2. Admin → **Online Store → Themes → Add theme → Connect from GitHub**.  
+3. Connect repo `milman1/Lauramilman.com`, branch **`main`**.  
+4. **Publish** that connected theme.  
+After that, every merge to `main` that touches theme folders deploys live.
+
+Do **not** connect two branches to the same published theme — pick one
+deploy branch and merge into it.
+
