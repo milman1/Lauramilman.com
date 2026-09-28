@@ -4,8 +4,8 @@
   shop-by chips, "Refine By" drawer (snippet), sort, product count, numbered
   pagination, and a filtered-empty state with Clear All.
 
-  "Navy mode" re-skins accents for the Peaceful Diamonds (lab-grown) tier —
-  assign templates/collection.peaceful.json to that collection.
+  "Navy mode" re-skins accents for the lab-grown diamond tier —
+  assign templates/collection.lab-grown.json to that collection.
 {%- endcomment -%}
 
 {%- liquid
@@ -18,7 +18,7 @@
 
   assign collection_heading = collection.title
   case collection.handle
-    when 'peaceful-diamonds-by-laura-milman-new-york'
+    when 'lab-grown-diamond-jewelry'
       assign collection_heading = 'Lab-Grown Jewelry'
     when 'david-webb'
       assign collection_heading = 'Pre-Owned David Webb Jewelry'
@@ -48,7 +48,7 @@
 
   assign collection_intro = ''
   case collection.handle
-    when 'peaceful-diamonds-by-laura-milman-new-york'
+    when 'lab-grown-diamond-jewelry'
       assign collection_intro = 'Lab-grown diamond jewelry by Laura Milman New York: certified studs, tennis and station bracelets, and pendants in 14K and 18K gold, made to be worn from the office through dinner.'
     when 'lab-grown-bracelets'
       assign collection_intro = 'Lab-grown diamond bracelets by Laura Milman New York: tennis, station, and bangle styles in 14K and 18K gold. Each listing states the total carat weight.'
@@ -1066,7 +1066,7 @@
     {
       "type": "checkbox",
       "id": "navy_mode",
-      "label": "Navy mode (Peaceful Diamonds tier)",
+      "label": "Navy mode (lab-grown diamond tier)",
       "info": "Cool navy accents for the lab-grown sub-brand. Leave off for LMNY-proper collections.",
       "default": false
     }

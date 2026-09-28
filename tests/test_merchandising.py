@@ -399,3 +399,38 @@ def test_homepage_has_a_watches_carousel_after_estate() -> None:
     chips = [b["settings"]["label"] for b in watches["blocks"].values() if b["type"] == "chip"]
     for brand in ("Rolex", "Cartier", "Patek Philippe"):
         assert brand in chips
+
+
+def test_lab_grown_collection_uses_the_clean_handle() -> None:
+    for path in (
+        "sections/header.liquid",
+        "sections/footer.liquid",
+        "sections/main-collection.liquid",
+        "sections/popular-searches.liquid",
+        "sections/page-about.liquid",
+        "snippets/breadcrumbs.liquid",
+        "snippets/collection-guide.liquid",
+        "snippets/filter-drawer.liquid",
+        "snippets/jewelry-style-bar.liquid",
+        "snippets/jewelry-style-filters.liquid",
+        "templates/index.json",
+        "templates/list-collections.json",
+        "templates/page.google-reviews.liquid",
+        "templates/page.shop.json",
+        "layout/theme.liquid",
+    ):
+        text = (ROOT / path).read_text()
+        assert "peaceful-diamonds-by-laura-milman-new-york" not in text, path
+    assert (ROOT / "templates/collection.lab-grown.json").exists()
+    assert (ROOT / "templates/collection.lab-grown-category.json").exists()
+    assert not (ROOT / "templates/collection.peaceful.json").exists()
+    assert not (ROOT / "templates/collection.peaceful-category.json").exists()
+
+
+def test_lab_grown_sections_are_not_merchant_labeled_peaceful() -> None:
+    hero_schema = extract_schema(ROOT / "sections/lab-grown-hero.liquid")
+    assert hero_schema["name"] == "Lab-Grown Hero"
+    feature_schema = extract_schema(ROOT / "sections/lab-grown-diamonds-feature.liquid")
+    assert feature_schema["name"] == "Lab-Grown Diamonds Feature"
+    assert not (ROOT / "sections/peaceful-hero.liquid").exists()
+    assert not (ROOT / "sections/peaceful-diamonds.liquid").exists()

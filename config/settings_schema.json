@@ -84,31 +84,31 @@
       },
       {
         "type": "header",
-        "content": "Peaceful Diamonds sub-brand",
-        "info": "Cool navy signature reserved for the Peaceful Diamonds (lab-grown) tier. Never used in LMNY-proper sections."
+        "content": "Lab-grown diamond tier",
+        "info": "Cool navy signature reserved for the lab-grown diamond tier. Never used in LMNY-proper sections."
       },
       {
         "type": "color",
         "id": "color_navy",
-        "label": "Peaceful Navy",
+        "label": "Lab-Grown Navy",
         "default": "#1A1F3A"
       },
       {
         "type": "color",
         "id": "color_navy_deep",
-        "label": "Peaceful Navy Deep",
+        "label": "Lab-Grown Navy Deep",
         "default": "#12162B"
       },
       {
         "type": "color",
         "id": "color_pd_blue",
-        "label": "Peaceful Blue Accent",
+        "label": "Lab-Grown Blue Accent",
         "default": "#5B7FBD"
       },
       {
         "type": "color",
         "id": "color_pd_ice",
-        "label": "Peaceful Ice",
+        "label": "Lab-Grown Ice",
         "default": "#A9BEE3"
       }
     ]
