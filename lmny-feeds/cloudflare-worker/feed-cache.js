@@ -32,6 +32,8 @@
  * move the Worker to the $5 paid plan (30s CPU vs 10ms free).
  */
 
+import { ENGRAVING_ROUTE, handleEngraving } from './engraving-render.js';
+
 const UPSTREAM = 'https://belgiumdia.com';
 const FEEDS = ['natural', 'lab', 'watch'];
 /** Cron fires at :07 / :27 / :47 — minute picks the feed to refresh. */
@@ -140,6 +142,10 @@ export default {
   },
 
   async fetch(request, env, ctx) {
+    // Storefront engraving render (POST from the product page). Separate from
+    // the feed cache below, which stays GET-only and key-gated.
+    if (new URL(request.url).pathname === ENGRAVING_ROUTE) return handleEngraving(request, env, ctx);
+
     if (request.method !== 'GET') return new Response('Method not allowed', { status: 405 });
     if (!env.FEED_CACHE) return new Response('Worker misconfigured: FEED_CACHE KV binding not set', { status: 500 });
 

@@ -376,6 +376,15 @@
           {%- endfor -%}
         {%- endunless -%}
 
+        {% render 'ring-engraving',
+          product: product,
+          addon: section.settings.engraving_product,
+          ai_endpoint: section.settings.engraving_ai_endpoint,
+          max_chars: section.settings.engraving_max_chars,
+          metal_hint: metal_pill,
+          is_watch: is_watch
+        %}
+
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
@@ -993,6 +1002,31 @@
       "id": "show_vendor",
       "label": "Show vendor",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Ring engraving"
+    },
+    {
+      "type": "product",
+      "id": "engraving_product",
+      "label": "Engraving add-on product",
+      "info": "Its price is what shoppers pay for engraving. The option shows on engagement rings only while this product is active on the Online Store."
+    },
+    {
+      "type": "range",
+      "id": "engraving_max_chars",
+      "label": "Inscription length limit",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "engraving_ai_endpoint",
+      "label": "AI engraving render endpoint",
+      "info": "https://lauramilman-com.<subdomain>.workers.dev/engraving/render. Leave blank to hide the AI button; the live preview still shows."
     }
   ],
   "blocks": [
