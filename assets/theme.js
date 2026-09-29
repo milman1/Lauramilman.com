@@ -471,6 +471,10 @@ function formatMoney(cents) {
     if (intent === 'message') {
       return "Hi — I'd like to message about " + piece + link + '.';
     }
+    if (intent === 'pair' && payload.pairTitle) {
+      var pairLink = payload.pairUrl ? ' (' + payload.pairUrl + ')' : '';
+      return "Hi — I'd like to set the " + payload.pairTitle + pairLink + ' in the ' + piece + link + '. Could you quote the pairing?';
+    }
     if (title) {
       return "Hi — I'm looking at " + title + link + '.';
     }
@@ -480,6 +484,7 @@ function formatMoney(cents) {
   function intentLabel(intent) {
     if (intent === 'offer') return 'Make an offer';
     if (intent === 'message') return 'Direct message';
+    if (intent === 'pair') return 'Pairing request';
     return 'Ask about this piece';
   }
 
@@ -746,6 +751,8 @@ function formatMoney(cents) {
       productId: btn.getAttribute('data-product-id') || '',
       productHandle: btn.getAttribute('data-product-handle') || '',
       productImage: btn.getAttribute('data-product-image') || '',
+      pairTitle: btn.getAttribute('data-pair-title') || '',
+      pairUrl: btn.getAttribute('data-pair-url') || '',
       intent: btn.getAttribute('data-chat-intent') || 'ask'
     };
   }

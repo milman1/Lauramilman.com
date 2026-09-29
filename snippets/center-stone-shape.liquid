@@ -1,0 +1,33 @@
+{%- comment -%}
+  Outputs the center-stone shape as one of the ten shapes the diamond filter
+  uses (Round, Princess, Cushion, Emerald, Oval, Radiant, Asscher, Marquise,
+  Heart, Pear), or nothing when the product doesn't state one.
+  custom.diamond_shape wins; otherwise a tag that is exactly a shape name
+  ("Oval", "Emerald Cut"). Never guessed from the title.
+  Usage: {%- capture s -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
+  assign found = ''
+  assign stated = product.metafields.custom.diamond_shape.value | strip | downcase
+  if stated != blank
+    for s in shapes
+      assign s_l = s | downcase
+      if stated == s_l
+        assign found = s
+      endif
+    endfor
+  endif
+  if found == ''
+    for tag in product.tags
+      assign t = tag | downcase | remove: ' cut' | strip
+      for s in shapes
+        assign s_l = s | downcase
+        if found == '' and t == s_l
+          assign found = s
+        endif
+      endfor
+    endfor
+  endif
+  echo found
+-%}

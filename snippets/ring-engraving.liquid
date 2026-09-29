@@ -21,23 +21,11 @@
   "Add an engraving" is ticked and an inscription is typed.
 {%- endcomment -%}
 
+{%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
 {%- liquid
   assign show_engraving = false
-  if enabled and is_watch != 'true'
-    unless product.tags contains 'backvault-feed'
-      for c in product.collections
-        if c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'
-          assign show_engraving = true
-        endif
-      endfor
-      if product.tags contains 'Engagement Rings'
-        assign show_engraving = true
-      endif
-      assign title_l = product.title | downcase
-      if title_l contains 'engagement ring'
-        assign show_engraving = true
-      endif
-    endunless
+  if enabled and is_watch != 'true' and is_er == 'true'
+    assign show_engraving = true
   endif
 
   assign max_chars = max_chars | default: 20

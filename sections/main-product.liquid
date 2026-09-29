@@ -411,6 +411,7 @@
       {%- endform -%}
 
       {% render 'product-inquiry', product: product %}
+      {% render 'ring-diamond-pairing', product: product, is_watch: is_watch %}
 
       <!-- 8. Specifications — only rows with values; whole block hides when empty -->
       {%- if spec_rows != blank -%}

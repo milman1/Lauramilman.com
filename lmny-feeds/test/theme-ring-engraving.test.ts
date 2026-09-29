@@ -21,10 +21,12 @@ describe('ring engraving on the product page', () => {
   });
 
   it('shows only on engagement rings, never watches or estate feed pieces', () => {
-    expect(snippet).toContain("if enabled and is_watch != 'true'");
-    expect(snippet).toContain("unless product.tags contains 'backvault-feed'");
-    expect(snippet).toContain("c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'");
-    expect(snippet).toContain("product.tags contains 'Engagement Rings'");
+    const isRing = themeFile('snippets/is-engagement-ring.liquid');
+    expect(snippet).toContain("{% render 'is-engagement-ring', product: product %}");
+    expect(snippet).toContain("if enabled and is_watch != 'true' and is_er == 'true'");
+    expect(isRing).toContain("unless product.tags contains 'backvault-feed'");
+    expect(isRing).toContain("c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'");
+    expect(isRing).toContain("product.tags contains 'Engagement Rings'");
   });
 
   it('is complimentary and only submits an inscription the shopper chose', () => {

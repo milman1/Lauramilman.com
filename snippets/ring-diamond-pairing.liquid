@@ -1,0 +1,248 @@
+{%- comment -%}
+  Ring page → loose diamonds that fit it.
+  Rendered by sections/main-product.liquid on engagement rings whose
+  center-stone shape is stated (custom.diamond_shape or a shape tag).
+
+  Without a chosen diamond: links to natural and lab-grown loose diamonds
+  of the same shape (the collections' native shape filter).
+  With one (?diamond=<handle> from a diamond page, remembered for the
+  visit): shows it beside the ring and a "Request this pairing" button that
+  opens the concierge chat with both pieces named. Rings are priced with
+  their own center stone, so a pairing is quoted, never added to the cart.
+
+  Accepts:
+  - product: the ring
+  - is_watch: 'true' for watches
+{%- endcomment -%}
+
+{%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
+{%- capture ring_shape -%}{% render 'center-stone-shape', product: product %}{%- endcapture -%}
+{%- assign ring_shape = ring_shape | strip -%}
+
+{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' -%}
+  {%- liquid
+    assign ring_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.'
+    assign ring_image = ''
+    if product.featured_image
+      assign ring_image = product.featured_image | image_url: width: 240
+    endif
+    assign shape_l = ring_shape | downcase
+    assign shape_q = ring_shape | url_encode
+  -%}
+  <div
+    class="pdp-pair"
+    data-pair
+    data-ring-shape="{{ ring_shape }}"
+    data-ring-handle="{{ product.handle }}"
+    data-ring-title="{{ ring_title | escape }}"
+    data-ring-url="{{ shop.url }}{{ product.url }}"
+    data-ring-image="{{ ring_image | escape }}"
+    data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
+  >
+    <p class="pdp-inquire__label">Choose your own diamond</p>
+
+    <div data-pair-browse>
+      <p class="pdp-pair__text">This setting takes {{ shape_l }}-cut center stones. Pick the {{ shape_l }} diamond you want and we will set it for you.</p>
+      <p class="pdp-pair__warn" data-pair-mismatch hidden></p>
+      <div class="pdp-inquire__actions">
+        <a class="pdp-inquire__btn" href="/collections/natural-diamonds?filter.p.m.custom.diamond_shape={{ shape_q }}">{{ ring_shape }} natural diamonds</a>
+        <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/collections/lab-grown-diamonds?filter.p.m.custom.diamond_shape={{ shape_q }}">{{ ring_shape }} lab-grown diamonds</a>
+      </div>
+    </div>
+
+    <div data-pair-chosen hidden>
+      <a class="pdp-pair__stone" href="#" data-pair-stone-link>
+        <img src="" alt="" width="64" height="64" loading="lazy" data-pair-stone-img>
+        <span class="pdp-pair__stone-text">
+          <span class="pdp-pair__stone-title" data-pair-stone-title></span>
+          <span class="pdp-pair__stone-price" data-pair-stone-price></span>
+        </span>
+      </a>
+      <p class="pdp-pair__text">The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+      <div class="pdp-inquire__actions">
+        <button
+          type="button"
+          class="pdp-inquire__btn js-open-product-chat"
+          data-chat-intent="pair"
+          data-product-id="{{ product.id }}"
+          data-product-handle="{{ product.handle }}"
+          data-product-title="{{ ring_title | escape }}"
+          data-product-url="{{ shop.url }}{{ product.url }}"
+          data-product-image="{{ ring_image | escape }}"
+          data-pair-title=""
+          data-pair-url=""
+          data-pair-request
+        >
+          Request this pairing
+        </button>
+        <button type="button" class="pdp-inquire__btn pdp-inquire__btn--ghost" data-pair-clear>Choose a different diamond</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .pdp-pair {
+      margin: 1.25rem 0 0;
+      padding-top: 1.15rem;
+      border-top: 1px solid var(--rule-light, #DDD5C5);
+    }
+    .pdp-pair__text,
+    .pdp-pair__warn {
+      margin: 0 0 0.85rem;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text-muted, #8A8070);
+    }
+    .pdp-pair__warn { color: var(--wine, #4A1428); }
+    .pdp-pair__stone {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin: 0 0 0.85rem;
+      padding: 0.75rem;
+      border: 1px solid var(--gold, #C9A050);
+      border-radius: var(--radius-md, 8px);
+      background: var(--warm-white, #FDFAF6);
+      color: var(--text-dark, #2C1810);
+      text-decoration: none;
+    }
+    .pdp-pair__stone img {
+      width: 64px;
+      height: 64px;
+      flex: none;
+      object-fit: cover;
+      border-radius: var(--radius-sm, 4px);
+      background: var(--cream, #FAF6F0);
+    }
+    .pdp-pair__stone-text { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .pdp-pair__stone-title {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.85rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .pdp-pair__stone-price {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.8rem;
+      color: var(--gold-dark, #A88340);
+    }
+  </style>
+
+  <script>
+    (function () {
+      var root = document.querySelector('[data-pair]');
+      if (!root) return;
+      var SHAPES = ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear'];
+      var DIAMOND_TYPES = ['Natural Diamond', 'Lab-Grown Diamond'];
+      var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
+      var ringShape = root.getAttribute('data-ring-shape');
+      var browse = root.querySelector('[data-pair-browse]');
+      var chosen = root.querySelector('[data-pair-chosen]');
+      var mismatch = root.querySelector('[data-pair-mismatch]');
+      var request = root.querySelector('[data-pair-request]');
+
+      function store(key, value) {
+        try {
+          if (value == null) sessionStorage.removeItem(key);
+          else sessionStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {}
+      }
+      function read(key) {
+        try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { return null; }
+      }
+
+      // Let a diamond page offer "set it in the ring you were viewing".
+      store('lmPairRing', {
+        handle: root.getAttribute('data-ring-handle'),
+        title: root.getAttribute('data-ring-title'),
+        shape: ringShape
+      });
+
+      function shapeOf(title) {
+        for (var i = 0; i < SHAPES.length; i++) {
+          if (new RegExp('\\b' + SHAPES[i] + '\\b', 'i').test(title)) return SHAPES[i];
+        }
+        return '';
+      }
+
+      function money(cents) {
+        try {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: root.getAttribute('data-currency') || 'USD',
+            maximumFractionDigits: 0
+          }).format(cents / 100);
+        } catch (e) {
+          return '$' + Math.round(cents / 100).toLocaleString('en-US');
+        }
+      }
+
+      function showBrowse(note) {
+        chosen.hidden = true;
+        browse.hidden = false;
+        mismatch.hidden = !note;
+        mismatch.textContent = note || '';
+      }
+
+      function showChosen(p) {
+        var url = window.location.origin + '/products/' + p.handle;
+        var img = root.querySelector('[data-pair-stone-img]');
+        root.querySelector('[data-pair-stone-link]').href = '/products/' + p.handle;
+        root.querySelector('[data-pair-stone-title]').textContent = p.title;
+        root.querySelector('[data-pair-stone-price]').textContent = money(p.price);
+        if (p.featured_image) {
+          img.src = p.featured_image;
+          img.alt = p.title;
+        } else {
+          img.hidden = true;
+        }
+        request.setAttribute('data-pair-title', p.title);
+        request.setAttribute('data-pair-url', url);
+        browse.hidden = true;
+        chosen.hidden = false;
+      }
+
+      var fromUrl = new URLSearchParams(window.location.search).get('diamond');
+      var remembered = read('lmPairDiamond');
+      var handle = (fromUrl || (remembered && remembered.handle) || '').toLowerCase();
+      if (!HANDLE.test(handle)) return;
+
+      fetch('/products/' + handle + '.js', { headers: { Accept: 'application/json' } })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (p) {
+          if (!p || DIAMOND_TYPES.indexOf(p.type) === -1) {
+            store('lmPairDiamond', null);
+            return;
+          }
+          var stoneShape = shapeOf(p.title);
+          if (stoneShape !== ringShape) {
+            // A remembered stone that doesn't fit this ring is left quietly;
+            // one the shopper just sent here gets an explanation.
+            if (fromUrl) {
+              showBrowse('The diamond you chose is ' + (stoneShape ? stoneShape.toLowerCase() + '-cut' : 'a different shape') + '. This setting takes ' + ringShape.toLowerCase() + '-cut center stones.');
+            }
+            return;
+          }
+          if (!p.available) {
+            store('lmPairDiamond', null);
+            if (fromUrl) showBrowse('That diamond is no longer available. Choose another below.');
+            return;
+          }
+          store('lmPairDiamond', { handle: p.handle });
+          showChosen(p);
+        })
+        .catch(function () {});
+
+      root.querySelector('[data-pair-clear]').addEventListener('click', function () {
+        store('lmPairDiamond', null);
+        if (fromUrl && window.history && window.history.replaceState) {
+          var u = new URL(window.location.href);
+          u.searchParams.delete('diamond');
+          window.history.replaceState(null, '', u.toString());
+        }
+        showBrowse('');
+      });
+    })();
+  </script>
+{%- endif -%}
