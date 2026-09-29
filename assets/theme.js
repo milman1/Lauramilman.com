@@ -48,16 +48,15 @@ function showCartNotification() {
   }, 2500);
 }
 
-function addVariantToCart(variantId, quantity, properties, extraItems) {
+function addVariantToCart(variantId, quantity, properties) {
   var qty = parseInt(quantity, 10);
   if (!qty || qty < 1) qty = 1;
   var line = { id: Number(variantId), quantity: qty };
   if (properties && Object.keys(properties).length) line.properties = properties;
-  var payload = (extraItems && extraItems.length) ? { items: [line].concat(extraItems) } : line;
   return fetch('/cart/add.js', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(line)
   }).then(function (res) {
     return res.json().then(function (data) {
       if (!res.ok || data.status) {
@@ -104,19 +103,6 @@ function formLineProperties(form) {
   return props;
 }
 
-/* Paid add-ons (ring engraving) ride along with the piece: same quantity,
-   same properties, plus the piece they belong to. */
-function formAddOnItems(form, quantity, properties) {
-  var items = [];
-  form.querySelectorAll('[data-addon-variant]').forEach(function (el) {
-    if (el.disabled || !el.value) return;
-    var props = { Ring: el.getAttribute('data-addon-for') || '' };
-    Object.keys(properties).forEach(function (k) { props[k] = properties[k]; });
-    items.push({ id: Number(el.value), quantity: quantity, properties: props });
-  });
-  return items;
-}
-
 /* === Add to Cart (AJAX) === */
 (function () {
   document.addEventListener('submit', function (e) {
@@ -142,9 +128,7 @@ function formAddOnItems(form, quantity, properties) {
     var originalText = atcBtn.textContent;
     atcBtn.textContent = '…';
 
-    if (!quantity || quantity < 1) quantity = 1;
-    var properties = formLineProperties(form);
-    addVariantToCart(variantId, quantity, properties, formAddOnItems(form, quantity, properties))
+    addVariantToCart(variantId, quantity, formLineProperties(form))
       .then(function () {
         if (goCheckout) {
           window.location.href = '/checkout';

@@ -10,28 +10,28 @@ describe('ring engraving on the product page', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const themeJs = themeFile('assets/theme.js');
 
-  it('renders inside the product form with the paid add-on and AI settings', () => {
+  it('renders inside the product form with the on/off and AI settings', () => {
     expect(mainProduct).toContain("{% render 'ring-engraving',");
-    expect(mainProduct).toContain('addon: section.settings.engraving_product');
+    expect(mainProduct).toContain('enabled: section.settings.engraving_enabled');
     expect(mainProduct).toContain('ai_endpoint: section.settings.engraving_ai_endpoint');
-    expect(mainProduct).toContain('"id": "engraving_product"');
+    expect(mainProduct).toContain('"id": "engraving_enabled"');
     expect(mainProduct).toContain('"id": "engraving_ai_endpoint"');
     const form = mainProduct.slice(mainProduct.indexOf("{%- form 'product'"), mainProduct.indexOf('{%- endform -%}'));
     expect(form).toContain("{% render 'ring-engraving',");
   });
 
-  it('shows only on engagement rings, never watches or estate feed pieces, and only with an active add-on', () => {
-    expect(snippet).toContain("if addon != blank and addon.available and is_watch != 'true'");
+  it('shows only on engagement rings, never watches or estate feed pieces', () => {
+    expect(snippet).toContain("if enabled and is_watch != 'true'");
     expect(snippet).toContain("unless product.tags contains 'backvault-feed'");
     expect(snippet).toContain("c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'");
     expect(snippet).toContain("product.tags contains 'Engagement Rings'");
   });
 
-  it('never submits an engraving without its charge', () => {
+  it('is complimentary and only submits an inscription the shopper chose', () => {
     expect(snippet).toContain('name="properties[Engraving]" value="" disabled');
     expect(snippet).toContain('name="properties[Engraving font]" value="" disabled');
-    expect(snippet).toMatch(/data-addon-variant[\s\S]*?disabled/);
-    expect(snippet).toContain('+ {{ addon_variant.price | money }}');
+    expect(snippet).toContain('<span class="pdp-engrave__price">Complimentary</span>');
+    expect(snippet).not.toContain('addon');
     // Visible fields are detached from the product form.
     expect(snippet).toContain('form="lm-engrave-none" data-engrave-toggle');
     expect(snippet).toMatch(/id="PdpEngraveText"[\s\S]*?form="lm-engrave-none"/);
@@ -48,11 +48,10 @@ describe('ring engraving on the product page', () => {
     expect(snippet).toMatch(/\{%- if endpoint != '' -%\}\s*<div class="pdp-engrave__ai">/);
   });
 
-  it('sends properties and the add-on line in one cart request', () => {
+  it('sends the engraving as line-item properties on the ring', () => {
     expect(themeJs).toContain('function formLineProperties(form)');
-    expect(themeJs).toContain("form.querySelectorAll('[data-addon-variant]')");
-    expect(themeJs).toContain('{ items: [line].concat(extraItems) }');
-    expect(themeJs).toContain("Ring: el.getAttribute('data-addon-for')");
-    expect(themeJs).toContain('addVariantToCart(variantId, quantity, properties, formAddOnItems(form, quantity, properties))');
+    expect(themeJs).toContain('if (properties && Object.keys(properties).length) line.properties = properties;');
+    expect(themeJs).toContain('addVariantToCart(variantId, quantity, formLineProperties(form))');
+    expect(themeJs).not.toContain('data-addon-variant');
   });
 });

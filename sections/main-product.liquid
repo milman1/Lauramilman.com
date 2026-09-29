@@ -378,7 +378,7 @@
 
         {% render 'ring-engraving',
           product: product,
-          addon: section.settings.engraving_product,
+          enabled: section.settings.engraving_enabled,
           ai_endpoint: section.settings.engraving_ai_endpoint,
           max_chars: section.settings.engraving_max_chars,
           metal_hint: metal_pill,
@@ -1008,10 +1008,11 @@
       "content": "Ring engraving"
     },
     {
-      "type": "product",
-      "id": "engraving_product",
-      "label": "Engraving add-on product",
-      "info": "Its price is what shoppers pay for engraving. The option shows on engagement rings only while this product is active on the Online Store."
+      "type": "checkbox",
+      "id": "engraving_enabled",
+      "label": "Offer complimentary engraving",
+      "info": "Shows on engagement rings. The inscription is saved on the order line.",
+      "default": true
     },
     {
       "type": "range",

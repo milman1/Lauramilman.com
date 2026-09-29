@@ -4,8 +4,7 @@
 
   Accepts:
   - product: the ring
-  - addon: the paid engraving product (section setting). Nothing renders
-    unless it is set and available, so engraving is never free by accident.
+  - enabled: section setting "Offer complimentary engraving"
   - ai_endpoint: Worker URL for the AI render (optional; button hidden if blank)
   - max_chars: inscription length limit
   - metal_hint: metal pill from the ring's tags, used until a variant says otherwise
@@ -13,17 +12,18 @@
 
   Shows an exact preview drawn in the browser as the shopper types, and an
   optional photoreal AI render of the same inscription on this ring. The
-  order carries the typed text (line-item properties on the ring and on the
-  engraving add-on); the AI image is only a visualization.
+  order carries the typed text as line-item properties on the ring
+  (Engraving, Engraving font); the AI image is only a visualization.
+  Engraving is complimentary.
 
   The visible fields sit outside the form (form="lm-engrave-none") and the
-  hidden properties start disabled, so a no-JS submit never carries an
-  engraving without its add-on charge. assets/theme.js adds the add-on line.
+  hidden properties start disabled; the script enables them only while
+  "Add an engraving" is ticked and an inscription is typed.
 {%- endcomment -%}
 
 {%- liquid
   assign show_engraving = false
-  if addon != blank and addon.available and is_watch != 'true' and product.id != addon.id
+  if enabled and is_watch != 'true'
     unless product.tags contains 'backvault-feed'
       for c in product.collections
         if c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'
@@ -40,7 +40,6 @@
     endunless
   endif
 
-  assign addon_variant = addon.selected_or_first_available_variant
   assign max_chars = max_chars | default: 20
   assign engrave_image = ''
   if product.featured_media != blank
@@ -71,7 +70,7 @@
     <label class="pdp-engrave__toggle">
       <input type="checkbox" form="lm-engrave-none" data-engrave-toggle aria-controls="PdpEngraveBody">
       <span class="pdp-engrave__toggle-text">Add an engraving</span>
-      <span class="pdp-engrave__price">+ {{ addon_variant.price | money }}</span>
+      <span class="pdp-engrave__price">Complimentary</span>
     </label>
 
     <div class="pdp-engrave__body" id="PdpEngraveBody" data-engrave-body hidden>
@@ -153,13 +152,6 @@
 
       <input type="hidden" name="properties[Engraving]" value="" disabled data-engrave-prop="text">
       <input type="hidden" name="properties[Engraving font]" value="" disabled data-engrave-prop="font">
-      <input
-        type="hidden"
-        value="{{ addon_variant.id }}"
-        data-addon-variant
-        data-addon-for="{{ product.title | escape }}"
-        disabled
-      >
     </div>
   </div>
 
@@ -311,7 +303,6 @@
       var fonts = root.querySelectorAll('[data-engrave-font]');
       var propText = root.querySelector('[data-engrave-prop="text"]');
       var propFont = root.querySelector('[data-engrave-prop="font"]');
-      var addon = root.querySelector('[data-addon-variant]');
       var aiBtn = root.querySelector('[data-engrave-ai]');
       var aiStatus = root.querySelector('[data-engrave-ai-status]');
       var aiResult = root.querySelector('[data-engrave-ai-result]');
@@ -385,7 +376,6 @@
         propFont.value = font;
         propText.disabled = !on;
         propFont.disabled = !on;
-        if (addon) addon.disabled = !on;
         if (text) error.hidden = true;
         if (aiResult && !aiResult.hidden) aiResult.classList.toggle('is-stale', stateKey() !== renderedKey);
         if (aiStatus && renderedKey && stateKey() !== renderedKey) {
