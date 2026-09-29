@@ -5,6 +5,7 @@ import { publicationMatchesChannel } from '../config/channels.js';
 import { APP_NAMESPACE, CUSTOM_NAMESPACE, FEED_TAG, MEDIA_MISSING_TAG, METAFIELD_NAMESPACE, OTHER_WATCH_BRAND_TAG, OTHER_WATCH_BRANDS_COLLECTION, PRODUCT_TYPES } from './product.js';
 import type { BrokenMedia, CatalogEntry } from './types.js';
 import {
+  HOUSE_GOLD_UPLOADIFY_HANDLES,
   isUploadifyNamespace,
   UPLOADIFY_ACTIVE_KEY,
   UPLOADIFY_VENDOR_SKU_KEY,
@@ -670,20 +671,23 @@ export class ShopifyClient {
   }
 
   /**
-   * Lab-grown finished jewelry and the gold-chains collection. Loose diamonds
-   * can appear in the lab-grown tag query; the caller drops them. Paginated
-   * on purpose so this does not start a second bulk operation.
+   * Lab-grown finished jewelry, the gold-chains collection, and the
+   * allowlisted house gold rings and bangles. Loose diamonds can appear in
+   * the lab-grown tag query; the caller drops them. Paginated on purpose so
+   * this does not start a second bulk operation.
    */
   async fetchUploadifyJewelry(): Promise<UploadifyJewelryCandidate[]> {
     const chains = await this.pageUploadifyJewelry(`collection handle`, 'chains');
     const chainIds = new Set(chains.map((product) => product.id));
-    const [peaceful, tagged] = await Promise.all([
+    const houseQuery = HOUSE_GOLD_UPLOADIFY_HANDLES.map((handle) => `handle:${handle}`).join(' OR ');
+    const [peaceful, tagged, house] = await Promise.all([
       this.pageUploadifyJewelry('vendor', `vendor:'Peaceful Diamonds'`),
       this.pageUploadifyJewelry('tag', 'tag:lab-grown'),
+      this.pageUploadifyJewelry('search', houseQuery),
     ]);
     const byId = new Map<string, UploadifyJewelryCandidate>();
     for (const product of chains) byId.set(product.id, { ...product, inChainsCollection: true });
-    for (const product of [...peaceful, ...tagged]) {
+    for (const product of [...peaceful, ...tagged, ...house]) {
       const existing = byId.get(product.id);
       if (existing) continue;
       byId.set(product.id, { ...product, inChainsCollection: chainIds.has(product.id) });
@@ -691,7 +695,10 @@ export class ShopifyClient {
     return [...byId.values()];
   }
 
-  private async pageUploadifyJewelry(mode: 'vendor' | 'tag' | 'collection handle', queryOrHandle: string): Promise<UploadifyJewelryCandidate[]> {
+  private async pageUploadifyJewelry(
+    mode: 'vendor' | 'tag' | 'search' | 'collection handle',
+    queryOrHandle: string,
+  ): Promise<UploadifyJewelryCandidate[]> {
     const out: UploadifyJewelryCandidate[] = [];
     let cursor: string | null = null;
     const fields = `

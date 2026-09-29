@@ -35,7 +35,7 @@ export function uploadifyActiveMetafield(active: boolean): Omit<UploadifyActiveW
 
 /**
  * Qualifying Belgium Dia watches (`w-` handles) get `uploadify_active` true.
- * `audience: 'jewelry'` is the lab-grown jewelry and gold-chain path.
+ * `audience: 'jewelry'` is the lab-grown jewelry, gold-chain, and house-gold path.
  * Loose diamonds are never written. Rows with no Shopify id yet are counted.
  */
 export function uploadifyActiveWrites(
@@ -144,8 +144,9 @@ export function uploadifyKeepHandles(
 /**
  * Delete `uploadify_active` from every product whose handle is not kept.
  * `keepHandles` may only retain `w-` watches. `jewelryKeepHandles` retains
- * active lab-grown jewelry and gold chains that still meet the Uploadify
- * gates. Any other handle is removed even if it was listed by mistake.
+ * active lab-grown jewelry, gold chains, and the allowlisted house gold
+ * rings and bangles that still meet the Uploadify gates. Any other handle
+ * is removed even if it was listed by mistake.
  */
 export function uploadifyActiveDeletesExcept(
   owners: Array<{ id: string; handle: string }>,
@@ -249,6 +250,24 @@ export function isGoldChainProduct(product: { inChainsCollection: boolean }): bo
   return product.inChainsCollection;
 }
 
+/**
+ * House gold rings and bangles priced from the Royal Chain cost sheet.
+ * These handles are the only fine-jewelry exceptions. A new piece is added
+ * here only after it is ACTIVE with a price, a SKU, and tracked quantity.
+ * The supplier name stays off the storefront, so it is not part of the handle.
+ */
+export const HOUSE_GOLD_UPLOADIFY_HANDLES = [
+  'polished-band-ring-14k-yellow-gold',
+  'mini-curb-stackable-ring-14k-yellow-gold',
+  'mini-signet-ring-14k-yellow-gold',
+  'polished-5mm-bangle-14k-yellow-gold',
+  'bar-cuff-bangle-14k-yellow-gold',
+] as const;
+
+export function isHouseGoldUploadifyHandle(handle: string): boolean {
+  return (HOUSE_GOLD_UPLOADIFY_HANDLES as readonly string[]).includes(handle);
+}
+
 function listingText(value: string): string {
   return value.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -269,10 +288,12 @@ export function uploadifyListingReady(product: UploadifyJewelryCandidate): boole
   return stocked.every((variant) => variant.priceUsd > 0);
 }
 
-/** Active lab-grown jewelry or a gold chain that meets the Uploadify gates. */
+/** Active lab-grown jewelry, a gold chain, or an allowlisted house gold piece that meets the Uploadify gates. */
 export function uploadifyJewelryQualifies(product: UploadifyJewelryCandidate): boolean {
   if (isLooseDiamondProduct(product)) return false;
-  if (!isLabGrownJewelry(product) && !isGoldChainProduct(product)) return false;
+  const allowed =
+    isLabGrownJewelry(product) || isGoldChainProduct(product) || isHouseGoldUploadifyHandle(product.handle);
+  if (!allowed) return false;
   return uploadifyListingReady(product);
 }
 
