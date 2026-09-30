@@ -80,7 +80,8 @@
             "link_text": "Shop gold",
             "url": "/collections/chains",
             "image_asset": "shop-world-fine-jewelry.webp",
-            "image_alt": "Gold station necklace on ivory satin"
+            "image_alt": "2.5mm paperclip chain bracelet in 14K yellow gold on a wrist",
+            "image": "shopify://shop_images/lmny-paperclip-2-5-mm-pclip060-wrist.png"
           }
         },
         "tile-2": {
@@ -203,43 +204,43 @@
             "url": "/collections/bangles"
           }
         },
-        "gold-6": {
-          "type": "product",
-          "settings": {
-            "product": "copy-of-band-gold-ring-sizable",
-            "title": "Nut Style Ring, Sizeable",
-            "subtitle": "14K Yellow Gold · Stackable"
-          }
-        },
-        "gold-7": {
+        "everyday-1": {
           "type": "product",
           "settings": {
             "product": "lmny-paperclip-2-5-mm-pclip060-bracelet",
             "title": "2.5mm Paperclip Chain Bracelet",
+            "subtitle": "14K Yellow Gold · 7 in"
+          }
+        },
+        "everyday-2": {
+          "type": "product",
+          "settings": {
+            "product": "lmny-rope-2-5-mm-hsr018",
+            "title": "2.7mm Rope Chain Necklace",
             "subtitle": "14K Yellow Gold"
           }
         },
-        "gold-8": {
+        "everyday-3": {
           "type": "product",
           "settings": {
-            "product": "lmny-herringbone-2-8-mm-sf030",
-            "title": "2.8mm Herringbone Chain Necklace",
+            "product": "lmny-herringbone-3-8-mm-sf040-bracelet",
+            "title": "3.8mm Herringbone Chain Bracelet",
             "subtitle": "14K Yellow Gold"
           }
         },
-        "gold-9": {
+        "everyday-4": {
           "type": "product",
           "settings": {
-            "product": "yellow-gold-bowtie-huggie-earrings-1",
-            "title": "Yellow Gold Bowtie Huggie Earrings",
-            "subtitle": "Yellow Gold"
+            "product": "lmny-curb-4-4-mm-lcrb100-bracelet",
+            "title": "4.4mm Curb Chain Bracelet",
+            "subtitle": "14K Yellow Gold"
           }
         },
-        "gold-10": {
+        "everyday-5": {
           "type": "product",
           "settings": {
-            "product": "lmny-snake-2-mm-ovsn200",
-            "title": "2mm Snake Chain Necklace",
+            "product": "lmny-snake-2-6-mm-ovsn260-bracelet",
+            "title": "2.6mm Snake Chain Bracelet",
             "subtitle": "14K Yellow Gold"
           }
         }
@@ -250,20 +251,20 @@
         "gold-3",
         "gold-4",
         "gold-5",
-        "gold-6",
-        "gold-7",
-        "gold-8",
-        "gold-9",
-        "gold-10"
+        "everyday-1",
+        "everyday-2",
+        "everyday-3",
+        "everyday-4",
+        "everyday-5"
       ],
       "settings": {
         "style": "cream",
         "columns": "5",
         "ratio": "0.84",
-        "eyebrow": "Gold Jewelry",
+        "eyebrow": "Everyday Gold",
         "title": "Gold for the office,",
         "title_emphasis": "and after.",
-        "text": "A weekday uniform that survives a noon lunch in Midtown, a 4 p.m. deck and a 7 p.m. drink without a costume change.",
+        "text": "Chains and bracelets for a weekday uniform: a noon lunch in Midtown, a 4 p.m. deck and a 7 p.m. drink without a costume change.",
         "all_text": "Shop all",
         "all_url": "/collections/chains",
         "mobile_button_text": "Shop All Gold Jewelry",
@@ -305,7 +306,7 @@
       ],
       "settings": {
         "image_asset": "shop-world-preowned-maison.webp",
-        "image_alt": "Gold diamond link bracelet on travertine and ivory satin",
+        "image_alt": "2.8mm herringbone chain bracelet in 14K yellow gold on a wrist",
         "eyebrow": "Wear it together",
         "title": "The watch you earned, and",
         "title_emphasis": "what you wear with it.",
@@ -314,7 +315,8 @@
         "button_url": "/collections/time-pieces",
         "link_text": "Tennis bracelets",
         "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery."
+        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery.",
+        "image": "shopify://shop_images/lmny-herringbone-2-8-mm-sf030-wrist.png"
       }
     },
     "pre-owned": {
@@ -723,12 +725,12 @@
     "worlds",
     "trust-strip",
     "gold",
-    "wear-together",
-    "pre-owned",
     "lab-grown",
     "loose-diamonds",
     "private-clients",
     "engagement",
+    "wear-together",
+    "pre-owned",
     "brand-story",
     "reviews"
   ]

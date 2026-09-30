@@ -185,14 +185,14 @@ def strip_liquid_comments(text: str) -> str:
     return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
 
 
-def test_homepage_walks_gold_watches_then_diamonds() -> None:
-    """The approved preview: gold, then watches with signed jewelry, then diamonds."""
+def test_homepage_walks_gold_and_diamonds_before_watches() -> None:
+    """Everyday gold and lab-grown lead; watches and signed jewelry sit lower."""
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     sections = data["sections"]
     assert order == [
-        "hero", "worlds", "trust-strip", "gold", "wear-together", "pre-owned",
-        "lab-grown", "loose-diamonds", "private-clients", "engagement",
+        "hero", "worlds", "trust-strip", "gold", "lab-grown", "loose-diamonds",
+        "private-clients", "engagement", "wear-together", "pre-owned",
         "brand-story", "reviews",
     ]
     types = {key: sections[key]["type"] for key in order}
@@ -419,7 +419,7 @@ def test_homepage_pairs_watches_with_signed_jewelry() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     pre = data["sections"]["pre-owned"]
-    assert order.index("wear-together") < order.index("pre-owned") < order.index("lab-grown")
+    assert order.index("lab-grown") < order.index("wear-together") < order.index("pre-owned")
     blocks = list(pre["blocks"].values())
     watch_chips = [b["settings"]["text"] for b in blocks if b["type"] == "watch_chip"]
     jewelry_chips = [b["settings"]["text"] for b in blocks if b["type"] == "jewelry_chip"]
