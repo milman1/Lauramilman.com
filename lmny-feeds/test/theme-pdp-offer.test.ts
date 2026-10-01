@@ -13,8 +13,8 @@ describe('product-page inquiry pills', () => {
 
   it('renders Ask, Make an offer, and Direct message on every product page', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
-    expect(inquiry).toContain('data-chat-intent="offer"');
     expect(inquiry).toContain('data-chat-intent="message"');
+    expect(inquiry).toContain('js-open-offer');
     expect(inquiry).toContain('Ask about this piece');
     expect(inquiry).toContain('Make an offer');
     expect(inquiry).toContain('Direct message');
@@ -23,6 +23,25 @@ describe('product-page inquiry pills', () => {
     expect(inquiry).not.toContain('desk_piece');
     expect(inquiry).not.toContain('Private viewing');
     expect(inquiry).not.toContain('Book a call');
+  });
+
+  it('sends offers through the contact form, not the AI chat iframe', () => {
+    expect(inquiry).not.toContain('data-chat-intent="offer"');
+    expect(inquiry).toContain("{%- form 'contact', id: 'PdpOfferForm'");
+    expect(inquiry).toContain('name="contact[request_type]" value="Offer"');
+    expect(inquiry).toContain('name="contact[offer]"');
+    expect(inquiry).toContain('name="contact[email]"');
+    expect(inquiry).toContain('name="contact[product]"');
+    expect(inquiry).toContain('name="contact[product_url]"');
+    expect(inquiry).toContain('form.posted_successfully?');
+    expect(inquiry).toContain('aria-controls="{{ offer_id }}"');
+    // The offer form must sit outside the add-to-cart form; nested forms break both.
+    for (const section of [mainProduct, diamondProduct]) {
+      const endProductForm = section.indexOf('{%- endform -%}');
+      const render = section.indexOf("{% render 'product-inquiry'");
+      expect(endProductForm).toBeGreaterThan(-1);
+      expect(render).toBeGreaterThan(endProductForm);
+    }
   });
 
   it('is rendered on jewelry and diamond product templates', () => {
