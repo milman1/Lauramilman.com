@@ -6,13 +6,21 @@
   Without a chosen diamond: links to natural and lab-grown loose diamonds
   of the same shape (the collections' native shape filter).
   With one (?diamond=<handle> from a diamond page, remembered for the
-  visit): shows it beside the ring and a "Request this pairing" button that
-  opens the concierge chat with both pieces named. Rings are priced with
-  their own center stone, so a pairing is quoted, never added to the cart.
+  visit): shows it beside the ring with a "Request this pairing" chat.
+
+  Checkout: rings are priced with their own center stone, so buying the
+  ring with the shopper's diamond needs a setting-only price. Those live on
+  one hidden product (section setting "Setting-only product"), one variant
+  per ring, SKU "SET-<ring handle>", or "SET-<ring handle>-<option value>"
+  when the price differs by a ring option such as 14K / 18K. Labor to set
+  the stone is included in that price. When a ring has an available
+  setting variant, the panel shows setting + diamond = total and adds both
+  to the cart; otherwise the pairing stays a quote request.
 
   Accepts:
   - product: the ring
   - is_watch: 'true' for watches
+  - setting_product: the hidden setting-only product (optional)
 {%- endcomment -%}
 
 {%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
@@ -28,6 +36,39 @@
     endif
     assign shape_l = ring_shape | downcase
     assign shape_q = ring_shape | url_encode
+
+    # Setting-only variants for this ring, matched by SKU.
+    assign sku_base = 'SET-' | append: product.handle | downcase
+    assign sku_prefix = sku_base | append: '-'
+    assign setting_json = ''
+    if setting_product != blank
+      for v in setting_product.variants
+        assign v_sku = v.sku | downcase
+        assign v_head = v_sku | slice: 0, sku_prefix.size
+        assign v_match = false
+        if v_sku == sku_base or v_head == sku_prefix
+          assign v_match = v.available
+        endif
+        if v_match
+          capture setting_json
+            echo setting_json
+            unless setting_json == ''
+              echo ','
+            endunless
+            echo '{"id":'
+            echo v.id
+            echo ',"sku":'
+            echo v_sku | json
+            echo ',"price":'
+            echo v.price
+            echo '}'
+          endcapture
+        endif
+      endfor
+    endif
+
+    # Ring option names, to record the shopper's choices (size, metal) on the order.
+    assign option_names = product.options | json
   -%}
   <div
     class="pdp-pair"
@@ -38,7 +79,10 @@
     data-ring-url="{{ shop.url }}{{ product.url }}"
     data-ring-image="{{ ring_image | escape }}"
     data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
+    data-setting-base="{{ sku_base | escape }}"
+    data-option-names="{{ option_names | escape }}"
   >
+    <script type="application/json" data-pair-settings>[{{ setting_json }}]</script>
     <p class="pdp-inquire__label">Choose your own diamond</p>
 
     <div data-pair-browse>
@@ -58,8 +102,17 @@
           <span class="pdp-pair__stone-price" data-pair-stone-price></span>
         </span>
       </a>
-      <p class="pdp-pair__text">The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+      <div class="pdp-pair__sum" data-pair-sum hidden>
+        <div class="pdp-pair__row"><span>Setting, without center stone</span><span data-pair-setting-price></span></div>
+        <div class="pdp-pair__row"><span>Your diamond</span><span data-pair-diamond-price></span></div>
+        <div class="pdp-pair__row"><span>Setting your diamond</span><span>Included</span></div>
+        <div class="pdp-pair__row pdp-pair__row--total"><span>Total</span><span data-pair-total></span></div>
+      </div>
+      <p class="pdp-pair__text" data-pair-buy-note hidden>We set your diamond by hand and confirm every detail with you before your ring is made.</p>
+      <p class="pdp-pair__text" data-pair-quote-note>The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+      <p class="pdp-pair__warn" data-pair-error role="alert" hidden></p>
       <div class="pdp-inquire__actions">
+        <button type="button" class="pdp-inquire__btn" data-pair-buy hidden>Add ring with this diamond</button>
         <button
           type="button"
           class="pdp-inquire__btn js-open-product-chat"
@@ -95,6 +148,7 @@
       color: var(--text-muted, #8A8070);
     }
     .pdp-pair__warn { color: var(--wine, #4A1428); }
+    .pdp-pair [hidden] { display: none !important; }
     .pdp-pair__stone {
       display: flex;
       align-items: center;
@@ -127,6 +181,21 @@
       font-size: 0.8rem;
       color: var(--gold-dark, #A88340);
     }
+    .pdp-pair__sum {
+      margin: 0 0 0.85rem;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.85rem;
+      color: var(--text-dark, #2C1810);
+    }
+    .pdp-pair__row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border-light, #E8E2D8);
+    }
+    .pdp-pair__row span:last-child { white-space: nowrap; }
+    .pdp-pair__row--total { font-weight: 600; border-bottom: 0; padding-top: 0.6rem; }
   </style>
 
   <script>
@@ -141,6 +210,14 @@
       var chosen = root.querySelector('[data-pair-chosen]');
       var mismatch = root.querySelector('[data-pair-mismatch]');
       var request = root.querySelector('[data-pair-request]');
+      var buy = root.querySelector('[data-pair-buy]');
+      var pairError = root.querySelector('[data-pair-error]');
+      var ringForm = document.querySelector('form[data-product-form]');
+      var settings = [];
+      try { settings = JSON.parse(root.querySelector('[data-pair-settings]').textContent) || []; } catch (e) {}
+      var optionNames = [];
+      try { optionNames = JSON.parse(root.getAttribute('data-option-names')) || []; } catch (e) {}
+      var stone = null;
 
       function store(key, value) {
         try {
@@ -185,7 +262,50 @@
         mismatch.textContent = note || '';
       }
 
+      // The ring options the shopper picked (size, metal), from the variant select.
+      function ringChoices() {
+        var sel = ringForm && ringForm.querySelector('select[name="id"]');
+        var opt = sel && sel.options[sel.selectedIndex];
+        var values = [];
+        try { values = JSON.parse((opt && opt.getAttribute('data-options')) || '[]'); } catch (e) {}
+        var out = [];
+        values.forEach(function (v, i) {
+          var name = optionNames[i] || '';
+          if (!v || v === 'Default Title' || /carat/i.test(name)) return;
+          out.push({ name: name, value: v });
+        });
+        return out;
+      }
+
+      // SET-<handle>-<option value> wins over SET-<handle> when it matches a choice.
+      function settingVariant() {
+        var base = root.getAttribute('data-setting-base');
+        var picked = ringChoices().map(function (c) { return String(c.value).toLowerCase().replace(/\s+/g, '-'); });
+        var exact = null;
+        var specific = null;
+        settings.forEach(function (v) {
+          if (v.sku === base) exact = v;
+          else if (picked.some(function (val) { return v.sku === base + '-' + val; })) specific = v;
+        });
+        return specific || exact;
+      }
+
+      function renderSum() {
+        var setting = stone && settingVariant();
+        var canBuy = !!(setting && stone.variants && stone.variants[0]);
+        root.querySelector('[data-pair-sum]').hidden = !canBuy;
+        root.querySelector('[data-pair-buy-note]').hidden = !canBuy;
+        root.querySelector('[data-pair-quote-note]').hidden = canBuy;
+        buy.hidden = !canBuy;
+        request.classList.toggle('pdp-inquire__btn--ghost', canBuy);
+        if (!canBuy) return;
+        root.querySelector('[data-pair-setting-price]').textContent = money(setting.price);
+        root.querySelector('[data-pair-diamond-price]').textContent = money(stone.price);
+        root.querySelector('[data-pair-total]').textContent = money(setting.price + stone.price);
+      }
+
       function showChosen(p) {
+        stone = p;
         var url = window.location.origin + '/products/' + p.handle;
         var img = root.querySelector('[data-pair-stone-img]');
         root.querySelector('[data-pair-stone-link]').href = '/products/' + p.handle;
@@ -201,7 +321,48 @@
         request.setAttribute('data-pair-url', url);
         browse.hidden = true;
         chosen.hidden = false;
+        renderSum();
       }
+
+      if (ringForm) {
+        ringForm.addEventListener('click', function (e) {
+          if (e.target.closest('[data-option-group]')) setTimeout(renderSum, 0);
+        });
+      }
+
+      buy.addEventListener('click', function () {
+        var setting = settingVariant();
+        if (!stone || !setting) return;
+        var ringTitle = root.getAttribute('data-ring-title');
+        // Engraving and any other properties the shopper added on the ring form.
+        var props = (ringForm && typeof window.formLineProperties === 'function') ? window.formLineProperties(ringForm) : {};
+        props.Ring = ringTitle;
+        props.Diamond = stone.title;
+        ringChoices().forEach(function (c) { if (c.name) props[c.name] = c.value; });
+        buy.disabled = true;
+        pairError.hidden = true;
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            items: [
+              { id: setting.id, quantity: 1, properties: props },
+              { id: stone.variants[0].id, quantity: 1, properties: { 'Set in': ringTitle } }
+            ]
+          })
+        })
+          .then(function (res) {
+            return res.json().then(function (data) {
+              if (!res.ok || data.status) throw new Error(data.description || 'cart');
+              window.location.href = '/cart';
+            });
+          })
+          .catch(function () {
+            buy.disabled = false;
+            pairError.textContent = 'We could not add this pairing to your cart. Please try again, or request it below.';
+            pairError.hidden = false;
+          });
+      });
 
       var fromUrl = new URLSearchParams(window.location.search).get('diamond');
       var remembered = read('lmPairDiamond');
@@ -236,6 +397,7 @@
 
       root.querySelector('[data-pair-clear]').addEventListener('click', function () {
         store('lmPairDiamond', null);
+        stone = null;
         if (fromUrl && window.history && window.history.replaceState) {
           var u = new URL(window.location.href);
           u.searchParams.delete('diamond');

@@ -411,7 +411,7 @@
       {%- endform -%}
 
       {% render 'product-inquiry', product: product %}
-      {% render 'ring-diamond-pairing', product: product, is_watch: is_watch %}
+      {% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}
 
       <!-- 8. Specifications — only rows with values; whole block hides when empty -->
       {%- if spec_rows != blank -%}
@@ -1029,6 +1029,16 @@
       "id": "engraving_ai_endpoint",
       "label": "AI engraving render endpoint",
       "info": "https://lauramilman-com.<subdomain>.workers.dev/engraving/render. Leave blank to hide the AI button; the live preview still shows."
+    },
+    {
+      "type": "header",
+      "content": "Your own diamond"
+    },
+    {
+      "type": "product",
+      "id": "setting_only_product",
+      "label": "Setting-only product",
+      "info": "Hidden product with one variant per engagement ring at its setting-only price (labor included). Variant SKU: SET-<ring handle>, or SET-<ring handle>-<option> such as -14k. Rings without one stay on Request this pairing."
     }
   ],
   "blocks": [

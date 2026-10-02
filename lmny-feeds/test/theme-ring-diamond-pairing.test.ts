@@ -31,20 +31,32 @@ describe('engagement ring ↔ loose diamond pairing', () => {
   });
 
   it('links a ring to loose diamonds of its shape through the native filter', () => {
-    expect(mainProduct).toContain("{% render 'ring-diamond-pairing', product: product, is_watch: is_watch %}");
+    expect(mainProduct).toContain("{% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}");
     expect(ringSide).toContain('/collections/natural-diamonds?filter.p.m.custom.diamond_shape={{ shape_q }}');
     expect(ringSide).toContain('/collections/lab-grown-diamonds?filter.p.m.custom.diamond_shape={{ shape_q }}');
     expect(ringSide).toContain("{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' -%}");
   });
 
-  it('only pairs an available loose diamond of the same shape, and quotes rather than adds to cart', () => {
+  it('only pairs an available loose diamond of the same shape', () => {
     expect(ringSide).toContain("var DIAMOND_TYPES = ['Natural Diamond', 'Lab-Grown Diamond'];");
     expect(ringSide).toContain('if (stoneShape !== ringShape)');
     expect(ringSide).toContain('if (!p.available)');
     expect(ringSide).toContain('var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;');
     expect(ringSide).toContain('data-chat-intent="pair"');
+  });
+
+  it('sells setting + diamond only when a setting-only price exists, labor included', () => {
+    expect(mainProduct).toContain('setting_product: section.settings.setting_only_product');
+    expect(mainProduct).toContain('"id": "setting_only_product"');
+    expect(ringSide).toContain("assign sku_base = 'SET-' | append: product.handle | downcase");
+    expect(ringSide).toContain('assign v_match = v.available');
+    expect(ringSide).toContain('<span>Setting your diamond</span><span>Included</span>');
+    expect(ringSide).toContain('var canBuy = !!(setting && stone.variants && stone.variants[0]);');
+    expect(ringSide).toContain("{ id: setting.id, quantity: 1, properties: props }");
+    expect(ringSide).toContain("{ id: stone.variants[0].id, quantity: 1, properties: { 'Set in': ringTitle } }");
+    // Without a setting price the pairing stays a quote.
     expect(ringSide).toContain('The ring price above includes our own center stone.');
-    expect(ringSide).not.toContain('/cart/add');
+    expect(ringSide).toContain('.pdp-pair [hidden] { display: none !important; }');
   });
 
   it('names both pieces in the concierge chat', () => {
