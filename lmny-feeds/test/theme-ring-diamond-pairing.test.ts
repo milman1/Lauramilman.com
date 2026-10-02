@@ -27,7 +27,6 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(diamondSide).toContain('{%- if ring_shape == stone_shape -%}');
     expect(diamondSide).toContain('{{ ring.url }}?diamond={{ product.handle | url_encode }}');
     expect(diamondSide).not.toContain('ring.price');
-    expect(diamondSide).toContain('Rings are pictured with our own center stones.');
   });
 
   it('links a ring to loose diamonds of its shape through the native filter', () => {
@@ -57,6 +56,21 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     // Without a setting price the pairing stays a quote.
     expect(ringSide).toContain('The ring price above includes our own center stone.');
     expect(ringSide).toContain('.pdp-pair [hidden] { display: none !important; }');
+  });
+
+  it('sells a setting product (tag ring-setting) as itself with the chosen diamond', () => {
+    const isRing = themeFile('snippets/is-engagement-ring.liquid');
+    expect(isRing).toContain("product.tags contains 'ring-setting'");
+    expect(ringSide).toContain("if product.tags contains 'ring-setting'");
+    expect(ringSide).toContain('echo \',"self":true,"price":\'');
+    expect(ringSide).toContain('if (settings.length && settings[0].self)');
+    expect(ringSide).toContain('This setting is sold without a center stone.');
+  });
+
+  it('lists settings before finished rings on diamond pages', () => {
+    expect(diamondSide).toContain("assign setting_collection = collections['ring-settings']");
+    expect(diamondSide).toContain('{%- if pass == 1 -%}{%- assign source = setting_collection -%}');
+    expect(diamondSide).toContain('Choose a setting and we will set this diamond in it, labor included.');
   });
 
   it('names both pieces in the concierge chat', () => {

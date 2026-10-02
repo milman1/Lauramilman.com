@@ -16,6 +16,8 @@
   the stone is included in that price. When a ring has an available
   setting variant, the panel shows setting + diamond = total and adds both
   to the cart; otherwise the pairing stays a quote request.
+  A product tagged ring-setting is itself sold without a center stone, so
+  its own selected variant is the setting.
 
   Accepts:
   - product: the ring
@@ -41,7 +43,25 @@
     assign sku_base = 'SET-' | append: product.handle | downcase
     assign sku_prefix = sku_base | append: '-'
     assign setting_json = ''
-    if setting_product != blank
+    assign is_setting = false
+    if product.tags contains 'ring-setting'
+      assign is_setting = true
+      for v in product.variants
+        if v.available
+          capture setting_json
+            echo setting_json
+            unless setting_json == ''
+              echo ','
+            endunless
+            echo '{"id":'
+            echo v.id
+            echo ',"self":true,"price":'
+            echo v.price
+            echo '}'
+          endcapture
+        endif
+      endfor
+    elsif setting_product != blank
       for v in setting_product.variants
         assign v_sku = v.sku | downcase
         assign v_head = v_sku | slice: 0, sku_prefix.size
@@ -109,7 +129,11 @@
         <div class="pdp-pair__row pdp-pair__row--total"><span>Total</span><span data-pair-total></span></div>
       </div>
       <p class="pdp-pair__text" data-pair-buy-note hidden>We set your diamond by hand and confirm every detail with you before your ring is made.</p>
-      <p class="pdp-pair__text" data-pair-quote-note>The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+      {%- if is_setting -%}
+        <p class="pdp-pair__text" data-pair-quote-note>This setting is sold without a center stone. Request the pairing and we will confirm availability and every detail before anything is made.</p>
+      {%- else -%}
+        <p class="pdp-pair__text" data-pair-quote-note>The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+      {%- endif -%}
       <p class="pdp-pair__warn" data-pair-error role="alert" hidden></p>
       <div class="pdp-inquire__actions">
         <button type="button" class="pdp-inquire__btn" data-pair-buy hidden>Add ring with this diamond</button>
@@ -279,6 +303,15 @@
 
       // SET-<handle>-<option value> wins over SET-<handle> when it matches a choice.
       function settingVariant() {
+        // A setting product sells its own selected variant.
+        if (settings.length && settings[0].self) {
+          var sel = ringForm && ringForm.querySelector('select[name="id"]');
+          var current = sel ? String(sel.value) : '';
+          for (var i = 0; i < settings.length; i++) {
+            if (String(settings[i].id) === current) return settings[i];
+          }
+          return null;
+        }
         var base = root.getAttribute('data-setting-base');
         var picked = ringChoices().map(function (c) { return String(c.value).toLowerCase().replace(/\s+/g, '-'); });
         var exact = null;

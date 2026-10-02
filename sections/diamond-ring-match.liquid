@@ -3,13 +3,16 @@
   Matches on shape only: the diamond's custom.diamond_shape against each
   ring's stated center-stone shape (snippets/center-stone-shape.liquid).
   "Set it in this ring" opens the ring with ?diamond=<handle>, where the
-  pairing block shows both and takes a quote request. Rings are priced with
-  their own center stone, so no ring price is shown here.
+  pairing block shows both, with checkout where a setting-only price exists
+  and a quote request otherwise. Settings sold without a center stone
+  (collection ring-settings, tag ring-setting) are listed first, then the
+  finished engagement rings. No prices are shown here.
 {%- endcomment -%}
 
 {%- liquid
   assign stone_shape = product.metafields.custom.diamond_shape.value | strip
   assign ring_collection = section.settings.collection | default: collections['engagement-rings']
+  assign setting_collection = collections['ring-settings']
   assign max_rings = section.settings.max_rings | default: 4
   assign matches = 0
   assign stone_image = ''
@@ -20,7 +23,10 @@
 
 {%- if stone_shape != blank and ring_collection != blank -%}
   {%- capture cards -%}
-    {%- for ring in ring_collection.products limit: 50 -%}
+    {%- for pass in (1..2) -%}
+    {%- if pass == 1 -%}{%- assign source = setting_collection -%}{%- else -%}{%- assign source = ring_collection -%}{%- endif -%}
+    {%- if source == blank -%}{%- continue -%}{%- endif -%}
+    {%- for ring in source.products limit: 50 -%}
       {%- if matches < max_rings and ring.available and ring.id != product.id -%}
         {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
         {%- assign ring_shape = ring_shape | strip -%}
@@ -48,6 +54,7 @@
         {%- endif -%}
       {%- endif -%}
     {%- endfor -%}
+    {%- endfor -%}
   {%- endcapture -%}
 
   <section class="dring" aria-labelledby="DiamondRingMatch-{{ section.id }}" data-dring data-stone-shape="{{ stone_shape | escape }}" data-stone-handle="{{ product.handle }}">
@@ -63,7 +70,7 @@
 
       {%- if matches > 0 -%}
         <ul class="dring__grid" role="list">{{ cards }}</ul>
-        <p class="dring__note">Rings are pictured with our own center stones. Choose a setting and we will quote it with this diamond and confirm every detail before anything is made.</p>
+        <p class="dring__note">Choose a setting and we will set this diamond in it, labor included. Finished rings are pictured with our own center stones. We confirm every detail with you before anything is made.</p>
       {%- else -%}
         <p class="dring__note">None of our current settings is made for {{ stone_shape | downcase }}-cut diamonds. Ask us about a custom setting for this stone.</p>
         <div class="pdp-inquire__actions dring__ask">
