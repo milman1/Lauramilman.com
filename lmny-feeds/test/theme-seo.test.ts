@@ -24,7 +24,7 @@ describe('theme SEO integration', () => {
     const layout = themeFile('layout/theme.liquid');
     const meta = themeFile('snippets/meta-tags.liquid');
 
-    expect(layout).toContain('Lab-Grown & Estate Jewelry | Laura Milman New York');
+    expect(layout).toContain('Gold & Lab-Grown Diamond Jewelry | Laura Milman New York');
     expect(layout).toContain('suppress_shop_suffix');
     expect(layout).toContain("when 'david-webb'");
     expect(layout).toContain('Lab-Grown Jewelry | Laura Milman');
@@ -60,24 +60,25 @@ describe('theme SEO integration', () => {
     expect(diamondCollection).toContain('server-rendered diamond links');
     expect(diamondCollection).toContain("render 'product-card'");
     expect(collection).toContain("render 'collection-guide'");
-    expect(themeFile('sections/header.liquid')).toContain('>All Jewelry</a>');
+    expect(themeFile('sections/header.liquid')).toContain('>All jewelry</a>');
     expect(themeFile('sections/header.liquid')).not.toContain('All Fine Jewelry');
-    const labBlock = themeFile('sections/peaceful-diamonds.liquid');
+    const labBlock = themeFile('sections/lab-grown-diamonds-feature.liquid');
     expect(labBlock).toContain('var(--wine, #4A1428)');
     expect(labBlock).toContain('var(--gold, #C9A050)');
     expect(labBlock).not.toContain('--pd-blue');
     expect(themeFile('assets/theme.css')).toContain('color: var(--wine, #4A1428)');
   });
 
-  it('lists Chains with the other Fine Jewelry types, not as a style column', () => {
+  it('lists Chains in the gold menu and keeps the chains collection linked', () => {
     const header = themeFile('sections/header.liquid');
     const footer = themeFile('sections/footer.liquid');
     const collection = themeFile('sections/main-collection.liquid');
 
     expect(header).not.toContain('nav__dropdown--fine');
     expect(header).not.toContain('All Chains');
-    expect(header).not.toContain('nav__dropdown-heading">Chains');
-    expect(header).toMatch(/href="\/collections\/necklaces"[\s\S]*href="\/collections\/chains"[\s\S]*href="\/collections\/pendants-1"/);
+    expect(header).toContain('href="/collections/chain-necklaces"');
+    expect(header).toContain('Chains by style');
+    expect(header).toMatch(/href="\/collections\/necklaces"[\s\S]*href="\/collections\/rings"[\s\S]*href="\/collections\/all-pendants"/);
     expect(header).toContain('>Chains</a>');
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');

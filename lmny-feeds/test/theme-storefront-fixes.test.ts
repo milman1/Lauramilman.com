@@ -26,44 +26,44 @@ describe('collection filter drawer', () => {
 });
 
 describe('lab-grown jewelry merchandising', () => {
-  it('slides the homepage still and sends the collection hero to loose diamonds', () => {
-    const block = themeFile('sections/peaceful-diamonds.liquid');
-    const hero = themeFile('sections/peaceful-hero.liquid');
-    const peaceful = themeJson('templates/collection.peaceful.json');
+  it('slides the lab-grown still and sends the collection hero to loose diamonds', () => {
+    const block = themeFile('sections/lab-grown-diamonds-feature.liquid');
+    const hero = themeFile('sections/lab-grown-hero.liquid');
+    const labGrown = themeJson('templates/collection.lab-grown.json');
 
     expect(block).toContain('data-pd-slider');
     expect(block).toContain('data-pd-prev');
     expect(block).toContain('data-pd-next');
     expect(hero).toContain("/collections/lab-grown-diamonds");
     expect(hero).not.toContain('/collections/lab-grown-rings');
-    expect(peaceful.sections.hero.settings?.primary_label).toBe('Shop Lab-Grown Jewelry');
-    expect(peaceful.sections.hero.settings?.secondary_label).toBe('Shop Lab-Grown Diamonds');
-    expect(peaceful.sections.hero.settings?.secondary_url).toBe('/collections/lab-grown-diamonds');
+    expect(labGrown.sections.hero.settings?.primary_label).toBe('Shop Lab-Grown Jewelry');
+    expect(labGrown.sections.hero.settings?.secondary_label).toBe('Shop Lab-Grown Diamonds');
+    expect(labGrown.sections.hero.settings?.secondary_url).toBe('/collections/lab-grown-diamonds');
   });
 
-  it('gives More to explore a lab-grown card and a product section', () => {
+  it('gives the homepage a lab-grown world and a product row', () => {
     const home = themeJson('templates/index.json');
-    const worlds = home.sections['shop-worlds'];
+    const worlds = home.sections.worlds;
     const titles = (worlds.block_order ?? []).map((id) => worlds.blocks?.[id]?.settings?.title);
-    expect(titles[0]).toBe('Lab-Grown Jewelry');
-    expect(home.sections['lab-grown-edit'].type).toBe('featured-products');
-    expect(home.sections['lab-grown-edit'].settings?.collection).toBe('peaceful-diamonds-by-laura-milman-new-york');
-    expect(home.order.indexOf('lab-grown-edit')).toBe(home.order.indexOf('shop-worlds') + 1);
+    expect(titles).toContain('Lab-Grown Diamonds');
+    expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
+    expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('worlds'));
+    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('loose-diamonds'));
   });
 });
 
 describe('homepage consultation and reviews', () => {
-  it('uses a compact consultation band above the story, and the testimonial cards', () => {
+  it('places the private-client band before the story and shows live Google reviews', () => {
     const home = themeJson('templates/index.json');
-    const consult = themeFile('sections/private-clients.liquid');
+    const reviews = themeFile('sections/lmh-reviews.liquid');
 
-    expect(home.sections['private-clients'].settings?.compact).toBe(true);
-    expect(consult).toContain('lm-private--compact');
-    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('philosophy-quote'));
+    expect(home.sections['private-clients'].type).toBe('lmh-private-band');
+    expect(home.sections['private-clients'].settings?.button_text).toBe('Book a Consultation');
     expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('brand-story'));
-    expect(home.sections.reviews.type).toBe('testimonials');
-    expect(JSON.stringify(home.sections.reviews)).not.toContain('google-reviews-strip');
-    expect(JSON.stringify(home.sections.reviews)).toContain('What Our Clients Say');
-    expect(JSON.stringify(home.sections.reviews)).toContain('Alexandra K.');
+    expect(home.sections.reviews.type).toBe('lmh-reviews');
+    expect(home.sections.reviews.settings?.title).toBe('What clients say');
+    expect(home.sections.reviews.settings?.embed_id).toBe('25717519');
+    expect(reviews).toContain('sk-ww-google-reviews');
+    expect(JSON.stringify(home.sections.reviews)).not.toContain('Alexandra K.');
   });
 });

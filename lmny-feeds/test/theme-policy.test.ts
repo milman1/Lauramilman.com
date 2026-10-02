@@ -40,11 +40,15 @@ describe('storefront warranty and return policy', () => {
     expect(pdp).toContain('Exchanges Only');
     expect(pdp).toContain('1-Year Warranty');
 
-    for (const path of ['templates/index.json', 'templates/page.shop.json', 'templates/page.ring-builder.json', 'sections/trust-strip.liquid']) {
+    for (const path of ['templates/page.shop.json', 'templates/page.ring-builder.json', 'sections/trust-strip.liquid']) {
       const text = themeFile(path);
       expect(text, path).toContain('7-Day Jewelry Returns');
       expect(text, path).toContain('Watches: Exchanges Only');
     }
+
+    const home = themeFile('templates/index.json');
+    expect(home, 'templates/index.json').toContain('7-Day Jewelry Returns');
+    expect(home, 'templates/index.json').toContain('Watches are exchange-only within 7 days of delivery');
 
     const footer = themeFile('sections/footer.liquid');
     const settings = themeFile('config/settings_data.json');
