@@ -251,3 +251,27 @@ export function supplierRetailFromCost(costUsd: number): number {
   const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
   return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
 }
+
+/**
+ * Engagement-ring settings sold without a center stone, for a shopper who
+ * pairs the ring with a loose diamond (theme: snippets/ring-diamond-pairing,
+ * one hidden "setting-only" variant per ring, SKU SET-<ring handle>).
+ * Merchant decision 2026-10-02: retail = setting cost × 3, labor to set the
+ * shopper's diamond included in that price. Rounded to the nearest dollar;
+ * no other rounding was specified.
+ *
+ *   retail = round(cost × 3)
+ *
+ * Settings only. It is not the Royal Chain rule above, even though both are
+ * × 3, and it never prices a complete ring with its own center stone.
+ */
+export const SETTING_ONLY = {
+  costMultiple: 3,
+} as const;
+
+export function settingOnlyRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Setting-only pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * SETTING_ONLY.costMultiple);
+}

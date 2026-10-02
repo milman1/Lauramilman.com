@@ -48,13 +48,15 @@ function showCartNotification() {
   }, 2500);
 }
 
-function addVariantToCart(variantId, quantity) {
+function addVariantToCart(variantId, quantity, properties) {
   var qty = parseInt(quantity, 10);
   if (!qty || qty < 1) qty = 1;
+  var line = { id: Number(variantId), quantity: qty };
+  if (properties && Object.keys(properties).length) line.properties = properties;
   return fetch('/cart/add.js', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ id: Number(variantId), quantity: qty })
+    body: JSON.stringify(line)
   }).then(function (res) {
     return res.json().then(function (data) {
       if (!res.ok || data.status) {
@@ -91,6 +93,16 @@ function updateCartCount() {
     .catch(function () {});
 }
 
+/* Line-item properties (e.g. the engraving) from enabled properties[...] fields. */
+function formLineProperties(form) {
+  var props = {};
+  Array.prototype.forEach.call(form.elements, function (el) {
+    var m = !el.disabled && el.name && el.name.match(/^properties\[(.+)\]$/);
+    if (m && el.value !== '') props[m[1]] = el.value;
+  });
+  return props;
+}
+
 /* === Add to Cart (AJAX) === */
 (function () {
   document.addEventListener('submit', function (e) {
@@ -116,7 +128,7 @@ function updateCartCount() {
     var originalText = atcBtn.textContent;
     atcBtn.textContent = '…';
 
-    addVariantToCart(variantId, quantity)
+    addVariantToCart(variantId, quantity, formLineProperties(form))
       .then(function () {
         if (goCheckout) {
           window.location.href = '/checkout';
@@ -459,6 +471,10 @@ function formatMoney(cents) {
     if (intent === 'message') {
       return "Hi — I'd like to message about " + piece + link + '.';
     }
+    if (intent === 'pair' && payload.pairTitle) {
+      var pairLink = payload.pairUrl ? ' (' + payload.pairUrl + ')' : '';
+      return "Hi — I'd like to set the " + payload.pairTitle + pairLink + ' in the ' + piece + link + '. Could you quote the pairing?';
+    }
     if (title) {
       return "Hi — I'm looking at " + title + link + '.';
     }
@@ -468,6 +484,7 @@ function formatMoney(cents) {
   function intentLabel(intent) {
     if (intent === 'offer') return 'Make an offer';
     if (intent === 'message') return 'Direct message';
+    if (intent === 'pair') return 'Pairing request';
     return 'Ask about this piece';
   }
 
@@ -734,6 +751,8 @@ function formatMoney(cents) {
       productId: btn.getAttribute('data-product-id') || '',
       productHandle: btn.getAttribute('data-product-handle') || '',
       productImage: btn.getAttribute('data-product-image') || '',
+      pairTitle: btn.getAttribute('data-pair-title') || '',
+      pairUrl: btn.getAttribute('data-pair-url') || '',
       intent: btn.getAttribute('data-chat-intent') || 'ask'
     };
   }
