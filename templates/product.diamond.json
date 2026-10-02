@@ -7,15 +7,10 @@
     "recommendations": {
       "type": "product-recommendations",
       "settings": {}
-    },
-    "ring-match": {
-      "type": "diamond-ring-match",
-      "settings": {}
     }
   },
   "order": [
     "main",
-    "ring-match",
     "recommendations"
   ]
 }

@@ -376,15 +376,6 @@
           {%- endfor -%}
         {%- endunless -%}
 
-        {% render 'ring-engraving',
-          product: product,
-          enabled: section.settings.engraving_enabled,
-          ai_endpoint: section.settings.engraving_ai_endpoint,
-          max_chars: section.settings.engraving_max_chars,
-          metal_hint: metal_pill,
-          is_watch: is_watch
-        %}
-
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
@@ -410,8 +401,22 @@
 
       {%- endform -%}
 
-      {% render 'product-inquiry', product: product %}
       {% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}
+      {%- comment -%}
+        Engraving sits below the buy area and the diamond panel; its fields are
+        tied to the product form by form="{{ product_form_id }}", so Add to Cart
+        and "Add ring with this diamond" still carry the inscription.
+      {%- endcomment -%}
+      {% render 'ring-engraving',
+        product: product,
+        form_id: product_form_id,
+        enabled: section.settings.engraving_enabled,
+        ai_endpoint: section.settings.engraving_ai_endpoint,
+        max_chars: section.settings.engraving_max_chars,
+        metal_hint: metal_pill,
+        is_watch: is_watch
+      %}
+      {% render 'product-inquiry', product: product %}
 
       <!-- 8. Specifications — only rows with values; whole block hides when empty -->
       {%- if spec_rows != blank -%}

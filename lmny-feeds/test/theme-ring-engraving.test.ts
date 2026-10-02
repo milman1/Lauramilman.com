@@ -10,14 +10,20 @@ describe('ring engraving on the product page', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const themeJs = themeFile('assets/theme.js');
 
-  it('renders inside the product form with the on/off and AI settings', () => {
+  it('renders below the buy area and diamond panel, tied to the product form', () => {
     expect(mainProduct).toContain("{% render 'ring-engraving',");
+    expect(mainProduct).toContain('form_id: product_form_id,');
     expect(mainProduct).toContain('enabled: section.settings.engraving_enabled');
     expect(mainProduct).toContain('ai_endpoint: section.settings.engraving_ai_endpoint');
     expect(mainProduct).toContain('"id": "engraving_enabled"');
     expect(mainProduct).toContain('"id": "engraving_ai_endpoint"');
     const form = mainProduct.slice(mainProduct.indexOf("{%- form 'product'"), mainProduct.indexOf('{%- endform -%}'));
-    expect(form).toContain("{% render 'ring-engraving',");
+    expect(form).not.toContain("{% render 'ring-engraving',");
+    const after = mainProduct.slice(mainProduct.indexOf("{% render 'ring-diamond-pairing'"));
+    expect(after.indexOf("{% render 'ring-engraving',")).toBeGreaterThan(0);
+    expect(after.indexOf("{% render 'ring-engraving',")).toBeLessThan(after.indexOf("{% render 'product-inquiry'"));
+    expect(snippet).toContain('<input type="hidden" form="{{ form_id }}" name="properties[Engraving]"');
+    expect(snippet).toContain("document.getElementById(root.getAttribute('data-form-id'))");
   });
 
   it('shows only on engagement rings, never watches or estate feed pieces', () => {
