@@ -41,29 +41,31 @@ describe('natural pricing', () => {
 });
 
 describe('lab pricing', () => {
-  it('applies 3× at every size', () => {
+  it('applies 6× through $1,000 and 3× above', () => {
     const cheap = priceLab(labStone({ carat: 1.0, costUsd: 400, pricePerCaratUsd: 400 }));
-    const sold = priceLab(labStone({ carat: 2.0, costUsd: 182, pricePerCaratUsd: 91 }));
+    const atCap = priceLab(labStone({ carat: 2.69, costUsd: 239.41, pricePerCaratUsd: 89 }));
+    const boundary = priceLab(labStone({ carat: 2.0, costUsd: 1000, pricePerCaratUsd: 500 }));
     const mid = priceLab(labStone({ carat: 2.0, costUsd: 1200, pricePerCaratUsd: 600 }));
     const big = priceLab(labStone({ carat: 10.26, costUsd: 1662.12, pricePerCaratUsd: 162 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(1200);
-    expect(sold.ok && sold.priced.retailUsd).toBe(546);
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(2400);
+    expect(atCap.ok && atCap.priced.retailUsd).toBe(1436);
+    expect(boundary.ok && boundary.priced.retailUsd).toBe(6000);
     expect(mid.ok && mid.priced.retailUsd).toBe(3600);
     expect(big.ok && big.priced.retailUsd).toBe(4986);
   });
 
-  it('does not compress markup on high-value lab stones', () => {
+  it('keeps stones above $1,000 at 3×', () => {
     const r = priceLab(labStone({ carat: 12, costUsd: 50_000, pricePerCaratUsd: 4000 }));
     expect(r.ok && r.priced.retailUsd).toBe(150_000);
   });
 
-  it('keeps a representative 5.01ct stone profitable after the 10% welcome discount', () => {
+  it('keeps a representative low-cost stone profitable after the 10% welcome discount', () => {
     const r = priceLab(labStone({ carat: 5.01, costUsd: 590, pricePerCaratUsd: 117.76 }));
-    expect(r.ok && r.priced.retailUsd).toBe(1770);
+    expect(r.ok && r.priced.retailUsd).toBe(3540);
     if (r.ok) {
       const discountedRevenue = r.priced.retailUsd * 0.9;
-      expect(discountedRevenue).toBeCloseTo(1593);
-      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.63, 2);
+      expect(discountedRevenue).toBeCloseTo(3186);
+      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.815, 2);
     }
   });
 
@@ -81,18 +83,18 @@ describe('lab pricing', () => {
 
   it('holds when retail is below the absolute floor for ≥1ct', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 40, pricePerCaratUsd: 40 }));
-    // 40 × 3 = 120 < $216 retail floor
+    // 40 × 6 = 240 < $432 retail floor
     expect(!r.ok && (r.hold.reason === 'lab_retail_floor' || r.hold.reason === 'lab_cost_per_carat_floor')).toBe(true);
   });
 
-  it('publishes a 1ct lab once its 3× ticket reaches the $216 floor', () => {
+  it('publishes a 1ct lab once its 6× ticket reaches the $432 floor', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 72, pricePerCaratUsd: 72 }));
-    expect(r.ok && r.priced.retailUsd).toBe(216);
+    expect(r.ok && r.priced.retailUsd).toBe(432);
   });
 
-  it('publishes a 1ct lab once the ticket clears $216', () => {
+  it('publishes a 1ct lab once the ticket clears $432', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 130, pricePerCaratUsd: 130 }));
-    expect(r.ok && r.priced.retailUsd).toBe(390);
+    expect(r.ok && r.priced.retailUsd).toBe(780);
   });
 
   it('holds when retail < cost (structurally impossible)', () => {
@@ -112,7 +114,7 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
    * and grade are fixed, larger stones must retail for more — never less.
    */
   it('is monotonic across 0.5 → 10ct', () => {
-    const ppc = 130; // fixed $/ct; 1ct × 3 = $390, above the $216 floor
+    const ppc = 80; // fixed $/ct; 10ct Amount $800 stays in the 6× band, above the $432 floor
     const carats = [0.5, 1, 2, 3, 6, 10];
     const retails: number[] = [];
     for (const carat of carats) {

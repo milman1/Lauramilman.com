@@ -43,13 +43,15 @@ holds a stones table — Shopify products are the only live copy.
      |---|---|---|
      | ≤ $4,000 | 1.40× | ~29% |
      | above $4,000 | 1.25× | 20% |
-   - lab: retail = round(Amount × 3) at every size. Mapping guards still catch
-     a Buy_Price used as a total. The 10% welcome discount remains eligible
-     (realized 2.70× cost).
+   - lab: retail = round(Amount × 6) when Amount ≤ $1,000, and round(Amount × 3)
+     above that. Mapping guards still catch a Buy_Price used as a total. The
+     10% welcome discount remains eligible (realized 5.40× cost on the low
+     band, 2.70× above $1,000).
 
      | Amount (cost) | Multiplier | After 10% welcome |
      |---|---|---|
-     | any | 3× | 2.70× |
+     | ≤ $1,000 | 6× | 5.40× |
+     | above $1,000 | 3× | 2.70× |
    - watches: supplier cost × chart (`config/pricing.ts` `WATCH_COST_TIERS`,
      applied in `src/watchPricing.ts`). **No Hours mid.** Aftermarket,
      no-papers, iced-out, naked-comment, Power Watch, and Uncle Manny are

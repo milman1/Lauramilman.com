@@ -53,7 +53,7 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
     expect(priced.ok && priced.priced.retailUsd).not.toBe(88_719);
   });
 
-  it('applies the flat 3× markup to a mid-priced lab', () => {
+  it('applies the 6× markup to a lab at or under $1,000', () => {
     const { items, holds } = normalizeStones(
       [
         {
@@ -79,6 +79,6 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
       costUsd: 900,
     });
     const priced = priceLab(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(2700); // 900 × 3
+    expect(priced.ok && priced.priced.retailUsd).toBe(5400); // 900 × 6
   });
 });
