@@ -127,19 +127,19 @@ describe('priceWatchFromCost', () => {
     });
   });
 
-  it('keeps the ten market ceilings', () => {
+  it('keeps the market ceilings that still clear cost after fees', () => {
     expect(WATCH_RETAIL_CAP_BY_STOCK).toEqual({
-      RW3087: 7_900,
       T3489: 10_600,
       T3559: 14_900,
       T3652: 15_800,
       T3690: 15_900,
-      T3691: 15_900,
       RW3084: 16_500,
       RW3103: 16_500,
       T3590: 26_400,
       RW3100: 49_000,
     });
+    expect(WATCH_RETAIL_CAP_BY_STOCK.RW3087).toBeUndefined();
+    expect(WATCH_RETAIL_CAP_BY_STOCK.T3691).toBeUndefined();
   });
 
   /**

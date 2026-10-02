@@ -136,18 +136,19 @@ export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
 
 /**
  * Retail ceiling, in USD, for feed stock numbers whose chart price sits above
- * the highest comparable ask on record and whose cost still fits under that
- * ask. Rounded down to $100 so the site price is at or under the ask.
+ * the highest comparable ask on record, whose cost still fits under that ask,
+ * and whose ceiling still clears cost after the eBay watch fee. Rounded down
+ * to $100 so the site price is at or under the ask. 114200 (RW3087) and
+ * 126234 (T3691) stay on the chart: the ask there is under cost once the fee
+ * is taken out.
  * Keyed by stock number, not reference: a sibling of the same reference that
  * is already under the ask keeps the chart.
  */
 export const WATCH_RETAIL_CAP_BY_STOCK: Readonly<Record<string, number>> = {
-  RW3087: 7_900, // 114200
   T3489: 10_600, // 116234
   T3559: 14_900, // 124060
   T3652: 15_800, // 116713LN
   T3690: 15_900, // 116613LN
-  T3691: 15_900, // 126234
   RW3084: 16_500, // 116613LB
   RW3103: 16_500, // 116613LB
   T3590: 26_400, // 116610LV
