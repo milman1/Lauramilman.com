@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  FANCY_COLOR_JEWELRY,
   LAB_GROWN_JEWELRY,
   LOOSE_LAB_GROWN,
+  fancyColorJewelryRetailFromCost,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
   STONE_TIERS,
@@ -42,5 +44,20 @@ describe('pricing SSOT — API + lab jewelry', () => {
   it('rejects non-positive lab jewelry cost', () => {
     expect(() => labGrownJewelryRetailFromCost(0)).toThrow(/invalid cost/);
     expect(() => labGrownJewelryRetailFromCost(-10)).toThrow(/invalid cost/);
+  });
+
+  it('prices fancy-color jewelry at a 35% margin, nearest $10', () => {
+    expect(FANCY_COLOR_JEWELRY.grossMarginPct).toBe(0.35);
+    expect(FANCY_COLOR_JEWELRY.roundToUsd).toBe(10);
+    expect(fancyColorJewelryRetailFromCost(650)).toBe(1000);
+    expect(fancyColorJewelryRetailFromCost(1000)).toBe(1540);
+    expect(fancyColorJewelryRetailFromCost(325)).toBe(500);
+    const retail = fancyColorJewelryRetailFromCost(1000);
+    expect((retail - 1000) / retail).toBeCloseTo(0.35, 2);
+  });
+
+  it('rejects non-positive fancy-color jewelry cost', () => {
+    expect(() => fancyColorJewelryRetailFromCost(0)).toThrow(/invalid cost/);
+    expect(() => fancyColorJewelryRetailFromCost(-10)).toThrow(/invalid cost/);
   });
 });

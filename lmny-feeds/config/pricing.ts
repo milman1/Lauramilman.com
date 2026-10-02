@@ -164,6 +164,33 @@ export function labGrownJewelryRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
 }
 
+/**
+ * Fancy-color finished jewelry bought from the Namdar wholesale sheet
+ * (merchant decision 2026-10-02). Not loose stones, not lab-grown jewelry,
+ * not Royal Chain, and not Back Vault.
+ *
+ *   retail = round to nearest $10 of cost / (1 − 0.35)
+ *
+ * 35% is the gross margin, (retail − cost) / retail. Half-dollars round
+ * away from zero via `Math.round`. Cost is the June wholesale price when
+ * the catalog lists one, otherwise the September sheet price. The supplier
+ * name never appears on a product.
+ */
+export const FANCY_COLOR_JEWELRY = {
+  grossMarginPct: 0.35,
+  roundToUsd: 10,
+} as const;
+
+/** Retail for fancy-color finished jewelry from recorded wholesale cost. */
+export function fancyColorJewelryRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Fancy color jewelry pricing: invalid cost ${costUsd}`);
+  }
+  const raw = costUsd / (1 - FANCY_COLOR_JEWELRY.grossMarginPct);
+  const step = FANCY_COLOR_JEWELRY.roundToUsd;
+  return Math.round(raw / step) * step;
+}
+
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
 export const STONE_GATES = {
   worstColor: 'L',
