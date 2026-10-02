@@ -9,12 +9,13 @@
  */
 
 import {
+  EBAY_WATCH_FEE,
   WATCH_COST_TIERS,
   WATCH_RETAIL_CAP_BY_STOCK,
   type WatchCostTier,
 } from '../config/pricing.js';
 
-export { WATCH_COST_TIERS, WATCH_RETAIL_CAP_BY_STOCK, type WatchCostTier };
+export { EBAY_WATCH_FEE, WATCH_COST_TIERS, WATCH_RETAIL_CAP_BY_STOCK, type WatchCostTier };
 
 export type WatchPricingOutcome =
   | { status: 'priced'; retailUsd: number }
@@ -58,17 +59,57 @@ export function retailFromCost(costUsd: number): number {
   return Math.max(roundUpTo100(costUsd * tier.multiplier), tier.minRetailUsd);
 }
 
+/** eBay Watches, Parts & Accessories final value fee, plus the per-order fee. */
+export function ebayWatchFeeUsd(priceUsd: number): number {
+  if (!(priceUsd > 0)) return EBAY_WATCH_FEE.perOrderUsd;
+  let fee = EBAY_WATCH_FEE.perOrderUsd;
+  let prev = 0;
+  let left = priceUsd;
+  for (const band of EBAY_WATCH_FEE.bands) {
+    const slice = Math.min(left, band.upToUsd - prev);
+    if (slice > 0) fee += slice * band.rate;
+    left -= slice;
+    prev = band.upToUsd;
+    if (left <= 1e-9) break;
+  }
+  return fee;
+}
+
 /**
- * Chart retail, then the stock-number ceiling when that ceiling is at least
- * cost. A ceiling below cost is ignored. A ceiling above the chart does not
- * raise the price.
+ * Lowest $100 price whose eBay watch-fee net is still at least cost.
+ * Marginal fee never exceeds the price, so stepping up by $100 reaches it.
+ */
+export function minRetailClearingEbayFee(costUsd: number): number {
+  const low = EBAY_WATCH_FEE.bands[0]!;
+  const mid = EBAY_WATCH_FEE.bands[1]!;
+  const top = EBAY_WATCH_FEE.bands[2]!;
+  const topStart = mid.upToUsd;
+  const feeThroughTopStart = ebayWatchFeeUsd(topStart);
+  let raw = (costUsd + feeThroughTopStart - top.rate * topStart) / (1 - top.rate);
+  if (!(raw > topStart)) {
+    const midStart = low.upToUsd;
+    const feeThroughMidStart = ebayWatchFeeUsd(midStart);
+    raw = (costUsd + feeThroughMidStart - mid.rate * midStart) / (1 - mid.rate);
+    if (!(raw > midStart)) {
+      raw = (costUsd + EBAY_WATCH_FEE.perOrderUsd) / (1 - low.rate);
+    }
+  }
+  let price = roundUpTo100(Math.max(raw, costUsd));
+  while (price - ebayWatchFeeUsd(price) + 1e-6 < costUsd) price += 100;
+  return price;
+}
+
+/**
+ * Chart retail, then a stock-number ceiling when that ceiling still nets at
+ * least cost after the eBay watch fee. A ceiling that would not is ignored.
+ * The result is never below the fee floor, so the net cannot fall under cost.
  */
 export function retailForWatch(costUsd: number, stockRef?: string | null): number {
   const chart = retailFromCost(costUsd);
+  const floor = minRetailClearingEbayFee(costUsd);
   const cap = stockRef ? WATCH_RETAIL_CAP_BY_STOCK[stockRef] : undefined;
-  if (cap == null) return chart;
-  if (!(cap >= roundUpTo100(costUsd))) return chart;
-  return Math.min(chart, cap);
+  const capped = cap != null && cap < chart && cap >= floor ? cap : chart;
+  return Math.max(capped, floor);
 }
 
 /**

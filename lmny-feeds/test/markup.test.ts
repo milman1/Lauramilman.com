@@ -174,8 +174,12 @@ describe('watch pricing', () => {
   });
 
   it('prices a capped stock number through the sync entry point', () => {
-    const r = priceWatch(watch({ stockRef: 'T3489', costUsd: 10_000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(10_600);
+    // 9400 × 1.20 = 11280 → 11300. The $10,600 ceiling still clears the fee.
+    const capped = priceWatch(watch({ stockRef: 'T3489', costUsd: 9_400 }));
+    expect(capped.ok && capped.priced.retailUsd).toBe(10_600);
+    // At $10,000 the same ceiling nets under cost, so the chart stands.
+    const chart = priceWatch(watch({ stockRef: 'T3489', costUsd: 10_000 }));
+    expect(chart.ok && chart.priced.retailUsd).toBe(12_000);
   });
 
   it('floors the $5k band at $6,500', () => {

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ebayWatchFeeUsd,
+  minRetailClearingEbayFee,
   priceWatchFromCost,
   retailFromCost,
   roundUpTo100,
@@ -104,6 +106,32 @@ describe('priceWatchFromCost', () => {
 
   it('prices from cost alone', () => {
     expect(priceWatchFromCost({ costUsd: 9_000 })).toEqual({ status: 'priced', retailUsd: 10_800 });
+  });
+
+  it('charges the eBay watch fee in slices', () => {
+    // 15% of 500 + $0.40.
+    expect(ebayWatchFeeUsd(500)).toBeCloseTo(75.4, 5);
+    // 15% of 1,000 + 6.5% of 6,500 + 3% of 2,500 + $0.40.
+    expect(ebayWatchFeeUsd(10_000)).toBeCloseTo(647.9, 5);
+  });
+
+  it('never nets under cost after the eBay watch fee', () => {
+    for (let cost = 100; cost <= 80_000; cost += 100) {
+      const retail = priceWatchFromCost({ costUsd: cost });
+      expect(retail.status).toBe('priced');
+      if (retail.status !== 'priced') continue;
+      const net = retail.retailUsd - ebayWatchFeeUsd(retail.retailUsd);
+      expect(net, `cost ${cost}`).toBeGreaterThanOrEqual(cost);
+      expect(retail.retailUsd).toBeGreaterThanOrEqual(minRetailClearingEbayFee(cost));
+    }
+  });
+
+  it('drops a ceiling that would net under cost', () => {
+    // Ceiling 10,600 on a $10,000 cost nets under the fee. Chart is 12,000.
+    expect(priceWatchFromCost({ costUsd: 10_000, stockRef: 'T3489' })).toEqual({
+      status: 'priced',
+      retailUsd: 12_000,
+    });
   });
 
   it('caps a listed stock number without raising the chart', () => {

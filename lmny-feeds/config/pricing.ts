@@ -122,9 +122,23 @@ export const LAB_GUARDS = {
  *   Above $40,000         1.08×  round up to $100, min $44,800
  *
  * `WATCH_RETAIL_CAP_BY_STOCK` is a retail ceiling for one feed stock number.
- * It applies only when the ceiling is at least cost rounded up to $100.
- * A ceiling below cost is ignored and the chart stands.
+ * It applies only when the ceiling still nets at least cost after
+ * `EBAY_WATCH_FEE`. Otherwise the chart stands.
+ *
+ * `EBAY_WATCH_FEE` is the published Watches, Parts & Accessories final value
+ * fee with no store subscription, plus the per-order fee. A store
+ * subscription charges less, and a site card fee is smaller, so a price that
+ * clears this fee does not net under cost on either channel.
  */
+export const EBAY_WATCH_FEE = {
+  perOrderUsd: 0.4,
+  /** Each rate applies only to the slice of the price inside the band. */
+  bands: [
+    { upToUsd: 1_000, rate: 0.15 },
+    { upToUsd: 7_500, rate: 0.065 },
+    { upToUsd: Number.POSITIVE_INFINITY, rate: 0.03 },
+  ],
+} as const;
 export const WATCH_COST_TIERS = [
   { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
   { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
@@ -137,7 +151,7 @@ export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
 /**
  * Retail ceiling, in USD, for feed stock numbers whose chart price sits above
  * the highest comparable ask on record, whose cost still fits under that ask,
- * and whose ceiling still clears cost after the eBay watch fee. Rounded down
+ * and whose ceiling still nets at least cost after `EBAY_WATCH_FEE`. Rounded down
  * to $100 so the site price is at or under the ask. 114200 (RW3087) and
  * 126234 (T3691) stay on the chart: the ask there is under cost once the fee
  * is taken out.

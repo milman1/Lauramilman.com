@@ -64,9 +64,11 @@ holds a stones table — Shopify products are the only live copy.
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
 
      Eight feed stock numbers in `WATCH_RETAIL_CAP_BY_STOCK` use that retail
-     ceiling when it is at least cost. A ceiling below cost is ignored.
-     114200 (RW3087) and 126234 (T3691) stay on the chart: the comparable
-     ask there nets under cost after the eBay watch fee.
+     ceiling when it still nets at least cost after the eBay watch fee
+     (`EBAY_WATCH_FEE`: 15% to $1,000, 6.5% to $7,500, 3% above, plus $0.40).
+     A ceiling that would net under cost is ignored, and retail is never
+     below the price that clears the fee. 114200 (RW3087) and 126234 (T3691)
+     stay on the chart.
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
      `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
