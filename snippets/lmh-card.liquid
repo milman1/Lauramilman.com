@@ -1,0 +1,32 @@
+{%- comment -%}
+  Homepage product card (lmh-*). Live photo, price and availability come
+  from the product; the short title and the spec line come from the block,
+  so a long listing title reads as it does in the approved preview.
+
+  Params: card_product (product), card_title (text), card_sub (text),
+  sizes (string for srcset).
+{%- endcomment -%}
+{%- if card_product != blank -%}
+  {%- assign lmh_title = card_title | default: card_product.title -%}
+  <a class="lmh-card" href="{{ card_product.url }}">
+    <span class="lmh-card__media">
+      {%- if card_product.featured_image != blank -%}
+        {{ card_product.featured_image | image_url: width: 720 | image_tag:
+          widths: '240, 360, 480, 720',
+          sizes: sizes,
+          loading: 'lazy',
+          alt: lmh_title
+        }}
+      {%- endif -%}
+    </span>
+    <span class="lmh-card__body">
+      <span class="lmh-card__title">{{ lmh_title | escape }}</span>
+      {%- if card_sub != blank -%}<span class="lmh-card__sub">{{ card_sub | escape }}</span>{%- endif -%}
+      {%- if card_product.available -%}
+        <span class="lmh-card__price">{{ card_product.price | money_without_trailing_zeros }}</span>
+      {%- else -%}
+        <span class="lmh-card__sold">Sold</span>
+      {%- endif -%}
+    </span>
+  </a>
+{%- endif -%}

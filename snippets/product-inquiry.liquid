@@ -1,7 +1,11 @@
 {%- comment -%}
   Product-page concierge. Every product — watches, jewelry, diamonds —
-  gets the same three pills. Each one opens Shopify Inbox with this
-  product already named in the chat. Hold is intentionally not rendered.
+  gets the same three pills. Ask and Direct message open Shopify chat with
+  this product pinned beside it. Make an offer opens a short form that
+  posts through Shopify's contact form, so the offer reaches the store's
+  email with the piece attached. Shopify chat is now an AI agent in a
+  cross-origin iframe the theme cannot type into, so offers never depend
+  on it. Hold is intentionally not rendered.
 {%- endcomment -%}
 {%- liquid
   assign product_image = ''
@@ -9,6 +13,7 @@
     assign product_image = product.featured_image | image_url: width: 240
   endif
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign offer_id = 'PdpOffer-' | append: product.id
 -%}
 
 <div class="pdp-inquire" id="PdpInquire">
@@ -28,13 +33,9 @@
     </button>
     <button
       type="button"
-      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-      data-chat-intent="offer"
-      data-product-id="{{ product.id }}"
-      data-product-handle="{{ product.handle }}"
-      data-product-title="{{ display_title | escape }}"
-      data-product-url="{{ shop.url }}{{ product.url }}"
-      data-product-image="{{ product_image | escape }}"
+      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-offer"
+      aria-expanded="false"
+      aria-controls="{{ offer_id }}"
     >
       Make an offer
     </button>
@@ -50,6 +51,59 @@
     >
       Direct message
     </button>
+  </div>
+
+  <div class="pdp-offer" id="{{ offer_id }}" hidden>
+    {%- form 'contact', id: 'PdpOfferForm', class: 'pdp-offer__form' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="pdp-offer__status" role="status" data-offer-result>
+          Thank you — your offer was sent. We will reply by email.
+        </p>
+      {%- else -%}
+        {%- if form.errors -%}
+          <p class="pdp-offer__status pdp-offer__status--error" role="alert" data-offer-result>
+            Your offer did not send. Please check your email address and try again.
+          </p>
+        {%- endif -%}
+        <p class="pdp-offer__intro">
+          Name your price for <strong>{{ display_title }}</strong>. We review every offer and reply by email.
+        </p>
+
+        <input type="hidden" name="contact[request_type]" value="Offer">
+        <input type="hidden" name="contact[product]" value="{{ display_title | escape }}">
+        <input type="hidden" name="contact[product_url]" value="{{ shop.url }}{{ product.url }}">
+        <input type="hidden" name="contact[listed_price]" value="{{ product.selected_or_first_available_variant.price | money_without_trailing_zeros | strip_html | escape }}">
+        {%- unless product.has_only_default_variant -%}
+          <input type="hidden" name="contact[option]" value="{{ product.selected_or_first_available_variant.title | escape }}" data-offer-variant>
+        {%- endunless -%}
+
+        <div class="pdp-offer__row">
+          <div class="pdp-offer__field">
+            <label for="{{ offer_id }}-amount">Your offer (USD)</label>
+            <input type="text" id="{{ offer_id }}-amount" name="contact[offer]" inputmode="decimal" autocomplete="off" placeholder="$" required>
+          </div>
+          <div class="pdp-offer__field">
+            <label for="{{ offer_id }}-name">Name</label>
+            <input type="text" id="{{ offer_id }}-name" name="contact[name]" autocomplete="name" value="{{ customer.name | escape }}" required>
+          </div>
+        </div>
+        <div class="pdp-offer__row">
+          <div class="pdp-offer__field">
+            <label for="{{ offer_id }}-email">Email</label>
+            <input type="email" id="{{ offer_id }}-email" name="contact[email]" autocomplete="email" value="{{ customer.email | escape }}" required>
+          </div>
+          <div class="pdp-offer__field">
+            <label for="{{ offer_id }}-phone">Phone (optional)</label>
+            <input type="tel" id="{{ offer_id }}-phone" name="contact[phone]" autocomplete="tel">
+          </div>
+        </div>
+        <div class="pdp-offer__field">
+          <label for="{{ offer_id }}-note">Note (optional)</label>
+          <textarea id="{{ offer_id }}-note" name="contact[body]" rows="2"></textarea>
+        </div>
+        <button type="submit" class="pdp-inquire__btn pdp-offer__submit">Send offer</button>
+      {%- endif -%}
+    {%- endform -%}
   </div>
 </div>
 
@@ -101,6 +155,62 @@
     color: var(--gold-dark, #A88340);
     background: rgba(201, 160, 80, 0.08);
   }
+  .pdp-offer {
+    margin-top: 0.9rem;
+  }
+  .pdp-offer[hidden] {
+    display: none;
+  }
+  .pdp-offer__intro,
+  .pdp-offer__status {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-dark, #2C1810);
+  }
+  .pdp-offer__status--error {
+    color: #9B2C2C;
+  }
+  .pdp-offer__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .pdp-offer__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+  }
+  .pdp-offer__field label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+  .pdp-offer__field input,
+  .pdp-offer__field textarea {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    font-size: 16px;
+    color: var(--text-dark, #2C1810);
+    background: #fff;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+  }
+  .pdp-offer__field input:focus,
+  .pdp-offer__field textarea:focus {
+    outline: 2px solid var(--gold, #C9A050);
+    outline-offset: 1px;
+  }
+  @media (max-width: 480px) {
+    .pdp-offer__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
   .dpdp--navy .pdp-inquire__btn {
     background: var(--wine, #4A1428);
     border-color: var(--wine, #4A1428);
@@ -147,6 +257,39 @@
         if (go() || tries >= 40) clearInterval(wait);
       }, 100);
     }
+    function setOfferOpen(toggle, panel, open) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    document.querySelectorAll('.js-open-offer').forEach(function (toggle) {
+      var panel = document.getElementById(toggle.getAttribute('aria-controls'));
+      if (!panel) return;
+      if (panel.querySelector('[data-offer-result]')) {
+        setOfferOpen(toggle, panel, true);
+        panel.scrollIntoView({ block: 'center' });
+      }
+      toggle.addEventListener('click', function (event) {
+        event.preventDefault();
+        var open = panel.hidden;
+        setOfferOpen(toggle, panel, open);
+        if (open) {
+          var amount = panel.querySelector('input[name="contact[offer]"]');
+          if (amount) amount.focus();
+        }
+      });
+      var form = panel.querySelector('form');
+      var variantField = panel.querySelector('[data-offer-variant]');
+      if (form && variantField) {
+        form.addEventListener('submit', function () {
+          var picked = document.querySelector('form[data-product-form] select[name="id"] option:checked');
+          var options = picked && picked.getAttribute('data-options');
+          if (!options) return;
+          try {
+            variantField.value = JSON.parse(options).join(' / ');
+          } catch (err) {}
+        });
+      }
+    });
     document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
       btn.addEventListener('click', function (event) {
         event.preventDefault();

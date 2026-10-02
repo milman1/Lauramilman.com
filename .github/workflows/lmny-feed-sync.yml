@@ -58,7 +58,16 @@ jobs:
 
       - run: npm ci
 
-      - run: npm test
+      # Theme snapshot tests describe the storefront. A homepage or header
+      # edit must not stop the hourly catalogue sync. Pull requests still
+      # run the full suite, including those snapshots.
+      - name: Test sync logic
+        if: github.event_name == 'schedule'
+        run: npx vitest run --exclude 'test/theme-*.test.ts'
+
+      - name: Test
+        if: github.event_name != 'schedule'
+        run: npm test
 
       - name: Run sync
         env:

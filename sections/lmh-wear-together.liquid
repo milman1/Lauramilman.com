@@ -1,0 +1,83 @@
+{%- comment -%}
+  "Wear it together": photo at left, an espresso panel at right listing a
+  watch, a tennis bracelet and a chain bracelet with live prices.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-wear lmh-dark" aria-labelledby="LmhWear-{{ section.id }}">
+  <div class="lmh-wear__media">
+    {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 45vw' -%}
+  </div>
+  <div class="lmh-wear__copy">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhWear-{{ section.id }}">
+      {{- section.settings.title | escape -}}
+      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+    </h2>
+    {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+    <ul class="lmh-wear__list" role="list">
+      {%- for block in section.blocks -%}
+        {%- assign p = block.settings.product -%}
+        {%- if p != blank -%}
+          <li {{ block.shopify_attributes }}>
+            <a class="lmh-wear__item" href="{{ p.url }}">
+              <span class="lmh-wear__thumb">
+                {%- if p.featured_image != blank -%}
+                  {{ p.featured_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: '' }}
+                {%- endif -%}
+              </span>
+              <span class="lmh-wear__name">
+                <strong>{{ block.settings.title | default: p.title | escape }}</strong>
+                {%- if block.settings.subtitle != blank -%}<span>{{ block.settings.subtitle | escape }}</span>{%- endif -%}
+              </span>
+              <span class="lmh-wear__price">{% if p.available %}{{ p.price | money_without_trailing_zeros }}{% else %}Sold{% endif %}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    <div class="lmh-wear__ctas">
+      {%- if section.settings.button_text != blank -%}
+        <a class="lmh-btn lmh-btn--gold" href="{{ section.settings.button_url }}">{{ section.settings.button_text | escape }}</a>
+      {%- endif -%}
+      {%- if section.settings.link_text != blank -%}
+        <a class="lmh-arrow" href="{{ section.settings.link_url }}">{{ section.settings.link_text | escape }} {% render 'lmh-arrow' %}</a>
+      {%- endif -%}
+    </div>
+    {%- if section.settings.note != blank -%}<p class="lmh-wear__note">{{ section.settings.note | escape }}</p>{%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM wear it together",
+  "tag": "div",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_asset", "label": "Theme asset image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Wear it together" },
+    { "type": "text", "id": "title", "label": "Heading" },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "button_text", "label": "Button" },
+    { "type": "url", "id": "button_url", "label": "Button link" },
+    { "type": "text", "id": "link_text", "label": "Second link" },
+    { "type": "url", "id": "link_url", "label": "Second link URL" },
+    { "type": "textarea", "id": "note", "label": "Small print" }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "title", "label": "Short name (optional)" },
+        { "type": "text", "id": "subtitle", "label": "Spec line" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [{ "name": "LM wear it together" }]
+}
+{% endschema %}

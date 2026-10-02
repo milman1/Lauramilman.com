@@ -31,18 +31,16 @@
     "sections": {
       "header": {
         "type": "header",
-        "custom_css": [
-          ".header{background:#1e1109!important}",
-          ".logo{width:165px!important;height:60px;display:block;flex-shrink:0;background:#1e1109 url(\"https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=800\") center/235px auto no-repeat;background-blend-mode:lighten}",
-          ".logo img{opacity:0;width:100%!important;height:100%!important}",
-          "@media(max-width:600px){.logo{width:145px!important;height:48px;background-size:210px}}"
-        ],
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "estate_label": "Pre-Owned Watches & Jewelry",
           "peaceful_label": "Lab-Grown Diamonds",
           "peaceful_url": "",
-          "enable_sticky": true
+          "enable_sticky": true,
+          "announce_text": "Private appointments in Midtown",
+          "announce_link_text": "Book a viewing",
+          "announce_link_short": "Book",
+          "announce_url": "/pages/private-clients"
         }
       },
       "footer": {
@@ -126,14 +124,6 @@
         "settings": {
           "enabled": true,
           "label": "Popular Searches"
-        }
-      },
-      "announcement-bar": {
-        "type": "announcement-bar",
-        "settings": {
-          "enable": true,
-          "text": "Private appointments in Midtown · Book a viewing",
-          "link": "/pages/private-clients"
         }
       }
     },

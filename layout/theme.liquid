@@ -256,9 +256,11 @@
 
   <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
     <a class="lm-skip-link" href="#MainContent">Skip to content</a>
-    {% section 'announcement-bar' %}
     {% section 'header' %}
-    {% section 'popular-searches' %}
+    {%- comment -%} The approved homepage goes straight from the header to the hero. {%- endcomment -%}
+    {%- unless template.name == 'index' -%}
+      {% section 'popular-searches' %}
+    {%- endunless -%}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {%- unless request.page_type == 'index' or request.page_type == 'product' -%}
