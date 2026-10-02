@@ -4,6 +4,7 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  isHouseGoldUploadifyHandle,
   uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
@@ -255,6 +256,48 @@ describe('uploadifyJewelryQualifies', () => {
     ).toBe(true);
   });
 
+  it('accepts allowlisted house gold when it is listing-ready', () => {
+    expect(isHouseGoldUploadifyHandle('polished-band-ring-14k-yellow-gold')).toBe(true);
+    expect(isHouseGoldUploadifyHandle('cluster-diamond-studs')).toBe(false);
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'polished-band-ring-14k-yellow-gold',
+          vendor: 'Laura Milman New York',
+          tags: ['media-missing'],
+          productType: 'Rings',
+          inChainsCollection: false,
+          variants: [{ sku: 'R6651-07', qty: 1, tracked: true, priceUsd: 360 }],
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'polished-5mm-bangle-14k-yellow-gold',
+          vendor: 'Laura Milman New York',
+          tags: ['media-missing'],
+          productType: 'Bracelets',
+          variants: [
+            { sku: '3/16S-07', qty: 1, tracked: true, priceUsd: 2225 },
+            { sku: '3/16S-08', qty: 1, tracked: true, priceUsd: 2455 },
+          ],
+        }),
+      ),
+    ).toBe(true);
+    expect(uploadifyVendorSkuForVariants([{ sku: '3/16S-07' }, { sku: '3/16S-08' }])).toBeNull();
+    expect(
+      uploadifyJewelryQualifies(
+        jewelry({
+          handle: 'bar-cuff-bangle-14k-yellow-gold',
+          vendor: 'Laura Milman New York',
+          tags: [],
+          status: 'DRAFT',
+        }),
+      ),
+    ).toBe(false);
+  });
+
   it('rejects drafts, loose stones, missing sku, zero quantity, and a blank category', () => {
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-draft', status: 'DRAFT' }))).toBe(false);
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lg-stone', productType: 'Lab-Grown Diamond', tags: ['lab-grown'] }))).toBe(false);
@@ -286,6 +329,19 @@ describe('uploadify jewelry writes', () => {
       },
     ]);
     expect(sku.writes[0]?.value).toBe('BC14WTSRD150P');
+  });
+
+  it('keeps an allowlisted house gold handle and still removes other fine jewelry', () => {
+    expect(
+      uploadifyActiveDeletesExcept(
+        [
+          { id: 'gid://shopify/Product/8', handle: 'mini-signet-ring-14k-yellow-gold' },
+          { id: 'gid://shopify/Product/4', handle: 'cluster-diamond-studs' },
+        ],
+        new Set(),
+        new Set(['mini-signet-ring-14k-yellow-gold']),
+      ),
+    ).toEqual([{ ownerId: 'gid://shopify/Product/4', namespace: 'uploadify_product', key: 'uploadify_active' }]);
   });
 
   it('keeps a qualifying jewelry handle and still removes everything else', () => {
