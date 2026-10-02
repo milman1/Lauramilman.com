@@ -8,7 +8,8 @@ function themeFile(path: string): string {
 describe('engagement ring ↔ loose diamond pairing', () => {
   const shape = themeFile('snippets/center-stone-shape.liquid');
   const ringSide = themeFile('snippets/ring-diamond-pairing.liquid');
-  const diamondSide = themeFile('sections/diamond-ring-match.liquid');
+  const diamondSide = themeFile('snippets/diamond-setting-picker.liquid');
+  const diamondSection = themeFile('sections/main-product-diamond.liquid');
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondTemplate = JSON.parse(themeFile('templates/product.diamond.json'));
   const themeJs = themeFile('assets/theme.js');
@@ -20,13 +21,17 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(shape).not.toContain('product.title');
   });
 
-  it('puts rings for this shape on every loose-diamond page, without ring prices', () => {
-    expect(diamondTemplate.order).toEqual(['main', 'ring-match', 'recommendations']);
-    expect(diamondTemplate.sections['ring-match'].type).toBe('diamond-ring-match');
+  it('shows matching settings in the diamond buy column, right under Add to Cart', () => {
+    expect(diamondTemplate.order).toEqual(['main', 'recommendations']);
+    const afterBuy = diamondSection.slice(diamondSection.indexOf('{%- endform -%}'));
+    expect(afterBuy.indexOf("{% render 'diamond-setting-picker', product: product %}")).toBeGreaterThan(0);
+    expect(afterBuy.indexOf("{% render 'diamond-setting-picker'")).toBeLessThan(afterBuy.indexOf("{% render 'product-inquiry'"));
     expect(diamondSide).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(diamondSide).toContain('{%- if ring_shape == stone_shape -%}');
     expect(diamondSide).toContain('{{ ring.url }}?diamond={{ product.handle | url_encode }}');
-    expect(diamondSide).not.toContain('ring.price');
+    // Settings show their price and the total with this diamond; finished rings are quoted.
+    expect(diamondSide).toContain('With this diamond {{ ring.price | plus: stone_price | money_without_trailing_zeros }}');
+    expect(diamondSide).toContain('Quoted with this diamond');
   });
 
   it('links a ring to loose diamonds of its shape through the native filter', () => {
@@ -70,7 +75,7 @@ describe('engagement ring ↔ loose diamond pairing', () => {
   it('lists settings before finished rings on diamond pages', () => {
     expect(diamondSide).toContain("assign setting_collection = collections['ring-settings']");
     expect(diamondSide).toContain('{%- if pass == 1 -%}{%- assign source = setting_collection -%}');
-    expect(diamondSide).toContain('Choose a setting and we will set this diamond in it, labor included.');
+    expect(diamondSide).toContain('We set this diamond in your setting by hand, labor included');
   });
 
   it('names both pieces in the concierge chat', () => {

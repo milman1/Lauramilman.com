@@ -1,9 +1,12 @@
 {%- comment -%}
   Ring engraving — engagement rings only.
-  Rendered inside the product form by sections/main-product.liquid.
+  Rendered by sections/main-product.liquid below the buy area and the
+  diamond-pairing panel, outside the product form: the hidden properties
+  join that form through form="<form_id>".
 
   Accepts:
   - product: the ring
+  - form_id: id of the product form the properties belong to
   - enabled: section setting "Offer complimentary engraving"
   - ai_endpoint: Worker URL for the AI render (optional; button hidden if blank)
   - max_chars: inscription length limit
@@ -50,6 +53,7 @@
     data-engrave
     data-metal="{{ metal_hint | escape }}"
     data-max="{{ max_chars }}"
+    data-form-id="{{ form_id }}"
     {% if endpoint != '' %}
       data-ai-endpoint="{{ endpoint | escape }}"
       data-image="{{ engrave_image | escape }}"
@@ -138,8 +142,8 @@
 
       <p class="pdp-engrave__note">Engraved rings are made for you and are final sale. See <a href="/pages/shipping-returns">returns</a>.</p>
 
-      <input type="hidden" name="properties[Engraving]" value="" disabled data-engrave-prop="text">
-      <input type="hidden" name="properties[Engraving font]" value="" disabled data-engrave-prop="font">
+      <input type="hidden" form="{{ form_id }}" name="properties[Engraving]" value="" disabled data-engrave-prop="text">
+      <input type="hidden" form="{{ form_id }}" name="properties[Engraving font]" value="" disabled data-engrave-prop="font">
     </div>
   </div>
 
@@ -279,7 +283,7 @@
     (function () {
       var root = document.querySelector('[data-engrave]');
       if (!root) return;
-      var form = root.closest('form');
+      var form = document.getElementById(root.getAttribute('data-form-id')) || root.closest('form');
       var toggle = root.querySelector('[data-engrave-toggle]');
       var body = root.querySelector('[data-engrave-body]');
       var input = root.querySelector('[data-engrave-text]');

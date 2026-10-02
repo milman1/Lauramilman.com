@@ -147,6 +147,8 @@
           </div>
         {%- endform -%}
 
+        {% render 'diamond-setting-picker', product: product %}
+
         {% render 'product-inquiry', product: product %}
 
         {%- if m.cert_url -%}
