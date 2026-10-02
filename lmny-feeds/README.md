@@ -74,7 +74,7 @@ holds a stones table — Shopify products are the only live copy.
      still nets at least cost after shipping. A ceiling that would lose
      money is ignored. 114200 (RW3087) and 126234 (T3691) stay on the rule.
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
-     `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
+     `retail = round(cost × 3)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    delete / archive / skip. Unchanged hashes are skipped entirely. Loose
