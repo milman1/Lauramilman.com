@@ -115,25 +115,72 @@ export const LAB_GUARDS = {
  * Uncle Manny LLC rows are excluded at normalize. Missing cost → hold with
  * tag `pricing-review`; existing Shopify price is left alone.
  *
- * Chart (first matching band wins); applied in `src/watchPricing.ts`:
- *   Under $5,000          1.30×  round up to $100
- *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
- *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
- *   Above $40,000         1.08×  round up to $100, min $44,800
+ * Retail is the lowest $100 price that still leaves a share of the selling
+ * price after `EBAY_WATCH_FEE` and seller-paid shipping. Shipping is free to
+ * the buyer: postage, signature, and packing are the flat amount, and jewelry
+ * insurance is the rate times the sale. Carriers cap ordinary watch coverage
+ * near $1,000, so the insurance is a third-party policy at about 1% of the sale.
+ *
+ * A price of $10,000 or under leaves 10% of the sale. Above $10,000 it leaves
+ * 5%. The price does not step down as cost rises, so it can sit at $10,000
+ * while that leftover eases from 10% to 5%.
+ *
+ * A stock-number ceiling in `WATCH_RETAIL_CAP_BY_STOCK` may lower that price
+ * only while the eBay sale still nets at least cost after shipping. A ceiling
+ * that would lose money is ignored.
  */
-export const WATCH_COST_TIERS = [
-  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
-  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
-  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
-] as const;
+export const EBAY_WATCH_FEE = {
+  perOrderUsd: 0.4,
+  /** Each rate applies only to the slice of the price inside the band. */
+  bands: [
+    { upToUsd: 1_000, rate: 0.15 },
+    { upToUsd: 7_500, rate: 0.065 },
+    { upToUsd: Number.POSITIVE_INFINITY, rate: 0.03 },
+  ],
+} as const;
 
-export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+export const WATCH_SALE = {
+  /**
+   * Share of the selling price left after cost, the eBay watch fee, and
+   * shipping, once the price is above `higherMarginMaxPriceUsd`.
+   */
+  minNetMarginOfPrice: 0.05,
+  /** A selling price at or under this keeps the higher margin. */
+  higherMarginMaxPriceUsd: 10_000,
+  /** Share left when the selling price is at or under $10,000. */
+  higherMinNetMarginOfPrice: 0.1,
+  /** Seller-paid postage, signature, and packing. The buyer is not charged. */
+  shippingFlatUsd: 120,
+  /** Third-party jewelry insurance as a share of the selling price. */
+  shippingInsuranceRate: 0.01,
+} as const;
+
+/**
+ * Retail ceiling, in USD, for feed stock numbers whose chart price sits above
+ * the highest comparable ask on record, whose cost still fits under that ask,
+ * and whose ceiling still nets at least cost after `EBAY_WATCH_FEE` and
+ * seller-paid shipping. Rounded down to $100 so the site price is at or under
+ * the ask. 114200 (RW3087) and 126234 (T3691) stay on the chart: the ask there
+ * is under cost once the fee and shipping are taken out.
+ * Keyed by stock number, not reference: a sibling of the same reference that
+ * is already under the ask keeps the chart.
+ */
+export const WATCH_RETAIL_CAP_BY_STOCK: Readonly<Record<string, number>> = {
+  T3489: 10_600, // 116234
+  T3559: 14_900, // 124060
+  T3652: 15_800, // 116713LN
+  T3690: 15_900, // 116613LN
+  RW3084: 16_500, // 116613LB
+  RW3103: 16_500, // 116613LB
+  T3590: 26_400, // 116610LV
+  RW3100: 49_000, // 126618LB
+};
 
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
-  costTiers: WATCH_COST_TIERS,
+  sale: WATCH_SALE,
+  retailCapByStock: WATCH_RETAIL_CAP_BY_STOCK,
 } as const;
 
 /**

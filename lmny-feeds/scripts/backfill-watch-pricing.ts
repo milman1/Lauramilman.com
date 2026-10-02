@@ -9,7 +9,8 @@
  *   npx tsx scripts/backfill-watch-pricing.ts --limit=25
  *
  * Selects product_type:Watch + tag:lmny-feed (~620). Reads InventoryItem.cost.
- * Retail is cost × chart multiplier — Hours mid is not used. no_cost → tag
+ * Retail is cost × chart multiplier, then a stock-number ceiling when one
+ * is set and it is at least cost. Hours mid is not used. no_cost → tag
  * pricing-review, leave existing price.
  */
 
@@ -35,6 +36,7 @@ interface WatchRow {
   variantId: string | null;
   price: number | null;
   costUsd: number | null;
+  sku: string | null;
 }
 
 function parseFlags(argv: string[]): Flags {
@@ -89,6 +91,7 @@ async function fetchWatchRows(shopify: ShopifyClient): Promise<WatchRow[]> {
             edges {
               node {
                 id
+                sku
                 price
                 inventoryItem { unitCost { amount } }
               }
@@ -128,12 +131,14 @@ async function fetchWatchRows(shopify: ShopifyClient): Promise<WatchRow[]> {
         variantId: null,
         price: null,
         costUsd: null,
+        sku: null,
       });
       order.push(r.id);
     } else if (typeof r.__parentId === 'string' && typeof r.id === 'string' && r.price != null) {
       const parent = byId.get(r.__parentId);
       if (!parent) continue;
       parent.variantId = r.id;
+      parent.sku = typeof r.sku === 'string' ? r.sku.trim() : parent.sku;
       parent.price = numOrNull(r.price);
       const unitCost = (r.inventoryItem as { unitCost?: { amount?: string } | null } | null)?.unitCost?.amount;
       parent.costUsd = numOrNull(unitCost);
@@ -182,6 +187,7 @@ async function main() {
   for (const row of rows) {
     const outcome = priceWatchFromCost({
       costUsd: row.costUsd,
+      stockRef: row.sku,
     });
     if (outcome.status === 'priced') {
       counts.priced += 1;

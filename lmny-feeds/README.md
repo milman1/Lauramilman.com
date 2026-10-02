@@ -50,18 +50,29 @@ holds a stones table — Shopify products are the only live copy.
      | Amount (cost) | Multiplier | After 10% welcome |
      |---|---|---|
      | any | 3× | 2.70× |
-   - watches: supplier cost × chart (`config/pricing.ts` `WATCH_COST_TIERS`,
-     applied in `src/watchPricing.ts`). **No Hours mid.** Aftermarket,
-     no-papers, iced-out, naked-comment, Power Watch, and Uncle Manny are
-     excluded at normalize. Missing cost is tagged `pricing-review` and the
-     existing Shopify price is left alone.
+   - watches: supplier cost through `config/pricing.ts` `WATCH_SALE`, applied
+     in `src/watchPricing.ts`. **No Hours mid.** Aftermarket, no-papers,
+     iced-out, naked-comment, Power Watch, and Uncle Manny are excluded at
+     normalize. Missing cost is tagged `pricing-review` and the existing
+     Shopify price is left alone.
 
-     | Supplier cost | Multiplier | Retail |
-     |---|---|---|
-     | Under $5,000 | 1.30× | Cost × 1.30, rounded up to nearest $100 |
-     | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
-     | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
-     | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
+     Retail is the lowest $100 price that leaves a share of the sale after
+     the eBay watch fee and seller-paid shipping. The buyer is not charged
+     for shipping: $120 covers postage, signature, and packing, and 1% of
+     the sale covers third-party jewelry insurance. The fee is the no-store
+     Watches, Parts & Accessories rate (`EBAY_WATCH_FEE`: 15% to $1,000,
+     6.5% to $7,500, 3% above, plus $0.40 per order).
+
+     | Selling price | Left after cost, the eBay fee, and shipping |
+     |---|---|
+     | $10,000 or under | 10% of the selling price |
+     | Above $10,000 | 5% of the selling price |
+
+     The price does not step down as cost rises, so it can sit at $10,000
+     while that leftover eases from 10% to 5%. Eight feed stock numbers in
+     `WATCH_RETAIL_CAP_BY_STOCK` use that retail ceiling when the eBay sale
+     still nets at least cost after shipping. A ceiling that would lose
+     money is ignored. 114200 (RW3087) and 126234 (T3691) stay on the rule.
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
      `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
@@ -116,7 +127,7 @@ holds a stones table — Shopify products are the only live copy.
    variant SKU. That is the identifier Uploadify sends as the eBay Custom
    Label. TLV watches
    that pass the same papers and condition gates are created or reactivated
-   through the normal watch write, priced with the watch cost tiers, and
+   through the normal watch write, priced with the watch sale rule, and
    published to the watch sales channels. They do not get the `ebay` tag.
    Rows that fail those gates stay held and are not flagged. Active lab-grown
    jewelry and gold chains that meet the same listing gates (below) keep the

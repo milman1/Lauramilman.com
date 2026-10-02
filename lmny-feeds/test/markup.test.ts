@@ -155,27 +155,35 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
 });
 
 describe('watch pricing', () => {
-  it('prices from cost tiers (1.20× in the $5k–$15k band), not Hours mid', () => {
+  it('leaves 5% above $10,000 and does not use Hours mid', () => {
     const r = priceWatch(watch({ costUsd: 9000, box: true, papers: true, isNaked: false }));
-    expect(r.ok && r.priced.retailUsd).toBe(10800);
+    expect(r.ok && r.priced.retailUsd).toBe(10500);
   });
 
   it('does not apply naked or partial accessory haircuts', () => {
     const naked = priceWatch(watch({ costUsd: 8000, box: false, papers: false, isNaked: true }));
     const partial = priceWatch(watch({ costUsd: 8000, box: true, papers: false, isNaked: false }));
-    expect(naked.ok && naked.priced.retailUsd).toBe(9600);
-    expect(partial.ok && partial.priced.retailUsd).toBe(9600);
+    expect(naked.ok && naked.priced.retailUsd).toBe(9900);
+    expect(partial.ok && partial.priced.retailUsd).toBe(9900);
   });
 
   it('rounds retail up to the nearest $100', () => {
-    // 4123 × 1.30 = 5359.9 → 5400
     const r = priceWatch(watch({ costUsd: 4123 }));
-    expect(r.ok && r.priced.retailUsd).toBe(5400);
+    expect(r.ok && r.priced.retailUsd).toBe(5300);
   });
 
-  it('floors the $5k band at $6,500', () => {
+  it('prices a capped stock number through the sync entry point', () => {
+    // The $10,600 ceiling still clears the fee and shipping at this cost.
+    const capped = priceWatch(watch({ stockRef: 'T3489', costUsd: 9_400 }));
+    expect(capped.ok && capped.priced.retailUsd).toBe(10_600);
+    // At $10,000 the same ceiling nets under cost, so the sale price stands.
+    const chart = priceWatch(watch({ stockRef: 'T3489', costUsd: 10_000 }));
+    expect(chart.ok && chart.priced.retailUsd).toBe(11_600);
+  });
+
+  it('leaves 10% when the price lands under $10,000', () => {
     const r = priceWatch(watch({ costUsd: 5000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(6500);
+    expect(r.ok && r.priced.retailUsd).toBe(6400);
   });
 
   it('holds no_cost when supplier cost is missing', () => {
