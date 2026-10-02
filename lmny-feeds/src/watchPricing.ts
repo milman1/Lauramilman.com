@@ -8,9 +8,13 @@
  * crosses a boundary.
  */
 
-import { WATCH_COST_TIERS, type WatchCostTier } from '../config/pricing.js';
+import {
+  WATCH_COST_TIERS,
+  WATCH_RETAIL_CAP_BY_STOCK,
+  type WatchCostTier,
+} from '../config/pricing.js';
 
-export { WATCH_COST_TIERS, type WatchCostTier };
+export { WATCH_COST_TIERS, WATCH_RETAIL_CAP_BY_STOCK, type WatchCostTier };
 
 export type WatchPricingOutcome =
   | { status: 'priced'; retailUsd: number }
@@ -20,6 +24,8 @@ export type WatchPricingOutcome =
 export interface WatchPricingInput {
   /** Supplier unit cost in USD. Missing / ≤0 → no_cost. */
   costUsd?: number | null;
+  /** Feed stock number. When set, a retail ceiling in the chart may apply. */
+  stockRef?: string | null;
   /** Feed condition aftermarket — excluded entirely. */
   aftermarket?: boolean;
 }
@@ -53,6 +59,19 @@ export function retailFromCost(costUsd: number): number {
 }
 
 /**
+ * Chart retail, then the stock-number ceiling when that ceiling is at least
+ * cost. A ceiling below cost is ignored. A ceiling above the chart does not
+ * raise the price.
+ */
+export function retailForWatch(costUsd: number, stockRef?: string | null): number {
+  const chart = retailFromCost(costUsd);
+  const cap = stockRef ? WATCH_RETAIL_CAP_BY_STOCK[stockRef] : undefined;
+  if (cap == null) return chart;
+  if (!(cap >= roundUpTo100(costUsd))) return chart;
+  return Math.min(chart, cap);
+}
+
+/**
  * Price a feed watch from supplier cost.
  *
  * Outcomes:
@@ -70,5 +89,5 @@ export function priceWatchFromCost(input: WatchPricingInput): WatchPricingOutcom
     return { status: 'no_cost' };
   }
 
-  return { status: 'priced', retailUsd: retailFromCost(cost) };
+  return { status: 'priced', retailUsd: retailForWatch(cost, input.stockRef) };
 }

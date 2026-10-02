@@ -117,28 +117,48 @@ export const LAB_GUARDS = {
  *
  * Chart (first matching band wins); applied in `src/watchPricing.ts`:
  *   Under $5,000          1.30×  round up to $100
- *   $5,000 – $12,000      1.20×  round up to $100, min $6,500
- *   $12,001 – $40,000     1.12×  round up to $100, min $14,400
+ *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
+ *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
  *   Above $40,000         1.08×  round up to $100, min $44,800
  *
- * The $14,400 floor is $12,000 × 1.20, so retail does not drop when cost
- * crosses into the 1.12× band. It replaced an $18,000 floor that was
- * $15,000 × 1.20 and pinned every cost from $15,001 to about $16,100 at
- * one price.
+ * `WATCH_RETAIL_CAP_BY_STOCK` is a retail ceiling for one feed stock number.
+ * It applies only when the ceiling is at least cost rounded up to $100.
+ * A ceiling below cost is ignored and the chart stands.
  */
 export const WATCH_COST_TIERS = [
   { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
-  { maxCostUsd: 12_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
-  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 14_400 },
+  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
   { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
 ] as const;
 
 export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
 
+/**
+ * Retail ceiling, in USD, for feed stock numbers whose chart price sits above
+ * the highest comparable ask on record and whose cost still fits under that
+ * ask. Rounded down to $100 so the site price is at or under the ask.
+ * Keyed by stock number, not reference: a sibling of the same reference that
+ * is already under the ask keeps the chart.
+ */
+export const WATCH_RETAIL_CAP_BY_STOCK: Readonly<Record<string, number>> = {
+  RW3087: 7_900, // 114200
+  T3489: 10_600, // 116234
+  T3559: 14_900, // 124060
+  T3652: 15_800, // 116713LN
+  T3690: 15_900, // 116613LN
+  T3691: 15_900, // 126234
+  RW3084: 16_500, // 116613LB
+  RW3103: 16_500, // 116613LB
+  T3590: 26_400, // 116610LV
+  RW3100: 49_000, // 126618LB
+};
+
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
   costTiers: WATCH_COST_TIERS,
+  retailCapByStock: WATCH_RETAIL_CAP_BY_STOCK,
 } as const;
 
 /**

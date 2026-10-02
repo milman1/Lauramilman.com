@@ -149,10 +149,13 @@ export interface WatchComp {
 /**
  * Watches: supplier-cost tiers via watchPricing.ts. No Hours mid — retail is
  * cost × chart multiplier, rounded up to $100, with the chart band floors.
+ * A stock number listed in `WATCH_RETAIL_CAP_BY_STOCK` is capped at that
+ * retail when the cap is at least cost.
  */
 export function priceWatch(item: WatchItem): PriceResult {
   const outcome = priceWatchFromCost({
     costUsd: item.costUsd,
+    stockRef: item.stockRef,
     aftermarket: false, // normalize already excludes aftermarket
   });
 

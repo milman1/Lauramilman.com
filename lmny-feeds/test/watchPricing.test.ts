@@ -6,6 +6,7 @@ import {
   tierForCost,
   tierFloorUsd,
 } from '../src/watchPricing.js';
+import { WATCH_RETAIL_CAP_BY_STOCK } from '../config/pricing.js';
 
 describe('roundUpTo100', () => {
   it('rounds up to the next hundred', () => {
@@ -19,13 +20,12 @@ describe('chart bands', () => {
   it('uses 1.30× under $5,000', () => {
     expect(tierForCost(4_999).multiplier).toBe(1.3);
   });
-  it('uses 1.20× from $5,000 through $12,000 inclusive', () => {
+  it('uses 1.20× from $5,000 through $15,000 inclusive', () => {
     expect(tierForCost(5_000).multiplier).toBe(1.2);
-    expect(tierForCost(12_000).multiplier).toBe(1.2);
+    expect(tierForCost(15_000).multiplier).toBe(1.2);
   });
-  it('uses 1.12× from $12,001 through $40,000 inclusive', () => {
-    expect(tierForCost(12_001).multiplier).toBe(1.12);
-    expect(tierForCost(15_000).multiplier).toBe(1.12);
+  it('uses 1.12× from $15,001 through $40,000 inclusive', () => {
+    expect(tierForCost(15_001).multiplier).toBe(1.12);
     expect(tierForCost(40_000).multiplier).toBe(1.12);
   });
   it('uses 1.08× above $40,000', () => {
@@ -37,11 +37,11 @@ describe('tier floors (chart mins)', () => {
   it('has no floor under $5k', () => {
     expect(tierFloorUsd(0)).toBe(0);
   });
-  it('floors the $5k–$12k band at $6,500', () => {
+  it('floors the $5k–$15k band at $6,500', () => {
     expect(tierFloorUsd(1)).toBe(6_500);
   });
-  it('floors the $12,001–$40k band at $14,400', () => {
-    expect(tierFloorUsd(2)).toBe(14_400);
+  it('floors the $15,001–$40k band at $18,000', () => {
+    expect(tierFloorUsd(2)).toBe(18_000);
   });
   it('floors the above-$40k band at $44,800', () => {
     expect(tierFloorUsd(3)).toBe(44_800);
@@ -62,20 +62,10 @@ describe('retailFromCost', () => {
     expect(at).toBeGreaterThanOrEqual(below);
   });
 
-  it('keeps $12,000 in the 1.20× band', () => {
-    expect(retailFromCost(11_999)).toBe(14_400); // 11999 × 1.20 = 14398.8 → 14400
-    expect(retailFromCost(12_000)).toBe(14_400); // 12000 × 1.20
-    expect(retailFromCost(12_001)).toBe(14_400); // 12001 × 1.12 = 13441 → 13500, min 14400
-  });
-
-  it('clears the $14,400 floor once 1.12× exceeds it', () => {
-    expect(retailFromCost(12_857)).toBe(14_400); // 12857 × 1.12 = 14399.84 → 14400
-    expect(retailFromCost(12_858)).toBe(14_500); // 12858 × 1.12 = 14400.96 → 14500
-  });
-
-  it('prices a $15,000 cost at 1.12×', () => {
-    expect(retailFromCost(15_000)).toBe(16_800); // 15000 × 1.12
-    expect(retailFromCost(15_001)).toBe(16_900); // 15001 × 1.12 = 16801.12 → 16900
+  it('keeps $15,000 in the 1.20× band', () => {
+    expect(retailFromCost(14_999)).toBe(18_000);
+    expect(retailFromCost(15_000)).toBe(18_000); // 15000 × 1.20
+    expect(retailFromCost(15_001)).toBe(18_000); // 15001 × 1.12 = 16801 → 16900, min 18000
   });
 
   it('keeps $40,000 in the 1.12× band', () => {
@@ -114,6 +104,42 @@ describe('priceWatchFromCost', () => {
 
   it('prices from cost alone', () => {
     expect(priceWatchFromCost({ costUsd: 9_000 })).toEqual({ status: 'priced', retailUsd: 10_800 });
+  });
+
+  it('caps a listed stock number without raising the chart', () => {
+    // 24000 × 1.12 = 26880 → 26900, ceiling 26400.
+    expect(priceWatchFromCost({ costUsd: 24_000, stockRef: 'T3590' })).toEqual({
+      status: 'priced',
+      retailUsd: 26_400,
+    });
+    // Chart for 20000 is 22400, under the 26400 ceiling.
+    expect(priceWatchFromCost({ costUsd: 20_000, stockRef: 'T3590' })).toEqual({
+      status: 'priced',
+      retailUsd: 22_400,
+    });
+  });
+
+  it('ignores a ceiling that is below cost', () => {
+    // 27000 × 1.12 = 30240 → 30300. Ceiling 26400 is below cost.
+    expect(priceWatchFromCost({ costUsd: 27_000, stockRef: 'T3590' })).toEqual({
+      status: 'priced',
+      retailUsd: 30_300,
+    });
+  });
+
+  it('keeps the ten market ceilings', () => {
+    expect(WATCH_RETAIL_CAP_BY_STOCK).toEqual({
+      RW3087: 7_900,
+      T3489: 10_600,
+      T3559: 14_900,
+      T3652: 15_800,
+      T3690: 15_900,
+      T3691: 15_900,
+      RW3084: 16_500,
+      RW3103: 16_500,
+      T3590: 26_400,
+      RW3100: 49_000,
+    });
   });
 
   /**

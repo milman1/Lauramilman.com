@@ -7,6 +7,7 @@ import {
   STONE_TIERS,
   WATCH,
   WATCH_COST_TIERS,
+  WATCH_RETAIL_CAP_BY_STOCK,
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
@@ -27,6 +28,7 @@ describe('pricing SSOT — API + lab jewelry', () => {
 
   it('exposes Belgium Dia watch cost tiers on pricing.ts', () => {
     expect(WATCH.costTiers).toBe(WATCH_COST_TIERS);
+    expect(WATCH.retailCapByStock).toBe(WATCH_RETAIL_CAP_BY_STOCK);
     expect(WATCH_COST_TIERS.map((t) => t.multiplier)).toEqual([1.3, 1.2, 1.12, 1.08]);
     expect(WATCH.reviewTag).toBe('pricing-review');
   });

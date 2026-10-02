@@ -155,7 +155,7 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
 });
 
 describe('watch pricing', () => {
-  it('prices from cost tiers (1.20× in the $5k–$12k band), not Hours mid', () => {
+  it('prices from cost tiers (1.20× in the $5k–$15k band), not Hours mid', () => {
     const r = priceWatch(watch({ costUsd: 9000, box: true, papers: true, isNaked: false }));
     expect(r.ok && r.priced.retailUsd).toBe(10800);
   });
@@ -171,6 +171,11 @@ describe('watch pricing', () => {
     // 4123 × 1.30 = 5359.9 → 5400
     const r = priceWatch(watch({ costUsd: 4123 }));
     expect(r.ok && r.priced.retailUsd).toBe(5400);
+  });
+
+  it('prices a capped stock number through the sync entry point', () => {
+    const r = priceWatch(watch({ stockRef: 'T3489', costUsd: 10_000 }));
+    expect(r.ok && r.priced.retailUsd).toBe(10_600);
   });
 
   it('floors the $5k band at $6,500', () => {
