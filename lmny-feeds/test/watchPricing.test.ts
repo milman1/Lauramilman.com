@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
+import { WATCH_RETAIL_CAP_BY_STOCK, WATCH_SALE } from '../config/pricing.js';
 import {
   ebayWatchFeeUsd,
-  minRetailClearingEbayFee,
+  minRetailLeavingMargin,
   priceWatchFromCost,
   retailFromCost,
   roundUpTo100,
-  tierForCost,
-  tierFloorUsd,
+  watchNetAfterSaleUsd,
+  watchShippingUsd,
 } from '../src/watchPricing.js';
-import { WATCH_RETAIL_CAP_BY_STOCK } from '../config/pricing.js';
+
+function netsAtLeast(price: number, cost: number, margin: number): boolean {
+  return watchNetAfterSaleUsd(price, cost) + 1e-6 >= margin * price;
+}
 
 describe('roundUpTo100', () => {
   it('rounds up to the next hundred', () => {
@@ -18,74 +22,73 @@ describe('roundUpTo100', () => {
   });
 });
 
-describe('chart bands', () => {
-  it('uses 1.30× under $5,000', () => {
-    expect(tierForCost(4_999).multiplier).toBe(1.3);
+describe('ebay watch fee and shipping', () => {
+  it('charges the eBay watch fee in slices', () => {
+    // 15% of 500 + $0.40.
+    expect(ebayWatchFeeUsd(500)).toBeCloseTo(75.4, 5);
+    // 15% of 1,000 + 6.5% of 6,500 + 3% of 2,500 + $0.40.
+    expect(ebayWatchFeeUsd(10_000)).toBeCloseTo(647.9, 5);
   });
-  it('uses 1.20× from $5,000 through $15,000 inclusive', () => {
-    expect(tierForCost(5_000).multiplier).toBe(1.2);
-    expect(tierForCost(15_000).multiplier).toBe(1.2);
-  });
-  it('uses 1.12× from $15,001 through $40,000 inclusive', () => {
-    expect(tierForCost(15_001).multiplier).toBe(1.12);
-    expect(tierForCost(40_000).multiplier).toBe(1.12);
-  });
-  it('uses 1.08× above $40,000', () => {
-    expect(tierForCost(40_001).multiplier).toBe(1.08);
-  });
-});
 
-describe('tier floors (chart mins)', () => {
-  it('has no floor under $5k', () => {
-    expect(tierFloorUsd(0)).toBe(0);
-  });
-  it('floors the $5k–$15k band at $6,500', () => {
-    expect(tierFloorUsd(1)).toBe(6_500);
-  });
-  it('floors the $15,001–$40k band at $18,000', () => {
-    expect(tierFloorUsd(2)).toBe(18_000);
-  });
-  it('floors the above-$40k band at $44,800', () => {
-    expect(tierFloorUsd(3)).toBe(44_800);
+  it('charges a flat postage amount plus 1% insurance', () => {
+    expect(watchShippingUsd(9_000)).toBe(210);
+    expect(WATCH_SALE.shippingFlatUsd).toBe(120);
+    expect(WATCH_SALE.shippingInsuranceRate).toBe(0.01);
   });
 });
 
 describe('retailFromCost', () => {
-  it('applies 1.30× under $5k and rounds up to $100', () => {
-    expect(retailFromCost(4_000)).toBe(5_200);
-    expect(retailFromCost(4_123)).toBe(5_400); // 5359.9 → 5400
+  it('leaves 10% on a watch priced under $10,000', () => {
+    // $8,000 cost: 10% price is $9,900, which is under the line.
+    expect(retailFromCost(8_000)).toBe(9_900);
+    expect(retailFromCost(7_500)).toBe(9_300);
+    expect(retailFromCost(5_000)).toBe(6_400);
+    expect(retailFromCost(4_123)).toBe(5_300);
+    for (const cost of [4_123, 5_000, 7_500, 8_000]) {
+      const price = retailFromCost(cost);
+      expect(price).toBeLessThanOrEqual(10_000);
+      expect(netsAtLeast(price, cost, 0.1)).toBe(true);
+      expect(netsAtLeast(price - 100, cost, 0.1)).toBe(false);
+    }
   });
 
-  it('never drops across the $5k boundary', () => {
-    const below = retailFromCost(4_999);
-    const at = retailFromCost(5_000);
-    expect(below).toBe(6_500); // 6498.7 → 6500
-    expect(at).toBe(6_500); // 5000 × 1.20 = 6000, min 6500
-    expect(at).toBeGreaterThanOrEqual(below);
+  it('holds $10,000 while the margin eases from 10% toward 5%', () => {
+    // 10% would clear $10,000; 5% is still under it. Sit on $10,000.
+    expect(retailFromCost(8_400)).toBe(10_000);
+    expect(netsAtLeast(10_000, 8_400, 0.05)).toBe(true);
+    expect(netsAtLeast(10_000, 8_400, 0.1)).toBe(false);
   });
 
-  it('keeps $15,000 in the 1.20× band', () => {
-    expect(retailFromCost(14_999)).toBe(18_000);
-    expect(retailFromCost(15_000)).toBe(18_000); // 15000 × 1.20
-    expect(retailFromCost(15_001)).toBe(18_000); // 15001 × 1.12 = 16801 → 16900, min 18000
+  it('leaves 5% once the price is above $10,000', () => {
+    expect(retailFromCost(9_000)).toBe(10_500);
+    expect(retailFromCost(15_000)).toBe(17_000);
+    expect(retailFromCost(40_000)).toBe(44_500);
+    expect(retailFromCost(42_000)).toBe(46_700);
+    expect(retailFromCost(50_000)).toBe(55_500);
+    for (const cost of [9_000, 15_000, 40_000, 42_000, 50_000]) {
+      const price = retailFromCost(cost);
+      expect(price).toBeGreaterThan(10_000);
+      expect(netsAtLeast(price, cost, 0.05)).toBe(true);
+      expect(netsAtLeast(price - 100, cost, 0.05)).toBe(false);
+    }
   });
 
-  it('keeps $40,000 in the 1.12× band', () => {
-    expect(retailFromCost(39_999)).toBe(44_800);
-    expect(retailFromCost(40_000)).toBe(44_800); // 40000 × 1.12
-    expect(retailFromCost(40_001)).toBe(44_800); // 40001 × 1.08 = 43201 → 43300, min 44800
-  });
-
-  it('uses 1.08× above $40k once past the floor', () => {
-    expect(retailFromCost(50_000)).toBe(54_000);
-  });
-
-  it('is monotonic across a dense cost sweep', () => {
+  it('is monotonic and never nets under the rule', () => {
     let prev = 0;
     for (let cost = 100; cost <= 80_000; cost += 100) {
-      const retail = retailFromCost(cost);
-      expect(retail, `cost ${cost}`).toBeGreaterThanOrEqual(prev);
-      prev = retail;
+      const price = retailFromCost(cost);
+      expect(price, `cost ${cost}`).toBeGreaterThanOrEqual(prev);
+      const margin = price <= WATCH_SALE.higherMarginMaxPriceUsd ? 0.05 : 0.05;
+      // Under $10,000 the leftover is 10%. At $10,000 it is at least 5%.
+      if (price < WATCH_SALE.higherMarginMaxPriceUsd) {
+        expect(netsAtLeast(price, cost, 0.1), `cost ${cost}`).toBe(true);
+      } else if (price > WATCH_SALE.higherMarginMaxPriceUsd) {
+        expect(netsAtLeast(price, cost, 0.05), `cost ${cost}`).toBe(true);
+      } else {
+        expect(netsAtLeast(price, cost, margin), `cost ${cost}`).toBe(true);
+      }
+      expect(watchNetAfterSaleUsd(price, cost), `cost ${cost}`).toBeGreaterThanOrEqual(-1e-6);
+      prev = price;
     }
   });
 });
@@ -105,57 +108,49 @@ describe('priceWatchFromCost', () => {
   });
 
   it('prices from cost alone', () => {
-    expect(priceWatchFromCost({ costUsd: 9_000 })).toEqual({ status: 'priced', retailUsd: 10_800 });
+    expect(priceWatchFromCost({ costUsd: 9_000 })).toEqual({ status: 'priced', retailUsd: 10_500 });
   });
 
-  it('charges the eBay watch fee in slices', () => {
-    // 15% of 500 + $0.40.
-    expect(ebayWatchFeeUsd(500)).toBeCloseTo(75.4, 5);
-    // 15% of 1,000 + 6.5% of 6,500 + 3% of 2,500 + $0.40.
-    expect(ebayWatchFeeUsd(10_000)).toBeCloseTo(647.9, 5);
-  });
-
-  it('never nets under cost after the eBay watch fee', () => {
+  it('never nets under cost after the eBay fee and free shipping', () => {
     for (let cost = 100; cost <= 80_000; cost += 100) {
       const retail = priceWatchFromCost({ costUsd: cost });
       expect(retail.status).toBe('priced');
       if (retail.status !== 'priced') continue;
-      const net = retail.retailUsd - ebayWatchFeeUsd(retail.retailUsd);
-      expect(net, `cost ${cost}`).toBeGreaterThanOrEqual(cost);
-      expect(retail.retailUsd).toBeGreaterThanOrEqual(minRetailClearingEbayFee(cost));
+      expect(watchNetAfterSaleUsd(retail.retailUsd, cost), `cost ${cost}`).toBeGreaterThanOrEqual(-1e-6);
+      expect(retail.retailUsd).toBeGreaterThanOrEqual(minRetailLeavingMargin(cost, 0));
     }
   });
 
-  it('drops a ceiling that would net under cost', () => {
-    // Ceiling 10,600 on a $10,000 cost nets under the fee. Chart is 12,000.
+  it('drops a ceiling that would net under cost after shipping', () => {
+    // Ceiling $10,600 on a $10,000 cost is under the break-even price.
     expect(priceWatchFromCost({ costUsd: 10_000, stockRef: 'T3489' })).toEqual({
       status: 'priced',
-      retailUsd: 12_000,
+      retailUsd: 11_600,
     });
   });
 
-  it('caps a listed stock number without raising the chart', () => {
-    // 24000 × 1.12 = 26880 → 26900, ceiling 26400.
+  it('caps a listed stock number without raising the standard price', () => {
+    // $24,000 cost prices at $26,900 before the $26,400 ceiling.
     expect(priceWatchFromCost({ costUsd: 24_000, stockRef: 'T3590' })).toEqual({
       status: 'priced',
       retailUsd: 26_400,
     });
-    // Chart for 20000 is 22400, under the 26400 ceiling.
+    // $20,000 prices at $22,500, under the ceiling.
     expect(priceWatchFromCost({ costUsd: 20_000, stockRef: 'T3590' })).toEqual({
       status: 'priced',
-      retailUsd: 22_400,
+      retailUsd: 22_500,
     });
   });
 
-  it('ignores a ceiling that is below cost', () => {
-    // 27000 × 1.12 = 30240 → 30300. Ceiling 26400 is below cost.
+  it('ignores a ceiling that is below the break-even price', () => {
+    // $27,000 prices at $30,200. The $26,400 ceiling does not clear shipping.
     expect(priceWatchFromCost({ costUsd: 27_000, stockRef: 'T3590' })).toEqual({
       status: 'priced',
-      retailUsd: 30_300,
+      retailUsd: 30_200,
     });
   });
 
-  it('keeps the market ceilings that still clear cost after fees', () => {
+  it('keeps the market ceilings that can still clear cost after shipping', () => {
     expect(WATCH_RETAIL_CAP_BY_STOCK).toEqual({
       T3489: 10_600,
       T3559: 14_900,
@@ -172,17 +167,16 @@ describe('priceWatchFromCost', () => {
 
   /**
    * Shape of the Audemars Piguet failure under the old mid×0.97 rule:
-   * market mid below cost → published retail under cost. Cost-tier markup
-   * always clears cost and never consults Hours.
+   * market mid below cost → published retail under cost. The sale rule
+   * always clears cost after the eBay fee and shipping, and never consults Hours.
    */
   it('does not publish under cost (old AP mid×0.97 shape)', () => {
     const costUsd = 42_000;
     const r = priceWatchFromCost({ costUsd });
-    // 42000 × 1.08 = 45360 → 45400, floored at 44800 → 45400
     expect(r.status).toBe('priced');
     if (r.status === 'priced') {
-      expect(r.retailUsd).toBeGreaterThanOrEqual(costUsd);
-      expect(r.retailUsd).toBe(45_400);
+      expect(r.retailUsd).toBe(46_700);
+      expect(watchNetAfterSaleUsd(r.retailUsd, costUsd)).toBeGreaterThan(0);
     }
   });
 });

@@ -6,8 +6,8 @@ import {
   labRetailMultipleFromCost,
   STONE_TIERS,
   WATCH,
-  WATCH_COST_TIERS,
   WATCH_RETAIL_CAP_BY_STOCK,
+  WATCH_SALE,
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
@@ -26,10 +26,14 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(2.7);
   });
 
-  it('exposes Belgium Dia watch cost tiers on pricing.ts', () => {
-    expect(WATCH.costTiers).toBe(WATCH_COST_TIERS);
+  it('exposes the Belgium Dia watch sale rule on pricing.ts', () => {
+    expect(WATCH.sale).toBe(WATCH_SALE);
     expect(WATCH.retailCapByStock).toBe(WATCH_RETAIL_CAP_BY_STOCK);
-    expect(WATCH_COST_TIERS.map((t) => t.multiplier)).toEqual([1.3, 1.2, 1.12, 1.08]);
+    expect(WATCH.sale.minNetMarginOfPrice).toBe(0.05);
+    expect(WATCH.sale.higherMinNetMarginOfPrice).toBe(0.1);
+    expect(WATCH.sale.higherMarginMaxPriceUsd).toBe(10_000);
+    expect(WATCH.sale.shippingFlatUsd).toBe(120);
+    expect(WATCH.sale.shippingInsuranceRate).toBe(0.01);
     expect(WATCH.reviewTag).toBe('pricing-review');
   });
 
