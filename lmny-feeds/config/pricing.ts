@@ -117,14 +117,19 @@ export const LAB_GUARDS = {
  *
  * Chart (first matching band wins); applied in `src/watchPricing.ts`:
  *   Under $5,000          1.30×  round up to $100
- *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
- *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
+ *   $5,000 – $12,000      1.20×  round up to $100, min $6,500
+ *   $12,001 – $40,000     1.12×  round up to $100, min $14,400
  *   Above $40,000         1.08×  round up to $100, min $44,800
+ *
+ * The $14,400 floor is $12,000 × 1.20, so retail does not drop when cost
+ * crosses into the 1.12× band. It replaced an $18,000 floor that was
+ * $15,000 × 1.20 and pinned every cost from $15,001 to about $16,100 at
+ * one price.
  */
 export const WATCH_COST_TIERS = [
   { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
-  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
-  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
+  { maxCostUsd: 12_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
+  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 14_400 },
   { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
 ] as const;
 

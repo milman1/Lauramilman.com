@@ -59,8 +59,8 @@ holds a stones table — Shopify products are the only live copy.
      | Supplier cost | Multiplier | Retail |
      |---|---|---|
      | Under $5,000 | 1.30× | Cost × 1.30, rounded up to nearest $100 |
-     | $5,000 – $15,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
-     | $15,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $18,000) |
+     | $5,000 – $12,000 | 1.20× | Cost × 1.20, rounded up to nearest $100 (min $6,500) |
+     | $12,001 – $40,000 | 1.12× | Cost × 1.12, rounded up to nearest $100 (min $14,400) |
      | Above $40,000 | 1.08× | Cost × 1.08, rounded up to nearest $100 (min $44,800) |
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
      `retail = round(cost × 4)` via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
