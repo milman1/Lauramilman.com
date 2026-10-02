@@ -575,7 +575,9 @@
     border: 1px solid var(--rule-light, #DDD5C5);
     border-radius: var(--radius-md, 8px);
     padding: 2rem;
-    overflow: hidden;
+    /* Visible so the grade tips can sit above a label without the panel
+       edge clipping them. The range tracks clip themselves. */
+    overflow: visible;
     min-width: 0;
   }
 
@@ -627,10 +629,16 @@
     grid-column: 1 / -1;
   }
 
+  .lm-dfilter__group {
+    position: relative;
+    min-width: 0;
+  }
+
   .lm-dfilter__label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    width: 100%;
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.7rem;
     font-weight: 600;
@@ -638,6 +646,8 @@
     text-transform: uppercase;
     color: var(--text-dark, #2C1810);
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
   }
 
   .lm-dfilter__info {
@@ -653,7 +663,10 @@
     font-weight: 700;
     line-height: 1;
     cursor: help;
-    position: relative;
+    /* The tip positions against the label, not this 16px button.
+       Centering a 240px bubble on the button hangs it off a short
+       label such as Cut, and the panel clips the left of the sentence. */
+    position: static;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -667,17 +680,24 @@
   .lm-dfilter__info::after {
     content: attr(data-tip);
     position: absolute;
-    left: 50%;
+    left: 0;
     bottom: calc(100% + 8px);
-    transform: translateX(-50%);
-    width: 240px;
+    /* A percentage width would collapse to the 16px button. Use a fixed
+       width that starts at the button, which is already inside the panel,
+       and grows to the right instead of hanging off the left. */
+    width: 260px;
+    max-width: calc(100vw - 3rem);
+    box-sizing: border-box;
     padding: 0.65rem 0.8rem;
     background: var(--espresso, #1E1109);
     color: var(--cream, #FAF6F0);
     font-size: 0.72rem;
     font-weight: 400;
     line-height: 1.5;
+    letter-spacing: 0;
+    text-transform: none;
     text-align: left;
+    white-space: normal;
     border-radius: var(--radius-sm, 4px);
     opacity: 0;
     visibility: hidden;
