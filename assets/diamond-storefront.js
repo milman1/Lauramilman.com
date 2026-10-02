@@ -147,6 +147,10 @@
           '" alt="" width="600" height="600" loading="lazy">'
         : '');
 
+    var origin = stone.kind || cfg.kind;
+    var labTag =
+      origin === 'lab' ? '<span class="lab-grown-tag">Lab Grown Diamond</span>' : '';
+
     return (
       '<div class="product-card" data-stock="' +
       escapeAttr(stone.stock_ref) +
@@ -161,6 +165,7 @@
       images +
       '</a>' +
       '<div class="product-card__content">' +
+      labTag +
       '<h3 class="product-card__title"><a href="' +
       escapeAttr(href) +
       '">' +
