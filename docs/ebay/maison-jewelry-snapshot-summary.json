@@ -1,0 +1,22 @@
+{
+  "shop": "omitted",
+  "at": "2026-09-14T13:11:38.501Z",
+  "counts": {
+    "antique": 757,
+    "designer": 757,
+    "pool": 757,
+    "ebayTagged": 1851,
+    "ebayTaggedJewelry": 1261,
+    "ebayTaggedWatches": 590
+  },
+  "plan": 0,
+  "skipped": 757,
+  "skipReasons": {
+    "already-tagged-and-conditioned": 661,
+    "status": 20,
+    "watch": 35,
+    "sku-already-ebay": 33,
+    "title-vendor-already-ebay": 8
+  },
+  "actions": {}
+}
