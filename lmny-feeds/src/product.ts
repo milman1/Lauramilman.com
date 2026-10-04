@@ -321,9 +321,13 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
         });
       }
     }
-    // productSet deletes metafields omitted from this list. These Google
-    // keys are not in the content hash; they ride along so a later watch
-    // update does not strip them. Loose stones never get them.
+    // productSet deletes metafields omitted from this list. Uploadify matches
+    // the eBay listing by vendor_sku. Leaving it off this payload deletes the
+    // Custom Label on every watch update, and the later metafieldsSet skips
+    // a value that still matched the pre-write read — Uploadify then reports
+    // "eBay: SKU not found". Qualifying watches carry both fields here.
+    fields.push(...uploadifyMetafieldsFor(item, priced));
+    // Google keys ride along for the same reason. Loose stones never get them.
     appendGoogleShopping(fields, {
       title: titleFor(item),
       productType: 'Watch',
@@ -331,6 +335,30 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     });
   }
   return fields;
+}
+
+/**
+ * Listing switch and eBay Custom Label for a watch Uploadify may list.
+ * Omitted for everything else so productSet removes a stale flag.
+ */
+function uploadifyMetafieldsFor(item: FeedItem, priced: Priced): MetafieldValue[] {
+  if (item.kind !== 'watch' || !watchListsOnUploadify(item, priced)) return [];
+  const stockRef = item.stockRef.trim();
+  if (!stockRef) return [];
+  return [
+    {
+      namespace: 'uploadify_product',
+      key: 'uploadify_active',
+      type: 'boolean',
+      value: 'true',
+    },
+    {
+      namespace: 'uploadify_product',
+      key: 'vendor_sku',
+      type: 'single_line_text_field',
+      value: stockRef,
+    },
+  ];
 }
 
 function appendGoogleShopping(
@@ -400,7 +428,7 @@ function escapeHtml(s: string): string {
  * synced_at and the hash itself are excluded by construction.
  */
 export function contentHashFor(item: FeedItem, priced: Priced): string {
-  return contentHash({
+  const payload: Record<string, unknown> = {
     schemaVersion: PRODUCT_SCHEMA_VERSION,
     handle: handleFor(item),
     title: titleFor(item),
@@ -423,7 +451,14 @@ export function contentHashFor(item: FeedItem, priced: Priced): string {
     tablePct: item.kind !== 'watch' ? (item.tablePct ?? null) : null,
     depthPct: item.kind !== 'watch' ? (item.depthPct ?? null) : null,
     isNaked: item.kind === 'watch' ? item.isNaked : null,
-  });
+  };
+  // Watch-only. Adding the key on stones would rewrite the diamond catalogue.
+  // Qualifying watches refresh once so productSet puts the Custom Label back
+  // on rows an earlier update stripped.
+  if (item.kind === 'watch') {
+    payload.uploadifyVendorSku = watchListsOnUploadify(item, priced) ? item.stockRef.trim() : '';
+  }
+  return contentHash(payload);
 }
 
 /** What the Shopify catalogue already holds for this handle, if anything. */

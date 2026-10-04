@@ -125,7 +125,11 @@ holds a stones table — Shopify products are the only live copy.
    qty > 0 is written `uploadify_product.uploadify_active` = true, and
    `uploadify_product.vendor_sku` is set to the same stock number as the
    variant SKU. That is the identifier Uploadify sends as the eBay Custom
-   Label. TLV watches
+   Label. Both metafields are included on the watch `productSet` payload:
+   `productSet` deletes metafields it is not given, and the follow-up write
+   used to skip a Vendor SKU that still matched the pre-write catalog read,
+   so an hourly update removed the Custom Label and Uploadify reported
+   `eBay: SKU not found`. TLV watches
    that pass the same papers and condition gates are created or reactivated
    through the normal watch write, priced with the watch sale rule, and
    published to the watch sales channels. They do not get the `ebay` tag.

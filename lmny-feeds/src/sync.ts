@@ -779,10 +779,15 @@ async function main() {
     for (const ref of createdRefs) {
       if (ref.handle && ref.id) uploadifyOwnerByHandle.set(ref.handle, ref.id);
     }
+    // productSet drops metafields it is not given. The catalog read happened
+    // before that write, so a Vendor SKU that already matched would be skipped
+    // and stay deleted. Watches in this run's productSet are written again.
+    const productSetHandles = new Set(inputs.map((input) => String(input.handle)));
     const uploadifyActiveLive = uploadifyActiveWrites(
       uploadifyActiveRows.map((row) => ({
         ...row,
         ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+        current: productSetHandles.has(row.handle) ? null : row.current,
       })),
     );
     if (uploadifyActiveLive.writes.length > 0) {
@@ -803,7 +808,7 @@ async function main() {
         ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
         desired: row.desired,
         stockRef: row.stockRef,
-        current: row.currentVendorSku,
+        current: productSetHandles.has(row.handle) ? null : row.currentVendorSku,
       })),
     );
     if (uploadifyVendorSkuLive.writes.length > 0) {

@@ -285,6 +285,29 @@ describe('storefront-readable facet metafields', () => {
     const fields = metafieldsFor(naturalStone(), priced(), 'hash', at);
     expect(find(fields, 'lmny_feed', 'cost_usd')).toBeUndefined();
   });
+
+  it('puts the Uploadify listing switch and stock number on a qualifying watch', () => {
+    const fields = metafieldsFor(watch(), priced(), 'hash', at);
+    expect(find(fields, 'uploadify_product', 'uploadify_active')).toEqual({
+      namespace: 'uploadify_product',
+      key: 'uploadify_active',
+      type: 'boolean',
+      value: 'true',
+    });
+    expect(find(fields, 'uploadify_product', 'vendor_sku')?.value).toBe('W-889');
+    const input = buildProductSetInput(watch(), priced(), at);
+    const variant = (input.variants as Array<{ sku: string }>)[0]!;
+    expect(variant.sku).toBe('W-889');
+    expect((input.metafields as Metafield[]).find((f) => f.key === 'vendor_sku')?.value).toBe(variant.sku);
+  });
+
+  it('omits Uploadify metafields when the watch must not be listed', () => {
+    for (const item of [watch({ condition: 'SLIDER' }), watch({ imageUrls: [] }), naturalStone()]) {
+      const fields = metafieldsFor(item, priced(), 'hash', at);
+      expect(find(fields, 'uploadify_product', 'uploadify_active')).toBeUndefined();
+      expect(find(fields, 'uploadify_product', 'vendor_sku')).toBeUndefined();
+    }
+  });
 });
 
 describe('content hash', () => {
@@ -311,6 +334,14 @@ describe('content hash', () => {
   it('changes when watch cost changes so Admin Cost per item stays in sync', () => {
     const base = contentHashFor(watch({ costUsd: 17_500 }), priced());
     expect(contentHashFor(watch({ costUsd: 18_000 }), priced())).not.toBe(base);
+  });
+
+  it('refreshes a qualifying watch when the Uploadify stock number changes, and leaves stones alone', () => {
+    const stone = contentHashFor(naturalStone(), priced());
+    expect(contentHashFor(naturalStone(), priced())).toBe(stone);
+    const listed = contentHashFor(watch(), priced());
+    expect(contentHashFor(watch({ stockRef: 'T3803' }), priced())).not.toBe(listed);
+    expect(contentHashFor(watch({ condition: 'SLIDER' }), priced())).not.toBe(listed);
   });
 });
 
