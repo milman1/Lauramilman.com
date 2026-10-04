@@ -351,7 +351,12 @@ cd lmny-feeds
 npx tsx scripts/validate-jewelry-csv.ts ../products.csv
 ```
 
-Expect exit 0 and `Jewelry CSV OK`. Fix every listed row before Shopify
-Admin → Products → Import. This is the same idea as the Back Vault scrub
-in §3b: catch blanks before they go live.
+Expect exit 0 and `Jewelry CSV OK`. The check requires Title, Body (HTML),
+SEO Title, and SEO Description in addition to the marketplace columns.
+SEO title must be at or under 60 characters and keep its suffix. SEO
+description must be at or under 160 characters and end with
+`Free insured shipping and 7-day returns.` Hype words fail the file.
+Fix every listed row before Shopify Admin → Products → Import. This is
+the same idea as the Back Vault scrub in §3b: catch blanks before they
+go live. A passing file does not publish anything by itself.
 
