@@ -321,7 +321,14 @@ that should list on eBay includes:
 | Column | Value |
 |---|---|
 | `Tags` | include `ebay` (alongside the brand and type tags) |
-| `Metafield: custom.ebay_condition [single_line_text_field]` | `1000` new (fine, lab-grown) or `3000` pre-owned (estate) |
+| `Metafield: custom.condition [single_line_text_field]` | `New` on every piece except watches, loose diamonds, and vintage |
+| `Metafield: custom.ebay_condition [single_line_text_field]` | `1000` for that same new set; `3000` pre-owned for vintage. Watches keep the feed's own condition id |
+
+Uploadify reads `custom.condition`. `New` is what makes an eBay listing come
+through as new. Vintage means a `backvault-feed`, `antique-estate`,
+`designer-jewelry`, or `vintage` tag, a `bv-` handle, or a title that says
+vintage, estate, or pre-owned. A cut name such as Antique Cushion is not
+vintage. Watches and loose diamonds are left alone.
 
 Never tag a draft or a loose diamond. Feed products (Belgium Dia watches,
 Back Vault estate pieces) get these from the sync code, not the CSV.
