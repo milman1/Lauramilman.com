@@ -17,6 +17,10 @@ export interface JewelryCsvIssue {
 interface CsvProduct {
   handle: string;
   headerRow: number;
+  title: string;
+  body: string;
+  seoTitle: string;
+  seoDescription: string;
   status: string;
   published: string;
   type: string;
@@ -26,6 +30,11 @@ interface CsvProduct {
   qty: string;
   policy: string;
 }
+
+const JEWELRY_SEO_CLOSER = 'Free insured shipping and 7-day returns.';
+const ESTATE_SEO_CLOSER = 'Authenticated by Laura Milman New York.';
+const HYPE_WORDS = ['stunning', 'must-have', 'breathtaking', 'beautiful', 'exquisite', 'killer', 'exceptional', 'spectacular', 'elegant', 'luxury'];
+const SEO_TITLE_SUFFIXES = ['| Laura Milman', '| Estate Jewelry', '| Pre-Owned Watch'];
 
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -90,6 +99,10 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
   const headers = rows[0]!.map((h) => h.trim());
   const col = {
     handle: headerIndex(headers, 'Handle'),
+    title: headerIndex(headers, 'Title'),
+    body: headerIndex(headers, 'Body (HTML)'),
+    seoTitle: headerIndex(headers, 'SEO Title'),
+    seoDescription: headerIndex(headers, 'SEO Description'),
     status: headerIndex(headers, 'Status'),
     published: headerIndex(headers, 'Published'),
     type: headerIndex(headers, 'Type'),
@@ -102,6 +115,10 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
   const issues: JewelryCsvIssue[] = [];
   const required: Array<[keyof typeof col, string]> = [
     ['handle', 'Handle'],
+    ['title', 'Title'],
+    ['body', 'Body (HTML)'],
+    ['seoTitle', 'SEO Title'],
+    ['seoDescription', 'SEO Description'],
     ['status', 'Status'],
     ['sku', 'Variant SKU'],
     ['tracker', 'Variant Inventory Tracker'],
@@ -127,6 +144,10 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
     const product: CsvProduct = existing ?? {
       handle,
       headerRow: i + 1,
+      title: '',
+      body: '',
+      seoTitle: '',
+      seoDescription: '',
       status: '',
       published: '',
       type: '',
@@ -136,6 +157,10 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
       qty: '',
       policy: '',
     };
+    const title = cell(row, col.title);
+    const body = cell(row, col.body);
+    const seoTitle = cell(row, col.seoTitle);
+    const seoDescription = cell(row, col.seoDescription);
     const status = cell(row, col.status);
     const category = cell(row, col.category);
     const type = cell(row, col.type);
@@ -144,6 +169,10 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
     const qty = cell(row, col.qty);
     const policy = cell(row, col.policy);
     const published = cell(row, col.published);
+    if (title) product.title = title;
+    if (body) product.body = body;
+    if (seoTitle) product.seoTitle = seoTitle;
+    if (seoDescription) product.seoDescription = seoDescription;
     if (status) product.status = status;
     if (category) product.category = category;
     if (type) product.type = type;
@@ -201,6 +230,32 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
         message: `Use "deny" so qty 0 cannot sell (got "${product.policy}").`,
       });
     }
+    const copy = [product.title, product.body, product.seoTitle, product.seoDescription].join(' ');
+    const hype = HYPE_WORDS.find((word) => new RegExp(`\\b${word}\\b`, 'i').test(copy));
+    if (!product.title) {
+      issues.push({ handle: product.handle, row, field: 'Title', message: 'Title is required.' });
+    }
+    if (!product.body) {
+      issues.push({ handle: product.handle, row, field: 'Body (HTML)', message: 'Body is required. One factual paragraph, with no hype.' });
+    }
+    if (!product.seoTitle) {
+      issues.push({ handle: product.handle, row, field: 'SEO Title', message: 'SEO title is required and must be 60 characters or fewer.' });
+    } else if (product.seoTitle.length > 60) {
+      issues.push({ handle: product.handle, row, field: 'SEO Title', message: `SEO title is ${product.seoTitle.length} characters. Keep it at or under 60 and preserve the suffix.` });
+    } else if (!seoTitleAllowed(product.seoTitle)) {
+      issues.push({ handle: product.handle, row, field: 'SEO Title', message: 'SEO title must end with "| Laura Milman", "| Estate Jewelry", "| Pre-Owned Watch", or a lab-grown metal suffix.' });
+    }
+    const closerOk = product.seoDescription.endsWith(JEWELRY_SEO_CLOSER) || product.seoDescription.endsWith(ESTATE_SEO_CLOSER);
+    if (!product.seoDescription) {
+      issues.push({ handle: product.handle, row, field: 'SEO Description', message: `SEO description must end with "${JEWELRY_SEO_CLOSER}"` });
+    } else if (product.seoDescription.length > 160) {
+      issues.push({ handle: product.handle, row, field: 'SEO Description', message: `SEO description is ${product.seoDescription.length} characters. Keep it at or under 160.` });
+    } else if (!closerOk) {
+      issues.push({ handle: product.handle, row, field: 'SEO Description', message: `SEO description must end with "${JEWELRY_SEO_CLOSER}"` });
+    }
+    if (hype) {
+      issues.push({ handle: product.handle, row, field: 'Title', message: `Remove the hype word "${hype}".` });
+    }
     if (!product.category) {
       const suggested = taxonomyForProductType(product.type);
       issues.push({
@@ -221,8 +276,13 @@ export function validateJewelryCsv(text: string): JewelryCsvIssue[] {
   return issues;
 }
 
+function seoTitleAllowed(title: string): boolean {
+  if (SEO_TITLE_SUFFIXES.some((suffix) => title.endsWith(suffix))) return true;
+  return /lab grown/i.test(title) && /\| \d{1,2}K [A-Za-z ]+Gold$/.test(title);
+}
+
 export function formatJewelryCsvReport(issues: JewelryCsvIssue[]): string {
-  if (issues.length === 0) return 'Jewelry CSV OK — every product is ACTIVE, has a SKU, tracked qty ≥ 1, and a Shopify Category.\n';
+  if (issues.length === 0) return 'Jewelry CSV OK — every product is ACTIVE, has a SKU, tracked qty ≥ 1, a Shopify Category, and listing copy within the SEO rules.\n';
   const lines = ['Jewelry CSV failed Uploadify/marketplace checks:', ''];
   for (const issue of issues) {
     const where = issue.handle ? `${issue.handle} (row ${issue.row})` : `row ${issue.row}`;

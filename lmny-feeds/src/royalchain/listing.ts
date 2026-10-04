@@ -202,7 +202,11 @@ function buildRoyalChainProductForType(
   ];
   const descriptionHtml = `<section class="lmny-product-description"><p>This ${escapeHtml(width)}mm ${escapeHtml(style.toLowerCase())} ${singularType.toLowerCase()} is crafted in ${escapeHtml(metal)} and offered by Laura Milman New York.</p>${detailsHtml(descriptionDetails)}</section>`;
   const seoTitle = fitWithSuffix(title, '| Laura Milman', 60);
-  const seoDescription = truncateAtWord(`Shop the ${width}mm ${style.toLowerCase()} chain in ${metal}, available in ${lengths.join(' and ')}, from Laura Milman New York.`, 160);
+  const seoDescription = fitWithSuffix(
+    `Shop this ${width}mm ${style.toLowerCase()} ${singularType.toLowerCase()} in ${metal}.`,
+    'Free insured shipping and 7-day returns.',
+    160,
+  );
   const fallbackHandle = `lmny-${itemNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
   const baseHandle = source.existingHandle || EXISTING_HANDLES[itemNumber] || fallbackHandle;
   const handle = splitByType && productType === ROYALCHAIN_BRACELET_PRODUCT_TYPE ? `${baseHandle}-bracelet` : baseHandle;
