@@ -77,6 +77,12 @@
         assign system = 'EU'
       endif
       assign rest = rest | remove: 'us' | remove: 'eu' | strip
+      # "Size 6." ends a sentence; drop the trailing period.
+      assign last_char = rest | slice: -1, 1
+      if last_char == '.'
+        assign keep = rest.size | minus: 1
+        assign rest = rest | slice: 0, keep
+      endif
       assign leftover = rest | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9' | remove: '.'
       if labeled and rest != '' and leftover == ''
         assign estate_size = system | append: ' ' | append: rest
