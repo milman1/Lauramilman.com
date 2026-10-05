@@ -1,0 +1,16 @@
+{%- comment -%}
+  Maps one search word to the word the catalog uses. Covers misspellings and
+  Spanish terms that shoppers typed into the store search ("brazalet",
+  "brasalect", "brazaletes", "blacelet"). Outputs the corrected word, or the
+  word unchanged when it is not on the list.
+  Usage: {%- capture fixed -%}{% render 'search-synonyms', word: word %}{%- endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign w = word | downcase | strip
+  case w
+    when 'brazalet', 'brazalets', 'brazalete', 'brazaletes', 'brasalet', 'brasalets', 'brasalect', 'brasalete', 'brasaletes', 'blacelet', 'blacelets', 'braclet', 'braclets', 'braselet', 'braselets', 'bracalet', 'bracelt', 'pulsera', 'pulseras'
+      echo 'bracelet'
+    else
+      echo w
+  endcase
+-%}
