@@ -189,7 +189,7 @@ export const WATCH = {
  * `LOOSE_LAB_GROWN`.
  * Not sourced from the Belgium Dia diamond API.
  *
- *   retail = round(cost × 3)
+ *   retail = cost × 2 (rounded to cents)
  *
  * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
  * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
@@ -200,7 +200,7 @@ export const LAB_GROWN_JEWELRY = {
   /** Common Peaceful Diamonds SKU prefixes observed on the store. */
   skuPrefixes: ['BC14', 'NK14'] as const,
   /** retail = cost × this. */
-  costMultiple: 3,
+  costMultiple: 2,
 } as const;
 
 /** Retail for lab-grown jewelry from recorded wholesale cost. */
@@ -208,7 +208,7 @@ export function labGrownJewelryRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
   }
-  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
+  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple * 100) / 100;
 }
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
@@ -282,7 +282,7 @@ export const BACKVAULT = {
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
  * jewelry and hand-imported estate pieces are merchant-set and have no
- * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×3). A new
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×2). A new
  * supplier gets its own constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {

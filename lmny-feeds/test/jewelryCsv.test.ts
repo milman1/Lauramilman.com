@@ -10,7 +10,7 @@ describe('validateJewelryCsv', () => {
       HEADER,
       'cartier-love-ring,Cartier Love Ring,Rings,Apparel & Accessories > Jewelry > Rings,CLV-001,shopify,1,deny,active,true',
     ].join('\n');
-    expect(validateJewelryCsv(csv)).toEqual([]);
+    expect(validateJewelryCsv(csv, 'marketplace-audit')).toEqual([]);
   });
 
   it('rejects blank SKU, untracked qty, inactive status, and missing category', () => {
@@ -18,7 +18,7 @@ describe('validateJewelryCsv', () => {
       HEADER,
       'bad-piece,Bad Piece,Rings,,,,,deny,draft,false',
     ].join('\n');
-    const issues = validateJewelryCsv(csv);
+    const issues = validateJewelryCsv(csv, 'marketplace-audit');
     expect(issues.map((i) => i.field).sort()).toEqual([
       'Product Category',
       'Status',
@@ -34,12 +34,12 @@ describe('validateJewelryCsv', () => {
       'piece,Piece,Earrings,Apparel & Accessories > Jewelry > Earrings,ER-1,shopify,1,deny,active,true',
       'piece,,,,,,,,,',
     ].join('\n');
-    expect(validateJewelryCsv(csv)).toEqual([]);
+    expect(validateJewelryCsv(csv, 'marketplace-audit')).toEqual([]);
   });
 
   it('fails closed on a missing required column', () => {
     const csv = 'Handle,Title,Status\npiece,Piece,active\n';
-    const issues = validateJewelryCsv(csv);
+    const issues = validateJewelryCsv(csv, 'marketplace-audit');
     expect(issues.some((i) => i.field === 'Variant SKU')).toBe(true);
     expect(formatJewelryCsvReport(issues)).toContain('Missing column');
   });
