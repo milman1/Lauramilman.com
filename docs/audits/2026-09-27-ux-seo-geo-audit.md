@@ -44,7 +44,7 @@ against each finding. ✅ done, 🟡 partly done, ⬜ still open.
 | 6. Watch policy used as a trust badge | ✅ | The rebuilt homepage trust strip is 14K Gold · Certified Loose Diamonds · Free Insured Shipping · 7-Day Jewelry Returns; the watch exchange line is gone from it. |
 | 7. `/pages/shop` duplicates the homepage | ✅ | Unpublished, redirects to `/`. |
 | 8. Legacy promotional copy | ✅ | Omega, Chopard, Hermès and Vintage all have fact-only copy now. |
-| 9. Boilerplate "Authenticated by…" suffix | ⬜ | Not reviewed this round. Still needs a pass over every collection's SEO description. |
+| 9. Boilerplate "Authenticated by…" suffix | ✅ | 2026-10-05: removed from 17 house and category collections (they now end with the real shipping and 7-day returns line); kept on estate and watch collections only. See `docs/seo/2026-10-build-log.md`. |
 | Claims to verify table | ⬜ | Not reviewed this round; still needs the merchant's confirmation of each claim. |
 
 ### Section 3 — Layout and UX

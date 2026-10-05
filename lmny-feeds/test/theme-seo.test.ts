@@ -92,4 +92,25 @@ describe('theme SEO integration', () => {
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');
   });
+
+  it('renders the collection long-form guide and FAQ from collection metafields', () => {
+    const longform = themeFile('snippets/collection-longform.liquid');
+    const renderCall = "render 'collection-longform', collection: collection, page_number: paginate.current_page";
+
+    expect(themeFile('sections/main-collection.liquid')).toContain(renderCall);
+    expect(themeFile('sections/diamond-filter.liquid')).toContain(renderCall);
+    expect(longform).toContain('collection.metafields.custom.guide_html.value');
+    expect(longform).toContain('collection.metafields.custom.guide_faq.value');
+    // FAQPage JSON-LD is built from the same entries as the visible <details>,
+    // and only for entries with both a question and an answer.
+    expect(longform).toContain('"@type": "FAQPage"');
+    expect(longform).toContain('<details class="lm-longform__q"');
+    expect(longform.match(/faq\.question != blank and faq\.answer != blank/g)).toHaveLength(3);
+    // Page 1 only, so paginated pages don't repeat the guide.
+    expect(longform).toContain('page_number > 1');
+  });
+
+  it('lets admin own the Hermès collection meta description', () => {
+    expect(themeFile('layout/theme.liquid')).not.toContain("when 'hermes'");
+  });
 });
