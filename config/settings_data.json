@@ -29,6 +29,7 @@
     "social_facebook": "https://www.facebook.com/laurasgemsnyc",
     "social_tiktok": "https://www.tiktok.com/@laurasgemsnyc",
     "social_pinterest": "https://www.pinterest.com/laurasgemsny/",
+    "favicon": "shopify://shop_images/favicon_LMNY.png",
     "sections": {
       "header": {
         "type": "header",
