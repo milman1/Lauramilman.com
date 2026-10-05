@@ -1,5 +1,5 @@
 /**
- * Laura Milman — API-backed diamond filter + inquiry/reserve.
+ * Laura Milman — API-backed diamond filter.
  * Keeps lm-dfilter visual classes; data from Supabase Edge Function
  * (or App Proxy /apps/diamonds once wired).
  */
@@ -12,7 +12,6 @@
   var cfg = {
     apiBase: (root.dataset.apiBase || '').replace(/\/+$/, ''),
     anonKey: root.dataset.anonKey || '',
-    reserveUrl: (root.dataset.reserveUrl || '').replace(/\/+$/, ''),
     kind: root.dataset.kind || 'lab',
     perPage: parseInt(root.dataset.perPage || '24', 10) || 24,
     currency: root.dataset.currency || 'USD',
@@ -187,9 +186,6 @@
       escapeAttr(href.replace('/products/', '')) +
       '">Buy now</button>' +
       '</div>' +
-      '<button type="button" class="lm-stone-card__reserve" data-reserve="' +
-      escapeAttr(stone.stock_ref) +
-      '">Reserve instead</button>' +
       '</div></div>'
     );
   }
@@ -378,73 +374,6 @@
     });
   }
 
-  /* ── Reserve modal ── */
-  var modal = document.getElementById('lm-reserve-modal');
-  var reserveStock = null;
-
-  function openReserve(stockRef, title) {
-    reserveStock = stockRef;
-    if (!modal) return;
-    modal.hidden = false;
-    document.body.classList.add('lm-reserve-open');
-    var t = modal.querySelector('[data-reserve-title]');
-    if (t) t.textContent = title || 'Stock #' + stockRef;
-    var stockInput = modal.querySelector('[name="stock_ref"]');
-    if (stockInput) stockInput.value = stockRef;
-    var status = modal.querySelector('[data-reserve-status]');
-    if (status) {
-      status.hidden = true;
-      status.textContent = '';
-    }
-  }
-
-  function closeReserve() {
-    if (!modal) return;
-    modal.hidden = true;
-    document.body.classList.remove('lm-reserve-open');
-    reserveStock = null;
-  }
-
-  async function submitReserve(event) {
-    event.preventDefault();
-    if (!cfg.reserveUrl || !reserveStock) return;
-    var fd = new FormData(event.target);
-    var payload = {
-      stock_ref: reserveStock,
-      name: String(fd.get('name') || '').trim(),
-      email: String(fd.get('email') || '').trim(),
-      phone: String(fd.get('phone') || '').trim(),
-      message: String(fd.get('message') || '').trim(),
-    };
-    var status = modal.querySelector('[data-reserve-status]');
-    var btn = modal.querySelector('[type="submit"]');
-    if (btn) btn.disabled = true;
-    try {
-      var res = await fetch(cfg.reserveUrl, {
-        method: 'POST',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, headers()),
-        body: JSON.stringify(payload),
-      });
-      var data = await res.json();
-      if (!res.ok) throw new Error(data.detail || data.error || 'Could not reserve');
-      if (status) {
-        status.hidden = false;
-        status.textContent =
-          'Reserved. We will confirm availability and send a private invoice to ' +
-          payload.email +
-          ' shortly.';
-      }
-      event.target.reset();
-    } catch (err) {
-      if (status) {
-        status.hidden = false;
-        status.textContent = err.message || String(err);
-      }
-    } finally {
-      if (btn) btn.disabled = false;
-    }
-  }
-
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -491,18 +420,6 @@
 
   if (resultsEl) {
     resultsEl.addEventListener('click', function (e) {
-      var reserveBtn = e.target.closest('[data-reserve]');
-      if (reserveBtn) {
-        e.preventDefault();
-        var card = reserveBtn.closest('.product-card');
-        var title = card ? card.querySelector('.product-card__title') : null;
-        openReserve(
-          reserveBtn.getAttribute('data-reserve'),
-          title ? title.textContent.trim() : '',
-        );
-        return;
-      }
-
       var buyBtn = e.target.closest('[data-buy-handle], [data-add-handle]');
       if (!buyBtn) return;
       e.preventDefault();
@@ -553,14 +470,6 @@
           }, 2200);
         });
     });
-  }
-
-  if (modal) {
-    modal.querySelectorAll('[data-reserve-close]').forEach(function (el) {
-      el.addEventListener('click', closeReserve);
-    });
-    var reserveForm = modal.querySelector('form');
-    if (reserveForm) reserveForm.addEventListener('submit', submitReserve);
   }
 
   load();
