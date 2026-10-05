@@ -50,6 +50,17 @@ def test_unsure_note_is_off_until_ticked() -> None:
     assert "unsureProp.disabled = !unsure.checked" in fit
 
 
+def test_one_size_rings_require_a_size_before_adding() -> None:
+    # The size buttons fill one hidden property; it starts empty, and both
+    # add paths stop until it has a value.
+    fit = FIT.read_text()
+    assert '<input type="hidden" name="properties[Ring size]" value="" data-fit-size-prop>' in fit
+    assert "<select" not in fit
+    assert "e.stopPropagation();" in fit.split("form.addEventListener('submit'")[-1]
+    assert "closest('[data-pair-buy]') && missingSize()" in fit
+    assert "}, true);" in fit  # capture phase, ahead of the pairing panel's own click handler
+
+
 def test_ring_fit_buttons_never_submit_the_product_form() -> None:
     fit = FIT.read_text()
     buttons = re.findall(r"<button\b[^>]*>", fit)

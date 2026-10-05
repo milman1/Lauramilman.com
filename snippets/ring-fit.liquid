@@ -19,8 +19,10 @@
     pieces never promise resizing.
   - Rings with a size option: "Not sure of the size?" adds the property
     Size check, so the store confirms the size before the ring ships.
-  - House rings sold in one size: an optional "Your ring size" select
-    (property Ring size), including "Not sure — please contact me".
+  - House rings sold in one size: square size buttons 3–13 plus "Not
+    sure", saved as the property Ring size. A choice is required: Add to
+    Cart (and the sticky bar) and "Add ring with this diamond" stop with a
+    prompt until one is picked.
   - Estate and pre-owned pieces (a tag containing "estate" or
     "pre-owned"): the ring's own size when
     custom.measurements labels it ("Size: 6.25", "US 9.5", "EU 52"); bare
@@ -95,7 +97,7 @@
     endif
     assign chat_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
     assign dialog_id = 'PdpFitDialog-' | append: product.id
-    assign select_id = 'PdpFitSize-' | append: product.id
+    assign pick_id = 'PdpFitSize-' | append: product.id
   -%}
 
   {%- capture chat_attrs -%}
@@ -148,21 +150,25 @@
       </label>
       <input type="hidden" name="properties[Size check]" value="Please confirm my size before shipping" disabled data-fit-unsure-prop>
     {%- elsif ask_size -%}
-      <label class="pdp-fit__label" for="{{ select_id }}">Your ring size <span>(optional)</span></label>
-      <select class="pdp-fit__select" id="{{ select_id }}" name="properties[Ring size]">
-        <option value="">Select your size</option>
-        {%- for half in (6..26) -%}
-          {%- assign whole = half | divided_by: 2 | floor -%}
-          {%- assign rem = half | modulo: 2 -%}
-          {%- if rem == 0 -%}
-            <option value="{{ whole }}">{{ whole }}</option>
-          {%- else -%}
-            <option value="{{ whole }}.5">{{ whole }}.5</option>
-          {%- endif -%}
-        {%- endfor -%}
-        <option value="Not sure — please contact me">Not sure — please contact me</option>
-      </select>
-      <p class="pdp-fit__hint">Tell us your size and we’ll confirm the fit with you before it ships.</p>
+      <div class="pdp-fit__pick" data-fit-pick>
+        <div class="product-option-label" id="{{ pick_id }}-label">Ring size — <span data-fit-pick-label>choose your size</span></div>
+        <div class="product-option-row pdp-fit__sizes" role="group" aria-labelledby="{{ pick_id }}-label">
+          {%- for half in (6..26) -%}
+            {%- assign whole = half | divided_by: 2 | floor -%}
+            {%- assign rem = half | modulo: 2 -%}
+            {%- if rem == 0 -%}
+              {%- assign size_value = whole | append: '' -%}
+            {%- else -%}
+              {%- assign size_value = whole | append: '.5' -%}
+            {%- endif -%}
+            <button type="button" class="product-option-btn size-btn" data-fit-size="{{ size_value }}" aria-pressed="false">{{ size_value }}</button>
+          {%- endfor -%}
+          <button type="button" class="product-option-btn pdp-fit__unsure" data-fit-size="Not sure — please contact me" data-fit-size-label="Not sure — we’ll contact you" aria-pressed="false">Not sure</button>
+        </div>
+        <input type="hidden" name="properties[Ring size]" value="" data-fit-size-prop>
+        <p class="pdp-fit__error" data-fit-error role="alert" hidden>Choose a ring size, or “Not sure” and we’ll help you find it.</p>
+        <p class="pdp-fit__hint">Pick “Not sure” and we’ll contact you to confirm the fit before it ships.</p>
+      </div>
     {%- endif -%}
 
     <dialog class="pdp-fit-dialog" id="{{ dialog_id }}" aria-labelledby="{{ dialog_id }}-title">
@@ -248,25 +254,14 @@
       cursor: pointer;
     }
     .pdp-fit__check input { margin-top: 0.15rem; accent-color: var(--gold-dark, #A88340); }
-    .pdp-fit__label {
-      display: block;
-      margin-top: 0.75rem;
-      margin-bottom: 0.35rem;
+    .pdp-fit__pick { margin-top: 0.9rem; }
+    .pdp-fit__sizes { margin-bottom: 0.4rem; }
+    .pdp-fit__unsure { padding-inline: 16px; }
+    .pdp-fit__error {
+      margin: 0.4rem 0 0;
       font-size: 0.8rem;
       font-weight: 500;
-      color: var(--text-dark, #2C1810);
-    }
-    .pdp-fit__label span { font-weight: 400; color: var(--text-muted, #8A8070); }
-    .pdp-fit__select {
-      width: 100%;
-      max-width: 320px;
-      padding: 10px 12px;
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      color: var(--text-dark, #2C1810);
-      background: var(--warm-white, #FDFAF6);
-      border: 1px solid var(--border-medium, #CFC7B8);
-      border-radius: var(--radius-sm, 4px);
+      color: #9B2C2C;
     }
 
     .pdp-fit-dialog {
@@ -408,6 +403,53 @@
           unsure.addEventListener('change', function () {
             unsureProp.disabled = !unsure.checked;
           });
+        }
+
+        // One-size rings: a size (or "Not sure") is required before the ring is added.
+        var pick = root.querySelector('[data-fit-pick]');
+        if (pick) {
+          var sizeProp = pick.querySelector('[data-fit-size-prop]');
+          var pickLabel = pick.querySelector('[data-fit-pick-label]');
+          var pickError = pick.querySelector('[data-fit-error]');
+
+          pick.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-fit-size]');
+            if (!btn) return;
+            pick.querySelectorAll('[data-fit-size]').forEach(function (b) {
+              b.classList.toggle('active', b === btn);
+              b.setAttribute('aria-pressed', String(b === btn));
+            });
+            sizeProp.value = btn.getAttribute('data-fit-size');
+            pickLabel.textContent = btn.getAttribute('data-fit-size-label') || btn.textContent;
+            pickError.hidden = true;
+          });
+
+          var missingSize = function () {
+            if (sizeProp.value) return false;
+            pickError.hidden = false;
+            pick.scrollIntoView({ block: 'center' });
+            var firstSize = pick.querySelector('[data-fit-size]');
+            if (firstSize) firstSize.focus({ preventScroll: true });
+            return true;
+          };
+
+          // Add to Cart and the sticky bar submit the form; stop before assets/theme.js adds it.
+          var form = root.closest('form');
+          if (form) {
+            form.addEventListener('submit', function (e) {
+              if (missingSize()) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            });
+          }
+          // "Add ring with this diamond" adds by click; catch it before its own handler.
+          document.addEventListener('click', function (e) {
+            if (e.target.closest && e.target.closest('[data-pair-buy]') && missingSize()) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          }, true);
         }
       });
     })();
