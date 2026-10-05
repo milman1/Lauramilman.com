@@ -25,9 +25,10 @@
     "color_navy_deep": "#12162B",
     "color_pd_blue": "#5B7FBD",
     "color_pd_ice": "#A9BEE3",
-    "social_instagram": "https://www.instagram.com/lauramilmannewyork",
+    "social_instagram": "https://www.instagram.com/laurasgemsnyc",
+    "social_facebook": "https://www.facebook.com/laurasgemsnyc",
+    "social_tiktok": "https://www.tiktok.com/@laurasgemsnyc",
     "social_pinterest": "",
-    "social_facebook": "",
     "sections": {
       "header": {
         "type": "header",
@@ -54,9 +55,10 @@
         "settings": {
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "description": "House jewelry is designed in New York and crafted in Italy. Signed estate pieces and watches are authenticated in New York.",
-          "social_instagram": "",
-          "social_pinterest": "",
-          "social_facebook": ""
+          "social_instagram": "https://www.instagram.com/laurasgemsnyc",
+          "social_facebook": "https://www.facebook.com/laurasgemsnyc",
+          "social_tiktok": "https://www.tiktok.com/@laurasgemsnyc",
+          "social_pinterest": ""
         }
       },
       "popular-searches": {
