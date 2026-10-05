@@ -376,6 +376,14 @@
           {%- endfor -%}
         {%- endunless -%}
 
+        {%- comment -%} Ring size help: guide dialog, resizing note, size fields (properties on this form) {%- endcomment -%}
+        {% render 'ring-fit',
+          product: product,
+          is_watch: is_watch,
+          enabled: section.settings.ring_fit_enabled,
+          ask_size: section.settings.ring_fit_ask_size
+        %}
+
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
@@ -1034,6 +1042,24 @@
       "id": "engraving_ai_endpoint",
       "label": "AI engraving render endpoint",
       "info": "https://lauramilman-com.<subdomain>.workers.dev/engraving/render. Leave blank to hide the AI button; the live preview still shows."
+    },
+    {
+      "type": "header",
+      "content": "Ring sizing"
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_fit_enabled",
+      "label": "Show ring size help",
+      "info": "On rings: a Find your size dialog, the resizing note, and a \"Not sure of the size?\" option. Tag a ring no-resize to say it can't be resized.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_fit_ask_size",
+      "label": "Ask for a size on one-size rings",
+      "info": "House rings without a size option get an optional Your ring size field, saved on the order line. Estate pieces never show it.",
+      "default": true
     },
     {
       "type": "header",

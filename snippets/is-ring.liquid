@@ -1,0 +1,33 @@
+{%- comment -%}
+  Outputs 'true' when the product is a ring: a ring product type (Ring,
+  Rings, Solitaire Ring, Wedding Band…, never Earrings), an engagement
+  ring, or a "Jewelry"-typed piece titled as a ring or band.
+  Usage: {%- capture is_ring -%}{% render 'is-ring', product: product %}{%- endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign ring = false
+  assign type_l = product.type | downcase
+  assign title_l = product.title | downcase
+  if type_l contains 'earring'
+    assign ring = false
+  elsif type_l contains 'ring' or type_l == 'wedding band'
+    assign ring = true
+  elsif type_l == 'jewelry' or type_l == ''
+    if title_l contains ' ring' or title_l contains ' band'
+      unless title_l contains 'earring'
+        assign ring = true
+      endunless
+    endif
+  endif
+  unless ring
+    capture is_er
+      render 'is-engagement-ring', product: product
+    endcapture
+    if is_er == 'true'
+      assign ring = true
+    endif
+  endunless
+  if ring
+    echo 'true'
+  endif
+-%}
