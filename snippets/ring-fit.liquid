@@ -1,0 +1,409 @@
+{%- comment -%}
+  Ring fit — size help on ring product pages.
+  Rendered by sections/main-product.liquid inside the product form, just
+  above Add to Cart, so its fields travel as line-item properties on both
+  Add to Cart and "Add ring with this diamond".
+
+  Accepts:
+  - product: the ring
+  - is_watch: 'true' for watches (never shown)
+  - enabled: section setting "Show ring size help"
+  - ask_size: section setting "Ask for a size on one-size rings"
+
+  What it shows:
+  - "Find your size" opens a dialog with the US size chart, three
+    measuring tips, the full guide and Ask a specialist.
+  - A resizing note. House rings: one complimentary resizing (the policy
+    on the FAQ and Shipping & Returns pages). Eternity bands and pieces
+    tagged "no-resize": can't be resized, confirm before ordering. Estate
+    pieces never promise resizing.
+  - Rings with a size option: "Not sure of the size?" adds the property
+    Size check, so the store confirms the size before the ring ships.
+  - House rings sold in one size: an optional "Your ring size" select
+    (property Ring size), including "Not sure — please contact me".
+  - Estate and pre-owned pieces (a tag containing "estate" or
+    "pre-owned"): the ring's own size when
+    custom.measurements labels it ("Size: 6.25", "US 9.5", "EU 52"); bare
+    numbers are left alone because they can be a width. Otherwise a
+    prompt to ask a specialist for the size.
+{%- endcomment -%}
+
+{%- capture is_ring -%}{% render 'is-ring', product: product %}{%- endcapture -%}
+{%- if enabled and is_watch != 'true' and is_ring == 'true' -%}
+  {%- liquid
+    # Estate and pre-owned rings are one of a kind, in the size they come in.
+    assign tags_l = product.tags | join: ' ' | downcase
+    assign estate = false
+    if tags_l contains 'estate' or tags_l contains 'pre-owned'
+      assign estate = true
+    endif
+
+    assign has_size_option = false
+    for option in product.options_with_values
+      assign option_l = option.name | downcase
+      if option_l contains 'size'
+        assign has_size_option = true
+      endif
+    endfor
+
+    # Resizing: eternity bands (not half eternity) and "no-resize" pieces can't be resized.
+    assign no_resize = ''
+    assign title_l = product.title | downcase
+    assign style_l = product.metafields.custom.setting_style.value | default: '' | downcase
+    assign eternity_text = title_l | append: ' ' | append: tags_l | append: ' ' | append: style_l
+    if product.tags contains 'no-resize'
+      assign no_resize = 'This design can’t be resized, so please confirm your size before ordering.'
+    elsif eternity_text contains 'eternity'
+      unless eternity_text contains 'half eternity' or eternity_text contains 'half-eternity'
+        assign no_resize = 'Eternity bands can’t be resized, so please confirm your size before ordering.'
+      endunless
+    endif
+
+    # Estate ring size, only when the measurements field labels it as a size.
+    assign estate_size = ''
+    if estate
+      assign m_l = product.metafields.custom.measurements.value | default: '' | downcase | strip
+      assign labeled = false
+      if m_l contains 'size'
+        assign labeled = true
+      endif
+      assign rest = m_l | remove: 'ring size' | remove: 'size' | remove: ':' | strip
+      assign system = 'US'
+      assign head = rest | slice: 0, 2
+      if head == 'us'
+        assign labeled = true
+      elsif head == 'eu'
+        assign labeled = true
+        assign system = 'EU'
+      endif
+      assign rest = rest | remove: 'us' | remove: 'eu' | strip
+      assign leftover = rest | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9' | remove: '.'
+      if labeled and rest != '' and leftover == ''
+        assign estate_size = system | append: ' ' | append: rest
+      endif
+    endif
+
+    assign product_image = ''
+    if product.featured_image
+      assign product_image = product.featured_image | image_url: width: 240
+    endif
+    assign chat_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+    assign dialog_id = 'PdpFitDialog-' | append: product.id
+    assign select_id = 'PdpFitSize-' | append: product.id
+  -%}
+
+  {%- capture chat_attrs -%}
+    data-chat-intent="ask"
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+    data-product-title="{{ chat_title | escape }}"
+    data-product-url="{{ shop.url }}{{ product.url }}"
+    data-product-image="{{ product_image | escape }}"
+  {%- endcapture -%}
+
+  <div class="pdp-fit" data-ring-fit>
+    <div class="pdp-fit__row">
+      <button
+        type="button"
+        class="pdp-fit__guide"
+        data-fit-open
+        aria-haspopup="dialog"
+        aria-controls="{{ dialog_id }}"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="7"/><path d="M9 5l3-3 3 3"/></svg>
+        Find your size
+      </button>
+      {%- if estate -%}
+        {%- if estate_size != '' -%}
+          <span class="pdp-fit__note"><strong>Ring size {{ estate_size }}</strong> · one of a kind</span>
+        {%- endif -%}
+      {%- elsif no_resize != '' -%}
+        <span class="pdp-fit__note">{{ no_resize }}</span>
+      {%- else -%}
+        <span class="pdp-fit__note">One complimentary resizing included</span>
+      {%- endif -%}
+    </div>
+
+    {%- if estate -%}
+      <p class="pdp-fit__help">
+        {%- if estate_size != '' -%}
+          Need a different size?
+          <button type="button" class="pdp-fit__link js-open-product-chat" {{ chat_attrs }}>Ask a specialist</button>
+          before you buy. Some estate pieces can’t be resized.
+        {%- else -%}
+          <button type="button" class="pdp-fit__link js-open-product-chat" {{ chat_attrs }}>Ask a specialist</button>
+          for this ring’s size before you buy. Some estate pieces can’t be resized.
+        {%- endif -%}
+      </p>
+    {%- elsif has_size_option -%}
+      <label class="pdp-fit__check">
+        <input type="checkbox" data-fit-unsure>
+        <span>Not sure of the size? We’ll contact you to confirm it before your ring ships.</span>
+      </label>
+      <input type="hidden" name="properties[Size check]" value="Please confirm my size before shipping" disabled data-fit-unsure-prop>
+    {%- elsif ask_size -%}
+      <label class="pdp-fit__label" for="{{ select_id }}">Your ring size <span>(optional)</span></label>
+      <select class="pdp-fit__select" id="{{ select_id }}" name="properties[Ring size]">
+        <option value="">Select your size</option>
+        {%- for half in (6..26) -%}
+          {%- assign whole = half | divided_by: 2 | floor -%}
+          {%- assign rem = half | modulo: 2 -%}
+          {%- if rem == 0 -%}
+            <option value="{{ whole }}">{{ whole }}</option>
+          {%- else -%}
+            <option value="{{ whole }}.5">{{ whole }}.5</option>
+          {%- endif -%}
+        {%- endfor -%}
+        <option value="Not sure — please contact me">Not sure — please contact me</option>
+      </select>
+      <p class="pdp-fit__hint">Tell us your size and we’ll confirm the fit with you before it ships.</p>
+    {%- endif -%}
+
+    <dialog class="pdp-fit-dialog" id="{{ dialog_id }}" aria-labelledby="{{ dialog_id }}-title">
+      <div class="pdp-fit-dialog__head">
+        <h2 class="pdp-fit-dialog__title" id="{{ dialog_id }}-title">Find your ring size</h2>
+        <button type="button" class="pdp-fit-dialog__close" data-fit-close aria-label="Close size guide">×</button>
+      </div>
+      <ol class="pdp-fit-dialog__tips">
+        <li>Wrap a thin strip of paper snugly around the base of the finger, mark where it overlaps, and measure the length in millimeters. Match it to the circumference column.</li>
+        <li>Have a ring that fits? Measure its inside diameter and match it to the diameter column.</li>
+        <li>Measure at the end of the day, when fingers are largest. Between two sizes, or a band over 6mm wide? Choose the larger size.</li>
+      </ol>
+      <div class="pdp-fit-dialog__table-wrap">
+        {% render 'ring-size-chart', class: 'pdp-fit-dialog__table' %}
+      </div>
+      <p class="pdp-fit-dialog__surprise">Buying as a surprise? Borrow a ring they wear on that finger and measure its inside diameter. Still unsure? Ask us and we’ll help you get it right.</p>
+      <div class="pdp-fit-dialog__actions">
+        <a class="pdp-fit-dialog__more" href="/pages/ring-size-guide">Full ring size guide</a>
+        <button type="button" class="pdp-fit-dialog__ask js-open-product-chat" data-fit-close {{ chat_attrs }}>Ask a specialist</button>
+      </div>
+    </dialog>
+  </div>
+
+  <style>
+    .pdp-fit {
+      margin: 0 0 var(--space-md, 1rem);
+      padding: var(--space-sm, 0.75rem) 0 0;
+      border-top: 1px solid var(--border-light, #E8E2D8);
+    }
+    .pdp-fit__row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+    }
+    .pdp-fit__guide {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+      background: none;
+      border: 0;
+      border-bottom: 1px solid var(--gold, #C9A050);
+      cursor: pointer;
+    }
+    .pdp-fit__guide:hover,
+    .pdp-fit__guide:focus-visible { color: var(--gold-dark, #A88340); }
+    .pdp-fit__note {
+      font-size: 0.78rem;
+      color: var(--text-muted, #8A8070);
+    }
+    .pdp-fit__note strong { color: var(--text-dark, #2C1810); font-weight: 500; }
+    .pdp-fit__help,
+    .pdp-fit__hint {
+      margin: 0.5rem 0 0;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-muted, #8A8070);
+    }
+    .pdp-fit__link {
+      padding: 0;
+      font: inherit;
+      color: var(--text-dark, #2C1810);
+      background: none;
+      border: 0;
+      text-decoration: underline;
+      text-decoration-color: var(--gold, #C9A050);
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    .pdp-fit__check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-dark, #2C1810);
+      cursor: pointer;
+    }
+    .pdp-fit__check input { margin-top: 0.15rem; accent-color: var(--gold-dark, #A88340); }
+    .pdp-fit__label {
+      display: block;
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+    }
+    .pdp-fit__label span { font-weight: 400; color: var(--text-muted, #8A8070); }
+    .pdp-fit__select {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--text-dark, #2C1810);
+      background: var(--warm-white, #FDFAF6);
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: var(--radius-sm, 4px);
+    }
+
+    .pdp-fit-dialog {
+      /* The theme's reset zeroes margins; auto margins centre the modal. */
+      margin: auto;
+      width: min(560px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      padding: 1.5rem;
+      color: var(--text-dark, #2C1810);
+      background: var(--warm-white, #FDFAF6);
+      border: 1px solid var(--border-light, #E8E2D8);
+      border-radius: var(--radius-md, 8px);
+      overflow-y: auto;
+    }
+    .pdp-fit-dialog::backdrop { background: rgba(30, 17, 9, 0.55); }
+    .pdp-fit-dialog__head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .pdp-fit-dialog__title {
+      margin: 0;
+      font-family: var(--font-heading, 'Cormorant Garamond', serif);
+      font-size: 1.6rem;
+      font-weight: 400;
+    }
+    .pdp-fit-dialog__close {
+      padding: 0 0.25rem;
+      font-size: 1.6rem;
+      line-height: 1;
+      color: var(--text-dark, #2C1810);
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+    .pdp-fit-dialog__tips {
+      margin: 0 0 1rem;
+      padding-left: 1.2rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .pdp-fit-dialog__tips li + li { margin-top: 0.4rem; }
+    .pdp-fit-dialog__table-wrap {
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid var(--border-light, #E8E2D8);
+      border-radius: var(--radius-sm, 4px);
+    }
+    .pdp-fit-dialog__table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: center;
+    }
+    .pdp-fit-dialog__table th {
+      position: sticky;
+      top: 0;
+      padding: 0.55rem 0.5rem;
+      font-weight: 500;
+      background: var(--cream, #FAF6F0);
+      border-bottom: 1px solid var(--border-light, #E8E2D8);
+    }
+    .pdp-fit-dialog__table td {
+      padding: 0.45rem 0.5rem;
+      border-bottom: 1px solid var(--border-light, #E8E2D8);
+    }
+    .pdp-fit-dialog__surprise {
+      margin: 1rem 0 0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted, #8A8070);
+    }
+    .pdp-fit-dialog__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .pdp-fit-dialog__more {
+      font-size: 0.82rem;
+      color: var(--text-dark, #2C1810);
+      text-decoration: underline;
+      text-decoration-color: var(--gold, #C9A050);
+      text-underline-offset: 3px;
+    }
+    .pdp-fit-dialog__ask {
+      padding: 10px 20px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text-dark, #2C1810);
+      background: transparent;
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: var(--radius-sm, 4px);
+      cursor: pointer;
+    }
+    .pdp-fit-dialog__ask:hover { border-color: var(--gold, #C9A050); }
+    @media (max-width: 600px) {
+      .pdp-fit-dialog { padding: 1.1rem; }
+      .pdp-fit-dialog__title { font-size: 1.35rem; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      document.querySelectorAll('[data-ring-fit]').forEach(function (root) {
+        if (root.dataset.fitReady) return;
+        root.dataset.fitReady = '1';
+        var dialog = root.querySelector('.pdp-fit-dialog');
+        var opener = root.querySelector('[data-fit-open]');
+
+        function close() {
+          if (!dialog) return;
+          if (typeof dialog.close === 'function') dialog.close();
+          else dialog.removeAttribute('open');
+          if (opener) opener.focus();
+        }
+
+        if (opener && dialog) {
+          opener.addEventListener('click', function () {
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+          });
+          dialog.addEventListener('click', function (e) {
+            if (e.target.closest('[data-fit-close]')) return close();
+            if (e.target !== dialog) return;
+            // A click on the dialog box itself is either its padding or the backdrop.
+            var r = dialog.getBoundingClientRect();
+            var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+            if (!inside) close();
+          });
+        }
+
+        var unsure = root.querySelector('[data-fit-unsure]');
+        var unsureProp = root.querySelector('[data-fit-unsure-prop]');
+        if (unsure && unsureProp) {
+          unsure.addEventListener('change', function () {
+            unsureProp.disabled = !unsure.checked;
+          });
+        }
+      });
+    })();
+  </script>
+{%- endif -%}
