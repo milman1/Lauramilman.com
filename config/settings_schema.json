@@ -140,6 +140,11 @@
         "type": "url",
         "id": "social_facebook",
         "label": "Facebook URL"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok",
+        "label": "TikTok URL"
       }
     ]
   }
