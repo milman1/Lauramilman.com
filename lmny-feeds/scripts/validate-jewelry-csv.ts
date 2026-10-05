@@ -1,7 +1,7 @@
 /**
  * Usage: npx tsx scripts/validate-jewelry-csv.ts path/to/products.csv
  *
- * Exit 0 when every jewelry row is ACTIVE + SKU + tracked qty ≥ 1 + Category.
+ * Draft-import structural preflight. Exit 0 does not authorize activation.
  * Exit 1 otherwise. Run this before Shopify Admin → Products → Import.
  */
 import { readFileSync } from 'node:fs';

@@ -1,5 +1,10 @@
 # Product SEO title formulas
 
+> For finished house/lab-grown jewelry and settings, the mandatory standard is
+> `docs/seo/finished-jewelry-activation-checklist.md` and its executable
+> `docs/seo/jewelry-activation-gate.md` workflow. Every applicable check must
+> pass; an 8/10 score cannot authorize activation.
+
 This file is only the character budgets and per-source title strings.
 
 - Listing voice, GEO rules, and video-first gallery order: [`docs/seo/listing-seo-geo.md`](../../docs/seo/listing-seo-geo.md)

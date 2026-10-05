@@ -93,7 +93,7 @@ its row; if the row says "merchant-set", ask, never assume.
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
 | Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; sourced from Bucherer and Exquisite Timepieces; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Retailer list price as scraped from Bucherer or Exquisite Timepieces (the lower when both list the reference) unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the retailer's list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
 | Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
-| Lab-grown jewelry (tag `Lab Grown Diamond`, not a loose stone; SKUs `BC14…` / `NK14…`. Vendor was "Peaceful Diamonds" until 2026-10-05, now Laura Milman New York) | Merchant wholesale / Shopify Cost per item | **Cost × 3**, rounded to the nearest dollar. Different from loose lab stones and from fine jewelry. A reprice skips any piece with no Cost per item recorded and never infers one. On 2026-10-02, 4 variants had a cost and were repriced; 183 variants still had none. | `config/pricing.ts` `LAB_GROWN_JEWELRY`, `labGrownJewelryRetailFromCost` |
+| Lab-grown jewelry (tag `Lab Grown Diamond`, not a loose stone; SKUs `BC14…` / `NK14…`. Vendor was "Peaceful Diamonds" until 2026-10-05, now Laura Milman New York) | Merchant wholesale / Shopify Cost per item | **Cost × 2**, rounded to cents (merchant decision 2026-10-05). Settings excluded. Different from loose lab stones and from fine jewelry. A reprice skips any piece with no Cost per item recorded and never infers one. On 2026-10-02, 4 variants had a cost and were repriced; 183 variants still had none. | `config/pricing.ts` `LAB_GROWN_JEWELRY`, `labGrownJewelryRetailFromCost` |
 | Engagement-ring settings without a center stone (hidden "setting-only" product, one variant per ring, SKU `SET-<ring handle>`; sold with a shopper's loose diamond) | Merchant's setting cost | **Cost × 3**, rounded to the nearest dollar, labor to set the diamond included (merchant decision 2026-10-02). Settings only, never a complete ring with its own stone; not the Royal Chain rule. | `config/pricing.ts` `SETTING_ONLY`, `settingOnlyRetailFromCost` |
 | Hand-imported estate pieces (Cartier, Tiffany, Chopard, etc. not tagged `backvault-feed`) | Varies by consignor or purchase | **Merchant-set.** No formula in the repo. | Not in code |
 | Any new supplier | Its own trade account | Its own row here and its own constant in `config/pricing.ts` before the first product is created | Added per supplier |
@@ -771,3 +771,20 @@ pricing, availability, and channel code; audit fix list items 2 to 12,
 which belong to the first SEO plan (recipe E); the lab-grown reprice,
 waiting on #94's cost data; Royal Chain product creation, waiting on
 #93's cost data.
+
+
+## Required finished-jewelry intake and activation gate
+
+For new house jewelry, finished lab-grown jewelry, house chains, and settings,
+read `docs/seo/finished-jewelry-activation-checklist.md` and
+`docs/seo/jewelry-activation-gate.md`. They supersede conflicting copy scores,
+old finished lab-grown pricing, and manual activation steps for this scope.
+Use `npm run jewelry:gate -- draft` for API creation or the default
+`validate:jewelry-csv` preflight before a draft-only CSV import. Activate only
+through `jewelry:gate plan`, documented review, `check`, and `activate`.
+Do not bypass it with a direct ACTIVE mutation, Admin click, bulk status edit,
+or an independent connector. Each product needs current evidence and the
+merchant's authorization for its exact scope; do not fabricate attestations.
+Excluded categories retain their own workflows. Never activate existing
+archived products or unrelated drafts. A repo rule does not intercept external
+apps: see the enforcement limits in the workflow document.

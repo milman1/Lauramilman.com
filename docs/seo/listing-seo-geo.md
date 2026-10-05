@@ -1,5 +1,10 @@
 # Listing copy: SEO and GEO
 
+> For finished house/lab-grown jewelry and settings, the mandatory standard is
+> `docs/seo/finished-jewelry-activation-checklist.md` and its executable
+> `docs/seo/jewelry-activation-gate.md` workflow. Every applicable check must
+> pass; an 8/10 score cannot authorize activation.
+
 Agents write every product title, body, and SEO field from this file.
 Length formulas stay in `lmny-feeds/docs/seo-title-formulas.md` and
 `lmny-feeds/docs/watch-listing-schema.md`. This file is the voice,

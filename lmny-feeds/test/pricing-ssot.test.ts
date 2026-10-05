@@ -37,12 +37,12 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(WATCH.reviewTag).toBe('pricing-review');
   });
 
-  it('prices lab-grown jewelry at cost × 3', () => {
-    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(3);
+  it('prices lab-grown jewelry at cost × 2', () => {
+    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(2);
     expect(LAB_GROWN_JEWELRY.vendors).toContain('Peaceful Diamonds');
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
-    expect(labGrownJewelryRetailFromCost(250)).toBe(750);
-    expect(labGrownJewelryRetailFromCost(333.33)).toBe(1000);
+    expect(labGrownJewelryRetailFromCost(250)).toBe(500);
+    expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
   });
 
   it('rejects non-positive lab jewelry cost', () => {

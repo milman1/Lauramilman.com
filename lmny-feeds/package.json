@@ -23,7 +23,8 @@
     "upload:royalchain-media": "tsx scripts/upload-royalchain-generated-media.ts",
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "jewelry:gate": "tsx scripts/jewelry-gate.ts"
   },
   "engines": {
     "node": ">=20"
