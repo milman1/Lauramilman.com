@@ -16,7 +16,7 @@
       "type": "product-education",
       "blocks": {
         "lab-1": { "type": "lab_point", "settings": { "title": "Identical Brilliance", "text": "Same fire, same hardness, same sparkle as a mined diamond — because it is a diamond." } },
-        "lab-2": { "type": "lab_point", "settings": { "title": "Certified & Transparent", "text": "Every stone arrives with an independent grading certificate documenting its cut, color, clarity and carat." } },
+        "lab-2": { "type": "lab_point", "settings": { "title": "Diamond Details", "text": "Diamond color, clarity and carat weight are stated when verified. Grading reports are included only when specified for the piece." } },
         "lab-3": { "type": "lab_point", "settings": { "title": "Exceptional Value", "text": "Larger, finer stones for your budget — typically 40–60% less than comparable mined diamonds." } },
         "estate-1": { "type": "estate_point", "settings": { "title": "Authenticated by Specialists", "text": "Hallmarks, serial numbers and construction verified against each maison's conventions before a piece is ever listed." } },
         "estate-2": { "type": "estate_point", "settings": { "title": "Provenance & Papers", "text": "Original boxes and certificates included where they exist; our own authentication documentation ships either way." } },
