@@ -1,11 +1,13 @@
 {%- comment -%}
-  Product-page concierge. Every product — watches, jewelry, diamonds —
-  gets the same three pills. Ask and Direct message open Shopify chat with
-  this product pinned beside it. Make an offer opens a short form that
-  posts through Shopify's contact form, so the offer reaches the store's
-  email with the piece attached. Shopify chat is now an AI agent in a
-  cross-origin iframe the theme cannot type into, so offers never depend
-  on it. Hold is intentionally not rendered.
+  Product-page concierge. Ask and Direct message open Shopify chat with
+  this product pinned beside it on every product. Make an offer opens a
+  short form that posts through Shopify's contact form, so the offer
+  reaches the store's email with the piece attached. That form is only
+  for loose natural diamonds, maison / vintage / estate pieces, and
+  watches. Lab-grown loose diamonds and other jewelry do not get it.
+  Shopify chat is now an AI agent in a cross-origin iframe the theme
+  cannot type into, so offers never depend on it. Hold is intentionally
+  not rendered.
 {%- endcomment -%}
 {%- liquid
   assign product_image = ''
@@ -14,6 +16,20 @@
   endif
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign offer_id = 'PdpOffer-' | append: product.id
+  assign type_l = product.type | downcase | strip
+-%}
+{%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
+{%- liquid
+  assign is_watch = is_watch | strip
+  assign is_vintage = is_vintage | strip
+  assign offer_ok = false
+  if type_l == 'natural diamond' or is_watch == 'true' or is_vintage == 'true'
+    assign offer_ok = true
+  endif
+  if type_l == 'lab-grown diamond'
+    assign offer_ok = false
+  endif
 -%}
 
 <div class="pdp-inquire" id="PdpInquire">
@@ -31,14 +47,16 @@
     >
       Ask about this piece
     </button>
-    <button
-      type="button"
-      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-offer"
-      aria-expanded="false"
-      aria-controls="{{ offer_id }}"
-    >
-      Make an offer
-    </button>
+    {%- if offer_ok -%}
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-offer"
+        aria-expanded="false"
+        aria-controls="{{ offer_id }}"
+      >
+        Make an offer
+      </button>
+    {%- endif -%}
     <button
       type="button"
       class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
@@ -53,6 +71,7 @@
     </button>
   </div>
 
+  {%- if offer_ok -%}
   <div class="pdp-offer" id="{{ offer_id }}" hidden>
     {%- form 'contact', id: 'PdpOfferForm', class: 'pdp-offer__form' -%}
       {%- if form.posted_successfully? -%}
@@ -105,6 +124,7 @@
       {%- endif -%}
     {%- endform -%}
   </div>
+  {%- endif -%}
 </div>
 
 <style>
