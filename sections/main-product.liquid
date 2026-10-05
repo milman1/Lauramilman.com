@@ -112,6 +112,11 @@
   endif
 
   assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,metal_weight:Metal Weight,measurements:Measurements,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  # Condition only reads on vintage, estate and pre-owned pieces and watches;
+  # new pieces keep custom.condition for search (structured data) but don't show it.
+  capture is_vintage
+    render 'product-is-vintage', product: product
+  endcapture
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
@@ -119,6 +124,12 @@
     assign v = ''
     if mf != blank
       assign v = mf.value | strip
+    endif
+    if def_parts[0] == 'condition' or def_parts[0] == 'condition_grade'
+      if is_watch != 'true' and is_vintage != 'true'
+        assign v = ''
+        continue
+      endif
     endif
     if v == blank or v == '—' or v == '-'
       assign v = ''

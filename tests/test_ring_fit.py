@@ -61,6 +61,15 @@ def test_one_size_rings_require_a_size_before_adding() -> None:
     assert "}, true);" in fit  # capture phase, ahead of the pairing panel's own click handler
 
 
+def test_condition_shows_only_on_vintage_pieces_and_watches() -> None:
+    # "Condition: New" on a new house ring reads as a pre-owned listing.
+    pdp = (ROOT / "sections/main-product.liquid").read_text()
+    loop = pdp[pdp.index("for def in spec_defs"):pdp.index("endfor", pdp.index("for def in spec_defs"))]
+    assert "render 'product-is-vintage'" in pdp
+    assert "def_parts[0] == 'condition'" in loop
+    assert "is_watch != 'true' and is_vintage != 'true'" in loop
+
+
 def test_ring_fit_buttons_never_submit_the_product_form() -> None:
     fit = FIT.read_text()
     buttons = re.findall(r"<button\b[^>]*>", fit)

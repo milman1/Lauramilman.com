@@ -22,7 +22,9 @@
   - House rings sold in one size: square size buttons 3–13 plus "Not
     sure", saved as the property Ring size. A choice is required: Add to
     Cart (and the sticky bar) and "Add ring with this diamond" stop with a
-    prompt until one is picked.
+    prompt until one is picked. The buttons reuse .product-option-btn
+    outside [data-option-group], so the variant picker in assets/theme.js
+    leaves them alone.
   - Estate and pre-owned pieces (a tag containing "estate" or
     "pre-owned"): the ring's own size when
     custom.measurements labels it ("Size: 6.25", "US 9.5", "EU 52"); bare
