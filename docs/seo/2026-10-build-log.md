@@ -103,10 +103,26 @@ the facts the listings already show. Verified: 8 of 8 fields read back equal.
 `snippets/collection-longform.liquid` is merged and deployed. Until then
 these fields do nothing on the storefront.
 
+## 2026-10-05 (later) — merchant decisions applied
+
+Merchant answers to the open questions:
+
+1. Alt text fix: **approved and applied.** 608 media on 335 products,
+   verified 608/608. Details in `docs/audits/2026-10-05-alt-text-audit.md`.
+2. Collection guide theme PR: **not now.** The PR stays unmerged and no
+   further guides get written. The four stored guides stay invisible.
+3. Claims: **confirmed** by the merchant: "crafted in Italy", certificates on
+   rings, and every watch and estate piece examined before listing. The
+   articles keep that wording. Still inconsistent: lab-grown savings are
+   "40–60%" in four published articles and "60 to 85 percent" in the
+   lab vs natural guide. Both stay until the merchant picks one number.
+4. Journal drafts: **published** 2026-10-05 12:43 UTC: Rolex box and papers,
+   David Webb authentication, gold chain guide, lab-grown vs natural
+   diamonds. All links checked first. The redirect
+   `/blogs/news/lab-grown-diamonds-vs-natural-diamonds-2026` now points at the
+   new lab vs natural guide instead of the "are lab-grown diamonds real" article.
+
 ## Next
 
-- Merchant review of the four guides on a preview theme, then the next
-  batch: `time-pieces`, `engagement-rings`, `estate-jewelry`, `tiffany`,
-  `van-cleef-arpels`, `lab-grown-diamonds`, `chains`, `rings`.
-- Alt text fix plan: `docs/audits/2026-10-05-alt-text-audit.md`, waiting
-  for approval.
+- Collection guides are on hold by merchant decision (PR not merged).
+- Pick one lab-grown savings figure for the Journal.

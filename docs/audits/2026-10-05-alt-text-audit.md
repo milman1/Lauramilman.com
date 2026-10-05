@@ -2,8 +2,10 @@
 
 Scope: every product image and video in the store, read in one Shopify bulk
 export on 2026-10-05 (30,000+ products, 31,000+ images, all statuses).
-Read-only. **Nothing has been written to products.** The fix plan is
-`2026-10-05-alt-fix-plan.csv` in this folder and waits for merchant approval.
+**Status: applied 2026-10-05 with merchant approval.** 608 images and videos on
+335 active products now carry alt text built from their current titles, and a
+fresh export confirmed every one (see "Applied" below). The plan is
+`2026-10-05-alt-fix-plan.csv` in this folder.
 
 ## Result
 
@@ -58,15 +60,25 @@ Rule, from `AGENTS.md` recipe I step 2.6:
 The 29 video rows have no media ID in the export; the apply step reads them
 again first.
 
-## To apply (needs merchant approval)
+## Applied
 
-Because it changes product media, this is not run without a yes.
+Approved by the merchant on 2026-10-05 and applied the same day.
 
-1. Re-read the 335 products and drop any row whose title changed since
-   2026-10-05, so a new title never gets an old alt.
-2. Apply with `fileUpdate` (alt per media ID) in batches, first 5 products,
-   check them on the storefront, then the rest.
-3. Re-export and confirm every row equals `new_alt`.
+1. Re-read every active product first. 13 had been retitled since the
+   morning export (for example "Tennis Choker Necklace" became "Diamond
+   Tennis Choker Necklace in 14K White Gold"), so their alt was rebuilt from
+   the new title, never the old one.
+2. Checkpoint: 5 products (9 media, one video) with `fileUpdate`, read back
+   on the products, then the rest in batches of about 100. Zero errors.
+3. Independent re-export: 608 of 608 rows equal the planned alt. No active
+   jewelry or watch image says "Laura's Gems", and none has empty alt.
+
+Feed products (diamonds, estate) were not touched; their sync writes alt.
+New hand uploads need alt at upload time; the weekly pulse checks for gaps.
+
+One leftover: two pre-owned Bvlgari and Van Cleef & Arpels watch titles repeat
+themselves ("Bvlgari Circa 1990 18K Two Tone Bvlgari Circa 1990 …"), so their
+alt does too. Fixing the title fixes the alt.
 
 Still open (not alt text): Journal articles have no featured images (0 of
 13), so they have no image alt. Collection images `lab-grown-diamond-jewelry`
