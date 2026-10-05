@@ -324,8 +324,12 @@ lists a product that is ACTIVE, published, carries the `ebay` tag, and has
 Condition ID in the app. Watches got this from the Belgium sync; the Back
 Vault sync now writes both for every estate piece; fine, lab-grown, and
 hand-imported estate pieces (525) were tagged by workers on 2026-09-09.
-Loose stones and drafts are never tagged. Blank product types (142 fine
-pieces) still need a type before eBay category mapping is clean.
+Loose stones and drafts are never tagged. On 2026-10-05 every active
+product got a type from the store's plural list (201 changed, including the
+20 that were blank; plan and record in
+`docs/audits/2026-10-05-product-type-plan.csv`). Two active pieces keep
+off-list types for a merchant decision: a money clip (`Clip`) and a chain
+extender (`Chain Extenders`). Drafts and archived pieces were not touched.
 
 **Template:** `snippets/ebay-default.liquid` is a Marketplace Connect
 (Codisto) template with `{placeholders}`; the theme never renders it. It
@@ -416,8 +420,8 @@ unworn, SKU = reference, price = the retailer's list price as scraped
 ACTIVE by a job. Title format is "Unworn Jacob & Co {Collection} {Dial}
 {Reference}"; the theme prints "Jacob & Co." and never "Jacob & Company"
 (`snippets/jacob-co-name.liquid`, tests in `test/theme-pdp-offer.test.ts`).
-Product type is `Watch` (singular; nine older uploads say `Watches` and
-should be normalized). Condition metafield `1000` when unworn. Neither
+Product type is `Watch` (singular; the last `Watches` products were
+normalized on 2026-10-05). Condition metafield `1000` when unworn. Neither
 retailer's name appears anywhere on the store, per rule 1.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
