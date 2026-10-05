@@ -49,6 +49,8 @@ describe('theme SEO integration', () => {
     expect(themeFile('config/settings_data.json')).toContain('https://www.instagram.com/laurasgemsnyc');
     expect(themeFile('config/settings_data.json')).toContain('https://www.facebook.com/laurasgemsnyc');
     expect(themeFile('config/settings_data.json')).toContain('https://www.tiktok.com/@laurasgemsnyc');
+    expect(themeFile('config/settings_data.json')).toContain('https://www.pinterest.com/laurasgemsny/');
+    expect(themeFile('snippets/house-social.liquid')).toContain('aria-label="Pinterest"');
     expect(themeFile('sections/footer.liquid')).toContain("render 'house-social'");
     expect(themeFile('sections/header.liquid')).toContain("render 'house-social'");
     expect(themeFile('snippets/house-social.liquid')).toContain('aria-label="TikTok"');
