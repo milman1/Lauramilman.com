@@ -1,0 +1,143 @@
+{% doc %}
+  Long-form buying guide and FAQ under a collection's product grid.
+
+  Content lives on the collection, not in the theme:
+  - custom.guide_html (multi-line text holding HTML): the guide. Use h2/h3, p, ul and links.
+  - custom.guide_faq (JSON): [{"question": "...", "answer": "..."}]. Answers may hold links.
+
+  The FAQ is rendered as visible text and the FAQPage JSON-LD is built from the same
+  entries, so the markup can never claim an answer the page doesn't show.
+  Renders on page 1 only, and nothing at all when both fields are blank.
+
+  @param {collection} collection - The collection being shown
+  @param {number} [page_number] - paginate.current_page; the block shows on page 1 only
+
+  @example
+  {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
+{% enddoc %}
+
+{%- liquid
+  assign guide_html = collection.metafields.custom.guide_html.value
+  assign guide_faq = collection.metafields.custom.guide_faq.value
+  assign faq_count = 0
+  for faq in guide_faq
+    if faq.question != blank and faq.answer != blank
+      assign faq_count = faq_count | plus: 1
+    endif
+  endfor
+
+  assign show_longform = false
+  if guide_html != blank or faq_count > 0
+    assign show_longform = true
+  endif
+  if page_number and page_number > 1
+    assign show_longform = false
+  endif
+-%}
+
+{%- if show_longform -%}
+  <section class="lm-longform" aria-labelledby="lm-longform-{{ collection.id }}">
+    <div class="lm-longform__inner">
+      <h2 class="lm-longform__title" id="lm-longform-{{ collection.id }}">About {{ collection.title | escape }}</h2>
+
+      {%- if guide_html != blank -%}
+        <div class="lm-longform__body">{{ guide_html }}</div>
+      {%- endif -%}
+
+      {%- if faq_count > 0 -%}
+        <div class="lm-longform__faq">
+          <h2 class="lm-longform__faq-title">Questions</h2>
+          {%- for faq in guide_faq -%}
+            {%- if faq.question != blank and faq.answer != blank -%}
+              <details class="lm-longform__q"{% if forloop.first %} open{% endif %}>
+                <summary>{{ faq.question | escape }}</summary>
+                <div class="lm-longform__a"><p>{{ faq.answer }}</p></div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {%- assign faq_i = 0 -%}
+              {%- for faq in guide_faq -%}
+                {%- if faq.question != blank and faq.answer != blank -%}
+                  {%- assign faq_i = faq_i | plus: 1 -%}
+                  {
+                    "@type": "Question",
+                    "name": {{ faq.question | strip_html | json }},
+                    "acceptedAnswer": { "@type": "Answer", "text": {{ faq.answer | strip_html | json }} }
+                  }{%- unless faq_i == faq_count -%},{%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+            ]
+          }
+        </script>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <style>
+    .lm-longform {
+      border-top: 1px solid #DDD5C5;
+      margin-top: 3rem;
+      padding: 2.75rem 0 0;
+    }
+    .lm-longform__inner {
+      max-width: 46rem;
+    }
+    .lm-longform__title,
+    .lm-longform__faq-title {
+      font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+      font-weight: 400;
+      font-size: clamp(1.5rem, 3vw, 1.9rem);
+      color: var(--text-dark, #2C1810);
+      margin: 0 0 1rem;
+    }
+    .lm-longform__body,
+    .lm-longform__a {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #4A3F35;
+    }
+    .lm-longform__body h2,
+    .lm-longform__body h3 {
+      font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+      margin: 1.75rem 0 0.6rem;
+    }
+    .lm-longform__body h2 { font-size: 1.4rem; }
+    .lm-longform__body h3 { font-size: 1.2rem; }
+    .lm-longform__body p { margin: 0 0 0.9rem; }
+    .lm-longform__body ul { margin: 0 0 1rem; padding-left: 1.2rem; }
+    .lm-longform__body li { margin-bottom: 0.4rem; }
+    .lm-longform__body a,
+    .lm-longform__a a {
+      color: var(--text-dark, #2C1810);
+      text-underline-offset: 0.2em;
+    }
+    .lm-longform__faq { margin-top: 2.25rem; }
+    .lm-longform__q {
+      border-bottom: 1px solid #DDD5C5;
+      padding: 0.9rem 0;
+    }
+    .lm-longform__q summary {
+      cursor: pointer;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+      list-style-position: outside;
+    }
+    .lm-longform__q summary:focus-visible {
+      outline: 2px solid #C9A050;
+      outline-offset: 3px;
+    }
+    .lm-longform__a p { margin: 0.6rem 0 0; }
+  </style>
+{%- endif -%}
