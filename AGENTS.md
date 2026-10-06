@@ -328,9 +328,11 @@ hand-imported estate pieces (525) were tagged by workers on 2026-09-09.
 Loose stones and drafts are never tagged. On 2026-10-05 every active
 product got a type from the store's plural list (201 changed, including the
 20 that were blank; plan and record in
-`docs/audits/2026-10-05-product-type-plan.csv`). Two active pieces keep
-off-list types for a merchant decision: a money clip (`Clip`) and a chain
-extender (`Chain Extenders`). Drafts and archived pieces were not touched.
+`docs/audits/2026-10-05-product-type-plan.csv`). The last two off-list
+types followed: the Cartier money clip is `Jewelry` with the Shopify category
+Money Clips (`aa-5-5-9`), and the 3-inch chain extender is `Bracelets`, the
+Royal Chain rule for pieces under 14 inches. Drafts and archived pieces were
+not touched.
 
 **Template:** `snippets/ebay-default.liquid` is a Marketplace Connect
 (Codisto) template with `{placeholders}`; the theme never renders it. It
