@@ -121,9 +121,8 @@ export const LAB_GUARDS = {
  * insurance is the rate times the sale. Carriers cap ordinary watch coverage
  * near $1,000, so the insurance is a third-party policy at about 1% of the sale.
  *
- * A price of $10,000 or under leaves 10% of the sale. Above $10,000 it leaves
- * 5%. The price does not step down as cost rises, so it can sit at $10,000
- * while that leftover eases from 10% to 5%.
+ * Every price leaves 5% of the sale. A $10,000 watch keeps $500 after cost,
+ * the eBay fee, and shipping. There is no second rate under $10,000.
  *
  * A stock-number ceiling in `WATCH_RETAIL_CAP_BY_STOCK` may lower that price
  * only while the eBay sale still nets at least cost after shipping. A ceiling
@@ -142,13 +141,9 @@ export const EBAY_WATCH_FEE = {
 export const WATCH_SALE = {
   /**
    * Share of the selling price left after cost, the eBay watch fee, and
-   * shipping, once the price is above `higherMarginMaxPriceUsd`.
+   * shipping. Five percent of $10,000 is $500.
    */
   minNetMarginOfPrice: 0.05,
-  /** A selling price at or under this keeps the higher margin. */
-  higherMarginMaxPriceUsd: 10_000,
-  /** Share left when the selling price is at or under $10,000. */
-  higherMinNetMarginOfPrice: 0.1,
   /** Seller-paid postage, signature, and packing. The buyer is not charged. */
   shippingFlatUsd: 120,
   /** Third-party jewelry insurance as a share of the selling price. */

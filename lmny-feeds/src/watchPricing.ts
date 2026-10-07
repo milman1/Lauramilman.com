@@ -121,15 +121,11 @@ export function minRetailLeavingMargin(costUsd: number, marginOfPrice: number): 
 }
 
 /**
- * Standard retail. A price under $10,000 leaves 10% of the sale. Above
- * $10,000 it leaves 5%. The result never falls below $10,000 once the 10%
- * price has crossed that line, so retail does not step down as cost rises.
+ * Standard retail. Every price leaves 5% of the sale after the eBay watch
+ * fee and seller-paid shipping. A $10,000 price keeps $500.
  */
 export function retailFromCost(costUsd: number): number {
-  const rich = minRetailLeavingMargin(costUsd, WATCH_SALE.higherMinNetMarginOfPrice);
-  if (rich <= WATCH_SALE.higherMarginMaxPriceUsd) return rich;
-  const thin = minRetailLeavingMargin(costUsd, WATCH_SALE.minNetMarginOfPrice);
-  return Math.max(thin, WATCH_SALE.higherMarginMaxPriceUsd);
+  return minRetailLeavingMargin(costUsd, WATCH_SALE.minNetMarginOfPrice);
 }
 
 /**

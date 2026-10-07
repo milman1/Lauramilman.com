@@ -148,9 +148,9 @@ export interface WatchComp {
 
 /**
  * Watches: `WATCH_SALE` via watchPricing.ts. No Hours mid. Retail is the
- * lowest $100 that leaves 10% of the price after the eBay watch fee and
- * seller-paid shipping when that price is $10,000 or under, and 5% above
- * that. A stock number in `WATCH_RETAIL_CAP_BY_STOCK` may lower it only
+ * lowest $100 that leaves 5% of the price after the eBay watch fee and
+ * seller-paid shipping. A $10,000 price keeps $500. A stock number in
+ * `WATCH_RETAIL_CAP_BY_STOCK` may lower it only
  * while the sale still nets at least cost after shipping.
  */
 export function priceWatch(item: WatchItem): PriceResult {

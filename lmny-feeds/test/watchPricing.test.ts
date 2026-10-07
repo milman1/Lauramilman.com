@@ -38,25 +38,22 @@ describe('ebay watch fee and shipping', () => {
 });
 
 describe('retailFromCost', () => {
-  it('leaves 10% on a watch priced under $10,000', () => {
-    // $8,000 cost: 10% price is $9,900, which is under the line.
-    expect(retailFromCost(8_000)).toBe(9_900);
-    expect(retailFromCost(7_500)).toBe(9_300);
-    expect(retailFromCost(5_000)).toBe(6_400);
-    expect(retailFromCost(4_123)).toBe(5_300);
+  it('leaves 5% on a lower-cost watch', () => {
+    expect(retailFromCost(8_000)).toBe(9_400);
+    expect(retailFromCost(7_500)).toBe(8_800);
+    expect(retailFromCost(5_000)).toBe(6_000);
+    expect(retailFromCost(4_123)).toBe(5_000);
     for (const cost of [4_123, 5_000, 7_500, 8_000]) {
       const price = retailFromCost(cost);
-      expect(price).toBeLessThanOrEqual(10_000);
-      expect(netsAtLeast(price, cost, 0.1)).toBe(true);
-      expect(netsAtLeast(price - 100, cost, 0.1)).toBe(false);
+      expect(netsAtLeast(price, cost, 0.05)).toBe(true);
+      expect(netsAtLeast(price - 100, cost, 0.05)).toBe(false);
     }
   });
 
-  it('holds $10,000 while the margin eases from 10% toward 5%', () => {
-    // 10% would clear $10,000; 5% is still under it. Sit on $10,000.
-    expect(retailFromCost(8_400)).toBe(10_000);
-    expect(netsAtLeast(10_000, 8_400, 0.05)).toBe(true);
-    expect(netsAtLeast(10_000, 8_400, 0.1)).toBe(false);
+  it('leaves $500 on a $10,000 price', () => {
+    expect(retailFromCost(8_600)).toBe(10_000);
+    expect(watchNetAfterSaleUsd(10_000, 8_600)).toBeGreaterThanOrEqual(500);
+    expect(watchNetAfterSaleUsd(9_900, 8_600)).toBeLessThan(0.05 * 9_900);
   });
 
   it('leaves 5% once the price is above $10,000', () => {
@@ -78,15 +75,7 @@ describe('retailFromCost', () => {
     for (let cost = 100; cost <= 80_000; cost += 100) {
       const price = retailFromCost(cost);
       expect(price, `cost ${cost}`).toBeGreaterThanOrEqual(prev);
-      const margin = price <= WATCH_SALE.higherMarginMaxPriceUsd ? 0.05 : 0.05;
-      // Under $10,000 the leftover is 10%. At $10,000 it is at least 5%.
-      if (price < WATCH_SALE.higherMarginMaxPriceUsd) {
-        expect(netsAtLeast(price, cost, 0.1), `cost ${cost}`).toBe(true);
-      } else if (price > WATCH_SALE.higherMarginMaxPriceUsd) {
-        expect(netsAtLeast(price, cost, 0.05), `cost ${cost}`).toBe(true);
-      } else {
-        expect(netsAtLeast(price, cost, margin), `cost ${cost}`).toBe(true);
-      }
+      expect(netsAtLeast(price, cost, WATCH_SALE.minNetMarginOfPrice), `cost ${cost}`).toBe(true);
       expect(watchNetAfterSaleUsd(price, cost), `cost ${cost}`).toBeGreaterThanOrEqual(-1e-6);
       prev = price;
     }
