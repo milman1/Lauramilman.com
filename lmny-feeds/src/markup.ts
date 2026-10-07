@@ -2,12 +2,10 @@ import {
   DIAMOND,
   LAB_GUARDS,
   labRetailMultipleFromCost,
-  STONE_TIERS as FALLBACK_RULES,
+  naturalRetailFromCost,
 } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
 import { priceWatchFromCost } from './watchPricing.js';
-
-export { FALLBACK_RULES };
 
 export type PriceResult =
   | { ok: true; priced: Priced }
@@ -40,7 +38,10 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
       },
     };
   }
-  const retailUsd = round(item.costUsd * multiple);
+  return finishStonePrice(item, round(item.costUsd * multiple));
+}
+
+function finishStonePrice(item: StoneItem, retailUsd: number): PriceResult {
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -53,8 +54,8 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
     };
   }
   const marginPct = margin(retailUsd, item.costUsd);
-  // 1.25× is exactly 20% before rounding; round(cost × 1.25) can sit a
-  // fraction of a cent under the floor (stock 350393: 19.9999%).
+  // Dollar rounding can sit a fraction under a round margin. The tolerance
+  // keeps a true floor price from being held.
   if (marginPct < DIAMOND.minMarginPct - 1e-4) {
     return {
       ok: false,
@@ -69,16 +70,18 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   return { ok: true, priced: { retailUsd, marginPct } };
 }
 
-function retailMultipleForCost(costUsd: number): number | undefined {
-  return FALLBACK_RULES.find((t) => costUsd <= t.maxCostUsd)?.multiplier;
-}
-
 export function priceNatural(item: StoneItem): PriceResult {
-  const multiple = retailMultipleForCost(item.costUsd);
-  if (multiple === undefined) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_markup_tier' } };
+  if (!(item.costUsd > 0)) {
+    return {
+      ok: false,
+      hold: {
+        kind: item.kind,
+        stockRef: item.stockRef,
+        reason: 'natural_no_cost',
+      },
+    };
   }
-  return priceFromLmnyCost(item, multiple);
+  return finishStonePrice(item, naturalRetailFromCost(item.costUsd));
 }
 
 /**

@@ -3,18 +3,21 @@ import { priceLab, priceNatural, priceWatch } from '../src/markup.js';
 import { labStone, naturalStone, watch } from './fixtures.js';
 
 describe('natural pricing', () => {
-  it('prices expensive stones at 1.25× Amount (20% margin-on-retail)', () => {
+  it('prices every natural at a 30% gross margin', () => {
     const r = priceNatural(naturalStone({ costUsd: 106_463 }));
-    expect(r.ok && r.priced.retailUsd).toBe(133_079);
+    expect(r.ok && r.priced.retailUsd).toBe(152_090);
+    if (r.ok) expect(r.priced.marginPct).toBeCloseTo(0.3, 2);
   });
 
-  it('uses the natural-diamond cost-band chart', () => {
+  it('uses the same 30% margin below and above $4,000', () => {
     const cheap = priceNatural(naturalStone({ costUsd: 400 }));
     const mid = priceNatural(naturalStone({ costUsd: 900 }));
     const upper = priceNatural(naturalStone({ costUsd: 2_000 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(560); // 400 × 1.40
-    expect(mid.ok && mid.priced.retailUsd).toBe(1260); // 900 × 1.40
-    expect(upper.ok && upper.priced.retailUsd).toBe(2800); // 2000 × 1.40
+    const large = priceNatural(naturalStone({ costUsd: 4_080 }));
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(571); // round(400 / 0.70)
+    expect(mid.ok && mid.priced.retailUsd).toBe(1286); // round(900 / 0.70)
+    expect(upper.ok && upper.priced.retailUsd).toBe(2857); // round(2000 / 0.70)
+    expect(large.ok && large.priced.retailUsd).toBe(5829); // round(4080 / 0.70)
   });
 
   it('holds when there is no cost', () => {
@@ -22,10 +25,13 @@ describe('natural pricing', () => {
     expect(!r.ok && r.hold.reason).toBe('natural_no_cost');
   });
 
-  it('publishes at the 20% margin floor (1.25×)', () => {
+  it('stays above the 20% hold floor after dollar rounding', () => {
     const r = priceNatural(naturalStone({ costUsd: 12_000 }));
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.priced.retailUsd).toBe(15_000);
+    if (r.ok) {
+      expect(r.priced.retailUsd).toBe(17_143);
+      expect(r.priced.marginPct).toBeGreaterThanOrEqual(0.2);
+    }
   });
 
   it('retail stays at or above cost', () => {
@@ -34,9 +40,9 @@ describe('natural pricing', () => {
     if (r.ok) expect(r.priced.retailUsd).toBeGreaterThanOrEqual(900);
   });
 
-  it('prices a typical 1ct natural at 1.40× (through $4,000 Amount)', () => {
+  it('prices a typical 1ct natural at 30% margin', () => {
     const r = priceNatural(naturalStone({ costUsd: 3101.71 }));
-    expect(r.ok && r.priced.retailUsd).toBe(4342);
+    expect(r.ok && r.priced.retailUsd).toBe(4431);
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lmnyStoneCost } from '../config/pricing.js';
+import { lmnyStoneCost, naturalRetailFromCost } from '../config/pricing.js';
 import { priceLab, priceNatural } from '../src/markup.js';
 import { normalizeStones } from '../src/normalize.js';
 
@@ -25,7 +25,7 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
     expect(lmnyStoneCost(106_463)).toBe(106_463);
   });
 
-  it('prices stock 350393 at $133,079 (1.25× the $106,463 Amount)', () => {
+  it('prices stock 350393 at $152,090 (30% margin on the $106,463 Amount)', () => {
     const { items, holds } = normalizeStones([stock350393], 'natural');
     expect(holds).toEqual([]);
     const stone = items[0]!;
@@ -38,8 +38,8 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
       costUsd: 106_463,
     });
     const priced = priceNatural(stone);
-    expect(priced.ok && priced.priced.retailUsd).toBe(133_079);
-    expect(priced.ok && priced.priced.retailUsd).toBe(Math.round(lmnyStoneCost(106_463) * 1.25));
+    expect(priced.ok && priced.priced.retailUsd).toBe(152_090);
+    expect(priced.ok && priced.priced.retailUsd).toBe(naturalRetailFromCost(lmnyStoneCost(106_463)));
   });
 
   it('prefers Amount over Rap × 0.75 (the live under-wholesale bug)', () => {

@@ -86,7 +86,7 @@ its row; if the row says "merchant-set", ask, never assume.
 
 | Source (how to recognize it) | Cost comes from | Retail rule | Where it lives |
 |---|---|---|---|
-| Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | **Cost × 1.40** when Amount ≤ $4,000; **× 1.25** above $4,000; held under 20% margin | `config/pricing.ts` `STONE_TIERS`, `src/markup.ts` |
+| Loose natural diamonds (Belgium Dia API, tag `lmny-feed`, type `Natural Diamond`, handle `nd-`) | Belgium Dia **Amount $** per stone | **30% gross margin** at every cost: retail = round(cost / 0.70). Held under 20% margin. Lab stones are not on this rule. | `config/pricing.ts` `NATURAL_STONE`, `naturalRetailFromCost`, `src/markup.ts` |
 | Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | **Cost × 3** at every size, plus fail-closed guards against a $/ct read as a total. The 10% welcome discount remains eligible; discounted revenue is 2.70× cost. | `LOOSE_LAB_GROWN`, `labRetailMultipleFromCost`, `LAB_GUARDS`, `src/markup.ts` |
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Lowest $100 price that leaves 10% of the selling price after the eBay watch fee and seller-paid shipping when the price is $10,000 or under, and 5% above that. Shipping is free to the buyer ($120 postage, signature, and packing, plus 1% of the sale for jewelry insurance). The price does not step down as cost rises. No cost → tag `pricing-review`, price untouched. Eight stock numbers in `WATCH_RETAIL_CAP_BY_STOCK` use that retail ceiling when the ceiling still nets at least cost after the fee and shipping. | `config/pricing.ts` `WATCH_SALE`, `WATCH_RETAIL_CAP_BY_STOCK`, `EBAY_WATCH_FEE`, `src/watchPricing.ts` |
 | Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500. Their catalogue is larger than the 25,000 products their pagination allows, so a run often cannot see the whole of it: each match is remembered on the product (`backvault_feed.competitor_price` + `competitor_price_at`), and on a run whose index is incomplete an unmatched piece is priced from a remembered comparison **under 90 days old** — the same midpoint rule, against that run's cost, so a supplier markdown still reaches the storefront. Nothing remembered, or older than 90 days: cost + $500, as for any piece that is not on their site. A complete index always wins over memory. | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts`, `diff.ts` |
@@ -103,8 +103,8 @@ borrowing a neighbour's multiplier. When the merchant states a rule for
 one of them, add the constant to `config/pricing.ts`, update this row,
 and only then reprice.
 
-Repo check, 2026-10-02 (updated): `config/pricing.ts` holds coded rules for
-loose naturals (`STONE_TIERS`: 1.40× through $4,000 Amount, 1.25× above),
+Repo check, 2026-10-07 (updated): `config/pricing.ts` holds coded rules for
+loose naturals (`NATURAL_STONE`: 30% gross margin, retail = round(cost / 0.70)),
 loose labs (`LOOSE_LAB_GROWN`: 3× at every size), watches
 (`WATCH_SALE`: 10% of the price left after the eBay fee and free shipping at $10,000 or under, 5% above), Back Vault, Royal Chain, and lab-grown jewelry
 (`LAB_GROWN_JEWELRY`, cost × 3). Nothing in the repository defines a retail

@@ -4,6 +4,8 @@ import {
   LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
+  NATURAL_STONE,
+  naturalRetailFromCost,
   STONE_TIERS,
   WATCH,
   WATCH_RETAIL_CAP_BY_STOCK,
@@ -11,9 +13,13 @@ import {
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
-  it('keeps 1.40× through $4,000 Amount and 1.25× above', () => {
-    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.25]);
-    expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
+  it('prices every natural stone at a 30% gross margin', () => {
+    expect(NATURAL_STONE.marginPct).toBe(0.3);
+    expect(STONE_TIERS).toHaveLength(1);
+    expect(STONE_TIERS[0]?.maxCostUsd).toBe(Number.POSITIVE_INFINITY);
+    expect(naturalRetailFromCost(400)).toBe(571);
+    expect(naturalRetailFromCost(4_080)).toBe(5829);
+    expect(naturalRetailFromCost(106_463)).toBe(152_090);
   });
 
   it('prices every loose lab at 3×', () => {
