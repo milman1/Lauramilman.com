@@ -98,6 +98,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
   text-transform: uppercase;
 }
 .lmhh__util a { text-decoration: none; white-space: nowrap; }
+/* With a phone number the row holds three links; Our Story stays in the main nav. */
+.lmhh__util--phone a[href="/pages/about"] { display: none; }
 .lmhh__util a:hover { color: var(--lmhh-bronze); }
 
 .lmhh__logo {
@@ -303,6 +305,9 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 @media (min-width: 1200px) and (max-width: 1379px) {
   .header .nav__dropdown { grid-template-columns: repeat(3, minmax(0, 1fr)) 1.3fr; gap: 32px; }
   .header .nav__card { display: none; }
+  /* Our Story is already in the main nav; keep the utility row to one line. */
+  .lmhh__util { gap: 20px; }
+  .lmhh__util a[href="/pages/about"] { display: none; }
 }
 
 /* =============================================================
@@ -500,8 +505,13 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20"/></svg>
     </button>
 
-    <div class="lmhh__util">
+    {%- assign header_phone = section.settings.contact_phone | strip -%}
+    <div class="lmhh__util{% if header_phone != blank %} lmhh__util--phone{% endif %}">
       <a href="/pages/private-clients">Book an Appointment</a>
+      {%- if header_phone != blank -%}
+        <a href="tel:{{ header_phone | remove: ' ' | remove: '.' | remove: '-' | remove: '(' | remove: ')' }}">{{ header_phone | escape }}</a>
+      {%- endif -%}
+      <a href="/collections/gifts-under-2500">Gifts</a>
       <a href="/pages/about">Our Story</a>
     </div>
 
@@ -623,10 +633,12 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned &amp; estate</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Start here</span>
-          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis bracelets to wear with a watch</a>
-          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Gold chain bracelets</a>
-          <a href="/pages/authentication" class="nav__dropdown-link">Estate authentication</a>
+          <span class="nav__dropdown-label">By gemstone</span>
+          <a href="/collections/emerald-jewelry" class="nav__dropdown-link">Emerald</a>
+          <a href="/collections/ruby-jewelry" class="nav__dropdown-link">Ruby</a>
+          <a href="/collections/sapphire-jewelry" class="nav__dropdown-link">Sapphire</a>
+          <a href="/collections/pearl-jewelry" class="nav__dropdown-link">Pearl</a>
+          <a href="/pages/authentication" class="nav__dropdown-link nav__dropdown-link--all">Estate authentication</a>
         </div>
         <div class="nav__intro">
           <span class="nav__dropdown-label">How pre-owned is listed</span>
@@ -731,6 +743,11 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     <div class="lmhh__mextra">
       <a href="/pages/about" class="nav__link">Our Story</a>
       <a href="/pages/private-clients" class="nav__link">Book an Appointment</a>
+      {%- if header_phone != blank -%}
+        <a href="tel:{{ header_phone | remove: ' ' | remove: '.' | remove: '-' | remove: '(' | remove: ')' }}" class="nav__link">Call {{ header_phone | escape }}</a>
+      {%- endif -%}
+      <a href="/collections/gifts-under-1000" class="nav__link">Gifts under $1,000</a>
+      <a href="/collections/gifts-under-2500" class="nav__link">Gifts under $2,500</a>
       <a href="{{ routes.account_url }}" class="nav__link">Account</a>
     </div>
     <div class="lmhh__mnote">
@@ -1302,6 +1319,12 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       "type": "url",
       "id": "announce_url",
       "label": "Announcement link URL"
+    },
+    {
+      "type": "text",
+      "id": "contact_phone",
+      "label": "Phone number in the header",
+      "info": "Shown next to Book an Appointment and in the phone menu. Leave blank to hide."
     },
     {
       "type": "image_picker",

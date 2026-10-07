@@ -92,4 +92,15 @@ describe('theme SEO integration', () => {
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');
   });
+
+  it('links gemstone and gift collections and keeps the header phone optional', () => {
+    const header = themeFile('sections/header.liquid');
+
+    for (const handle of ['emerald-jewelry', 'ruby-jewelry', 'sapphire-jewelry', 'pearl-jewelry', 'gifts-under-1000', 'gifts-under-2500']) {
+      expect(header).toContain(`href="/collections/${handle}"`);
+    }
+    expect(header).toContain('"id": "contact_phone"');
+    expect(header).toContain('{%- if header_phone != blank -%}');
+    expect(header).toContain('href="/pages/private-clients">Book an Appointment</a>');
+  });
 });
