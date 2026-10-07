@@ -107,7 +107,8 @@ Repo check, 2026-10-02 (updated): `config/pricing.ts` holds coded rules for
 loose naturals (`STONE_TIERS`: 1.40× through $4,000 Amount, 1.25× above),
 loose labs (`LOOSE_LAB_GROWN`: 3× at every size), watches
 (`WATCH_SALE`: 10% of the price left after the eBay fee and free shipping at $10,000 or under, 5% above), Back Vault, Royal Chain, and lab-grown jewelry
-(`LAB_GROWN_JEWELRY`, cost × 3). Nothing in the repository defines a retail
+(`LAB_GROWN_JEWELRY`, cost × 2 since 2026-10-05; settings stay at
+`SETTING_ONLY` cost × 3). Nothing in the repository defines a retail
 multiplier for fine jewelry, hand-imported estate, or Jacob & Co. One Royal
 Chain item already in the store (`MZ003379`, a 14K franco chain under the
 house vendor) was priced by hand at ×2.8 before the ×3 rule existed; the
