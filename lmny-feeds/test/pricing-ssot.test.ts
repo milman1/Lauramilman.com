@@ -30,8 +30,7 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(WATCH.sale).toBe(WATCH_SALE);
     expect(WATCH.retailCapByStock).toBe(WATCH_RETAIL_CAP_BY_STOCK);
     expect(WATCH.sale.minNetMarginOfPrice).toBe(0.05);
-    expect(WATCH.sale.higherMinNetMarginOfPrice).toBe(0.1);
-    expect(WATCH.sale.higherMarginMaxPriceUsd).toBe(10_000);
+    expect(WATCH.sale).not.toHaveProperty('higherMinNetMarginOfPrice');
     expect(WATCH.sale.shippingFlatUsd).toBe(120);
     expect(WATCH.sale.shippingInsuranceRate).toBe(0.01);
     expect(WATCH.reviewTag).toBe('pricing-review');

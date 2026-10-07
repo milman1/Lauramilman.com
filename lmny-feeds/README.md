@@ -63,13 +63,10 @@ holds a stones table — Shopify products are the only live copy.
      Watches, Parts & Accessories rate (`EBAY_WATCH_FEE`: 15% to $1,000,
      6.5% to $7,500, 3% above, plus $0.40 per order).
 
-     | Selling price | Left after cost, the eBay fee, and shipping |
-     |---|---|
-     | $10,000 or under | 10% of the selling price |
-     | Above $10,000 | 5% of the selling price |
+     Every selling price leaves 5% after cost, the eBay fee, and shipping.
+     A $10,000 watch keeps $500. There is no higher rate under $10,000.
 
-     The price does not step down as cost rises, so it can sit at $10,000
-     while that leftover eases from 10% to 5%. Eight feed stock numbers in
+     Eight feed stock numbers in
      `WATCH_RETAIL_CAP_BY_STOCK` use that retail ceiling when the eBay sale
      still nets at least cost after shipping. A ceiling that would lose
      money is ignored. 114200 (RW3087) and 126234 (T3691) stay on the rule.

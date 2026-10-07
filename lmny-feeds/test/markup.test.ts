@@ -163,13 +163,13 @@ describe('watch pricing', () => {
   it('does not apply naked or partial accessory haircuts', () => {
     const naked = priceWatch(watch({ costUsd: 8000, box: false, papers: false, isNaked: true }));
     const partial = priceWatch(watch({ costUsd: 8000, box: true, papers: false, isNaked: false }));
-    expect(naked.ok && naked.priced.retailUsd).toBe(9900);
-    expect(partial.ok && partial.priced.retailUsd).toBe(9900);
+    expect(naked.ok && naked.priced.retailUsd).toBe(9400);
+    expect(partial.ok && partial.priced.retailUsd).toBe(9400);
   });
 
   it('rounds retail up to the nearest $100', () => {
     const r = priceWatch(watch({ costUsd: 4123 }));
-    expect(r.ok && r.priced.retailUsd).toBe(5300);
+    expect(r.ok && r.priced.retailUsd).toBe(5000);
   });
 
   it('prices a capped stock number through the sync entry point', () => {
@@ -181,9 +181,9 @@ describe('watch pricing', () => {
     expect(chart.ok && chart.priced.retailUsd).toBe(11_600);
   });
 
-  it('leaves 10% when the price lands under $10,000', () => {
+  it('leaves 5% when the price lands under $10,000', () => {
     const r = priceWatch(watch({ costUsd: 5000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(6400);
+    expect(r.ok && r.priced.retailUsd).toBe(6000);
   });
 
   it('holds no_cost when supplier cost is missing', () => {
