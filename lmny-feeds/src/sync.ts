@@ -29,7 +29,9 @@ import {
   promoteUntrackedInventoryUpdates,
   skipPricingReviewArchives,
 } from './diff.js';
-import { priceLab, priceNatural, priceWatch } from './markup.js';
+import { validateNaturalPricingConfig } from '../config/pricing.js';
+import { NullCompProvider, type DiamondCompProvider } from './compProvider.js';
+import { naturalFloorViolation, priceLab, priceNatural, priceWatch, type NaturalComps } from './markup.js';
 import { enrichWatchGalleries, watchGalleryStats, type WatchGalleryStats } from './dnaGallery.js';
 import { normalizeStones, normalizeWatches } from './normalize.js';
 import {
@@ -198,6 +200,10 @@ async function main() {
   const startedAt = new Date().toISOString();
   const notes: string[] = [];
 
+  // Refuse to run on an unsafe natural pricing config (floor <= cost).
+  validateNaturalPricingConfig();
+  const compProvider: DiamondCompProvider = new NullCompProvider();
+
   await checkConfiguration();
   const domain = requireEnv('SHOPIFY_STORE_DOMAIN');
   const shopify = new ShopifyClient(domain, await resolveShopifyToken(domain));
@@ -269,10 +275,31 @@ async function main() {
   const publishable: Publishable[] = [];
   const watchLines: WatchLine[] = [];
 
+  const pricedAt = new Date();
   for (const item of items) {
     let result;
     if (item.kind !== 'watch') {
-      result = item.kind === 'natural' ? priceNatural(item) : priceLab(item);
+      if (item.kind === 'natural') {
+        const comps: NaturalComps = {
+          cert: item.certNumber ? await compProvider.getCertComp(item.certNumber, item.lab) : null,
+          spec: await compProvider.getSpecComps(item),
+        };
+        result = priceNatural(item, comps, pricedAt);
+        // Final write-path assertion, independent of priceNatural: a natural
+        // at or below its floor is skipped and logged, the run continues.
+        if (result.ok) {
+          const violation = naturalFloorViolation(item, result.priced.retailUsd);
+          if (violation) {
+            console.error(`natural floor assertion failed for ${item.stockRef}: ${violation} — skipped`);
+            result = {
+              ok: false as const,
+              hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_floor_assertion_failed', detail: violation },
+            };
+          }
+        }
+      } else {
+        result = priceLab(item);
+      }
     } else {
       result = priceWatch(item);
       let watchTitle: string;

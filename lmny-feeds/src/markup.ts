@@ -2,12 +2,12 @@ import {
   DIAMOND,
   LAB_GUARDS,
   labRetailMultipleFromCost,
-  STONE_TIERS as FALLBACK_RULES,
+  NATURAL_PRICING,
+  toBps,
 } from '../config/pricing.js';
-import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
+import type { CertComp, SpecComp } from './compProvider.js';
+import type { Hold, PriceSource, Priced, StoneItem, WatchItem } from './types.js';
 import { priceWatchFromCost } from './watchPricing.js';
-
-export { FALLBACK_RULES };
 
 export type PriceResult =
   | { ok: true; priced: Priced }
@@ -27,7 +27,7 @@ function minCostPerCaratFloor(carat: number): number {
 }
 
 /**
- * Ticket = round(Amount × chart multiple). Amount is invoice cost.
+ * Lab ticket = round(Amount × chart multiple). Amount is invoice cost.
  */
 function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   if (!(item.costUsd > 0)) {
@@ -36,7 +36,7 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
       hold: {
         kind: item.kind,
         stockRef: item.stockRef,
-        reason: item.kind === 'lab' ? 'lab_no_cost' : 'natural_no_cost',
+        reason: 'lab_no_cost',
       },
     };
   }
@@ -61,7 +61,7 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
       hold: {
         kind: item.kind,
         stockRef: item.stockRef,
-        reason: item.kind === 'lab' ? 'lab_margin_floor' : 'natural_margin_floor',
+        reason: 'lab_margin_floor',
         detail: `margin ${(marginPct * 100).toFixed(1)}% < ${(DIAMOND.minMarginPct * 100).toFixed(0)}%`,
       },
     };
@@ -69,16 +69,127 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
   return { ok: true, priced: { retailUsd, marginPct } };
 }
 
-function retailMultipleForCost(costUsd: number): number | undefined {
-  return FALLBACK_RULES.find((t) => costUsd <= t.maxCostUsd)?.multiplier;
+export interface NaturalComps {
+  cert?: CertComp | null;
+  spec?: SpecComp | null;
 }
 
-export function priceNatural(item: StoneItem): PriceResult {
-  const multiple = retailMultipleForCost(item.costUsd);
-  if (multiple === undefined) {
-    return { ok: false, hold: { kind: item.kind, stockRef: item.stockRef, reason: 'natural_no_markup_tier' } };
+const BPS = 10_000;
+const DAY_MS = 86_400_000;
+const N = NATURAL_PRICING;
+const GOOD_COLORS_D_H = new Set(['D', 'E', 'F', 'G', 'H']);
+const WEAK_COLORS_I_L = new Set(['I', 'J', 'K', 'L']);
+
+/** Dollars (feed) → integer cents, or undefined when null/zero/negative/unparseable. */
+function costToCents(costUsd: unknown): number | undefined {
+  if (typeof costUsd !== 'number' || !Number.isFinite(costUsd) || costUsd <= 0) return undefined;
+  const cents = Math.round(costUsd * 100);
+  return cents > 0 ? cents : undefined;
+}
+
+/** floor = max(cost × floorMult, cost + floorAbs), integer cents, rounded up. */
+export function naturalFloorCents(costCents: number): number {
+  const byMult = Math.ceil((costCents * toBps(N.floorMult)) / BPS);
+  return Math.max(byMult, costCents + N.floorAbsCents);
+}
+
+/** k(segment) in basis points, clamped. */
+export function rapKBps(item: StoneItem): number {
+  const k = N.rapK;
+  let bps = toBps(k.base);
+  const color = item.color.trim().toUpperCase();
+  const clarity = item.clarity.trim().toUpperCase();
+  const cut = (item.cut ?? '').trim().toLowerCase();
+  const polish = (item.polish ?? '').trim().toLowerCase();
+  const sym = (item.symmetry ?? '').trim().toLowerCase();
+  const fluor = (item.fluorescence ?? '').trim().toLowerCase();
+  if (clarity === 'SI1' || clarity === 'SI2') bps += toBps(k.si1OrSi2);
+  if (WEAK_COLORS_I_L.has(color)) bps += toBps(k.colorIJKL);
+  if (item.carat < 1) bps += toBps(k.caratUnder1);
+  if (item.carat >= 2) bps += toBps(k.carat2Plus);
+  if ((cut === 'excellent' || cut === 'ideal') && polish === 'excellent' && sym === 'excellent') {
+    bps += toBps(k.excellentCutPolishSymmetry);
   }
-  return priceFromLmnyCost(item, multiple);
+  if (cut === 'good' || cut === 'fair') bps += toBps(k.goodOrFairCut);
+  if (['medium', 'strong', 'very strong'].includes(fluor) && GOOD_COLORS_D_H.has(color)) {
+    bps += toBps(k.fluorMediumPlusOnColorDH);
+  }
+  return Math.min(toBps(k.max), Math.max(toBps(k.min), bps));
+}
+
+function fresh(asOf: string, now: Date): boolean {
+  const t = Date.parse(asOf);
+  return Number.isFinite(t) && now.getTime() - t <= N.compMaxAgeDays * DAY_MS;
+}
+
+/** First available anchor tier, in cents. Comps older than the max age or too thin are ignored. */
+function naturalAnchor(
+  item: StoneItem,
+  costCents: number,
+  comps: NaturalComps,
+  now: Date,
+): { anchorCents: number; source: PriceSource } {
+  const undercut = toBps(N.compUndercut);
+  const cert = comps.cert;
+  if (cert && item.certNumber && cert.lowestCents > 0 && fresh(cert.asOf, now)) {
+    return { anchorCents: Math.floor((cert.lowestCents * undercut) / BPS), source: 'cert' };
+  }
+  const spec = comps.spec;
+  if (spec && spec.p25Cents > 0 && spec.count >= N.specCompMinCount && fresh(spec.asOf, now)) {
+    return { anchorCents: Math.floor((spec.p25Cents * undercut) / BPS), source: 'spec' };
+  }
+  const rapPerCarat = item.rapPriceUsd;
+  if (typeof rapPerCarat === 'number' && Number.isFinite(rapPerCarat) && rapPerCarat > 0) {
+    // Feed Rap is per carat. Total = rap/ct × carat, in integer cents (carat in milli-carats).
+    const rapTotalCents = Math.round((Math.round(rapPerCarat * 100) * Math.round(item.carat * 1000)) / 1000);
+    return { anchorCents: Math.floor((rapTotalCents * rapKBps(item)) / BPS), source: 'rap' };
+  }
+  return { anchorCents: Math.floor((costCents * toBps(N.fallbackMultiple)) / BPS), source: 'fallback' };
+}
+
+/**
+ * Natural retail: market anchor rounded down to $25, never below the floor
+ * (and so never at or below cost). A stone whose anchor lands under the
+ * floor is held, never rounded up.
+ */
+export function priceNatural(item: StoneItem, comps: NaturalComps = {}, now: Date = new Date()): PriceResult {
+  const hold = (reason: string, detail?: string): PriceResult => ({
+    ok: false,
+    hold: { kind: item.kind, stockRef: item.stockRef, reason, detail },
+  });
+  const costCents = costToCents(item.costUsd);
+  if (costCents === undefined) return hold('natural_no_cost');
+
+  const floorCents = naturalFloorCents(costCents);
+  const { anchorCents, source } = naturalAnchor(item, costCents, comps, now);
+  const retailCents = Math.floor(anchorCents / N.roundDownCents) * N.roundDownCents;
+  if (!(retailCents >= floorCents) || retailCents <= costCents) {
+    return hold('natural_below_floor', `${source} retail ${retailCents}¢ < floor ${floorCents}¢ (cost ${costCents}¢)`);
+  }
+  return {
+    ok: true,
+    priced: {
+      retailUsd: retailCents / 100,
+      priceSource: source,
+      marginPct: (retailCents - costCents) / retailCents,
+    },
+  };
+}
+
+/**
+ * Independent write-path check, used right before a natural price is sent to
+ * Shopify or the stones table. Recomputes the floor from the stone's cost and
+ * does not trust the pricing function. Returns a reason string on failure.
+ */
+export function naturalFloorViolation(item: StoneItem, retailUsd: number): string | null {
+  const costCents = costToCents(item.costUsd);
+  if (costCents === undefined) return 'natural_no_cost';
+  if (typeof retailUsd !== 'number' || !Number.isFinite(retailUsd)) return 'retail not a number';
+  const retailCents = Math.round(retailUsd * 100);
+  const floorCents = naturalFloorCents(costCents);
+  if (retailCents <= costCents) return `retail ${retailCents}¢ <= cost ${costCents}¢`;
+  if (retailCents < floorCents) return `retail ${retailCents}¢ < floor ${floorCents}¢`;
+  return null;
 }
 
 /**

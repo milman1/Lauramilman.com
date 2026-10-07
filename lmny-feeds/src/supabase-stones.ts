@@ -6,7 +6,8 @@
  * store. Populate and verify this table before deleting tag:lmny-feed products.
  */
 
-import type { Publishable, StoneItem } from './types.js';
+import { naturalFloorViolation } from './markup.js';
+import type { PriceSource, Publishable, StoneItem } from './types.js';
 
 export interface StoneRow {
   stock_ref: string;
@@ -29,6 +30,8 @@ export interface StoneRow {
   price_per_carat_usd: number | null;
   rap_price_usd: number | null;
   retail_usd: number;
+  /** Natural stones: which tier priced it (cert | spec | rap | fallback). */
+  price_source: PriceSource | null;
   image_urls: string[];
   video_urls: string[];
   content_hash: string;
@@ -50,6 +53,7 @@ export function stoneRowFor(
   retailUsd: number,
   contentHash: string,
   syncedAt: string,
+  priceSource?: PriceSource,
 ): StoneRow {
   return {
     stock_ref: item.stockRef,
@@ -72,6 +76,7 @@ export function stoneRowFor(
     price_per_carat_usd: item.pricePerCaratUsd ?? null,
     rap_price_usd: item.rapPriceUsd ?? null,
     retail_usd: retailUsd,
+    price_source: priceSource ?? null,
     image_urls: item.imageUrls,
     video_urls: item.videoUrls,
     content_hash: contentHash,
@@ -88,8 +93,15 @@ export async function dualWriteStones(
   opts: { url: string; key: string; fetchImpl?: typeof fetch } = supabaseConfigured()!,
 ): Promise<{ upserted: number; markedUnavailable: number }> {
   const stones = publishable.filter((p): p is Publishable & { item: StoneItem } => p.item.kind !== 'watch');
-  const rows = stones.map((p) =>
-    stoneRowFor(p.item, p.priced.retailUsd, contentHashByStockRef.get(p.item.stockRef) ?? '', syncedAt),
+  // Write-path assertion: a natural at or below its floor never reaches the table.
+  const writable = stones.filter((p) => {
+    if (p.item.kind !== 'natural') return true;
+    const violation = naturalFloorViolation(p.item, p.priced.retailUsd);
+    if (violation) console.error(`stones write skipped ${p.item.stockRef}: ${violation}`);
+    return !violation;
+  });
+  const rows = writable.map((p) =>
+    stoneRowFor(p.item, p.priced.retailUsd, contentHashByStockRef.get(p.item.stockRef) ?? '', syncedAt, p.priced.priceSource),
   );
   const fetchFn = opts.fetchImpl ?? fetch;
   const headers = {

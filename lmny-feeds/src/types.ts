@@ -70,8 +70,13 @@ export interface WatchItem {
 
 export type FeedItem = StoneItem | WatchItem;
 
+/** Which tier priced a natural stone. */
+export type PriceSource = 'cert' | 'spec' | 'rap' | 'fallback';
+
 export interface Priced {
   retailUsd: number;
+  /** Natural stones only: the anchor tier that set the price. */
+  priceSource?: PriceSource;
   /** (retail − cost) / retail */
   marginPct: number;
 }

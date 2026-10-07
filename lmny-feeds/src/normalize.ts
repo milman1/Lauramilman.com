@@ -250,6 +250,12 @@ export function certNumberFromUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
   try {
     const u = new URL(url);
+    // Viewer wrappers (docs.google.com/viewer?url=<pdf>) carry the real link in `url`.
+    const inner = u.searchParams.get('url');
+    if (inner && inner !== url) {
+      const fromInner = certNumberFromUrl(inner);
+      if (fromInner) return fromInner;
+    }
     for (const key of ['reportno', 'reportNo', 'report_no', 'report']) {
       const v = u.searchParams.get(key);
       if (v && /^[A-Za-z0-9-]{5,}$/.test(v)) return v;

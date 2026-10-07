@@ -112,7 +112,7 @@ export function naturalMarginStats(publishable: Publishable[], holds: Hold[]) {
     p25: percentile(margins, 0.25),
     median: percentile(margins, 0.5),
     p75: percentile(margins, 0.75),
-    rejectedByFloor: holds.filter((h) => h.reason === 'natural_margin_floor').length,
+    rejectedByFloor: holds.filter((h) => h.reason === 'natural_below_floor').length,
   };
 }
 

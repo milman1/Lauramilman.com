@@ -18,9 +18,9 @@
  * lab-grown stone. Stock 350393 (5.01ct Emerald): Amount $106,463.
  */
 export const DIAMOND = {
-  /** Natural-diamond retail floor above $4,000 Amount. 1.25× = 20% margin. */
+  /** Lab-grown margin floor multiple (naturals use NATURAL_PRICING). */
   amountMultiple: 1.25,
-  /** (retail − cost) / retail must be ≥ this, else the stone is held. */
+  /** Lab: (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
 } as const;
 
@@ -28,9 +28,6 @@ export const DIAMOND = {
 export function lmnyStoneCost(amountUsd: number): number {
   return Math.round(amountUsd * 100) / 100;
 }
-
-/** Naturals use the tiered STONE_TIERS chart. */
-export const NATURAL = DIAMOND;
 
 export interface LabTier {
   /** Tier applies when total costUsd ≤ maxCostUsd. First matching tier wins. */
@@ -40,19 +37,76 @@ export interface LabTier {
 }
 
 /**
- * Natural-diamond markup on **Amount** (invoice cost). First match wins.
+ * Natural-diamond pricing: market-anchored, with a hard floor over cost.
+ * Everything is integer cents (rates are integer basis points, 10000 = 1.0)
+ * so no float ever reaches a price. Source: merchant decision 2026-10-07.
  *
- *   ≤ $4,000   1.40×  ~29% margin
- *   above      1.25×  20% margin
+ *   floor  = max(cost × floorMult, cost + floorAbs)
+ *   anchor = certComp × undercut → specComp p25 × undercut
+ *            → Rap total × k(segment) → cost × fallbackMultiple (no Rap)
+ *   retail = anchor rounded DOWN to roundDownCents
+ *   retail < floor → HOLD (natural_below_floor). Never rounded up to rescue.
  *
- * Merchant decision 2026-09-17: collapse the old 1.35× / 1.30× bands into
- * 1.40× through $4,000 (typical 1ct tickets). Stones above $4,000 stay at
- * 1.25× so large-carat naturals do not jump with the small-stone lift.
+ * Hard rule: no natural ever sells at or below cost. Cost missing, zero,
+ * negative or unparseable → HOLD (natural_no_cost). The floor is enforced in
+ * `priceNatural` and asserted again at the write path (`assertNaturalFloor`).
+ * Compare-at is never set from Rap or from a comp.
  */
-export const STONE_TIERS: LabTier[] = [
-  { maxCostUsd: 4000, multiplier: 1.4 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
-];
+export const NATURAL_PRICING = {
+  /** NATURAL_FLOOR_MULT: floor is at least cost × this. Must be > 1.0. */
+  floorMult: 1.15,
+  /** NATURAL_FLOOR_ABS in cents ($250): floor is at least cost + this. Must be > 0. */
+  floorAbsCents: 25_000,
+  /** COMP_UNDERCUT applied to a cert comp's lowest live retail and a spec comp's p25. */
+  compUndercut: 0.98,
+  /** SPEC_COMP_MIN_COUNT: a spec comp with fewer comps is ignored. */
+  specCompMinCount: 5,
+  /** COMP_MAX_AGE_DAYS: older comps are ignored. */
+  compMaxAgeDays: 7,
+  /** NATURAL_FALLBACK_MULTIPLE: no Rap on the stone → cost × this. */
+  fallbackMultiple: 1.5,
+  /** Retail is rounded DOWN to a multiple of this ($25). */
+  roundDownCents: 2_500,
+  /**
+   * k(segment) for the Rap fallback: start at `base`, add every matching
+   * adjustment, clamp to [min, max]. Recalibrate here, not in code.
+   */
+  rapK: {
+    base: 0.75,
+    min: 0.55,
+    max: 0.85,
+    si1OrSi2: -0.07,
+    colorIJKL: -0.05,
+    caratUnder1: -0.05,
+    carat2Plus: 0.05,
+    excellentCutPolishSymmetry: 0.05,
+    goodOrFairCut: -0.1,
+    fluorMediumPlusOnColorDH: -0.05,
+  },
+} as const;
+
+/** Rate (e.g. 1.15, 0.98, -0.07) → integer basis points, so math stays integer. */
+export function toBps(rate: number): number {
+  return Math.round(rate * 10_000);
+}
+
+/** Startup validation. Throws (the run refuses to start) on an unsafe config. */
+export function validateNaturalPricingConfig(c: typeof NATURAL_PRICING = NATURAL_PRICING): void {
+  const bad: string[] = [];
+  if (!(Number.isFinite(c.floorMult) && c.floorMult > 1.0)) {
+    bad.push(`NATURAL_FLOOR_MULT must be > 1.0 (got ${c.floorMult})`);
+  }
+  if (!(Number.isInteger(c.floorAbsCents) && c.floorAbsCents > 0)) {
+    bad.push(`NATURAL_FLOOR_ABS must be a positive integer of cents (got ${c.floorAbsCents})`);
+  }
+  if (!(Number.isInteger(c.roundDownCents) && c.roundDownCents > 0)) {
+    bad.push(`roundDownCents must be a positive integer (got ${c.roundDownCents})`);
+  }
+  if (!(c.compUndercut > 0 && c.compUndercut <= 1)) bad.push(`compUndercut must be in (0, 1] (got ${c.compUndercut})`);
+  if (!(c.fallbackMultiple > 0)) bad.push(`fallbackMultiple must be > 0 (got ${c.fallbackMultiple})`);
+  if (!(c.rapK.min > 0 && c.rapK.min <= c.rapK.max)) bad.push('rapK clamp must satisfy 0 < min <= max');
+  if (bad.length > 0) throw new Error(`Natural pricing config invalid: ${bad.join('; ')}`);
+}
 
 /**
  * Loose lab-grown diamonds: 3× invoice cost at every size. Fail-closed

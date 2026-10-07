@@ -2,43 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { priceLab, priceNatural, priceWatch } from '../src/markup.js';
 import { labStone, naturalStone, watch } from './fixtures.js';
 
-describe('natural pricing', () => {
-  it('prices expensive stones at 1.25× Amount (20% margin-on-retail)', () => {
-    const r = priceNatural(naturalStone({ costUsd: 106_463 }));
-    expect(r.ok && r.priced.retailUsd).toBe(133_079);
-  });
-
-  it('uses the natural-diamond cost-band chart', () => {
-    const cheap = priceNatural(naturalStone({ costUsd: 400 }));
-    const mid = priceNatural(naturalStone({ costUsd: 900 }));
-    const upper = priceNatural(naturalStone({ costUsd: 2_000 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(560); // 400 × 1.40
-    expect(mid.ok && mid.priced.retailUsd).toBe(1260); // 900 × 1.40
-    expect(upper.ok && upper.priced.retailUsd).toBe(2800); // 2000 × 1.40
-  });
-
-  it('holds when there is no cost', () => {
-    const r = priceNatural(naturalStone({ costUsd: 0, rapPriceUsd: undefined }));
-    expect(!r.ok && r.hold.reason).toBe('natural_no_cost');
-  });
-
-  it('publishes at the 20% margin floor (1.25×)', () => {
-    const r = priceNatural(naturalStone({ costUsd: 12_000 }));
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.priced.retailUsd).toBe(15_000);
-  });
-
-  it('retail stays at or above cost', () => {
-    const r = priceNatural(naturalStone({ costUsd: 900 }));
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.priced.retailUsd).toBeGreaterThanOrEqual(900);
-  });
-
-  it('prices a typical 1ct natural at 1.40× (through $4,000 Amount)', () => {
-    const r = priceNatural(naturalStone({ costUsd: 3101.71 }));
-    expect(r.ok && r.priced.retailUsd).toBe(4342);
-  });
-});
+// Natural pricing is covered by natural-pricing.test.ts.
 
 describe('lab pricing', () => {
   it('applies 3× at every size', () => {

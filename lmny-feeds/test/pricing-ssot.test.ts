@@ -4,16 +4,20 @@ import {
   LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
-  STONE_TIERS,
+  NATURAL_PRICING,
   WATCH,
   WATCH_RETAIL_CAP_BY_STOCK,
   WATCH_SALE,
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
-  it('keeps 1.40× through $4,000 Amount and 1.25× above', () => {
-    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.25]);
-    expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
+  it('keeps the natural floor and tunables on pricing.ts', () => {
+    expect(NATURAL_PRICING.floorMult).toBe(1.15);
+    expect(NATURAL_PRICING.floorAbsCents).toBe(25_000);
+    expect(NATURAL_PRICING.compUndercut).toBe(0.98);
+    expect(NATURAL_PRICING.specCompMinCount).toBe(5);
+    expect(NATURAL_PRICING.compMaxAgeDays).toBe(7);
+    expect(NATURAL_PRICING.fallbackMultiple).toBe(1.5);
   });
 
   it('prices every loose lab at 3×', () => {
