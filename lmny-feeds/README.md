@@ -35,14 +35,12 @@ holds a stones table — Shopify products are the only live copy.
    - naturals and lab: LMNY cost is Belgium Dia **Amount $** (invoice cost,
      confirmed 2026-08-31). Stock 350393: Amount $106,463. Rap ($) is per
      carat and is not the ticket.
-   - naturals: retail = round(Amount × chart). Amount ≤ $4,000 is 1.40×
-     (~29% margin); above $4,000 stays 1.25× (20%). Held under the 20%
-     floor.
+   - naturals: retail = round(Amount / 0.70), a 30% gross margin at every
+     cost. Held under the 20% floor.
 
-     | Amount (cost) | Multiplier | Margin |
+     | Amount (cost) | Retail | Margin |
      |---|---|---|
-     | ≤ $4,000 | 1.40× | ~29% |
-     | above $4,000 | 1.25× | 20% |
+     | any | round(cost / 0.70) | 30% |
    - lab: retail = round(Amount × 3) at every size. Mapping guards still catch
      a Buy_Price used as a total. The 10% welcome discount remains eligible
      (realized 2.70× cost).

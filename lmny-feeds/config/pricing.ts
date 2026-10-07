@@ -18,8 +18,6 @@
  * lab-grown stone. Stock 350393 (5.01ct Emerald): Amount $106,463.
  */
 export const DIAMOND = {
-  /** Natural-diamond retail floor above $4,000 Amount. 1.25× = 20% margin. */
-  amountMultiple: 1.25,
   /** (retail − cost) / retail must be ≥ this, else the stone is held. */
   minMarginPct: 0.2,
 } as const;
@@ -29,8 +27,30 @@ export function lmnyStoneCost(amountUsd: number): number {
   return Math.round(amountUsd * 100) / 100;
 }
 
-/** Naturals use the tiered STONE_TIERS chart. */
+/** Naturals use `NATURAL_STONE`. The 20% figure here is the hold floor, not the ticket. */
 export const NATURAL = DIAMOND;
+
+/**
+ * Loose natural diamonds: 30% gross margin at every invoice cost.
+ *
+ *   retail = round(cost / 0.70)
+ *
+ * (retail − cost) / retail is 30% before dollar rounding. Merchant decision
+ * 2026-10-07: replace the 1.40× band through $4,000 and the 1.25× band above
+ * it. Lab-grown stones do not use this rule.
+ */
+export const NATURAL_STONE = {
+  /** (retail − cost) / retail. */
+  marginPct: 0.3,
+} as const;
+
+/** Retail for a loose natural diamond. Throws on a non-positive cost. */
+export function naturalRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Natural pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd / (1 - NATURAL_STONE.marginPct));
+}
 
 export interface LabTier {
   /** Tier applies when total costUsd ≤ maxCostUsd. First matching tier wins. */
@@ -40,18 +60,11 @@ export interface LabTier {
 }
 
 /**
- * Natural-diamond markup on **Amount** (invoice cost). First match wins.
- *
- *   ≤ $4,000   1.40×  ~29% margin
- *   above      1.25×  20% margin
- *
- * Merchant decision 2026-09-17: collapse the old 1.35× / 1.30× bands into
- * 1.40× through $4,000 (typical 1ct tickets). Stones above $4,000 stay at
- * 1.25× so large-carat naturals do not jump with the small-stone lift.
+ * Natural-diamond markup on **Amount** (invoice cost). One tier: cost / 0.70,
+ * which is a 30% gross margin. `priceNatural` uses `naturalRetailFromCost`.
  */
 export const STONE_TIERS: LabTier[] = [
-  { maxCostUsd: 4000, multiplier: 1.4 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1 / (1 - NATURAL_STONE.marginPct) },
 ];
 
 /**
