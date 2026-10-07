@@ -314,7 +314,16 @@ export function supplierRetailFromCost(costUsd: number): number {
  */
 export const SETTING_ONLY = {
   costMultiple: 3,
+  /** Flat add-on in USD for the 18K option on a setting listed in 14K. */
+  upcharge18kUsd: 250,
 } as const;
+
+export function setting18kRetailFrom14kRetail(retail14kUsd: number): number {
+  if (!Number.isFinite(retail14kUsd) || retail14kUsd <= 0) {
+    throw new Error(`Setting 18K pricing: invalid 14K retail ${retail14kUsd}`);
+  }
+  return retail14kUsd + SETTING_ONLY.upcharge18kUsd;
+}
 
 export function settingOnlyRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
