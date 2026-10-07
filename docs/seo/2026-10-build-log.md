@@ -136,6 +136,37 @@ These records were split out of theme PR #202 so they could land on `main`.
 PR #202 keeps only the unmerged theme code (the collection guide block and
 the Hermès meta description fix).
 
+## 2026-10-07 — gemstone and gift collections, header links
+
+Prompted by the J.R. Dunn comparison. Six new smart collections were created
+**unpublished** (no sales channel) so they stay off the storefront until the
+merchant approves the header PR; then they are published and the PR merged
+together.
+
+| Handle | Rule (all must match) | Products at creation |
+|---|---|---:|
+| `emerald-jewelry` | title contains "emerald", not "emerald diamond" / "emerald cut" / "emerald-cut" / "lab grown emerald" / "lab-grown emerald" / "emerald lab"; type not Watch, Natural Diamond, Lab-Grown Diamond | 64 |
+| `ruby-jewelry` | title contains "rub" (catches ruby and rubies), not "rubber"; same type exclusions | 69 |
+| `sapphire-jewelry` | title contains "sapphire"; same type exclusions | 65 |
+| `pearl-jewelry` | title contains "pearl" (includes mother-of-pearl); same type exclusions | 52 |
+| `gifts-under-1000` | a variant under $1,000 with inventory > 0; type not Watch or loose diamond; title not "wedding", "engagement", "extender" | 101 |
+| `gifts-under-2500` | same, under $2,500 | 257 |
+
+Counts include drafts and archived pieces, which the storefront hides.
+Emerald-cut diamonds are excluded by title so the emerald page shows only
+green emeralds.
+
+Engagement rings by style (solitaire, halo, three-stone) were **not** made:
+about 21 active engagement rings split into 1–5 per style, which would be thin
+pages.
+
+Header PR: a "By gemstone" group replaces "Start here" in the Pre-Owned
+dropdown (estate authentication stays). "Gifts" was added to the top row, and
+both gift pages to the phone menu. A new header setting, `contact_phone`, is
+blank by default; when it is filled, the number shows as a `tel:` link next to
+Book an Appointment and in the phone menu. Book an Appointment was already in
+the top row and the announcement bar on every device.
+
 ## Next
 
 - Collection guides are on hold by merchant decision (PR #202 not merged).
