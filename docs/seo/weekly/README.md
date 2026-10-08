@@ -24,6 +24,23 @@ To connect Google data, the merchant does one of these:
    claude.ai Settings → Connectors (none was available in this workspace on
    2026-10-05; Supermetrics covers GA4).
 
+## Competitors (merchant's list, 2026-10-08)
+
+| Competitor | Site | Compare against |
+|---|---|---|
+| Rare Carat | rarecarat.com | Loose lab-grown and natural diamonds, engagement settings, policies |
+| Blue Nile | bluenile.com | Loose lab-grown and natural diamonds, settings, policies |
+| Michael Gabriels | michaelgabriels.com | Lab-grown jewelry (tennis bracelets, studs, hoops), engagement rings; New York |
+| J.R. Dunn | jrdunn.com | Rolex and watches, designer jewelry, bridal, store services |
+
+Once a month (first report of the month), re-run the price check: read each
+site's public listing pages through Firecrawl, match round stones by carat
+(±0.06), color and clarity against the live catalog, and save the matches as
+`docs/seo/YYYY-MM-DD-lab-price-comparison.csv`. If the lab-grown search note
+(`templates/collection.diamonds-lab.json`, `price_note`) is still true,
+propose new text and a new `price_note_until`; if it is not, propose removing
+it. Never name a competitor on the storefront.
+
 ## Queries (ShopifyQL)
 
 Last 28 days unless noted. Compare with the previous report.
