@@ -63,6 +63,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -222,6 +223,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -1469,6 +1471,18 @@
       "id": "subheading",
       "label": "Subheading",
       "info": "Falls back to the collection description."
+    },
+    {
+      "type": "textarea",
+      "id": "price_note",
+      "label": "Price comparison note",
+      "info": "Plain text shown under the subheading. Only state a comparison you have checked and recorded in the docs."
+    },
+    {
+      "type": "text",
+      "id": "price_note_until",
+      "label": "Hide the note after (YYYY-MM-DD)",
+      "info": "Required. The note disappears after this date so an old comparison is never shown. Re-check prices before extending it."
     },
     {
       "type": "range",

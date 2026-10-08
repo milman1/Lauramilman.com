@@ -92,4 +92,17 @@ describe('theme SEO integration', () => {
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');
   });
+
+  it('shows the dated lab-grown price note only until its re-check date', () => {
+    const note = themeFile('snippets/price-comparison-note.liquid');
+    const filter = themeFile('sections/diamond-filter.liquid');
+    const lab = themeFile('templates/collection.diamonds-lab.json');
+
+    expect(note).toContain("today_num <= until_num");
+    expect(note).toContain('{%- if text != blank and until != blank -%}');
+    expect(filter.match(/render 'price-comparison-note'/g)).toHaveLength(2);
+    expect(lab).toMatch(/"price_note_until": "\d{4}-\d{2}-\d{2}"/);
+    expect(lab).toContain('Checked October 8, 2026');
+    expect(lab).not.toMatch(/rare ?carat/i);
+  });
 });

@@ -1,0 +1,26 @@
+{%- comment -%}
+  Dated price comparison under a diamond search heading.
+  Params: text (plain text), until ('YYYY-MM-DD').
+  Hidden when text is blank, when until is blank, or after the until date, so a
+  comparison is never shown once it is older than its re-check window. The
+  evidence behind the text lives in docs/seo/ (see the build log).
+{%- endcomment -%}
+{%- if text != blank and until != blank -%}
+  {%- assign today_num = 'now' | date: '%Y%m%d' | plus: 0 -%}
+  {%- assign until_num = until | strip | remove: '-' | plus: 0 -%}
+  {%- if until_num > 0 and today_num <= until_num -%}
+    <p class="lm-price-note">{{ text | escape }}</p>
+    <style>
+      .lm-price-note {
+        margin: 14px auto 0;
+        max-width: 640px;
+        padding: 10px 14px;
+        border-left: 2px solid var(--gold, #C9A050);
+        font-size: 0.85rem;
+        line-height: 1.6;
+        text-align: left;
+        opacity: 0.92;
+      }
+    </style>
+  {%- endif -%}
+{%- endif -%}

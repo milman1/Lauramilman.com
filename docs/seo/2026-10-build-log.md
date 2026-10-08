@@ -136,6 +136,25 @@ These records were split out of theme PR #202 so they could land on `main`.
 PR #202 keeps only the unmerged theme code (the collection guide block and
 the Hermès meta description fix).
 
+## 2026-10-08 — lab-grown price comparison note
+
+Merchant asked to say on the site that loose lab-grown stones are priced
+below the big online sellers. Evidence: `docs/seo/2026-10-08-lab-price-comparison.csv`,
+round stones on a leading online diamond marketplace's 1, 1.5 and 2 carat
+pages (read 2026-10-08, during their "Anniversary Sale"), matched to our live
+catalog by carat (±0.06), color and clarity.
+
+- 1 carat: ours 0.74–0.77 of theirs (about 25% lower), 6 matches.
+- 1.5 carat: 0.50–0.65 (35–50% lower), 4 matches; 1.1 ct D VVS1 0.41.
+- 2 carat: their cheapest listed was $710 (J VS1); 801 of our 1,042 round
+  2.00–2.09 ct D–F VS-or-better stones were under $710.
+- Natural (2 carat, 21 matches): ours a median 1.11 of theirs. Not claimed.
+
+The note names no competitor. It renders from the `diamond-filter` section
+settings `price_note` and `price_note_until` on the loose lab-grown search
+page only, and hides itself after `price_note_until` (set to 2026-11-08), so
+the claim has to be re-checked and the date moved before it can stay up.
+
 ## Next
 
 - Collection guides are on hold by merchant decision (PR #202 not merged).
