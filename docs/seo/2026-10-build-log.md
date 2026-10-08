@@ -159,6 +159,12 @@ catalog by carat (±0.06), color and clarity.
 
 The competitor set is recorded in `docs/seo/weekly/README.md`.
 
+**Wording is for the prices after PR #219** (loose lab-grown × 3 → × 3.5,
+every price × 7/6): 1 ct 0.86–0.90 of the first seller (10–15% lower); 1.5 ct
+0.58–0.76 of the first and 0.47–0.64 of the second (about 25–50% lower); 463
+of 1,042 round 2.00–2.09 ct D–F VS-or-better stones under $710. Merge #219
+first. The CSV holds the pre-change prices.
+
 The note names no competitor. It renders from the `diamond-filter` section
 settings `price_note` and `price_note_until` on the loose lab-grown search
 page only, and hides itself after `price_note_until` (set to 2026-11-08), so
