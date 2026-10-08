@@ -136,6 +136,32 @@ These records were split out of theme PR #202 so they could land on `main`.
 PR #202 keeps only the unmerged theme code (the collection guide block and
 the Hermès meta description fix).
 
+## 2026-10-08 — lab-grown stone and setting markups (merchant decision)
+
+Option 1 of the competitor review: loose lab-grown stones × 3 → × 3.5 and
+engagement-ring settings × 3 → × 2.25 (`lmny-feeds/config/pricing.ts`). The
+lab retail floor scales with it ($216 → $252 at ≥1 ct) so the same invoices
+stay held.
+
+Expected effect, from the 2026-10-08 catalog export (19,605 active loose
+lab-grown stones): each price rises by one sixth, a median of +$144
+(median stone $863 → about $1,007). The hourly feed sync applies it after
+merge. Settings are not synced; their 9 products (all variants) are repriced
+by hand after merge from Shopify Cost per item:
+
+| Setting | Cost | Now | New |
+|---|---:|---:|---:|
+| 14K pavé and hidden halo (3 products), 14K variants | $600 | $1,800 | $1,350 |
+| Same 3 products, 18K variants (14K + $250) | — | $2,050 | $1,600 |
+| Round pavé, 18K white gold (own product, cost $600, priced as 14K + $250) | $600 | $2,050 | $1,600 |
+| Oval hidden halo 0.09 ct, 18K | $750 | $2,250 | $1,688 |
+| Oval solitaire 18K; oval hidden halo 0.11 ct 18K; oval hidden halo 18K & platinum | $900 | $2,700 | $2,025 |
+| Elongated cushion bezel solitaire, 18K | $1,100 | $3,300 | $2,475 |
+
+A 2 ct D–F VS1 lab round in a 14K setting goes from about $2,400 to about
+$2,050. The lab-grown search price note (PR #218) must be re-worded to the
+post-change ratios before it is merged.
+
 ## Next
 
 - Collection guides are on hold by merchant decision (PR #202 not merged).

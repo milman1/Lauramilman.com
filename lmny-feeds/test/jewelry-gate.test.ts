@@ -74,12 +74,12 @@ describe('jewelry activation gate', () => {
     snapshot.product.media.nodes.push({ id: 'v', alt: '', mediaContentType: 'VIDEO', status: 'PROCESSING' }); renew(snapshot, review);
     const errors = validateActivation(snapshot, review, NOW).join(' '); expect(errors).toMatch(/READY/); expect(errors).toMatch(/first/);
   });
-  it('retains settings at 3× instead of the finished lab-grown 2×', () => {
+  it('retains settings at 2.25× instead of the finished lab-grown 2×', () => {
     const { snapshot, review } = fixture(); review.kind = 'setting'; snapshot.product.tags = ['ring-setting'];
     snapshot.product.title = 'Diamond Ring Setting in 14K White Gold'; snapshot.product.productType = 'Ring Settings';
     snapshot.product.descriptionHtml = '<p>Diamond ring setting in 14K white gold. Center diamond not included.</p>';
     snapshot.product.seo.title = 'Diamond Ring Setting | 14K White Gold';
-    snapshot.product.variants.nodes[0]!.price = '370'; renew(snapshot, review);
+    snapshot.product.variants.nodes[0]!.price = '278'; renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
     snapshot.product.variants.nodes[0]!.price = '246.90'; renew(snapshot, review); expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/source rule/);
   });
