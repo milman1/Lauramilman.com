@@ -82,7 +82,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: 3× invoice cost at every size, after fail-closed mapping guards.
+ * Lab-grown: 3.5× invoice cost at every size, after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);

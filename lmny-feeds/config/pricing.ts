@@ -55,22 +55,25 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 3× invoice cost at every size. Fail-closed
+ * Loose lab-grown diamonds: 3.5× invoice cost at every size. Fail-closed
  * $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 2.70× cost (63.0% gross before fees).
+ * is 3.15× cost (68.3% gross before fees).
  *
  * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
  * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
  * which cross $500 on weight alone, at a thinner markup than small stones.
+ * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
+ * so a stone plus setting totals less while stones stay below the large
+ * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 3,
+  costMultiple: 3.5,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3× at every size. */
+/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
 export function labRetailMultipleFromCost(_costUsd: number): number {
   return LOOSE_LAB_GROWN.costMultiple;
 }
@@ -89,9 +92,9 @@ export const LAB_GUARDS = {
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
    * total). Scaled with the multiple so the same invoices stay held:
-   * at 3×, 1ct Amount $70 → $210 is held; Amount $72 → $216 publishes.
+   * at 3.5×, 1ct Amount $70 → $245 is held; Amount $72 → $252 publishes.
    */
-  minRetailUsd: 216,
+  minRetailUsd: 252,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
@@ -305,15 +308,16 @@ export function supplierRetailFromCost(costUsd: number): number {
  * one hidden "setting-only" variant per ring, SKU SET-<ring handle>).
  * Merchant decision 2026-10-02: retail = setting cost × 3, labor to set the
  * shopper's diamond included in that price. Rounded to the nearest dollar;
- * no other rounding was specified.
+ * no other rounding was specified. Merchant decision 2026-10-08: × 3 → × 2.25
+ * (paired with loose lab-grown 3× → 3.5×).
  *
- *   retail = round(cost × 3)
+ *   retail = round(cost × 2.25)
  *
- * Settings only. It is not the Royal Chain rule above, even though both are
- * × 3, and it never prices a complete ring with its own center stone.
+ * Settings only. It is not the Royal Chain rule above, and it never prices a
+ * complete ring with its own center stone.
  */
 export const SETTING_ONLY = {
-  costMultiple: 3,
+  costMultiple: 2.25,
   /** Flat add-on in USD for the 18K option on a setting listed in 14K. */
   upcharge18kUsd: 250,
 } as const;
