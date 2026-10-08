@@ -103,6 +103,6 @@ describe('theme SEO integration', () => {
     expect(filter.match(/render 'price-comparison-note'/g)).toHaveLength(2);
     expect(lab).toMatch(/"price_note_until": "\d{4}-\d{2}-\d{2}"/);
     expect(lab).toContain('Checked October 8, 2026');
-    expect(lab).not.toMatch(/rare ?carat/i);
+    expect(lab).not.toMatch(/rare ?carat|blue ?nile|michael gabriels|j\.?r\.? dunn/i);
   });
 });

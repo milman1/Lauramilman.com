@@ -149,6 +149,15 @@ catalog by carat (±0.06), color and clarity.
 - 2 carat: their cheapest listed was $710 (J VS1); 801 of our 1,042 round
   2.00–2.09 ct D–F VS-or-better stones were under $710.
 - Natural (2 carat, 21 matches): ours a median 1.11 of theirs. Not claimed.
+- Second seller, same day (`marketplace_b` in the CSV), its lab-grown search
+  page: 1.51–1.58 ct D–F VS1 IGI rounds at $1,018–$1,063; ours 0.40–0.55 of
+  that (45–60% lower), 8 matches. Its natural rounds: ours a median 0.99, 9
+  matches. Not claimed.
+- Lab-grown tennis bracelets vs a New York lab-grown jeweler (sale prices,
+  E–F VS1, 14K): theirs 2 ct $1,950, 5 ct $3,100, 6 ct $3,700; ours 1.92 ct
+  $2,500 and 5.8 ct $4,500, so ours are about 25% higher. Not claimed.
+
+The competitor set is recorded in `docs/seo/weekly/README.md`.
 
 The note names no competitor. It renders from the `diamond-filter` section
 settings `price_note` and `price_note_until` on the loose lab-grown search

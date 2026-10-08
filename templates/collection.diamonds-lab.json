@@ -19,7 +19,7 @@
         "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
         "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
         "stone_kind": "lab",
-        "price_note": "Checked October 8, 2026 against a leading online diamond marketplace: round lab-grown diamonds of the same carat, color and clarity were about 25% lower here at 1 carat and 35–50% lower at 1.5 carats. Most of our 2 carat D–F stones cost less than the cheapest 2 carat stone they listed, a J color. Prices on both sites change daily; every stone here shows its live price.",
+        "price_note": "Checked October 8, 2026 against two of the largest online diamond sellers: round lab-grown diamonds of the same carat, color and clarity were 35–60% lower here at 1.5 carats than at either, and about 25% lower at 1 carat than at one of them. Most of our 2 carat D–F stones cost less than the cheapest 2 carat stone that seller listed, a J color. Prices change daily; every stone here shows its live price.",
         "price_note_until": "2026-11-08"
       }
     }
