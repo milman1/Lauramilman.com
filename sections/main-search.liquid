@@ -32,8 +32,9 @@
   if search.performed
     for item in search.results
       if item.object_type == 'product'
-        assign item_tags = item.tags | join: ' '
-        assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase
+        capture searchable_text
+          render 'search-match-text', item: item
+        endcapture
         assign matches_search = true
 
         for word in search_words
@@ -96,8 +97,7 @@
       <div class="products-grid lm-search__grid">
         {%- for item in search.results -%}
           {%- if item.object_type == 'product' -%}
-            {%- assign item_tags = item.tags | join: ' ' -%}
-            {%- assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase -%}
+            {%- capture searchable_text -%}{%- render 'search-match-text', item: item -%}{%- endcapture -%}
             {%- assign matches_search = true -%}
 
             {%- for word in search_words -%}

@@ -1,0 +1,21 @@
+{%- comment -%}
+  Lower-case text a search result must contain for main-search to show it:
+  title, vendor, type, tags, handle, every variant SKU and the grading report
+  number. Shopify already matched these fields; without SKU and report number
+  here, a search by SKU or IGI/GIA number was found and then hidden.
+
+  The report number comes from the lmny_feed.cert_number metafield, or from
+  the certificate PDF's file name when the feed hasn't stored it yet.
+
+  Usage: {%- capture text -%}{% render 'search-match-text', item: item %}{%- endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign skus = item.variants | map: 'sku' | join: ' '
+  assign cert = item.metafields.lmny_feed.cert_number.value
+  if cert == blank
+    assign cert_url = item.metafields.lmny_feed.cert_url.value | default: ''
+    assign cert = cert_url | split: '?' | first | split: '/' | last | remove: '.pdf'
+  endif
+  assign text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item.tags | append: ' ' | append: item.handle | append: ' ' | append: skus | append: ' ' | append: cert
+  echo text | downcase
+-%}
