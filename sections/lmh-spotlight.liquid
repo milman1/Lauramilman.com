@@ -8,7 +8,7 @@
   available stone.
 
   Settings: the first four available products in the ring-settings
-  collection. The product title "Round Hidden Halo Engagement Ring Setting in
+  collection, one per style. The product title "Round Hidden Halo Engagement Ring Setting in
   Yellow Gold – 0.10 CT" shows as "Round Hidden Halo" over "Yellow Gold –
   0.10 CT". Photos skip the video so the card shows a still.
 {%- endcomment -%}
@@ -95,6 +95,7 @@
     </div>
     <ul class="lmh-grid lmh-grid--4 lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
       {%- assign set_count = 0 -%}
+      {%- assign set_names = '' -%}
       {%- for sp in settings_pool -%}
         {%- if set_count >= 4 -%}{%- break -%}{%- endif -%}
         {%- if sp.available and sp.images.size > 0 -%}
@@ -104,8 +105,12 @@
             if sp.title contains ' in '
               assign sp_sub = sp.title | split: ' in ' | last
             endif
-            assign set_count = set_count | plus: 1
+            assign sp_key = '|' | append: sp_name | append: '|'
           -%}
+          {%- comment -%} One card per style: three metals of the same halo read as a repeat. {%- endcomment -%}
+          {%- if set_names contains sp_key -%}{%- continue -%}{%- endif -%}
+          {%- assign set_names = set_names | append: sp_key -%}
+          {%- assign set_count = set_count | plus: 1 -%}
           <li>
             <a class="lmh-card" href="{{ sp.url }}">
               <span class="lmh-card__media">
