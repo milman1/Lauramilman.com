@@ -128,8 +128,34 @@
       </nav>
     {%- endif -%}
 
+    {%- liquid
+      assign hj_page = false
+      case collection.handle
+        when 'high-jewelry', 'high-jewelry-rings', 'high-jewelry-earrings', 'high-jewelry-bracelets', 'high-jewelry-necklaces', 'fancy-yellow-diamonds', 'fancy-pink-diamonds', 'fancy-green-diamonds'
+          assign hj_page = true
+      endcase
+    -%}
+    {%- if hj_page -%}
+      <nav class="lm-collection__chips" aria-label="High jewelry by piece">
+        <span class="lm-collection__chips-label">Shop by piece</span>
+        {%- assign hj_links = 'high-jewelry::All|high-jewelry-rings::Rings|high-jewelry-earrings::Earrings|high-jewelry-bracelets::Bracelets|high-jewelry-necklaces::Pendants &amp; Necklaces' | split: '|' -%}
+        {%- for hj in hj_links -%}
+          {%- assign hj_parts = hj | split: '::' -%}
+          <a href="/collections/{{ hj_parts[0] }}" class="lm-collection__chip"{% if collection.handle == hj_parts[0] %} aria-current="page"{% endif %}>{{ hj_parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+      <nav class="lm-collection__chips" aria-label="High jewelry by color">
+        <span class="lm-collection__chips-label">Shop by color</span>
+        {%- assign hj_links = 'fancy-yellow-diamonds::Yellow|fancy-pink-diamonds::Pink|fancy-green-diamonds::Green' | split: '|' -%}
+        {%- for hj in hj_links -%}
+          {%- assign hj_parts = hj | split: '::' -%}
+          <a href="/collections/{{ hj_parts[0] }}" class="lm-collection__chip"{% if collection.handle == hj_parts[0] %} aria-current="page"{% endif %}>{{ hj_parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
     <!-- Shop-by chips -->
-    {%- if jewelry_only == false and gold_page == false and section.blocks.size > 0 -%}
+    {%- if jewelry_only == false and gold_page == false and hj_page == false and section.blocks.size > 0 -%}
       <nav class="lm-collection__chips" aria-label="Shop by">
         {%- if section.settings.chips_label != blank -%}
           <span class="lm-collection__chips-label">{{ section.settings.chips_label }}</span>

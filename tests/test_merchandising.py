@@ -315,11 +315,20 @@ def test_new_gold_collections_get_style_filters() -> None:
         assert f"'{handle}'" in drawer, handle
 
 
+def test_high_jewelry_pages_use_piece_and_color_chips() -> None:
+    liquid = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "hj_page == false and section.blocks.size > 0" in liquid
+    for handle in ("high-jewelry-rings", "high-jewelry-earrings", "high-jewelry-bracelets",
+                   "high-jewelry-necklaces", "fancy-yellow-diamonds", "fancy-pink-diamonds",
+                   "fancy-green-diamonds"):
+        assert f"{handle}::" in liquid, handle
+
+
 def test_gold_pages_use_gold_chips_not_budget_row() -> None:
     bar = (ROOT / "snippets/jewelry-style-bar.liquid").read_text()
     liquid = (ROOT / "sections/main-collection.liquid").read_text()
     assert "'gold-jewelry'" not in bar
-    assert "gold_page == false and section.blocks.size > 0" in liquid
+    assert "gold_page == false and hj_page == false and section.blocks.size > 0" in liquid
     for handle in ("gold-chains", "gold-bracelets", "gold-rings", "first-gold-piece"):
         assert f'href="/collections/{handle}"' in liquid, handle
 
