@@ -62,6 +62,28 @@
         </li>
       {%- endif -%}
     {%- endfor -%}
+    {%- comment -%}
+      A collection fills the row live in the collection's own sort order.
+      "Polished Band Ring in 14K Yellow Gold" shows as the title "Polished
+      Band Ring" over the spec line "14K Yellow Gold".
+    {%- endcomment -%}
+    {%- if section.settings.collection != blank -%}
+      {%- assign row_limit = section.settings.limit | default: 10 -%}
+      {%- for p in section.settings.collection.products limit: row_limit -%}
+        {%- liquid
+          assign p_title = p.title
+          assign p_sub = ''
+          if p.title contains ' in '
+            assign p_parts = p.title | split: ' in '
+            assign p_title = p_parts.first
+            assign p_sub = p.title | remove_first: p_title | remove_first: ' in '
+          endif
+        -%}
+        <li>
+          {%- render 'lmh-card', card_product: p, card_title: p_title, card_sub: p_sub, sizes: '(max-width: 749px) 168px, 20vw' -%}
+        </li>
+      {%- endfor -%}
+    {%- endif -%}
   </ul>
 
   {%- if section.settings.mobile_button_text != blank -%}
@@ -79,6 +101,8 @@
     { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
     { "type": "select", "id": "columns", "label": "Cards per row (desktop)", "default": "5", "options": [ { "value": "4", "label": "4" }, { "value": "5", "label": "5" } ] },
     { "type": "text", "id": "ratio", "label": "Photo shape (width / height)", "default": "0.84" },
+    { "type": "collection", "id": "collection", "label": "Fill with collection", "info": "Shows this collection's products after any product blocks." },
+    { "type": "range", "id": "limit", "label": "Collection products shown", "min": 4, "max": 20, "step": 1, "default": 10 },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
     { "type": "text", "id": "title", "label": "Heading" },
     { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },

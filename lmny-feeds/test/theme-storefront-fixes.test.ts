@@ -45,7 +45,7 @@ describe('lab-grown jewelry merchandising', () => {
     const home = themeJson('templates/index.json');
     const worlds = home.sections.worlds;
     const titles = (worlds.block_order ?? []).map((id) => worlds.blocks?.[id]?.settings?.title);
-    expect(titles).toContain('Lab-Grown Diamonds');
+    expect(titles).toContain('Loose Diamonds');
     expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
     expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('worlds'));
     expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('loose-diamonds'));
