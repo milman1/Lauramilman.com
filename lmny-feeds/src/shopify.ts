@@ -671,7 +671,8 @@ export class ShopifyClient {
 
   /**
    * Lab-grown finished jewelry, the gold-chains collection, and Jacob & Co
-   * boutique watches. Loose diamonds can appear in the lab-grown tag query;
+   * boutique watches. The Jacob tag is read only so the sync can leave those
+   * products alone. Loose diamonds can appear in the lab-grown tag query;
    * the caller drops them. Paginated on purpose so this does not start a
    * second bulk operation.
    */

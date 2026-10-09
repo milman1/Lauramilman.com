@@ -4,7 +4,7 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
-  uploadifyJacobQualifies,
+  isJacobCoBoutiqueProduct,
   uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
@@ -266,7 +266,7 @@ describe('uploadifyJewelryQualifies', () => {
   });
 });
 
-describe('uploadifyJacobQualifies', () => {
+describe('Jacob & Co boutique watches', () => {
   const jacob = (overrides: Partial<UploadifyJewelryCandidate> = {}): UploadifyJewelryCandidate =>
     jewelry({
       handle: 'unworn-jacob-co-epic-x',
@@ -279,19 +279,27 @@ describe('uploadifyJacobQualifies', () => {
       ...overrides,
     });
 
-  it('accepts an active boutique watch with a SKU, quantity, price, copy, and category', () => {
-    expect(uploadifyJacobQualifies(jacob())).toBe(true);
-    expect(uploadifyJacobQualifies(jacob({ tags: ['Jacob-Co-Boutique'] }))).toBe(true);
+  it('recognizes the boutique tag and does not treat the watch as lab jewelry', () => {
+    expect(isJacobCoBoutiqueProduct(jacob())).toBe(true);
+    expect(isJacobCoBoutiqueProduct(jacob({ tags: ['Jacob-Co-Boutique'] }))).toBe(true);
+    expect(isJacobCoBoutiqueProduct(jacob({ tags: ['Watch', 'new-unworn'] }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jacob())).toBe(false);
   });
 
-  it('rejects drafts, a missing SKU, a watch without the tag, and a Belgium handle', () => {
-    expect(uploadifyJacobQualifies(jacob({ status: 'DRAFT' }))).toBe(false);
+  it('leaves a boutique watch untouched when the sync clears other flags', () => {
     expect(
-      uploadifyJacobQualifies(jacob({ variants: [{ sku: '', qty: 1, tracked: true, priceUsd: 90000 }] })),
-    ).toBe(false);
-    expect(uploadifyJacobQualifies(jacob({ tags: ['Watch', 'new-unworn'] }))).toBe(false);
-    expect(uploadifyJacobQualifies(jacob({ handle: 'w-jacob' }))).toBe(false);
-    expect(uploadifyJewelryQualifies(jacob())).toBe(false);
+      uploadifyActiveDeletesExcept(
+        [
+          { id: 'gid://shopify/Product/1', handle: 'unworn-jacob-co-epic-x' },
+          { id: 'gid://shopify/Product/2', handle: 'cluster-diamond-studs' },
+        ],
+        new Set(),
+        new Set(),
+        new Set(['unworn-jacob-co-epic-x']),
+      ),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'uploadify_active' },
+    ]);
   });
 });
 
@@ -327,10 +335,9 @@ describe('uploadify jewelry writes', () => {
           { id: 'gid://shopify/Product/3', handle: 'lmny-cuban-3-9-mm-nmc120' },
           { id: 'gid://shopify/Product/4', handle: 'cluster-diamond-studs' },
           { id: 'gid://shopify/Product/5', handle: 'lg-stone' },
-          { id: 'gid://shopify/Product/6', handle: 'unworn-jacob-co-epic-x' },
         ],
         new Set(['w-3194']),
-        new Set(['lab-diamond-tennis-bracelet', 'lmny-cuban-3-9-mm-nmc120', 'lg-stone', 'unworn-jacob-co-epic-x']),
+        new Set(['lab-diamond-tennis-bracelet', 'lmny-cuban-3-9-mm-nmc120', 'lg-stone']),
       ),
     ).toEqual([
       { ownerId: 'gid://shopify/Product/4', namespace: 'uploadify_product', key: 'uploadify_active' },
