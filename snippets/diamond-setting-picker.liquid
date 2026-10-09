@@ -1,0 +1,197 @@
+{%- comment -%}
+  Loose-diamond page → settings and engagement rings that fit this diamond,
+  shown in the buy column right under Add to Cart so shoppers see it.
+  Matches on center-stone shape only (snippets/center-stone-shape.liquid).
+
+  Settings sold without a center stone (collection ring-settings, tag
+  ring-setting) come first and show their price plus the total with this
+  diamond. Finished engagement rings follow without a price: they carry
+  their own center stone, so a pairing with this diamond is quoted.
+  Each card opens the ring with ?diamond=<handle>, where the pairing panel
+  takes over.
+
+  Accepts:
+  - product: the loose diamond
+  - max: cards to show (default 6)
+{%- endcomment -%}
+
+{%- liquid
+  assign stone_shape = product.metafields.custom.diamond_shape.value | strip
+  assign stone_price = product.selected_or_first_available_variant.price
+  assign max = max | default: 6
+  assign setting_collection = collections['ring-settings']
+  assign ring_collection = collections['engagement-rings']
+  assign matches = 0
+  assign shape_l = stone_shape | downcase
+-%}
+
+{%- if stone_shape != blank -%}
+  {%- capture cards -%}
+    {%- for pass in (1..2) -%}
+      {%- if pass == 1 -%}{%- assign source = setting_collection -%}{%- else -%}{%- assign source = ring_collection -%}{%- endif -%}
+      {%- if source == blank -%}{%- continue -%}{%- endif -%}
+      {%- for ring in source.products limit: 50 -%}
+        {%- if matches < max and ring.available and ring.id != product.id -%}
+          {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
+          {%- assign ring_shape = ring_shape | strip -%}
+          {%- if ring_shape == stone_shape -%}
+            {%- assign matches = matches | plus: 1 -%}
+            {%- assign is_setting = false -%}
+            {%- if ring.tags contains 'ring-setting' -%}{%- assign is_setting = true -%}{%- endif -%}
+            <li class="dsp__card">
+              <a class="dsp__link" href="{{ ring.url }}?diamond={{ product.handle | url_encode }}">
+                <span class="dsp__media">
+                  {%- if ring.featured_image -%}
+                    <img
+                      src="{{ ring.featured_image | image_url: width: 320 }}"
+                      srcset="{{ ring.featured_image | image_url: width: 160 }} 160w, {{ ring.featured_image | image_url: width: 320 }} 320w"
+                      sizes="150px"
+                      alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
+                      width="320"
+                      height="320"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                </span>
+                <span class="dsp__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' | remove: ' Engagement Ring' }}</span>
+                {%- if is_setting -%}
+                  <span class="dsp__price">Setting {{ ring.price | money_without_trailing_zeros }}</span>
+                  <span class="dsp__total">With this diamond {{ ring.price | plus: stone_price | money_without_trailing_zeros }}</span>
+                {%- else -%}
+                  <span class="dsp__price">Finished ring</span>
+                  <span class="dsp__total">Quoted with this diamond</span>
+                {%- endif -%}
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  <section class="dsp" aria-labelledby="DspHeading" data-dsp data-stone-shape="{{ stone_shape | escape }}" data-stone-handle="{{ product.handle }}">
+    <div class="dsp__head">
+      <p class="dsp__eyebrow">Make it a ring</p>
+      <h2 class="dsp__heading" id="DspHeading">Settings for this {{ shape_l }} diamond</h2>
+    </div>
+
+    <p class="dsp__recent" data-dsp-recent hidden>
+      <a href="#" data-dsp-recent-link></a>
+    </p>
+
+    {%- if matches > 0 -%}
+      <ul class="dsp__row" role="list">{{ cards }}</ul>
+      <p class="dsp__note">We set this diamond in your setting by hand, labor included, and confirm every detail before it is made.</p>
+      {%- if setting_collection != blank -%}
+        <a class="dsp__all" href="{{ setting_collection.url }}">See all settings</a>
+      {%- endif -%}
+    {%- else -%}
+      <p class="dsp__note">None of our current settings is made for {{ shape_l }}-cut diamonds. Ask us about a custom setting for this stone using the buttons below.</p>
+    {%- endif -%}
+  </section>
+
+  <style>
+    .dsp {
+      margin: 1.25rem 0 0;
+      padding: 1rem 1rem 1.1rem;
+      border: 1px solid var(--gold, #C9A050);
+      border-radius: var(--radius-md, 8px);
+      background: var(--warm-white, #FDFAF6);
+    }
+    .dsp [hidden] { display: none !important; }
+    .dsp__eyebrow {
+      margin: 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-dark, #A88340);
+    }
+    .dsp__heading {
+      margin: 0.2rem 0 0.85rem;
+      font-family: var(--font-heading, 'Cormorant Garamond', serif);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+    }
+    .dsp__row {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0.35rem;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 150px;
+      gap: 0.75rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .dsp__card { scroll-snap-align: start; }
+    .dsp__link {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      height: 100%;
+      color: var(--text-dark, #2C1810);
+      text-decoration: none;
+    }
+    .dsp__media {
+      display: block;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: var(--radius-sm, 4px);
+      background: var(--cream, #FAF6F0);
+      border: 1px solid var(--border-light, #E8E2D8);
+    }
+    .dsp__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .dsp__link:hover .dsp__media img { transform: scale(1.04); }
+    .dsp__link:hover .dsp__media { border-color: var(--gold, #C9A050); }
+    .dsp__name {
+      margin-top: 0.2rem;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    .dsp__price,
+    .dsp__total {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.72rem;
+      color: var(--text-muted, #8A8070);
+    }
+    .dsp__total { font-weight: 600; color: var(--gold-dark, #A88340); }
+    .dsp__note,
+    .dsp__recent {
+      margin: 0.6rem 0 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.76rem;
+      line-height: 1.6;
+      color: var(--text-muted, #8A8070);
+    }
+    .dsp__recent { margin: 0 0 0.75rem; }
+    .dsp__recent a,
+    .dsp__all {
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--gold-dark, #A88340);
+    }
+    .dsp__all { display: inline-block; margin-top: 0.5rem; letter-spacing: 0.04em; }
+  </style>
+
+  <script>
+    (function () {
+      var root = document.querySelector('[data-dsp]');
+      if (!root) return;
+      var ring = null;
+      try { ring = JSON.parse(sessionStorage.getItem('lmPairRing') || 'null'); } catch (e) {}
+      if (!ring || !ring.handle || !/^[a-z0-9][a-z0-9-]{0,99}$/.test(ring.handle)) return;
+      if (ring.shape !== root.getAttribute('data-stone-shape')) return;
+      // The ring the shopper came from goes first, as a direct link back.
+      var link = root.querySelector('[data-dsp-recent-link]');
+      link.href = '/products/' + ring.handle + '?diamond=' + encodeURIComponent(root.getAttribute('data-stone-handle'));
+      link.textContent = 'Set this diamond in the ' + (ring.title || 'ring you were viewing') + ' →';
+      root.querySelector('[data-dsp-recent]').hidden = false;
+    })();
+  </script>
+{%- endif -%}

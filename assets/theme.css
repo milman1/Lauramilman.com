@@ -738,25 +738,30 @@ p {
 }
 
 /* Lab-grown marker under a product thumbnail. Wine on a warm wash, so it
-   reads as the house line and not as a sale badge. */
+   reads as the house line and not as a sale badge. fit-content plus auto
+   margins centres the pill even when the card text is left-aligned. A
+   nowrap pill is wider than a phone's two-up card and the card's
+   overflow:hidden clips the right side, so the label wraps instead. */
 .lab-grown-tag {
-  display: inline-block;
-  margin: 0 0 var(--space-sm);
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto var(--space-sm);
   padding: 0.2rem 0.6rem;
   font-family: var(--font-body);
   font-size: 0.62rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.35;
   letter-spacing: 0.12em;
+  text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
   color: var(--wine, #4A1428);
   background: rgba(74, 20, 40, 0.08);
   border: 1px solid rgba(74, 20, 40, 0.22);
   border-radius: var(--radius-full);
 }
 
-/* Dawn-derived cards left-align their text; the LMNY card centres it. */
 .card__information .lab-grown-tag {
   margin-bottom: var(--space-xs);
 }
@@ -2119,6 +2124,14 @@ p {
 
   .product-card__content {
     padding: 8px;
+  }
+
+  /* Two-up cards are ~160px wide here. The full "Lab Grown Diamond"
+     label only stays inside the card, and centred, at a tighter size. */
+  .lab-grown-tag {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.05em;
   }
 
   .product-card__title {

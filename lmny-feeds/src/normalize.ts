@@ -242,8 +242,9 @@ function titleCase(s: string): string {
  * row showed the lab with no number.
  *
  * Two shapes observed: report-check URLs (?reportno=2205551234) and hosted
- * PDFs whose filename IS the number (…/certificate_images/6455949159.pdf).
- * The filename path insists on digits only, so a URL like …/certificate.pdf
+ * PDFs whose filename IS the number (…/certificate_images/6455949159.pdf,
+ * or LG810637353.pdf for IGI lab-grown reports).
+ * The filename path insists on digits (with an optional LG prefix), so a URL like …/certificate.pdf
  * yields nothing rather than the word "certificate".
  */
 export function certNumberFromUrl(url: string | undefined): string | undefined {
@@ -256,7 +257,8 @@ export function certNumberFromUrl(url: string | undefined): string | undefined {
     }
     const base = u.pathname.split('/').filter(Boolean).pop() ?? '';
     const stem = base.replace(/\.(pdf|jpe?g|png|html?)$/i, '');
-    return /^\d{5,}$/.test(stem) ? stem : undefined;
+    // IGI lab-grown reports are numbered LG + digits (…/LG810637353.pdf).
+    return /^(LG)?\d{5,}$/i.test(stem) ? stem.toUpperCase() : undefined;
   } catch {
     return undefined;
   }

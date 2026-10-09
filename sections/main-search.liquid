@@ -9,11 +9,32 @@
   assign search_words = search.terms | downcase | strip | split: ' '
   assign matching_results = 0
 
+  # Misspelled or Spanish words ("brazalet", "blacelet") are re-run as the
+  # catalog word; the list lives in snippets/search-synonyms.liquid.
+  assign corrected_terms = ''
+  assign search_corrected = false
+  if search.performed
+    for word in search_words
+      capture fixed_word
+        render 'search-synonyms', word: word
+      endcapture
+      if fixed_word != word
+        assign search_corrected = true
+      endif
+      if corrected_terms == ''
+        assign corrected_terms = fixed_word
+      else
+        assign corrected_terms = corrected_terms | append: ' ' | append: fixed_word
+      endif
+    endfor
+  endif
+
   if search.performed
     for item in search.results
       if item.object_type == 'product'
-        assign item_tags = item.tags | join: ' '
-        assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase
+        capture searchable_text
+          render 'search-match-text', item: item
+        endcapture
         assign matches_search = true
 
         for word in search_words
@@ -32,6 +53,11 @@
     endfor
   endif
 -%}
+
+{%- if search_corrected -%}
+  {%- capture corrected_url -%}{{ routes.search_url }}?q={{ corrected_terms | url_encode }}&type=product{%- endcapture -%}
+  <script>window.location.replace({{ corrected_url | json }});</script>
+{%- endif -%}
 
 <section class="lm-search" aria-label="Search results">
   <div class="lm-search__container">
@@ -71,8 +97,7 @@
       <div class="products-grid lm-search__grid">
         {%- for item in search.results -%}
           {%- if item.object_type == 'product' -%}
-            {%- assign item_tags = item.tags | join: ' ' -%}
-            {%- assign searchable_text = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.type | append: ' ' | append: item_tags | downcase -%}
+            {%- capture searchable_text -%}{%- render 'search-match-text', item: item -%}{%- endcapture -%}
             {%- assign matches_search = true -%}
 
             {%- for word in search_words -%}
@@ -106,6 +131,9 @@
     {%- elsif search.performed -%}
       <div class="lm-search__empty">
         <p class="lm-search__empty-title">Nothing matched &ldquo;{{ search.terms | escape }}&rdquo;</p>
+        {%- if search_corrected -%}
+          <p class="lm-search__empty-text">Did you mean <a href="{{ corrected_url }}">{{ corrected_terms | escape }}</a>?</p>
+        {%- endif -%}
         <p class="lm-search__empty-text">Try a different term, or browse the full collection.</p>
         <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Jewelry</a>
       </div>

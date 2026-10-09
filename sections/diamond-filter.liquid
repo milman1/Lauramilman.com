@@ -51,7 +51,6 @@
   aria-label="{{ collection.title | escape }}"
   data-api-base="{{ section.settings.api_base_url | escape }}"
   data-anon-key="{{ section.settings.api_anon_key | escape }}"
-  data-reserve-url="{{ section.settings.reserve_url | escape }}"
   data-kind="{{ stone_kind | escape }}"
   data-per-page="{{ section.settings.products_per_page }}"
   data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
@@ -64,6 +63,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -173,25 +173,6 @@
   </div>
 </section>
 
-<div class="lm-reserve-modal" id="lm-reserve-modal" hidden>
-  <div class="lm-reserve-modal__backdrop" data-reserve-close></div>
-  <div class="lm-reserve-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="lm-reserve-heading">
-    <button type="button" class="lm-reserve-modal__close" data-reserve-close aria-label="Close">&times;</button>
-    <h2 id="lm-reserve-heading">Reserve this diamond</h2>
-    <p class="lm-reserve-modal__stone" data-reserve-title></p>
-    <p class="lm-reserve-modal__copy">We will confirm the stone is still available and send a private invoice. No charge until you accept.</p>
-    <form>
-      <input type="hidden" name="stock_ref" value="">
-      <label>Name<input type="text" name="name" required autocomplete="name"></label>
-      <label>Email<input type="email" name="email" required autocomplete="email"></label>
-      <label>Phone <span>(optional)</span><input type="tel" name="phone" autocomplete="tel"></label>
-      <label>Note <span>(optional)</span><textarea name="message" rows="3" placeholder="Ring setting, timeline, questions…"></textarea></label>
-      <p class="lm-reserve-modal__status" data-reserve-status hidden></p>
-      <button type="submit" class="lm-dfilter__apply">Request reservation</button>
-    </form>
-  </div>
-</div>
-
 <script src="{{ 'diamond-storefront.js' | asset_url }}" defer></script>
 
 {%- else -%}
@@ -242,6 +223,7 @@
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
+      {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -575,7 +557,9 @@
     border: 1px solid var(--rule-light, #DDD5C5);
     border-radius: var(--radius-md, 8px);
     padding: 2rem;
-    overflow: hidden;
+    /* Visible so the grade tips can sit above a label without the panel
+       edge clipping them. The range tracks clip themselves. */
+    overflow: visible;
     min-width: 0;
   }
 
@@ -627,10 +611,16 @@
     grid-column: 1 / -1;
   }
 
+  .lm-dfilter__group {
+    position: relative;
+    min-width: 0;
+  }
+
   .lm-dfilter__label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    width: 100%;
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.7rem;
     font-weight: 600;
@@ -638,6 +628,8 @@
     text-transform: uppercase;
     color: var(--text-dark, #2C1810);
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
   }
 
   .lm-dfilter__info {
@@ -653,7 +645,10 @@
     font-weight: 700;
     line-height: 1;
     cursor: help;
-    position: relative;
+    /* The tip positions against the label, not this 16px button.
+       Centering a 240px bubble on the button hangs it off a short
+       label such as Cut, and the panel clips the left of the sentence. */
+    position: static;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -667,17 +662,24 @@
   .lm-dfilter__info::after {
     content: attr(data-tip);
     position: absolute;
-    left: 50%;
+    left: 0;
     bottom: calc(100% + 8px);
-    transform: translateX(-50%);
-    width: 240px;
+    /* A percentage width would collapse to the 16px button. Use a fixed
+       width that starts at the button, which is already inside the panel,
+       and grows to the right instead of hanging off the left. */
+    width: 260px;
+    max-width: calc(100vw - 3rem);
+    box-sizing: border-box;
     padding: 0.65rem 0.8rem;
     background: var(--espresso, #1E1109);
     color: var(--cream, #FAF6F0);
     font-size: 0.72rem;
     font-weight: 400;
     line-height: 1.5;
+    letter-spacing: 0;
+    text-transform: none;
     text-align: left;
+    white-space: normal;
     border-radius: var(--radius-sm, 4px);
     opacity: 0;
     visibility: hidden;
@@ -909,7 +911,7 @@
     border-color: var(--gold, #C9A050);
   }
 
-  /* The floor carries the handle — it's the value the shopper actually set. */
+  /* Every ticked grade gets the filled dot. */
   .lm-scale__stop.is-floor .lm-scale__dot {
     width: 17px;
     height: 17px;
@@ -1283,7 +1285,7 @@
     }
   }
 
-  /* API mode: purchase + reserve CTAs — cards reuse .product-card image markup */
+  /* API mode: purchase CTAs — cards reuse .product-card image markup */
   .lm-dfilter__results-host.is-loading {
     opacity: 0.55;
     pointer-events: none;
@@ -1316,20 +1318,6 @@
     color: var(--espresso, #1E1109);
     border-color: var(--gold, #C9A050);
   }
-  .lm-dfilter__results-host .lm-stone-card__reserve {
-    margin-top: 0.45rem;
-    align-self: flex-start;
-    background: none;
-    border: 0;
-    padding: 0;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted, #8A8070);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
   .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__atc {
     background: var(--wine, #4A1428);
     border-color: var(--wine, #4A1428);
@@ -1339,92 +1327,6 @@
     border-color: var(--gold, #C9A050);
     color: var(--espresso, #1E1109);
   }
-  .lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__reserve {
-    color: var(--wine, #4A1428);
-  }
-
-  .lm-reserve-modal[hidden] { display: none !important; }
-  .lm-reserve-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.25rem;
-  }
-  .lm-reserve-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(30, 17, 9, 0.55);
-  }
-  .lm-reserve-modal__dialog {
-    position: relative;
-    width: min(440px, 100%);
-    background: #FDFAF6;
-    padding: 2rem 1.75rem 1.75rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  }
-  .lm-reserve-modal__close {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.9rem;
-    border: 0;
-    background: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    color: #8A8070;
-  }
-  .lm-reserve-modal h2 {
-    margin: 0 0 0.35rem;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-weight: 500;
-    font-size: 1.75rem;
-  }
-  .lm-reserve-modal__stone {
-    margin: 0 0 0.75rem;
-    color: #A88340;
-    font-size: 0.95rem;
-  }
-  .lm-reserve-modal__copy {
-    margin: 0 0 1.25rem;
-    color: #8A8070;
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-  .lm-reserve-modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-  .lm-reserve-modal label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #8A8070;
-  }
-  .lm-reserve-modal label span { text-transform: none; letter-spacing: 0; }
-  .lm-reserve-modal input,
-  .lm-reserve-modal textarea {
-    font: inherit;
-    font-size: 0.95rem;
-    letter-spacing: 0;
-    text-transform: none;
-    color: #1E1109;
-    border: 1px solid rgba(30, 17, 9, 0.15);
-    background: #fff;
-    padding: 0.65rem 0.75rem;
-  }
-  .lm-reserve-modal__status {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #476154;
-  }
-  body.lm-reserve-open { overflow: hidden; }
 </style>
 
 <script>
@@ -1447,10 +1349,8 @@
     var form = document.getElementById('DiamondFilterForm');
     if (!form) return;
 
-    /* Grade scales set a floor: picking VS1 means "VS1 and better". The track
-       fills from the chosen stop rightwards so the result is visible — the
-       earlier tile grid made selecting the lowest grade look like everything
-       had been ticked by mistake. */
+    /* Grade scales: each grade toggles on its own, so a shopper can pick just
+       G, or G and H, without the grades around it being ticked for them. */
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
       var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
       if (!stops.length) return;
@@ -1459,40 +1359,27 @@
       var noun = hint ? hint.textContent : '';
 
       function paint() {
-        var floor = -1;
-        stops.forEach(function (stop, i) {
+        var picked = [];
+        stops.forEach(function (stop) {
           var on = stop.querySelector('input').checked;
           stop.classList.toggle('is-in-range', on);
-          stop.classList.remove('is-floor');
-          if (on && floor === -1) floor = i;
+          stop.classList.toggle('is-floor', on);
+          if (on) picked.push(stop.dataset.grade);
         });
-
         if (fill) {
-          if (floor === -1) {
-            fill.style.left = '0%';
-            fill.style.right = '100%';
-          } else {
-            stops[floor].classList.add('is-floor');
-            /* Stops are evenly spaced, so the centre of stop i sits at
-               (i + 0.5) / n across the track. */
-            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
-            fill.style.right = (100 / stops.length) * 0.5 + '%';
-          }
+          fill.style.left = '0%';
+          fill.style.right = '100%';
         }
-
         if (hint) {
-          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
+          hint.textContent = picked.length ? picked.join(', ') : noun;
         }
       }
 
-      stops.forEach(function (stop, index) {
+      stops.forEach(function (stop) {
         stop.addEventListener('click', function (event) {
           event.preventDefault();
-          var isFloor = stop.classList.contains('is-floor');
-          stops.forEach(function (s, i) {
-            /* Clicking the current floor again clears the scale. */
-            s.querySelector('input').checked = !isFloor && i >= index;
-          });
+          var input = stop.querySelector('input');
+          input.checked = !input.checked;
           paint();
         });
       });
@@ -1571,6 +1458,18 @@
       "info": "Falls back to the collection description."
     },
     {
+      "type": "textarea",
+      "id": "price_note",
+      "label": "Price comparison note",
+      "info": "Plain text shown under the subheading. Only state a comparison you have checked and recorded in the docs."
+    },
+    {
+      "type": "text",
+      "id": "price_note_until",
+      "label": "Hide the note after (YYYY-MM-DD)",
+      "info": "Required. The note disappears after this date so an old comparison is never shown. Re-check prices before extending it."
+    },
+    {
       "type": "range",
       "id": "products_per_page",
       "label": "Diamonds per page",
@@ -1605,12 +1504,6 @@
       "id": "api_anon_key",
       "label": "Supabase anon key",
       "info": "Required when calling the Edge Function directly. Leave blank for App Proxy."
-    },
-    {
-      "type": "text",
-      "id": "reserve_url",
-      "label": "Reserve endpoint URL",
-      "info": "POST endpoint for inquiry/reserve, e.g. https://….supabase.co/functions/v1/reserve-diamond"
     },
     {
       "type": "select",

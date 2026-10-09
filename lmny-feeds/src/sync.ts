@@ -10,6 +10,7 @@
  * upserted into public.stones (dual-write).
  */
 
+import { assertSafeDiamondRemovals } from './feedSafety.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
@@ -515,6 +516,7 @@ async function main() {
   if (unavailableArchived > 0) {
     notes.push(`${unavailableArchived} listing(s) archived as merchant-unavailable (Hermès Kelly PM + Mother of Pearl)`);
   }
+  assertSafeDiamondRemovals(decisions, catalog);
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(
@@ -621,13 +623,13 @@ async function main() {
         const source = item?.imageUrls[0];
         if (!source) noSource += 1;
         if (source && rescueBudget <= 0) continue; // leave for the next run
+        if (source) rescueBudget -= 1; // every attempt counts, including successful rescues
         // Shopify refuses some supplier images over their Content-Type alone.
         // Fetching the bytes and re-uploading with a sniffed type rescues the
         // ones that are really images; the rest are genuinely missing.
         const staged = source ? await shopify.rehostImage(source) : null;
         if (source && !staged) {
           rehostFailed += 1;
-          rescueBudget -= 1;
         }
         if (staged) {
           await shopify.deleteMedia(p.id, p.failedMediaIds);
@@ -650,7 +652,7 @@ async function main() {
       if (broken.length > 0) {
         console.log(
           `Media: rescued ${mediaRehosted.length} of ${broken.length} ` +
-            `(no feed source: ${noSource}, fetch/sniff failed: ${rehostFailed})`,
+            `(attempted: ${15 - rescueBudget}, no feed source: ${noSource}, fetch/sniff failed: ${rehostFailed})`,
         );
       }
     } catch (err) {
@@ -779,10 +781,15 @@ async function main() {
     for (const ref of createdRefs) {
       if (ref.handle && ref.id) uploadifyOwnerByHandle.set(ref.handle, ref.id);
     }
+    // productSet drops metafields it is not given. The catalog read happened
+    // before that write, so a Vendor SKU that already matched would be skipped
+    // and stay deleted. Watches in this run's productSet are written again.
+    const productSetHandles = new Set(inputs.map((input) => String(input.handle)));
     const uploadifyActiveLive = uploadifyActiveWrites(
       uploadifyActiveRows.map((row) => ({
         ...row,
         ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
+        current: productSetHandles.has(row.handle) ? null : row.current,
       })),
     );
     if (uploadifyActiveLive.writes.length > 0) {
@@ -803,7 +810,7 @@ async function main() {
         ownerId: uploadifyOwnerByHandle.get(row.handle) ?? row.ownerId,
         desired: row.desired,
         stockRef: row.stockRef,
-        current: row.currentVendorSku,
+        current: productSetHandles.has(row.handle) ? null : row.currentVendorSku,
       })),
     );
     if (uploadifyVendorSkuLive.writes.length > 0) {

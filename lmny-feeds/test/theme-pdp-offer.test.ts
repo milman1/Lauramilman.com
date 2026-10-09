@@ -11,18 +11,64 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('renders Ask, Make an offer, and Direct message on every product page', () => {
+  it('keeps Ask and Direct message on every product, and Make an offer only for natural diamonds, maison vintage, and watches', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
-    expect(inquiry).toContain('data-chat-intent="offer"');
     expect(inquiry).toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
-    expect(inquiry).toContain('Make an offer');
     expect(inquiry).toContain('Direct message');
+    expect(inquiry).toContain("render 'product-is-watch', product: product");
+    expect(inquiry).toContain("render 'product-is-vintage', product: product");
+    expect(inquiry).toContain("type_l == 'natural diamond' or is_watch == 'true' or is_vintage == 'true'");
+    expect(inquiry).toContain("type_l == 'lab-grown diamond'");
+    expect(inquiry).toContain('assign offer_ok = false');
+    const offerStart = inquiry.indexOf('{%- if offer_ok -%}');
+    const offerLabel = inquiry.indexOf('Make an offer', offerStart);
+    const offerForm = inquiry.indexOf("form 'contact', id: 'PdpOfferForm'");
+    const offerEnd = inquiry.lastIndexOf('{%- endif -%}');
+    expect(offerStart).toBeGreaterThan(-1);
+    expect(offerLabel).toBeGreaterThan(offerStart);
+    expect(offerForm).toBeGreaterThan(offerLabel);
+    expect(offerEnd).toBeGreaterThan(offerForm);
     expect(inquiry).not.toContain('Hold this piece');
     expect(inquiry).not.toContain('piece-hold');
     expect(inquiry).not.toContain('desk_piece');
     expect(inquiry).not.toContain('Private viewing');
     expect(inquiry).not.toContain('Book a call');
+  });
+
+  it('removes Reserve this diamond from natural and lab diamond search', () => {
+    const filter = themeFile('sections/diamond-filter.liquid');
+    const cards = themeFile('assets/diamond-storefront.js');
+    const natural = themeFile('templates/collection.diamonds.json');
+    const lab = themeFile('templates/collection.diamonds-lab.json');
+    for (const file of [filter, cards, natural, lab]) {
+      expect(file).not.toContain('Reserve this diamond');
+      expect(file).not.toContain('Reserve instead');
+      expect(file).not.toContain('reserve_url');
+      expect(file).not.toContain('reserve-diamond');
+      expect(file).not.toContain('data-reserve');
+    }
+    expect(cards).toContain('Add to cart');
+    expect(cards).toContain('Buy now');
+  });
+
+  it('sends offers through the contact form, not the AI chat iframe', () => {
+    expect(inquiry).not.toContain('data-chat-intent="offer"');
+    expect(inquiry).toContain("{%- form 'contact', id: 'PdpOfferForm'");
+    expect(inquiry).toContain('name="contact[request_type]" value="Offer"');
+    expect(inquiry).toContain('name="contact[offer]"');
+    expect(inquiry).toContain('name="contact[email]"');
+    expect(inquiry).toContain('name="contact[product]"');
+    expect(inquiry).toContain('name="contact[product_url]"');
+    expect(inquiry).toContain('form.posted_successfully?');
+    expect(inquiry).toContain('aria-controls="{{ offer_id }}"');
+    // The offer form must sit outside the add-to-cart form; nested forms break both.
+    for (const section of [mainProduct, diamondProduct]) {
+      const endProductForm = section.indexOf('{%- endform -%}');
+      const render = section.indexOf("{% render 'product-inquiry'");
+      expect(endProductForm).toBeGreaterThan(-1);
+      expect(render).toBeGreaterThan(endProductForm);
+    }
   });
 
   it('is rendered on jewelry and diamond product templates', () => {

@@ -6,7 +6,8 @@ import {
   labRetailMultipleFromCost,
   STONE_TIERS,
   WATCH,
-  WATCH_COST_TIERS,
+  WATCH_RETAIL_CAP_BY_STOCK,
+  WATCH_SALE,
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
@@ -15,28 +16,33 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
   });
 
-  it('prices every loose lab at 3×', () => {
-    expect(LOOSE_LAB_GROWN.costMultiple).toBe(3);
-    expect(labRetailMultipleFromCost(182)).toBe(3);
-    expect(labRetailMultipleFromCost(500)).toBe(3);
-    expect(labRetailMultipleFromCost(501)).toBe(3);
-    expect(labRetailMultipleFromCost(1662.12)).toBe(3);
+  it('prices every loose lab at 3.5×', () => {
+    expect(LOOSE_LAB_GROWN.costMultiple).toBe(3.5);
+    expect(labRetailMultipleFromCost(182)).toBe(3.5);
+    expect(labRetailMultipleFromCost(500)).toBe(3.5);
+    expect(labRetailMultipleFromCost(501)).toBe(3.5);
+    expect(labRetailMultipleFromCost(1662.12)).toBe(3.5);
     expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
-    expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(2.7);
+    expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(3.15);
   });
 
-  it('exposes Belgium Dia watch cost tiers on pricing.ts', () => {
-    expect(WATCH.costTiers).toBe(WATCH_COST_TIERS);
-    expect(WATCH_COST_TIERS.map((t) => t.multiplier)).toEqual([1.3, 1.2, 1.12, 1.08]);
+  it('exposes the Belgium Dia watch sale rule on pricing.ts', () => {
+    expect(WATCH.sale).toBe(WATCH_SALE);
+    expect(WATCH.retailCapByStock).toBe(WATCH_RETAIL_CAP_BY_STOCK);
+    expect(WATCH.sale.minNetMarginOfPrice).toBe(0.05);
+    expect(WATCH.sale.higherMinNetMarginOfPrice).toBe(0.1);
+    expect(WATCH.sale.higherMarginMaxPriceUsd).toBe(10_000);
+    expect(WATCH.sale.shippingFlatUsd).toBe(120);
+    expect(WATCH.sale.shippingInsuranceRate).toBe(0.01);
     expect(WATCH.reviewTag).toBe('pricing-review');
   });
 
-  it('prices lab-grown jewelry at cost × 4', () => {
-    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(4);
+  it('prices lab-grown jewelry at cost × 2', () => {
+    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(2);
     expect(LAB_GROWN_JEWELRY.vendors).toContain('Peaceful Diamonds');
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
-    expect(labGrownJewelryRetailFromCost(250)).toBe(1000);
-    expect(labGrownJewelryRetailFromCost(333.33)).toBe(1333);
+    expect(labGrownJewelryRetailFromCost(250)).toBe(500);
+    expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
   });
 
   it('rejects non-positive lab jewelry cost', () => {

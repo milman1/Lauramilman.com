@@ -1,0 +1,222 @@
+[
+  {
+    "path": "cropped/bar-cuff-bangle-14k-yellow-gold-onbody.jpg",
+    "sha256": "84376f8d6290d4afa32abd6e8138e8de8e77fc8e46bfab0d92bd1dac5d3cf5a7",
+    "bytes": 524299
+  },
+  {
+    "path": "cropped/diamond-raindrop-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "f779b832a3e5b4ac0f3ee8d925da3e2a6850e9ac223841402a663d50c2541635",
+    "bytes": 433795
+  },
+  {
+    "path": "cropped/graduated-tubogas-necklace-14k-yellow-gold-onbody.jpg",
+    "sha256": "e43b00ed12ef2ce79d724e06fd9a22ed2657511f879744a2555a46694965a94a",
+    "bytes": 518963
+  },
+  {
+    "path": "cropped/graduated-tubogas-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "bf90b40ab6918b13a5a79b2959fd17c7e211fa37abab53cccf354a8e2669098f",
+    "bytes": 388536
+  },
+  {
+    "path": "cropped/mini-curb-stackable-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "f0b64017f25d8bad02fae8b08a073e3149416a5308dca91980dde01d85add8af",
+    "bytes": 436659
+  },
+  {
+    "path": "cropped/mini-initial-necklace-in-14k-yellow-gold-onbody.jpg",
+    "sha256": "93cae146ace73ad1a75846ad4bf0ebe4accc0dc5c4df1120e8a09c2df9fc0527",
+    "bytes": 587768
+  },
+  {
+    "path": "cropped/mini-signet-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "21205a206778c88ca2f78bfb1b3eab3ae89242f21ef0119d736058d983e3c061",
+    "bytes": 398838
+  },
+  {
+    "path": "cropped/polished-5mm-bangle-14k-yellow-gold-onbody.jpg",
+    "sha256": "6ebaa63709e8db531ac9c33118923821b049c71b6173ffd7cd65acfaee981cfa",
+    "bytes": 376942
+  },
+  {
+    "path": "cropped/polished-band-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "08ca563534889af5b147767c8f414d5043caf2bcdea23648b1e27bcb86ffd809",
+    "bytes": 365287
+  },
+  {
+    "path": "cropped/rectangular-signet-ring-in-14k-yellow-gold-onbody.jpg",
+    "sha256": "441111fa72bdd51c42b964e754dbfdb329f5ee8e8641ca57004d98af15ecc1af",
+    "bytes": 508079
+  },
+  {
+    "path": "cropped/thick-tubogas-ring-14k-yellow-gold-onbody.jpg",
+    "sha256": "28b94e3304e7c9cf3709666dffdda3f6799c5316136df2a9a9c685962c4051e8",
+    "bytes": 494117
+  },
+  {
+    "path": "face/bar-cuff-bangle-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "d3230e61cdd7bf1a78a2fd30ae72fd04ae7a7b1016586d3c95f315ed1283ea1b",
+    "bytes": 499017
+  },
+  {
+    "path": "face/diamond-raindrop-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "0f580c80167cd4d2b8ba0296d320bbbc41cb15fe88fdd1069ac6fa6a4854c893",
+    "bytes": 517724
+  },
+  {
+    "path": "face/graduated-tubogas-necklace-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "bfc2241098942110764c8247ce578e5f2e580779032317045fb73cdcb40e3005",
+    "bytes": 523074
+  },
+  {
+    "path": "face/graduated-tubogas-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "fb20f979273abc42ce91b250f9e8fdc756331219da368155bea908f7f267f2b1",
+    "bytes": 447558
+  },
+  {
+    "path": "face/mini-curb-stackable-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "61702d1abc8579cd7c73b6422d8bfeae9a05c69ccafc111cb8acfc5d6dad47a5",
+    "bytes": 486682
+  },
+  {
+    "path": "face/mini-initial-necklace-in-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "4310e51f3b155575ba33a7bfeb5fcb55b75ab485296146ccf74a866abc66b651",
+    "bytes": 623182
+  },
+  {
+    "path": "face/mini-signet-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "56ea847acd65eac3c788387440a31b2e7153c959f2c4d81f06347d0497908c59",
+    "bytes": 563223
+  },
+  {
+    "path": "face/polished-5mm-bangle-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "1baeca37a5c6a0977fed37a9cd06ecdbe3aec9767cc3df1b85e3aa3a9c398392",
+    "bytes": 484340
+  },
+  {
+    "path": "face/polished-band-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "c8e4a47e61c323598564e61151ad5ae3252e6df0546bb70370b6c84f73c0095e",
+    "bytes": 424457
+  },
+  {
+    "path": "face/rectangular-signet-ring-in-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "b749ebcade12aeb2341663779ffe124dcf2adf6cad0740a0b594a54145da56c6",
+    "bytes": 554341
+  },
+  {
+    "path": "face/thick-tubogas-ring-14k-yellow-gold-onbody-face.jpg",
+    "sha256": "3cf108fcf8fb648656971b8371db6f7165ae3ff39d346182c99e72bff59e17bc",
+    "bytes": 600262
+  },
+  {
+    "path": "combos/graduated-tubogas-necklace-and-ring-14k-yellow-gold-combo.jpg",
+    "sha256": "345e8938d1ae38b749dda2d827b7141a443dd8f734f02de285c3e93359fb5ee0",
+    "bytes": 534796
+  },
+  {
+    "path": "combos/mini-initial-a-necklace-and-mini-curb-ring-14k-yellow-gold-combo.jpg",
+    "sha256": "acf538bc4176b7e903b9b15a62fb2c92205b056a69cd57e38437fdcd19843b5f",
+    "bytes": 600423
+  },
+  {
+    "path": "combos/mini-initial-a-necklace-and-mini-signet-ring-14k-yellow-gold-combo.jpg",
+    "sha256": "b2ec02b7b5be357789650336777433d1f1d8abca3b8030717a07c84b4f3f4030",
+    "bytes": 600138
+  },
+  {
+    "path": "references/bg3407_1.jpg",
+    "sha256": "5540d778ceeb4e1ccace9e825e483bbe0336c2c5b9c2f61218ebdf775a65cfad",
+    "bytes": 244563
+  },
+  {
+    "path": "references/c18094-17.jpg",
+    "sha256": "696fc19a736ec0139290719752cd0d279f5088988ba7d6f1e56ee6999e6161f6",
+    "bytes": 131562
+  },
+  {
+    "path": "references/initials-group.jpg",
+    "sha256": "4ecca3800c57386681322f4f5566579e9650fcd5d5d1724162c845ec6330637e",
+    "bytes": 41778
+  },
+  {
+    "path": "references/pg-3.jpg",
+    "sha256": "80930de2256d40a79f09a6067d5639ec6b31f7005bacc3f58dfd635b500a2d1a",
+    "bytes": 35097
+  },
+  {
+    "path": "references/r10068-pdp.png",
+    "sha256": "ef052c95358160b122840cb4357ce89cc540a2d3fa19dcceab8c9c1ecde86948",
+    "bytes": 216643
+  },
+  {
+    "path": "references/r10314-07.jpg",
+    "sha256": "ffe56312bd2a2831676e1fd471a9bad3d3ad1df9a495d06534aa6e90cbc0dd9f",
+    "bytes": 71911
+  },
+  {
+    "path": "references/r10315-07.jpg",
+    "sha256": "102d704ff98be74d06895787bfaafa7a4669377cc919cc2754c507e2e6423d86",
+    "bytes": 65413
+  },
+  {
+    "path": "references/r10317.png",
+    "sha256": "31c33c4fafac3fdd4eb0643d08a3b170c34e698fdc12953e310988bafbd7a12c",
+    "bytes": 850648
+  },
+  {
+    "path": "references/r6651.jpg",
+    "sha256": "75cf97427e75f3b95155756f40d005bfb3bef9d91f9092208e1fa6ec901bd660",
+    "bytes": 36670
+  },
+  {
+    "path": "references/r7333.jpg",
+    "sha256": "6c0d52dd3ab452573129012acab2284f7cbc38b95e1bd6912051ae12308d9645",
+    "bytes": 141460
+  },
+  {
+    "path": "references/rectangular-signet-ring-14k-yellow-gold.jpg",
+    "sha256": "283ef6b01b59703327e0f3d758b2b87eeddee80cab7e105a65fef7fdae102019",
+    "bytes": 169370
+  },
+  {
+    "path": "supplier-originals/bar-cuff-royal-chain-product.jpg",
+    "sha256": "a5a0ed787aa0b61e3d2925c2853168d40976bdde612a944a0a30e22023a56f23",
+    "bytes": 286833
+  },
+  {
+    "path": "supplier-originals/graduated-tubogas-ring-royal-chain-model.jpg",
+    "sha256": "64f29d6a404db9ec9943ad81103ba7fbde7bde1a3fee105bd395fe24cbf60824",
+    "bytes": 65366
+  },
+  {
+    "path": "supplier-originals/initial-a-product.jpg",
+    "sha256": "4cba1350ebcfb052fcd81bbe3724d35e9f2b890ece8adecec45049de4da105b0",
+    "bytes": 29200
+  },
+  {
+    "path": "supplier-originals/initial-a-series.jpg",
+    "sha256": "4cba1350ebcfb052fcd81bbe3724d35e9f2b890ece8adecec45049de4da105b0",
+    "bytes": 29200
+  },
+  {
+    "path": "supplier-originals/initials-necks-groups.png",
+    "sha256": "61926aa5e7d54ccb1a2c5c6c3411645e96e4108942524a48d61511a79899362f",
+    "bytes": 1456421
+  },
+  {
+    "path": "downloads/jewelry-combos-3-images.zip",
+    "sha256": "fdc908df030fce187429406a8fab6d37bae77940ab9290051dd6965d200a465f",
+    "bytes": 1736402
+  },
+  {
+    "path": "downloads/jewelry-onbody-11-images.zip",
+    "sha256": "840e995ded9e235d32ff9f213cf0ffa6f0d2d22ab317453cc9cf6a91e38704da",
+    "bytes": 5035862
+  },
+  {
+    "path": "downloads/jewelry-onbody-face-11-images.zip",
+    "sha256": "806f6c1adb7621b5720a8e377bbff83632d2fec9a64e789963ddee71a2edc5b6",
+    "bytes": 5727040
+  }
+]

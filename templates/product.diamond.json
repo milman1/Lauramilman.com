@@ -9,5 +9,8 @@
       "settings": {}
     }
   },
-  "order": ["main", "recommendations"]
+  "order": [
+    "main",
+    "recommendations"
+  ]
 }

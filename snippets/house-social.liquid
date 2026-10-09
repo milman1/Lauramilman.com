@@ -1,0 +1,49 @@
+{% doc %}
+  Social profiles from the Google Business listing.
+  A passed URL wins. A blank argument falls through to the theme setting.
+
+  @param {string} [instagram] - Instagram URL override
+  @param {string} [facebook] - Facebook URL override
+  @param {string} [tiktok] - TikTok URL override
+  @param {string} [pinterest] - Pinterest URL override
+  @param {string} [link_class] - Class on each anchor
+{% enddoc %}
+{%- liquid
+  assign social_instagram = instagram | default: settings.social_instagram
+  assign social_facebook = facebook | default: settings.social_facebook
+  assign social_tiktok = tiktok | default: settings.social_tiktok
+  assign social_pinterest = pinterest | default: settings.social_pinterest
+  assign social_class = link_class | default: 'house-social__link'
+-%}
+{%- if social_instagram != blank -%}
+  <a href="{{ social_instagram }}" class="{{ social_class }}" aria-label="Instagram" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+    </svg>
+  </a>
+{%- endif -%}
+{%- if social_facebook != blank -%}
+  <a href="{{ social_facebook }}" class="{{ social_class }}" aria-label="Facebook" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+    </svg>
+  </a>
+{%- endif -%}
+{%- if social_tiktok != blank -%}
+  <a href="{{ social_tiktok }}" class="{{ social_class }}" aria-label="TikTok" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
+    </svg>
+  </a>
+{%- endif -%}
+{%- if social_pinterest != blank -%}
+  <a href="{{ social_pinterest }}" class="{{ social_class }}" aria-label="Pinterest" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M8 12c0 3 2 6 4 6s4-6 4-6-2-6-4-6-4 3-4 6"/>
+      <line x1="12" y1="12" x2="12" y2="21"/>
+    </svg>
+  </a>
+{%- endif -%}

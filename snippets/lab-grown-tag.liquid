@@ -1,24 +1,34 @@
 {%- comment -%}
   Renders the lab-grown marker that sits under a product thumbnail.
 
-  A piece can be identified as lab-grown three different ways in this catalog,
-  and all three have to be honoured or the marker misses stock:
-    - the canonical "Lab Grown Diamond" product tag (all finished jewelry),
-    - the "Peaceful Diamonds" vendor (the sub-brand is lab-grown by definition),
-    - the "Lab-Grown Diamond" product type (the loose-stone feed).
+  A piece is lab-grown in more than one way in this catalog, and the marker
+  misses stock when only one spelling is checked:
+    - product type "Lab-Grown Diamond" (loose stones from the feed)
+    - tags "Lab Grown Diamond", "Lab-Grown Diamond", or "lab-grown"
+    - vendor "Peaceful Diamonds"
+    - a title or handle that says lab-grown, for finished jewelry that
+      carries the words in the name (solitaire rings, for example) and not
+      the canonical tag
 
-  The hyphenated tag variant is still checked because older imports carry it.
+  Matching is case-insensitive, same as the product education block.
+  A natural stone whose title, tags, type, and handle do not say lab-grown
+  stays unmarked. The description is not read, so a comparison sentence
+  on a natural piece cannot light the marker.
 
   Usage: {% render 'lab-grown-tag', product: product %}
 {%- endcomment -%}
 
 {%- liquid
+  assign lab_tags = product.tags | join: '||' | downcase
+  assign lab_title = product.title | downcase
+  assign lab_type = product.type | downcase
+  assign lab_vendor = product.vendor | downcase
+  assign lab_handle = product.handle | downcase
+  assign lab_hay = lab_title | append: '||' | append: lab_tags | append: '||' | append: lab_type | append: '||' | append: lab_handle
   assign is_lab_grown = false
-  if product.tags contains 'Lab Grown Diamond' or product.tags contains 'Lab-Grown Diamond'
+  if lab_vendor == 'peaceful diamonds'
     assign is_lab_grown = true
-  elsif product.vendor == 'Peaceful Diamonds'
-    assign is_lab_grown = true
-  elsif product.type == 'Lab-Grown Diamond'
+  elsif lab_hay contains 'lab grown' or lab_hay contains 'lab-grown' or lab_hay contains 'lab created' or lab_hay contains 'lab-created' or lab_handle contains 'lg-' or lab_handle contains 'lab-diamond'
     assign is_lab_grown = true
   endif
 -%}

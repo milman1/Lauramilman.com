@@ -55,22 +55,25 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 3× invoice cost at every size. Fail-closed
+ * Loose lab-grown diamonds: 3.5× invoice cost at every size. Fail-closed
  * $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 2.70× cost (63.0% gross before fees).
+ * is 3.15× cost (68.3% gross before fees).
  *
  * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
  * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
  * which cross $500 on weight alone, at a thinner markup than small stones.
+ * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
+ * so a stone plus setting totals less while stones stay below the large
+ * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 3,
+  costMultiple: 3.5,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3× at every size. */
+/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
 export function labRetailMultipleFromCost(_costUsd: number): number {
   return LOOSE_LAB_GROWN.costMultiple;
 }
@@ -89,9 +92,9 @@ export const LAB_GUARDS = {
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
    * total). Scaled with the multiple so the same invoices stay held:
-   * at 3×, 1ct Amount $70 → $210 is held; Amount $72 → $216 publishes.
+   * at 3.5×, 1ct Amount $70 → $245 is held; Amount $72 → $252 publishes.
    */
-  minRetailUsd: 216,
+  minRetailUsd: 252,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
@@ -115,25 +118,72 @@ export const LAB_GUARDS = {
  * Uncle Manny LLC rows are excluded at normalize. Missing cost → hold with
  * tag `pricing-review`; existing Shopify price is left alone.
  *
- * Chart (first matching band wins); applied in `src/watchPricing.ts`:
- *   Under $5,000          1.30×  round up to $100
- *   $5,000 – $15,000      1.20×  round up to $100, min $6,500
- *   $15,001 – $40,000     1.12×  round up to $100, min $18,000
- *   Above $40,000         1.08×  round up to $100, min $44,800
+ * Retail is the lowest $100 price that still leaves a share of the selling
+ * price after `EBAY_WATCH_FEE` and seller-paid shipping. Shipping is free to
+ * the buyer: postage, signature, and packing are the flat amount, and jewelry
+ * insurance is the rate times the sale. Carriers cap ordinary watch coverage
+ * near $1,000, so the insurance is a third-party policy at about 1% of the sale.
+ *
+ * A price of $10,000 or under leaves 10% of the sale. Above $10,000 it leaves
+ * 5%. The price does not step down as cost rises, so it can sit at $10,000
+ * while that leftover eases from 10% to 5%.
+ *
+ * A stock-number ceiling in `WATCH_RETAIL_CAP_BY_STOCK` may lower that price
+ * only while the eBay sale still nets at least cost after shipping. A ceiling
+ * that would lose money is ignored.
  */
-export const WATCH_COST_TIERS = [
-  { maxCostUsd: 5_000, maxInclusive: false, multiplier: 1.3, minRetailUsd: 0 },
-  { maxCostUsd: 15_000, maxInclusive: true, multiplier: 1.2, minRetailUsd: 6_500 },
-  { maxCostUsd: 40_000, maxInclusive: true, multiplier: 1.12, minRetailUsd: 18_000 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, maxInclusive: true, multiplier: 1.08, minRetailUsd: 44_800 },
-] as const;
+export const EBAY_WATCH_FEE = {
+  perOrderUsd: 0.4,
+  /** Each rate applies only to the slice of the price inside the band. */
+  bands: [
+    { upToUsd: 1_000, rate: 0.15 },
+    { upToUsd: 7_500, rate: 0.065 },
+    { upToUsd: Number.POSITIVE_INFINITY, rate: 0.03 },
+  ],
+} as const;
 
-export type WatchCostTier = (typeof WATCH_COST_TIERS)[number];
+export const WATCH_SALE = {
+  /**
+   * Share of the selling price left after cost, the eBay watch fee, and
+   * shipping, once the price is above `higherMarginMaxPriceUsd`.
+   */
+  minNetMarginOfPrice: 0.05,
+  /** A selling price at or under this keeps the higher margin. */
+  higherMarginMaxPriceUsd: 10_000,
+  /** Share left when the selling price is at or under $10,000. */
+  higherMinNetMarginOfPrice: 0.1,
+  /** Seller-paid postage, signature, and packing. The buyer is not charged. */
+  shippingFlatUsd: 120,
+  /** Third-party jewelry insurance as a share of the selling price. */
+  shippingInsuranceRate: 0.01,
+} as const;
+
+/**
+ * Retail ceiling, in USD, for feed stock numbers whose chart price sits above
+ * the highest comparable ask on record, whose cost still fits under that ask,
+ * and whose ceiling still nets at least cost after `EBAY_WATCH_FEE` and
+ * seller-paid shipping. Rounded down to $100 so the site price is at or under
+ * the ask. 114200 (RW3087) and 126234 (T3691) stay on the chart: the ask there
+ * is under cost once the fee and shipping are taken out.
+ * Keyed by stock number, not reference: a sibling of the same reference that
+ * is already under the ask keeps the chart.
+ */
+export const WATCH_RETAIL_CAP_BY_STOCK: Readonly<Record<string, number>> = {
+  T3489: 10_600, // 116234
+  T3559: 14_900, // 124060
+  T3652: 15_800, // 116713LN
+  T3690: 15_900, // 116613LN
+  RW3084: 16_500, // 116613LB
+  RW3103: 16_500, // 116613LB
+  T3590: 26_400, // 116610LV
+  RW3100: 49_000, // 126618LB
+};
 
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
-  costTiers: WATCH_COST_TIERS,
+  sale: WATCH_SALE,
+  retailCapByStock: WATCH_RETAIL_CAP_BY_STOCK,
 } as const;
 
 /**
@@ -142,7 +192,7 @@ export const WATCH = {
  * `LOOSE_LAB_GROWN`.
  * Not sourced from the Belgium Dia diamond API.
  *
- *   retail = round(cost × 4)
+ *   retail = cost × 2 (rounded to cents)
  *
  * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
  * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
@@ -153,7 +203,7 @@ export const LAB_GROWN_JEWELRY = {
   /** Common Peaceful Diamonds SKU prefixes observed on the store. */
   skuPrefixes: ['BC14', 'NK14'] as const,
   /** retail = cost × this. */
-  costMultiple: 4,
+  costMultiple: 2,
 } as const;
 
 /** Retail for lab-grown jewelry from recorded wholesale cost. */
@@ -161,7 +211,7 @@ export function labGrownJewelryRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
   }
-  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple);
+  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple * 100) / 100;
 }
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
@@ -235,7 +285,7 @@ export const BACKVAULT = {
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
  * jewelry and hand-imported estate pieces are merchant-set and have no
- * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×4). A new
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×2). A new
  * supplier gets its own constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {
@@ -250,4 +300,38 @@ export function supplierRetailFromCost(costUsd: number): number {
   }
   const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
   return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+}
+
+/**
+ * Engagement-ring settings sold without a center stone, for a shopper who
+ * pairs the ring with a loose diamond (theme: snippets/ring-diamond-pairing,
+ * one hidden "setting-only" variant per ring, SKU SET-<ring handle>).
+ * Merchant decision 2026-10-02: retail = setting cost × 3, labor to set the
+ * shopper's diamond included in that price. Rounded to the nearest dollar;
+ * no other rounding was specified. Merchant decision 2026-10-08: × 3 → × 2.25
+ * (paired with loose lab-grown 3× → 3.5×).
+ *
+ *   retail = round(cost × 2.25)
+ *
+ * Settings only. It is not the Royal Chain rule above, and it never prices a
+ * complete ring with its own center stone.
+ */
+export const SETTING_ONLY = {
+  costMultiple: 2.25,
+  /** Flat add-on in USD for the 18K option on a setting listed in 14K. */
+  upcharge18kUsd: 250,
+} as const;
+
+export function setting18kRetailFrom14kRetail(retail14kUsd: number): number {
+  if (!Number.isFinite(retail14kUsd) || retail14kUsd <= 0) {
+    throw new Error(`Setting 18K pricing: invalid 14K retail ${retail14kUsd}`);
+  }
+  return retail14kUsd + SETTING_ONLY.upcharge18kUsd;
+}
+
+export function settingOnlyRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Setting-only pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }

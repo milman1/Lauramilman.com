@@ -82,7 +82,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: 3× invoice cost at every size, after fail-closed mapping guards.
+ * Lab-grown: 3.5× invoice cost at every size, after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -147,12 +147,16 @@ export interface WatchComp {
 }
 
 /**
- * Watches: supplier-cost tiers via watchPricing.ts. No Hours mid — retail is
- * cost × chart multiplier, rounded up to $100, with the chart band floors.
+ * Watches: `WATCH_SALE` via watchPricing.ts. No Hours mid. Retail is the
+ * lowest $100 that leaves 10% of the price after the eBay watch fee and
+ * seller-paid shipping when that price is $10,000 or under, and 5% above
+ * that. A stock number in `WATCH_RETAIL_CAP_BY_STOCK` may lower it only
+ * while the sale still nets at least cost after shipping.
  */
 export function priceWatch(item: WatchItem): PriceResult {
   const outcome = priceWatchFromCost({
     costUsd: item.costUsd,
+    stockRef: item.stockRef,
     aftermarket: false, // normalize already excludes aftermarket
   });
 

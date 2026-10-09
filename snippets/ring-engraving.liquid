@@ -1,0 +1,471 @@
+{%- comment -%}
+  Ring engraving — engagement rings only.
+  Rendered by sections/main-product.liquid below the buy area and the
+  diamond-pairing panel, outside the product form: the hidden properties
+  join that form through form="<form_id>".
+
+  Accepts:
+  - product: the ring
+  - form_id: id of the product form the properties belong to
+  - enabled: section setting "Offer complimentary engraving"
+  - ai_endpoint: Worker URL for the AI render (optional; button hidden if blank)
+  - max_chars: inscription length limit
+  - metal_hint: metal pill from the ring's tags, used until a variant says otherwise
+  - is_watch: 'true' for watches
+
+  Shows an exact preview drawn in the browser as the shopper types, and an
+  optional photoreal AI render of the same inscription on this ring. The
+  order carries the typed text as line-item properties on the ring
+  (Engraving, Engraving font); the AI image is only a visualization.
+  Engraving is complimentary.
+
+  The visible fields sit outside the form (form="lm-engrave-none") and the
+  hidden properties start disabled; the script enables them only while
+  "Add an engraving" is ticked and an inscription is typed.
+{%- endcomment -%}
+
+{%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
+{%- liquid
+  assign show_engraving = false
+  if enabled and is_watch != 'true' and is_er == 'true'
+    assign show_engraving = true
+  endif
+
+  assign max_chars = max_chars | default: 20
+  assign engrave_image = ''
+  if product.featured_media != blank
+    assign engrave_image = product.featured_media.preview_image | image_url: width: 1024
+  endif
+  assign endpoint = ai_endpoint | strip
+  unless endpoint contains 'https://'
+    assign endpoint = ''
+  endunless
+  if engrave_image == ''
+    assign endpoint = ''
+  endif
+-%}
+
+{%- if show_engraving -%}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" media="print" onload="this.media='all'">
+
+  <div
+    class="pdp-engrave"
+    data-engrave
+    data-metal="{{ metal_hint | escape }}"
+    data-max="{{ max_chars }}"
+    data-form-id="{{ form_id }}"
+    {% if endpoint != '' %}
+      data-ai-endpoint="{{ endpoint | escape }}"
+      data-image="{{ engrave_image | escape }}"
+    {% endif %}
+  >
+    <label class="pdp-engrave__toggle">
+      <input type="checkbox" form="lm-engrave-none" data-engrave-toggle aria-controls="PdpEngraveBody">
+      <span class="pdp-engrave__toggle-text">Add an engraving</span>
+      <span class="pdp-engrave__price">Complimentary</span>
+    </label>
+
+    <div class="pdp-engrave__body" id="PdpEngraveBody" data-engrave-body hidden>
+      <div class="pdp-engrave__field">
+        <label for="PdpEngraveText" class="product-option-label">Inscription</label>
+        <input
+          id="PdpEngraveText"
+          class="pdp-engrave__input"
+          type="text"
+          form="lm-engrave-none"
+          maxlength="{{ max_chars }}"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Forever yours"
+          aria-describedby="PdpEngraveCount PdpEngraveError"
+          data-engrave-text
+        >
+        <span class="pdp-engrave__count" id="PdpEngraveCount" aria-live="polite" data-engrave-count>0 / {{ max_chars }}</span>
+      </div>
+      <p class="pdp-engrave__error" id="PdpEngraveError" role="alert" data-engrave-error hidden></p>
+
+      <div class="pdp-engrave__row">
+        <div class="product-option-row pdp-engrave__fonts" role="radiogroup" aria-label="Lettering">
+          <label class="product-option-btn active"><input type="radio" class="pdp-engrave__radio" form="lm-engrave-none" name="lm-engrave-font" value="Script" checked data-engrave-font>Script</label>
+          <label class="product-option-btn"><input type="radio" class="pdp-engrave__radio" form="lm-engrave-none" name="lm-engrave-font" value="Classic" data-engrave-font>Classic</label>
+          <label class="product-option-btn"><input type="radio" class="pdp-engrave__radio" form="lm-engrave-none" name="lm-engrave-font" value="Block" data-engrave-font>Block</label>
+        </div>
+        <div class="pdp-engrave__symbols">
+          <button type="button" class="product-option-btn" data-engrave-symbol="♥" aria-label="Insert heart">♥</button>
+          <button type="button" class="product-option-btn" data-engrave-symbol="∞" aria-label="Insert infinity sign">∞</button>
+        </div>
+      </div>
+
+      <figure class="pdp-engrave__preview" data-font="Script">
+        <svg viewBox="0 0 600 240" role="img" aria-labelledby="PdpEngravePreviewLabel" focusable="false">
+          <title id="PdpEngravePreviewLabel" data-engrave-label>Preview of the inside of the band</title>
+          <defs>
+            <linearGradient id="PdpEngraveMetal" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" class="pdp-engrave__stop-hi"/>
+              <stop offset="0.45" class="pdp-engrave__stop-mid"/>
+              <stop offset="0.7" class="pdp-engrave__stop-hi"/>
+              <stop offset="1" class="pdp-engrave__stop-lo"/>
+            </linearGradient>
+            <radialGradient id="PdpEngraveHole" cx="0.5" cy="0.35" r="0.7">
+              <stop offset="0.6" stop-color="#FDFAF6"/>
+              <stop offset="1" stop-color="#E8E2D8"/>
+            </radialGradient>
+            <path id="PdpEngravePath" d="M 56 140 A 258 86 0 0 0 544 140"/>
+          </defs>
+          <ellipse cx="300" cy="120" rx="280" ry="105" fill="url(#PdpEngraveMetal)"/>
+          <ellipse cx="300" cy="120" rx="279" ry="104" fill="none" class="pdp-engrave__rim"/>
+          <ellipse cx="300" cy="98" rx="236" ry="64" fill="url(#PdpEngraveHole)"/>
+          <ellipse cx="300" cy="98" rx="236" ry="64" fill="none" class="pdp-engrave__lip"/>
+          <text class="pdp-engrave__glyphs pdp-engrave__glyphs--light" text-anchor="middle" transform="translate(0 1.2)">
+            <textPath href="#PdpEngravePath" startOffset="50%" data-engrave-glyphs></textPath>
+          </text>
+          <text class="pdp-engrave__glyphs" text-anchor="middle">
+            <textPath href="#PdpEngravePath" startOffset="50%" data-engrave-glyphs></textPath>
+          </text>
+        </svg>
+        <figcaption class="pdp-engrave__caption">Inside the band, as it will read.</figcaption>
+      </figure>
+
+      {%- if endpoint != '' -%}
+        <div class="pdp-engrave__ai">
+          <button type="button" class="pdp-engrave__ai-btn" data-engrave-ai>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+            See it on this ring with AI
+          </button>
+          <p class="pdp-engrave__ai-status" aria-live="polite" data-engrave-ai-status></p>
+          <figure class="pdp-engrave__ai-result" data-engrave-ai-result hidden>
+            <img alt="" width="1024" height="1024" data-engrave-ai-img>
+            <figcaption>AI visualization. Your ring is engraved by hand with exactly the text you typed above.</figcaption>
+          </figure>
+        </div>
+      {%- endif -%}
+
+      <p class="pdp-engrave__note">Engraved rings are made for you and are final sale. See <a href="/pages/shipping-returns">returns</a>.</p>
+
+      <input type="hidden" form="{{ form_id }}" name="properties[Engraving]" value="" disabled data-engrave-prop="text">
+      <input type="hidden" form="{{ form_id }}" name="properties[Engraving font]" value="" disabled data-engrave-prop="font">
+    </div>
+  </div>
+
+  <style>
+    .pdp-engrave {
+      --eng-hi: #F3DFA2;
+      --eng-mid: #D4AF61;
+      --eng-lo: #9C7A35;
+      --eng-ink: #5E451A;
+      margin: var(--space-lg, 1.5rem) 0 0;
+      padding: var(--space-md, 1rem) var(--space-lg, 1.5rem);
+      border: 1px solid var(--border-light, #E8E2D8);
+      border-radius: var(--radius-md, 8px);
+      background: var(--warm-white, #FDFAF6);
+    }
+    .pdp-engrave[data-tone="white"] { --eng-hi: #F6F6F4; --eng-mid: #CDCFD1; --eng-lo: #8E9194; --eng-ink: #4F5357; }
+    .pdp-engrave[data-tone="platinum"] { --eng-hi: #EEEFF1; --eng-mid: #BFC3C8; --eng-lo: #858B92; --eng-ink: #4B5158; }
+    .pdp-engrave[data-tone="rose"] { --eng-hi: #F6D3C2; --eng-mid: #D99A80; --eng-lo: #A7684F; --eng-ink: #6E3B2B; }
+
+    .pdp-engrave__toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+    }
+    .pdp-engrave__toggle input { width: 18px; height: 18px; accent-color: var(--gold, #C9A050); margin: 0; }
+    .pdp-engrave__price { margin-left: auto; color: var(--gold-dark, #A88340); font-weight: 400; }
+
+    .pdp-engrave__body { padding-top: var(--space-md, 1rem); }
+    .pdp-engrave__field { position: relative; }
+    .pdp-engrave__input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 4.5rem 12px 14px;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 1rem;
+      color: var(--text-dark, #2C1810);
+      background: #fff;
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: var(--radius-sm, 4px);
+    }
+    .pdp-engrave__input:focus { outline: 2px solid var(--gold, #C9A050); outline-offset: 1px; }
+    .pdp-engrave__count {
+      position: absolute;
+      right: 12px;
+      bottom: 13px;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.72rem;
+      color: var(--text-muted, #8A8070);
+    }
+    .pdp-engrave__error {
+      margin: 0.4rem 0 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.78rem;
+      color: var(--wine, #4A1428);
+    }
+    .pdp-engrave__row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: var(--space-md, 1rem);
+    }
+    .pdp-engrave__fonts,
+    .pdp-engrave__symbols { display: flex; gap: 8px; margin: 0; }
+    .pdp-engrave .product-option-btn { padding: 8px 14px; }
+    .pdp-engrave__radio { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+    .pdp-engrave__fonts .product-option-btn { position: relative; }
+    .pdp-engrave__fonts .product-option-btn:focus-within { outline: 2px solid var(--gold, #C9A050); outline-offset: 2px; }
+
+    .pdp-engrave__preview { margin: var(--space-md, 1rem) 0 0; }
+    .pdp-engrave__preview svg { display: block; width: 100%; height: auto; }
+    .pdp-engrave__stop-hi { stop-color: var(--eng-hi); }
+    .pdp-engrave__stop-mid { stop-color: var(--eng-mid); }
+    .pdp-engrave__stop-lo { stop-color: var(--eng-lo); }
+    .pdp-engrave__rim { stroke: rgba(255, 255, 255, 0.55); stroke-width: 2; }
+    .pdp-engrave__lip { stroke: var(--eng-lo); stroke-width: 3; opacity: 0.6; }
+    .pdp-engrave__glyphs { fill: var(--eng-ink); font-size: 30px; }
+    .pdp-engrave__glyphs--light { fill: rgba(255, 255, 255, 0.6); }
+    .pdp-engrave__preview[data-font="Script"] .pdp-engrave__glyphs { font-family: 'Pinyon Script', 'Snell Roundhand', cursive; font-size: 36px; }
+    .pdp-engrave__preview[data-font="Classic"] .pdp-engrave__glyphs { font-family: var(--font-heading, 'Cormorant Garamond', serif); font-style: italic; }
+    .pdp-engrave__preview[data-font="Block"] .pdp-engrave__glyphs { font-family: var(--font-body, 'Montserrat', sans-serif); font-size: 22px; letter-spacing: 0.22em; text-transform: uppercase; }
+    .pdp-engrave__preview.is-empty .pdp-engrave__glyphs { opacity: 0.35; }
+    .pdp-engrave__caption,
+    .pdp-engrave__ai-result figcaption,
+    .pdp-engrave__ai-status,
+    .pdp-engrave__note {
+      margin: 0.4rem 0 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.74rem;
+      line-height: 1.6;
+      color: var(--text-muted, #8A8070);
+      text-align: center;
+    }
+    .pdp-engrave__note { text-align: left; margin-top: var(--space-md, 1rem); }
+    .pdp-engrave__note a { color: inherit; text-decoration: underline; }
+
+    .pdp-engrave__ai { margin-top: var(--space-md, 1rem); text-align: center; }
+    .pdp-engrave__ai-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 10px 18px;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--espresso, #1E1109);
+      background: transparent;
+      border: 1px solid var(--gold, #C9A050);
+      border-radius: var(--radius-sm, 4px);
+      cursor: pointer;
+    }
+    .pdp-engrave__ai-btn:hover { background: var(--gold-pale, #F0DFB0); }
+    .pdp-engrave__ai-btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
+    .pdp-engrave__ai-result { margin: var(--space-sm, 0.5rem) 0 0; }
+    .pdp-engrave__ai-result img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm, 4px);
+      background: var(--cream, #FAF6F0);
+    }
+    .pdp-engrave__ai-result.is-stale img { opacity: 0.45; }
+
+    @media (max-width: 600px) {
+      .pdp-engrave { padding: var(--space-md, 1rem); }
+      .pdp-engrave__row { justify-content: flex-start; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      var root = document.querySelector('[data-engrave]');
+      if (!root) return;
+      var form = document.getElementById(root.getAttribute('data-form-id')) || root.closest('form');
+      var toggle = root.querySelector('[data-engrave-toggle]');
+      var body = root.querySelector('[data-engrave-body]');
+      var input = root.querySelector('[data-engrave-text]');
+      var count = root.querySelector('[data-engrave-count]');
+      var error = root.querySelector('[data-engrave-error]');
+      var preview = root.querySelector('.pdp-engrave__preview');
+      var label = root.querySelector('[data-engrave-label]');
+      var glyphs = root.querySelectorAll('[data-engrave-glyphs]');
+      var fonts = root.querySelectorAll('[data-engrave-font]');
+      var propText = root.querySelector('[data-engrave-prop="text"]');
+      var propFont = root.querySelector('[data-engrave-prop="font"]');
+      var aiBtn = root.querySelector('[data-engrave-ai]');
+      var aiStatus = root.querySelector('[data-engrave-ai-status]');
+      var aiResult = root.querySelector('[data-engrave-ai-result]');
+      var aiImg = root.querySelector('[data-engrave-ai-img]');
+      var max = parseInt(root.getAttribute('data-max'), 10) || 20;
+      var PLACEHOLDER = 'Your words here';
+      var renderedKey = '';
+      var objectUrl = '';
+
+      // Same character set the render endpoint accepts.
+      var DISALLOWED = /[^\p{L}\p{N} .,'&+\-:\/#♥∞]/gu;
+
+      function clean(value) {
+        var chars = Array.from(value.replace(DISALLOWED, '').replace(/\s+/g, ' '));
+        return chars.slice(0, max).join('');
+      }
+
+      function currentFont() {
+        for (var i = 0; i < fonts.length; i++) if (fonts[i].checked) return fonts[i].value;
+        return 'Script';
+      }
+
+      function currentTone() {
+        var parts = [root.getAttribute('data-metal') || ''];
+        if (form) {
+          form.querySelectorAll('.product-option-btn.active[data-value]').forEach(function (b) {
+            parts.unshift(b.getAttribute('data-value') || '');
+          });
+        }
+        var s = parts.join(' ').toLowerCase();
+        if (/platinum/.test(s)) return 'platinum';
+        if (/rose/.test(s)) return 'rose';
+        if (/white/.test(s)) return 'white';
+        return 'yellow';
+      }
+
+      function stateKey() {
+        return [input.value.trim(), currentFont(), currentTone()].join('|');
+      }
+
+      function fitText() {
+        var node = glyphs[glyphs.length - 1].parentNode;
+        glyphs.forEach(function (g) { g.parentNode.style.fontSize = ''; });
+        try {
+          var len = node.getComputedTextLength();
+          var room = 420;
+          if (len > room) {
+            var size = parseFloat(getComputedStyle(node).fontSize) * (room / len);
+            glyphs.forEach(function (g) { g.parentNode.style.fontSize = size + 'px'; });
+          }
+        } catch (e) {}
+      }
+
+      function sync() {
+        var cleaned = clean(input.value);
+        if (cleaned !== input.value) input.value = cleaned;
+        var text = cleaned.trim();
+        var font = currentFont();
+        var on = toggle.checked && text !== '';
+
+        count.textContent = Array.from(cleaned).length + ' / ' + max;
+        root.setAttribute('data-tone', currentTone());
+        preview.setAttribute('data-font', font);
+        preview.classList.toggle('is-empty', text === '');
+        glyphs.forEach(function (g) { g.textContent = text || PLACEHOLDER; });
+        label.textContent = text ? 'Preview of the inside of the band engraved "' + text + '"' : 'Preview of the inside of the band';
+        fitText();
+
+        fonts.forEach(function (f) { f.parentNode.classList.toggle('active', f.checked); });
+        propText.value = text;
+        propFont.value = font;
+        propText.disabled = !on;
+        propFont.disabled = !on;
+        if (text) error.hidden = true;
+        if (aiResult && !aiResult.hidden) aiResult.classList.toggle('is-stale', stateKey() !== renderedKey);
+        if (aiStatus && renderedKey && stateKey() !== renderedKey) {
+          aiStatus.textContent = 'Inscription changed. Render again to see it on the ring.';
+        }
+      }
+
+      function showError(message) {
+        error.textContent = message;
+        error.hidden = false;
+      }
+
+      toggle.addEventListener('change', function () {
+        body.hidden = !toggle.checked;
+        if (toggle.checked) input.focus();
+        sync();
+      });
+      input.addEventListener('input', sync);
+      fonts.forEach(function (f) { f.addEventListener('change', sync); });
+      root.querySelectorAll('[data-engrave-symbol]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var pos = input.selectionStart == null ? input.value.length : input.selectionStart;
+          input.value = input.value.slice(0, pos) + btn.getAttribute('data-engrave-symbol') + input.value.slice(pos);
+          sync();
+          input.focus();
+        });
+      });
+      if (form) {
+        form.addEventListener('click', function (e) {
+          if (e.target.closest('[data-option-group]')) setTimeout(sync, 0);
+        });
+        // An empty inscription with engraving ticked would add nothing; stop
+        // before assets/theme.js sends the cart request.
+        form.addEventListener('submit', function (e) {
+          if (toggle.checked && input.value.trim() === '') {
+            e.preventDefault();
+            e.stopPropagation();
+            showError('Type your inscription, or untick "Add an engraving".');
+            input.focus();
+          }
+        });
+      }
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitText);
+
+      if (aiBtn) {
+        var MESSAGES = {
+          daily_limit: 'Our AI studio is at capacity for today. The preview above shows your exact inscription.',
+          visitor_limit: 'You have rendered several versions this hour. Try again shortly; the preview above stays exact.',
+          text_characters: 'That inscription has a character we cannot render. The preview above is exact.'
+        };
+        aiBtn.addEventListener('click', function () {
+          var text = input.value.trim();
+          if (!text) {
+            showError('Type your inscription first.');
+            input.focus();
+            return;
+          }
+          var key = stateKey();
+          aiBtn.setAttribute('aria-busy', 'true');
+          aiBtn.disabled = true;
+          aiStatus.textContent = 'Rendering your inscription on this ring. This takes about 20 seconds.';
+          fetch(root.getAttribute('data-ai-endpoint'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: root.getAttribute('data-image'),
+              text: text,
+              font: currentFont(),
+              metal: currentTone()
+            })
+          })
+            .then(function (res) {
+              if (res.ok) return res.blob();
+              return res.json().catch(function () { return {}; }).then(function (data) {
+                throw new Error((data && data.error) || 'render_failed');
+              });
+            })
+            .then(function (blob) {
+              if (objectUrl) URL.revokeObjectURL(objectUrl);
+              objectUrl = URL.createObjectURL(blob);
+              aiImg.src = objectUrl;
+              aiImg.alt = 'AI visualization of this ring engraved "' + text + '" inside the band';
+              aiResult.hidden = false;
+              aiResult.classList.remove('is-stale');
+              renderedKey = key;
+              aiStatus.textContent = '';
+            })
+            .catch(function (err) {
+              aiStatus.textContent = MESSAGES[err && err.message] || 'We could not render that just now. The preview above shows your exact inscription.';
+            })
+            .then(function () {
+              aiBtn.removeAttribute('aria-busy');
+              aiBtn.disabled = false;
+            });
+        });
+      }
+
+      sync();
+    })();
+  </script>
+{%- endif -%}

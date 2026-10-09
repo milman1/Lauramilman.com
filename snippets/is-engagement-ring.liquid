@@ -1,0 +1,27 @@
+{%- comment -%}
+  Outputs 'true' when the product is an engagement ring we make: in the
+  engagement-rings collections, tagged "Engagement Rings" or "ring-setting"
+  (a setting sold without a center stone), or titled as one.
+  Estate feed pieces are never included.
+  Usage: {%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign er = false
+  unless product.tags contains 'backvault-feed'
+    for c in product.collections
+      if c.handle == 'engagement-rings' or c.handle == 'lab-grown-engagement-rings'
+        assign er = true
+      endif
+    endfor
+    if product.tags contains 'Engagement Rings' or product.tags contains 'ring-setting'
+      assign er = true
+    endif
+    assign title_l = product.title | downcase
+    if title_l contains 'engagement ring'
+      assign er = true
+    endif
+  endunless
+  if er
+    echo 'true'
+  endif
+-%}

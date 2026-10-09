@@ -459,6 +459,22 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     color: var(--lmhh-muted);
   }
   .header .lmhh__mextra + .lmhh__mnote { margin-top: 24px; }
+  .header .lmhh__social {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 14px;
+  }
+  .header .lmhh__social-link {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--lmhh-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lmhh-ink);
+    text-decoration: none;
+  }
+  .header .lmhh__social-link:hover { border-color: var(--lmhh-gold); color: var(--lmhh-gold); }
   .header--nav-open .nav__icons,
   .header--nav-open .mobile-toggle { visibility: hidden; }
 }
@@ -718,6 +734,9 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       <a href="{{ routes.account_url }}" class="nav__link">Account</a>
     </div>
     <div class="lmhh__mnote">
+      <div class="lmhh__social">
+        {%- render 'house-social', link_class: 'lmhh__social-link' -%}
+      </div>
       <span>Free insured U.S. shipping · 7-day jewelry returns</span>
       <span>1185 6th Avenue, Floor 3 · By appointment</span>
     </div>
@@ -1215,19 +1234,25 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           return;
         }
         searchDebounce = setTimeout(function() {
-          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6')
+          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6&resources[options][fields]=title,product_type,vendor,tag,variants.title,variants.sku,body')
             .then(function(r) { return r.json(); })
             .then(function(data) {
               if (searchInput.value.trim() !== q) return;
 
               var products = ((data.resources && data.resources.results && data.resources.results.products) || []).filter(function(product) {
-                var searchableText = [product.title, product.vendor, product.type]
+                var searchableText = [product.title, product.vendor, product.type, product.handle]
                   .concat(product.tags || [])
+                  .concat((product.variants || []).map(function(v) { return v.sku; }))
                   .join(' ')
                   .toLowerCase();
+                /* Words with a digit can be a SKU or an IGI/GIA report number,
+                   which only the description carries; plain words still have to
+                   match the title, type or tags. */
+                var bodyText = String(product.body || '').toLowerCase();
 
                 return q.toLowerCase().split(/\s+/).every(function(word) {
-                  return word.length < 2 || searchableText.indexOf(word) !== -1;
+                  if (word.length < 2 || searchableText.indexOf(word) !== -1) return true;
+                  return /\d/.test(word) && bodyText.indexOf(word) !== -1;
                 });
               });
               if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';

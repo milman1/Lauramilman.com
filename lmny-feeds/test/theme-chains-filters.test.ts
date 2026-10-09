@@ -6,7 +6,7 @@ function themeFile(path: string): string {
 }
 
 describe('Chains collection filters', () => {
-  it('puts chain styles on the collection chips and Refine drawer, not the header', () => {
+  it('puts chain styles on the collection chips, the Refine drawer, and the gold menu', () => {
     const bar = themeFile('snippets/jewelry-style-bar.liquid');
     const filters = themeFile('snippets/jewelry-style-filters.liquid');
     const drawer = themeFile('snippets/filter-drawer.liquid');
@@ -25,8 +25,12 @@ describe('Chains collection filters', () => {
 
     expect(drawer).toMatch(/'chains'/);
 
-    expect(header).not.toContain('>Cuban<');
-    expect(header).not.toContain('>Paperclip<');
+    expect(header).toContain('Chains by style');
+    expect(header).toContain('href="/collections/chains?type=Cuban"');
+    expect(header).toContain('href="/collections/chains?type=Paperclip"');
+    expect(header).toContain('href="/collections/chains?type=Rope"');
+    expect(header).toContain('href="/collections/chains?type=Herringbone"');
+    expect(header).toContain('href="/collections/chains?type=Curb"');
     expect(header).not.toContain('>Snake<');
   });
 });

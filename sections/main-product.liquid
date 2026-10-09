@@ -112,6 +112,11 @@
   endif
 
   assign spec_defs = 'brand:Brand,model:Model,reference:Reference,year:Year,diamond_shape:Diamond Shape,carat_weight:Carat Weight,case_size:Case Size,metal:Metal,metal_weight:Metal Weight,measurements:Measurements,dial:Dial,bezel:Bezel,bracelet:Bracelet,clarity:Clarity,color:Color,condition:Condition,condition_grade:Condition Grade,setting_style:Setting Style,length:Length,box:Box,papers:Papers,original_tag:Original Tag,link:Link,stock_number:Stock #' | split: ','
+  # Condition only reads on vintage, estate and pre-owned pieces and watches;
+  # new pieces keep custom.condition for search (structured data) but don't show it.
+  capture is_vintage
+    render 'product-is-vintage', product: product
+  endcapture
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
@@ -119,6 +124,12 @@
     assign v = ''
     if mf != blank
       assign v = mf.value | strip
+    endif
+    if def_parts[0] == 'condition' or def_parts[0] == 'condition_grade'
+      if is_watch != 'true' and is_vintage != 'true'
+        assign v = ''
+        continue
+      endif
     endif
     if v == blank or v == '—' or v == '-'
       assign v = ''
@@ -376,6 +387,14 @@
           {%- endfor -%}
         {%- endunless -%}
 
+        {%- comment -%} Ring size help: guide dialog, resizing note, size fields (properties on this form) {%- endcomment -%}
+        {% render 'ring-fit',
+          product: product,
+          is_watch: is_watch,
+          enabled: section.settings.ring_fit_enabled,
+          ask_size: section.settings.ring_fit_ask_size
+        %}
+
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
@@ -401,6 +420,21 @@
 
       {%- endform -%}
 
+      {% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}
+      {%- comment -%}
+        Engraving sits below the buy area and the diamond panel; its fields are
+        tied to the product form by form="{{ product_form_id }}", so Add to Cart
+        and "Add ring with this diamond" still carry the inscription.
+      {%- endcomment -%}
+      {% render 'ring-engraving',
+        product: product,
+        form_id: product_form_id,
+        enabled: section.settings.engraving_enabled,
+        ai_endpoint: section.settings.engraving_ai_endpoint,
+        max_chars: section.settings.engraving_max_chars,
+        metal_hint: metal_pill,
+        is_watch: is_watch
+      %}
       {% render 'product-inquiry', product: product %}
 
       <!-- 8. Specifications — only rows with values; whole block hides when empty -->
@@ -993,6 +1027,60 @@
       "id": "show_vendor",
       "label": "Show vendor",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Ring engraving"
+    },
+    {
+      "type": "checkbox",
+      "id": "engraving_enabled",
+      "label": "Offer complimentary engraving",
+      "info": "Shows on engagement rings. The inscription is saved on the order line.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "engraving_max_chars",
+      "label": "Inscription length limit",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "engraving_ai_endpoint",
+      "label": "AI engraving render endpoint",
+      "info": "https://lauramilman-com.<subdomain>.workers.dev/engraving/render. Leave blank to hide the AI button; the live preview still shows."
+    },
+    {
+      "type": "header",
+      "content": "Ring sizing"
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_fit_enabled",
+      "label": "Show ring size help",
+      "info": "On rings: a Find your size dialog, the resizing note, and a \"Not sure of the size?\" option. Tag a ring no-resize to say it can't be resized.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_fit_ask_size",
+      "label": "Ask for a size on one-size rings",
+      "info": "House rings without a size option get size buttons (3–13 and Not sure), saved on the order line. A choice is required before adding to cart. Estate pieces never show them.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Your own diamond"
+    },
+    {
+      "type": "product",
+      "id": "setting_only_product",
+      "label": "Setting-only product",
+      "info": "Hidden product with one variant per engagement ring at its setting-only price (labor included). Variant SKU: SET-<ring handle>, or SET-<ring handle>-<option> such as -14k. Rings without one stay on Request this pairing."
     }
   ],
   "blocks": [

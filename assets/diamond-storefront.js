@@ -1,5 +1,5 @@
 /**
- * Laura Milman — API-backed diamond filter + inquiry/reserve.
+ * Laura Milman — API-backed diamond filter.
  * Keeps lm-dfilter visual classes; data from Supabase Edge Function
  * (or App Proxy /apps/diamonds once wired).
  */
@@ -12,7 +12,6 @@
   var cfg = {
     apiBase: (root.dataset.apiBase || '').replace(/\/+$/, ''),
     anonKey: root.dataset.anonKey || '',
-    reserveUrl: (root.dataset.reserveUrl || '').replace(/\/+$/, ''),
     kind: root.dataset.kind || 'lab',
     perPage: parseInt(root.dataset.perPage || '24', 10) || 24,
     currency: root.dataset.currency || 'USD',
@@ -59,7 +58,7 @@
       .filter(Boolean);
   }
 
-  /** Grade scale: floor and better (checked stops). */
+  /** Grade scale: the grades the shopper ticked, each picked on its own. */
   function selectedGrades(name) {
     return Array.prototype.map
       .call(form.querySelectorAll('[data-scale="' + name + '"] input:checked'), function (el) {
@@ -147,6 +146,10 @@
           '" alt="" width="600" height="600" loading="lazy">'
         : '');
 
+    var origin = stone.kind || cfg.kind;
+    var labTag =
+      origin === 'lab' ? '<span class="lab-grown-tag">Lab Grown Diamond</span>' : '';
+
     return (
       '<div class="product-card" data-stock="' +
       escapeAttr(stone.stock_ref) +
@@ -161,6 +164,7 @@
       images +
       '</a>' +
       '<div class="product-card__content">' +
+      labTag +
       '<h3 class="product-card__title"><a href="' +
       escapeAttr(href) +
       '">' +
@@ -182,9 +186,6 @@
       escapeAttr(href.replace('/products/', '')) +
       '">Buy now</button>' +
       '</div>' +
-      '<button type="button" class="lm-stone-card__reserve" data-reserve="' +
-      escapeAttr(stone.stock_ref) +
-      '">Reserve instead</button>' +
       '</div></div>'
     );
   }
@@ -279,6 +280,9 @@
   /* ── Grade scale / shape / range paint (same UX as facet version) ── */
   function wireScales() {
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
+      /* Reset calls this again; repaint instead of adding a second click
+         handler, which would toggle each grade twice and cancel out. */
+      if (scale.lmPaint) return scale.lmPaint();
       var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
       if (!stops.length) return;
       var fill = scale.querySelector('[data-scale-fill]');
@@ -286,38 +290,31 @@
       var noun = hint ? hint.textContent : '';
 
       function paint() {
-        var floor = -1;
-        stops.forEach(function (stop, i) {
+        var picked = [];
+        stops.forEach(function (stop) {
           var on = stop.querySelector('input').checked;
           stop.classList.toggle('is-in-range', on);
-          stop.classList.remove('is-floor');
-          if (on && floor === -1) floor = i;
+          stop.classList.toggle('is-floor', on);
+          if (on) picked.push(stop.dataset.grade);
         });
         if (fill) {
-          if (floor === -1) {
-            fill.style.left = '0%';
-            fill.style.right = '100%';
-          } else {
-            stops[floor].classList.add('is-floor');
-            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
-            fill.style.right = (100 / stops.length) * 0.5 + '%';
-          }
+          fill.style.left = '0%';
+          fill.style.right = '100%';
         }
         if (hint) {
-          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
+          hint.textContent = picked.length ? picked.join(', ') : noun;
         }
       }
 
-      stops.forEach(function (stop, index) {
+      stops.forEach(function (stop) {
         stop.addEventListener('click', function (event) {
           event.preventDefault();
-          var isFloor = stop.classList.contains('is-floor');
-          stops.forEach(function (s, i) {
-            s.querySelector('input').checked = !isFloor && i >= index;
-          });
+          var input = stop.querySelector('input');
+          input.checked = !input.checked;
           paint();
         });
       });
+      scale.lmPaint = paint;
       paint();
     });
   }
@@ -373,73 +370,6 @@
     });
   }
 
-  /* ── Reserve modal ── */
-  var modal = document.getElementById('lm-reserve-modal');
-  var reserveStock = null;
-
-  function openReserve(stockRef, title) {
-    reserveStock = stockRef;
-    if (!modal) return;
-    modal.hidden = false;
-    document.body.classList.add('lm-reserve-open');
-    var t = modal.querySelector('[data-reserve-title]');
-    if (t) t.textContent = title || 'Stock #' + stockRef;
-    var stockInput = modal.querySelector('[name="stock_ref"]');
-    if (stockInput) stockInput.value = stockRef;
-    var status = modal.querySelector('[data-reserve-status]');
-    if (status) {
-      status.hidden = true;
-      status.textContent = '';
-    }
-  }
-
-  function closeReserve() {
-    if (!modal) return;
-    modal.hidden = true;
-    document.body.classList.remove('lm-reserve-open');
-    reserveStock = null;
-  }
-
-  async function submitReserve(event) {
-    event.preventDefault();
-    if (!cfg.reserveUrl || !reserveStock) return;
-    var fd = new FormData(event.target);
-    var payload = {
-      stock_ref: reserveStock,
-      name: String(fd.get('name') || '').trim(),
-      email: String(fd.get('email') || '').trim(),
-      phone: String(fd.get('phone') || '').trim(),
-      message: String(fd.get('message') || '').trim(),
-    };
-    var status = modal.querySelector('[data-reserve-status]');
-    var btn = modal.querySelector('[type="submit"]');
-    if (btn) btn.disabled = true;
-    try {
-      var res = await fetch(cfg.reserveUrl, {
-        method: 'POST',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, headers()),
-        body: JSON.stringify(payload),
-      });
-      var data = await res.json();
-      if (!res.ok) throw new Error(data.detail || data.error || 'Could not reserve');
-      if (status) {
-        status.hidden = false;
-        status.textContent =
-          'Reserved. We will confirm availability and send a private invoice to ' +
-          payload.email +
-          ' shortly.';
-      }
-      event.target.reset();
-    } catch (err) {
-      if (status) {
-        status.hidden = false;
-        status.textContent = err.message || String(err);
-      }
-    } finally {
-      if (btn) btn.disabled = false;
-    }
-  }
-
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -486,18 +416,6 @@
 
   if (resultsEl) {
     resultsEl.addEventListener('click', function (e) {
-      var reserveBtn = e.target.closest('[data-reserve]');
-      if (reserveBtn) {
-        e.preventDefault();
-        var card = reserveBtn.closest('.product-card');
-        var title = card ? card.querySelector('.product-card__title') : null;
-        openReserve(
-          reserveBtn.getAttribute('data-reserve'),
-          title ? title.textContent.trim() : '',
-        );
-        return;
-      }
-
       var buyBtn = e.target.closest('[data-buy-handle], [data-add-handle]');
       if (!buyBtn) return;
       e.preventDefault();
@@ -548,14 +466,6 @@
           }, 2200);
         });
     });
-  }
-
-  if (modal) {
-    modal.querySelectorAll('[data-reserve-close]').forEach(function (el) {
-      el.addEventListener('click', closeReserve);
-    });
-    var reserveForm = modal.querySelector('form');
-    if (reserveForm) reserveForm.addEventListener('submit', submitReserve);
   }
 
   load();
