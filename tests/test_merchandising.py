@@ -226,8 +226,8 @@ def test_hero_is_the_split_layout() -> None:
     settings = hero["settings"]
     assert hero["type"] == "lmh-hero"
     assert settings["title_emphasis"]
-    assert settings["primary_url"] == "/collections/lab-grown-diamonds"
-    assert settings["secondary_url"] == "/collections/ring-settings"
+    assert settings["primary_url"] == "/pages/ring-builder"
+    assert settings["secondary_url"] == "/collections/work-essentials"
     assert (ROOT / "assets" / settings["image_asset"]).exists()
     # Phones get the preview's pills under the header.
     pills = [b["settings"]["text"] for b in hero["blocks"].values() if b["type"] == "pill"]
