@@ -623,13 +623,13 @@ async function main() {
         const source = item?.imageUrls[0];
         if (!source) noSource += 1;
         if (source && rescueBudget <= 0) continue; // leave for the next run
+        if (source) rescueBudget -= 1; // every attempt counts, including successful rescues
         // Shopify refuses some supplier images over their Content-Type alone.
         // Fetching the bytes and re-uploading with a sniffed type rescues the
         // ones that are really images; the rest are genuinely missing.
         const staged = source ? await shopify.rehostImage(source) : null;
         if (source && !staged) {
           rehostFailed += 1;
-          rescueBudget -= 1;
         }
         if (staged) {
           await shopify.deleteMedia(p.id, p.failedMediaIds);
@@ -652,7 +652,7 @@ async function main() {
       if (broken.length > 0) {
         console.log(
           `Media: rescued ${mediaRehosted.length} of ${broken.length} ` +
-            `(no feed source: ${noSource}, fetch/sniff failed: ${rehostFailed})`,
+            `(attempted: ${15 - rescueBudget}, no feed source: ${noSource}, fetch/sniff failed: ${rehostFailed})`,
         );
       }
     } catch (err) {
