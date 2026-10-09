@@ -185,31 +185,30 @@ def strip_liquid_comments(text: str) -> str:
     return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
 
 
-def test_homepage_walks_gold_and_diamonds_before_watches() -> None:
-    """Loose diamonds and settings lead, then gold; watches and signed jewelry sit lower."""
+def test_homepage_leads_with_loose_lab_grown_diamonds() -> None:
+    """Loose lab-grown stones sell best online, so they lead; watches follow the proof strip."""
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     sections = data["sections"]
     assert order == [
-        "hero", "gold", "worlds", "trust-strip", "lab-grown", "loose-diamonds", "spotlight",
-        "private-clients", "engagement", "wear-together", "pre-owned",
-        "brand-story", "reviews",
+        "hero", "carat", "spotlight", "trust-strip", "pre-owned", "work-essentials",
+        "high-jewelry", "private-clients", "brand-story", "reviews",
     ]
     types = {key: sections[key]["type"] for key in order}
     assert types["hero"] == "lmh-hero"
+    assert types["carat"] == "lmh-carat"
     assert types["spotlight"] == "lmh-spotlight"
-    assert types["worlds"] == "lmh-worlds"
-    assert types["gold"] == types["lab-grown"] == "lmh-product-row"
-    assert types["wear-together"] == "lmh-wear-together"
+    # The section right under the banner is not the dark navy block.
+    assert sections["spotlight"]["settings"]["style"] == "cream"
+    assert types["work-essentials"] == types["high-jewelry"] == "lmh-product-row"
+    assert sections["work-essentials"]["settings"]["collection"] == "work-essentials"
+    assert sections["high-jewelry"]["settings"]["collection"] == "high-jewelry"
     assert types["pre-owned"] == "lmh-preowned"
-    assert types["loose-diamonds"] == "lmh-diamond-choice"
     assert types["private-clients"] == "lmh-private-band"
-    assert types["engagement"] == "lmh-engagement"
-    # The gold row fills from the Gold Jewelry collection.
-    assert sections["gold"]["settings"]["collection"] == "gold-jewelry"
-    assert sections["gold"]["settings"]["all_url"] == "/collections/gold-jewelry"
-    chips = [b for b in sections["gold"]["blocks"].values() if b["type"] == "chip"]
-    assert len(chips) >= 4
+    # Carat bands link to the search with the range pre-set.
+    bands = [b["settings"] for b in sections["carat"]["blocks"].values()]
+    assert [b["min"] for b in bands] == ["1", "2", "3", "5"]
+    assert "hydrateCaratFromURL" in (ROOT / "assets/diamond-storefront.js").read_text()
     # No price-capped edit on the homepage: the house is not sold as "under $2,500".
     text = (ROOT / "templates/index.json").read_text()
     assert "under-2500" not in text
@@ -226,12 +225,12 @@ def test_hero_is_the_split_layout() -> None:
     settings = hero["settings"]
     assert hero["type"] == "lmh-hero"
     assert settings["title_emphasis"]
-    assert settings["primary_url"] == "/pages/ring-builder"
-    assert settings["secondary_url"] == "/collections/work-essentials"
+    assert settings["primary_url"] == "/collections/lab-grown-diamonds"
+    assert settings["secondary_url"] == "/pages/ring-builder"
     assert (ROOT / "assets" / settings["image_asset"]).exists()
     # Phones get the preview's pills under the header.
     pills = [b["settings"]["text"] for b in hero["blocks"].values() if b["type"] == "pill"]
-    assert pills[:4] == ["Loose Diamonds", "Ring Settings", "Gold Jewelry", "High Jewelry"]
+    assert pills[:4] == ["Loose Diamonds", "Build Your Ring", "Work Essentials", "Watches"]
     liquid = (ROOT / "sections/lmh-hero.liquid").read_text()
     assert "lmh-hero__media" in liquid
 
@@ -415,13 +414,10 @@ def test_reviews_are_branded_cards_of_real_reviews_only() -> None:
             assert invented not in text, (path, invented)
 
 
-def test_lab_grown_rail_mixes_categories_in_a_carousel() -> None:
-    lab = load_json(ROOT / "templates/index.json")["sections"]["lab-grown"]
-    assert lab["settings"]["style"] == "navy"
-    handles = [b["settings"]["product"] for b in lab["blocks"].values() if b["type"] == "product"]
-    assert len(handles) >= 4
-    for kind in ("earrings", "bracelet", "necklace"):
-        assert any(kind in h for h in handles), kind
+def test_work_essentials_row_is_a_carousel_of_the_collection() -> None:
+    row = load_json(ROOT / "templates/index.json")["sections"]["work-essentials"]
+    assert row["settings"]["collection"] == "work-essentials"
+    assert row["settings"]["limit"] >= 8
     # Cards scroll sideways on phones.
     assert "lmh-scroll" in (ROOT / "sections/lmh-product-row.liquid").read_text()
 
@@ -445,7 +441,8 @@ def test_homepage_pairs_watches_with_signed_jewelry() -> None:
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     pre = data["sections"]["pre-owned"]
-    assert order.index("lab-grown") < order.index("wear-together") < order.index("pre-owned")
+    # Watches drive revenue: right after the diamond sections and the proof strip.
+    assert order.index("spotlight") < order.index("trust-strip") < order.index("pre-owned") < order.index("work-essentials")
     blocks = list(pre["blocks"].values())
     watch_chips = [b["settings"]["text"] for b in blocks if b["type"] == "watch_chip"]
     jewelry_chips = [b["settings"]["text"] for b in blocks if b["type"] == "jewelry_chip"]

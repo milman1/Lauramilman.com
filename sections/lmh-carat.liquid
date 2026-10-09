@@ -1,0 +1,139 @@
+{%- comment -%}
+  Homepage "Shop by carat": four carat bands of loose lab-grown diamonds.
+  Each tile links to the diamond search with the carat range pre-set
+  (assets/diamond-storefront.js reads min_carat / max_carat from the URL).
+
+  The "from" price, stone count and photo are live: the browser asks the
+  same diamonds API the search page uses for the cheapest stone in each
+  band. Without that answer the tile still links, with no price shown, so
+  a stale or invented price never appears.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+{%- assign search_url = '/collections/' | append: section.settings.diamond_collection -%}
+
+<section class="lmh lmh-row lmh-carat" aria-labelledby="LmhCarat-{{ section.id }}"
+  data-carat-api="{{ section.settings.api_base_url | escape }}"
+  data-carat-key="{{ section.settings.api_anon_key | escape }}">
+  <div class="lmh-split-head">
+    <div class="lmh-split-head__l">
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhCarat-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h2>
+    </div>
+    <div class="lmh-split-head__r">
+      {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+      <div class="lmh-chips lmh-chips--scroll">
+        {%- assign chip_shapes = 'Round,Oval,Emerald,Radiant,Pear,Cushion' | split: ',' -%}
+        {%- for s in chip_shapes -%}
+          <a class="lmh-chip" href="{{ search_url }}?shape={{ s }}">{{ s }}</a>
+        {%- endfor -%}
+        <a class="lmh-arrow" style="padding: 0 6px;" href="{{ search_url }}">All diamonds {% render 'lmh-arrow' %}</a>
+      </div>
+    </div>
+  </div>
+
+  <ul class="lmh-carat__grid" role="list">
+    {%- for block in section.blocks -%}
+      {%- capture band_url -%}{{ search_url }}?min_carat={{ block.settings.min }}{% if block.settings.max != blank %}&max_carat={{ block.settings.max }}{% endif %}{%- endcapture -%}
+      <li {{ block.shopify_attributes }}>
+        <a class="lmh-carat__tile" href="{{ band_url }}" data-band-min="{{ block.settings.min }}" data-band-max="{{ block.settings.max }}">
+          <span class="lmh-carat__media">
+            {%- render 'lmh-img', asset: section.settings.fallback_asset, alt: '', sizes: '(max-width: 749px) 50vw, 25vw' -%}
+          </span>
+          <span class="lmh-carat__body">
+            <span class="lmh-carat__title">{{ block.settings.title | escape }}</span>
+            <span class="lmh-carat__note">{{ block.settings.note | escape }}</span>
+            <span class="lmh-carat__price" data-band-price></span>
+          </span>
+        </a>
+      </li>
+    {%- endfor -%}
+  </ul>
+</section>
+
+<style>
+  .lmh-carat__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
+  .lmh-carat__tile { display: flex; flex-direction: column; gap: 14px; color: inherit; text-decoration: none; }
+  .lmh-carat__media { position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: #ECE7DF; }
+  .lmh-carat__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+  .lmh-carat__tile:hover .lmh-carat__media img { transform: scale(1.03); }
+  .lmh-carat__body { display: flex; flex-direction: column; gap: 4px; }
+  .lmh-carat__title { font-family: var(--lmh-serif); font-size: 28px; font-weight: 500; line-height: 1.1; }
+  .lmh-carat__note { font-size: 12.5px; color: var(--lmh-muted, #6F6457); }
+  .lmh-carat__price { min-height: 1.4em; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+  @media (max-width: 749px) {
+    .lmh-carat__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .lmh-carat__title { font-size: 22px; }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-carat-api]');
+    if (!root || !window.fetch) return;
+    var api = (root.dataset.caratApi || '').replace(/\/+$/, '');
+    if (!api) return;
+    var headers = {};
+    if (root.dataset.caratKey) {
+      headers.apikey = root.dataset.caratKey;
+      headers.Authorization = 'Bearer ' + root.dataset.caratKey;
+    }
+    function money(n) {
+      return '$' + Math.round(Number(n)).toLocaleString('en-US');
+    }
+    root.querySelectorAll('[data-band-min]').forEach(function (tile) {
+      var q = new URLSearchParams({ kind: 'lab', sort: 'price_asc', page: '1', per_page: '12', min_carat: tile.dataset.bandMin });
+      if (tile.dataset.bandMax) q.set('max_carat', tile.dataset.bandMax);
+      fetch(api + '?' + q.toString(), { headers: headers })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data || !data.stones || !data.stones.length) return;
+          var stone = data.stones[0];
+          var price = tile.querySelector('[data-band-price]');
+          if (price && Number(stone.retail_usd) > 0) {
+            price.textContent = 'From ' + money(stone.retail_usd) + ' · ' + Number(data.total || 0).toLocaleString('en-US') + ' stones';
+          }
+          var src = stone.image_urls && stone.image_urls[0];
+          var img = tile.querySelector('.lmh-carat__media img');
+          if (src && img) {
+            img.removeAttribute('srcset');
+            img.src = src;
+            img.alt = stone.carat + ' ct ' + (stone.shape || '') + ' lab-grown diamond';
+          }
+        })
+        .catch(function () {});
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "LM shop by carat",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose lab-grown diamonds" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Shop by carat." },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "diamond_collection", "label": "Diamond search collection handle", "default": "lab-grown-diamonds" },
+    { "type": "text", "id": "api_base_url", "label": "Diamonds API URL" },
+    { "type": "text", "id": "api_anon_key", "label": "Diamonds API public key" },
+    { "type": "text", "id": "fallback_asset", "label": "Photo before prices load (theme asset)", "default": "diamond-destination-lab.webp" }
+  ],
+  "blocks": [
+    {
+      "type": "band",
+      "name": "Carat band",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "text", "id": "note", "label": "Note" },
+        { "type": "text", "id": "min", "label": "Minimum carat" },
+        { "type": "text", "id": "max", "label": "Maximum carat (blank for no limit)" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "LM shop by carat" }]
+}
+{% endschema %}

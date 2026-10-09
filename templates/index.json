@@ -22,29 +22,29 @@
         "pill-2": {
           "type": "pill",
           "settings": {
-            "text": "Ring Settings",
-            "url": "/collections/ring-settings"
+            "text": "Build Your Ring",
+            "url": "/pages/ring-builder"
           }
         },
         "pill-3": {
           "type": "pill",
           "settings": {
-            "text": "Gold Jewelry",
-            "url": "/collections/gold-jewelry"
+            "text": "Work Essentials",
+            "url": "/collections/work-essentials"
           }
         },
         "pill-4": {
           "type": "pill",
           "settings": {
-            "text": "High Jewelry",
-            "url": "/collections/high-jewelry"
+            "text": "Watches",
+            "url": "/collections/time-pieces"
           }
         },
         "pill-5": {
           "type": "pill",
           "settings": {
-            "text": "Pre-Owned",
-            "url": "/collections/time-pieces"
+            "text": "High Jewelry",
+            "url": "/collections/high-jewelry"
           }
         }
       },
@@ -56,75 +56,17 @@
         "pill-5"
       ],
       "settings": {
-        "eyebrow": "Lab-grown diamonds · Ring settings · 14K gold",
-        "title": "Jewelry for the week",
-        "title_emphasis": "you work.",
-        "text": "Loose lab-grown diamonds with live prices, settings to put them in, and solid 14K gold for the office, from a New York house with 30+ years in the Diamond District.",
-        "primary_text": "Build Your Ring",
-        "primary_url": "/pages/ring-builder",
-        "secondary_text": "Work Essentials",
-        "secondary_url": "/collections/work-essentials",
+        "eyebrow": "Lab-grown diamonds · IGI & GIA graded",
+        "title": "Bigger diamonds,",
+        "title_emphasis": "lab-grown and certified.",
+        "text": "Loose lab-grown diamonds graded by IGI or GIA, with a live price on every stone, and settings to put them in. From a New York house with 30+ years in the Diamond District.",
+        "primary_text": "Shop Loose Diamonds",
+        "primary_url": "/collections/lab-grown-diamonds",
+        "secondary_text": "Build Your Ring",
+        "secondary_url": "/pages/ring-builder",
         "note": "Shop Pay Installments available at checkout.",
         "image_asset": "fine-jewelry-model-earrings.jpg",
         "image_alt": "Woman wearing long diamond drop earrings"
-      }
-    },
-    "worlds": {
-      "type": "lmh-worlds",
-      "blocks": {
-        "tile-1": {
-          "type": "tile",
-          "settings": {
-            "title": "Loose Diamonds",
-            "text": "Lab-grown stones graded by IGI or GIA. Search by shape, carat, color and clarity.",
-            "link_text": "Shop loose diamonds",
-            "url": "/collections/lab-grown-diamonds",
-            "image_asset": "diamond-destination-lab.webp",
-            "image_alt": "Radiant-cut diamond held in tweezers over a glass dish"
-          }
-        },
-        "tile-2": {
-          "type": "tile",
-          "settings": {
-            "title": "Ring Settings",
-            "text": "Solitaire, hidden halo and bezel settings in 14K and 18K gold, ready for the diamond you choose.",
-            "link_text": "Shop settings",
-            "url": "/collections/ring-settings",
-            "image": "shopify://shop_images/round-hidden-halo-engagement-ring-setting-in-14k-yellow-gold-0-10-ct-hero.png",
-            "image_alt": "Round hidden halo engagement ring setting in yellow gold"
-          }
-        },
-        "tile-3": {
-          "type": "tile",
-          "settings": {
-            "title": "Gold Jewelry",
-            "text": "Solid 14K chains, signet rings and bangles for the workweek.",
-            "link_text": "Shop gold",
-            "url": "/collections/gold-jewelry",
-            "image": "shopify://shop_images/mini-signet-ring-14k-yellow-gold-onbody.jpg",
-            "image_alt": "Mini signet ring in 14K yellow gold worn on the hand"
-          }
-        },
-        "tile-4": {
-          "type": "tile",
-          "settings": {
-            "title": "High Jewelry",
-            "text": "Fancy yellow, pink and green diamonds in platinum and 18K gold.",
-            "link_text": "Shop high jewelry",
-            "url": "/collections/high-jewelry",
-            "image": "shopify://shop_images/J2940.png",
-            "image_alt": "Fancy yellow-green cushion diamond ring in platinum and rose gold"
-          }
-        }
-      },
-      "block_order": [
-        "tile-1",
-        "tile-2",
-        "tile-3",
-        "tile-4"
-      ],
-      "settings": {
-        "heading": "Shop the house"
       }
     },
     "trust-strip": {
@@ -163,108 +105,6 @@
         "promise-4"
       ],
       "settings": {}
-    },
-    "gold": {
-      "type": "lmh-product-row",
-      "blocks": {
-        "gold-1": {
-          "type": "chip",
-          "settings": {
-            "text": "Chains",
-            "url": "/collections/gold-chains"
-          }
-        },
-        "gold-2": {
-          "type": "chip",
-          "settings": {
-            "text": "Bracelets",
-            "url": "/collections/gold-bracelets"
-          }
-        },
-        "gold-3": {
-          "type": "chip",
-          "settings": {
-            "text": "Rings",
-            "url": "/collections/gold-rings"
-          }
-        },
-        "gold-4": {
-          "type": "chip",
-          "settings": {
-            "text": "Your First Gold Piece",
-            "url": "/collections/first-gold-piece"
-          }
-        }
-      },
-      "block_order": [
-        "gold-1",
-        "gold-2",
-        "gold-3",
-        "gold-4"
-      ],
-      "settings": {
-        "style": "cream",
-        "columns": "5",
-        "ratio": "0.84",
-        "collection": "gold-jewelry",
-        "limit": 10,
-        "eyebrow": "Gold Jewelry",
-        "title": "Solid 14K gold for the workweek,",
-        "title_emphasis": "one piece at a time.",
-        "text": "Chains, signet rings and stackables that go from the 9 a.m. meeting to dinner. Start with one piece and add to it.",
-        "all_text": "Shop all",
-        "all_url": "/collections/gold-jewelry",
-        "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/gold-jewelry"
-      }
-    },
-    "wear-together": {
-      "type": "lmh-wear-together",
-      "blocks": {
-        "wear-1": {
-          "type": "product",
-          "settings": {
-            "product": "w-t3492",
-            "title": "Pre-Owned Rolex Lady Date Just",
-            "subtitle": "Ref. 179174 · 26mm"
-          }
-        },
-        "wear-2": {
-          "type": "product",
-          "settings": {
-            "product": "lab-diamond-tennis-bracelet-round-1-92ct-bc14wtsrd175p",
-            "title": "Lab Grown Round Brilliant Diamond Tennis Bracelet",
-            "subtitle": "1.92 CT · 14K White Gold"
-          }
-        },
-        "wear-3": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-herringbone-2-8-mm-sf030-bracelet",
-            "title": "2.8mm Herringbone Chain Bracelet",
-            "subtitle": "14K Yellow Gold · 7 in"
-          }
-        }
-      },
-      "block_order": [
-        "wear-1",
-        "wear-2",
-        "wear-3"
-      ],
-      "settings": {
-        "image_asset": "shop-world-preowned-maison.webp",
-        "image_alt": "2.8mm herringbone chain bracelet in 14K yellow gold on a wrist",
-        "eyebrow": "Wear it together",
-        "title": "The watch you earned, and",
-        "title_emphasis": "what you wear with it.",
-        "text": "Start with a pre-owned watch, add a lab-grown tennis bracelet, and finish with a gold chain bracelet.",
-        "button_text": "Shop Pre-Owned Watches",
-        "button_url": "/collections/time-pieces",
-        "link_text": "Tennis bracelets",
-        "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery.",
-        "image": "shopify://shop_images/lmny-herringbone-2-8-mm-sf030-wrist.png"
-      }
     },
     "pre-owned": {
       "type": "lmh-preowned",
@@ -428,7 +268,7 @@
         "eyebrow": "Pre-Owned",
         "title": "Pre-owned watches and",
         "title_emphasis": "signed jewelry.",
-        "text": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Missing items are never implied. Signed jewelry is authenticated and hand-inspected by Laura Milman New York.",
+        "text": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Missing items are never implied. Signed jewelry is authenticated and hand-inspected by Laura Milman New York. Watches are exchange-only within 7 days of delivery.",
         "watch_title": "Watches",
         "watch_all_text": "All watches",
         "watch_all_short": "All watches",
@@ -437,153 +277,6 @@
         "jewelry_all_text": "All pre-owned & estate",
         "jewelry_all_short": "All estate",
         "jewelry_all_url": "/collections/estate-jewelry"
-      }
-    },
-    "lab-grown": {
-      "type": "lmh-product-row",
-      "blocks": {
-        "lab-1": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
-            "title": "Lab Grown Emerald Diamond Huggie Earrings",
-            "subtitle": "0.41 CT · 14K Yellow Gold"
-          }
-        },
-        "lab-2": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-diamond-station-bracelet-065-ct-14k-yellow-gold-bc2423",
-            "title": "Lab Grown Round Diamond Station Bracelet",
-            "subtitle": "0.65 CT · 14K Yellow Gold"
-          }
-        },
-        "lab-3": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-diamond-hoop-earrings-101-ct-14k-yellow-gold-er9257",
-            "title": "Lab Grown Round Diamond Hoop Earrings",
-            "subtitle": "1.01 CT · 14K Yellow Gold"
-          }
-        },
-        "lab-4": {
-          "type": "product",
-          "settings": {
-            "product": "lab-diamond-round-station-necklace-1-76ct-nk14ystrd175p",
-            "title": "Lab Grown Round Diamond Station Necklace",
-            "subtitle": "1.76 CT · 14K Yellow Gold"
-          }
-        }
-      },
-      "block_order": [
-        "lab-1",
-        "lab-2",
-        "lab-3",
-        "lab-4"
-      ],
-      "settings": {
-        "style": "navy",
-        "columns": "4",
-        "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds",
-        "title": "Diamonds for the week,",
-        "title_emphasis": "not a step on the way to something else.",
-        "text": "The stones differ. The design standard does not. Huggies, station pieces and tennis bracelets in 14K gold, set with lab-grown diamonds.",
-        "button_1_text": "Shop Lab-Grown Jewelry",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry",
-        "button_2_text": "Loose Lab-Grown Diamonds",
-        "button_2_url": "/collections/lab-grown-diamonds"
-      }
-    },
-    "loose-diamonds": {
-      "type": "lmh-diamond-choice",
-      "blocks": {
-        "shape-1": {
-          "type": "shape",
-          "settings": {
-            "text": "Round",
-            "url": "/collections/lab-grown-diamonds?shape=Round"
-          }
-        },
-        "shape-2": {
-          "type": "shape",
-          "settings": {
-            "text": "Oval",
-            "url": "/collections/lab-grown-diamonds?shape=Oval"
-          }
-        },
-        "shape-3": {
-          "type": "shape",
-          "settings": {
-            "text": "Emerald",
-            "url": "/collections/lab-grown-diamonds?shape=Emerald"
-          }
-        },
-        "shape-4": {
-          "type": "shape",
-          "settings": {
-            "text": "Pear",
-            "url": "/collections/lab-grown-diamonds?shape=Pear"
-          }
-        },
-        "shape-5": {
-          "type": "shape",
-          "settings": {
-            "text": "Radiant",
-            "url": "/collections/lab-grown-diamonds?shape=Radiant"
-          }
-        },
-        "shape-6": {
-          "type": "shape",
-          "settings": {
-            "text": "Cushion",
-            "url": "/collections/lab-grown-diamonds?shape=Cushion"
-          }
-        }
-      },
-      "block_order": [
-        "shape-1",
-        "shape-2",
-        "shape-3",
-        "shape-4",
-        "shape-5",
-        "shape-6"
-      ],
-      "settings": {
-        "eyebrow": "Loose Diamonds",
-        "title": "Choose your diamond:",
-        "title_emphasis": "lab-grown or natural.",
-        "text": "Every stone is listed with its grading lab and certificate. Search by shape, carat, color and clarity, or book an appointment to talk it through in Midtown.",
-        "lab_image_asset": "diamond-destination-lab.webp",
-        "lab_image_alt": "Radiant-cut diamond held in tweezers over a glass dish",
-        "lab_title": "Lab-Grown Diamonds",
-        "lab_short": "Lab-Grown",
-        "lab_text": "Identical to mined diamonds in every measurable way, grown rather than extracted.",
-        "lab_origin": "Grown in a lab",
-        "lab_grading": "IGI or GIA, on every listing",
-        "lab_selection": "20,000+ stones",
-        "lab_example_product": "lg-886886",
-        "lab_example_text": "1.02 ct round · E · VS2 · IGI",
-        "lab_example_short": "1.02 ct · IGI",
-        "lab_button": "Search Lab-Grown Diamonds",
-        "lab_button_short": "Search Lab-Grown",
-        "lab_url": "/collections/lab-grown-diamonds",
-        "natural_image_asset": "shop-world-loose-diamonds.webp",
-        "natural_image_alt": "Oval diamond resting on champagne satin",
-        "natural_title": "Natural Diamonds",
-        "natural_short": "Natural",
-        "natural_text": "Formed in the earth and priced against the live market.",
-        "natural_origin": "Formed in the earth",
-        "natural_grading": "GIA on nearly every stone",
-        "natural_selection": "3,500+ stones",
-        "natural_example_product": "nd-k15512b",
-        "natural_example_text": "1.0 ct round · E · VS2 · GIA",
-        "natural_example_short": "1.0 ct · GIA",
-        "natural_button": "Search Natural Diamonds",
-        "natural_button_short": "Search Natural",
-        "natural_url": "/collections/natural-diamonds",
-        "compare_example_label": "Matched example · 1 ct round · E · VS2",
-        "shapes_label": "Shop by shape"
       }
     },
     "private-clients": {
@@ -598,21 +291,6 @@
         "button_text": "Book a Consultation",
         "button_url": "/pages/private-clients",
         "note": "Complimentary · No obligation"
-      }
-    },
-    "engagement": {
-      "type": "lmh-engagement",
-      "settings": {
-        "image_asset": "peaceful-hero-diamonds.jpg",
-        "image_alt": "Loose diamonds of several shapes on navy velvet",
-        "eyebrow": "Engagement",
-        "title": "Start with",
-        "title_emphasis": "the stone.",
-        "text": "Choose a lab-grown or natural diamond, pick a setting, and our goldsmiths in Italy craft the ring.",
-        "primary_text": "Build Your Ring",
-        "primary_url": "/pages/ring-builder",
-        "secondary_text": "Engagement Rings",
-        "secondary_url": "/collections/engagement-rings"
       }
     },
     "brand-story": {
@@ -669,28 +347,175 @@
     "spotlight": {
       "type": "lmh-spotlight",
       "settings": {
-        "eyebrow": "Loose diamonds & ring settings",
+        "eyebrow": "Build your ring",
         "title": "Choose the diamond.",
         "title_emphasis": "Choose the setting.",
-        "text": "IGI- and GIA-graded lab-grown diamonds with live prices, and settings in 14K and 18K gold. Pick the stone, pick the setting, and we set it for you.",
+        "text": "Pick a lab-grown diamond and a setting in 14K or 18K gold, and we set the stone for you. Every setting is listed with its own price.",
         "settings_note": "14K and 18K gold · Setting prices do not include the center diamond.",
         "diamond_collection": "lab-grown-diamonds",
-        "settings_collection": "ring-settings"
+        "settings_collection": "ring-settings",
+        "style": "cream"
       }
+    },
+    "carat": {
+      "type": "lmh-carat",
+      "settings": {
+        "eyebrow": "Loose lab-grown diamonds",
+        "title": "Shop by carat.",
+        "title_emphasis": "Live prices on every stone.",
+        "text": "Each listing shows its grading lab, color, clarity and cut. Pick a size, then narrow it by shape and grade.",
+        "diamond_collection": "lab-grown-diamonds",
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
+        "fallback_asset": "diamond-destination-lab.webp"
+      },
+      "blocks": {
+        "band-1": {
+          "type": "band",
+          "settings": {
+            "title": "1 carat",
+            "note": "1.00–1.99 ct",
+            "min": "1",
+            "max": "1.99"
+          }
+        },
+        "band-2": {
+          "type": "band",
+          "settings": {
+            "title": "2 carats",
+            "note": "2.00–2.99 ct",
+            "min": "2",
+            "max": "2.99"
+          }
+        },
+        "band-3": {
+          "type": "band",
+          "settings": {
+            "title": "3 carats",
+            "note": "3.00–4.99 ct",
+            "min": "3",
+            "max": "4.99"
+          }
+        },
+        "band-4": {
+          "type": "band",
+          "settings": {
+            "title": "5 carats +",
+            "note": "5 ct and up",
+            "min": "5",
+            "max": ""
+          }
+        }
+      },
+      "block_order": [
+        "band-1",
+        "band-2",
+        "band-3",
+        "band-4"
+      ]
+    },
+    "work-essentials": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "we-1": {
+          "type": "chip",
+          "settings": {
+            "text": "Gold Jewelry",
+            "url": "/collections/gold-jewelry"
+          }
+        },
+        "we-2": {
+          "type": "chip",
+          "settings": {
+            "text": "Your First Gold Piece",
+            "url": "/collections/first-gold-piece"
+          }
+        },
+        "we-3": {
+          "type": "chip",
+          "settings": {
+            "text": "Lab-Grown Jewelry",
+            "url": "/collections/lab-grown-diamond-jewelry"
+          }
+        }
+      },
+      "block_order": [
+        "we-1",
+        "we-2",
+        "we-3"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "5",
+        "ratio": "0.84",
+        "collection": "work-essentials",
+        "limit": 10,
+        "eyebrow": "Work Essentials",
+        "title": "Monday to Friday,",
+        "title_emphasis": "and after.",
+        "text": "Diamond studs, a pendant, a signet ring and a chain bracelet: solid 14K gold and lab-grown diamonds that go from the 9 a.m. meeting to dinner.",
+        "all_text": "Shop all",
+        "all_url": "/collections/work-essentials",
+        "mobile_button_text": "Shop Work Essentials",
+        "mobile_button_url": "/collections/work-essentials"
+      }
+    },
+    "high-jewelry": {
+      "type": "lmh-product-row",
+      "settings": {
+        "style": "cream",
+        "columns": "5",
+        "ratio": "1",
+        "collection": "high-jewelry",
+        "limit": 5,
+        "eyebrow": "High Jewelry",
+        "title": "Rare color,",
+        "title_emphasis": "one of each.",
+        "text": "Fancy yellow, pink and green diamonds in platinum and 18K gold, many with GIA reports. Private viewings by appointment in Midtown.",
+        "all_text": "Shop all",
+        "all_url": "/collections/high-jewelry",
+        "mobile_button_text": "Shop High Jewelry",
+        "mobile_button_url": "/collections/high-jewelry"
+      },
+      "blocks": {
+        "hj-1": {
+          "type": "chip",
+          "settings": {
+            "text": "Yellow",
+            "url": "/collections/fancy-yellow-diamonds"
+          }
+        },
+        "hj-2": {
+          "type": "chip",
+          "settings": {
+            "text": "Pink",
+            "url": "/collections/fancy-pink-diamonds"
+          }
+        },
+        "hj-3": {
+          "type": "chip",
+          "settings": {
+            "text": "Green",
+            "url": "/collections/fancy-green-diamonds"
+          }
+        }
+      },
+      "block_order": [
+        "hj-1",
+        "hj-2",
+        "hj-3"
+      ]
     }
   },
   "order": [
     "hero",
-    "gold",
-    "worlds",
-    "trust-strip",
-    "lab-grown",
-    "loose-diamonds",
+    "carat",
     "spotlight",
-    "private-clients",
-    "engagement",
-    "wear-together",
+    "trust-strip",
     "pre-owned",
+    "work-essentials",
+    "high-jewelry",
+    "private-clients",
     "brand-story",
     "reviews"
   ]

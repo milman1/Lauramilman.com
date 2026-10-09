@@ -23,7 +23,8 @@
   assign shown_count = 0
 -%}
 
-<section class="lmh lmh-row lmh-row--navy lmh-dark lmh-navy lmh-spot" aria-labelledby="LmhSpot-{{ section.id }}" style="--lmh-card-ratio: 1;">
+{%- assign spot_navy = false -%}{%- if section.settings.style == 'navy' -%}{%- assign spot_navy = true -%}{%- endif -%}
+<section class="lmh lmh-row{% if spot_navy %} lmh-row--navy lmh-dark lmh-navy lmh-spot--navy{% endif %} lmh-spot" aria-labelledby="LmhSpot-{{ section.id }}" style="--lmh-card-ratio: 1;">
   <div class="lmh-split-head">
     <div class="lmh-split-head__l">
       <p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>
@@ -32,8 +33,8 @@
     <div class="lmh-split-head__r">
       <p class="lmh-lede">{{ section.settings.text | escape }}</p>
       <div class="lmh-row__ctas">
-        <a class="lmh-btn lmh-btn--gold" href="{{ diamonds_url }}">Shop loose diamonds</a>
-        <a class="lmh-btn lmh-btn--light" href="{{ settings_url }}">Shop ring settings</a>
+        <a class="lmh-btn {% if spot_navy %}lmh-btn--gold{% else %}lmh-btn--dark{% endif %}" href="{{ diamonds_url }}">Shop loose diamonds</a>
+        <a class="lmh-btn {% if spot_navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ settings_url }}">Shop ring settings</a>
       </div>
     </div>
   </div>
@@ -129,28 +130,34 @@
   </div>
 
   <div class="lmh-row__more">
-    <a class="lmh-btn lmh-btn--light" href="{{ diamonds_url }}">Shop loose diamonds</a>
+    <a class="lmh-btn {% if spot_navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ diamonds_url }}">Shop loose diamonds</a>
   </div>
 </section>
 
 <style>
   .lmh-spot { gap: 44px; }
-  .lmh-spot__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(250,246,240,.18); border-bottom: 1px solid rgba(250,246,240,.18); }
-  .lmh-spot__steps li { padding: 18px 20px; font-size: 13px; letter-spacing: .04em; color: var(--lmh-on-dark); }
-  .lmh-spot__steps li + li { border-left: 1px solid rgba(250,246,240,.18); }
-  .lmh-spot__steps span { margin-right: 10px; font-family: var(--lmh-serif); font-size: 22px; font-style: italic; color: var(--lmh-gold-light); }
+  .lmh-spot { --spot-line: rgba(44,24,16,.14); }
+  .lmh-spot--navy { --spot-line: rgba(250,246,240,.18); }
+  .lmh-spot__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--spot-line); border-bottom: 1px solid var(--spot-line); }
+  .lmh-spot__steps li { padding: 18px 20px; font-size: 13px; letter-spacing: .04em; }
+  .lmh-spot__steps li + li { border-left: 1px solid var(--spot-line); }
+  .lmh-spot__steps span { margin-right: 10px; font-family: var(--lmh-serif); font-size: 22px; font-style: italic; color: var(--lmh-gold, #B8975A); }
   .lmh-spot__block { display: flex; flex-direction: column; gap: 22px; }
   .lmh-spot__bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .lmh-spot__h3 { margin: 0; font-family: var(--lmh-serif); font-weight: 500; font-size: 30px; color: var(--lmh-cream); }
-  .lmh-spot__note { margin: 0; font-size: 12.5px; color: var(--lmh-on-dark-muted); }
-  .lmh-spot .lmh-chip { background: transparent; border-color: rgba(250,246,240,.35); color: var(--lmh-cream) !important; }
-  .lmh-spot .lmh-chip:hover { border-color: var(--lmh-gold); }
-  .lmh-spot .lmh-card__price { color: var(--lmh-cream); }
+  .lmh-spot__h3 { margin: 0; font-family: var(--lmh-serif); font-weight: 500; font-size: 30px; }
+  .lmh-spot__note { margin: 0; font-size: 12.5px; color: var(--lmh-muted, #6F6457); }
+  .lmh-spot--navy .lmh-spot__steps li { color: var(--lmh-on-dark); }
+  .lmh-spot--navy .lmh-spot__steps span { color: var(--lmh-gold-light); }
+  .lmh-spot--navy .lmh-spot__h3 { color: var(--lmh-cream); }
+  .lmh-spot--navy .lmh-spot__note { color: var(--lmh-on-dark-muted); }
+  .lmh-spot--navy .lmh-chip { background: transparent; border-color: rgba(250,246,240,.35); color: var(--lmh-cream) !important; }
+  .lmh-spot--navy .lmh-chip:hover { border-color: var(--lmh-gold); }
+  .lmh-spot--navy .lmh-card__price { color: var(--lmh-cream); }
   @media (max-width: 749px) {
     .lmh-spot { gap: 28px; }
     .lmh-spot__steps { grid-template-columns: minmax(0, 1fr); }
     .lmh-spot__steps li { padding: 12px 0; }
-    .lmh-spot__steps li + li { border-left: 0; border-top: 1px solid rgba(250,246,240,.18); }
+    .lmh-spot__steps li + li { border-left: 0; border-top: 1px solid var(--spot-line); }
     .lmh-spot__h3 { font-size: 26px; }
     .lmh-spot__bar { gap: 12px; }
     .lmh-spot__chips { width: 100%; }
@@ -162,6 +169,7 @@
   "name": "LM diamond spotlight",
   "tag": "div",
   "settings": [
+    { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose diamonds & ring settings" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Choose the diamond." },
     { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "Choose the setting." },
