@@ -334,6 +334,24 @@
     });
   }
 
+  /** Links such as ?min_carat=2&max_carat=2.99 pre-set the carat range. */
+  function hydrateCaratFromURL() {
+    var params;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch (e) {
+      return;
+    }
+    var wrap = form.querySelector('[data-range-key="carat"]');
+    if (!wrap) return;
+    var pairs = [['min_carat', '[data-range-min]'], ['max_carat', '[data-range-max]']];
+    pairs.forEach(function (pair) {
+      var value = Number(params.get(pair[0]));
+      var input = wrap.querySelector(pair[1]);
+      if (input && params.get(pair[0]) !== null && Number.isFinite(value) && value > 0) input.value = String(value);
+    });
+  }
+
   function wireShapes() {
     form.querySelectorAll('.lm-shape').forEach(function (label) {
       var input = label.querySelector('input');
@@ -392,6 +410,7 @@
     }
     wireScales();
     hydrateShapesFromURL();
+    hydrateCaratFromURL();
     wireShapes();
     wireRanges();
   }

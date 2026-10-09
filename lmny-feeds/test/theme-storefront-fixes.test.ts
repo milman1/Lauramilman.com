@@ -41,14 +41,11 @@ describe('lab-grown jewelry merchandising', () => {
     expect(labGrown.sections.hero.settings?.secondary_url).toBe('/collections/lab-grown-diamonds');
   });
 
-  it('gives the homepage a lab-grown world and a product row', () => {
+  it('leads the homepage with loose lab-grown diamonds and settings', () => {
     const home = themeJson('templates/index.json');
-    const worlds = home.sections.worlds;
-    const titles = (worlds.block_order ?? []).map((id) => worlds.blocks?.[id]?.settings?.title);
-    expect(titles).toContain('Lab-Grown Diamonds');
-    expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
-    expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('worlds'));
-    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('loose-diamonds'));
+    expect(home.order.slice(0, 3)).toEqual(['hero', 'carat', 'spotlight']);
+    expect(home.sections.carat.type).toBe('lmh-carat');
+    expect(home.sections.hero.settings?.primary_url).toBe('/collections/lab-grown-diamonds');
   });
 });
 

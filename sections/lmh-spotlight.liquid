@@ -1,0 +1,183 @@
+{%- comment -%}
+  Homepage spotlight under the hero: loose lab-grown diamonds and ring
+  settings. Both rows are live listings.
+
+  Diamonds: one available stone per shape (1.5–2.6 ct) from the lab-grown
+  collection, so a sold stone is replaced on the next page view rather than
+  leaving a gap. Any shape that finds nothing is filled with the next
+  available stone.
+
+  Settings: the first four available products in the ring-settings
+  collection, one per style. The product title "Round Hidden Halo Engagement Ring Setting in
+  Yellow Gold – 0.10 CT" shows as "Round Hidden Halo" over "Yellow Gold –
+  0.10 CT". Photos skip the video so the card shows a still.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign pool = collections[section.settings.diamond_collection].products
+  assign settings_pool = collections[section.settings.settings_collection].products
+  assign diamonds_url = '/collections/' | append: section.settings.diamond_collection
+  assign settings_url = '/collections/' | append: section.settings.settings_collection
+  assign shapes = 'Round,Oval,Emerald,Cushion' | split: ','
+  assign shown = ''
+  assign shown_count = 0
+-%}
+
+{%- assign spot_navy = false -%}{%- if section.settings.style == 'navy' -%}{%- assign spot_navy = true -%}{%- endif -%}
+<section class="lmh lmh-row{% if spot_navy %} lmh-row--navy lmh-dark lmh-navy lmh-spot--navy{% endif %} lmh-spot" aria-labelledby="LmhSpot-{{ section.id }}" style="--lmh-card-ratio: 1;">
+  <div class="lmh-split-head">
+    <div class="lmh-split-head__l">
+      <p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h2 class="lmh-h2" id="LmhSpot-{{ section.id }}">{{ section.settings.title | escape }} <em>{{ section.settings.title_emphasis | escape }}</em></h2>
+    </div>
+    <div class="lmh-split-head__r">
+      <p class="lmh-lede">{{ section.settings.text | escape }}</p>
+      <div class="lmh-row__ctas">
+        <a class="lmh-btn {% if spot_navy %}lmh-btn--gold{% else %}lmh-btn--dark{% endif %}" href="{{ diamonds_url }}">Shop loose diamonds</a>
+        <a class="lmh-btn {% if spot_navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ settings_url }}">Shop ring settings</a>
+      </div>
+    </div>
+  </div>
+
+  <ol class="lmh-spot__steps" role="list">
+    <li><span>01</span> Choose a lab-grown diamond</li>
+    <li><span>02</span> Choose a setting and metal</li>
+    <li><span>03</span> We set it and ship it insured</li>
+  </ol>
+
+  <div class="lmh-spot__block">
+    <div class="lmh-spot__bar">
+      <h3 class="lmh-spot__h3">The diamond</h3>
+      <div class="lmh-chips lmh-chips--scroll lmh-spot__chips">
+        {%- assign chip_shapes = 'Round,Oval,Emerald,Cushion,Pear,Radiant' | split: ',' -%}
+        {%- for s in chip_shapes -%}
+          <a class="lmh-chip" href="{{ diamonds_url }}?shape={{ s }}">{{ s }}</a>
+        {%- endfor -%}
+        <a class="lmh-arrow" style="padding: 0 6px;" href="{{ diamonds_url }}">All diamonds {% render 'lmh-arrow' %}</a>
+      </div>
+    </div>
+    <ul class="lmh-grid lmh-grid--4 lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+      {%- for want in shapes -%}
+        {%- for d in pool -%}
+          {%- assign dm = d.metafields.custom -%}
+          {%- assign ct = dm.carat_weight.value | default: 0 -%}
+          {%- if d.available and dm.diamond_shape.value == want and ct >= 1.5 and ct <= 2.6 -%}
+            {%- capture d_title -%}{{ ct }} ct {{ want }}{%- endcapture -%}
+            {%- capture d_sub -%}{{ dm.color }} · {{ dm.clarity }} · {{ d.metafields.lmny_feed.lab | default: 'IGI' }}{%- endcapture -%}
+            <li>{%- render 'lmh-card', card_product: d, card_title: d_title, card_sub: d_sub, sizes: '(max-width: 749px) 168px, 22vw' -%}</li>
+            {%- assign shown = shown | append: '|' | append: d.handle | append: '|' -%}
+            {%- assign shown_count = shown_count | plus: 1 -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {%- if shown_count < 4 -%}
+        {%- for d in pool -%}
+          {%- if shown_count >= 4 -%}{%- break -%}{%- endif -%}
+          {%- capture d_key -%}|{{ d.handle }}|{%- endcapture -%}
+          {%- if shown contains d_key -%}{%- continue -%}{%- endif -%}
+          {%- if d.available and d.featured_image -%}
+            {%- assign dm = d.metafields.custom -%}
+            {%- capture d_title -%}{{ dm.carat_weight.value }} ct {{ dm.diamond_shape.value }}{%- endcapture -%}
+            {%- capture d_sub -%}{{ dm.color }} · {{ dm.clarity }} · {{ d.metafields.lmny_feed.lab | default: 'IGI' }}{%- endcapture -%}
+            <li>{%- render 'lmh-card', card_product: d, card_title: d_title, card_sub: d_sub, sizes: '(max-width: 749px) 168px, 22vw' -%}</li>
+            {%- assign shown = shown | append: d_key -%}
+            {%- assign shown_count = shown_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </ul>
+  </div>
+
+  <div class="lmh-spot__block" id="LmhSpotSettings">
+    <div class="lmh-spot__bar">
+      <h3 class="lmh-spot__h3">The setting</h3>
+      <p class="lmh-spot__note">{{ section.settings.settings_note | escape }}</p>
+    </div>
+    <ul class="lmh-grid lmh-grid--4 lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+      {%- assign set_count = 0 -%}
+      {%- assign set_names = '' -%}
+      {%- for sp in settings_pool -%}
+        {%- if set_count >= 4 -%}{%- break -%}{%- endif -%}
+        {%- if sp.available and sp.images.size > 0 -%}
+          {%- liquid
+            assign sp_name = sp.title | split: ' Engagement Ring Setting' | first | split: ' Ring Setting' | first
+            assign sp_sub = ''
+            if sp.title contains ' in '
+              assign sp_sub = sp.title | split: ' in ' | last
+            endif
+            assign sp_key = '|' | append: sp_name | append: '|'
+          -%}
+          {%- comment -%} One card per style: three metals of the same halo read as a repeat. {%- endcomment -%}
+          {%- if set_names contains sp_key -%}{%- continue -%}{%- endif -%}
+          {%- assign set_names = set_names | append: sp_key -%}
+          {%- assign set_count = set_count | plus: 1 -%}
+          <li>
+            <a class="lmh-card" href="{{ sp.url }}">
+              <span class="lmh-card__media">
+                {{ sp.images.first | image_url: width: 720 | image_tag: widths: '240, 360, 480, 720', sizes: '(max-width: 749px) 168px, 22vw', loading: 'lazy', alt: sp.title }}
+              </span>
+              <span class="lmh-card__body">
+                <span class="lmh-card__title">{{ sp_name | escape }}</span>
+                {%- if sp_sub != blank -%}<span class="lmh-card__sub">{{ sp_sub | escape }}</span>{%- endif -%}
+                <span class="lmh-card__price">Setting from {{ sp.price_min | money_without_trailing_zeros }}</span>
+              </span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  <div class="lmh-row__more">
+    <a class="lmh-btn {% if spot_navy %}lmh-btn--light{% else %}lmh-btn--outline{% endif %}" href="{{ diamonds_url }}">Shop loose diamonds</a>
+  </div>
+</section>
+
+<style>
+  .lmh-spot { gap: 44px; }
+  .lmh-spot { --spot-line: rgba(44,24,16,.14); }
+  .lmh-spot--navy { --spot-line: rgba(250,246,240,.18); }
+  .lmh-spot__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--spot-line); border-bottom: 1px solid var(--spot-line); }
+  .lmh-spot__steps li { padding: 18px 20px; font-size: 13px; letter-spacing: .04em; }
+  .lmh-spot__steps li + li { border-left: 1px solid var(--spot-line); }
+  .lmh-spot__steps span { margin-right: 10px; font-family: var(--lmh-serif); font-size: 22px; font-style: italic; color: var(--lmh-gold, #B8975A); }
+  .lmh-spot__block { display: flex; flex-direction: column; gap: 22px; }
+  .lmh-spot__bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .lmh-spot__h3 { margin: 0; font-family: var(--lmh-serif); font-weight: 500; font-size: 30px; }
+  .lmh-spot__note { margin: 0; font-size: 12.5px; color: var(--lmh-muted, #6F6457); }
+  .lmh-spot--navy .lmh-spot__steps li { color: var(--lmh-on-dark); }
+  .lmh-spot--navy .lmh-spot__steps span { color: var(--lmh-gold-light); }
+  .lmh-spot--navy .lmh-spot__h3 { color: var(--lmh-cream); }
+  .lmh-spot--navy .lmh-spot__note { color: var(--lmh-on-dark-muted); }
+  .lmh-spot--navy .lmh-chip { background: transparent; border-color: rgba(250,246,240,.35); color: var(--lmh-cream) !important; }
+  .lmh-spot--navy .lmh-chip:hover { border-color: var(--lmh-gold); }
+  .lmh-spot--navy .lmh-card__price { color: var(--lmh-cream); }
+  @media (max-width: 749px) {
+    .lmh-spot { gap: 28px; }
+    .lmh-spot__steps { grid-template-columns: minmax(0, 1fr); }
+    .lmh-spot__steps li { padding: 12px 0; }
+    .lmh-spot__steps li + li { border-left: 0; border-top: 1px solid var(--spot-line); }
+    .lmh-spot__h3 { font-size: 26px; }
+    .lmh-spot__bar { gap: 12px; }
+    .lmh-spot__chips { width: 100%; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "LM diamond spotlight",
+  "tag": "div",
+  "settings": [
+    { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose diamonds & ring settings" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Choose the diamond." },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "Choose the setting." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "settings_note", "label": "Note beside the settings", "default": "Setting prices do not include the center diamond." },
+    { "type": "text", "id": "diamond_collection", "label": "Diamond collection handle", "default": "lab-grown-diamonds" },
+    { "type": "text", "id": "settings_collection", "label": "Settings collection handle", "default": "ring-settings" }
+  ],
+  "presets": [{ "name": "LM diamond spotlight" }]
+}
+{% endschema %}
