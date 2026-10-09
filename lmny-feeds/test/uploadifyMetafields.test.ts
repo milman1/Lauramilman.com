@@ -4,6 +4,7 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  isJacobCoBoutiqueProduct,
   uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
@@ -262,6 +263,43 @@ describe('uploadifyJewelryQualifies', () => {
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-zero', variants: [{ sku: 'BC1', qty: 0, tracked: true, priceUsd: 100 }] }))).toBe(false);
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-nocat', categoryId: null }))).toBe(false);
     expect(uploadifyJewelryQualifies(jewelry({ handle: 'lab-nobody', descriptionHtml: '' }))).toBe(false);
+  });
+});
+
+describe('Jacob & Co boutique watches', () => {
+  const jacob = (overrides: Partial<UploadifyJewelryCandidate> = {}): UploadifyJewelryCandidate =>
+    jewelry({
+      handle: 'unworn-jacob-co-epic-x',
+      vendor: 'Jacob & Co',
+      productType: 'Watch',
+      tags: ['jacob-co-boutique', 'new-unworn'],
+      title: 'Unworn Jacob & Co Epic X',
+      descriptionHtml: '<p>Unworn with its original box and papers.</p>',
+      variants: [{ sku: 'EX120.43.AB.AB.ABRUA', qty: 1, tracked: true, priceUsd: 90000 }],
+      ...overrides,
+    });
+
+  it('recognizes the boutique tag and does not treat the watch as lab jewelry', () => {
+    expect(isJacobCoBoutiqueProduct(jacob())).toBe(true);
+    expect(isJacobCoBoutiqueProduct(jacob({ tags: ['Jacob-Co-Boutique'] }))).toBe(true);
+    expect(isJacobCoBoutiqueProduct(jacob({ tags: ['Watch', 'new-unworn'] }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jacob())).toBe(false);
+  });
+
+  it('leaves a boutique watch untouched when the sync clears other flags', () => {
+    expect(
+      uploadifyActiveDeletesExcept(
+        [
+          { id: 'gid://shopify/Product/1', handle: 'unworn-jacob-co-epic-x' },
+          { id: 'gid://shopify/Product/2', handle: 'cluster-diamond-studs' },
+        ],
+        new Set(),
+        new Set(),
+        new Set(['unworn-jacob-co-epic-x']),
+      ),
+    ).toEqual([
+      { ownerId: 'gid://shopify/Product/2', namespace: 'uploadify_product', key: 'uploadify_active' },
+    ]);
   });
 });
 

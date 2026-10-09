@@ -66,6 +66,7 @@ import {
 import {
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  isJacobCoBoutiqueProduct,
   uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
@@ -393,15 +394,25 @@ async function main() {
     uploadifyJewelry = await shopify.fetchUploadifyJewelry();
   } catch (err) {
     jewelryReadOk = false;
-    const msg = `Uploadify jewelry catalog was not read — existing flags on lab-grown jewelry and gold chains stay (${err instanceof Error ? err.message : String(err)})`;
+    const msg = `Uploadify jewelry catalog was not read — existing flags on lab-grown jewelry and gold chains stay, and Jacob & Co watches stay untouched (${err instanceof Error ? err.message : String(err)})`;
     notes.push(msg);
     console.warn(msg);
   }
-  const uploadifyJewelryRows = uploadifyJewelry.filter(uploadifyJewelryQualifies);
+  const jacobUntouched = new Set(
+    uploadifyJewelry.filter(isJacobCoBoutiqueProduct).map((product) => product.handle),
+  );
+  const uploadifyJewelryRows = uploadifyJewelry.filter(
+    (product) => !isJacobCoBoutiqueProduct(product) && uploadifyJewelryQualifies(product),
+  );
   const jewelryKeep = jewelryReadOk
     ? new Set(uploadifyJewelryRows.map((product) => product.handle))
     : new Set(uploadifyActiveOwners.filter((owner) => kindForHandle(owner.handle) == null).map((owner) => owner.handle));
-  const uploadifyActiveClears = uploadifyActiveDeletesExcept(uploadifyActiveOwners, uploadifyKeep, jewelryKeep);
+  const uploadifyActiveClears = uploadifyActiveDeletesExcept(
+    uploadifyActiveOwners,
+    uploadifyKeep,
+    jewelryKeep,
+    jacobUntouched,
+  );
   if (uploadifyActiveClears.length > 0) {
     const msg =
       `${uploadifyActiveClears.length} product(s) other than qualifying watches, lab-grown jewelry, and gold chains have uploadify_active — removing it`;
@@ -438,6 +449,10 @@ async function main() {
   }
   if (jewelryReadOk) {
     const jewelryMsg = `${uploadifyJewelryRows.length} active lab-grown jewelry piece(s) and gold chain(s) meet the Uploadify gates`;
+    if (jacobUntouched.size > 0) {
+      notes.push(`${jacobUntouched.size} Jacob & Co boutique watch(es) left untouched`);
+      console.log(`${jacobUntouched.size} Jacob & Co boutique watch(es) left untouched`);
+    }
     notes.push(flags.dryRun ? `${jewelryMsg} (dry run — not written)` : jewelryMsg);
     console.log(jewelryMsg);
   }

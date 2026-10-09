@@ -135,7 +135,9 @@ holds a stones table — Shopify products are the only live copy.
    published to the watch sales channels. They do not get the `ebay` tag.
    Rows that fail those gates stay held and are not flagged. Active lab-grown
    jewelry and gold chains that meet the same listing gates (below) keep the
-   flag. Every other Shopify product that still has that metafield — Vivid,
+   flag. Jacob & Co boutique watches are not part of this sync: a run does
+   not change their status, condition, or Uploadify switch. Every other
+   Shopify product that still has that metafield — Vivid,
    other partner watches, fine jewelry, estate pieces, imageless watches,
    loose diamonds — has it deleted on the same run. Archive sets qty `0`
    then `ARCHIVED`; diamonds that left the feed are still deleted. The live
@@ -185,7 +187,8 @@ holds a stones table — Shopify products are the only live copy.
   `uploadify_product.uploadify_active` = true. Watches, and jewelry with a
   single variant SKU, also get `uploadify_product.vendor_sku` equal to that
   SKU (the eBay Custom Label). Lab-grown jewelry means Peaceful Diamonds and
-  finished pieces tagged `lab-grown`; loose diamonds stay out. A piece must
+  finished pieces tagged `lab-grown`; loose diamonds stay out. Jacob & Co
+  boutique watches are left as they are. A piece must
   be ACTIVE, with a title, description, price, a SKU on every variant,
   tracked quantity above zero, and a Shopify category. The sync deletes that
   listing switch, and the Vendor SKU with it, from every other product in
