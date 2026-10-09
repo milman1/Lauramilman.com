@@ -280,6 +280,9 @@
   /* ── Grade scale / shape / range paint (same UX as facet version) ── */
   function wireScales() {
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
+      /* Reset calls this again; repaint instead of adding a second click
+         handler, which would toggle each grade twice and cancel out. */
+      if (scale.lmPaint) return scale.lmPaint();
       var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
       if (!stops.length) return;
       var fill = scale.querySelector('[data-scale-fill]');
@@ -311,6 +314,7 @@
           paint();
         });
       });
+      scale.lmPaint = paint;
       paint();
     });
   }
