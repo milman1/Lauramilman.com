@@ -206,6 +206,19 @@ export const LAB_GROWN_JEWELRY = {
   costMultiple: 2,
 } as const;
 
+/** Merchant-approved Skylab assortment intake, 2026-10-05. Not a catalog reprice. */
+export const SKYLAB_OCTOBER_INTAKE = {
+  batchTag: 'intake-2026-10-05',
+  costMultiple: 2,
+} as const;
+
+export function skylabOctoberIntakeRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`October jewelry intake pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * SKYLAB_OCTOBER_INTAKE.costMultiple * 100) / 100;
+}
+
 /** Retail for lab-grown jewelry from recorded wholesale cost. */
 export function labGrownJewelryRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
+  skylabOctoberIntakeRetailFromCost,
   LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
@@ -11,6 +12,13 @@ import {
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
+  it('prices the approved October assortment at 2× without changing other jewelry', () => {
+    expect(skylabOctoberIntakeRetailFromCost(850)).toBe(1700);
+    expect(skylabOctoberIntakeRetailFromCost(333.33)).toBe(666.66);
+    expect(labGrownJewelryRetailFromCost(850)).toBe(2550);
+    expect(() => skylabOctoberIntakeRetailFromCost(0)).toThrow(/invalid cost/);
+    expect(() => skylabOctoberIntakeRetailFromCost(Number.NaN)).toThrow(/invalid cost/);
+  });
   it('keeps 1.40× through $4,000 Amount and 1.25× above', () => {
     expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.25]);
     expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
