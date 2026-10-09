@@ -196,6 +196,27 @@ A 2 ct D–F VS1 lab round in a 14K setting goes from about $2,400 to about
 $2,050. The lab-grown search price note (PR #218) must be re-worded to the
 post-change ratios before it is merged.
 
+## 2026-10-09 — Ask about this stone (loose lab-grown)
+
+Merchant chose to keep "Reserve this diamond" and "Make an offer" off loose
+lab-grown stones (removed 2026-10-05) and to add a plain question form. The
+only other way to ask about a lab stone was the Shopify AI chat, which cannot
+receive the stone's details.
+
+- Loose lab-grown stone pages (`product.type` Lab-Grown Diamond) show **Ask
+  about this stone** in place of the chat "Ask about this piece" pill; Direct
+  message stays. It opens a name / email / optional phone / question form that
+  posts through Shopify's contact form (`PdpAskForm`), so the question lands in
+  the store inbox with `request_type: Stone question`, the stone title, link,
+  stock number and listed price.
+- It promises no hold and takes no offer. Natural diamonds, watches, vintage
+  and jewelry are unchanged. Natural stones keep Make an offer, whose note
+  field also reaches the inbox.
+- Background found while checking: the old Reserve button wrote requests to the
+  `reservations` table and never emailed anyone. Two real natural-stone
+  requests (2026-08-30 and 2026-09-12) sat unanswered; they are listed in the
+  session notes, not here, because they hold customer contact details.
+
 ## Next
 
 - Collection guides are on hold by merchant decision (PR #202 not merged).
