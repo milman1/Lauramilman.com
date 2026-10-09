@@ -5,6 +5,10 @@
   reaches the store's email with the piece attached. That form is only
   for loose natural diamonds, maison / vintage / estate pieces, and
   watches. Lab-grown loose diamonds and other jewelry do not get it.
+  Loose lab-grown diamonds get "Ask about this stone" instead of the chat
+  "Ask" pill: a short question form through the same contact form, so the
+  stone and the shopper's email reach the store's inbox. It makes no
+  promise to keep the stone for the shopper and does not take offers.
   Shopify chat is now an AI agent in a cross-origin iframe the theme
   cannot type into, so offers never depend on it. Hold is intentionally
   not rendered.
@@ -16,6 +20,7 @@
   endif
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign offer_id = 'PdpOffer-' | append: product.id
+  assign ask_id = 'PdpAsk-' | append: product.id
   assign type_l = product.type | downcase | strip
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
@@ -27,26 +32,39 @@
   if type_l == 'natural diamond' or is_watch == 'true' or is_vintage == 'true'
     assign offer_ok = true
   endif
+  assign ask_form_ok = false
   if type_l == 'lab-grown diamond'
     assign offer_ok = false
+    assign ask_form_ok = true
   endif
 -%}
 
 <div class="pdp-inquire" id="PdpInquire">
   <p class="pdp-inquire__label">Questions about this piece?</p>
   <div class="pdp-inquire__actions">
-    <button
-      type="button"
-      class="pdp-inquire__btn js-open-product-chat"
-      data-chat-intent="ask"
-      data-product-id="{{ product.id }}"
-      data-product-handle="{{ product.handle }}"
-      data-product-title="{{ display_title | escape }}"
-      data-product-url="{{ shop.url }}{{ product.url }}"
-      data-product-image="{{ product_image | escape }}"
-    >
-      Ask about this piece
-    </button>
+    {%- if ask_form_ok -%}
+      <button
+        type="button"
+        class="pdp-inquire__btn js-open-offer"
+        aria-expanded="false"
+        aria-controls="{{ ask_id }}"
+      >
+        Ask about this stone
+      </button>
+    {%- else -%}
+      <button
+        type="button"
+        class="pdp-inquire__btn js-open-product-chat"
+        data-chat-intent="ask"
+        data-product-id="{{ product.id }}"
+        data-product-handle="{{ product.handle }}"
+        data-product-title="{{ display_title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-image="{{ product_image | escape }}"
+      >
+        Ask about this piece
+      </button>
+    {%- endif -%}
     {%- if offer_ok -%}
       <button
         type="button"
@@ -121,6 +139,53 @@
           <textarea id="{{ offer_id }}-note" name="contact[body]" rows="2"></textarea>
         </div>
         <button type="submit" class="pdp-inquire__btn pdp-offer__submit">Send offer</button>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+  {%- endif -%}
+
+  {%- if ask_form_ok -%}
+  <div class="pdp-offer" id="{{ ask_id }}" hidden>
+    {%- form 'contact', id: 'PdpAskForm', class: 'pdp-offer__form' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="pdp-offer__status" role="status" data-offer-result>
+          Thank you — your question was sent. We will reply by email.
+        </p>
+      {%- else -%}
+        {%- if form.errors -%}
+          <p class="pdp-offer__status pdp-offer__status--error" role="alert" data-offer-result>
+            Your question did not send. Please check your email address and try again.
+          </p>
+        {%- endif -%}
+        <p class="pdp-offer__intro">
+          Ask us anything about <strong>{{ display_title }}</strong>: the certificate, how it looks, setting it in a ring, or whether it is still available. We reply by email.
+        </p>
+
+        <input type="hidden" name="contact[request_type]" value="Stone question">
+        <input type="hidden" name="contact[product]" value="{{ display_title | escape }}">
+        <input type="hidden" name="contact[product_url]" value="{{ shop.url }}{{ product.url }}">
+        <input type="hidden" name="contact[stock_number]" value="{{ product.metafields.lmny_feed.stock_ref | escape }}">
+        <input type="hidden" name="contact[listed_price]" value="{{ product.selected_or_first_available_variant.price | money_without_trailing_zeros | strip_html | escape }}">
+
+        <div class="pdp-offer__row">
+          <div class="pdp-offer__field">
+            <label for="{{ ask_id }}-name">Name</label>
+            <input type="text" id="{{ ask_id }}-name" name="contact[name]" autocomplete="name" value="{{ customer.name | escape }}" required>
+          </div>
+          <div class="pdp-offer__field">
+            <label for="{{ ask_id }}-email">Email</label>
+            <input type="email" id="{{ ask_id }}-email" name="contact[email]" autocomplete="email" value="{{ customer.email | escape }}" required>
+          </div>
+        </div>
+        <div class="pdp-offer__field">
+          <label for="{{ ask_id }}-phone">Phone (optional)</label>
+          <input type="tel" id="{{ ask_id }}-phone" name="contact[phone]" autocomplete="tel">
+        </div>
+        <div class="pdp-offer__field">
+          <label for="{{ ask_id }}-question">Your question</label>
+          <textarea id="{{ ask_id }}-question" name="contact[body]" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="pdp-inquire__btn pdp-offer__submit">Send question</button>
       {%- endif -%}
     {%- endform -%}
   </div>
@@ -293,8 +358,8 @@
         var open = panel.hidden;
         setOfferOpen(toggle, panel, open);
         if (open) {
-          var amount = panel.querySelector('input[name="contact[offer]"]');
-          if (amount) amount.focus();
+          var first = panel.querySelector('input[name="contact[offer]"], input[name="contact[name]"]');
+          if (first) first.focus();
         }
       });
       var form = panel.querySelector('form');
