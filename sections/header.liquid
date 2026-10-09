@@ -1234,19 +1234,25 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           return;
         }
         searchDebounce = setTimeout(function() {
-          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6')
+          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6&resources[options][fields]=title,product_type,vendor,tag,variants.title,variants.sku,body')
             .then(function(r) { return r.json(); })
             .then(function(data) {
               if (searchInput.value.trim() !== q) return;
 
               var products = ((data.resources && data.resources.results && data.resources.results.products) || []).filter(function(product) {
-                var searchableText = [product.title, product.vendor, product.type]
+                var searchableText = [product.title, product.vendor, product.type, product.handle]
                   .concat(product.tags || [])
+                  .concat((product.variants || []).map(function(v) { return v.sku; }))
                   .join(' ')
                   .toLowerCase();
+                /* Words with a digit can be a SKU or an IGI/GIA report number,
+                   which only the description carries; plain words still have to
+                   match the title, type or tags. */
+                var bodyText = String(product.body || '').toLowerCase();
 
                 return q.toLowerCase().split(/\s+/).every(function(word) {
-                  return word.length < 2 || searchableText.indexOf(word) !== -1;
+                  if (word.length < 2 || searchableText.indexOf(word) !== -1) return true;
+                  return /\d/.test(word) && bodyText.indexOf(word) !== -1;
                 });
               });
               if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';

@@ -414,6 +414,8 @@ describe('certificate number recovery from URL', () => {
     const { certNumberFromUrl } = await import('../src/normalize.js');
     expect(certNumberFromUrl('https://dnalinks.in/certificate_images/6455949159.pdf')).toBe('6455949159');
     expect(certNumberFromUrl('https://dnalinks.in/certificate_images/2544514964.pdf')).toBe('2544514964');
+    expect(certNumberFromUrl('https://dnalinks.in/certificate_images/LG810637353.pdf')).toBe('LG810637353');
+    expect(certNumberFromUrl('https://dnalinks.in/certificate_images/lg764695542.pdf')).toBe('LG764695542');
   });
 
   it('reads report-check query params', async () => {

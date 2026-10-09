@@ -911,7 +911,7 @@
     border-color: var(--gold, #C9A050);
   }
 
-  /* The floor carries the handle — it's the value the shopper actually set. */
+  /* Every ticked grade gets the filled dot. */
   .lm-scale__stop.is-floor .lm-scale__dot {
     width: 17px;
     height: 17px;
@@ -1349,10 +1349,8 @@
     var form = document.getElementById('DiamondFilterForm');
     if (!form) return;
 
-    /* Grade scales set a floor: picking VS1 means "VS1 and better". The track
-       fills from the chosen stop rightwards so the result is visible — the
-       earlier tile grid made selecting the lowest grade look like everything
-       had been ticked by mistake. */
+    /* Grade scales: each grade toggles on its own, so a shopper can pick just
+       G, or G and H, without the grades around it being ticked for them. */
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
       var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
       if (!stops.length) return;
@@ -1361,40 +1359,27 @@
       var noun = hint ? hint.textContent : '';
 
       function paint() {
-        var floor = -1;
-        stops.forEach(function (stop, i) {
+        var picked = [];
+        stops.forEach(function (stop) {
           var on = stop.querySelector('input').checked;
           stop.classList.toggle('is-in-range', on);
-          stop.classList.remove('is-floor');
-          if (on && floor === -1) floor = i;
+          stop.classList.toggle('is-floor', on);
+          if (on) picked.push(stop.dataset.grade);
         });
-
         if (fill) {
-          if (floor === -1) {
-            fill.style.left = '0%';
-            fill.style.right = '100%';
-          } else {
-            stops[floor].classList.add('is-floor');
-            /* Stops are evenly spaced, so the centre of stop i sits at
-               (i + 0.5) / n across the track. */
-            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
-            fill.style.right = (100 / stops.length) * 0.5 + '%';
-          }
+          fill.style.left = '0%';
+          fill.style.right = '100%';
         }
-
         if (hint) {
-          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
+          hint.textContent = picked.length ? picked.join(', ') : noun;
         }
       }
 
-      stops.forEach(function (stop, index) {
+      stops.forEach(function (stop) {
         stop.addEventListener('click', function (event) {
           event.preventDefault();
-          var isFloor = stop.classList.contains('is-floor');
-          stops.forEach(function (s, i) {
-            /* Clicking the current floor again clears the scale. */
-            s.querySelector('input').checked = !isFloor && i >= index;
-          });
+          var input = stop.querySelector('input');
+          input.checked = !input.checked;
           paint();
         });
       });

@@ -58,7 +58,7 @@
       .filter(Boolean);
   }
 
-  /** Grade scale: floor and better (checked stops). */
+  /** Grade scale: the grades the shopper ticked, each picked on its own. */
   function selectedGrades(name) {
     return Array.prototype.map
       .call(form.querySelectorAll('[data-scale="' + name + '"] input:checked'), function (el) {
@@ -280,6 +280,9 @@
   /* ── Grade scale / shape / range paint (same UX as facet version) ── */
   function wireScales() {
     form.querySelectorAll('[data-scale]').forEach(function (scale) {
+      /* Reset calls this again; repaint instead of adding a second click
+         handler, which would toggle each grade twice and cancel out. */
+      if (scale.lmPaint) return scale.lmPaint();
       var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
       if (!stops.length) return;
       var fill = scale.querySelector('[data-scale-fill]');
@@ -287,38 +290,31 @@
       var noun = hint ? hint.textContent : '';
 
       function paint() {
-        var floor = -1;
-        stops.forEach(function (stop, i) {
+        var picked = [];
+        stops.forEach(function (stop) {
           var on = stop.querySelector('input').checked;
           stop.classList.toggle('is-in-range', on);
-          stop.classList.remove('is-floor');
-          if (on && floor === -1) floor = i;
+          stop.classList.toggle('is-floor', on);
+          if (on) picked.push(stop.dataset.grade);
         });
         if (fill) {
-          if (floor === -1) {
-            fill.style.left = '0%';
-            fill.style.right = '100%';
-          } else {
-            stops[floor].classList.add('is-floor');
-            fill.style.left = ((floor + 0.5) / stops.length) * 100 + '%';
-            fill.style.right = (100 / stops.length) * 0.5 + '%';
-          }
+          fill.style.left = '0%';
+          fill.style.right = '100%';
         }
         if (hint) {
-          hint.textContent = floor === -1 ? noun : stops[floor].dataset.grade + ' and better';
+          hint.textContent = picked.length ? picked.join(', ') : noun;
         }
       }
 
-      stops.forEach(function (stop, index) {
+      stops.forEach(function (stop) {
         stop.addEventListener('click', function (event) {
           event.preventDefault();
-          var isFloor = stop.classList.contains('is-floor');
-          stops.forEach(function (s, i) {
-            s.querySelector('input').checked = !isFloor && i >= index;
-          });
+          var input = stop.querySelector('input');
+          input.checked = !input.checked;
           paint();
         });
       });
+      scale.lmPaint = paint;
       paint();
     });
   }
