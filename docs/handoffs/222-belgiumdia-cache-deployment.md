@@ -1,9 +1,9 @@
 # Belgium Dia feed-cache deployment recovery
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/222
-- Updated: 2026-10-09 16:20 UTC
+- Updated: 2026-10-09 17:00 UTC
 - Owner: Codex, fix/bounded-media-recovery
-- Status: complete-cache Worker deployed and dry-run verified; approved live sync paused for bounded media recovery fix.
+- Status: natural/lab cache and approved live reconciliation verified; scheduled live sync restored. Watch feed remains unavailable.
 - Scope: existing lauramilman-com Worker and Belgium Dia feed sync, including merchant-approved loose-diamond reconciliation. No pricing rule changes or unrelated jewelry activations.
 
 ## Verified work
@@ -43,3 +43,18 @@ Merchant approved the above live scope at 15:57 UTC. Live #953 matched those dec
 The existing 15-attempt image recovery budget counted only failed rehosts, so hundreds of successful recoveries were delaying the requested sync. This fix counts every source attempt, successful or failed, and logs attempted count; remaining source-backed media waits for subsequent runs. All 823 tests passed. Typecheck still reports errors in unchanged Shopify, Uploadify, and theme tests.
 
 Next: merge this fix, compare a fresh dry run to the approved removal handles, execute only the approved live scope, inspect report writeErrors and verify Shopify samples (create nd-220229, update nd-205200, delete nd-222890), then restore LMNY_SYNC_LIVE=true. Keep watch recovery separate and do not claim it is resolved. No paid Cloudflare plan upgrade authorized.
+
+
+## 2026-10-09 17:00 UTC — live diamond recovery verified
+
+PR #227 merged as b2f67fdcb7553179c62bfc103825162f54720add, fixing the 15-attempt media recovery limit. Fresh dry run #954 succeeded with zero writes and its exact create/update/delete/archive sets matched approved #952. Report artifact 11629801708. Queued duplicate schedule #955 was cancelled while writes were paused.
+
+Live retry #956 completed successfully at 16:52:56 UTC with zero writeErrors: https://github.com/milman1/Lauramilman.com/actions/runs/37959380570 . Report artifact 11632725613. Natural 3,678 raw / 3,589 publishable; lab 25,310 raw / 24,925 publishable. Supplier added two lab stones after the dry run, so creates rose to 107; updates stayed 1,062, removals stayed 141, archives zero. Compared the live artifact to approved #952 and confirmed the exact 61 natural + 80 lab removal handles match.
+
+Shopify independent verification: all 107 newly created handles exist (89 ACTIVE, 18 DRAFT); all 141 approved removal handles are absent. Sample nd-220229 is ACTIVE with an image; nd-205200 is ACTIVE with an image and its updated retail price; nd-222890 is absent. The report records 1,045 successful publications and 124 non-ACTIVE writes skipped for publication because source images are missing. Those 124 include the 18 new drafts. Do not activate them without resolving their image holds. Media recovery attempted exactly 15 source images, with 13 accepted recoveries and two failures; the larger media backlog is not complete.
+
+The sync app lacks write_online_store_navigation and skipped redirects. The already-connected Shopify app has that existing permission. Checked that none of the 141 redirects already existed, created them in controlled batches, independently verified the first 20 before continuing, then read back all 141 exact path/target pairs. Natural removed URLs redirect to /collections/natural-diamonds; lab removed URLs to /collections/lab-grown-diamonds. This was an authorized one-time repair and does not grant the sync app new permissions; future automatic removals still cannot create redirects until its existing app scope is separately updated.
+
+Restored LMNY_SYNC_LIVE=true and verified the saved repository Variables table at approximately 16:58 UTC. BELGIUMDIA_API_URL remains https://lauramilman-com.milmanavi.workers.dev; SYNC_FEEDS remains natural,lab,watch. Existing mass-removal protection stays enabled. Do not rerun these verified writes blindly.
+
+Remaining: watch cache returns 503 and direct watch supplier returns zero; the watch segment remains protected from automatic removal. Missing-image drafts and the media backlog need separate resolution from verified source media. Keep #222 open for the unresolved watch feed state. No paid-plan change, new credentials, pricing-rule changes, or unrelated jewelry activation in this recovery.
