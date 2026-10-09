@@ -134,7 +134,8 @@ holds a stones table — Shopify products are the only live copy.
    through the normal watch write, priced with the watch sale rule, and
    published to the watch sales channels. They do not get the `ebay` tag.
    Rows that fail those gates stay held and are not flagged. Active lab-grown
-   jewelry and gold chains that meet the same listing gates (below) keep the
+   jewelry, gold chains, and Jacob & Co boutique watches (tag
+   `jacob-co-boutique`) that meet the same listing gates (below) keep the
    flag. Every other Shopify product that still has that metafield — Vivid,
    other partner watches, fine jewelry, estate pieces, imageless watches,
    loose diamonds — has it deleted on the same run. Archive sets qty `0`
@@ -181,11 +182,13 @@ holds a stones table — Shopify products are the only live copy.
 - Unique inventory: tracked qty 1 while publishable for watches. Loose
   diamonds are tracked qty 0 (`CONTINUE`) so Uploadify does not import them.
   Only qualifying Belgium Watch (ROMAN) and TLV watches, active lab-grown
-  jewelry, and gold chains in the chains collection get
+  jewelry, gold chains in the chains collection, and Jacob & Co boutique
+  watches tagged `jacob-co-boutique` get
   `uploadify_product.uploadify_active` = true. Watches, and jewelry with a
   single variant SKU, also get `uploadify_product.vendor_sku` equal to that
   SKU (the eBay Custom Label). Lab-grown jewelry means Peaceful Diamonds and
-  finished pieces tagged `lab-grown`; loose diamonds stay out. A piece must
+  finished pieces tagged `lab-grown`; loose diamonds stay out. Jacob drafts
+  and boutique watches with no variant SKU are left off. A piece must
   be ACTIVE, with a title, description, price, a SKU on every variant,
   tracked quantity above zero, and a Shopify category. The sync deletes that
   listing switch, and the Vendor SKU with it, from every other product in

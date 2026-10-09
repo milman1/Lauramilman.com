@@ -144,8 +144,10 @@ export function uploadifyKeepHandles(
 /**
  * Delete `uploadify_active` from every product whose handle is not kept.
  * `keepHandles` may only retain `w-` watches. `jewelryKeepHandles` retains
- * active lab-grown jewelry and gold chains that still meet the Uploadify
- * gates. Any other handle is removed even if it was listed by mistake.
+ * active lab-grown jewelry, gold chains, and Jacob & Co boutique watches
+ * (tag `jacob-co-boutique`, handles that are not `w-` / `nd-` / `lg-`) that
+ * still meet the Uploadify gates. Any other handle is removed even if it
+ * was listed by mistake.
  */
 export function uploadifyActiveDeletesExcept(
   owners: Array<{ id: string; handle: string }>,
@@ -273,6 +275,25 @@ export function uploadifyListingReady(product: UploadifyJewelryCandidate): boole
 export function uploadifyJewelryQualifies(product: UploadifyJewelryCandidate): boolean {
   if (isLooseDiamondProduct(product)) return false;
   if (!isLabGrownJewelry(product) && !isGoldChainProduct(product)) return false;
+  return uploadifyListingReady(product);
+}
+
+const JACOB_CO_BOUTIQUE_TAG = 'jacob-co-boutique';
+
+/** Merchant tag for Jacob & Co boutique watches. Case-insensitive. */
+export function isJacobCoBoutiqueProduct(product: { tags: readonly string[] }): boolean {
+  return product.tags.some((tag) => tag.trim().toLowerCase() === JACOB_CO_BOUTIQUE_TAG);
+}
+
+/**
+ * Jacob & Co boutique watches use the same Uploadify gates as finished
+ * jewelry. Drafts, untracked stock, and a missing variant SKU stay off.
+ * A `w-` Belgium watch is not this path.
+ */
+export function uploadifyJacobQualifies(product: UploadifyJewelryCandidate): boolean {
+  if (isLooseDiamondProduct(product)) return false;
+  if (kindForHandle(product.handle) === 'watch') return false;
+  if (!isJacobCoBoutiqueProduct(product)) return false;
   return uploadifyListingReady(product);
 }
 

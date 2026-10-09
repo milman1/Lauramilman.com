@@ -4,6 +4,7 @@ import {
   isUploadifyNamespace,
   uploadifyActiveDeletesExcept,
   uploadifyActiveWrites,
+  uploadifyJacobQualifies,
   uploadifyJewelryQualifies,
   uploadifyKeepHandles,
   uploadifyMetafieldDeletesForDiamonds,
@@ -265,6 +266,35 @@ describe('uploadifyJewelryQualifies', () => {
   });
 });
 
+describe('uploadifyJacobQualifies', () => {
+  const jacob = (overrides: Partial<UploadifyJewelryCandidate> = {}): UploadifyJewelryCandidate =>
+    jewelry({
+      handle: 'unworn-jacob-co-epic-x',
+      vendor: 'Jacob & Co',
+      productType: 'Watch',
+      tags: ['jacob-co-boutique', 'new-unworn'],
+      title: 'Unworn Jacob & Co Epic X',
+      descriptionHtml: '<p>Unworn with its original box and papers.</p>',
+      variants: [{ sku: 'EX120.43.AB.AB.ABRUA', qty: 1, tracked: true, priceUsd: 90000 }],
+      ...overrides,
+    });
+
+  it('accepts an active boutique watch with a SKU, quantity, price, copy, and category', () => {
+    expect(uploadifyJacobQualifies(jacob())).toBe(true);
+    expect(uploadifyJacobQualifies(jacob({ tags: ['Jacob-Co-Boutique'] }))).toBe(true);
+  });
+
+  it('rejects drafts, a missing SKU, a watch without the tag, and a Belgium handle', () => {
+    expect(uploadifyJacobQualifies(jacob({ status: 'DRAFT' }))).toBe(false);
+    expect(
+      uploadifyJacobQualifies(jacob({ variants: [{ sku: '', qty: 1, tracked: true, priceUsd: 90000 }] })),
+    ).toBe(false);
+    expect(uploadifyJacobQualifies(jacob({ tags: ['Watch', 'new-unworn'] }))).toBe(false);
+    expect(uploadifyJacobQualifies(jacob({ handle: 'w-jacob' }))).toBe(false);
+    expect(uploadifyJewelryQualifies(jacob())).toBe(false);
+  });
+});
+
 describe('uploadify jewelry writes', () => {
   it('flags jewelry and copies a single variant SKU', () => {
     const { writes } = uploadifyActiveWrites([
@@ -297,9 +327,10 @@ describe('uploadify jewelry writes', () => {
           { id: 'gid://shopify/Product/3', handle: 'lmny-cuban-3-9-mm-nmc120' },
           { id: 'gid://shopify/Product/4', handle: 'cluster-diamond-studs' },
           { id: 'gid://shopify/Product/5', handle: 'lg-stone' },
+          { id: 'gid://shopify/Product/6', handle: 'unworn-jacob-co-epic-x' },
         ],
         new Set(['w-3194']),
-        new Set(['lab-diamond-tennis-bracelet', 'lmny-cuban-3-9-mm-nmc120', 'lg-stone']),
+        new Set(['lab-diamond-tennis-bracelet', 'lmny-cuban-3-9-mm-nmc120', 'lg-stone', 'unworn-jacob-co-epic-x']),
       ),
     ).toEqual([
       { ownerId: 'gid://shopify/Product/4', namespace: 'uploadify_product', key: 'uploadify_active' },
