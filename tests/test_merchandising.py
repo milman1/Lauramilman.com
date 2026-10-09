@@ -308,10 +308,20 @@ def test_new_gold_collections_get_style_filters() -> None:
     bar = (ROOT / "snippets/jewelry-style-bar.liquid").read_text()
     filters = (ROOT / "snippets/jewelry-style-filters.liquid").read_text()
     drawer = (ROOT / "snippets/filter-drawer.liquid").read_text()
-    for handle in ("gold-jewelry", "chain-bracelets", "chain-necklaces"):
+    for handle in ("chain-bracelets", "chain-necklaces"):
         assert f"'{handle}'" in bar, handle
+    for handle in ("gold-jewelry", "chain-bracelets", "chain-necklaces"):
         assert f"'{handle}'" in filters, handle
         assert f"'{handle}'" in drawer, handle
+
+
+def test_gold_pages_use_gold_chips_not_budget_row() -> None:
+    bar = (ROOT / "snippets/jewelry-style-bar.liquid").read_text()
+    liquid = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "'gold-jewelry'" not in bar
+    assert "gold_page == false and section.blocks.size > 0" in liquid
+    for handle in ("gold-chains", "gold-bracelets", "gold-rings", "first-gold-piece"):
+        assert f'href="/collections/{handle}"' in liquid, handle
 
 
 def test_all_jewelry_is_a_real_paginated_collection() -> None:
