@@ -373,22 +373,13 @@
         "band-1": {
           "type": "band",
           "settings": {
-            "title": "1 carat",
-            "note": "1.00–1.99 ct",
-            "min": "1",
-            "max": "1.99"
-          }
-        },
-        "band-2": {
-          "type": "band",
-          "settings": {
             "title": "2 carats",
             "note": "2.00–2.99 ct",
             "min": "2",
             "max": "2.99"
           }
         },
-        "band-3": {
+        "band-2": {
           "type": "band",
           "settings": {
             "title": "3 carats",
@@ -397,12 +388,21 @@
             "max": "4.99"
           }
         },
+        "band-3": {
+          "type": "band",
+          "settings": {
+            "title": "5 carats",
+            "note": "5.00–6.99 ct",
+            "min": "5",
+            "max": "6.99"
+          }
+        },
         "band-4": {
           "type": "band",
           "settings": {
-            "title": "5 carats +",
-            "note": "5 ct and up",
-            "min": "5",
+            "title": "7 carats +",
+            "note": "7 ct and up",
+            "min": "7",
             "max": ""
           }
         }

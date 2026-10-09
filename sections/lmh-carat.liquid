@@ -95,12 +95,22 @@
           if (price && Number(stone.retail_usd) > 0) {
             price.textContent = 'From ' + money(stone.retail_usd) + ' · ' + Number(data.total || 0).toLocaleString('en-US') + ' stones';
           }
-          var src = stone.image_urls && stone.image_urls[0];
+        })
+        .catch(function () {});
+      /* The photo is the cheapest round in the band, so the four tiles don't
+         all show whichever shape happens to be cheapest. */
+      var qr = new URLSearchParams(q.toString());
+      qr.set('shapes', 'Round');
+      fetch(api + '?' + qr.toString(), { headers: headers })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var stone = data && data.stones && data.stones[0];
+          var src = stone && stone.image_urls && stone.image_urls[0];
           var img = tile.querySelector('.lmh-carat__media img');
           if (src && img) {
             img.removeAttribute('srcset');
             img.src = src;
-            img.alt = stone.carat + ' ct ' + (stone.shape || '') + ' lab-grown diamond';
+            img.alt = stone.carat + ' ct round lab-grown diamond';
           }
         })
         .catch(function () {});

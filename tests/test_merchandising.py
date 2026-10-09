@@ -207,7 +207,7 @@ def test_homepage_leads_with_loose_lab_grown_diamonds() -> None:
     assert types["private-clients"] == "lmh-private-band"
     # Carat bands link to the search with the range pre-set.
     bands = [b["settings"] for b in sections["carat"]["blocks"].values()]
-    assert [b["min"] for b in bands] == ["1", "2", "3", "5"]
+    assert [b["min"] for b in bands] == ["2", "3", "5", "7"]
     assert "hydrateCaratFromURL" in (ROOT / "assets/diamond-storefront.js").read_text()
     # No price-capped edit on the homepage: the house is not sold as "under $2,500".
     text = (ROOT / "templates/index.json").read_text()
