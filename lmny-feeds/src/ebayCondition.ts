@@ -34,6 +34,16 @@ export const UNWORN_TITLE_RE = /\bunworn\b/i;
 
 export type WatchState = 'preowned' | 'unworn';
 
+/**
+ * Merchant decision 2026-10-09: every Jacob & Co boutique watch is unworn
+ * with its original box and papers. The pre-owned repair fails closed to
+ * condition 3000 when it has no supplier state, so it must leave this tag
+ * alone.
+ */
+export function isJacobCoBoutiqueWatch(tags: readonly string[]): boolean {
+  return tags.some((tag) => tag.trim().toLowerCase() === 'jacob-co-boutique');
+}
+
 export interface ClassifiedWatchCondition {
   state: WatchState;
   titleWord: 'Pre-Owned' | 'Unworn';

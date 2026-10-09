@@ -17,6 +17,7 @@ import {
   EBAY_CONDITION_KEY,
   EBAY_CONDITION_NAMESPACE,
   EBAY_FEATURES_KEY,
+  isJacobCoBoutiqueWatch,
   planEbayConditionFix,
   type EbayConditionPlan,
 } from '../src/ebayCondition.js';
@@ -153,6 +154,7 @@ async function fetchRows(shopify: ShopifyClient): Promise<CatalogRow[]> {
 }
 
 function planFor(row: CatalogRow): EbayConditionPlan | null {
+  if (isJacobCoBoutiqueWatch(row.tags)) return null;
   return planEbayConditionFix({
     title: row.title,
     descriptionHtml: row.descriptionHtml,
