@@ -191,7 +191,7 @@ def test_homepage_walks_gold_and_diamonds_before_watches() -> None:
     order = data["order"]
     sections = data["sections"]
     assert order == [
-        "hero", "spotlight", "gold", "worlds", "trust-strip", "lab-grown", "loose-diamonds",
+        "hero", "gold", "worlds", "trust-strip", "lab-grown", "loose-diamonds", "spotlight",
         "private-clients", "engagement", "wear-together", "pre-owned",
         "brand-story", "reviews",
     ]

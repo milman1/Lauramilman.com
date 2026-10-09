@@ -681,12 +681,12 @@
   },
   "order": [
     "hero",
-    "spotlight",
     "gold",
     "worlds",
     "trust-strip",
     "lab-grown",
     "loose-diamonds",
+    "spotlight",
     "private-clients",
     "engagement",
     "wear-together",
