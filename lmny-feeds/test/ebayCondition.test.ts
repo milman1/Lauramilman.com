@@ -9,6 +9,7 @@ import {
   ebayFeaturesFromBoxPapers,
   ebayFeaturesFromYesNo,
   hasNewWithBoxLanguage,
+  isJacobCoBoutiqueWatch,
   isPreownedNewWithBoxMismatch,
   planEbayConditionFix,
   rewritePreownedBoxPapersCopy,
@@ -31,6 +32,14 @@ describe('ebayConditionForWatch', () => {
   it('uses ConditionID 1500 for source-confirmed unworn watches without a complete accessory set', () => {
     expect(ebayConditionForWatch({ state: 'unworn', box: true, papers: false })).toBe(EBAY_CONDITION_NEW_OTHER);
     expect(ebayConditionForWatch({ state: 'unworn', box: null, papers: null })).toBe(EBAY_CONDITION_NEW_OTHER);
+  });
+});
+
+describe('isJacobCoBoutiqueWatch', () => {
+  it('recognizes the boutique tag so the pre-owned repair leaves those watches alone', () => {
+    expect(isJacobCoBoutiqueWatch(['jacob-co-boutique', 'new-unworn'])).toBe(true);
+    expect(isJacobCoBoutiqueWatch(['Jacob-Co-Boutique'])).toBe(true);
+    expect(isJacobCoBoutiqueWatch(['Watch', 'ebay'])).toBe(false);
   });
 });
 
