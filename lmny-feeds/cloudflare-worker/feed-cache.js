@@ -32,6 +32,8 @@
  * move the Worker to the $5 paid plan (30s CPU vs 10ms free).
  */
 
+import { collectFeed } from './complete-feed.js';
+
 import { ENGRAVING_ROUTE, handleEngraving } from './engraving-render.js';
 
 const UPSTREAM = 'https://belgiumdia.com';
@@ -43,13 +45,13 @@ const KEY_KV = 'auth:key';
 /** KV marker throttling adoption probes, so junk keys can't burn the limit. */
 const PROBE_KV = 'auth:probing';
 
-function upstreamUrl(kind, key) {
+function upstreamUrl(kind, key, page = 1) {
   const url = new URL(
     UPSTREAM + (kind === 'watch' ? '/api/developer-api/watch' : '/api/developer-api/diamond'),
   );
   if (kind !== 'watch') {
     url.searchParams.set('type', kind);
-    url.searchParams.set('page', '1');
+    url.searchParams.set('page', String(page));
   }
   url.searchParams.set('key', key);
   return url.toString();
@@ -66,9 +68,8 @@ async function activeKey(env) {
 
 /**
  * Classify an upstream body without paying to parse it. The lab feed is
- * ~30 MB and JSON.parsing it busts the free plan's CPU budget (that was the
- * HTTP 500 the sync saw), so size alone distinguishes real data from a
- * refusal — the limiter's answer is ~90 bytes. Only tiny bodies get parsed.
+ * large; this is used only to prove a credential, never to decide cache
+ * completeness. collectFeed validates every page before caching it.
  *
  * Returns 'data' (cacheable rows), 'limited' (the key was accepted but is
  * early — proof the credential is good), or 'bad'.
@@ -86,18 +87,18 @@ function classifyBody(buf) {
 }
 
 /** Store a feed body gzipped, streamed through the native codec. */
-async function storeFeed(kind, env, buf) {
+async function storeFeed(kind, env, buf, rows) {
   const gz = new Blob([buf]).stream().pipeThrough(new CompressionStream('gzip'));
-  await env.FEED_CACHE.put(`feed:${kind}`, gz, {
-    metadata: { fetchedAt: new Date().toISOString(), bytes: buf.byteLength },
+  await env.FEED_CACHE.put(`feed:v2:${kind}`, gz, {
+    metadata: { fetchedAt: new Date().toISOString(), bytes: buf.byteLength, complete: true, rows },
   });
 }
 
 /**
  * Does this key work against the supplier? Costs one upstream request, so
  * callers must hold the PROBE_KV cooldown first. On success the fetched
- * body isn't thrown away — it warms the natural cache, so adoption spends
- * nothing the cron would have spent anyway.
+ * body only verifies the key; it cannot warm the cache until all pages
+ * have been fetched successfully.
  */
 async function probeKey(key, env) {
   let res;
@@ -109,24 +110,23 @@ async function probeKey(key, env) {
   if (!res.ok) return false;
   const buf = await res.arrayBuffer();
   const verdict = classifyBody(buf);
-  if (verdict === 'data') await storeFeed('natural', env, buf);
+  // A key probe is only page one: never publish it as a complete feed.
   return verdict !== 'bad';
 }
 
 /**
- * One upstream fetch. Returns true if the cache was refreshed; false when
- * the API answered empty (rate-limited or down) — the old cache is kept,
- * which is the whole point: stale beats empty.
+ * Fetch every upstream page before replacing the complete snapshot. A
+ * failure leaves the previous complete snapshot intact; serving expires
+ * it after three hours. Legacy unversioned page-one data is never read.
  */
 async function refreshFeed(kind, env, key) {
   if (!key) return false;
-  const res = await fetch(upstreamUrl(kind, key), {
+  const rows = await collectFeed(kind, page => fetch(upstreamUrl(kind, key, page), {
     headers: { Accept: 'application/json' },
-  });
-  if (!res.ok) return false;
-  const buf = await res.arrayBuffer();
-  if (classifyBody(buf) !== 'data') return false;
-  await storeFeed(kind, env, buf);
+    signal: AbortSignal.timeout(30_000),
+  }));
+  const buf = new TextEncoder().encode(JSON.stringify({ data: rows }));
+  await storeFeed(kind, env, buf, rows.length);
   return true;
 }
 
@@ -150,6 +150,8 @@ export default {
     if (!env.FEED_CACHE) return new Response('Worker misconfigured: FEED_CACHE KV binding not set', { status: 500 });
 
     const url = new URL(request.url);
+
+    if (url.pathname === '/__version') return new Response('feed-cache-v2-complete-pages\n');
 
     // Unauthenticated fingerprint of the key actually in use: 12 hex chars of
     // its SHA-256. Safe to expose, and it makes "the two copies of the key
@@ -183,7 +185,7 @@ export default {
     if (url.pathname === '/__status') {
       const status = {};
       for (const kind of FEEDS) {
-        const { metadata } = await env.FEED_CACHE.getWithMetadata(`feed:${kind}`);
+        const { metadata } = await env.FEED_CACHE.getWithMetadata(`feed:v2:${kind}`);
         status[kind] = metadata ?? null;
       }
       return new Response(JSON.stringify(status, null, 2), {
@@ -200,28 +202,25 @@ export default {
       return new Response('Not found', { status: 404 });
     }
 
-    // The feeds are single-page (the API ignores `page`); answer the sync's
-    // page-2 terminator request from here instead of spending upstream calls.
     const page = url.searchParams.get('page') ?? '1';
+    if (!/^[1-9][0-9]*$/.test(page)) return new Response('Invalid page', { status: 400 });
+    let snapshot = await env.FEED_CACHE.getWithMetadata(`feed:v2:${kind}`, { type: 'arrayBuffer' });
+    const usable = s => s.value && s.metadata?.complete === true &&
+      Date.now() - Date.parse(s.metadata.fetchedAt) < 3 * 60 * 60 * 1000;
+    if (!usable(snapshot)) {
+      // No legacy page-one cache is ever served. A failed refresh leaves the
+      // last complete snapshot intact, but expired snapshots fail closed.
+      try { await refreshFeed(kind, env, presented || (await activeKey(env))); }
+      catch { return new Response('Complete feed snapshot unavailable', { status: 503 }); }
+      snapshot = await env.FEED_CACHE.getWithMetadata(`feed:v2:${kind}`, { type: 'arrayBuffer' });
+      if (!usable(snapshot)) return new Response('Complete feed snapshot unavailable', { status: 503 });
+    }
+    // The cache combines every upstream page into page one. Only a verified
+    // complete snapshot is allowed to emit the synthetic page-two terminator.
     if (kind !== 'watch' && page !== '1') {
       return new Response('{"data":[]}', { headers: { 'Content-Type': 'application/json' } });
     }
-
-    const { value, metadata } = await env.FEED_CACHE.getWithMetadata(`feed:${kind}`, { type: 'arrayBuffer' });
-
-    if (!value) {
-      // Cold start: try upstream once, then serve whatever landed.
-      await refreshFeed(kind, env, presented || (await activeKey(env)));
-      const retry = await env.FEED_CACHE.getWithMetadata(`feed:${kind}`, { type: 'arrayBuffer' });
-      if (!retry.value) {
-        // Upstream is limited and there's no cache yet. The sync's 0-row
-        // outage guard treats this correctly (no archives).
-        return new Response('{"data":[]}', { headers: { 'Content-Type': 'application/json' } });
-      }
-      return gzipResponse(retry.value, retry.metadata);
-    }
-
-    return gzipResponse(value, metadata);
+    return gzipResponse(snapshot.value, snapshot.metadata);
   },
 };
 
@@ -232,6 +231,8 @@ function gzipResponse(bytes, metadata) {
       'Content-Type': 'application/json',
       'Content-Encoding': 'gzip',
       'X-Feed-Fetched-At': (metadata && metadata.fetchedAt) || 'unknown',
+      'X-Feed-Cache-Version': '2',
+      'X-Feed-Rows': String(metadata?.rows || 0),
       'X-Feed-Bytes': String((metadata && metadata.bytes) || 0),
     },
   });

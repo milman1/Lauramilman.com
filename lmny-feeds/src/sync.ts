@@ -10,6 +10,7 @@
  * upserted into public.stones (dual-write).
  */
 
+import { assertSafeDiamondRemovals } from './feedSafety.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
@@ -515,6 +516,7 @@ async function main() {
   if (unavailableArchived > 0) {
     notes.push(`${unavailableArchived} listing(s) archived as merchant-unavailable (Hermès Kelly PM + Mother of Pearl)`);
   }
+  assertSafeDiamondRemovals(decisions, catalog);
   const summary = summarizeDecisions(decisions);
   const heldInFeed = decisions.filter((d) => d.action === 'archive' && d.reason === 'held_in_feed').length;
   console.log(
