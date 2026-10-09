@@ -111,8 +111,25 @@
       </nav>
     {%- endif -%}
 
+    {%- liquid
+      assign gold_page = false
+      case collection.handle
+        when 'gold-jewelry', 'gold-chains', 'gold-bracelets', 'gold-rings', 'first-gold-piece'
+          assign gold_page = true
+      endcase
+    -%}
+    {%- if gold_page -%}
+      <nav class="lm-collection__chips" aria-label="Shop gold">
+        <span class="lm-collection__chips-label">Shop gold</span>
+        <a href="/collections/gold-chains" class="lm-collection__chip"{% if collection.handle == 'gold-chains' %} aria-current="page"{% endif %}>Chains</a>
+        <a href="/collections/gold-bracelets" class="lm-collection__chip"{% if collection.handle == 'gold-bracelets' %} aria-current="page"{% endif %}>Bracelets</a>
+        <a href="/collections/gold-rings" class="lm-collection__chip"{% if collection.handle == 'gold-rings' %} aria-current="page"{% endif %}>Rings</a>
+        <a href="/collections/first-gold-piece" class="lm-collection__chip"{% if collection.handle == 'first-gold-piece' %} aria-current="page"{% endif %}>Your First Gold Piece</a>
+      </nav>
+    {%- endif -%}
+
     <!-- Shop-by chips -->
-    {%- if jewelry_only == false and section.blocks.size > 0 -%}
+    {%- if jewelry_only == false and gold_page == false and section.blocks.size > 0 -%}
       <nav class="lm-collection__chips" aria-label="Shop by">
         {%- if section.settings.chips_label != blank -%}
           <span class="lm-collection__chips-label">{{ section.settings.chips_label }}</span>
@@ -358,6 +375,7 @@
     background: transparent;
   }
 
+  .lm-collection__chip[aria-current="page"] { border-color: currentColor; font-weight: 600; }
   .lm-collection__chip:hover {
     border-color: var(--gold, #C9A050);
     color: var(--gold-dark, #A88340);
