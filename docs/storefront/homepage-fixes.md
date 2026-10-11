@@ -10,7 +10,9 @@ themselves (under $1,000).
 
 - [ ] 1. (Pushed; awaiting preview.) Banner and copy: lead with loose lab-grown stones, then rings and
       settings, then push presents / self-purchase.
-- [ ] 2. "Shop the house" tiles: new layout. Lab-grown diamonds and rings
+- [ ] 2. (Pushed; awaiting preview. Feature tile + 2x2; photos come from real
+      products picked per tile: Rolex Day-Date 228238, Cartier Love ring,
+      lg-886886, nd-352890, lab-grown eternity band.) "Shop the house" tiles: new layout. Lab-grown diamonds and rings
       first. Rename "Pre-Owned Watches & Jewelry" to "Watches" (drop
       "Pre-Owned" up front); use a real photo of an in-stock, branded watch,
       not an AI image. Consider a "Pre-Owned Maison Jewelry" tile. Replace
@@ -26,3 +28,6 @@ themselves (under $1,000).
       the everyday fine jewelry in the main category and separate the rest.
 - [ ] 8. Lower-cost lab-grown (under $1,000) in rings, tennis bracelets and
       necklaces: needs a supplier and the jewelry activation gate (drafts).
+- [ ] 9. Loose-diamonds homepage section points its natural example at
+      `nd-k15512b`, which no longer exists; pick a current stone.
+- [ ] 10. Engagement section reuses the hero's loose-diamond photo; swap it.

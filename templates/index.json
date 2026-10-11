@@ -75,58 +75,57 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "Basics",
-            "text": "Studs, huggies and hoops to wear every day.",
-            "link_text": "Shop basics",
-            "url": "/collections/lab-grown-earrings?type=Stud,Huggie,Hoop",
-            "image_asset": "fine-jewelry-model-earrings.jpg",
-            "image_alt": "Woman wearing long diamond drop earrings"
+            "title": "Lab-Grown Diamonds",
+            "text": "Loose lab-grown stones, each listed with its IGI or GIA certificate. Search by shape, carat, color and clarity.",
+            "link_text": "Search lab-grown diamonds",
+            "url": "/collections/lab-grown-diamonds",
+            "product": "lg-886886",
+            "image_asset": "diamond-destination-lab.webp"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "Loose Lab-Grown Stones",
-            "text": "Search by shape, carat, color and clarity. IGI or GIA on every stone.",
-            "link_text": "Search stones",
-            "url": "/collections/lab-grown-diamonds",
-            "image_asset": "diamond-destination-lab.webp",
-            "image_alt": "Radiant-cut diamond held in tweezers over a glass dish"
+            "title": "Rings",
+            "text": "Solitaires, bands and eternity rings to wear every day, or to propose with.",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
+            "image_asset": "shop-channel-cover.jpg",
+            "position": "76% 50%"
           }
         },
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "Tennis Bracelets",
-            "text": "Lab-grown diamonds in 14K gold, made for daily wear.",
-            "link_text": "Shop tennis bracelets",
-            "url": "/collections/lab-grown-bracelets?type=Tennis",
-            "image_asset": "shop-channel-cover.jpg",
-            "image_alt": "Gold tennis bracelet on navy velvet",
-            "position": "38% 50%"
+            "title": "Watches",
+            "text": "Rolex, Cartier and Bvlgari, authenticity guaranteed.",
+            "link_text": "Shop watches",
+            "url": "/collections/time-pieces",
+            "product": "w-t3757",
+            "image_asset": "shop-world-preowned-timepieces-rolex.jpg"
           }
         },
         "tile-4": {
           "type": "tile",
           "settings": {
-            "title": "Gold Jewelry",
-            "text": "Chains, bracelets, huggies and bangles in yellow gold.",
-            "link_text": "Shop gold",
-            "url": "/collections/chains",
-            "image_asset": "shop-world-fine-jewelry.webp",
-            "image_alt": "Gold station necklace on ivory satin"
+            "title": "Pre-Owned Maison Jewelry",
+            "text": "Signed Cartier, Van Cleef & Arpels and David Webb.",
+            "link_text": "Shop maison jewelry",
+            "url": "/collections/estate-jewelry",
+            "product": "bv-cartier-love-18k-white-gold-3-diamond-ring-j10168",
+            "image_asset": "shop-world-preowned-maison.webp"
           }
         },
         "tile-5": {
           "type": "tile",
           "settings": {
-            "title": "Rings",
-            "text": "Stacking bands, eternity rings and engagement rings.",
-            "link_text": "Shop rings",
-            "url": "/collections/rings",
-            "image_asset": "shop-channel-cover.jpg",
-            "image_alt": "Gold diamond eternity band on navy velvet",
-            "position": "76% 50%"
+            "title": "Natural Diamonds",
+            "text": "Loose natural diamonds, GIA on nearly every stone.",
+            "link_text": "Shop natural",
+            "url": "/collections/natural-diamonds",
+            "product": "nd-352890",
+            "image_asset": "diamond-destination-natural.webp"
           }
         }
       },
