@@ -836,6 +836,67 @@
         "mobile_button_text": "Shop All Rolex",
         "mobile_button_url": "/collections/rolex-watches"
       }
+    },
+    "shelf": {
+      "type": "lmh-shelf",
+      "blocks": {
+        "tab-1": {
+          "type": "shelf",
+          "settings": {
+            "label": "Rings",
+            "collection": "rings",
+            "limit": 10,
+            "link_text": "Shop all rings"
+          }
+        },
+        "tab-2": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold bracelets",
+            "collection": "gold-bracelets",
+            "limit": 10,
+            "link_text": "Shop gold bracelets"
+          }
+        },
+        "tab-3": {
+          "type": "shelf",
+          "settings": {
+            "label": "Tennis necklaces",
+            "collection": "lab-grown-tennis-necklaces",
+            "limit": 10,
+            "link_text": "Shop tennis necklaces"
+          }
+        },
+        "tab-4": {
+          "type": "shelf",
+          "settings": {
+            "label": "Earrings",
+            "collection": "all-earrings",
+            "limit": 10,
+            "link_text": "Shop earrings"
+          }
+        },
+        "tab-5": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold chains",
+            "collection": "chain-necklaces",
+            "limit": 10,
+            "link_text": "Shop gold chains"
+          }
+        }
+      },
+      "block_order": [
+        "tab-1",
+        "tab-2",
+        "tab-3",
+        "tab-4",
+        "tab-5"
+      ],
+      "settings": {
+        "eyebrow": "Scroll the house",
+        "title": "Shop by piece"
+      }
     }
   },
   "order": [
@@ -845,6 +906,7 @@
     "rings-your-way",
     "worlds",
     "trust-strip",
+    "shelf",
     "reviews",
     "gold",
     "rolex",

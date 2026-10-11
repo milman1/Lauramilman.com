@@ -155,7 +155,14 @@ Work one at a time; tick when pushed.
 - [x] R5. Under the three tiles, a "Shop all fine jewelry" link.
 - [x] R6. "Shop the house" tiles: the real diamond stills are zoomed and out of
       proportion; show the whole stone, centered, on a quiet warm background.
-- [ ] R7. New scrollable product rows (swipe on phones, arrows on desktop):
+- [x] R7. New scrollable product rows (swipe on phones, arrows on desktop):
       gold bracelets, lab-grown tennis necklaces, rings, etc.
 - [ ] R8. Background audit: the heavy navy/espresso/sand blocks make the page
       feel busy and cheap; settle on one warm ground with gold rules.
+
+R7 detail: new "Shop by piece" shelf after the promise band, tabs Rings / Gold
+bracelets / Tennis necklaces / Earrings / Gold chains (in-stock pieces only, from
+rings, gold-bracelets, lab-grown-tennis-necklaces, all-earrings, chain-necklaces).
+New live collection `lab-grown-tennis-necklaces` (smart: tags "Tennis Necklace" +
+"Lab Grown Diamond"; Online Store only), created while building the shelf.
+R8 is a proposal awaiting the merchant's choice (see chat).
