@@ -1,0 +1,109 @@
+{{ 'colored-diamond-filter.css' | asset_url | stylesheet_tag }}
+{%- assign shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear,Baguette,Trillion' | split: ',' -%}
+{%- assign colors = 'Blue,Pink,Yellow,Green,Orange,Brown' | split: ',' -%}
+{%- assign intensities = 'Faint,Very Light,Light,Fancy Light,Fancy,Fancy Intense,Fancy Vivid,Fancy Deep,Fancy Dark' | split: ',' -%}
+{%- assign clarities = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' -%}
+{%- paginate collection.products by 100 -%}
+<section class="lm-dfilter lm-dfilter--navy" data-colored-diamonds data-section="{{ section.id }}" data-currency="{{ cart.currency.iso_code | escape }}" aria-label="{{ collection.title | escape }}">
+  <div class="lm-dfilter__container">
+    <header class="lm-dfilter__header">
+      <h1 class="lm-dfilter__title">{{ collection.title | escape }}</h1>
+      <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+      <div class="lm-dfilter__origin" aria-label="Diamond collections">
+        <a class="lm-dfilter__origin-btn" href="/collections/natural-diamonds">{{ 'colored_diamonds.natural' | t }}</a>
+        <a class="lm-dfilter__origin-btn" href="/collections/lab-grown-diamonds">{{ 'colored_diamonds.lab' | t }}</a>
+        <a class="lm-dfilter__origin-btn is-active" href="{{ collection.url }}" aria-current="page">{{ 'colored_diamonds.colored' | t }}</a>
+      </div>
+    </header>
+    <form class="lm-dfilter__form" data-colored-form>
+      <div class="lm-dfilter__grid">
+        <fieldset class="lm-dfilter__group lm-dfilter__group--wide">
+          <legend class="lm-dfilter__label">{{ 'colored_diamonds.shape' | t }}</legend>
+          <div class="lm-dfilter__shapes">
+            {%- for shape in shapes -%}
+              {%- assign icon = shape | downcase -%}
+              <label class="lm-shape"><input type="checkbox" name="shape" value="{{ shape }}">{% render 'diamond-shape-icon', shape: icon %}<span class="lm-shape__name">{{ shape }}</span></label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+        {%- assign range_names = 'carat,price' | split: ',' -%}
+        {%- for name in range_names -%}
+          {%- assign label_key = 'colored_diamonds.' | append: name -%}
+          <fieldset class="lm-dfilter__group">
+            <legend class="lm-dfilter__label">{{ label_key | t }}</legend>
+            <div class="lm-range__inputs">
+              <label class="lm-range__field"><span>{{ 'colored_diamonds.min' | t }}</span><input type="number" inputmode="decimal" min="0" step="{% if name == 'carat' %}0.01{% else %}1{% endif %}" name="min_{{ name }}" aria-label="{{ 'colored_diamonds.min' | t }} {{ label_key | t }}"></label>
+              <span aria-hidden="true">–</span>
+              <label class="lm-range__field"><span>{{ 'colored_diamonds.max' | t }}</span><input type="number" inputmode="decimal" min="0" step="{% if name == 'carat' %}0.01{% else %}1{% endif %}" name="max_{{ name }}" aria-label="{{ 'colored_diamonds.max' | t }} {{ label_key | t }}"></label>
+            </div>
+          </fieldset>
+        {%- endfor -%}
+        {%- assign grade_names = 'color,intensity,clarity' | split: ',' -%}
+        {%- for name in grade_names -%}
+          {%- liquid
+            assign grades = colors
+            if name == 'intensity'
+              assign grades = intensities
+            elsif name == 'clarity'
+              assign grades = clarities
+            endif
+            assign label_key = 'colored_diamonds.' | append: name
+          -%}
+          <fieldset class="lm-dfilter__group">
+            <legend class="lm-dfilter__label">{{ label_key | t }}</legend>
+            <div class="lm-colored-chips">
+              {%- for grade in grades -%}
+                <label><input type="checkbox" name="{{ name }}" value="{{ grade }}"><span>{{ grade }}</span></label>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+        {%- endfor -%}
+      </div>
+      <div class="lm-dfilter__actions">
+        <button type="submit" class="lm-dfilter__apply" data-colored-apply disabled>{{ 'colored_diamonds.view' | t }}</button>
+        <button type="reset" class="lm-dfilter__reset">{{ 'colored_diamonds.reset' | t }}</button>
+      </div>
+    </form>
+    <div class="lm-dfilter__toolbar">
+      <span role="status" data-colored-count data-loading="{{ 'colored_diamonds.loading' | t | escape }}" data-error="{{ 'colored_diamonds.error' | t | escape }}" data-empty="{{ 'colored_diamonds.empty' | t | escape }}" data-count-label="{{ 'colored_diamonds.diamonds' | t | escape }}">{{ collection.products_count }} {{ 'colored_diamonds.diamonds' | t }}</span>
+      <div class="lm-dfilter__sort"><label for="ColoredSort-{{ section.id }}">{{ 'colored_diamonds.sort' | t }}</label>
+        <select id="ColoredSort-{{ section.id }}" data-colored-sort>
+          <option value="price_asc">{{ 'colored_diamonds.price_asc' | t }}</option>
+          <option value="price_desc">{{ 'colored_diamonds.price_desc' | t }}</option>
+          <option value="carat_asc">{{ 'colored_diamonds.carat_asc' | t }}</option>
+          <option value="carat_desc">{{ 'colored_diamonds.carat_desc' | t }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="products-grid lm-dfilter__results" data-colored-results aria-live="polite">
+      {%- for product in collection.products limit: 24 -%}{% render 'product-card', product: product %}{%- endfor -%}
+    </div>
+    <div data-colored-pager data-prev="{{ 'colored_diamonds.previous' | t | escape }}" data-next="{{ 'colored_diamonds.next' | t | escape }}" data-page="{{ 'colored_diamonds.page' | t | escape }}"></div>
+    <noscript>{{ paginate | default_pagination }}</noscript>
+    <script type="application/json" data-colored-data>
+      {"page":{{ paginate.current_page }},"pages":{{ paginate.pages }},"stones":[
+        {%- for product in collection.products -%}
+          {%- assign photo = product.featured_image | image_url: width: 600 -%}
+          {"id":{{ product.id | json }},"title":{{ product.title | json }},"url":{{ product.url | json }},"image":{{ photo | json }},"price":{{ product.price | divided_by: 100.0 | json }},"carat":{{ product.metafields.custom.carat_weight.value | default: 0 | json }},"shape":{{ product.metafields.custom.diamond_shape.value | json }},"clarity":{{ product.metafields.custom.clarity.value | json }},"color":{{ product.metafields.custom.color.value | json }},"video":{{ product.metafields.lmny_feed.video_url.value | json }},"certificate":{{ product.metafields.lmny_feed.cert_number.value | json }},"tags":{{ product.tags | json }}}{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]}
+    </script>
+  </div>
+</section>
+{%- endpaginate -%}
+<script src="{{ 'colored-diamond-filter.js' | asset_url }}" defer></script>
+{% stylesheet %}
+[data-colored-diamonds] fieldset { border: 0; margin: 0; min-width: 0; padding: 0; }
+.lm-colored-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.lm-colored-chips label { cursor: pointer; }
+.lm-colored-chips input { position: absolute; opacity: 0; }
+.lm-colored-chips span { display: block; border: 1px solid #b4a495; border-radius: 3px; padding: 8px 12px; font-size: 12px; }
+.lm-colored-chips input:checked + span { background: #1e1109; color: #fdfaF6; }
+.lm-colored-chips input:focus-visible + span { outline: 2px solid #7a5c22; outline-offset: 3px; }
+[data-colored-pager] { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0; }
+[data-colored-pager] button { border: 1px solid #b4a495; background: transparent; padding: 10px 16px; cursor: pointer; }
+[data-colored-apply]:disabled { opacity: .6; }
+{% endstylesheet %}
+{% schema %}
+{"name":"Colored diamond filter","settings":[],"presets":[{"name":"Colored diamond filter"}]}
+{% endschema %}

@@ -698,5 +698,32 @@
       "created_ascending": "Date, old to new",
       "created_descending": "Date, new to old"
     }
+  },
+  "colored_diamonds": {
+    "natural": "Natural",
+    "lab": "Lab-grown",
+    "colored": "Colored lab-grown",
+    "shape": "Shape",
+    "carat": "Carat",
+    "price": "Price",
+    "min": "Min",
+    "max": "Max",
+    "color": "Color",
+    "intensity": "Color intensity",
+    "clarity": "Clarity",
+    "view": "View Diamonds",
+    "reset": "Reset all",
+    "sort": "Sort by",
+    "price_asc": "Price: Low to High",
+    "price_desc": "Price: High to Low",
+    "carat_asc": "Carat: Low to High",
+    "carat_desc": "Carat: High to Low",
+    "loading": "Loading diamonds…",
+    "error": "Diamonds could not load. Refresh to try again.",
+    "empty": "No diamonds match your selection.",
+    "diamonds": "diamonds",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
   }
 }

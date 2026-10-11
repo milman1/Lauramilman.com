@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const {filterStones}=require('../assets/colored-diamond-filter.js');
+const base={id:1,image:'photo.jpg',video:'video.mp4',certificate:'LG123',carat:2,price:700,shape:'Oval',clarity:'VS1',color:'Fancy Vivid Blue',tags:['colored-stone-feed','Blue']};
+const pink={...base,id:2,color:'Fancy Pink',tags:['colored-stone-feed','Pink'],carat:3,price:900};
+assert.equal(filterStones([base,pink],{color:['Blue'],intensity:['Fancy Vivid']},'price_asc').length,1);
+assert.equal(filterStones([base,pink],{color:['Blue','Pink'],min_carat:2.5},'price_asc')[0].id,2);
+assert.equal(filterStones([base,pink],{max_price:700},'price_asc')[0].id,1);
+assert.equal(filterStones([base,pink],{},'carat_desc')[0].id,2);
+assert.equal(filterStones([base,{...pink,video:''}],{},'price_asc').length,1);
+assert.equal(filterStones([base,pink],{clarity:['VVS1']},'price_asc').length,0);
+console.log('Colored filter: six behavior checks passed');
