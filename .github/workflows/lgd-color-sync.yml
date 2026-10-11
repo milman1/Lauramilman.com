@@ -1,0 +1,78 @@
+name: LMNY colored loose-diamond sync
+on:
+  schedule:
+    - cron: '37 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Preview, create five drafts, sync, or activate reviewed handles'
+        type: choice
+        options: [dry-run, sample, sync, activate]
+        default: dry-run
+      handles:
+        description: 'Exact comma-separated reviewed handles; activation only'
+        type: string
+        default: ''
+  pull_request:
+    paths:
+      - 'lmny-feeds/src/lgd-color/**'
+      - 'lmny-feeds/checks/lgd-color.check.mjs'
+      - 'lmny-feeds/config/pricing.ts'
+      - '.github/workflows/lgd-color-sync.yml'
+permissions:
+  contents: read
+concurrency:
+  group: lmny-colored-stone-sync
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --experimental-strip-types --test lmny-feeds/checks/lgd-color.check.mjs
+  sync:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.LGD_COLOR_SYNC_LIVE == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sync certified colored loose lab-grown diamonds
+        env:
+          LGD_API_KEY: ${{ secrets.LGD_API_KEY }}
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
+          LGD_ACTIVATION_HANDLES: ${{ inputs.handles }}
+          MODE: ${{ inputs.mode }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "schedule" ]; then
+            node --experimental-strip-types src/lgd-color/sync.mjs
+          else
+            case "$MODE" in
+              sample) node --experimental-strip-types src/lgd-color/sync.mjs --limit=5 ;;
+              sync) node --experimental-strip-types src/lgd-color/sync.mjs ;;
+              activate) node --experimental-strip-types src/lgd-color/sync.mjs --activate ;;
+              *) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run --limit=5 ;;
+            esac
+          fi
+      - name: Upload sanitized report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: colored-stone-report-${{ github.run_id }}
+          path: lmny-feeds/out/lgd-color-report.json
+          retention-days: 7
+

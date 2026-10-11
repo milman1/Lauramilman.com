@@ -335,3 +335,7 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
   }
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }
+
+/** LGD certified colored loose lab diamonds; merchant approved 2026-10-11. */
+export const LGD_COLOR_DIAMONDS = { costMultiple: 3.5, welcomeDiscountPct: 0.1 } as const;
+
