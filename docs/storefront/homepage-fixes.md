@@ -115,3 +115,15 @@ Still open:
 - [ ] 14. (Pushed.) Reviews spotlight: the live Google reviews widget moved up
       under the promise band, titled "Recent reviews". Newest-first order is
       set in the SociableKit dashboard (embed 25717519), not in the theme.
+
+### #12 live changes (2026-10-11, merchant approved) — verified on the storefront
+- 9073631952967 handle -> `oval-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-09-ct` (301 from the old round- handle).
+- 9073636409415 handle -> `oval-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-11-ct` (301 from the old round- handle).
+- 9080621432903 (duplicate 18K white-gold setting) ARCHIVED; redirect
+  /products/round-four-prong-pave-engagement-ring-setting-in-18k-white-gold
+  -> /products/round-four-prong-pave-engagement-ring-setting-in-white-gold-0-40-ct
+  (UrlRedirect 413239083079). The sibling sells 18K at the same $1,600.
+- "labor included.14K" was not a typo: descriptionHtml has two <p> paragraphs;
+  only the plain-text API field joins them. No change.
+- Still open: 0.40 ct white-gold style (four-prong pavé vs hidden halo); 0.11 ct
+  oval head fit (supplier/CAD).
