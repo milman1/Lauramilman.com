@@ -144,7 +144,7 @@ export async function main(argv=process.argv.slice(2)) {
   const verified=(await paginate(gql,OPS.catalog,'products',{query:'tag:'+FEED_TAG})).map(view);
   for(const line of plan.writes){
     const p=verified.find(p=>p.handle===line.handle);
-    if(!p || p.status!==line.input.status || p.price!==line.input.variants[0].price || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==line.stone.cost || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
+    if(!p || p.status!==line.input.status || p.price!==line.input.variants[0].price || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
   }
   for(const line of plan.holds)if(verified.find(p=>p.handle===line.handle)?.status!=='DRAFT')throw new Error('Withdrawal verification mismatch');
   sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
