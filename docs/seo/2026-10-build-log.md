@@ -227,3 +227,11 @@ receive the stone's details.
 - Section setting `show_ask_line` (default on) turns it off without code. No Reserve, no Make an offer.
 - Chosen over a button on every tile: 30+ tiles would crowd the grid, and a stone-specific question belongs on the stone page (PR #231), where the certificate and video are.
 - Tests added in `theme-pdp-offer.test.ts`; 826/826 pass.
+
+## 2026-10-11 — price note softened (merchant choice)
+
+The merchant chose "priced well below the large online sellers" over the
+percentage version. `price_note` on `templates/collection.diamonds-lab.json` now
+states no figures; the evidence (CSV and the 2026-10-08 entry above) still backs
+it, and `price_note_until` stays 2026-11-08, so it still hides itself unless
+re-checked.
