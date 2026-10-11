@@ -15,6 +15,7 @@ describe('product specification layout', () => {
     expect(product).not.toContain('spec_rows == blank and is_watch');
     expect(product).toContain('<!--FACTS:');
     expect(product).toContain("when 'diamond_shape'");
+    expect(product).toContain("assign v = 'Cushion, elongated cushion'");
     expect(product).toContain("when 'carat_weight'");
     expect(product).toContain("when 'metal'");
     expect(product).toContain("when 'clarity'");

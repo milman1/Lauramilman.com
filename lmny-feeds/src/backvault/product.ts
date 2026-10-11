@@ -4,6 +4,7 @@ import { taxonomyGidForProductType } from '../taxonomy.js';
 import { EBAY_CONDITION_PREOWNED } from '../ebayCondition.js';
 import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
+import { assertHouseSettingSkuNotInFeed } from '../settingCenterShape.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
 import type { BackVaultItem } from './types.js';
 
@@ -169,6 +170,8 @@ export function buildProductSetInput(
   existing?: ExistingProduct,
   locationId?: string,
 ): Record<string, unknown> {
+  assertHouseSettingSkuNotInFeed(item.sku);
+  assertHouseSettingSkuNotInFeed(item.sourceHandle);
   const handle = handleFor(item);
   const listing = buildJewelryListing(item);
   const tags = tagsFor(item);

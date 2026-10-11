@@ -10,6 +10,9 @@
   assign shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
   assign found = ''
   assign stated = product.metafields.custom.diamond_shape.value | strip | downcase
+  if stated == 'elongated cushion'
+    assign stated = 'cushion'
+  endif
   if stated != blank
     for s in shapes
       assign s_l = s | downcase

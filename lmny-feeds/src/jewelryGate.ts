@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { labGrownJewelryRetailFromCost, settingOnlyRetailFromCost, supplierRetailFromCost } from '../config/pricing.js';
+import { settingShapeIssues } from './settingCenterShape.js';
 
 export const POLICY = 'Free insured shipping and 7-day returns.';
 export const SPEC_KEYS = ['diamond_shape', 'carat_weight', 'color', 'clarity', 'metal', 'setting_style'] as const;
@@ -57,6 +58,13 @@ export function validateDraftInput(input: Record<string, unknown>): string[] {
     if (v.sku) skus.add(v.sku.trim());
     if (!(Number.isFinite(Number(v.price)) && Number(v.price) > 0)) issues.push('Every variant requires a positive confirmed retail price');
   }
+  issues.push(...settingShapeIssues({
+    skus: [...skus],
+    title: String(input.title ?? ''),
+    diamondShape: fields.find(m => m.namespace === 'custom' && m.key === 'diamond_shape')?.value ?? '',
+    tags: tags.map(t => String(t)),
+    copy: [input.title, input.descriptionHtml, seo?.title, seo?.description].filter(part => part != null).join(' '),
+  }));
   return issues;
 }
 
@@ -165,6 +173,13 @@ export function validateActivation(snapshot: Snapshot, review: Review, now = Dat
       }
     }
   }
+  issues.push(...settingShapeIssues({
+    skus: p.variants.nodes.map(v => v.sku),
+    title: p.title,
+    diamondShape: custom.diamond_shape ?? '',
+    tags: p.tags,
+    copy: [p.title, p.descriptionHtml, p.seo.title, p.seo.description].join(' '),
+  }));
   return issues;
 }
 
