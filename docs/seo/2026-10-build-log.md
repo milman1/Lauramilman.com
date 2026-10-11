@@ -220,3 +220,10 @@ receive the stone's details.
 ## Next
 
 - Collection guides are on hold by merchant decision (PR #202 not merged).
+
+## 2026-10-11 — "Not sure which stone?" help line on lab-grown search
+
+- New `snippets/collection-ask-line.liquid`, rendered under the heading of `/collections/lab-grown-diamonds` (both `diamond-filter` header paths, lab only). One line opens a short form (name, email, what are you looking for) through Shopify's contact form; it lands in the store inbox as request type "Stone search help" with the collection link.
+- Section setting `show_ask_line` (default on) turns it off without code. No Reserve, no Make an offer.
+- Chosen over a button on every tile: 30+ tiles would crowd the grid, and a stone-specific question belongs on the stone page (PR #231), where the certificate and video are.
+- Tests added in `theme-pdp-offer.test.ts`; 826/826 pass.

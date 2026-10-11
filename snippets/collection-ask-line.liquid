@@ -1,0 +1,93 @@
+{%- comment -%}
+  One-line help prompt under a loose-diamond search heading. Opens a short form
+  (a native <details>, no script) that posts through Shopify's contact form into
+  the store inbox as request type "Stone search help". It is a general question,
+  not tied to one stone, and it holds no stone and sets no price.
+  Params: collection.
+{%- endcomment -%}
+{%- form 'contact', id: 'CollectionAskForm', class: 'lm-askline' -%}
+  <details class="lm-askline__box"{% if form.posted_successfully? or form.errors %} open{% endif %}>
+    <summary class="lm-askline__summary">Not sure which stone? <span>Ask us and we will help you choose.</span></summary>
+    <div class="lm-askline__body">
+      {%- if form.posted_successfully? -%}
+        <p class="lm-askline__status" role="status">Thank you — your question was sent. We will reply by email.</p>
+      {%- else -%}
+        {%- if form.errors -%}
+          <p class="lm-askline__status lm-askline__status--error" role="alert">Your question did not send. Please check your email address and try again.</p>
+        {%- endif -%}
+        <input type="hidden" name="contact[request_type]" value="Stone search help">
+        <input type="hidden" name="contact[page]" value="{{ collection.title | escape }}">
+        <input type="hidden" name="contact[page_url]" value="{{ shop.url }}{{ collection.url }}">
+        <div class="lm-askline__row">
+          <div class="lm-askline__field">
+            <label for="CollectionAsk-name">Name</label>
+            <input type="text" id="CollectionAsk-name" name="contact[name]" autocomplete="name" value="{{ customer.name | escape }}" required>
+          </div>
+          <div class="lm-askline__field">
+            <label for="CollectionAsk-email">Email</label>
+            <input type="email" id="CollectionAsk-email" name="contact[email]" autocomplete="email" value="{{ customer.email | escape }}" required>
+          </div>
+        </div>
+        <div class="lm-askline__field">
+          <label for="CollectionAsk-body">What are you looking for?</label>
+          <textarea id="CollectionAsk-body" name="contact[body]" rows="3" placeholder="Shape, size, budget, or a ring you have in mind" required></textarea>
+        </div>
+        <button type="submit" class="lm-askline__submit">Send question</button>
+      {%- endif -%}
+    </div>
+  </details>
+{%- endform -%}
+<style>
+  .lm-askline {
+    margin: 14px auto 0;
+    max-width: 640px;
+    text-align: left;
+  }
+  .lm-askline__summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    border-left: 2px solid var(--gold, #C9A050);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    list-style: none;
+  }
+  .lm-askline__summary::-webkit-details-marker { display: none; }
+  .lm-askline__summary span { text-decoration: underline; text-underline-offset: 3px; }
+  .lm-askline__body { padding: 12px 14px 0; }
+  .lm-askline__row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .lm-askline__field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.6rem; }
+  .lm-askline__field label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .lm-askline__field input,
+  .lm-askline__field textarea {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    font-size: 16px;
+    color: #2C1810;
+    background: #fff;
+    border: 1px solid #CFC7B8;
+    border-radius: 4px;
+  }
+  .lm-askline__submit {
+    padding: 0.65rem 1.4rem;
+    font: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--wine, #4A1428);
+    border: 1px solid var(--wine, #4A1428);
+    cursor: pointer;
+  }
+  .lm-askline__status { margin: 0 0 0.75rem; font-size: 0.85rem; line-height: 1.5; }
+  .lm-askline__status--error { color: #9B2C2C; }
+  @media (max-width: 480px) {
+    .lm-askline__row { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>

@@ -64,6 +64,9 @@
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
       {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
+      {%- if origin_is_lab and section.settings.show_ask_line -%}
+        {%- render 'collection-ask-line', collection: collection -%}
+      {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -224,6 +227,9 @@
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
       {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
+      {%- if origin_is_lab and section.settings.show_ask_line -%}
+        {%- render 'collection-ask-line', collection: collection -%}
+      {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
       <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
         <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
@@ -1468,6 +1474,13 @@
       "id": "price_note_until",
       "label": "Hide the note after (YYYY-MM-DD)",
       "info": "Required. The note disappears after this date so an old comparison is never shown. Re-check prices before extending it."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ask_line",
+      "label": "Show the \"Not sure which stone?\" help form",
+      "info": "Lab-grown search only. Questions arrive in the store inbox as \"Stone search help\".",
+      "default": true
     },
     {
       "type": "range",
