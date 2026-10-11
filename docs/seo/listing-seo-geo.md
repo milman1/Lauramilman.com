@@ -123,7 +123,11 @@ Other sources keep their existing formulas:
   `src/backvault/listing.ts`
 - House fine jewelry and chains: `{design} {gem} {type} in {metal}` /
   `\| Laura Milman`
-- Jacob & Co.: `Unworn Jacob & Co {Collection} {Dial} {Reference}`
+- Jacob & Co.: `New Jacob & Co. {Collection} {Dial} {Reference}`
+- Jacob & Co. collection: H1 `New Jacob & Co. Watches`, SEO title
+  `New Jacob & Co. Watches | Laura Milman` (≤ 60). Description states box
+  and papers, shows a reference only when the record has one, and closes
+  with exchanges within 7 days.
 
 ---
 
