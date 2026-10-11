@@ -192,7 +192,7 @@
 .lmh-worlds { padding: 52px var(--lmh-gutter) 44px; display: flex; flex-direction: column; gap: 26px; }
 .lmh-rule-head { display: flex; align-items: center; gap: 18px; }
 .lmh-rule-head::after { content: ''; flex: 1; height: 1px; background: var(--lmh-line); }
-.lmh-worlds__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.lmh-worlds__grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; }
 .lmh-world { display: flex; flex-direction: column; gap: 18px; text-decoration: none; color: var(--lmh-ink) !important; }
 .lmh-world__media { display: block; aspect-ratio: 282 / 288; overflow: hidden; background: var(--lmh-tile); }
 .lmh-world__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
@@ -427,6 +427,8 @@
   .lmh-worlds__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; row-gap: 22px; }
   .lmh-world { gap: 12px; }
   .lmh-world__media { aspect-ratio: 168 / 200; }
+  .lmh-world:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .lmh-world:last-child:nth-child(odd) .lmh-world__media { aspect-ratio: 348 / 200; }
   .lmh-world__title { font-size: 21px; line-height: 1.12; }
   .lmh-world__text { display: none; }
   .lmh-world .lmh-arrow { font-size: 10.5px; margin-top: -4px; }

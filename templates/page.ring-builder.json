@@ -11,7 +11,19 @@
       "settings": {
         "eyebrow": "Ring Builder",
         "title": "Build Your Ring",
-        "description": "Two ways to begin. Start with the stone that speaks to you, or start with the setting you love — we'll bring the two together in Italy."
+        "description": "Two ways to begin. Start with the stone that speaks to you, or start with the setting you love — pair them on the stone's page, and our goldsmiths in Italy make the ring.",
+        "diamond_title": "Start with a Diamond",
+        "diamond_text": "Search lab-grown stones by shape, carat, color and clarity. Pick one, then choose a setting on its page. Each stone has its own certificate.",
+        "diamond_cta_text": "Search Lab-Grown Diamonds",
+        "diamond_cta_url": "/collections/lab-grown-diamonds",
+        "diamond_alt_text": "Prefer a natural stone?",
+        "diamond_alt_url": "/collections/natural-diamonds",
+        "diamond_note": "Not sure which stone? Every stone page has an Ask form.",
+        "setting_title": "Start with a Setting",
+        "setting_text": "Browse settings sold without a center stone, then add the diamond you choose. Setting and stone are priced separately, and the total is shown before checkout.",
+        "setting_cta_text": "Browse Settings",
+        "setting_cta_url": "/collections/ring-settings",
+        "setting_note": "Priced without center stone"
       }
     },
     "trust": {

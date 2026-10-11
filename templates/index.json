@@ -15,36 +15,36 @@
         "pill-1": {
           "type": "pill",
           "settings": {
-            "text": "Gold",
-            "url": "/collections/chains"
+            "text": "Basics",
+            "url": "/collections/lab-grown-earrings?type=Stud,Huggie,Hoop"
           }
         },
         "pill-2": {
           "type": "pill",
           "settings": {
-            "text": "Pre-Owned",
-            "url": "/collections/time-pieces"
+            "text": "Loose Lab-Grown",
+            "url": "/collections/lab-grown-diamonds"
           }
         },
         "pill-3": {
           "type": "pill",
           "settings": {
-            "text": "Lab-Grown",
-            "url": "/collections/lab-grown-diamond-jewelry"
+            "text": "Tennis Bracelets",
+            "url": "/collections/lab-grown-bracelets?type=Tennis"
           }
         },
         "pill-4": {
           "type": "pill",
           "settings": {
-            "text": "Natural Diamonds",
-            "url": "/collections/natural-diamonds"
+            "text": "Gold",
+            "url": "/collections/chains"
           }
         },
         "pill-5": {
           "type": "pill",
           "settings": {
-            "text": "Engagement",
-            "url": "/pages/ring-builder"
+            "text": "Rings",
+            "url": "/collections/rings"
           }
         }
       },
@@ -56,13 +56,13 @@
         "pill-5"
       ],
       "settings": {
-        "eyebrow": "Fine jewelry · Pre-owned watches · Diamonds",
+        "eyebrow": "Basics · Loose lab-grown stones · Tennis bracelets · Gold · Rings",
         "title": "Jewelry for the week",
         "title_emphasis": "you work.",
-        "text": "Gold chains and rings for the office, a pre-owned watch you earned, and diamonds, lab-grown or natural, from a New York house with 30+ years in the Diamond District.",
-        "primary_text": "Shop Gold Jewelry",
-        "primary_url": "/collections/chains",
-        "secondary_text": "Search Loose Diamonds",
+        "text": "Everyday basics, loose lab-grown stones, tennis bracelets, gold jewelry and rings, from a New York house with 30+ years in the Diamond District.",
+        "primary_text": "Shop Tennis Bracelets",
+        "primary_url": "/collections/lab-grown-bracelets?type=Tennis",
+        "secondary_text": "Search Loose Lab-Grown Stones",
         "secondary_url": "/collections/lab-grown-diamonds",
         "note": "Shop Pay Installments available at checkout.",
         "image_asset": "fine-jewelry-model-earrings.jpg",
@@ -75,46 +75,58 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "Gold Jewelry",
-            "text": "Chains, stacking rings, huggies and bangles in yellow gold.",
-            "link_text": "Shop gold",
-            "url": "/collections/chains",
-            "image_asset": "shop-world-fine-jewelry.webp",
-            "image_alt": "Gold station necklace on ivory satin"
+            "title": "Basics",
+            "text": "Studs, huggies and hoops to wear every day.",
+            "link_text": "Shop basics",
+            "url": "/collections/lab-grown-earrings?type=Stud,Huggie,Hoop",
+            "image_asset": "fine-jewelry-model-earrings.jpg",
+            "image_alt": "Woman wearing long diamond drop earrings"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "Pre-Owned Watches & Jewelry",
-            "text": "Rolex, Cartier and Bvlgari watches, and signed estate jewelry.",
-            "link_text": "Shop pre-owned",
-            "url": "/collections/time-pieces",
-            "image_asset": "shop-world-preowned-timepieces.webp",
-            "image_alt": "Steel watch on a suede display cushion"
+            "title": "Loose Lab-Grown Stones",
+            "text": "Search by shape, carat, color and clarity. IGI or GIA on every stone.",
+            "link_text": "Search stones",
+            "url": "/collections/lab-grown-diamonds",
+            "image_asset": "diamond-destination-lab.webp",
+            "image_alt": "Radiant-cut diamond held in tweezers over a glass dish"
           }
         },
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "Lab-Grown Diamonds",
-            "text": "Tennis bracelets, huggies and studs, plus loose lab-grown stones.",
-            "link_text": "Shop lab-grown",
-            "url": "/collections/lab-grown-diamond-jewelry",
+            "title": "Tennis Bracelets",
+            "text": "Lab-grown diamonds in 14K gold, made for daily wear.",
+            "link_text": "Shop tennis bracelets",
+            "url": "/collections/lab-grown-bracelets?type=Tennis",
             "image_asset": "shop-channel-cover.jpg",
-            "image_alt": "Gold tennis bracelet, diamond studs and an eternity band on navy velvet",
+            "image_alt": "Gold tennis bracelet on navy velvet",
             "position": "38% 50%"
           }
         },
         "tile-4": {
           "type": "tile",
           "settings": {
-            "title": "Natural Diamonds",
-            "text": "Loose natural diamonds, each listed with its grading lab.",
-            "link_text": "Shop natural",
-            "url": "/collections/natural-diamonds",
-            "image_asset": "diamond-destination-natural.webp",
-            "image_alt": "Round brilliant diamond on sand-colored stone"
+            "title": "Gold Jewelry",
+            "text": "Chains, bracelets, huggies and bangles in yellow gold.",
+            "link_text": "Shop gold",
+            "url": "/collections/chains",
+            "image_asset": "shop-world-fine-jewelry.webp",
+            "image_alt": "Gold station necklace on ivory satin"
+          }
+        },
+        "tile-5": {
+          "type": "tile",
+          "settings": {
+            "title": "Rings",
+            "text": "Stacking bands, eternity rings and engagement rings.",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "image_asset": "shop-channel-cover.jpg",
+            "image_alt": "Gold diamond eternity band on navy velvet",
+            "position": "76% 50%"
           }
         }
       },
@@ -122,7 +134,8 @@
         "tile-1",
         "tile-2",
         "tile-3",
-        "tile-4"
+        "tile-4",
+        "tile-5"
       ],
       "settings": {
         "heading": "Shop the house"
