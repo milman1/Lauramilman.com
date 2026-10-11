@@ -64,10 +64,10 @@
         "primary_url": "/collections/lab-grown-diamonds",
         "secondary_text": "Shop Rings",
         "secondary_url": "/collections/rings",
-        "note": "",
+        "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
         "image_alt": "Woman in an ivory blazer wearing a diamond solitaire ring",
-        "style": "light"
+        "style": "dark"
       }
     },
     "worlds": {
@@ -739,12 +739,18 @@
       }
     },
     "diamond-search": {
-      "type": "lmh-diamond-search",
+      "type": "diamond-filter",
       "settings": {
-        "title": "Find a diamond that feels like you.",
-        "text": "Search every lab-grown stone by shape, carat, budget, color and clarity. Each one is listed with its IGI or GIA certificate.",
-        "button_text": "Explore All Diamonds",
-        "note": "Not sure where to start? Every lab-grown stone page has an Ask form."
+        "heading": "Find a diamond that feels like you.",
+        "subheading": "Search every lab-grown stone by shape, carat, price, color, clarity and cut. Each one is listed with its IGI or GIA certificate.",
+        "search_only": true,
+        "navy_mode": true,
+        "stone_kind": "lab",
+        "search_url": "/collections/lab-grown-diamonds",
+        "show_ask_line": false,
+        "products_per_page": 24,
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
       }
     },
     "rings-your-way": {
@@ -757,7 +763,8 @@
             "link_text": "Build your ring",
             "url": "/pages/ring-builder",
             "image_asset": "home-rings-forever.webp",
-            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal"
+            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal",
+            "position": "92% 50%"
           }
         },
         "tile-2": {
@@ -767,16 +774,30 @@
             "link_text": "Shop stacking rings",
             "url": "/collections/stackable-rings",
             "image_asset": "home-rings-because.webp",
-            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal"
+            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal",
+            "position": "92% 50%"
+          }
+        },
+        "tile-3": {
+          "type": "tile",
+          "settings": {
+            "title": "For every day",
+            "link_text": "Shop bracelets",
+            "url": "/collections/all-bracelets",
+            "image_asset": "home-bracelets.webp",
+            "image_alt": "Stack of gold chain bracelets with colored stones on a woman's wrist",
+            "position": "60% 50%"
           }
         }
       },
       "block_order": [
         "tile-1",
-        "tile-2"
+        "tile-2",
+        "tile-3"
       ],
       "settings": {
-        "title": "Rings, your way."
+        "title": "Rings, your way.",
+        "style": "navy"
       }
     },
     "rolex": {

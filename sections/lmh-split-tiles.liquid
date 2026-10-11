@@ -1,16 +1,17 @@
 {%- comment -%}
-  "Rings, your way.": a heading over two wide photo tiles, each with a
-  serif title set on the photo. Stacks on phones.
+  "Rings, your way.": a heading over up to three photo tiles, each with a
+  serif title and a link beneath. Colors come from the brand palette
+  (navy, espresso or cream). Stacks on phones.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-split" aria-labelledby="LmhSplit-{{ section.id }}">
+<section class="lmh lmh-split lmh-split--{{ section.settings.style | default: 'navy' }}" aria-labelledby="LmhSplit-{{ section.id }}">
   <h2 class="lmh-h2 lmh-split__title" id="LmhSplit-{{ section.id }}">{{ section.settings.title | escape }}</h2>
   <div class="lmh-split__grid">
     {%- for block in section.blocks -%}
       <a class="lmh-split__tile" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
-        <span class="lmh-split__media">
-          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
+        <span class="lmh-split__media"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
+          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 100vw, 33vw' -%}
         </span>
         {%- if block.settings.title != blank -%}<span class="lmh-split__label">{{ block.settings.title | escape }}</span>{%- endif -%}
         {%- if block.settings.link_text != blank -%}<span class="lmh-split__link">{{ block.settings.link_text | escape }} {% render 'lmh-arrow' %}</span>{%- endif -%}
@@ -24,23 +25,25 @@
   "name": "LM split tiles",
   "tag": "div",
   "settings": [
-    { "type": "text", "id": "title", "label": "Heading", "default": "Rings, your way." }
+    { "type": "text", "id": "title", "label": "Heading", "default": "Rings, your way." },
+    { "type": "select", "id": "style", "label": "Color", "default": "navy", "options": [ { "value": "navy", "label": "Navy" }, { "value": "espresso", "label": "Espresso" }, { "value": "cream", "label": "Cream" } ] }
   ],
   "blocks": [
     {
       "type": "tile",
       "name": "Tile",
       "settings": [
-        { "type": "text", "id": "title", "label": "Title on photo", "info": "Leave blank when the photo already shows its title." },
+        { "type": "text", "id": "title", "label": "Title under the photo" },
         { "type": "text", "id": "link_text", "label": "Link text" },
         { "type": "url", "id": "url", "label": "Link" },
         { "type": "image_picker", "id": "image", "label": "Image" },
         { "type": "text", "id": "image_asset", "label": "Theme asset image" },
-        { "type": "text", "id": "image_alt", "label": "Image alt text" }
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        { "type": "text", "id": "position", "label": "Image focus (CSS object-position)", "info": "For example 92% 50% keeps a subject at the right in view." }
       ]
     }
   ],
-  "max_blocks": 2,
+  "max_blocks": 3,
   "presets": [{ "name": "LM split tiles" }]
 }
 {% endschema %}
