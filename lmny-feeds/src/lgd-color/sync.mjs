@@ -124,9 +124,20 @@ export async function main(argv=process.argv.slice(2)) {
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
-  const failedMedia=[];
-  for(const line of plan.writes)if(!(await mediaReady(line.stone)))failedMedia.push(line.handle);
-  if(failedMedia.length)throw new Error('Media unavailable for '+failedMedia.length+' planned stones; no writes performed');
+  const failedMedia=new Set();
+  const pendingMedia=stones.map(stone=>({handle:stone.handle,stone})); let mediaCursor=0;
+  await Promise.all(Array.from({length:Math.min(4,pendingMedia.length)},async()=>{
+    while(mediaCursor<pendingMedia.length){const line=pendingMedia[mediaCursor++];if(!(await mediaReady(line.stone)))failedMedia.add(line.handle);}
+  }));
+  plan.writes=plan.writes.filter(line=>!failedMedia.has(line.handle));
+  plan.skipped.push(...Array.from(failedMedia,handle=>({handle,reason:'media_unavailable'})));
+  if(!limit && !activate){
+    const existingHolds=new Set(plan.holds.map(line=>line.handle));
+    for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
+    const activeOwned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&p.status==='ACTIVE').length;
+    if(plan.holds.length>Math.max(5,activeOwned*0.1))throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  }
+  console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
   const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawals:plan.holds.map(l=>l.handle),skipped:plan.skipped};
   await mkdir('out',{recursive:true});
   await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
