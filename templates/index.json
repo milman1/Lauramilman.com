@@ -770,18 +770,18 @@
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "Just because",
-            "link_text": "Shop stacking rings",
-            "url": "/collections/stackable-rings",
-            "image_asset": "home-rings-because.webp",
-            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal",
-            "position": "92% 50%"
+            "title": "For work",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "image_asset": "home-rings-work.webp",
+            "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
+            "position": "60% 30%"
           }
         },
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "For every day",
+            "title": "For play",
             "link_text": "Shop bracelets",
             "url": "/collections/all-bracelets",
             "image_asset": "home-bracelets.webp",
@@ -797,7 +797,9 @@
       ],
       "settings": {
         "title": "Rings, your way.",
-        "style": "navy"
+        "style": "warm",
+        "footer_text": "Shop all fine jewelry",
+        "footer_url": "/collections/all"
       }
     },
     "rolex": {

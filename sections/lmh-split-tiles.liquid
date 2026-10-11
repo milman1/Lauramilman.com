@@ -1,11 +1,11 @@
 {%- comment -%}
   "Rings, your way.": a heading over up to three photo tiles, each with a
   serif title and a link beneath. Colors come from the brand palette
-  (navy, espresso or cream). Stacks on phones.
+  (warm white by default; navy or espresso optional). Stacks on phones.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-split lmh-split--{{ section.settings.style | default: 'navy' }}" aria-labelledby="LmhSplit-{{ section.id }}">
+<section class="lmh lmh-split lmh-split--{{ section.settings.style | default: 'warm' }}" aria-labelledby="LmhSplit-{{ section.id }}">
   <h2 class="lmh-h2 lmh-split__title" id="LmhSplit-{{ section.id }}">{{ section.settings.title | escape }}</h2>
   <div class="lmh-split__grid">
     {%- for block in section.blocks -%}
@@ -18,6 +18,9 @@
       </a>
     {%- endfor -%}
   </div>
+  {%- if section.settings.footer_text != blank -%}
+    <p class="lmh-split__all"><a class="lmh-arrow" href="{{ section.settings.footer_url | default: '/collections/all' }}">{{ section.settings.footer_text | escape }} {% render 'lmh-arrow' %}</a></p>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -26,7 +29,9 @@
   "tag": "div",
   "settings": [
     { "type": "text", "id": "title", "label": "Heading", "default": "Rings, your way." },
-    { "type": "select", "id": "style", "label": "Color", "default": "navy", "options": [ { "value": "navy", "label": "Navy" }, { "value": "espresso", "label": "Espresso" }, { "value": "cream", "label": "Cream" } ] }
+    { "type": "select", "id": "style", "label": "Color", "default": "warm", "options": [ { "value": "warm", "label": "Warm white (matches the page)" }, { "value": "navy", "label": "Navy" }, { "value": "espresso", "label": "Espresso" } ] },
+    { "type": "text", "id": "footer_text", "label": "Link under the tiles" },
+    { "type": "url", "id": "footer_url", "label": "Link under the tiles, URL" }
   ],
   "blocks": [
     {
