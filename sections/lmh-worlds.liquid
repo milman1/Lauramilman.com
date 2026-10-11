@@ -28,7 +28,7 @@
         endif
       -%}
       <a class="lmh-world" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
-        <span class="lmh-world__media"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
+        <span class="lmh-world__media{% if block.settings.fit == 'whole' %} lmh-world__media--whole{% endif %}"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
           {%- render 'lmh-img', img: tile_img, asset: block.settings.image_asset, alt: tile_alt, sizes: tile_sizes -%}
         </span>
         <span class="lmh-world__body">
@@ -65,7 +65,8 @@
         { "type": "product", "id": "product", "label": "Or use this product's photo", "info": "Used when no image is uploaded. Shows the product's real featured photo." },
         { "type": "text", "id": "image_asset", "label": "Theme asset image" },
         { "type": "text", "id": "image_alt", "label": "Image alt text" },
-        { "type": "text", "id": "position", "label": "Image focus (CSS object-position)" }
+        { "type": "text", "id": "position", "label": "Image focus (CSS object-position)" },
+        { "type": "select", "id": "fit", "label": "Photo fit", "default": "fill", "options": [ { "value": "fill", "label": "Fill the tile (crops)" }, { "value": "whole", "label": "Show the whole photo, centered in a warm frame" } ], "info": "Use the second for product photos, so a stone or a watch is never cropped or zoomed." }
       ]
     }
   ],

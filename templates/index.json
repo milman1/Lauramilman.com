@@ -81,7 +81,8 @@
             "link_text": "Search lab-grown diamonds",
             "url": "/collections/lab-grown-diamonds",
             "product": "lg-886886",
-            "image_asset": "diamond-destination-lab.webp"
+            "image_asset": "diamond-destination-lab.webp",
+            "fit": "whole"
           }
         },
         "tile-2": {
@@ -91,9 +92,10 @@
             "text": "Solitaires, bands and eternity rings to wear every day, or to propose with.",
             "link_text": "Shop rings",
             "url": "/collections/rings",
-            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
-            "image_asset": "shop-channel-cover.jpg",
-            "position": "76% 50%"
+            "image_asset": "home-rings-forever.webp",
+            "position": "92% 50%",
+            "image_alt": "Round diamond solitaire ring in yellow gold on a travertine pedestal",
+            "fit": "fill"
           }
         },
         "tile-3": {
@@ -104,7 +106,8 @@
             "link_text": "Shop watches",
             "url": "/collections/time-pieces",
             "product": "w-t3757",
-            "image_asset": "shop-world-preowned-timepieces-rolex.jpg"
+            "image_asset": "shop-world-preowned-timepieces-rolex.jpg",
+            "fit": "whole"
           }
         },
         "tile-4": {
@@ -115,7 +118,8 @@
             "link_text": "Shop maison jewelry",
             "url": "/collections/estate-jewelry",
             "product": "bv-cartier-love-18k-white-gold-3-diamond-ring-j10168",
-            "image_asset": "shop-world-preowned-maison.webp"
+            "image_asset": "shop-world-preowned-maison.webp",
+            "fit": "whole"
           }
         },
         "tile-5": {
@@ -126,7 +130,8 @@
             "link_text": "Shop natural",
             "url": "/collections/natural-diamonds",
             "product": "nd-352890",
-            "image_asset": "diamond-destination-natural.webp"
+            "image_asset": "diamond-destination-natural.webp",
+            "fit": "whole"
           }
         }
       },
@@ -730,7 +735,6 @@
     "meet-laura": {
       "type": "lmh-meet",
       "settings": {
-        "image": "shopify://shop_images/laura-milman-portrait.jpg",
         "image_alt": "Laura Milman",
         "title": "Meet Laura Milman",
         "text": "Discover the story behind the jewelry.",
@@ -770,18 +774,18 @@
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "Just because",
-            "link_text": "Shop stacking rings",
-            "url": "/collections/stackable-rings",
-            "image_asset": "home-rings-because.webp",
-            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal",
-            "position": "92% 50%"
+            "title": "For work",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "image_asset": "home-rings-work.webp",
+            "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
+            "position": "60% 30%"
           }
         },
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "For every day",
+            "title": "For play",
             "link_text": "Shop bracelets",
             "url": "/collections/all-bracelets",
             "image_asset": "home-bracelets.webp",
@@ -797,7 +801,9 @@
       ],
       "settings": {
         "title": "Rings, your way.",
-        "style": "navy"
+        "style": "warm",
+        "footer_text": "Shop all fine jewelry",
+        "footer_url": "/collections/all"
       }
     },
     "rolex": {
@@ -829,6 +835,67 @@
         "mobile_button_text": "Shop All Rolex",
         "mobile_button_url": "/collections/rolex-watches"
       }
+    },
+    "shelf": {
+      "type": "lmh-shelf",
+      "blocks": {
+        "tab-1": {
+          "type": "shelf",
+          "settings": {
+            "label": "Rings",
+            "collection": "rings",
+            "limit": 10,
+            "link_text": "Shop all rings"
+          }
+        },
+        "tab-2": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold bracelets",
+            "collection": "gold-bracelets",
+            "limit": 10,
+            "link_text": "Shop gold bracelets"
+          }
+        },
+        "tab-3": {
+          "type": "shelf",
+          "settings": {
+            "label": "Tennis necklaces",
+            "collection": "lab-grown-tennis-necklaces",
+            "limit": 10,
+            "link_text": "Shop tennis necklaces"
+          }
+        },
+        "tab-4": {
+          "type": "shelf",
+          "settings": {
+            "label": "Earrings",
+            "collection": "all-earrings",
+            "limit": 10,
+            "link_text": "Shop earrings"
+          }
+        },
+        "tab-5": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold chains",
+            "collection": "chain-necklaces",
+            "limit": 10,
+            "link_text": "Shop gold chains"
+          }
+        }
+      },
+      "block_order": [
+        "tab-1",
+        "tab-2",
+        "tab-3",
+        "tab-4",
+        "tab-5"
+      ],
+      "settings": {
+        "eyebrow": "Scroll the house",
+        "title": "Shop by piece"
+      }
     }
   },
   "order": [
@@ -838,6 +905,7 @@
     "rings-your-way",
     "worlds",
     "trust-strip",
+    "shelf",
     "reviews",
     "gold",
     "rolex",

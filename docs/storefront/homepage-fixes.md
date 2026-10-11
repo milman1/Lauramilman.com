@@ -140,3 +140,31 @@ Still open:
   (holiday campaign photo, `home-bracelets.webp`). Titles sit under the photos.
 - [ ] 15. Optional: a matching pedestal-style bracelet photo to replace the
       campaign crop.
+
+## Round 3 list (2026-10-11, merchant feedback from the live mobile page)
+Work one at a time; tick when pushed.
+
+- [x] R1. "Rings, your way." on phones: tiles must stack one per row (the phone
+      CSS was lost in the last cleanup, so three columns squeezed the text).
+- [x] R2. Same section, colors: navy block clashes with the warm page. Use the
+      warm-white/cream ground with wine titles and gold accents, matching the
+      diamond filter above it.
+- [x] R3. Same section, copy: tile 2 "For work" (links to Rings, link text
+      "Shop rings", not stackable rings); tile 3 "For play" (bracelets).
+- [x] R4. Tile 2 gets a new image: a regular ring, not the stack.
+- [x] R5. Under the three tiles, a "Shop all fine jewelry" link.
+- [x] R6. "Shop the house" tiles: the real diamond stills are zoomed and out of
+      proportion; show the whole stone, centered, on a quiet warm background.
+- [x] R7. New scrollable product rows (swipe on phones, arrows on desktop):
+      gold bracelets, lab-grown tennis necklaces, rings, etc.
+- [x] R8. Background audit: merchant chose to keep the navy lab-grown row as is.
+      feel busy and cheap; settle on one warm ground with gold rules.
+
+R7 detail: new "Shop by piece" shelf after the promise band, tabs Rings / Gold
+bracelets / Tennis necklaces / Earrings / Gold chains (in-stock pieces only, from
+rings, gold-bracelets, lab-grown-tennis-necklaces, all-earrings, chain-necklaces).
+New live collection `lab-grown-tennis-necklaces` (smart: tags "Tennis Necklace" +
+"Lab Grown Diamond"; Online Store only), created while building the shelf.
+R8 is a proposal awaiting the merchant's choice (see chat).
+- [x] R9. Meet Laura on the homepage: portrait removed; heading, line and the
+      "Read Laura's Story" link centered. Phone rules for the section restored.

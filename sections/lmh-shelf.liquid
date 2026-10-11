@@ -1,0 +1,106 @@
+{%- comment -%}
+  "Shelf": one place to scroll through different kinds of pieces. Tabs along
+  the top (gold bracelets, tennis necklaces, rings...), each filled from a
+  collection with in-stock pieces only, so sold pieces drop off by themselves.
+  Swipe on phones; arrow buttons on larger screens.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-shelf" aria-labelledby="LmhShelf-{{ section.id }}" data-lmh-shelf>
+  <div class="lmh-shelf__head">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhShelf-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+    </div>
+    <div class="lmh-shelf__arrows" aria-hidden="true">
+      <button type="button" class="lmh-shelf__arrow" data-shelf-prev tabindex="-1" aria-label="Previous">&#8592;</button>
+      <button type="button" class="lmh-shelf__arrow" data-shelf-next tabindex="-1" aria-label="Next">&#8594;</button>
+    </div>
+  </div>
+
+  <div class="lmh-shelf__tabs" role="tablist" aria-label="{{ section.settings.title | escape }}">
+    {%- for block in section.blocks -%}
+      <button type="button" role="tab" class="lmh-chip{% if forloop.first %} lmh-chip--on{% endif %}" id="LmhShelfTab-{{ block.id }}" aria-controls="LmhShelfPanel-{{ block.id }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-shelf-tab="{{ block.id }}" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</button>
+    {%- endfor -%}
+  </div>
+
+  {%- for block in section.blocks -%}
+    <div class="lmh-shelf__panel" role="tabpanel" id="LmhShelfPanel-{{ block.id }}" aria-labelledby="LmhShelfTab-{{ block.id }}" data-shelf-panel="{{ block.id }}"{% unless forloop.first %} hidden{% endunless %}>
+      <ul class="lmh-shelf__track" role="list">
+        {%- assign shown = 0 -%}
+        {%- assign limit = block.settings.limit | default: 10 -%}
+        {%- for product in block.settings.collection.products -%}
+          {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+          {%- if product.available -%}
+            {%- assign shown = shown | plus: 1 -%}
+            <li class="lmh-shelf__item">{%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 20vw' -%}</li>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if block.settings.collection != blank -%}
+          <li class="lmh-shelf__item lmh-shelf__item--all"><a class="lmh-shelf__all" href="{{ block.settings.collection.url }}"><span>{{ block.settings.link_text | default: 'Shop all' | escape }}</span>{% render 'lmh-arrow' %}</a></li>
+        {%- endif -%}
+      </ul>
+    </div>
+  {%- endfor -%}
+</section>
+
+<script>
+  (function () {
+    var root = document.currentScript.previousElementSibling;
+    if (!root || !root.hasAttribute('data-lmh-shelf')) return;
+    var tabs = root.querySelectorAll('[data-shelf-tab]');
+    var panels = root.querySelectorAll('[data-shelf-panel]');
+    function active() {
+      for (var i = 0; i < panels.length; i++) if (!panels[i].hidden) return panels[i];
+      return panels[0];
+    }
+    function show(id) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-shelf-tab') === id;
+        t.classList.toggle('lmh-chip--on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panels.forEach(function (p) {
+        var on = p.getAttribute('data-shelf-panel') === id;
+        p.hidden = !on;
+        if (on) p.querySelector('.lmh-shelf__track').scrollLeft = 0;
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-shelf-tab')); });
+    });
+    function scrollBy(dir) {
+      var track = active().querySelector('.lmh-shelf__track');
+      track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: 'smooth' });
+    }
+    var prev = root.querySelector('[data-shelf-prev]');
+    var next = root.querySelector('[data-shelf-next]');
+    if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
+    if (next) next.addEventListener('click', function () { scrollBy(1); });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "LM shelf",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Shop by piece" }
+  ],
+  "blocks": [
+    {
+      "type": "shelf",
+      "name": "Tab",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Tab name" },
+        { "type": "collection", "id": "collection", "label": "Collection", "info": "In-stock pieces from this collection, in its own order." },
+        { "type": "range", "id": "limit", "label": "Pieces to show", "min": 4, "max": 16, "step": 1, "default": 10 },
+        { "type": "text", "id": "link_text", "label": "Last card text", "default": "Shop all" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "LM shelf", "blocks": [{ "type": "shelf" }, { "type": "shelf" }, { "type": "shelf" }] }]
+}
+{% endschema %}

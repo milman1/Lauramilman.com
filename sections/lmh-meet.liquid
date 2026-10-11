@@ -1,13 +1,21 @@
 {%- comment -%}
-  "Meet Laura Milman": portrait at left, a heading, one line and a link.
-  Stacks on phones.
+  "Meet Laura Milman": a heading, one line and a link, centered. With a
+  portrait picked it sits at left and the copy at right; stacks on phones.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-meet" aria-labelledby="LmhMeet-{{ section.id }}">
-  <div class="lmh-meet__media">
-    {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
-  </div>
+{%- liquid
+  assign has_photo = false
+  if section.settings.image != blank or section.settings.image_asset != blank
+    assign has_photo = true
+  endif
+-%}
+<section class="lmh lmh-meet{% unless has_photo %} lmh-meet--text{% endunless %}" aria-labelledby="LmhMeet-{{ section.id }}">
+  {%- if has_photo -%}
+    <div class="lmh-meet__media">
+      {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
+    </div>
+  {%- endif -%}
   <div class="lmh-meet__copy">
     <h2 class="lmh-h2" id="LmhMeet-{{ section.id }}">{{ section.settings.title | escape }}</h2>
     {%- if section.settings.text != blank -%}<p>{{ section.settings.text | escape }}</p>{%- endif -%}
@@ -22,7 +30,7 @@
   "name": "LM meet Laura",
   "tag": "div",
   "settings": [
-    { "type": "image_picker", "id": "image", "label": "Portrait", "info": "Use a real photo of Laura." },
+    { "type": "image_picker", "id": "image", "label": "Portrait", "info": "Optional. Leave empty to show the text centered on its own." },
     { "type": "text", "id": "image_asset", "label": "Theme asset image" },
     { "type": "text", "id": "image_alt", "label": "Image alt text", "default": "Laura Milman" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Meet Laura Milman" },
