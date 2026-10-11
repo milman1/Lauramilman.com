@@ -1,10 +1,10 @@
 {%- comment -%}
-  "Wear it together": photo at left, an espresso panel at right listing a
+  "Wear it together": photo at left, a panel at right (warm by default; espresso optional) listing a
   watch, a tennis bracelet and a chain bracelet with live prices.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-wear lmh-dark" aria-labelledby="LmhWear-{{ section.id }}">
+<section class="lmh lmh-wear{% if section.settings.style == 'dark' %} lmh-dark{% else %} lmh-wear--light{% endif %}" aria-labelledby="LmhWear-{{ section.id }}">
   <div class="lmh-wear__media">
     {%- render 'lmh-img', img: section.settings.image, asset: section.settings.image_asset, alt: section.settings.image_alt, sizes: '(max-width: 749px) 100vw, 45vw' -%}
   </div>
@@ -53,6 +53,7 @@
   "name": "LM wear it together",
   "tag": "div",
   "settings": [
+    { "type": "select", "id": "style", "label": "Panel color", "default": "light", "options": [ { "value": "light", "label": "Warm (cream)" }, { "value": "dark", "label": "Espresso" } ] },
     { "type": "image_picker", "id": "image", "label": "Image" },
     { "type": "text", "id": "image_asset", "label": "Theme asset image" },
     { "type": "text", "id": "image_alt", "label": "Image alt text" },

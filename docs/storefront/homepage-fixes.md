@@ -168,3 +168,7 @@ New live collection `lab-grown-tennis-necklaces` (smart: tags "Tennis Necklace" 
 R8 is a proposal awaiting the merchant's choice (see chat).
 - [x] R9. Meet Laura on the homepage: portrait removed; heading, line and the
       "Read Laura's Story" link centered. Phone rules for the section restored.
+- [x] R10. Espresso kept only for the banner and footer (merchant 2026-10-11):
+      "Wear it together" and the private-clients band now default to a warm
+      style; each has a Color setting (Espresso still available). The navy
+      lab-grown row stays.

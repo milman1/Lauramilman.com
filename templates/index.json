@@ -326,7 +326,8 @@
         "button_url": "/collections/time-pieces",
         "link_text": "Tennis bracelets",
         "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery."
+        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery.",
+        "style": "light"
       }
     },
     "pre-owned": {
@@ -661,7 +662,8 @@
         "email": "hello@lauramilman.com",
         "button_text": "Book a Consultation",
         "button_url": "/pages/private-clients",
-        "note": "Complimentary · No obligation"
+        "note": "Complimentary · No obligation",
+        "style": "light"
       }
     },
     "engagement": {
