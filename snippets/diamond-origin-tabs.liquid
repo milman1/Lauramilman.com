@@ -1,0 +1,10 @@
+{%- comment -%}
+  Natural, lab-grown, and colored lab-grown. The same three tabs on every
+  loose-diamond search, so leaving one collection does not drop a tab.
+  Accepts current: natural | lab | colored
+{%- endcomment -%}
+<div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
+  <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% if current == 'natural' %} is-active{% endif %}" {% if current == 'natural' %}aria-current="page"{% endif %}>Natural</a>
+  <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if current == 'lab' %} is-active{% endif %}" {% if current == 'lab' %}aria-current="page"{% endif %}>Lab-grown</a>
+  <a href="/collections/colored-lab-grown-diamonds" class="lm-dfilter__origin-btn{% if current == 'colored' %} is-active{% endif %}" {% if current == 'colored' %}aria-current="page"{% endif %}>Colored lab-grown</a>
+</div>
