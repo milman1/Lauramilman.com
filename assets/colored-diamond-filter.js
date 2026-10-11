@@ -57,13 +57,13 @@
       var money = new Intl.NumberFormat(document.documentElement.lang || 'en-US',{style:'currency',currency:root.dataset.currency || 'USD'});
       matched.slice((page-1)*24,page*24).forEach(function (s) {
         var card = document.createElement('article'); card.className = 'product-card';
-        var link = document.createElement('a'); link.className = 'product-card__link'; link.href = s.url;
-        var wrap = document.createElement('div'); wrap.className = 'product-card__image-wrap';
+        var link = document.createElement('a'); link.className = 'product-card__image-wrapper'; link.href = s.url;
+        var wrap = document.createElement('div'); wrap.className = 'product-card__image-container';
         var img = document.createElement('img'); img.src = s.image; img.alt = s.title; img.loading = 'lazy'; img.width = 600; img.height = 600; img.className = 'product-card__image product-card__image--primary'; wrap.append(img);
-        var body = document.createElement('div'); body.className = 'product-card__info';
-        var title = document.createElement('h2'); title.className = 'product-card__title'; title.textContent = s.title;
+        var body = document.createElement('div'); body.className = 'product-card__content';
+        var title = document.createElement('h2'); title.className = 'product-card__title'; var titleLink = document.createElement('a'); titleLink.href = s.url; titleLink.textContent = s.title; title.append(titleLink);
         var price = document.createElement('p'); price.className = 'product-card__price'; price.textContent = money.format(s.price);
-        body.append(title,price); link.append(wrap,body); card.append(link); results.append(card);
+        body.append(title,price); link.append(img); card.append(link,body); results.append(card);
       });
       pager.replaceChildren();
       if (pages > 1) {
