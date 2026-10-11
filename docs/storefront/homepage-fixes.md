@@ -112,3 +112,6 @@ Still open:
 - "labor included.14K" missing space on 9073582866503 and 9073616650311.
 - 9073582866503 / 9080621432903: title "Four-Prong Pavé" vs tag, photos,
   video and SKU "Hidden Halo"; style unconfirmed.
+- [ ] 14. (Pushed.) Reviews spotlight: the live Google reviews widget moved up
+      under the promise band, titled "Recent reviews". Newest-first order is
+      set in the SociableKit dashboard (embed 25717519), not in the theme.

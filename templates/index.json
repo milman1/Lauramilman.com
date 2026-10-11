@@ -720,8 +720,8 @@
     "reviews": {
       "type": "lmh-reviews",
       "settings": {
-        "eyebrow": "From Google",
-        "title": "What clients say",
+        "eyebrow": "Google reviews · shown unedited",
+        "title": "Recent reviews",
         "link_text": "Read all reviews",
         "link_url": "/pages/google-reviews",
         "embed_id": "25717519"
@@ -817,6 +817,7 @@
     "rings-your-way",
     "worlds",
     "trust-strip",
+    "reviews",
     "gold",
     "rolex",
     "wear-together",
@@ -825,7 +826,6 @@
     "loose-diamonds",
     "private-clients",
     "engagement",
-    "brand-story",
-    "reviews"
+    "brand-story"
   ]
 }
