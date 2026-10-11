@@ -61,7 +61,7 @@ describe('homepage consultation and reviews', () => {
     expect(home.sections['private-clients'].settings?.button_text).toBe('Book a Consultation');
     expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('brand-story'));
     expect(home.sections.reviews.type).toBe('lmh-reviews');
-    expect(home.sections.reviews.settings?.title).toBe('What clients say');
+    expect(home.sections.reviews.settings?.title).toBe('Recent reviews');
     expect(home.sections.reviews.settings?.embed_id).toBe('25717519');
     expect(reviews).toContain('sk-ww-google-reviews');
     expect(JSON.stringify(home.sections.reviews)).not.toContain('Alexandra K.');
