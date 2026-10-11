@@ -248,14 +248,6 @@
             "title": "Yellow Gold Bowtie Huggie Earrings",
             "subtitle": "Yellow Gold"
           }
-        },
-        "gold-10": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-snake-2-mm-ovsn200",
-            "title": "2mm Snake Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
         }
       },
       "block_order": [
@@ -267,8 +259,7 @@
         "gold-6",
         "gold-7",
         "gold-8",
-        "gold-9",
-        "gold-10"
+        "gold-9"
       ],
       "settings": {
         "style": "cream",
@@ -281,7 +272,9 @@
         "all_text": "Shop all",
         "all_url": "/collections/chains",
         "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/chains"
+        "mobile_button_url": "/collections/chains",
+        "feature_image_asset": "home-gold-editorial.webp",
+        "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets"
       }
     },
     "wear-together": {

@@ -597,3 +597,14 @@
   .lmh-split__label { top: 18px; left: 20px; }
   .lmh-split__link { left: 20px; bottom: 16px; }
 }
+
+/* product row with a feature photo */
+.lmh-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lmh-row__feature-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
+.lmh-row__feature { position: relative; display: block; overflow: hidden; min-height: 420px; background: var(--lmh-tile); }
+.lmh-row__feature img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transition: transform .6s ease; }
+.lmh-row__feature:hover img { transform: scale(1.03); }
+@media (max-width: 749px) {
+  .lmh-row__feature-wrap { display: flex; flex-direction: column; gap: 16px; }
+  .lmh-row__feature { min-height: 0; aspect-ratio: 1 / 1; }
+}
