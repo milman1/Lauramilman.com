@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHash } from './catalog.mjs';
+let stage = 'startup';
 
 export const OPS = {
   "catalog": "query ColoredCatalog($after:String,$query:String!) { products(first:100,after:$after,query:$query) { pageInfo { hasNextPage endCursor } nodes { id handle title status tags descriptionHtml templateSuffix vendor productType seo { title description } certificate:metafield(namespace:\"lmny_feed\",key:\"cert_number\"){value} video:metafield(namespace:\"lmny_feed\",key:\"video_url\"){value} hash:metafield(namespace:\"colored_feed\",key:\"content_hash\"){value} media(first:10){nodes{status mediaContentType}} variants(first:2){nodes{id sku price inventoryPolicy inventoryQuantity inventoryItem{tracked unitCost{amount currencyCode}}}} } } }",
@@ -87,19 +88,28 @@ export async function main(argv=process.argv.slice(2)) {
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
   if(activate && !process.env.LGD_ACTIVATION_HANDLES)throw new Error('Activation requires explicit reviewed LGD_ACTIVATION_HANDLES');
-  const rows=await fetchInventory(process.env.LGD_API_KEY), normalized=normalizeFeed(rows);
+  stage='supplier_fetch';
+  const rows=await fetchInventory(process.env.LGD_API_KEY);
+  stage='normalize';
+  const normalized=normalizeFeed(rows);
+  console.log(JSON.stringify({stage,fetched:rows.length,eligible:normalized.stones.length,excluded:normalized.holds}));
   if(!normalized.stones.length)throw new Error('No eligible stones; availability writes are unsafe');
+  stage='shopify_auth';
   const gql=await client();
+  stage='shopify_catalog';
   const catalog=(await paginate(gql,OPS.catalog,'products',{query:'product_type:"Lab-Grown Diamond" OR tag:'+FEED_TAG})).map(view);
+  stage='shopify_locations';
   const locations=await paginate(gql,OPS.location,'locations');
   const location=process.env.SHOPIFY_LOCATION_ID ? locations.find(l=>l.id===process.env.SHOPIFY_LOCATION_ID&&l.isActive):locations.filter(l=>l.isActive)[0];
   if(!location)throw new Error('No active Shopify location');
   const activationHandles=new Set((process.env.LGD_ACTIVATION_HANDLES||'').split(',').map(s=>s.trim()).filter(Boolean));
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
+  stage='plan';
   const plan=planFor(stones,catalog,{limit,activate,locationId:location.id});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
+  stage='media_check';
   const failedMedia=[];
   for(const line of plan.writes)if(!(await mediaReady(line.stone)))failedMedia.push(line.handle);
   if(failedMedia.length)throw new Error('Media unavailable for '+failedMedia.length+' planned stones; no writes performed');
@@ -124,5 +134,5 @@ export async function main(argv=process.argv.slice(2)) {
   sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }
-if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(()=>{console.error('Colored-diamond sync failed; inspect the sanitized report. Secrets and supplier costs are not logged.');process.exitCode=1;});
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(()=>{console.error(JSON.stringify({failedStage:stage,message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
 

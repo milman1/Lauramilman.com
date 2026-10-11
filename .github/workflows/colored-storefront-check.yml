@@ -1,0 +1,33 @@
+name: Colored diamond storefront checks
+on:
+  pull_request:
+    paths:
+      - 'assets/colored-diamond-filter.*'
+      - 'sections/colored-diamond-filter.liquid'
+      - 'sections/header.liquid'
+      - 'templates/collection.diamonds-colored.json'
+      - 'locales/en.default.json'
+      - 'checks/colored-diamond-filter.check.cjs'
+      - '.github/workflows/colored-storefront-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node checks/colored-diamond-filter.check.cjs
+      - name: Install official Shopify theme validators
+        run: |
+          mkdir -p "$RUNNER_TEMP/colored-theme-check"
+          cp lmny-feeds/checks/shopify-liquid-validate.mjs "$RUNNER_TEMP/colored-theme-check/validate.mjs"
+          npm install --prefix "$RUNNER_TEMP/colored-theme-check" --no-save @shopify/theme-check-common @shopify/theme-check-docs-updater @shopify/theme-check-node
+      - name: Validate section and collection template
+        run: |
+          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename colored-diamond-filter.liquid --filetype sections --file sections/colored-diamond-filter.liquid
+          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename collection.diamonds-colored.json --filetype templates --file templates/collection.diamonds-colored.json
+          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename en.default.json --filetype locales --file locales/en.default.json
