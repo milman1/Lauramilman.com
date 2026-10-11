@@ -28,7 +28,8 @@ jobs:
             const token=(await response.json()).access_token;
             if(!token)throw new Error('No token');
             const stones=normalizeFeed(await fetchInventory(process.env.LGD_API_KEY)).stones;
-            const data=await requestShopify(domain,token,OPS.catalog.replace('first:100','first:10'),{query:'tag:colored-stone-feed'});
+            const data={products:{nodes:[]}}; let after=null,more=true;
+            while(more){const page=await requestShopify(domain,token,OPS.catalog,{query:'tag:colored-stone-feed',after});data.products.nodes.push(...page.products.nodes);after=page.products.pageInfo.endCursor;more=page.products.pageInfo.hasNextPage;}
             const failed=new Set();
             for(const p of data.products.nodes){
               const s=stones.find(s=>s.handle===p.handle); if(!s)continue;
