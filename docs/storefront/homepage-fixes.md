@@ -94,3 +94,21 @@ human look at each hero photo.
 
 The shape metafield drives the "Make it a ring" pairing, so a wrong value
 offers the wrong diamonds with the setting.
+
+### #12 update (2026-10-11): shapes fixed in another session, verified here
+
+A fresh Admin read confirms titles, SEO titles, tags, `custom.diamond_shape` and
+descriptions: RG18YSO__PNS, RG18YHH_5PNS and RG18YHHRD10PNS are Oval;
+RG18YSO__BNS is Cushion (display "elongated cushion"). Code lock:
+`cursor/setting-shape-fix-8591` (keyed by SKU, not handle); it merges
+cleanly with this PR.
+
+Still open:
+- RG18YHHRD10PNS: supplier/CAD confirmation of center fit.
+- Handles `round-hidden-halo-...-0-09-ct` / `-0-11-ct` still say "round".
+  Shopify's productUpdate can rename with an automatic 301 (needs approval).
+- Duplicate 18K white-gold setting (9080621432903): SEO title still "14K";
+  proposed archive + redirect to 9073582866503 (needs approval).
+- "labor included.14K" missing space on 9073582866503 and 9073616650311.
+- 9073582866503 / 9080621432903: title "Four-Prong Pavé" vs tag, photos,
+  video and SKU "Hidden Halo"; style unconfirmed.
