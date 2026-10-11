@@ -29,12 +29,17 @@ jobs:
             if(!token)throw new Error('No token');
             const stones=normalizeFeed(await fetchInventory(process.env.LGD_API_KEY)).stones;
             const data=await requestShopify(domain,token,OPS.catalog.replace('first:100','first:10'),{query:'tag:colored-stone-feed'});
+            const failed=new Set();
             for(const p of data.products.nodes){
               const s=stones.find(s=>s.handle===p.handle); if(!s)continue;
               const v=p.variants.nodes[0],ready=p.media.nodes.some(m=>m.status==='READY'&&m.mediaContentType==='IMAGE');
               const expected=payloadFor(s,{...p,variantId:v.id,readyImage:ready},p.status);
               const flags={price:Number(v.price)===Number(expected.variants[0].price),sku:v.sku===s.stock,certificate:p.certificate?.value===s.certificate,video:p.video?.value===s.video,title:p.title===expected.title,template:p.templateSuffix==='diamond',hash:p.hash?.value===snapshotHash(s),cost:Number(v.inventoryItem.unitCost?.amount)===Number(expected.variants[0].inventoryItem.cost),tracked:v.inventoryItem.tracked===true,quantity:v.inventoryQuantity===0,tags:!p.tags.includes('ebay')&&!p.tags.includes('lmny-feed')};
-              console.log(JSON.stringify({handle:p.handle,failedFields:Object.keys(flags).filter(k=>!flags[k]),costVisible:v.inventoryItem.unitCost!==null,priceFormatMatches:v.price===expected.variants[0].price}));
+              for(const k of Object.keys(flags))if(!flags[k])failed.add(k);
+              if(v.price!==expected.variants[0].price)failed.add('money_format');
             }
+            const messages={price:'PRICE_COMPARISON_FAILED',sku:'SKU_COMPARISON_FAILED',certificate:'CERTIFICATE_COMPARISON_FAILED',video:'VIDEO_COMPARISON_FAILED',title:'TITLE_COMPARISON_FAILED',template:'TEMPLATE_COMPARISON_FAILED',hash:'HASH_COMPARISON_FAILED',cost:'COST_COMPARISON_FAILED',tracked:'TRACKING_COMPARISON_FAILED',quantity:'QUANTITY_COMPARISON_FAILED',tags:'SOURCE_TAG_COMPARISON_FAILED',money_format:'MONEY_STRING_FORMAT_DIFFERS'};
+            for(const k of failed)console.log(messages[k]);
+            console.log('Read-only comparisons completed; no product identifiers or values logged.');
           } catch { console.error('Diagnostic failed; no credentials or supplier values are logged.'); process.exitCode=1; }
           JS
