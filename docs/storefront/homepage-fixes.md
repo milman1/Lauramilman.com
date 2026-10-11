@@ -157,7 +157,7 @@ Work one at a time; tick when pushed.
       proportion; show the whole stone, centered, on a quiet warm background.
 - [x] R7. New scrollable product rows (swipe on phones, arrows on desktop):
       gold bracelets, lab-grown tennis necklaces, rings, etc.
-- [ ] R8. Background audit: the heavy navy/espresso/sand blocks make the page
+- [x] R8. Background audit: merchant chose to keep the navy lab-grown row as is.
       feel busy and cheap; settle on one warm ground with gold rules.
 
 R7 detail: new "Shop by piece" shelf after the promise band, tabs Rings / Gold
