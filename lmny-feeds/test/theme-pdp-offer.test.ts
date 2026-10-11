@@ -127,3 +127,24 @@ describe('product-page inquiry pills', () => {
     expect(inquiry.slice(offerFormStart, askGuard)).toContain('{%- endif -%}');
   });
 });
+
+describe('lab-grown search help line', () => {
+  const line = themeFile('snippets/collection-ask-line.liquid');
+  const filter = themeFile('sections/diamond-filter.liquid');
+
+  it('offers one general help form on lab-grown search, never a reserve or an offer', () => {
+    expect(line).toContain("form 'contact', id: 'CollectionAskForm'");
+    expect(line).toContain('Stone search help');
+    expect(line).toContain('contact[body]');
+    expect(line).toContain('contact[email]');
+    expect(line).not.toMatch(/reserve/i);
+    expect(line).not.toMatch(/offer/i);
+  });
+
+  it('renders under both diamond-filter headings, lab-grown only, behind a setting', () => {
+    const guard = "{%- if origin_is_lab and section.settings.show_ask_line -%}";
+    expect(filter.split(guard).length - 1).toBe(2);
+    expect(filter.split("render 'collection-ask-line'").length - 1).toBe(2);
+    expect(filter).toContain('"id": "show_ask_line"');
+  });
+});
