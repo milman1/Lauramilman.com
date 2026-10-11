@@ -319,18 +319,42 @@
     });
   }
 
-  /** Links such as ?shape=Oval (or ?shape=Oval,Pear) pre-select shapes. */
+  /**
+   * Links such as ?shape=Oval (or ?shape=Oval,Pear) pre-select shapes. The
+   * homepage search also sends color, clarity, cut (comma lists) and
+   * min_carat / max_carat / min_price / max_price.
+   */
   function hydrateShapesFromURL() {
-    var raw;
+    var params;
     try {
-      raw = new URLSearchParams(window.location.search).get('shape');
+      params = new URLSearchParams(window.location.search);
     } catch (e) {
       return;
     }
-    if (!raw) return;
-    var wanted = raw.split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
+    function list(key) {
+      return params.getAll(key).join(',').split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
+    }
+    // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
+    var shapes = list('shape').concat(list('filter.p.m.custom.diamond_shape'));
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
-      if (wanted.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+      if (shapes.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+    });
+    ['color', 'clarity', 'cut'].forEach(function (name) {
+      var wanted = list(name);
+      if (!wanted.length) return;
+      form.querySelectorAll('[data-scale="' + name + '"] input').forEach(function (input) {
+        if (wanted.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+      });
+    });
+    ['carat', 'price'].forEach(function (key) {
+      var wrap = form.querySelector('[data-range-key="' + key + '"]');
+      if (!wrap) return;
+      var min = Number(params.get('min_' + key));
+      var max = Number(params.get('max_' + key));
+      var minEl = wrap.querySelector('[data-range-min]');
+      var maxEl = wrap.querySelector('[data-range-max]');
+      if (params.get('min_' + key) && Number.isFinite(min) && minEl) minEl.value = String(min);
+      if (params.get('max_' + key) && Number.isFinite(max) && maxEl) maxEl.value = String(max);
     });
   }
 
@@ -390,8 +414,8 @@
         load();
       });
     }
-    wireScales();
     hydrateShapesFromURL();
+    wireScales();
     wireShapes();
     wireRanges();
   }

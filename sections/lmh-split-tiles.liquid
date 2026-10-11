@@ -1,0 +1,46 @@
+{%- comment -%}
+  "Rings, your way.": a heading over two wide photo tiles, each with a
+  serif title set on the photo. Stacks on phones.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-split" aria-labelledby="LmhSplit-{{ section.id }}">
+  <h2 class="lmh-h2 lmh-split__title" id="LmhSplit-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+  <div class="lmh-split__grid">
+    {%- for block in section.blocks -%}
+      <a class="lmh-split__tile" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
+        <span class="lmh-split__media">
+          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
+        </span>
+        {%- if block.settings.title != blank -%}<span class="lmh-split__label">{{ block.settings.title | escape }}</span>{%- endif -%}
+        {%- if block.settings.link_text != blank -%}<span class="lmh-split__link">{{ block.settings.link_text | escape }} {% render 'lmh-arrow' %}</span>{%- endif -%}
+      </a>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LM split tiles",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Heading", "default": "Rings, your way." }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title on photo", "info": "Leave blank when the photo already shows its title." },
+        { "type": "text", "id": "link_text", "label": "Link text" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_asset", "label": "Theme asset image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" }
+      ]
+    }
+  ],
+  "max_blocks": 2,
+  "presets": [{ "name": "LM split tiles" }]
+}
+{% endschema %}

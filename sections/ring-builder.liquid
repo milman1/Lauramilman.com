@@ -37,6 +37,9 @@
         <a href="{{ section.settings.diamond_cta_url | default: '/pages/private-clients' }}" class="btn btn--gold">
           {{ section.settings.diamond_cta_text }}
         </a>
+        {%- if section.settings.diamond_alt_text != blank -%}
+          <a href="{{ section.settings.diamond_alt_url | default: '/collections/natural-diamonds' }}" class="lm-builder__path-alt">{{ section.settings.diamond_alt_text }}</a>
+        {%- endif -%}
         {%- if section.settings.diamond_note != blank -%}
           <p class="lm-builder__path-note">{{ section.settings.diamond_note }}</p>
         {%- endif -%}
@@ -133,6 +136,16 @@
     border-color: rgba(201, 160, 80, 0.5);
     box-shadow: var(--shadow-xl);
     transform: translateY(-4px);
+  }
+
+  .lm-builder__path-alt {
+    margin-top: 1rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--text-dark, #2C1810);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .lm-builder__path-icon {
@@ -299,6 +312,17 @@
       "id": "diamond_cta_url",
       "label": "CTA link",
       "info": "Defaults to /pages/private-clients. Once the loose-diamond search feed is live on this store, point this at that route instead."
+    },
+    {
+      "type": "text",
+      "id": "diamond_alt_text",
+      "label": "Second link text",
+      "info": "Optional text link under the button, such as natural diamonds."
+    },
+    {
+      "type": "url",
+      "id": "diamond_alt_url",
+      "label": "Second link"
     },
     {
       "type": "text",

@@ -15,36 +15,36 @@
         "pill-1": {
           "type": "pill",
           "settings": {
-            "text": "Gold",
-            "url": "/collections/chains"
+            "text": "Loose Lab-Grown",
+            "url": "/collections/lab-grown-diamonds"
           }
         },
         "pill-2": {
           "type": "pill",
           "settings": {
-            "text": "Pre-Owned",
-            "url": "/collections/time-pieces"
+            "text": "Rings",
+            "url": "/collections/rings"
           }
         },
         "pill-3": {
           "type": "pill",
           "settings": {
-            "text": "Lab-Grown",
-            "url": "/collections/lab-grown-diamond-jewelry"
+            "text": "Ring Settings",
+            "url": "/collections/ring-settings"
           }
         },
         "pill-4": {
           "type": "pill",
           "settings": {
-            "text": "Natural Diamonds",
-            "url": "/collections/natural-diamonds"
+            "text": "Under $1,000",
+            "url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000"
           }
         },
         "pill-5": {
           "type": "pill",
           "settings": {
-            "text": "Engagement",
-            "url": "/pages/ring-builder"
+            "text": "Watches",
+            "url": "/collections/time-pieces"
           }
         }
       },
@@ -56,17 +56,18 @@
         "pill-5"
       ],
       "settings": {
-        "eyebrow": "Fine jewelry · Pre-owned watches · Diamonds",
-        "title": "Jewelry for the week",
-        "title_emphasis": "you work.",
-        "text": "Gold chains and rings for the office, a pre-owned watch you earned, and diamonds, lab-grown or natural, from a New York house with 30+ years in the Diamond District.",
-        "primary_text": "Shop Gold Jewelry",
-        "primary_url": "/collections/chains",
-        "secondary_text": "Search Loose Diamonds",
-        "secondary_url": "/collections/lab-grown-diamonds",
-        "note": "Shop Pay Installments available at checkout.",
-        "image_asset": "fine-jewelry-model-earrings.jpg",
-        "image_alt": "Woman wearing long diamond drop earrings"
+        "eyebrow": "Lab-grown diamonds & rings",
+        "title": "Your diamond.",
+        "title_emphasis": "Your story.",
+        "text": "For love, personal milestones, and the pleasure of choosing something for yourself.",
+        "primary_text": "Explore Loose Diamonds",
+        "primary_url": "/collections/lab-grown-diamonds",
+        "secondary_text": "Shop Rings",
+        "secondary_url": "/collections/rings",
+        "note": "",
+        "image_asset": "home-hero-ring.webp",
+        "image_alt": "Woman in an ivory blazer wearing a diamond solitaire ring",
+        "style": "light"
       }
     },
     "worlds": {
@@ -75,46 +76,57 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "Gold Jewelry",
-            "text": "Chains, stacking rings, huggies and bangles in yellow gold.",
-            "link_text": "Shop gold",
-            "url": "/collections/chains",
-            "image_asset": "shop-world-fine-jewelry.webp",
-            "image_alt": "Gold station necklace on ivory satin"
+            "title": "Lab-Grown Diamonds",
+            "text": "Loose lab-grown stones, each listed with its IGI or GIA certificate. Search by shape, carat, color and clarity.",
+            "link_text": "Search lab-grown diamonds",
+            "url": "/collections/lab-grown-diamonds",
+            "product": "lg-886886",
+            "image_asset": "diamond-destination-lab.webp"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "Pre-Owned Watches & Jewelry",
-            "text": "Rolex, Cartier and Bvlgari watches, and signed estate jewelry.",
-            "link_text": "Shop pre-owned",
-            "url": "/collections/time-pieces",
-            "image_asset": "shop-world-preowned-timepieces.webp",
-            "image_alt": "Steel watch on a suede display cushion"
+            "title": "Rings",
+            "text": "Solitaires, bands and eternity rings to wear every day, or to propose with.",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
+            "image_asset": "shop-channel-cover.jpg",
+            "position": "76% 50%"
           }
         },
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "Lab-Grown Diamonds",
-            "text": "Tennis bracelets, huggies and studs, plus loose lab-grown stones.",
-            "link_text": "Shop lab-grown",
-            "url": "/collections/lab-grown-diamond-jewelry",
-            "image_asset": "shop-channel-cover.jpg",
-            "image_alt": "Gold tennis bracelet, diamond studs and an eternity band on navy velvet",
-            "position": "38% 50%"
+            "title": "Watches",
+            "text": "Rolex, Cartier and Bvlgari, authenticity guaranteed.",
+            "link_text": "Shop watches",
+            "url": "/collections/time-pieces",
+            "product": "w-t3757",
+            "image_asset": "shop-world-preowned-timepieces-rolex.jpg"
           }
         },
         "tile-4": {
           "type": "tile",
           "settings": {
+            "title": "Pre-Owned Maison Jewelry",
+            "text": "Signed Cartier, Van Cleef & Arpels and David Webb.",
+            "link_text": "Shop maison jewelry",
+            "url": "/collections/estate-jewelry",
+            "product": "bv-cartier-love-18k-white-gold-3-diamond-ring-j10168",
+            "image_asset": "shop-world-preowned-maison.webp"
+          }
+        },
+        "tile-5": {
+          "type": "tile",
+          "settings": {
             "title": "Natural Diamonds",
-            "text": "Loose natural diamonds, each listed with its grading lab.",
+            "text": "Loose natural diamonds, GIA on nearly every stone.",
             "link_text": "Shop natural",
             "url": "/collections/natural-diamonds",
-            "image_asset": "diamond-destination-natural.webp",
-            "image_alt": "Round brilliant diamond on sand-colored stone"
+            "product": "nd-352890",
+            "image_asset": "diamond-destination-natural.webp"
           }
         }
       },
@@ -122,7 +134,8 @@
         "tile-1",
         "tile-2",
         "tile-3",
-        "tile-4"
+        "tile-4",
+        "tile-5"
       ],
       "settings": {
         "heading": "Shop the house"
@@ -134,7 +147,8 @@
         "promise-1": {
           "type": "item",
           "settings": {
-            "text": "14K Gold"
+            "text": "Authenticity Guaranteed",
+            "short": "Authenticity"
           }
         },
         "promise-2": {
@@ -234,14 +248,6 @@
             "title": "Yellow Gold Bowtie Huggie Earrings",
             "subtitle": "Yellow Gold"
           }
-        },
-        "gold-10": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-snake-2-mm-ovsn200",
-            "title": "2mm Snake Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
         }
       },
       "block_order": [
@@ -253,8 +259,7 @@
         "gold-6",
         "gold-7",
         "gold-8",
-        "gold-9",
-        "gold-10"
+        "gold-9"
       ],
       "settings": {
         "style": "cream",
@@ -267,7 +272,9 @@
         "all_text": "Shop all",
         "all_url": "/collections/chains",
         "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/chains"
+        "mobile_button_url": "/collections/chains",
+        "feature_image_asset": "home-gold-editorial.webp",
+        "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets"
       }
     },
     "wear-together": {
@@ -496,33 +503,33 @@
         "lab-1": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
-            "title": "Lab Grown Emerald Diamond Huggie Earrings",
-            "subtitle": "0.41 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Solitaire Pendant",
+            "subtitle": "Prong · Made to order"
           }
         },
         "lab-2": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-round-diamond-station-bracelet-065-ct-14k-yellow-gold-bc2423",
-            "title": "Lab Grown Round Diamond Station Bracelet",
-            "subtitle": "0.65 CT · 14K Yellow Gold"
+            "product": "lab-grown-oval-studs-earring-prong-north-south",
+            "title": "Lab-Grown Oval Diamond Stud Earrings",
+            "subtitle": "Prong · Made to order"
           }
         },
         "lab-3": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-round-diamond-hoop-earrings-101-ct-14k-yellow-gold-er9257",
-            "title": "Lab Grown Round Diamond Hoop Earrings",
-            "subtitle": "1.01 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
+            "title": "Lab-Grown Round Diamond Tennis Bracelet",
+            "subtitle": "14K White Gold"
           }
         },
         "lab-4": {
           "type": "product",
           "settings": {
-            "product": "lab-diamond-round-station-necklace-1-76ct-nk14ystrd175p",
-            "title": "Lab Grown Round Diamond Station Necklace",
-            "subtitle": "1.76 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Eternity Band",
+            "subtitle": "Prong · Made to order"
           }
         }
       },
@@ -536,14 +543,14 @@
         "style": "navy",
         "columns": "4",
         "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds",
-        "title": "Diamonds for the week,",
-        "title_emphasis": "not a step on the way to something else.",
-        "text": "The stones differ. The design standard does not. Huggies, station pieces and tennis bracelets in 14K gold, set with lab-grown diamonds.",
-        "button_1_text": "Shop Lab-Grown Jewelry",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry",
-        "button_2_text": "Loose Lab-Grown Diamonds",
-        "button_2_url": "/collections/lab-grown-diamonds"
+        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
+        "title": "For the push present,",
+        "title_emphasis": "or the promotion you bought yourself.",
+        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "button_1_text": "Shop Under $1,000",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
+        "button_2_text": "All Lab-Grown Jewelry",
+        "button_2_url": "/collections/lab-grown-diamond-jewelry"
       }
     },
     "loose-diamonds": {
@@ -635,7 +642,8 @@
         "natural_url": "/collections/natural-diamonds",
         "compare_example_label": "Matched example · 1 ct round · E · VS2",
         "shapes_label": "Shop by shape"
-      }
+      },
+      "disabled": true
     },
     "private-clients": {
       "type": "lmh-private-band",
@@ -664,7 +672,8 @@
         "primary_url": "/pages/ring-builder",
         "secondary_text": "Engagement Rings",
         "secondary_url": "/collections/engagement-rings"
-      }
+      },
+      "disabled": true
     },
     "brand-story": {
       "type": "lmh-story",
@@ -705,31 +714,118 @@
         "text": "Laura worked alongside her brother Jacob Arabo in the early years of what became Jacob & Co. She still sees clients in Midtown.",
         "link_text": "Read Laura's story",
         "link_url": "/pages/about"
-      }
+      },
+      "disabled": true
     },
     "reviews": {
       "type": "lmh-reviews",
       "settings": {
-        "eyebrow": "From Google",
-        "title": "What clients say",
+        "eyebrow": "Google reviews · shown unedited",
+        "title": "Recent reviews",
         "link_text": "Read all reviews",
         "link_url": "/pages/google-reviews",
         "embed_id": "25717519"
+      }
+    },
+    "meet-laura": {
+      "type": "lmh-meet",
+      "settings": {
+        "image": "shopify://shop_images/laura-milman-portrait.jpg",
+        "image_alt": "Laura Milman",
+        "title": "Meet Laura Milman",
+        "text": "Discover the story behind the jewelry.",
+        "link_text": "Read Laura's Story",
+        "link_url": "/pages/about"
+      }
+    },
+    "diamond-search": {
+      "type": "lmh-diamond-search",
+      "settings": {
+        "title": "Find a diamond that feels like you.",
+        "text": "Search every lab-grown stone by shape, carat, budget, color and clarity. Each one is listed with its IGI or GIA certificate.",
+        "button_text": "Explore All Diamonds",
+        "note": "Not sure where to start? Every lab-grown stone page has an Ask form."
+      }
+    },
+    "rings-your-way": {
+      "type": "lmh-split-tiles",
+      "blocks": {
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "title": "For your forever",
+            "link_text": "Build your ring",
+            "url": "/pages/ring-builder",
+            "image_asset": "home-rings-forever.webp",
+            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal"
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "title": "Just because",
+            "link_text": "Shop stacking rings",
+            "url": "/collections/stackable-rings",
+            "image_asset": "home-rings-because.webp",
+            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal"
+          }
+        }
+      },
+      "block_order": [
+        "tile-1",
+        "tile-2"
+      ],
+      "settings": {
+        "title": "Rings, your way."
+      }
+    },
+    "rolex": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "chip-1": {
+          "type": "chip",
+          "settings": {
+            "text": "All Watches",
+            "url": "/collections/time-pieces"
+          }
+        }
+      },
+      "block_order": [
+        "chip-1"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "5",
+        "ratio": "0.84",
+        "eyebrow": "Rolex",
+        "title": "The Rolex edit,",
+        "title_emphasis": "authenticity guaranteed.",
+        "text": "Daytona, Submariner, GMT-Master II, Datejust and Day-Date. Each listing gives the reference, the year and whether it is pre-owned or unworn.",
+        "all_text": "Shop all Rolex",
+        "all_url": "/collections/rolex-watches",
+        "collection": "rolex-watches",
+        "collection_limit": 5,
+        "mobile_button_text": "Shop All Rolex",
+        "mobile_button_url": "/collections/rolex-watches"
       }
     }
   },
   "order": [
     "hero",
+    "meet-laura",
+    "diamond-search",
+    "rings-your-way",
     "worlds",
     "trust-strip",
+    "reviews",
     "gold",
+    "rolex",
     "wear-together",
     "pre-owned",
     "lab-grown",
     "loose-diamonds",
     "private-clients",
     "engagement",
-    "brand-story",
-    "reviews"
+    "brand-story"
   ]
 }

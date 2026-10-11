@@ -1,6 +1,8 @@
 {%- comment -%}
-  "Shop the house": four equal tiles, photo over name, line and link.
-  Two by two on phones, where the line is dropped as in the preview.
+  "Shop the house": the first tile is a large feature tile, the rest fill a
+  two-by-two grid beside it. Each photo is an uploaded image, else the
+  featured photo of a chosen product (a real stock photo), else a theme asset.
+  On phones the feature tile spans the width and the line is dropped.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
@@ -10,9 +12,24 @@
   {%- endif -%}
   <div class="lmh-worlds__grid">
     {%- for block in section.blocks -%}
+      {%- liquid
+        assign tile_img = block.settings.image
+        assign tile_alt = block.settings.image_alt
+        if tile_img == blank and block.settings.product != blank
+          assign tile_img = block.settings.product.featured_image
+          if tile_alt == blank
+            assign tile_alt = block.settings.product.title
+          endif
+        endif
+        if forloop.first
+          assign tile_sizes = '(max-width: 749px) 100vw, 50vw'
+        else
+          assign tile_sizes = '(max-width: 749px) 50vw, 25vw'
+        endif
+      -%}
       <a class="lmh-world" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
         <span class="lmh-world__media"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
-          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 50vw, 25vw' -%}
+          {%- render 'lmh-img', img: tile_img, asset: block.settings.image_asset, alt: tile_alt, sizes: tile_sizes -%}
         </span>
         <span class="lmh-world__body">
           <span class="lmh-world__title">{{ block.settings.title | escape }}</span>
@@ -45,13 +62,14 @@
         { "type": "text", "id": "link_text", "label": "Link text" },
         { "type": "url", "id": "url", "label": "Link" },
         { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "product", "id": "product", "label": "Or use this product's photo", "info": "Used when no image is uploaded. Shows the product's real featured photo." },
         { "type": "text", "id": "image_asset", "label": "Theme asset image" },
         { "type": "text", "id": "image_alt", "label": "Image alt text" },
         { "type": "text", "id": "position", "label": "Image focus (CSS object-position)" }
       ]
     }
   ],
-  "max_blocks": 4,
+  "max_blocks": 5,
   "presets": [{ "name": "LM shop the house" }]
 }
 {% endschema %}

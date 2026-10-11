@@ -54,6 +54,19 @@
     </div>
   </div>
 
+  {%- liquid
+    assign has_feature = false
+    if section.settings.feature_image != blank or section.settings.feature_image_asset != blank
+      assign has_feature = true
+      assign row_cols = 2
+    endif
+  -%}
+  {%- if has_feature -%}
+  <div class="lmh-row__feature-wrap">
+    <a class="lmh-row__feature" href="{{ section.settings.all_url | default: section.settings.button_1_url | default: '#' }}">
+      {%- render 'lmh-img', img: section.settings.feature_image, asset: section.settings.feature_image_asset, alt: section.settings.feature_image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
+    </a>
+  {%- endif -%}
   <ul class="lmh-grid lmh-grid--{{ row_cols }} lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
     {%- for block in section.blocks -%}
       {%- if block.type == 'product' and block.settings.product != blank -%}
@@ -62,7 +75,20 @@
         </li>
       {%- endif -%}
     {%- endfor -%}
+    {%- if section.settings.collection != blank -%}
+      {%- assign shown = 0 -%}
+      {%- for product in section.settings.collection.products -%}
+        {%- if shown >= section.settings.collection_limit -%}{%- break -%}{%- endif -%}
+        {%- if product.available -%}
+          {%- assign shown = shown | plus: 1 -%}
+          <li>
+            {%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 20vw' -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
   </ul>
+  {%- if has_feature -%}</div>{%- endif -%}
 
   {%- if section.settings.mobile_button_text != blank -%}
     <div class="lmh-row__more">
@@ -89,6 +115,11 @@
     { "type": "url", "id": "button_1_url", "label": "Button 1 link" },
     { "type": "text", "id": "button_2_text", "label": "Button 2" },
     { "type": "url", "id": "button_2_url", "label": "Button 2 link" },
+    { "type": "image_picker", "id": "feature_image", "label": "Feature photo", "info": "Optional. Shown at left with the products in a two-by-two grid beside it; on phones it sits above the products. Use four products." },
+    { "type": "text", "id": "feature_image_asset", "label": "Feature photo, theme asset" },
+    { "type": "text", "id": "feature_image_alt", "label": "Feature photo alt text" },
+    { "type": "collection", "id": "collection", "label": "Also show products from a collection", "info": "Shows in-stock products from this collection after any picked products, so sold pieces drop off on their own." },
+    { "type": "range", "id": "collection_limit", "label": "Products from the collection", "min": 2, "max": 12, "step": 1, "default": 5 },
     { "type": "text", "id": "mobile_button_text", "label": "Phone button under the cards" },
     { "type": "url", "id": "mobile_button_url", "label": "Phone button link" }
   ],
