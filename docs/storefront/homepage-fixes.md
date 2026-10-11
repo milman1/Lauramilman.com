@@ -127,3 +127,16 @@ Still open:
   only the plain-text API field joins them. No change.
 - Still open: 0.40 ct white-gold style (four-prong pavé vs hidden halo); 0.11 ct
   oval head fit (supplier/CAD).
+
+## Homepage round 2 (2026-10-11, merchant feedback on the live page)
+- Brand palette (espresso, wine, gold, navy, warm white): the banner is back
+  to the dark espresso style with gold buttons; the Rings section uses navy.
+  Both have a color setting in the theme editor.
+- "Find a diamond that feels like you." now uses the real diamond filter
+  section (same shapes, sliders, grade scales and its lab-grown wine/gold
+  look) in a new "Search only" mode: View Diamonds opens the stone search with
+  the choices applied. My earlier compact search was deleted.
+- "Rings, your way." has a third tile, "For every day" -> all bracelets
+  (holiday campaign photo, `home-bracelets.webp`). Titles sit under the photos.
+- [ ] 15. Optional: a matching pedestal-style bracelet photo to replace the
+      campaign crop.

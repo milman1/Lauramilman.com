@@ -17,6 +17,13 @@
     currency: root.dataset.currency || 'USD',
   };
 
+  /**
+   * Homepage mode: show only the filter. View Diamonds opens the stone search
+   * (lab-grown or natural) with the choices in the link; nothing loads here.
+   */
+  var searchOnly = root.dataset.searchOnly === 'true';
+  var searchTarget = root.dataset.searchUrl || '/collections/lab-grown-diamonds';
+
   var state = {
     page: 1,
     sort: 'price_asc',
@@ -236,7 +243,7 @@
   }
 
   async function load() {
-    if (!cfg.apiBase || state.loading) return;
+    if (searchOnly || !cfg.apiBase || state.loading) return;
     state.loading = true;
     if (resultsEl) resultsEl.classList.add('is-loading');
     try {
@@ -394,12 +401,52 @@
     });
   }
 
+  /** Link to the stone search carrying only the choices that differ from "any". */
+  function goToSearch() {
+    var params = new URLSearchParams();
+    var shapes = selectedShapes();
+    if (shapes.length) params.set('shape', shapes.join(','));
+    ['color', 'clarity', 'cut'].forEach(function (name) {
+      var picked = selectedGrades(name);
+      if (picked.length) params.set(name, picked.join(','));
+    });
+    ['carat', 'price'].forEach(function (key) {
+      var wrap = form.querySelector('[data-range-key="' + key + '"]');
+      if (!wrap) return;
+      var floor = Number(wrap.dataset.floor);
+      var ceil = Number(wrap.dataset.ceil);
+      var pair = rangePair(key);
+      if (pair.min !== null && pair.min > floor) params.set('min_' + key, String(pair.min));
+      if (pair.max !== null && pair.max < ceil) params.set('max_' + key, String(pair.max));
+    });
+    var query = params.toString();
+    window.location.href = searchTarget + (query ? '?' + query : '');
+  }
+
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (searchOnly) {
+        goToSearch();
+        return;
+      }
       state.page = 1;
       load();
     });
+    if (searchOnly) {
+      root.querySelectorAll('.lm-dfilter__origin-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          searchTarget = btn.getAttribute('href') || searchTarget;
+          root.querySelectorAll('.lm-dfilter__origin-btn').forEach(function (other) {
+            var on = other === btn;
+            other.classList.toggle('is-active', on);
+            if (on) other.setAttribute('aria-current', 'page');
+            else other.removeAttribute('aria-current');
+          });
+        });
+      });
+    }
     var reset = form.querySelector('.lm-dfilter__reset');
     if (reset) {
       reset.addEventListener('click', function (e) {
