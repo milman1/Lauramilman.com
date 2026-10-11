@@ -509,33 +509,33 @@
         "lab-1": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
-            "title": "Lab Grown Emerald Diamond Huggie Earrings",
-            "subtitle": "0.41 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Solitaire Pendant",
+            "subtitle": "Prong · Made to order"
           }
         },
         "lab-2": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-round-diamond-station-bracelet-065-ct-14k-yellow-gold-bc2423",
-            "title": "Lab Grown Round Diamond Station Bracelet",
-            "subtitle": "0.65 CT · 14K Yellow Gold"
+            "product": "lab-grown-oval-studs-earring-prong-north-south",
+            "title": "Lab-Grown Oval Diamond Stud Earrings",
+            "subtitle": "Prong · Made to order"
           }
         },
         "lab-3": {
           "type": "product",
           "settings": {
-            "product": "lab-grown-round-diamond-hoop-earrings-101-ct-14k-yellow-gold-er9257",
-            "title": "Lab Grown Round Diamond Hoop Earrings",
-            "subtitle": "1.01 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
+            "title": "Lab-Grown Round Diamond Tennis Bracelet",
+            "subtitle": "14K White Gold"
           }
         },
         "lab-4": {
           "type": "product",
           "settings": {
-            "product": "lab-diamond-round-station-necklace-1-76ct-nk14ystrd175p",
-            "title": "Lab Grown Round Diamond Station Necklace",
-            "subtitle": "1.76 CT · 14K Yellow Gold"
+            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Eternity Band",
+            "subtitle": "Prong · Made to order"
           }
         }
       },
@@ -549,14 +549,14 @@
         "style": "navy",
         "columns": "4",
         "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds",
-        "title": "Diamonds for the week,",
-        "title_emphasis": "not a step on the way to something else.",
-        "text": "The stones differ. The design standard does not. Huggies, station pieces and tennis bracelets in 14K gold, set with lab-grown diamonds.",
-        "button_1_text": "Shop Lab-Grown Jewelry",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry",
-        "button_2_text": "Loose Lab-Grown Diamonds",
-        "button_2_url": "/collections/lab-grown-diamonds"
+        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
+        "title": "For the push present,",
+        "title_emphasis": "or the promotion you bought yourself.",
+        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "button_1_text": "Shop Under $1,000",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
+        "button_2_text": "All Lab-Grown Jewelry",
+        "button_2_url": "/collections/lab-grown-diamond-jewelry"
       }
     },
     "loose-diamonds": {
