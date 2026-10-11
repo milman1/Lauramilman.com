@@ -28,12 +28,14 @@ themselves (under $1,000).
       (we also carry 18K, platinum and silver).
 - [ ] 6. (Pushed: "The Rolex edit" row after Gold; shows the first five
       in-stock pieces from rolex-watches automatically.) Rolex spotlight section on the homepage.
-- [ ] 7. (Proposal sent; needs approval — live collection rules. Earrings:
+- [x] 7. (Done live 2026-10-11, merchant approved; see snapshot below.
+      Earrings 356->146, Rings 535->378, Bracelets 343->179, Necklaces 247->157,
+      admin counts incl. drafts; no backvault-feed piece left in any.) (Was: proposal; needs approval — live collection rules. Earrings:
       299 active, 201 Back Vault estate, 39 lab-grown. Rings: 472, 150 estate,
       49 lab-grown.) Category pages (e.g. Earrings) mix high jewelry, lab-grown and
       estate/David Webb with everyday fine jewelry. Proposal needed: keep
       the everyday fine jewelry in the main category and separate the rest.
-- [ ] 8. Lower-cost lab-grown (under $1,000) in rings, tennis bracelets and
+- [ ] 8. (Skipped for now, merchant 2026-10-11.) Lower-cost lab-grown (under $1,000) in rings, tennis bracelets and
       necklaces: needs a supplier and the jewelry activation gate (drafts).
 - [x] 9. (Section now hidden.) Loose-diamonds homepage section points its natural example at
       `nd-k15512b`, which no longer exists; pick a current stone.
@@ -57,3 +59,18 @@ brand story — they repeated the new sections. Re-enable in the theme editor.
       has the title "Round Four-Prong Pavé ... 18K White Gold" but its SEO
       title, description and photo describe a Hidden Halo in 14K white gold.
       Two oval settings have "round" handles. Check all 9 ring settings.
+
+## #7 collection rules — before snapshot (2026-10-11), for rollback
+
+- all-earrings (gid://shopify/Collection/349096902727): ANY of TYPE = Earrings, TYPE = Earring
+- rings (gid://shopify/Collection/168312406087): ANY of TYPE = Ring, TYPE = Rings, TYPE = Solitaire Ring
+- necklaces (gid://shopify/Collection/269851328583): ALL of TITLE contains "necklace", TITLE not contains "pre-owned", TITLE not contains "vintage"
+- all-bracelets (gid://shopify/Collection/349097590855): ANY of TYPE = Bracelet, Bracelets, Bangle, Tennis Bracelet
+
+After (merchant approved 2026-10-11): each is ALL-of, keeps its types and adds
+TAG not equal `backvault-feed`, so Back Vault estate pieces show only in
+Estate Jewelry and the designer collections. Bracelets uses TYPE starts with
+"B" and not contains "Brooch" (store types starting with B: Bangle, Bracelet,
+Bracelets, Brooch, Brooches); a new B-type would need adding to the exclusions.
+- [x] 13. Gold row: holiday campaign photo (2026 holiday marketing PDF,
+      image 2) beside a two-by-two product grid.
