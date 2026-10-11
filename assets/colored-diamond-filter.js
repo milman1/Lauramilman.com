@@ -37,7 +37,13 @@
     function filters() {
       var f = {}, data = new FormData(form);
       ['shape','color','intensity','clarity'].forEach(function (name) { f[name] = data.getAll(name); });
-      ['min_carat','max_carat','min_price','max_price'].forEach(function (name) { var v = data.get(name); f[name] = v === '' ? null : Number(v); });
+      var bounds = { carat: [0, 30], price: [0, 250000] };
+      ['carat','price'].forEach(function (key) {
+        var min = data.get('min_'+key), max = data.get('max_'+key);
+        var minN = min === '' ? null : Number(min), maxN = max === '' ? null : Number(max);
+        f['min_'+key] = minN == null || minN <= bounds[key][0] ? null : minN;
+        f['max_'+key] = maxN == null || maxN >= bounds[key][1] ? null : maxN;
+      });
       return f;
     }
     function syncUrl(f) {
@@ -76,7 +82,59 @@
       form.querySelectorAll('.lm-shape').forEach(function (label) { label.classList.toggle('is-active',label.querySelector('input').checked); });
     }
     form.addEventListener('submit',function (event) { event.preventDefault(); page = 1; render(true); });
-    form.addEventListener('reset',function () { setTimeout(function () { sort.value = 'price_asc'; page = 1; render(true); },0); });
+    function paintScale(scale) {
+      var stops = Array.prototype.slice.call(scale.querySelectorAll('[data-grade]'));
+      var fill = scale.querySelector('[data-scale-fill]');
+      var hint = scale.parentNode.querySelector('[data-scale-hint]');
+      var noun = scale.dataset.hintNoun || (hint ? hint.textContent : '');
+      scale.dataset.hintNoun = noun;
+      var picked = [];
+      stops.forEach(function (stop) {
+        var on = stop.querySelector('input').checked;
+        stop.classList.toggle('is-in-range', on);
+        stop.classList.toggle('is-floor', on);
+        if (on) picked.push(stop.dataset.grade);
+      });
+      if (fill) { fill.style.left = '0%'; fill.style.right = '100%'; }
+      if (hint) hint.textContent = picked.length ? picked.join(', ') : noun;
+    }
+    function paintRange(wrap) {
+      var minEl = wrap.querySelector('[data-range-min]');
+      var maxEl = wrap.querySelector('[data-range-max]');
+      var fill = wrap.querySelector('[data-range-fill]');
+      if (!fill || !minEl || !maxEl) return;
+      var floor = Number(wrap.dataset.floor || 0);
+      var ceil = Number(wrap.dataset.ceil || 100);
+      var min = minEl.value === '' ? floor : Number(minEl.value);
+      var max = maxEl.value === '' ? ceil : Number(maxEl.value);
+      if (!Number.isFinite(min)) min = floor;
+      if (!Number.isFinite(max)) max = ceil;
+      var span = ceil - floor || 1;
+      var left = Math.max(0, Math.min(100, ((min - floor) / span) * 100));
+      var right = Math.max(0, Math.min(100, ((max - floor) / span) * 100));
+      fill.style.left = Math.min(left, right) + '%';
+      fill.style.right = (100 - Math.max(left, right)) + '%';
+    }
+    form.querySelectorAll('[data-scale]').forEach(function (scale) {
+      if (scale.dataset.wired) return;
+      scale.dataset.wired = 'true';
+      scale.querySelectorAll('[data-grade]').forEach(function (stop) {
+        stop.addEventListener('click', function (event) {
+          event.preventDefault();
+          var input = stop.querySelector('input');
+          input.checked = !input.checked;
+          paintScale(scale);
+        });
+      });
+      paintScale(scale);
+    });
+    form.querySelectorAll('[data-range]').forEach(function (wrap) {
+      wrap.querySelectorAll('input').forEach(function (input) {
+        input.addEventListener('input', function () { paintRange(wrap); });
+      });
+      paintRange(wrap);
+    });
+    form.addEventListener('reset',function () { setTimeout(function () { sort.value = 'price_asc'; page = 1; form.querySelectorAll('[data-scale]').forEach(paintScale); form.querySelectorAll('[data-range]').forEach(paintRange); render(true); },0); });
     sort.addEventListener('change',function () { page = 1; render(true); });
     count.textContent = count.dataset.loading;
     try {
