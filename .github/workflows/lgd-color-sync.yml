@@ -35,7 +35,7 @@ jobs:
       - run: node --experimental-strip-types --test lmny-feeds/checks/lgd-color.check.mjs
   sync:
     needs: test
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.LGD_COLOR_SYNC_LIVE == 'true')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.LGD_COLOR_SYNC_LIVE != 'false')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:

@@ -7,7 +7,7 @@ The supplier name and wholesale cost never appear in storefront copy or tags.
 Requirements: LGD certified-color endpoint; Available status; IGI report link
 with a recoverable report number; recognized loose-diamond shape, color and
 clarity; positive total cost consistent with carat × per-carat cost; both
-HTTPS photo and MP4/WebM video URLs. Each planned write checks actual media
+HTTPS photo and MP4/WebM video URLs. Every eligible stone is checked for actual media
 bytes so HTML error pages cannot pass as photographs or videos. Unrecognized
 or incomplete rows are excluded. Certified feed entries can include rings;
 the scope gate excludes those. Source certificate duplicates fail closed;
@@ -29,8 +29,8 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
   active products. Existing archived products are never reactivated.
 - Activation accepts only an exact list of reviewed existing draft handles,
   requires ready Shopify image media, and publishes to Online Store and Shop.
-- Enable `LGD_COLOR_SYNC_LIVE=true` only after the first verified checkpoint.
-  Hourly runs then maintain approved active inventory; new arrivals stay draft.
+- Hourly runs maintain approved active inventory after the verified initial import;
+  new arrivals stay draft. Set `LGD_COLOR_SYNC_LIVE=false` to pause scheduled writes.
 - A complete nonempty paginated source snapshot is mandatory. Withdrawals
   exceeding 10% of active source-owned inventory (minimum five) fail closed.
   Five-product previews and targeted activation never withdraw other products.
