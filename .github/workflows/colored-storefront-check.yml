@@ -28,6 +28,4 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/colored-theme-check" --no-save @shopify/theme-check-common @shopify/theme-check-docs-updater @shopify/theme-check-node
       - name: Validate section and collection template
         run: |
-          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename colored-diamond-filter.liquid --filetype sections --file sections/colored-diamond-filter.liquid
-          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename collection.diamonds-colored.json --filetype templates --file templates/collection.diamonds-colored.json
-          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --filename en.default.json --filetype locales --file locales/en.default.json
+          node "$RUNNER_TEMP/colored-theme-check/validate.mjs" --theme-path "$GITHUB_WORKSPACE" --files sections/colored-diamond-filter.liquid,templates/collection.diamonds-colored.json,locales/en.default.json
