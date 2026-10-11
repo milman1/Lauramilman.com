@@ -147,7 +147,8 @@
         "promise-1": {
           "type": "item",
           "settings": {
-            "text": "14K Gold"
+            "text": "Authenticity Guaranteed",
+            "short": "Authenticity"
           }
         },
         "promise-2": {
@@ -784,6 +785,36 @@
       "settings": {
         "title": "Rings, your way."
       }
+    },
+    "rolex": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "chip-1": {
+          "type": "chip",
+          "settings": {
+            "text": "All Watches",
+            "url": "/collections/time-pieces"
+          }
+        }
+      },
+      "block_order": [
+        "chip-1"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "5",
+        "ratio": "0.84",
+        "eyebrow": "Rolex",
+        "title": "The Rolex edit,",
+        "title_emphasis": "authenticity guaranteed.",
+        "text": "Daytona, Submariner, GMT-Master II, Datejust and Day-Date. Each listing gives the reference, the year and whether it is pre-owned or unworn.",
+        "all_text": "Shop all Rolex",
+        "all_url": "/collections/rolex-watches",
+        "collection": "rolex-watches",
+        "collection_limit": 5,
+        "mobile_button_text": "Shop All Rolex",
+        "mobile_button_url": "/collections/rolex-watches"
+      }
     }
   },
   "order": [
@@ -794,6 +825,7 @@
     "worlds",
     "trust-strip",
     "gold",
+    "rolex",
     "wear-together",
     "pre-owned",
     "lab-grown",

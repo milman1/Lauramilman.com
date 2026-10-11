@@ -17,13 +17,20 @@ themselves (under $1,000).
       "Pre-Owned" up front); use a real photo of an in-stock, branded watch,
       not an AI image. Consider a "Pre-Owned Maison Jewelry" tile. Replace
       the lab-grown and natural tiles, which look AI-generated.
-- [ ] 3. Rings: present "engagement" rings that work as everyday rings as
+- [ ] 3. (Pushed: "Rings, your way" — Just because -> stackable rings. An
+      "Everyday Rings" collection needs approval: it is a live store change.) Rings: present "engagement" rings that work as everyday rings as
       rings worn every day too.
-- [ ] 4. Ring builder: fix the flow end to end (preview and walk through).
-- [ ] 5. Product rows after the tiles say "14K gold": drop it or broaden it
+- [ ] 4. (Pushed: setting pages' "lab-grown / natural diamonds" links now
+      pre-filter the stone search by shape; the search also accepts the old
+      link format. Walk-through on the preview theme still pending.) Ring builder: fix the flow end to end (preview and walk through).
+- [ ] 5. (Pushed: promise band "14K Gold" -> "Authenticity Guaranteed";
+      per-product spec lines keep their real metal.) Product rows after the tiles say "14K gold": drop it or broaden it
       (we also carry 18K, platinum and silver).
-- [ ] 6. Rolex spotlight section on the homepage.
-- [ ] 7. Category pages (e.g. Earrings) mix high jewelry, lab-grown and
+- [ ] 6. (Pushed: "The Rolex edit" row after Gold; shows the first five
+      in-stock pieces from rolex-watches automatically.) Rolex spotlight section on the homepage.
+- [ ] 7. (Proposal sent; needs approval — live collection rules. Earrings:
+      299 active, 201 Back Vault estate, 39 lab-grown. Rings: 472, 150 estate,
+      49 lab-grown.) Category pages (e.g. Earrings) mix high jewelry, lab-grown and
       estate/David Webb with everyday fine jewelry. Proposal needed: keep
       the everyday fine jewelry in the main category and separate the rest.
 - [ ] 8. Lower-cost lab-grown (under $1,000) in rings, tennis bracelets and
@@ -45,3 +52,7 @@ brand story — they repeated the new sections. Re-enable in the theme editor.
 
 - [ ] 11. Replace the mockup crops (banner and two ring photos, upscaled from
       a 1024px mockup) with the full-size originals or real photography.
+- [ ] 12. Catalog data: setting `round-four-prong-pave-engagement-ring-setting-in-18k-white-gold`
+      has the title "Round Four-Prong Pavé ... 18K White Gold" but its SEO
+      title, description and photo describe a Hidden Halo in 14K white gold.
+      Two oval settings have "round" handles. Check all 9 ring settings.

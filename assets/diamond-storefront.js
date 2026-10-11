@@ -334,7 +334,8 @@
     function list(key) {
       return params.getAll(key).join(',').split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
     }
-    var shapes = list('shape');
+    // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
+    var shapes = list('shape').concat(list('filter.p.m.custom.diamond_shape'));
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
       if (shapes.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
     });

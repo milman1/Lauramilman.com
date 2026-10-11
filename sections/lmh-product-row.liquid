@@ -62,6 +62,18 @@
         </li>
       {%- endif -%}
     {%- endfor -%}
+    {%- if section.settings.collection != blank -%}
+      {%- assign shown = 0 -%}
+      {%- for product in section.settings.collection.products -%}
+        {%- if shown >= section.settings.collection_limit -%}{%- break -%}{%- endif -%}
+        {%- if product.available -%}
+          {%- assign shown = shown | plus: 1 -%}
+          <li>
+            {%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 20vw' -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
   </ul>
 
   {%- if section.settings.mobile_button_text != blank -%}
@@ -89,6 +101,8 @@
     { "type": "url", "id": "button_1_url", "label": "Button 1 link" },
     { "type": "text", "id": "button_2_text", "label": "Button 2" },
     { "type": "url", "id": "button_2_url", "label": "Button 2 link" },
+    { "type": "collection", "id": "collection", "label": "Also show products from a collection", "info": "Shows in-stock products from this collection after any picked products, so sold pieces drop off on their own." },
+    { "type": "range", "id": "collection_limit", "label": "Products from the collection", "min": 2, "max": 12, "step": 1, "default": 5 },
     { "type": "text", "id": "mobile_button_text", "label": "Phone button under the cards" },
     { "type": "url", "id": "mobile_button_url", "label": "Phone button link" }
   ],
