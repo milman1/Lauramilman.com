@@ -153,7 +153,7 @@ Work one at a time; tick when pushed.
       "Shop rings", not stackable rings); tile 3 "For play" (bracelets).
 - [x] R4. Tile 2 gets a new image: a regular ring, not the stack.
 - [x] R5. Under the three tiles, a "Shop all fine jewelry" link.
-- [ ] R6. "Shop the house" tiles: the real diamond stills are zoomed and out of
+- [x] R6. "Shop the house" tiles: the real diamond stills are zoomed and out of
       proportion; show the whole stone, centered, on a quiet warm background.
 - [ ] R7. New scrollable product rows (swipe on phones, arrows on desktop):
       gold bracelets, lab-grown tennis necklaces, rings, etc.

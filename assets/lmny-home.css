@@ -196,11 +196,14 @@
 .lmh-world:first-child { grid-column: span 2; grid-row: span 2; }
 .lmh-world:first-child .lmh-world__media { position: relative; flex: 1 1 auto; aspect-ratio: auto; min-height: 420px; }
 .lmh-world:first-child .lmh-world__media img { position: absolute; inset: 0; }
+.lmh-world:first-child .lmh-world__media--whole img { inset: 6%; width: 88%; height: 88%; }
 .lmh-world:first-child .lmh-world__title { font-size: 34px; }
 .lmh-world { display: flex; flex-direction: column; gap: 18px; text-decoration: none; color: var(--lmh-ink) !important; }
-.lmh-world__media { display: block; aspect-ratio: 282 / 288; overflow: hidden; background: var(--lmh-tile); }
+.lmh-world__media { display: block; aspect-ratio: 1 / 1; overflow: hidden; background: var(--lmh-tile); }
 .lmh-world__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
 .lmh-world:hover .lmh-world__media img { transform: scale(1.03); }
+.lmh-world__media--whole { aspect-ratio: 1 / 1; padding: 9%; box-sizing: border-box; }
+.lmh-world__media--whole img { object-fit: contain; mix-blend-mode: multiply; }
 .lmh-world__body { display: flex; flex-direction: column; gap: 8px; }
 .lmh-world__title { font-family: var(--lmh-serif); font-size: 27px; font-weight: 500; line-height: 1.1; color: var(--lmh-espresso); }
 .lmh-world__text { font-size: 13px; line-height: 1.55; color: var(--lmh-muted); }
@@ -430,9 +433,11 @@
   .lmh-rule-head { gap: 14px; }
   .lmh-worlds__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; row-gap: 22px; }
   .lmh-world { gap: 12px; }
-  .lmh-world__media { aspect-ratio: 168 / 200; }
+  .lmh-world__media { aspect-ratio: 1 / 1; }
+  .lmh-world__media--whole { aspect-ratio: 1 / 1; padding: 7%; }
   .lmh-world:first-child { grid-column: 1 / -1; grid-row: auto; }
   .lmh-world:first-child .lmh-world__media { min-height: 0; aspect-ratio: 348 / 240; }
+  .lmh-world:first-child .lmh-world__media--whole { aspect-ratio: 1 / 1; padding: 0; }
   .lmh-world:first-child .lmh-world__title { font-size: 24px; }
   .lmh-world__title { font-size: 21px; line-height: 1.12; }
   .lmh-world__text { display: none; }
