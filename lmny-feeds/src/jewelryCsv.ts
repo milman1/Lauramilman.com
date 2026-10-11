@@ -5,6 +5,7 @@
  * is not an import approval. Full saved-product review uses jewelry:gate.
  */
 import { copyIssues } from './jewelryGate.js';
+import { settingShapeIssues } from './settingCenterShape.js';
 import { taxonomyForProductType, isRecognizedJewelryCategory } from './taxonomy.js';
 
 export interface JewelryCsvIssue {
@@ -286,6 +287,15 @@ function validateDraftRows(rows: string[][], col: { handle: number; status: numb
     }
     if (!get(first.row, 'Title')) add(handle, first.n, 'Title', 'Product row required');
     if (images.size < 3) add(handle, first.n, 'Image Src', 'At least three distinct accurate images required');
+    const shapeCol = headers.findIndex(header => /diamond_shape/i.test(header));
+    const shapeValue = shapeCol >= 0 ? entries.map(entry => cell(entry.row, shapeCol)).find(value => value) ?? '' : '';
+    for (const message of settingShapeIssues({
+      skus: [...skus],
+      title: entries.map(entry => get(entry.row, 'Title')).find(value => value) ?? '',
+      diamondShape: shapeValue,
+      tags: entries.flatMap(entry => get(entry.row, 'Tags').split(',')).map(tag => tag.trim()).filter(Boolean),
+      copy: entries.map(entry => [get(entry.row, 'Title'), get(entry.row, 'Body (HTML)'), get(entry.row, 'SEO Title'), get(entry.row, 'SEO Description')].join(' ')).join(' '),
+    })) add(handle, first.n, 'Center shape', message);
   }
   return issues;
 }

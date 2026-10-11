@@ -152,6 +152,9 @@
         endcase
       endif
     endif
+    if def_parts[0] == 'diamond_shape' and v == 'Cushion' and product.title contains 'Elongated Cushion'
+      assign v = 'Cushion, elongated cushion'
+    endif
     if v != blank
       capture spec_rows
         echo spec_rows

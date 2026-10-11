@@ -10,6 +10,7 @@ import {
   type WatchFeedRecord,
   type WatchListing,
 } from './watchListingBuilder.js';
+import { assertHouseSettingSkuNotInFeed } from './settingCenterShape.js';
 
 export const FEED_TAG = 'lmny-feed';
 export const MEDIA_MISSING_TAG = 'media-missing';
@@ -543,6 +544,7 @@ export function buildProductSetInput(
   existing?: ExistingProduct,
   locationId?: string,
 ): Record<string, unknown> {
+  assertHouseSettingSkuNotInFeed(item.stockRef);
   const hash = contentHashFor(item, priced);
   // A feed row with no image would otherwise go live with no photo and only be
   // caught by the next run's media audit. Quarantine it up front instead, so

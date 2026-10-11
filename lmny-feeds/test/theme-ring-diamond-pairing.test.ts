@@ -17,6 +17,8 @@ describe('engagement ring ↔ loose diamond pairing', () => {
   it('matches on the ten filter shapes, from the metafield first, never from the title', () => {
     expect(shape).toContain("'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','");
     expect(shape).toContain('product.metafields.custom.diamond_shape.value');
+    expect(shape).toContain("if stated == 'elongated cushion'");
+    expect(shape).toContain("assign stated = 'cushion'");
     expect(shape).toContain("assign t = tag | downcase | remove: ' cut' | strip");
     expect(shape).not.toContain('product.title');
   });
@@ -70,6 +72,9 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(ringSide).toContain('echo \',"self":true,"price":\'');
     expect(ringSide).toContain('if (settings.length && settings[0].self)');
     expect(ringSide).toContain('This setting is sold without a center stone.');
+    expect(ringSide).toContain('It takes {{ center_phrase }} center stones.');
+    expect(ringSide).toContain("{%- assign center_phrase = 'elongated cushion' -%}");
+    expect(ringSide).toContain('Measurements are checked against the head before the ring is made.');
   });
 
   it('lists settings before finished rings on diamond pages', () => {

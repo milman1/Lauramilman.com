@@ -106,7 +106,15 @@
     <p class="pdp-inquire__label">Choose your own diamond</p>
 
     <div data-pair-browse>
-      <p class="pdp-pair__text">This setting takes {{ shape_l }}-cut center stones. Pick the {{ shape_l }} diamond you want and we will set it for you.</p>
+      {%- if is_setting -%}
+        {%- assign center_phrase = shape_l | append: '-cut' -%}
+        {%- if product.title contains 'Elongated Cushion' -%}
+          {%- assign center_phrase = 'elongated cushion' -%}
+        {%- endif -%}
+        <p class="pdp-pair__text">This setting is sold without a center stone. It takes {{ center_phrase }} center stones. Pick the {{ shape_l }} diamond you want and we will set it for you. Measurements are checked against the head before the ring is made.</p>
+      {%- else -%}
+        <p class="pdp-pair__text">This setting takes {{ shape_l }}-cut center stones. Pick the {{ shape_l }} diamond you want and we will set it for you.</p>
+      {%- endif -%}
       <p class="pdp-pair__warn" data-pair-mismatch hidden></p>
       <div class="pdp-inquire__actions">
         <a class="pdp-inquire__btn" href="/collections/lab-grown-diamonds?shape={{ shape_q }}">{{ ring_shape }} lab-grown diamonds</a>

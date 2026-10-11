@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { activateReviewed, digest, POLICY, REVIEW_CHECKS, reviewTemplate, validateActivation, validateDraftInput, type GateClient, type Review, type Snapshot } from '../src/jewelryGate.js';
+import { SETTING_CENTER_SHAPES } from '../src/settingCenterShape.js';
 import { validateJewelryCsv } from '../src/jewelryCsv.js';
 
 const NOW = Date.parse('2026-10-05T12:00:00Z');
@@ -74,6 +75,25 @@ describe('jewelry activation gate', () => {
     snapshot.product.media.nodes.push({ id: 'v', alt: '', mediaContentType: 'VIDEO', status: 'PROCESSING' }); renew(snapshot, review);
     const errors = validateActivation(snapshot, review, NOW).join(' '); expect(errors).toMatch(/READY/); expect(errors).toMatch(/first/);
   });
+  it('keeps the mapped setting title and center shape on a future draft', () => {
+    const { snapshot, review } = fixture();
+    const row = SETTING_CENTER_SHAPES[3]!;
+    review.kind = 'setting';
+    snapshot.product.tags = ['ring-setting', 'Cushion'];
+    snapshot.product.title = row.title;
+    snapshot.product.productType = 'Rings';
+    snapshot.product.descriptionHtml = '<p>This elongated cushion bezel solitaire setting is made in 18K yellow gold and is sold without a center stone.</p>';
+    snapshot.product.seo = { title: 'Elongated Cushion Bezel | 18K Yellow Gold', description: `Elongated cushion bezel setting in 18K yellow gold. The center stone is sold separately. ${POLICY}` };
+    snapshot.product.variants.nodes[0]!.sku = `${row.sku}-6`;
+    snapshot.product.variants.nodes[0]!.price = '278';
+    snapshot.product.metafields.nodes.push({ namespace: 'custom', key: 'diamond_shape', value: 'Cushion', type: 'single_line_text_field' });
+    renew(snapshot, review);
+    expect(validateActivation(snapshot, review, NOW)).toEqual([]);
+    snapshot.product.metafields.nodes.find(m => m.key === 'diamond_shape')!.value = 'Oval';
+    snapshot.product.tags = ['ring-setting', 'Oval'];
+    renew(snapshot, review);
+    expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/must be Cushion/);
+  });
   it('retains settings at 2.25× instead of the finished lab-grown 2×', () => {
     const { snapshot, review } = fixture(); review.kind = 'setting'; snapshot.product.tags = ['ring-setting'];
     snapshot.product.title = 'Diamond Ring Setting in 14K White Gold'; snapshot.product.productType = 'Ring Settings';
@@ -111,6 +131,10 @@ describe('draft import preflight', () => {
     const { snapshot } = fixture(); const p = snapshot.product;
     const input = { title: p.title, descriptionHtml: p.descriptionHtml, seo: p.seo, status: 'DRAFT', handle: p.handle, productType: p.productType, category: p.category!.id, vendor: p.vendor, tags: p.tags, metafields: p.metafields.nodes, variants: [{ sku: 'TEST-1', price: '246.90' }] };
     expect(validateDraftInput(input)).toEqual([]);
+    const mapped = SETTING_CENTER_SHAPES[0]!;
+    const settingInput = { ...input, title: mapped.title, descriptionHtml: '<p>This oval four-prong solitaire setting is sold without a center stone.</p>', seo: { title: 'Oval Four-Prong Setting | 18K Yellow Gold', description: `Oval four-prong solitaire setting in 18K yellow gold. The center stone is sold separately. ${POLICY}` }, tags: ['ring-setting', 'Oval'], metafields: [...p.metafields.nodes, { namespace: 'custom', key: 'diamond_shape', value: 'Oval', type: 'single_line_text_field' }], variants: [{ sku: `${mapped.sku}-4`, price: '2025.00' }] };
+    expect(validateDraftInput(settingInput)).toEqual([]);
+    expect(validateDraftInput({ ...settingInput, metafields: p.metafields.nodes, tags: ['ring-setting', 'Round'] }).join(' ')).toMatch(/must be Oval/);
     expect(validateDraftInput({ ...input, status: 'ACTIVE', id: p.id, variants: [...input.variants, { price: '246.90' }] }).join(' ')).toMatch(/existing product.*DRAFT.*unique SKU/);
   });
   it('rejects a header-only CSV', () => expect(validateJewelryCsv(CSV_HEADER.join(','))).toContainEqual(expect.objectContaining({ field: 'file' })));
@@ -118,6 +142,23 @@ describe('draft import preflight', () => {
   it('rejects active or published imports even when a later row says draft', () => {
     const rows = draftCsv(); rows[1]![11] = 'active'; rows[1]![12] = 'true'; rows[2]![11] = 'draft';
     const errors = validateJewelryCsv(rows.map(csvRow).join('\n')); expect(errors.some(e => e.field === 'Status')).toBe(true); expect(errors.some(e => e.field === 'Published')).toBe(true);
+  });
+  it('rejects a mapped setting import whose shape disagrees with the SKU', () => {
+    const rows = draftCsv();
+    const shape = 'Diamond shape (product.metafields.custom.diamond_shape)';
+    rows[0]!.push(shape);
+    for (const row of rows.slice(1)) row.push('');
+    rows[1]![1] = 'Oval Hidden Halo Setting, 18K Yellow Gold, 0.09 CT';
+    rows[1]![2] = '<p>This oval hidden halo setting is sold without a center stone.</p>';
+    rows[1]![3] = 'Oval Hidden Halo Setting | 18K Yellow Gold';
+    rows[1]![4] = `Oval hidden halo setting in 18K yellow gold. The center stone is sold separately. ${POLICY}`;
+    rows[1]![7] = 'RG18YHH_5PNS-6';
+    rows[1]![17] = 'ring-setting, Round';
+    rows[1]![18] = 'Round';
+    expect(validateJewelryCsv(rows.map(csvRow).join('\n')).some(e => e.field === 'Center shape')).toBe(true);
+    rows[1]![17] = 'ring-setting, Oval';
+    rows[1]![18] = 'Oval';
+    expect(validateJewelryCsv(rows.map(csvRow).join('\n'))).toEqual([]);
   });
   it('catches missing SKU on a later variant', () => {
     const rows = draftCsv(); const variant = [...rows[1]!]; variant[7] = ''; variant[16] = 'Size 7'; rows.push(variant);
