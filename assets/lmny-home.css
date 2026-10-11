@@ -579,7 +579,7 @@
 .lmh-split__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .lmh-split__tile { position: relative; display: block; overflow: hidden; color: var(--lmh-espresso) !important; text-decoration: none; }
 .lmh-split__media { display: block; aspect-ratio: 455 / 195; background: var(--lmh-tile); }
-.lmh-split__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+.lmh-split__media img { width: 100%; height: 100%; object-fit: cover; object-position: 72% 50%; display: block; transition: transform .6s ease; }
 .lmh-split__tile:hover .lmh-split__media img { transform: scale(1.03); }
 .lmh-split__label { position: absolute; top: 28px; left: 30px; font-family: var(--lmh-serif); font-size: clamp(26px, 2.4vw, 36px); line-height: 1.1; color: var(--lmh-espresso); }
 .lmh-split__link { position: absolute; left: 30px; bottom: 24px; display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--lmh-espresso); }

@@ -760,21 +760,21 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "",
-            "link_text": "",
+            "title": "For your forever",
+            "link_text": "Build your ring",
             "url": "/pages/ring-builder",
             "image_asset": "home-rings-forever.webp",
-            "image_alt": "For your forever: a round diamond solitaire engagement ring in yellow gold"
+            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "",
-            "link_text": "",
+            "title": "Just because",
+            "link_text": "Shop stacking rings",
             "url": "/collections/stackable-rings",
             "image_asset": "home-rings-because.webp",
-            "image_alt": "Just because: a stack of yellow gold diamond bands"
+            "image_alt": "Stack of three yellow gold diamond bands on a travertine pedestal"
           }
         }
       },

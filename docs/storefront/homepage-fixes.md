@@ -50,8 +50,9 @@ forever -> ring builder; Just because -> stackable rings).
 Hidden (disabled, not deleted): loose-diamonds comparison, engagement band,
 brand story — they repeated the new sections. Re-enable in the theme editor.
 
-- [ ] 11. Replace the mockup crops (banner and two ring photos, upscaled from
-      a 1024px mockup) with the full-size originals or real photography.
+- [ ] 11. (Ring photos replaced with clean full-width originals, titles now
+      live text.) Banner photo is still an upscaled crop of the 1024px mockup;
+      replace with the full-size original.
 - [ ] 12. Catalog data: setting `round-four-prong-pave-engagement-ring-setting-in-18k-white-gold`
       has the title "Round Four-Prong Pavé ... 18K White Gold" but its SEO
       title, description and photo describe a Hidden Halo in 14K white gold.
