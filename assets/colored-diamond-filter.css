@@ -1,4 +1,5 @@
 
+  [data-colored-diamonds] { --text-muted: #766b60; --text-dark: #1e1109; }
   .lm-dfilter {
     background: var(--warm-white, #FDFAF6);
     padding: 2.5rem 0 0.5rem;
