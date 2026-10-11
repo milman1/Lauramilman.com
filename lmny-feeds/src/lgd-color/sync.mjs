@@ -53,7 +53,10 @@ async function client() {
   return async (query,variables={})=>{
     let r;try {r=await fetch('https://'+domain+'/admin/api/2026-10/graphql.json',{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Access-Token':token},body:JSON.stringify({query,variables}),signal:AbortSignal.timeout(60000),redirect:'error'});} catch {throw new Error('Shopify request failed');}
     if (!r.ok) throw new Error('Shopify HTTP '+r.status);
-    const j=await r.json();if(j.errors?.length) throw new Error('Shopify GraphQL operation failed');
+    const j=await r.json();if(j.errors?.length) {
+      console.error(JSON.stringify({shopifyErrorCodes:j.errors.map(e=>e.extensions?.code||'unknown'),paths:j.errors.map(e=>e.path||[]),requestedCost:j.extensions?.cost?.requestedQueryCost}));
+      throw new Error('Shopify GraphQL operation failed');
+    }
     if(!j.data) throw new Error('Shopify returned no data');return j.data;
   };
 }
