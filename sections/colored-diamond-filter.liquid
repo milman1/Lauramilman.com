@@ -9,58 +9,78 @@
     <header class="lm-dfilter__header">
       <h1 class="lm-dfilter__title">{{ collection.title | escape }}</h1>
       <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
-      <div class="lm-dfilter__origin" aria-label="Diamond collections">
-        <a class="lm-dfilter__origin-btn" href="/collections/natural-diamonds">{{ 'colored_diamonds.natural' | t }}</a>
-        <a class="lm-dfilter__origin-btn" href="/collections/lab-grown-diamonds">{{ 'colored_diamonds.lab' | t }}</a>
-        <a class="lm-dfilter__origin-btn is-active" href="{{ collection.url }}" aria-current="page">{{ 'colored_diamonds.colored' | t }}</a>
-      </div>
+      {%- render 'diamond-origin-tabs', current: 'colored' -%}
     </header>
     <form class="lm-dfilter__form" data-colored-form>
       <div class="lm-dfilter__grid">
-        <fieldset class="lm-dfilter__group lm-dfilter__group--wide">
-          <legend class="lm-dfilter__label">{{ 'colored_diamonds.shape' | t }}</legend>
+        <div class="lm-dfilter__group lm-dfilter__group--wide">
+          <span class="lm-dfilter__label">
+            {{ 'colored_diamonds.shape' | t }}
+            <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
+          </span>
           <div class="lm-dfilter__shapes">
             {%- for shape in shapes -%}
               {%- assign icon = shape | downcase -%}
-              <label class="lm-shape"><input type="checkbox" name="shape" value="{{ shape }}">{% render 'diamond-shape-icon', shape: icon %}<span class="lm-shape__name">{{ shape }}</span></label>
+              <label class="lm-shape">
+                <input type="checkbox" name="shape" value="{{ shape }}">
+                {%- render 'diamond-shape-icon', shape: icon -%}
+                <span class="lm-shape__name">{{ shape }}</span>
+              </label>
             {%- endfor -%}
           </div>
-        </fieldset>
-        {%- assign range_names = 'carat,price' | split: ',' -%}
-        {%- for name in range_names -%}
-          {%- assign label_key = 'colored_diamonds.' | append: name -%}
-          <fieldset class="lm-dfilter__group">
-            <legend class="lm-dfilter__label">{{ label_key | t }}</legend>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            {{ 'colored_diamonds.carat' | t }}
+            <button type="button" class="lm-dfilter__info" aria-label="About carat" data-tip="Carat is weight, not size: one carat is 200 milligrams.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="carat" data-floor="0" data-ceil="30" data-step="0.01">
             <div class="lm-range__inputs">
-              <label class="lm-range__field"><span>{{ 'colored_diamonds.min' | t }}</span><input type="number" inputmode="decimal" min="0" step="{% if name == 'carat' %}0.01{% else %}1{% endif %}" name="min_{{ name }}" aria-label="{{ 'colored_diamonds.min' | t }} {{ label_key | t }}"></label>
-              <span aria-hidden="true">–</span>
-              <label class="lm-range__field"><span>{{ 'colored_diamonds.max' | t }}</span><input type="number" inputmode="decimal" min="0" step="{% if name == 'carat' %}0.01{% else %}1{% endif %}" name="max_{{ name }}" aria-label="{{ 'colored_diamonds.max' | t }} {{ label_key | t }}"></label>
+              <label class="lm-range__field">
+                <span>{{ 'colored_diamonds.min' | t }}</span>
+                <input type="number" inputmode="decimal" step="0.01" min="0" max="30" name="min_carat" value="0" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>{{ 'colored_diamonds.max' | t }}</span>
+                <input type="number" inputmode="decimal" step="0.01" min="0" max="30" name="max_carat" value="30" data-range-max>
+              </label>
             </div>
-          </fieldset>
-        {%- endfor -%}
-        {%- assign grade_names = 'color,intensity,clarity' | split: ',' -%}
-        {%- for name in grade_names -%}
-          {%- liquid
-            assign grades = colors
-            if name == 'intensity'
-              assign grades = intensities
-            elsif name == 'clarity'
-              assign grades = clarities
-            endif
-            assign label_key = 'colored_diamonds.' | append: name
-          -%}
-          <fieldset class="lm-dfilter__group">
-            <legend class="lm-dfilter__label">{{ label_key | t }}</legend>
-            <div class="lm-colored-chips">
-              {%- for grade in grades -%}
-                <label><input type="checkbox" name="{{ name }}" value="{{ grade }}"><span>{{ grade }}</span></label>
-              {%- endfor -%}
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            {{ 'colored_diamonds.price' | t }}
+            <button type="button" class="lm-dfilter__info" aria-label="About price" data-tip="Every stone is priced individually against the current market.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="price" data-floor="0" data-ceil="250000" data-step="50">
+            <div class="lm-range__inputs">
+              <label class="lm-range__field">
+                <span>{{ 'colored_diamonds.min' | t }} {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="0" max="250000" name="min_price" value="0" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>{{ 'colored_diamonds.max' | t }} {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="0" max="250000" name="max_price" value="250000" data-range-max>
+              </label>
             </div>
-          </fieldset>
-        {%- endfor -%}
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        {%- render 'diamond-api-scale', name: 'color', order: colors, title: 'Color', tip: 'The hue named on the certificate: blue, pink, yellow, green, orange, or brown.' -%}
+        {%- render 'diamond-api-scale', name: 'intensity', order: intensities, title: 'Color intensity', tip: 'Intensity runs from Faint through Fancy Vivid to Fancy Dark and describes how strong the hue is.' -%}
+        {%- render 'diamond-api-scale', name: 'clarity', order: clarities, title: 'Clarity', tip: 'Clarity grades the inclusions inside the stone. From SI2 up, most are invisible without magnification; FL is flawless under 10x.' -%}
       </div>
       <div class="lm-dfilter__actions">
-        <button type="submit" class="lm-dfilter__apply" data-colored-apply disabled>{{ 'colored_diamonds.view' | t }}</button>
+        <button type="submit" class="lm-dfilter__apply" data-colored-apply disabled>
+          {{ 'colored_diamonds.view' | t }}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
         <button type="reset" class="lm-dfilter__reset">{{ 'colored_diamonds.reset' | t }}</button>
       </div>
     </form>
@@ -92,18 +112,6 @@
 </section>
 {%- endpaginate -%}
 <script src="{{ 'colored-diamond-filter.js' | asset_url }}" defer></script>
-{% stylesheet %}
-[data-colored-diamonds] fieldset { border: 0; margin: 0; min-width: 0; padding: 0; }
-.lm-colored-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.lm-colored-chips label { cursor: pointer; }
-.lm-colored-chips input { position: absolute; opacity: 0; }
-.lm-colored-chips span { display: block; border: 1px solid #b4a495; border-radius: 3px; padding: 8px 12px; font-size: 12px; }
-.lm-colored-chips input:checked + span { background: #1e1109; color: #fdfaF6; }
-.lm-colored-chips input:focus-visible + span { outline: 2px solid #7a5c22; outline-offset: 3px; }
-[data-colored-pager] { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0; }
-[data-colored-pager] button { border: 1px solid #b4a495; background: transparent; padding: 10px 16px; cursor: pointer; }
-[data-colored-apply]:disabled { opacity: .6; }
-{% endstylesheet %}
 {% schema %}
 {"name":"Colored diamond filter","settings":[],"presets":[{"name":"Colored diamond filter"}]}
 {% endschema %}

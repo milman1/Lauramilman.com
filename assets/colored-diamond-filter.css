@@ -810,3 +810,35 @@
     color: var(--espresso, #1E1109);
   }
 
+  /* Intensity labels are longer than D–Z grades, so they wrap under the dot. */
+  [data-colored-diamonds] .lm-scale__name {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  [data-colored-apply]:disabled { opacity: 0.6; }
+
+  [data-colored-pager] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0 8px;
+  }
+
+  [data-colored-pager] button {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+
+  [data-colored-pager] button:disabled { opacity: 0.45; cursor: default; }
+

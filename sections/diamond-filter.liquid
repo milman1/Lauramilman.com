@@ -31,6 +31,10 @@
   if stone_kind == 'lab'
     assign origin_is_lab = true
   endif
+  assign origin_tab = 'natural'
+  if origin_is_lab
+    assign origin_tab = 'lab'
+  endif
   assign carat_floor = 0.3
   assign carat_ceil = 15
   assign price_floor = 0
@@ -68,10 +72,7 @@
         {%- render 'collection-ask-line', collection: collection -%}
       {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
-      <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
-        <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
-        <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
-      </div>
+      {%- render 'diamond-origin-tabs', current: origin_tab -%}
     </header>
 
     <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ collection.url }}" method="get">
@@ -231,10 +232,7 @@
         {%- render 'collection-ask-line', collection: collection -%}
       {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
-      <div class="lm-dfilter__origin" role="tablist" aria-label="Diamond origin">
-        <a href="/collections/natural-diamonds" class="lm-dfilter__origin-btn{% unless origin_is_lab %} is-active{% endunless %}" {% unless origin_is_lab %}aria-current="page"{% endunless %}>Natural</a>
-        <a href="/collections/lab-grown-diamonds" class="lm-dfilter__origin-btn{% if origin_is_lab %} is-active{% endif %}" {% if origin_is_lab %}aria-current="page"{% endif %}>Lab-grown</a>
-      </div>
+      {%- render 'diamond-origin-tabs', current: origin_tab -%}
     </header>
 
 {%- if has_any -%}
