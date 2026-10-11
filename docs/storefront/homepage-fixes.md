@@ -166,3 +166,5 @@ rings, gold-bracelets, lab-grown-tennis-necklaces, all-earrings, chain-necklaces
 New live collection `lab-grown-tennis-necklaces` (smart: tags "Tennis Necklace" +
 "Lab Grown Diamond"; Online Store only), created while building the shelf.
 R8 is a proposal awaiting the merchant's choice (see chat).
+- [x] R9. Meet Laura on the homepage: portrait removed; heading, line and the
+      "Read Laura's Story" link centered. Phone rules for the section restored.

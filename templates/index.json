@@ -735,7 +735,6 @@
     "meet-laura": {
       "type": "lmh-meet",
       "settings": {
-        "image": "shopify://shop_images/laura-milman-portrait.jpg",
         "image_alt": "Laura Milman",
         "title": "Meet Laura Milman",
         "text": "Discover the story behind the jewelry.",
