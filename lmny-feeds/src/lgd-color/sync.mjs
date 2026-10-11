@@ -82,7 +82,7 @@ async function paginate(gql,operation,key,variables={}) {
   }
   throw new Error('Catalog page limit exceeded');
 }
-function requireNoErrors(result) {if(result.userErrors?.length) throw new Error('Shopify rejected operation: '+result.userErrors.map(e=>e.field?.join('.')||'input').join(', '));}
+function requireNoErrors(result) {if(result.userErrors?.length) { console.error(JSON.stringify({stage, rejectedFields:result.userErrors.map(e=>e.field||['input'])})); throw new Error('Shopify rejected operation'); }}
 export async function mediaReady(stone,fetcher=fetch) {
   for (const [url,kind] of [[stone.image,'image'],[stone.video,'video']]) {
     let r;try{r=await fetcher(url,{headers:{Range:'bytes=0-1023'},signal:AbortSignal.timeout(30000),redirect:'error'});}catch{return false;}
@@ -133,12 +133,14 @@ export async function main(argv=process.argv.slice(2)) {
   if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,skipped:plan.skipped.length}));return;}
   let publications=[];
   if(activate){publications=(await paginate(gql,OPS.publications,'publications')).filter(p=>p.name==='Online Store'||p.name==='Shop');if(!publications.some(p=>p.name==='Online Store'))throw new Error('Online Store publication unavailable');}
+  stage='shopify_write';
   for(const line of plan.holds)requireNoErrors((await gql(OPS.hold,{product:line.input})).productUpdate);
   for(const line of plan.writes){
     const data=(await gql(OPS.set,{input:line.input,identifier:line.identifier})).productSet;requireNoErrors(data);
     if(!data.product?.id)throw new Error('ProductSet returned no product');
     if(activate)requireNoErrors((await gql(OPS.publish,{id:data.product.id,input:publications.map(p=>({publicationId:p.id}))})).publishablePublish);
   }
+  stage='shopify_verify';
   const verified=(await paginate(gql,OPS.catalog,'products',{query:'tag:'+FEED_TAG})).map(view);
   for(const line of plan.writes){
     const p=verified.find(p=>p.handle===line.handle);
