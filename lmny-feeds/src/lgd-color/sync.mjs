@@ -50,15 +50,26 @@ async function client() {
   const domain=process.env.SHOPIFY_STORE_DOMAIN;
   if (!domain || !/^[a-z0-9-]+\.myshopify\.com$/i.test(domain)) throw new Error('SHOPIFY_STORE_DOMAIN must be a myshopify.com domain');
   const token=await tokenFor(domain);
-  return async (query,variables={})=>{
-    let r;try {r=await fetch('https://'+domain+'/admin/api/2026-10/graphql.json',{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Access-Token':token},body:JSON.stringify({query,variables}),signal:AbortSignal.timeout(60000),redirect:'error'});} catch {throw new Error('Shopify request failed');}
+  return (query,variables={})=>requestShopify(domain,token,query,variables);
+}
+export async function requestShopify(domain,token,query,variables={},fetcher=fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))) {
+  for(let attempt=0;attempt<12;attempt++){
+    let r;try {r=await fetcher('https://'+domain+'/admin/api/2026-10/graphql.json',{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Access-Token':token},body:JSON.stringify({query,variables}),signal:AbortSignal.timeout(60000),redirect:'error'});} catch {throw new Error('Shopify request failed');}
+    if(r.status===429){await sleep(Math.min(10000,Math.max(1000,Number(r.headers.get('retry-after')||2)*1000)));continue;}
     if (!r.ok) throw new Error('Shopify HTTP '+r.status);
-    const j=await r.json();if(j.errors?.length) {
+    const j=await r.json();
+    if(!j.data && j.errors?.length && j.errors.every(e=>e.extensions?.code==='THROTTLED')){
+      const cost=j.extensions?.cost,throttle=cost?.throttleStatus;
+      const wait=throttle?Math.ceil(Math.max(0,(cost.requestedQueryCost-throttle.currentlyAvailable)/Math.max(1,throttle.restoreRate))*1000)+250:2000;
+      await sleep(Math.min(10000,Math.max(1000,wait)));continue;
+    }
+    if(j.errors?.length) {
       console.error(JSON.stringify({shopifyErrorCodes:j.errors.map(e=>e.extensions?.code||'unknown'),paths:j.errors.map(e=>e.path||[]),requestedCost:j.extensions?.cost?.requestedQueryCost}));
       throw new Error('Shopify GraphQL operation failed');
     }
     if(!j.data) throw new Error('Shopify returned no data');return j.data;
-  };
+  }
+  throw new Error('Shopify rate limit did not recover');
 }
 async function paginate(gql,operation,key,variables={}) {
   const all=[];let after=null;

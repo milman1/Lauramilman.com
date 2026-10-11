@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeRow, normalizeFeed, payloadFor, fetchInventory, FEED_TAG } from '../src/lgd-color/catalog.mjs';
-import { planFor, mediaReady } from '../src/lgd-color/sync.mjs';
+import { planFor, mediaReady, requestShopify } from '../src/lgd-color/sync.mjs';
 const fixture = (override={}) => ({Stock_No:'TEST1',Shape:'RADIANT',Color:'BLUE',Fancy_Color_Intensity:'Fancy Vivid',Clarity:'VS1',Weight:'2',Buy_Price:'100',Buy_Price_Total:'200',Diamond_Type:'Lab Grown',Lab:'IGI',Availability:'Available',ImageLink:'https://example.com/stone.jpg',Video_HTML:'https://example.com/stone.mp4',CertificateLink:'https://example.com/LG12345678.pdf',...override});
 test('prices from total cost, never per-carat price',()=>{const s=normalizeRow(fixture()).stone;assert.equal(s.retail,700);assert.equal(s.cost,200);assert.equal(s.certificate,'LG12345678');});
 test('normalizes uppercase supplier intensity',()=>{assert.equal(normalizeRow(fixture({Fancy_Color_Intensity:'FANCY VIVID'})).stone.intensity,'Fancy Vivid');});
@@ -17,3 +17,5 @@ test('complete pagination required before availability writes',async()=>{let n=0
 test('HTML errors disguised as media cannot pass',async()=>{const s=normalizeRow(fixture()).stone;assert.equal(await mediaReady(s,async()=>new Response('<html>missing</html>',{headers:{'content-type':'text/html'}})),false);});
 test('updates identify the original product separately from its input',()=>{const s=normalizeRow(fixture()).stone;const p={id:'p',variantId:'v',variantCount:1,handle:s.handle,tags:[FEED_TAG],status:'DRAFT',readyImage:true};const line=planFor([s],[p]).writes[0];assert.deepEqual(line.identifier,{id:'p'});assert.equal(line.input.id,undefined);assert.equal(line.input.variants[0].id,'v');});
 test('large inventory withdrawals fail closed',()=>{const s=normalizeRow(fixture()).stone;const catalog=Array.from({length:10},(_,i)=>({id:'p'+i,handle:'lg-color-gone'+i,tags:[FEED_TAG],status:'ACTIVE'}));assert.throws(()=>planFor([s],catalog),/safety threshold/);});
+test('throttled Shopify reads retry the same request after recovery',async()=>{let calls=0;const delays=[];const fetcher=async()=>new Response(JSON.stringify(++calls<3?{errors:[{extensions:{code:'THROTTLED'}}],extensions:{cost:{requestedQueryCost:137,throttleStatus:{currentlyAvailable:37,restoreRate:50}}}}:{data:{ok:true}}));assert.deepEqual(await requestShopify('test.myshopify.com','secret','query {}',{},fetcher,async ms=>delays.push(ms)),{ok:true});assert.equal(calls,3);assert.deepEqual(delays,[2250,2250]);});
+test('Shopify failures without throttling are never retried',async()=>{let calls=0;await assert.rejects(()=>requestShopify('test.myshopify.com','secret','query {}',{},async()=>{calls++;return new Response('{}',{status:500});},async()=>{}));assert.equal(calls,1);});
