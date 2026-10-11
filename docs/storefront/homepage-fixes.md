@@ -28,6 +28,20 @@ themselves (under $1,000).
       the everyday fine jewelry in the main category and separate the rest.
 - [ ] 8. Lower-cost lab-grown (under $1,000) in rings, tennis bracelets and
       necklaces: needs a supplier and the jewelry activation gate (drafts).
-- [ ] 9. Loose-diamonds homepage section points its natural example at
+- [x] 9. (Section now hidden.) Loose-diamonds homepage section points its natural example at
       `nd-k15512b`, which no longer exists; pick a current stone.
-- [ ] 10. Engagement section reuses the hero's loose-diamond photo; swap it.
+- [x] 10. (Section now hidden.) Engagement section reuses the hero's loose-diamond photo; swap it.
+
+## Homepage mockup (2026-10-11, merchant-approved direction)
+
+Top of the homepage now follows the merchant's mockup, in the brand palette:
+cream banner "Your diamond. Your story." (mockup photo, cropped to drop the
+loose-diamond tray), "Meet Laura Milman" (her real portrait), "Find a diamond
+that feels like you." (compact stone search that opens the lab-grown or
+natural search with the choices applied), "Rings, your way." (For your
+forever -> ring builder; Just because -> stackable rings).
+Hidden (disabled, not deleted): loose-diamonds comparison, engagement band,
+brand story — they repeated the new sections. Re-enable in the theme editor.
+
+- [ ] 11. Replace the mockup crops (banner and two ring photos, upscaled from
+      a 1024px mockup) with the full-size originals or real photography.

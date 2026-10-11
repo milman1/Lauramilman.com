@@ -56,17 +56,18 @@
         "pill-5"
       ],
       "settings": {
-        "eyebrow": "Loose lab-grown diamonds · Rings · Settings",
-        "title": "Loose lab-grown diamonds,",
-        "title_emphasis": "from the Diamond District.",
-        "text": "Every stone is listed with its IGI or GIA certificate, priced fairly, and backed by a New York house with 30+ years in the Diamond District. Pick your stone, set it in a ring, and talk to a specialist whenever you want.",
-        "primary_text": "Search Loose Lab-Grown Diamonds",
+        "eyebrow": "Lab-grown diamonds & rings",
+        "title": "Your diamond.",
+        "title_emphasis": "Your story.",
+        "text": "For love, personal milestones, and the pleasure of choosing something for yourself.",
+        "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
-        "secondary_text": "Shop Rings & Settings",
-        "secondary_url": "/pages/ring-builder",
-        "note": "Free insured shipping · Shop Pay Installments at checkout",
-        "image_asset": "peaceful-hero-diamonds.jpg",
-        "image_alt": "Loose diamonds of several shapes on navy velvet"
+        "secondary_text": "Shop Rings",
+        "secondary_url": "/collections/rings",
+        "note": "",
+        "image_asset": "home-hero-ring.webp",
+        "image_alt": "Woman in an ivory blazer wearing a diamond solitaire ring",
+        "style": "light"
       }
     },
     "worlds": {
@@ -647,7 +648,8 @@
         "natural_url": "/collections/natural-diamonds",
         "compare_example_label": "Matched example · 1 ct round · E · VS2",
         "shapes_label": "Shop by shape"
-      }
+      },
+      "disabled": true
     },
     "private-clients": {
       "type": "lmh-private-band",
@@ -676,7 +678,8 @@
         "primary_url": "/pages/ring-builder",
         "secondary_text": "Engagement Rings",
         "secondary_url": "/collections/engagement-rings"
-      }
+      },
+      "disabled": true
     },
     "brand-story": {
       "type": "lmh-story",
@@ -717,7 +720,8 @@
         "text": "Laura worked alongside her brother Jacob Arabo in the early years of what became Jacob & Co. She still sees clients in Midtown.",
         "link_text": "Read Laura's story",
         "link_url": "/pages/about"
-      }
+      },
+      "disabled": true
     },
     "reviews": {
       "type": "lmh-reviews",
@@ -728,10 +732,65 @@
         "link_url": "/pages/google-reviews",
         "embed_id": "25717519"
       }
+    },
+    "meet-laura": {
+      "type": "lmh-meet",
+      "settings": {
+        "image": "shopify://shop_images/laura-milman-portrait.jpg",
+        "image_alt": "Laura Milman",
+        "title": "Meet Laura Milman",
+        "text": "Discover the story behind the jewelry.",
+        "link_text": "Read Laura's Story",
+        "link_url": "/pages/about"
+      }
+    },
+    "diamond-search": {
+      "type": "lmh-diamond-search",
+      "settings": {
+        "title": "Find a diamond that feels like you.",
+        "text": "Search every lab-grown stone by shape, carat, budget, color and clarity. Each one is listed with its IGI or GIA certificate.",
+        "button_text": "Explore All Diamonds",
+        "note": "Not sure where to start? Every lab-grown stone page has an Ask form."
+      }
+    },
+    "rings-your-way": {
+      "type": "lmh-split-tiles",
+      "blocks": {
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "title": "",
+            "link_text": "",
+            "url": "/pages/ring-builder",
+            "image_asset": "home-rings-forever.webp",
+            "image_alt": "For your forever: a round diamond solitaire engagement ring in yellow gold"
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "title": "",
+            "link_text": "",
+            "url": "/collections/stackable-rings",
+            "image_asset": "home-rings-because.webp",
+            "image_alt": "Just because: a stack of yellow gold diamond bands"
+          }
+        }
+      },
+      "block_order": [
+        "tile-1",
+        "tile-2"
+      ],
+      "settings": {
+        "title": "Rings, your way."
+      }
     }
   },
   "order": [
     "hero",
+    "meet-laura",
+    "diamond-search",
+    "rings-your-way",
     "worlds",
     "trust-strip",
     "gold",

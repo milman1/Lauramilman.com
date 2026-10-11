@@ -13,7 +13,7 @@
     </ul>
   </nav>
 {%- endif -%}
-<section class="lmh lmh-hero" aria-labelledby="LmhHero-{{ section.id }}">
+<section class="lmh lmh-hero{% if section.settings.style == 'light' %} lmh-hero--light{% endif %}" aria-labelledby="LmhHero-{{ section.id }}">
   <div class="lmh-hero__copy">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
     <h1 class="lmh-h1 lmh-em-bronze" id="LmhHero-{{ section.id }}">
@@ -41,6 +41,7 @@
   "name": "LM hero (split)",
   "tag": "div",
   "settings": [
+    { "type": "select", "id": "style", "label": "Color", "options": [{ "value": "dark", "label": "Espresso" }, { "value": "light", "label": "Cream" }], "default": "dark" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Fine jewelry · Pre-owned watches · Diamonds" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Jewelry for the week" },
     { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "you work." },
