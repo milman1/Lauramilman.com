@@ -4,6 +4,7 @@ import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHa
 let stage = 'startup';
 
 export const OPS = {
+  "verify": "query VerifyColoredIds($ids:[ID!]!){nodes(ids:$ids){...on Product{id handle title status tags descriptionHtml templateSuffix vendor productType seo { title description } certificate:metafield(namespace:\"lmny_feed\",key:\"cert_number\"){value} video:metafield(namespace:\"lmny_feed\",key:\"video_url\"){value} hash:metafield(namespace:\"colored_feed\",key:\"content_hash\"){value} media(first:10){nodes{status mediaContentType}} variants(first:2){nodes{id sku price inventoryPolicy inventoryQuantity inventoryItem{tracked unitCost{amount currencyCode}}}}}}}",
   "catalog": "query ColoredCatalog($after:String,$query:String!) { products(first:100,after:$after,query:$query) { pageInfo { hasNextPage endCursor } nodes { id handle title status tags descriptionHtml templateSuffix vendor productType seo { title description } certificate:metafield(namespace:\"lmny_feed\",key:\"cert_number\"){value} video:metafield(namespace:\"lmny_feed\",key:\"video_url\"){value} hash:metafield(namespace:\"colored_feed\",key:\"content_hash\"){value} media(first:10){nodes{status mediaContentType}} variants(first:2){nodes{id sku price inventoryPolicy inventoryQuantity inventoryItem{tracked unitCost{amount currencyCode}}}} } } }",
   "set": "mutation SetColoredStone($input:ProductSetInput!,$identifier:ProductSetIdentifiers){productSet(input:$input,identifier:$identifier,synchronous:true){product{id handle} userErrors{field message}}}",
   "hold": "mutation HoldColoredStone($product:ProductUpdateInput!){productUpdate(product:$product){product{id status}userErrors{field message}}}",
@@ -29,7 +30,7 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
     if (certOwners.some(p=>p.handle!==s.handle)) { skipped.push({handle:s.handle,reason:'duplicate_certificate'}); continue; }
     if (activate && (!existing || !existing.readyImage)) { skipped.push({handle:s.handle,reason:'draft_media_not_ready'}); continue; }
     const status = activate || existing?.status==='ACTIVE' ? 'ACTIVE' : 'DRAFT';
-    if (existing?.hash === snapshotHash(s) && existing.status===status && existing.readyImage && existing.video===s.video && existing.price===s.retail.toFixed(2)) continue;
+    if (existing?.hash === snapshotHash(s) && existing.status===status && existing.readyImage && existing.video===s.video && Number(existing.price)===s.retail) continue;
     const input=payloadFor(s,existing,status,locationId);
     writes.push({action:existing?'update':'create',handle:s.handle,identifier:existing?{id:existing.id}:null,input,stone:s});
   }
@@ -144,18 +145,25 @@ export async function main(argv=process.argv.slice(2)) {
   if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,skipped:plan.skipped.length}));return;}
   let publications=[];
   if(activate){publications=(await paginate(gql,OPS.publications,'publications')).filter(p=>p.name==='Online Store'||p.name==='Shop');if(!publications.some(p=>p.name==='Online Store'))throw new Error('Online Store publication unavailable');}
+  const writtenIds=new Map();
   stage='shopify_write';
   for(const line of plan.holds)requireNoErrors((await gql(OPS.hold,{product:line.input})).productUpdate);
   for(const line of plan.writes){
     const data=(await gql(OPS.set,{input:line.input,identifier:line.identifier})).productSet;requireNoErrors(data);
     if(!data.product?.id)throw new Error('ProductSet returned no product');
+    writtenIds.set(line.handle,data.product.id);
     if(activate)requireNoErrors((await gql(OPS.publish,{id:data.product.id,input:publications.map(p=>({publicationId:p.id}))})).publishablePublish);
   }
   stage='shopify_verify';
-  const verified=(await paginate(gql,OPS.catalog,'products',{query:'tag:'+FEED_TAG})).map(view);
+  const verificationIds=[...new Set([...writtenIds.values(),...plan.holds.map(line=>line.input.id)])];
+  const verified=[];
+  for(let offset=0;offset<verificationIds.length;offset+=100){
+    const data=await gql(OPS.verify,{ids:verificationIds.slice(offset,offset+100)});
+    verified.push(...data.nodes.filter(Boolean).map(view));
+  }
   for(const line of plan.writes){
     const p=verified.find(p=>p.handle===line.handle);
-    if(!p || p.status!==line.input.status || p.price!==line.input.variants[0].price || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
+    if(!p || p.status!==line.input.status || Number(p.price)!==Number(line.input.variants[0].price) || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
   }
   for(const line of plan.holds)if(verified.find(p=>p.handle===line.handle)?.status!=='DRAFT')throw new Error('Withdrawal verification mismatch');
   sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
