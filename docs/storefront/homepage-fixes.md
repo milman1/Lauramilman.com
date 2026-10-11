@@ -172,3 +172,10 @@ R8 is a proposal awaiting the merchant's choice (see chat).
       "Wear it together" and the private-clients band now default to a warm
       style; each has a Color setting (Espresso still available). The navy
       lab-grown row stays.
+- [x] R11. Menu and dropdowns follow the homepage: Loose Diamonds | Rings | Fine
+      Jewelry | Watches & Estate | Our Story. Lab-grown and natural stones share
+      one dropdown; gold and lab-grown jewelry sit under Fine Jewelry. Dropdown
+      photos are the approved real/campaign images; the watch card pulls a real
+      in-stock Rolex photo (w-t3757). The AI-generated Rolex asset is not used.
+      Python tests updated to the new homepage and menu (1 older failure remains:
+      "backvault-feed" tag name in main-product.liquid, not customer-facing).

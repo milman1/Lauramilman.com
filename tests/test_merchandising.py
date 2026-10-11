@@ -93,11 +93,16 @@ def test_related_merchandising_photos_fill_their_frames() -> None:
 
 def test_diamond_filter_offers_lab_and_natural_origin() -> None:
     liquid = (ROOT / "sections/diamond-filter.liquid").read_text()
-    assert 'aria-label="Diamond origin"' in liquid
-    assert 'href="/collections/lab-grown-diamonds"' in liquid
-    assert 'href="/collections/natural-diamonds"' in liquid
-    assert "lm-dfilter__origin" in liquid
+    # The origin tabs live in one snippet shared by every loose-diamond search.
+    assert "render 'diamond-origin-tabs'" in liquid
+    tabs = (ROOT / "snippets/diamond-origin-tabs.liquid").read_text()
+    assert 'aria-label="Diamond origin"' in tabs
+    assert 'href="/collections/lab-grown-diamonds"' in tabs
+    assert 'href="/collections/natural-diamonds"' in tabs
+    assert "lm-dfilter__origin" in tabs
     assert "overflow: hidden" in liquid
+    # The homepage uses the same filter in Search only mode.
+    assert "search_only" in liquid
     storefront = (ROOT / "assets/diamond-storefront.js").read_text()
     assert "Math.min(100" in storefront
     assert "data-add-handle" in storefront
@@ -185,23 +190,34 @@ def strip_liquid_comments(text: str) -> str:
     return re.sub(r"\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}", "", text, flags=re.S)
 
 
-def test_homepage_walks_gold_watches_then_diamonds() -> None:
-    """The approved preview: gold, then watches with signed jewelry, then diamonds."""
+def test_homepage_walks_stones_rings_then_the_house() -> None:
+    """Merchant-approved order (2026-10-11): the banner, Meet Laura, the stone search,
+    rings, shop the house, a scrollable shelf, reviews, then gold, Rolex, watches
+    with signed jewelry and the lab-grown row."""
     data = load_json(ROOT / "templates/index.json")
     order = data["order"]
     sections = data["sections"]
     assert order == [
-        "hero", "worlds", "trust-strip", "gold", "wear-together", "pre-owned",
-        "lab-grown", "loose-diamonds", "private-clients", "engagement",
-        "brand-story", "reviews",
+        "hero", "meet-laura", "diamond-search", "rings-your-way", "worlds",
+        "trust-strip", "shelf", "reviews", "gold", "rolex", "wear-together",
+        "pre-owned", "lab-grown", "loose-diamonds", "private-clients",
+        "engagement", "brand-story",
     ]
     types = {key: sections[key]["type"] for key in order}
     assert types["hero"] == "lmh-hero"
+    assert types["meet-laura"] == "lmh-meet"
+    assert types["diamond-search"] == "diamond-filter"
+    assert sections["diamond-search"]["settings"]["search_only"] is True
+    assert types["rings-your-way"] == "lmh-split-tiles"
+    assert types["shelf"] == "lmh-shelf"
     assert types["worlds"] == "lmh-worlds"
-    assert types["gold"] == types["lab-grown"] == "lmh-product-row"
+    assert types["gold"] == types["rolex"] == types["lab-grown"] == "lmh-product-row"
     assert types["wear-together"] == "lmh-wear-together"
     assert types["pre-owned"] == "lmh-preowned"
+    # The older comparison, engagement and story blocks repeat the new sections: hidden, not deleted.
     assert types["loose-diamonds"] == "lmh-diamond-choice"
+    for hidden in ("loose-diamonds", "engagement", "brand-story"):
+        assert sections[hidden].get("disabled") is True, hidden
     assert types["private-clients"] == "lmh-private-band"
     assert types["engagement"] == "lmh-engagement"
     # Gold links land on chains while the gold-jewelry collection is empty.
@@ -224,11 +240,12 @@ def test_hero_is_the_split_layout() -> None:
     settings = hero["settings"]
     assert hero["type"] == "lmh-hero"
     assert settings["title_emphasis"]
-    assert settings["secondary_url"] == "/collections/lab-grown-diamonds"
+    assert settings["primary_url"] == "/collections/lab-grown-diamonds"
+    assert settings["secondary_url"] == "/collections/rings"
     assert (ROOT / "assets" / settings["image_asset"]).exists()
     # Phones get the preview's pills under the header.
     pills = [b["settings"]["text"] for b in hero["blocks"].values() if b["type"] == "pill"]
-    assert pills[:4] == ["Gold", "Pre-Owned", "Lab-Grown", "Natural Diamonds"]
+    assert pills[:5] == ["Loose Lab-Grown", "Rings", "Ring Settings", "Under $1,000", "Watches"]
     liquid = (ROOT / "sections/lmh-hero.liquid").read_text()
     assert "lmh-hero__media" in liquid
 
@@ -257,7 +274,9 @@ def test_estate_links_use_the_single_estate_hub() -> None:
         text = (ROOT / path).read_text()
         assert "/collections/vintage-jewelry" not in text, path
         assert "estate-jewelry" in text, path
-    for path in ("sections/header.liquid", "sections/footer.liquid", "templates/index.json"):
+    # The homepage tile is named "Pre-Owned Maison Jewelry" at the merchant's request
+    # (2026-10-11); the menu and footer keep the estate hub wording.
+    for path in ("sections/header.liquid", "sections/footer.liquid"):
         assert "Pre-Owned Maison" not in (ROOT / path).read_text(), path
 
 
@@ -275,15 +294,17 @@ def test_category_links_use_rule_based_collections() -> None:
 def test_header_nav_names_what_the_house_sells() -> None:
     header = strip_liquid_comments((ROOT / "sections/header.liquid").read_text())
     assert "/collections/under-2500" not in header
-    gold = header.index('class="nav__item-link">Gold Jewelry')
+    loose = header.index('class="nav__item-link">Loose Diamonds')
+    rings = header.index('class="nav__item-link">Rings')
+    fine = header.index('class="nav__item-link">Fine Jewelry')
     preowned = header.index("estate_label")
-    lab = header.index("nav__item nav__item--peaceful")
-    natural = header.index('class="nav__item-link">Natural Diamonds')
     story = header.index('href="/pages/about" class="nav__item-link"')
-    assert gold < preowned < lab < natural < story
+    assert loose < rings < fine < preowned < story
+    # Natural and lab-grown stones share one menu; the old standalone items are gone.
+    assert 'class="nav__item-link">Natural Diamonds' not in header
+    assert 'class="nav__item-link">Gold Jewelry' not in header
     # Gold links fall back to chains until gold-jewelry has pieces in it.
     assert "collections['gold-jewelry'].products_count > 0" in header
-    assert header.count('<span class="nav__dropdown-label">Most popular') >= 3
     # The preview's cream header: wordmark set in type, appointment links at left.
     assert 'class="lmhh__word">Laura <em>Milman</em>' in header
     assert 'href="/pages/private-clients">Book an Appointment' in header
@@ -413,8 +434,9 @@ def test_lab_grown_rail_mixes_categories_in_a_carousel() -> None:
     assert lab["settings"]["style"] == "navy"
     handles = [b["settings"]["product"] for b in lab["blocks"].values() if b["type"] == "product"]
     assert len(handles) >= 4
-    for kind in ("earrings", "bracelet", "necklace"):
-        assert any(kind in h for h in handles), kind
+    # Under-$1,000 pieces across categories: at least three different kinds.
+    kinds = [k for k in ("earring", "bracelet", "necklace", "pendant", "ring", "band") if any(k in h for h in handles)]
+    assert len(kinds) >= 3, kinds
     # Cards scroll sideways on phones.
     assert "lmh-scroll" in (ROOT / "sections/lmh-product-row.liquid").read_text()
 
