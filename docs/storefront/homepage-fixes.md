@@ -74,3 +74,23 @@ Estate Jewelry and the designer collections. Bracelets uses TYPE starts with
 Bracelets, Brooch, Brooches); a new B-type would need adding to the exclusions.
 - [x] 13. Gold row: holiday campaign photo (2026 holiday marketing PDF,
       image 2) beside a two-by-two product grid.
+
+## #12 ring-setting audit (2026-10-11) — read only, nothing changed
+
+Collection `ring-settings`, 9 active products. Photos could not be checked by
+machine (an image reader only echoed the file names), so shape/style needs a
+human look at each hero photo.
+
+| # | Handle | Problem | Proposed fix |
+|---|---|---|---|
+| 1 | round-four-prong-pave-engagement-ring-setting-in-18k-white-gold | Duplicate of #7's 18K variants (same photos, video, $1,600; SKU RG18WHH_40RDP_S vs RG18WHH_40RDP). SEO title/description and metal metafield say 14K; title says 18K. | Archive; redirect URL to #7. |
+| 3 | round-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-11-ct | Title/description "Oval"; handle, shape metafield, tag, image alt "Round"; SKU has RD (round). | Confirm from photo; align all fields. |
+| 4 | round-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-09-ct | Title/description "Oval"; handle, shape metafield, tag "Round". | Confirm from photo; align all fields. |
+| 7 | round-four-prong-pave-engagement-ring-setting-in-white-gold-0-40-ct | Title "Four-Prong Pavé"; tag, photos, video and SKU (HH) say hidden halo. | Confirm style; align title/SEO or tag. |
+| 8 | north-south-solitaire-bezel-engagement-ring-setting-in-18k-yellow-gold | Title "Elongated Cushion"; shape metafield "Oval". | Confirm from photo; align. |
+| 9 | north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold | Title "Oval"; shape metafield "Round". | Confirm from photo; align. |
+| 6 | round-hidden-halo-engagement-ring-setting-in-yellow-gold-0-10-ct | Description typo "labor included.14K is the default" (missing space). | Add the space. |
+| 2, 5 | — | Consistent. | None. |
+
+The shape metafield drives the "Make it a ring" pairing, so a wrong value
+offers the wrong diamonds with the setting.
