@@ -125,7 +125,7 @@ export async function main(argv=process.argv.slice(2)) {
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
   const failedMedia=new Set();
-  const pendingMedia=plan.writes.slice(); let mediaCursor=0;
+  const pendingMedia=stones.map(stone=>({handle:stone.handle,stone})); let mediaCursor=0;
   await Promise.all(Array.from({length:Math.min(4,pendingMedia.length)},async()=>{
     while(mediaCursor<pendingMedia.length){const line=pendingMedia[mediaCursor++];if(!(await mediaReady(line.stone)))failedMedia.add(line.handle);}
   }));
