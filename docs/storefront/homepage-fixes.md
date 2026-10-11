@@ -140,3 +140,22 @@ Still open:
   (holiday campaign photo, `home-bracelets.webp`). Titles sit under the photos.
 - [ ] 15. Optional: a matching pedestal-style bracelet photo to replace the
       campaign crop.
+
+## Round 3 list (2026-10-11, merchant feedback from the live mobile page)
+Work one at a time; tick when pushed.
+
+- [ ] R1. "Rings, your way." on phones: tiles must stack one per row (the phone
+      CSS was lost in the last cleanup, so three columns squeezed the text).
+- [ ] R2. Same section, colors: navy block clashes with the warm page. Use the
+      warm-white/cream ground with wine titles and gold accents, matching the
+      diamond filter above it.
+- [ ] R3. Same section, copy: tile 2 "For work" (links to Rings, link text
+      "Shop rings", not stackable rings); tile 3 "For play" (bracelets).
+- [ ] R4. Tile 2 gets a new image: a regular ring, not the stack.
+- [ ] R5. Under the three tiles, a "Shop all fine jewelry" link.
+- [ ] R6. "Shop the house" tiles: the real diamond stills are zoomed and out of
+      proportion; show the whole stone, centered, on a quiet warm background.
+- [ ] R7. New scrollable product rows (swipe on phones, arrows on desktop):
+      gold bracelets, lab-grown tennis necklaces, rings, etc.
+- [ ] R8. Background audit: the heavy navy/espresso/sand blocks make the page
+      feel busy and cheap; settle on one warm ground with gold rules.
