@@ -421,11 +421,12 @@ under vendor `Jacob & Co`, tags `jacob-co-boutique` plus `new-unworn` when
 unworn, SKU = reference, price = the retailer's list price as scraped
 (when both sites list the same reference, the lower of the two), tag
 `price-unconfirmed` until the merchant confirms the number, and never
-ACTIVE by a job. Title format is "Unworn Jacob & Co {Collection} {Dial}
+ACTIVE by a job. Title format is "New Jacob & Co. {Collection} {Dial}
 {Reference}"; the theme prints "Jacob & Co." and never "Jacob & Company"
 (`snippets/jacob-co-name.liquid`, tests in `test/theme-pdp-offer.test.ts`).
 Product type is `Watch` (singular; the last `Watches` products were
-normalized on 2026-10-05). Condition metafield `1000` when unworn. Neither
+normalized on 2026-10-05). Storefront condition is New, and the condition
+metafield is `1000`. Neither
 retailer's name appears anywhere on the store, per rule 1.
 
 ### H. Supplier catalog intake (Royal Chain and similar B2B sites)
@@ -574,7 +575,7 @@ the intent suffix change.
 | Loose diamonds (feed) | `{carat}ct {shape} {Natural\|Lab-Grown} Diamond — {color} {clarity}, {lab} Certified` | `… \| {lab}` |
 | Watches (feed) | `{Pre-Owned\|Unworn} {brand} {model} {reference}` | `{brand} {model} {reference} – {titleWord} Watch` |
 | Estate jewelry (Back Vault) | `{brand} {normalized identifying details}`, watches `Pre-Owned {brand} {remainder}` | `… \| Estate Jewelry` or `… \| Pre-Owned Watch` |
-| Jacob & Co. (recipe G2) | `Unworn Jacob & Co {Collection} {Dial} {Reference}` | `… – Unworn Watch` |
+| Jacob & Co. (recipe G2) | `New Jacob & Co. {Collection} {Dial} {Reference}` | `… – New Watch` |
 | Fine jewelry, Royal Chain chains, Peaceful Diamonds | `{prefix}{distinctive design/model} {primary gemstone} {product type} in {metal}` | `… \| Laura Milman` |
 
 1. Per-source prefix rule: the prefix is empty for house fine jewelry and

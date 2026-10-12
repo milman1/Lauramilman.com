@@ -28,6 +28,9 @@ describe('theme SEO integration', () => {
     expect(layout).toContain('suppress_shop_suffix');
     expect(layout).toContain("when 'david-webb'");
     expect(layout).toContain('Lab-Grown Jewelry | Laura Milman');
+    expect(layout).toContain('New Jacob & Co. Watches | Laura Milman');
+    expect(layout).toContain('Exchanges only within 7 days of delivery.');
+    expect(layout).not.toContain('Unworn pieces are marked');
     expect(layout).toContain("request.page_type == 'collection' and seo_meta_description == blank");
     expect(layout).toContain("request.page_type == 'article' and seo_meta_description.size > 180");
     expect(layout).toContain("render 'meta-tags', meta_title: seo_social_title, meta_description: seo_meta_description");
