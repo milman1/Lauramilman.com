@@ -179,3 +179,10 @@ R8 is a proposal awaiting the merchant's choice (see chat).
       in-stock Rolex photo (w-t3757). The AI-generated Rolex asset is not used.
       Python tests updated to the new homepage and menu (1 older failure remains:
       "backvault-feed" tag name in main-product.liquid, not customer-facing).
+- [x] R12. Menu (2026-10-12): no "pre-owned" wording in the dropdowns ("All watches",
+      "All estate jewelry", "How watches are listed" — condition is named in the
+      copy and on every listing). New High Jewelry dropdown (by piece, by color,
+      by appointment; camera-original ring photo from fc-j1133 with a fallback).
+      The header search shortcuts still say "Pre-Owned Cartier / Pre-Owned & Estate".
+- [ ] R13. Proposal: "For work" and "For night out" occasion links need two small
+      curated collections first (merchant to approve the picks).

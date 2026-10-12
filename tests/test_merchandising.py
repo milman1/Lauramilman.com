@@ -297,9 +297,16 @@ def test_header_nav_names_what_the_house_sells() -> None:
     loose = header.index('class="nav__item-link">Loose Diamonds')
     rings = header.index('class="nav__item-link">Rings')
     fine = header.index('class="nav__item-link">Fine Jewelry')
+    high = header.index('class="nav__item-link">High Jewelry')
     preowned = header.index("estate_label")
     story = header.index('href="/pages/about" class="nav__item-link"')
-    assert loose < rings < fine < preowned < story
+    assert loose < rings < fine < high < preowned < story
+    # The menu panels do not say "pre-owned" (merchant, 2026-10-12); each listing states its condition.
+    panels = header[loose:story]
+    assert "pre-owned" not in panels.lower()
+    for href in ("/collections/high-jewelry", "/collections/high-jewelry-rings",
+                 "/collections/fancy-yellow-diamonds", "/collections/fancy-pink-diamonds"):
+        assert f'href="{href}"' in header, href
     # Natural and lab-grown stones share one menu; the old standalone items are gone.
     assert 'class="nav__item-link">Natural Diamonds' not in header
     assert 'class="nav__item-link">Gold Jewelry' not in header

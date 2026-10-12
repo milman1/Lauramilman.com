@@ -693,6 +693,47 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     </div>
 
     <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">High Jewelry {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By piece</span>
+          <a href="/collections/high-jewelry-rings" class="nav__dropdown-link">Rings</a>
+          <a href="/collections/high-jewelry-earrings" class="nav__dropdown-link">Earrings</a>
+          <a href="/collections/high-jewelry-bracelets" class="nav__dropdown-link">Bracelets</a>
+          <a href="/collections/high-jewelry-necklaces" class="nav__dropdown-link">Pendants &amp; Necklaces</a>
+          <a href="/collections/high-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All high jewelry</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By color</span>
+          <a href="/collections/fancy-yellow-diamonds" class="nav__dropdown-link">Fancy yellow</a>
+          <a href="/collections/fancy-pink-diamonds" class="nav__dropdown-link">Fancy pink</a>
+          <a href="/collections/fancy-green-diamonds" class="nav__dropdown-link">Fancy green</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By appointment</span>
+          <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
+          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">High jewelry</span>
+          <p class="nav__intro-line">Fancy color diamonds set in platinum and gold.</p>
+          <p>Private viewings in Midtown, in person or by video. Free insured shipping and 7-day jewelry returns.</p>
+          <a class="nav__arrow" href="/pages/private-clients">Book a viewing {{ arrow }}</a>
+        </div>
+        {%- assign hj_card = all_products['fc-j1133'] -%}
+        <a class="nav__card{% if hj_card.featured_image != blank %} nav__card--product{% endif %}" href="/collections/high-jewelry">
+          {%- if hj_card.featured_image != blank -%}
+            {{ hj_card.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: hj_card.title, widths: '300, 600', sizes: '300px' }}
+          {%- else -%}
+            <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
+          {%- endif -%}
+          <span class="nav__card-title">Fancy color diamonds</span>
+          <span class="nav__card-text">Yellow, pink, green and more, set in platinum and gold.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item">
       <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.estate_label | default: 'Watches &amp; Estate' }} {{ caret }}</button>
       <div class="nav__dropdown">
         <div class="nav__group">
@@ -702,7 +743,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
           <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
           <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
-          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned watches</a>
+          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All watches</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Signed jewelry</span>
@@ -711,7 +752,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
           <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
           <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned &amp; estate</a>
+          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All estate jewelry</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Start here</span>
@@ -720,9 +761,9 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/pages/authentication" class="nav__dropdown-link">Estate authentication</a>
         </div>
         <div class="nav__intro">
-          <span class="nav__dropdown-label">How pre-owned is listed</span>
+          <span class="nav__dropdown-label">How watches are listed</span>
           <p class="nav__intro-line">Every watch listing states what its record confirms.</p>
-          <p>Reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
+          <p>Condition, reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
           <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
         </div>
         {%- assign rolex_card = all_products['w-t3757'] -%}
