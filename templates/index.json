@@ -56,6 +56,7 @@
         "pill-5"
       ],
       "settings": {
+        "style": "dark",
         "eyebrow": "Lab-grown diamonds & rings",
         "title": "Your diamond.",
         "title_emphasis": "Your story.",
@@ -66,84 +67,18 @@
         "secondary_url": "/collections/rings",
         "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
-        "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring",
-        "style": "dark"
+        "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
       }
     },
-    "worlds": {
-      "type": "lmh-worlds",
-      "blocks": {
-        "tile-1": {
-          "type": "tile",
-          "settings": {
-            "title": "Lab-Grown Diamonds",
-            "text": "Loose lab-grown stones, each listed with its IGI or GIA certificate. Search by shape, carat, color and clarity.",
-            "link_text": "Search lab-grown diamonds",
-            "url": "/collections/lab-grown-diamonds",
-            "product": "lg-886886",
-            "image_asset": "diamond-destination-lab.webp",
-            "fit": "whole"
-          }
-        },
-        "tile-2": {
-          "type": "tile",
-          "settings": {
-            "title": "Rings",
-            "text": "Solitaires, bands and eternity rings to wear every day, or to propose with.",
-            "link_text": "Shop rings",
-            "url": "/collections/rings",
-            "image_asset": "home-rings-forever.webp",
-            "position": "92% 50%",
-            "image_alt": "Round diamond solitaire ring in yellow gold on a travertine pedestal",
-            "fit": "fill"
-          }
-        },
-        "tile-3": {
-          "type": "tile",
-          "settings": {
-            "title": "Watches",
-            "text": "Rolex, Cartier and Bvlgari, authenticity guaranteed.",
-            "link_text": "Shop watches",
-            "url": "/collections/time-pieces",
-            "product": "w-t3757",
-            "image_asset": "shop-world-preowned-timepieces-rolex.jpg",
-            "fit": "whole"
-          }
-        },
-        "tile-4": {
-          "type": "tile",
-          "settings": {
-            "title": "Pre-Owned Maison Jewelry",
-            "text": "Signed Cartier, Van Cleef & Arpels and David Webb.",
-            "link_text": "Shop maison jewelry",
-            "url": "/collections/estate-jewelry",
-            "product": "bv-cartier-love-18k-white-gold-3-diamond-ring-j10168",
-            "image_asset": "shop-world-preowned-maison.webp",
-            "fit": "whole"
-          }
-        },
-        "tile-5": {
-          "type": "tile",
-          "settings": {
-            "title": "Natural Diamonds",
-            "text": "Loose natural diamonds, GIA on nearly every stone.",
-            "link_text": "Shop natural",
-            "url": "/collections/natural-diamonds",
-            "product": "nd-352890",
-            "image_asset": "diamond-destination-natural.webp",
-            "fit": "whole"
-          }
-        }
-      },
-      "block_order": [
-        "tile-1",
-        "tile-2",
-        "tile-3",
-        "tile-4",
-        "tile-5"
-      ],
+    "meet-laura": {
+      "type": "lmh-meet",
       "settings": {
-        "heading": "Shop the house"
+        "image_asset": "",
+        "image_alt": "Laura Milman",
+        "title": "Meet Laura Milman",
+        "text": "Discover the story behind the jewelry.",
+        "link_text": "Read Laura's Story",
+        "link_url": "/pages/about"
       }
     },
     "trust-strip": {
@@ -166,13 +101,15 @@
         "promise-3": {
           "type": "item",
           "settings": {
-            "text": "Free Insured Shipping"
+            "text": "Free Insured Shipping",
+            "short": ""
           }
         },
         "promise-4": {
           "type": "item",
           "settings": {
-            "text": "7-Day Jewelry Returns"
+            "text": "7-Day Jewelry Returns",
+            "short": ""
           }
         }
       },
@@ -183,6 +120,176 @@
         "promise-4"
       ],
       "settings": {}
+    },
+    "loose-stones": {
+      "type": "lmh-stones",
+      "blocks": {
+        "size-1": {
+          "type": "size",
+          "settings": {
+            "label": "1 to 2 ct",
+            "query": "?min_carat=1&max_carat=2"
+          }
+        },
+        "size-2": {
+          "type": "size",
+          "settings": {
+            "label": "2 to 3 ct",
+            "query": "?min_carat=2&max_carat=3"
+          }
+        },
+        "size-3": {
+          "type": "size",
+          "settings": {
+            "label": "3 ct and up",
+            "query": "?min_carat=3"
+          }
+        },
+        "size-4": {
+          "type": "size",
+          "settings": {
+            "label": "Under $1,000",
+            "query": "?max_price=1000"
+          }
+        }
+      },
+      "block_order": [
+        "size-1",
+        "size-2",
+        "size-3",
+        "size-4"
+      ],
+      "settings": {
+        "eyebrow": "Loose diamonds",
+        "title": "Start with the stone.",
+        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
+        "search_url": "/collections/lab-grown-diamonds",
+        "link_text": "See all lab-grown diamonds",
+        "natural_url": "/collections/natural-diamonds",
+        "colored_url": "/collections/colored-lab-grown-diamonds",
+        "strip_text": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA.",
+        "colored_products": [
+          "lg-color-1012090",
+          "lg-color-1020779",
+          "lg-color-77274",
+          "lg-color-1017095",
+          "lg-color-70388",
+          "lg-color-1019767"
+        ],
+        "colored_collection": "colored-lab-grown-diamonds",
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
+      }
+    },
+    "rings-your-way": {
+      "type": "lmh-split-tiles",
+      "blocks": {
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "title": "For your forever",
+            "link_text": "Build your ring",
+            "url": "/pages/ring-builder",
+            "image_asset": "home-rings-forever.webp",
+            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal",
+            "position": "92% 50%"
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "title": "For work",
+            "link_text": "Shop rings",
+            "url": "/collections/rings",
+            "image_asset": "home-rings-work.webp",
+            "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
+            "position": "60% 30%"
+          }
+        },
+        "tile-3": {
+          "type": "tile",
+          "settings": {
+            "title": "For play",
+            "link_text": "Shop bracelets",
+            "url": "/collections/all-bracelets",
+            "image_asset": "home-bracelets.webp",
+            "image_alt": "Stack of gold chain bracelets with colored stones on a woman's wrist",
+            "position": "60% 50%"
+          }
+        }
+      },
+      "block_order": [
+        "tile-1",
+        "tile-2",
+        "tile-3"
+      ],
+      "settings": {
+        "title": "Rings, your way.",
+        "style": "warm",
+        "footer_text": "Shop all fine jewelry",
+        "footer_url": "/collections/all"
+      }
+    },
+    "shelf": {
+      "type": "lmh-shelf",
+      "blocks": {
+        "tab-1": {
+          "type": "shelf",
+          "settings": {
+            "label": "Rings",
+            "collection": "rings",
+            "limit": 10,
+            "link_text": "Shop all rings"
+          }
+        },
+        "tab-2": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold bracelets",
+            "collection": "gold-bracelets",
+            "limit": 10,
+            "link_text": "Shop gold bracelets"
+          }
+        },
+        "tab-3": {
+          "type": "shelf",
+          "settings": {
+            "label": "Tennis necklaces",
+            "collection": "lab-grown-tennis-necklaces",
+            "limit": 10,
+            "link_text": "Shop tennis necklaces"
+          }
+        },
+        "tab-4": {
+          "type": "shelf",
+          "settings": {
+            "label": "Earrings",
+            "collection": "all-earrings",
+            "limit": 10,
+            "link_text": "Shop earrings"
+          }
+        },
+        "tab-5": {
+          "type": "shelf",
+          "settings": {
+            "label": "Gold chains",
+            "collection": "chain-necklaces",
+            "limit": 10,
+            "link_text": "Shop gold chains"
+          }
+        }
+      },
+      "block_order": [
+        "tab-1",
+        "tab-2",
+        "tab-3",
+        "tab-4",
+        "tab-5"
+      ],
+      "settings": {
+        "eyebrow": "Scroll the house",
+        "title": "Shop by piece"
+      }
     },
     "gold": {
       "type": "lmh-product-row",
@@ -276,10 +383,62 @@
         "text": "A weekday uniform that survives a noon lunch in Midtown, a 4 p.m. deck and a 7 p.m. drink without a costume change.",
         "all_text": "Shop all",
         "all_url": "/collections/chains",
-        "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/chains",
+        "button_1_text": "",
+        "button_1_url": "",
+        "button_2_text": "",
+        "button_2_url": "",
         "feature_image_asset": "home-gold-editorial.webp",
-        "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets"
+        "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets",
+        "collection": "",
+        "collection_limit": 5,
+        "mobile_button_text": "Shop All Gold Jewelry",
+        "mobile_button_url": "/collections/chains"
+      }
+    },
+    "rolex": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "chip-1": {
+          "type": "chip",
+          "settings": {
+            "text": "All Watches",
+            "url": "/collections/time-pieces"
+          }
+        }
+      },
+      "block_order": [
+        "chip-1"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "5",
+        "ratio": "0.84",
+        "eyebrow": "Rolex",
+        "title": "The Rolex edit,",
+        "title_emphasis": "authenticity guaranteed.",
+        "text": "Daytona, Submariner, GMT-Master II, Datejust and Day-Date. Each listing gives the reference, the year and whether it is pre-owned or unworn.",
+        "all_text": "Shop all Rolex",
+        "all_url": "/collections/rolex-watches",
+        "button_1_text": "",
+        "button_1_url": "",
+        "button_2_text": "",
+        "button_2_url": "",
+        "feature_image_asset": "",
+        "feature_image_alt": "",
+        "collection": "rolex-watches",
+        "collection_limit": 5,
+        "mobile_button_text": "Shop All Rolex",
+        "mobile_button_url": "/collections/rolex-watches"
+      }
+    },
+    "reviews": {
+      "type": "lmh-reviews",
+      "settings": {
+        "eyebrow": "Google reviews · shown unedited",
+        "title": "Recent reviews",
+        "link_text": "Read all reviews",
+        "link_url": "/pages/google-reviews",
+        "embed_id": "25717519"
       }
     },
     "wear-together": {
@@ -316,6 +475,7 @@
         "wear-3"
       ],
       "settings": {
+        "style": "light",
         "image_asset": "shop-world-preowned-maison.webp",
         "image_alt": "Gold diamond link bracelet on travertine and ivory satin",
         "eyebrow": "Wear it together",
@@ -326,8 +486,7 @@
         "button_url": "/collections/time-pieces",
         "link_text": "Tennis bracelets",
         "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery.",
-        "style": "light"
+        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery."
       }
     },
     "pre-owned": {
@@ -553,107 +712,24 @@
         "title": "For the push present,",
         "title_emphasis": "or the promotion you bought yourself.",
         "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "all_text": "",
+        "all_url": "",
         "button_1_text": "Shop Under $1,000",
         "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
         "button_2_text": "All Lab-Grown Jewelry",
-        "button_2_url": "/collections/lab-grown-diamond-jewelry"
+        "button_2_url": "/collections/lab-grown-diamond-jewelry",
+        "feature_image_asset": "",
+        "feature_image_alt": "",
+        "collection": "",
+        "collection_limit": 5,
+        "mobile_button_text": "",
+        "mobile_button_url": ""
       }
-    },
-    "loose-diamonds": {
-      "type": "lmh-diamond-choice",
-      "blocks": {
-        "shape-1": {
-          "type": "shape",
-          "settings": {
-            "text": "Round",
-            "url": "/collections/lab-grown-diamonds?shape=Round"
-          }
-        },
-        "shape-2": {
-          "type": "shape",
-          "settings": {
-            "text": "Oval",
-            "url": "/collections/lab-grown-diamonds?shape=Oval"
-          }
-        },
-        "shape-3": {
-          "type": "shape",
-          "settings": {
-            "text": "Emerald",
-            "url": "/collections/lab-grown-diamonds?shape=Emerald"
-          }
-        },
-        "shape-4": {
-          "type": "shape",
-          "settings": {
-            "text": "Pear",
-            "url": "/collections/lab-grown-diamonds?shape=Pear"
-          }
-        },
-        "shape-5": {
-          "type": "shape",
-          "settings": {
-            "text": "Radiant",
-            "url": "/collections/lab-grown-diamonds?shape=Radiant"
-          }
-        },
-        "shape-6": {
-          "type": "shape",
-          "settings": {
-            "text": "Cushion",
-            "url": "/collections/lab-grown-diamonds?shape=Cushion"
-          }
-        }
-      },
-      "block_order": [
-        "shape-1",
-        "shape-2",
-        "shape-3",
-        "shape-4",
-        "shape-5",
-        "shape-6"
-      ],
-      "settings": {
-        "eyebrow": "Loose Diamonds",
-        "title": "Choose your diamond:",
-        "title_emphasis": "lab-grown or natural.",
-        "text": "Every stone is listed with its grading lab and certificate. Search by shape, carat, color and clarity, or book an appointment to talk it through in Midtown.",
-        "lab_image_asset": "diamond-destination-lab.webp",
-        "lab_image_alt": "Radiant-cut diamond held in tweezers over a glass dish",
-        "lab_title": "Lab-Grown Diamonds",
-        "lab_short": "Lab-Grown",
-        "lab_text": "Identical to mined diamonds in every measurable way, grown rather than extracted.",
-        "lab_origin": "Grown in a lab",
-        "lab_grading": "IGI or GIA, on every listing",
-        "lab_selection": "20,000+ stones",
-        "lab_example_product": "lg-886886",
-        "lab_example_text": "1.02 ct round · E · VS2 · IGI",
-        "lab_example_short": "1.02 ct · IGI",
-        "lab_button": "Search Lab-Grown Diamonds",
-        "lab_button_short": "Search Lab-Grown",
-        "lab_url": "/collections/lab-grown-diamonds",
-        "natural_image_asset": "shop-world-loose-diamonds.webp",
-        "natural_image_alt": "Oval diamond resting on champagne satin",
-        "natural_title": "Natural Diamonds",
-        "natural_short": "Natural",
-        "natural_text": "Formed in the earth and priced against the live market.",
-        "natural_origin": "Formed in the earth",
-        "natural_grading": "GIA on nearly every stone",
-        "natural_selection": "3,500+ stones",
-        "natural_example_product": "nd-k15512b",
-        "natural_example_text": "1.0 ct round · E · VS2 · GIA",
-        "natural_example_short": "1.0 ct · GIA",
-        "natural_button": "Search Natural Diamonds",
-        "natural_button_short": "Search Natural",
-        "natural_url": "/collections/natural-diamonds",
-        "compare_example_label": "Matched example · 1 ct round · E · VS2",
-        "shapes_label": "Shop by shape"
-      },
-      "disabled": true
     },
     "private-clients": {
       "type": "lmh-private-band",
       "settings": {
+        "style": "light",
         "eyebrow": "Private Clients",
         "title": "Bespoke,",
         "title_emphasis": "by appointment.",
@@ -662,12 +738,12 @@
         "email": "hello@lauramilman.com",
         "button_text": "Book a Consultation",
         "button_url": "/pages/private-clients",
-        "note": "Complimentary · No obligation",
-        "style": "light"
+        "note": "Complimentary · No obligation"
       }
     },
     "engagement": {
       "type": "lmh-engagement",
+      "disabled": true,
       "settings": {
         "image_asset": "peaceful-hero-diamonds.jpg",
         "image_alt": "Loose diamonds of several shapes on navy velvet",
@@ -679,8 +755,7 @@
         "primary_url": "/pages/ring-builder",
         "secondary_text": "Engagement Rings",
         "secondary_url": "/collections/engagement-rings"
-      },
-      "disabled": true
+      }
     },
     "brand-story": {
       "type": "lmh-story",
@@ -712,8 +787,10 @@
         "stat-2",
         "stat-3"
       ],
+      "disabled": true,
       "settings": {
         "image": "shopify://shop_images/laura-milman-portrait.jpg",
+        "image_asset": "",
         "image_alt": "Laura Milman",
         "eyebrow": "The Woman Behind It",
         "title": "Thirty years in the making.",
@@ -721,209 +798,22 @@
         "text": "Laura worked alongside her brother Jacob Arabo in the early years of what became Jacob & Co. She still sees clients in Midtown.",
         "link_text": "Read Laura's story",
         "link_url": "/pages/about"
-      },
-      "disabled": true
-    },
-    "reviews": {
-      "type": "lmh-reviews",
-      "settings": {
-        "eyebrow": "Google reviews · shown unedited",
-        "title": "Recent reviews",
-        "link_text": "Read all reviews",
-        "link_url": "/pages/google-reviews",
-        "embed_id": "25717519"
-      }
-    },
-    "meet-laura": {
-      "type": "lmh-meet",
-      "settings": {
-        "image_alt": "Laura Milman",
-        "title": "Meet Laura Milman",
-        "text": "Discover the story behind the jewelry.",
-        "link_text": "Read Laura's Story",
-        "link_url": "/pages/about"
-      }
-    },
-    "loose-stones": {
-      "type": "lmh-stones",
-      "blocks": {
-        "size-1": { "type": "size", "settings": { "label": "1 to 2 ct", "query": "?min_carat=1&max_carat=2" } },
-        "size-2": { "type": "size", "settings": { "label": "2 to 3 ct", "query": "?min_carat=2&max_carat=3" } },
-        "size-3": { "type": "size", "settings": { "label": "3 ct and up", "query": "?min_carat=3" } },
-        "size-4": { "type": "size", "settings": { "label": "Under $1,000", "query": "?max_price=1000" } }
-      },
-      "block_order": ["size-1", "size-2", "size-3", "size-4"],
-      "settings": {
-        "eyebrow": "Loose diamonds",
-        "title": "Start with the stone.",
-        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
-        "search_url": "/collections/lab-grown-diamonds",
-        "link_text": "See all lab-grown diamonds",
-        "natural_url": "/collections/natural-diamonds",
-        "colored_url": "/collections/colored-lab-grown-diamonds",
-        "strip_text": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA.",
-        "colored_products": ["lg-color-1012090", "lg-color-1020779", "lg-color-77274", "lg-color-1017095", "lg-color-70388", "lg-color-1019767"],
-        "colored_collection": "colored-lab-grown-diamonds",
-        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
-        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
-      }
-    },
-    "rings-your-way": {
-      "type": "lmh-split-tiles",
-      "blocks": {
-        "tile-1": {
-          "type": "tile",
-          "settings": {
-            "title": "For your forever",
-            "link_text": "Build your ring",
-            "url": "/pages/ring-builder",
-            "image_asset": "home-rings-forever.webp",
-            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal",
-            "position": "92% 50%"
-          }
-        },
-        "tile-2": {
-          "type": "tile",
-          "settings": {
-            "title": "For work",
-            "link_text": "Shop rings",
-            "url": "/collections/rings",
-            "image_asset": "home-rings-work.webp",
-            "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
-            "position": "60% 30%"
-          }
-        },
-        "tile-3": {
-          "type": "tile",
-          "settings": {
-            "title": "For play",
-            "link_text": "Shop bracelets",
-            "url": "/collections/all-bracelets",
-            "image_asset": "home-bracelets.webp",
-            "image_alt": "Stack of gold chain bracelets with colored stones on a woman's wrist",
-            "position": "60% 50%"
-          }
-        }
-      },
-      "block_order": [
-        "tile-1",
-        "tile-2",
-        "tile-3"
-      ],
-      "settings": {
-        "title": "Rings, your way.",
-        "style": "warm",
-        "footer_text": "Shop all fine jewelry",
-        "footer_url": "/collections/all"
-      }
-    },
-    "rolex": {
-      "type": "lmh-product-row",
-      "blocks": {
-        "chip-1": {
-          "type": "chip",
-          "settings": {
-            "text": "All Watches",
-            "url": "/collections/time-pieces"
-          }
-        }
-      },
-      "block_order": [
-        "chip-1"
-      ],
-      "settings": {
-        "style": "cream",
-        "columns": "5",
-        "ratio": "0.84",
-        "eyebrow": "Rolex",
-        "title": "The Rolex edit,",
-        "title_emphasis": "authenticity guaranteed.",
-        "text": "Daytona, Submariner, GMT-Master II, Datejust and Day-Date. Each listing gives the reference, the year and whether it is pre-owned or unworn.",
-        "all_text": "Shop all Rolex",
-        "all_url": "/collections/rolex-watches",
-        "collection": "rolex-watches",
-        "collection_limit": 5,
-        "mobile_button_text": "Shop All Rolex",
-        "mobile_button_url": "/collections/rolex-watches"
-      }
-    },
-    "shelf": {
-      "type": "lmh-shelf",
-      "blocks": {
-        "tab-1": {
-          "type": "shelf",
-          "settings": {
-            "label": "Rings",
-            "collection": "rings",
-            "limit": 10,
-            "link_text": "Shop all rings"
-          }
-        },
-        "tab-2": {
-          "type": "shelf",
-          "settings": {
-            "label": "Gold bracelets",
-            "collection": "gold-bracelets",
-            "limit": 10,
-            "link_text": "Shop gold bracelets"
-          }
-        },
-        "tab-3": {
-          "type": "shelf",
-          "settings": {
-            "label": "Tennis necklaces",
-            "collection": "lab-grown-tennis-necklaces",
-            "limit": 10,
-            "link_text": "Shop tennis necklaces"
-          }
-        },
-        "tab-4": {
-          "type": "shelf",
-          "settings": {
-            "label": "Earrings",
-            "collection": "all-earrings",
-            "limit": 10,
-            "link_text": "Shop earrings"
-          }
-        },
-        "tab-5": {
-          "type": "shelf",
-          "settings": {
-            "label": "Gold chains",
-            "collection": "chain-necklaces",
-            "limit": 10,
-            "link_text": "Shop gold chains"
-          }
-        }
-      },
-      "block_order": [
-        "tab-1",
-        "tab-2",
-        "tab-3",
-        "tab-4",
-        "tab-5"
-      ],
-      "settings": {
-        "eyebrow": "Scroll the house",
-        "title": "Shop by piece"
       }
     }
   },
   "order": [
     "hero",
     "meet-laura",
+    "trust-strip",
     "loose-stones",
     "rings-your-way",
-    "worlds",
-    "trust-strip",
     "shelf",
-    "reviews",
     "gold",
     "rolex",
+    "reviews",
     "wear-together",
     "pre-owned",
     "lab-grown",
-    "loose-diamonds",
     "private-clients",
     "engagement",
     "brand-story"
