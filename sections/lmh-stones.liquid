@@ -1,0 +1,104 @@
+{%- comment -%}
+  "Loose stones": the lab-grown diamond front door. Shape tiles and size/price
+  pills open the diamond page already filtered; a strip of real in-stock
+  stones is read live from the same stone search as the diamond page, so prices
+  and availability are never stale. The strip stays hidden if it cannot load.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign base = section.settings.search_url | default: '/collections/lab-grown-diamonds'
+  assign shape_list = 'Round,Oval,Emerald,Cushion,Pear,Radiant,Princess,Marquise' | split: ','
+-%}
+
+<section class="lmh lmh-stones" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
+  data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}" data-base="{{ base | escape }}">
+  <div class="lmh-stones__head">
+    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h2 class="lmh-h2" id="LmhStones-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+    {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+  </div>
+
+  <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
+    {%- for name in shape_list -%}
+      <li><a class="lmh-shape" href="{{ base }}?shape={{ name }}">{%- render 'diamond-shape-icon', shape: name | downcase -%}<span>{{ name }}</span></a></li>
+    {%- endfor -%}
+  </ul>
+
+  <div class="lmh-stones__sizes" aria-label="Shop by size or budget">
+    {%- for block in section.blocks -%}
+      <a class="lmh-chip" href="{{ base }}{{ block.settings.query }}" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>
+    {%- endfor -%}
+  </div>
+
+  <div class="lmh-stones__strip" data-stones-strip hidden>
+    <p class="lmh-stones__strip-title">In stock today <span>1 to 2 carats, D–G color, VS clarity or better. Every stone IGI or GIA certified.</span></p>
+    <ul class="lmh-stones__track" role="list" data-stones-track></ul>
+  </div>
+
+  <a class="lmh-stones__all" href="{{ base }}">{{ section.settings.link_text | default: 'See all lab-grown diamonds' | escape }}{% render 'lmh-arrow' %}</a>
+</section>
+
+<script>
+  (function () {
+    var root = document.currentScript.previousElementSibling;
+    if (!root || !root.hasAttribute('data-lmh-stones')) return;
+    var api = (root.getAttribute('data-api') || '').replace(/\/+$/, '');
+    var key = root.getAttribute('data-key') || '';
+    var strip = root.querySelector('[data-stones-strip]');
+    var track = root.querySelector('[data-stones-track]');
+    if (!api || !strip || !track || !window.fetch) return;
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function handle(s) {
+      return 'lg-' + String(s.stock_ref || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var q = 'kind=lab&per_page=8&sort=price_asc&min_carat=1&max_carat=2' +
+      '&colors=D,E,F,G&clarities=VVS1,VVS2,VS1,VS2&shapes=Round,Oval,Emerald,Pear,Cushion';
+    fetch(api + '?' + q, { headers: { Accept: 'application/json', apikey: key, Authorization: 'Bearer ' + key } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (d) {
+        var stones = (d && d.stones || []).filter(function (s) { return s.image_urls && s.image_urls[0]; }).slice(0, 8);
+        if (stones.length < 4) return;
+        track.innerHTML = stones.map(function (s) {
+          var price = '$' + Math.round(Number(s.retail_usd) || 0).toLocaleString('en-US');
+          return '<li class="lmh-stone"><a href="/products/' + esc(handle(s)) + '">' +
+            '<span class="lmh-stone__img"><img src="' + esc(s.image_urls[0]) + '" alt="" width="300" height="300" loading="lazy"></span>' +
+            '<span class="lmh-stone__name">' + esc(Number(s.carat).toFixed(2)) + ' ct ' + esc(s.shape) + '</span>' +
+            '<span class="lmh-stone__meta">' + esc([s.color, s.clarity, s.lab].filter(Boolean).join(' · ')) + '</span>' +
+            '<span class="lmh-stone__price">' + price + '</span></a></li>';
+        }).join('');
+        strip.hidden = false;
+      })
+      .catch(function () {});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "LM loose stones",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose lab-grown diamonds" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Start with the stone." },
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Choose a shape or a size and see real stones, real prices, certified by IGI or GIA." },
+    { "type": "text", "id": "search_url", "label": "Diamond page", "default": "/collections/lab-grown-diamonds" },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "See all lab-grown diamonds" },
+    { "type": "text", "id": "api_base_url", "label": "Stone search address" },
+    { "type": "text", "id": "api_anon_key", "label": "Stone search key" }
+  ],
+  "blocks": [
+    {
+      "type": "size",
+      "name": "Size or budget",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "1 to 2 ct" },
+        { "type": "text", "id": "query", "label": "Link filter", "default": "?min_carat=1&max_carat=2", "info": "Added to the diamond page link." }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "LM loose stones" }]
+}
+{% endschema %}
