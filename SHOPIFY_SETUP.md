@@ -241,7 +241,7 @@ with the tags your email app provides. Update **Settings → Policies → Refund
 policy** to match the 7-day jewelry / watches-exchange-only copy on
 `/pages/shipping-returns`. The Online Store refund policy in
 **Settings → Policies** is not in this repository and must be updated
-in Shopify admin to the same 7-day jewelry / 1-year warranty terms.
+in Shopify admin to the same 7-day jewelry / 1-year warranty terms. Loose diamonds follow the same 7-day window and 1-year warranty (merchant decision 2026-10-12); set that in the admin refund policy too.
 
 ---
 

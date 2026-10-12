@@ -148,3 +148,23 @@ describe('lab-grown search help line', () => {
     expect(filter).toContain('"id": "show_ask_line"');
   });
 });
+
+describe('loose-stone trust block', () => {
+  const diamondProduct = themeFile('sections/main-product-diamond.liquid');
+
+  it('states shipping, 7-day returns, warranty and the grading lab on every stone page', () => {
+    expect(diamondProduct).toContain('Free insured U.S. shipping');
+    expect(diamondProduct).toContain('7-day returns');
+    expect(diamondProduct).toContain('1-year warranty');
+    expect(diamondProduct).toContain('Certified by {{ m.lab }}');
+    expect(diamondProduct).toContain('/pages/shipping-returns');
+  });
+
+  it('shows Google reviews only from merchant-entered settings, with no default rating', () => {
+    expect(diamondProduct).toContain('google_reviews_url');
+    expect(diamondProduct).toContain('{%- if g_url != blank -%}');
+    const schema = diamondProduct.slice(diamondProduct.indexOf('{% schema %}'));
+    expect(schema).toContain('"id": "google_rating"');
+    expect(schema).not.toMatch(/"id": "google_(rating|review_count|reviews_url)"[^}]*"default"/);
+  });
+});
