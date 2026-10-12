@@ -650,15 +650,22 @@
 .lmh-stones__strip { margin-top: 44px; text-align: left; }
 .lmh-stones__strip-title { margin: 0 0 16px; font-family: var(--lmh-serif); font-size: 24px; color: #fff; }
 .lmh-stones__strip-title span { display: block; margin-top: 4px; font-family: var(--lmh-sans); font-size: 12px; color: var(--lmh-on-dark-muted); }
-.lmh-stones__track { list-style: none; margin: 0; padding: 0 0 8px; display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+.lmh-stones__track { list-style: none; margin: 0; padding: 0 0 12px; display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: rgba(201,160,80,.55) transparent; }
+.lmh-stones__track::-webkit-scrollbar { height: 3px; }
+.lmh-stones__track::-webkit-scrollbar-track { background: rgba(255,255,255,.08); }
+.lmh-stones__track::-webkit-scrollbar-thumb { background: rgba(201,160,80,.55); border-radius: 3px; }
 .lmh-stone { flex: 0 0 clamp(150px, 15.5vw, 210px); scroll-snap-align: start; }
 .lmh-stone a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #fff; }
 .lmh-stone__img { display: block; aspect-ratio: 1; background: #fff; overflow: hidden; margin-bottom: 8px; }
 .lmh-stone__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lmh-stone__kind { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lmh-gold); }
 .lmh-stone__name { font-family: var(--lmh-serif); font-size: 19px; }
 .lmh-stone__meta { font-size: 11px; letter-spacing: .08em; color: var(--lmh-on-dark-muted); }
 .lmh-stone__price { font-size: 15px; font-weight: 600; color: var(--lmh-gold-light); }
-.lmh-stones__all { display: inline-flex; align-items: center; gap: 10px; margin-top: 32px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lmh-gold-light); text-decoration: none; border-bottom: 1px solid var(--lmh-gold); padding-bottom: 4px; }
+.lmh-stones__links { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 12px 28px; margin-top: 32px; }
+.lmh-stones__more { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--lmh-on-dark); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.3); padding-bottom: 4px; }
+.lmh-stones__more:hover { color: #fff; border-color: var(--lmh-gold); }
+.lmh-stones__all { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lmh-gold-light); text-decoration: none; border-bottom: 1px solid var(--lmh-gold); padding-bottom: 4px; }
 @media (max-width: 749px) {
   .lmh-stones__shapes { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .lmh-stones .lmh-shape { padding: 14px 2px 10px; font-size: 9.5px; letter-spacing: .08em; }

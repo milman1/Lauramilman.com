@@ -1,17 +1,24 @@
 {%- comment -%}
-  "Loose stones": the lab-grown diamond front door. Shape tiles and size/price
-  pills open the diamond page already filtered; a strip of real in-stock
-  stones is read live from the same stone search as the diamond page, so prices
-  and availability are never stale. The strip stays hidden if it cannot load.
+  "Loose stones": the diamond front door. Shape tiles and size/price pills open
+  the lab-grown diamond page already filtered. The "In stock today" strip mixes
+  lab-grown, natural and colored stones across sizes: lab-grown and natural
+  stones are read live from the same stone search as the diamond pages (one
+  stone per band below), colored stones come from the picked Shopify products.
+  Sold stones drop off by themselves. The strip stays hidden if fewer than four
+  stones load.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign base = section.settings.search_url | default: '/collections/lab-grown-diamonds'
   assign shape_list = 'Round,Oval,Emerald,Cushion,Pear,Radiant,Princess,Marquise' | split: ','
+  assign colored = section.settings.colored_products
+  if colored == blank and section.settings.colored_collection != blank
+    assign colored = section.settings.colored_collection.products
+  endif
 -%}
 
 <section class="lmh lmh-stones" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
-  data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}" data-base="{{ base | escape }}">
+  data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}">
   <div class="lmh-stones__head">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
     <h2 class="lmh-h2" id="LmhStones-{{ section.id }}">{{ section.settings.title | escape }}</h2>
@@ -32,11 +39,47 @@
   </div>
 
   <div class="lmh-stones__strip" data-stones-strip hidden>
-    <p class="lmh-stones__strip-title">In stock today <span>1 to 2 carats, D–G color, VS clarity or better. Every stone IGI or GIA certified.</span></p>
+    <p class="lmh-stones__strip-title">In stock today <span>{{ section.settings.strip_text | escape }}</span></p>
     <ul class="lmh-stones__track" role="list" data-stones-track></ul>
   </div>
 
-  <a class="lmh-stones__all" href="{{ base }}">{{ section.settings.link_text | default: 'See all lab-grown diamonds' | escape }}{% render 'lmh-arrow' %}</a>
+  {%- comment -%} Colored stones, rendered here and placed into the strip by the script. {%- endcomment -%}
+  <template data-stones-colored>
+    {%- assign shown = 0 -%}
+    {%- for product in colored -%}
+      {%- if shown >= 4 -%}{%- break -%}{%- endif -%}
+      {%- if product.available and product.featured_image -%}
+        {%- assign shown = shown | plus: 1 -%}
+        {%- liquid
+          assign head = product.title | split: ' Lab-Grown' | first
+          assign words = head | split: ' '
+          assign tail = product.title | split: ' — ' | last | replace: ' | ', ' · '
+          if words.size > 2 and head contains 'ct '
+            assign carat = words[0] | remove: 'ct'
+            assign stone_name = carat | append: ' ct ' | append: words[1]
+            assign stone_color = head | remove_first: words[0] | remove_first: words[1] | strip
+            assign stone_meta = stone_color | append: ' · ' | append: tail
+          else
+            assign stone_name = product.title
+            assign stone_meta = ''
+          endif
+        -%}
+        <li class="lmh-stone"><a href="{{ product.url }}">
+          <span class="lmh-stone__img"><img src="{{ product.featured_image | image_url: width: 400 }}" alt="" width="300" height="300" loading="lazy"></span>
+          <span class="lmh-stone__kind">Colored lab-grown</span>
+          <span class="lmh-stone__name">{{ stone_name | escape }}</span>
+          {%- if stone_meta != blank -%}<span class="lmh-stone__meta">{{ stone_meta | escape }}</span>{%- endif -%}
+          <span class="lmh-stone__price">{{ product.price | money_without_trailing_zeros }}</span>
+        </a></li>
+      {%- endif -%}
+    {%- endfor -%}
+  </template>
+
+  <div class="lmh-stones__links">
+    <a class="lmh-stones__all" href="{{ base }}">{{ section.settings.link_text | default: 'See all lab-grown diamonds' | escape }}{% render 'lmh-arrow' %}</a>
+    {%- if section.settings.natural_url != blank -%}<a class="lmh-stones__more" href="{{ section.settings.natural_url }}">Natural diamonds</a>{%- endif -%}
+    {%- if section.settings.colored_url != blank -%}<a class="lmh-stones__more" href="{{ section.settings.colored_url }}">Colored diamonds</a>{%- endif -%}
+  </div>
 </section>
 
 <script>
@@ -47,32 +90,80 @@
     var key = root.getAttribute('data-key') || '';
     var strip = root.querySelector('[data-stones-strip]');
     var track = root.querySelector('[data-stones-track]');
-    if (!api || !strip || !track || !window.fetch) return;
+    var tpl = root.querySelector('[data-stones-colored]');
+    if (!strip || !track) return;
+
+    // One stone per band, cheapest first, so the strip spans sizes and origins.
+    var BANDS = [
+      { kind: 'lab', shape: 'Oval', min: 1.5, max: 2.2 },
+      { kind: 'natural', shape: 'Round', min: 1.5, max: 2 },
+      { kind: 'lab', shape: 'Pear', min: 2, max: 2.8 },
+      { kind: 'natural', shape: 'Oval', min: 1.5, max: 2.2 },
+      { kind: 'lab', shape: 'Emerald', min: 2.5, max: 3.2 },
+      { kind: 'lab', shape: 'Round', min: 3.5, max: 5 }
+    ];
+    var colored = tpl && tpl.content ? Array.prototype.slice.call(tpl.content.querySelectorAll('.lmh-stone')) : [];
 
     function esc(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
-    function handle(s) {
-      return 'lg-' + String(s.stock_ref || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    function card(s) {
+      var handle = (s.kind === 'natural' ? 'nd-' : 'lg-') +
+        String(s.stock_ref || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      var li = document.createElement('li');
+      li.className = 'lmh-stone';
+      li.innerHTML = '<a href="/products/' + esc(handle) + '">' +
+        '<span class="lmh-stone__img"><img src="' + esc(s.image_urls[0]) + '" alt="" width="300" height="300" loading="lazy"></span>' +
+        '<span class="lmh-stone__kind">' + (s.kind === 'natural' ? 'Natural' : 'Lab-grown') + '</span>' +
+        '<span class="lmh-stone__name">' + esc(Number(s.carat).toFixed(2)) + ' ct ' + esc(s.shape) + '</span>' +
+        '<span class="lmh-stone__meta">' + esc([s.color, s.clarity, s.lab].filter(Boolean).join(' · ')) + '</span>' +
+        '<span class="lmh-stone__price">$' + Math.round(Number(s.retail_usd) || 0).toLocaleString('en-US') + '</span></a>';
+      return li;
     }
-    var q = 'kind=lab&per_page=8&sort=price_asc&min_carat=1&max_carat=2' +
-      '&colors=D,E,F,G&clarities=VVS1,VVS2,VS1,VS2&shapes=Round,Oval,Emerald,Pear,Cushion';
-    fetch(api + '?' + q, { headers: { Accept: 'application/json', apikey: key, Authorization: 'Bearer ' + key } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function (d) {
-        var stones = (d && d.stones || []).filter(function (s) { return s.image_urls && s.image_urls[0]; }).slice(0, 8);
-        if (stones.length < 4) return;
-        track.innerHTML = stones.map(function (s) {
-          var price = '$' + Math.round(Number(s.retail_usd) || 0).toLocaleString('en-US');
-          return '<li class="lmh-stone"><a href="/products/' + esc(handle(s)) + '">' +
-            '<span class="lmh-stone__img"><img src="' + esc(s.image_urls[0]) + '" alt="" width="300" height="300" loading="lazy"></span>' +
-            '<span class="lmh-stone__name">' + esc(Number(s.carat).toFixed(2)) + ' ct ' + esc(s.shape) + '</span>' +
-            '<span class="lmh-stone__meta">' + esc([s.color, s.clarity, s.lab].filter(Boolean).join(' · ')) + '</span>' +
-            '<span class="lmh-stone__price">' + price + '</span></a></li>';
-        }).join('');
-        strip.hidden = false;
-      })
-      .catch(function () {});
+    function fetchBand(b) {
+      var q = 'kind=' + b.kind + '&shapes=' + b.shape + '&min_carat=' + b.min + '&max_carat=' + b.max +
+        '&colors=' + (b.kind === 'natural' ? 'D,E,F,G,H' : 'D,E,F,G') +
+        '&clarities=VVS1,VVS2,VS1,VS2&sort=price_asc&per_page=12';
+      return fetch(api + '?' + q, { headers: { Accept: 'application/json', apikey: key, Authorization: 'Bearer ' + key } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var list = (d && d.stones) || [];
+          for (var i = 0; i < list.length; i++) if (list[i].image_urls && list[i].image_urls[0]) return list[i];
+          return null;
+        })
+        .catch(function () { return null; });
+    }
+    function cached() {
+      try {
+        var c = JSON.parse(sessionStorage.getItem('lmh-stones') || 'null');
+        if (c && Date.now() - c.t < 10 * 60 * 1000) return Promise.resolve(c.stones);
+      } catch (e) {}
+      return null;
+    }
+    function render(stones) {
+      // Lab-grown and natural first in band order, a colored stone after every second one.
+      var cards = [];
+      var c = 0;
+      stones.forEach(function (s, i) {
+        if (s) cards.push(card(s));
+        if (i % 2 === 1 && colored[c]) cards.push(colored[c++]);
+      });
+      while (colored[c]) cards.push(colored[c++]);
+      if (cards.length < 4) return;
+      cards.forEach(function (el) { track.appendChild(el); });
+      strip.hidden = false;
+    }
+
+    var pending = cached();
+    if (!pending) {
+      pending = api && window.fetch
+        ? Promise.all(BANDS.map(fetchBand)).then(function (stones) {
+            try { sessionStorage.setItem('lmh-stones', JSON.stringify({ t: Date.now(), stones: stones })); } catch (e) {}
+            return stones;
+          })
+        : Promise.resolve([]);
+    }
+    pending.then(render);
   })();
 </script>
 
@@ -81,11 +172,16 @@
   "name": "LM loose stones",
   "tag": "div",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose lab-grown diamonds" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose diamonds" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Start with the stone." },
-    { "type": "textarea", "id": "text", "label": "Text", "default": "Choose a shape or a size and see real stones, real prices, certified by IGI or GIA." },
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA." },
     { "type": "text", "id": "search_url", "label": "Diamond page", "default": "/collections/lab-grown-diamonds" },
     { "type": "text", "id": "link_text", "label": "Link text", "default": "See all lab-grown diamonds" },
+    { "type": "text", "id": "natural_url", "label": "Natural diamonds page", "default": "/collections/natural-diamonds" },
+    { "type": "text", "id": "colored_url", "label": "Colored diamonds page", "default": "/collections/colored-lab-grown-diamonds" },
+    { "type": "text", "id": "strip_text", "label": "In stock today text", "default": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA." },
+    { "type": "product_list", "id": "colored_products", "label": "Colored stones to show", "limit": 8, "info": "Sold stones are skipped. Up to four show." },
+    { "type": "collection", "id": "colored_collection", "label": "Colored stones fallback", "info": "Used when no colored stones are picked." },
     { "type": "text", "id": "api_base_url", "label": "Stone search address" },
     { "type": "text", "id": "api_anon_key", "label": "Stone search key" }
   ],
