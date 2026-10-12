@@ -29,7 +29,7 @@
 {%- capture ring_shape -%}{% render 'center-stone-shape', product: product %}{%- endcapture -%}
 {%- assign ring_shape = ring_shape | strip -%}
 
-{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' -%}
+{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' and product.tags contains 'ring-setting' -%}
   {%- liquid
     assign ring_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.'
     assign ring_image = ''
