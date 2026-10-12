@@ -297,7 +297,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 .header .nav__card-title { font-family: 'Cormorant Garamond', Garamond, serif; font-size: 22px; font-weight: 500; color: var(--lmhh-espresso); }
 .header .nav__card-text { font-size: 12.5px; line-height: 1.55; color: var(--lmhh-muted); }
 
-.header .nav__dropdown--four { grid-template-columns: repeat(4, minmax(0, 1fr)) 300px; }
+.header .nav__dropdown--five { grid-template-columns: repeat(5, minmax(0, 1fr)) 250px; gap: 28px; padding-left: clamp(24px, 4.4vw, 64px); padding-right: clamp(24px, 4.4vw, 64px); }
 .header .nav__card--product img { object-fit: contain; background: var(--lmhh-sand, #F5F0E8); mix-blend-mode: multiply; padding: 14px; box-sizing: border-box; }
 
 .header .nav-overlay { display: none; }
@@ -305,7 +305,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 /* Narrow desktops: drop the photo card so the link columns keep their width. */
 @media (min-width: 1200px) and (max-width: 1379px) {
   .header .nav__dropdown { grid-template-columns: repeat(3, minmax(0, 1fr)) 1.3fr; gap: 32px; }
-  .header .nav__dropdown--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .header .nav__dropdown--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .header .nav__card { display: none; }
 }
 
@@ -648,7 +648,15 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 
     <div class="nav__item">
       <button type="button" aria-expanded="false" class="nav__item-link">Fine Jewelry {{ caret }}</button>
-      <div class="nav__dropdown nav__dropdown--four">
+      <div class="nav__dropdown nav__dropdown--five">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Shop by occasion</span>
+          <a href="/collections/for-work" class="nav__dropdown-link">For work</a>
+          <a href="/collections/for-a-night-out" class="nav__dropdown-link">For a night out</a>
+          <a href="/collections/engagement-rings" class="nav__dropdown-link">Wedding &amp; engagement</a>
+          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">A push present, under $1,000</a>
+          <a href="/collections/lab-grown-earrings?type=Stud,Huggie,Hoop" class="nav__dropdown-link">Everyday basics</a>
+        </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Shop by piece</span>
           <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>

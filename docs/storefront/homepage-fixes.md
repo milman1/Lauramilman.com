@@ -184,5 +184,10 @@ R8 is a proposal awaiting the merchant's choice (see chat).
       copy and on every listing). New High Jewelry dropdown (by piece, by color,
       by appointment; camera-original ring photo from fc-j1133 with a fallback).
       The header search shortcuts still say "Pre-Owned Cartier / Pre-Owned & Estate".
-- [ ] R13. Proposal: "For work" and "For night out" occasion links need two small
-      curated collections first (merchant to approve the picks).
+- [x] R13. (Built, NOT yet published.) "Shop by occasion" column in the Fine Jewelry menu:
+      For work, For a night out, Wedding & engagement, A push present (under $1,000),
+      Everyday basics. New hand-picked collections `for-work` (43 pieces) and
+      `for-a-night-out` (69), created 2026-10-12 with no sales channels; publish to
+      the Online Store only together with the menu merge. Manual collections: sold
+      pieces do not drop out on their own. Banner subtext now: "...Designed in New
+      York, crafted in Italy, by a house with 30+ years in the Diamond District."

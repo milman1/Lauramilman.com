@@ -304,6 +304,10 @@ def test_header_nav_names_what_the_house_sells() -> None:
     # The menu panels do not say "pre-owned" (merchant, 2026-10-12); each listing states its condition.
     panels = header[loose:story]
     assert "pre-owned" not in panels.lower()
+    # Shop by occasion lives in the Fine Jewelry menu (merchant, 2026-10-12).
+    assert '<span class="nav__dropdown-label">Shop by occasion</span>' in header
+    for href in ("/collections/for-work", "/collections/for-a-night-out", "/collections/engagement-rings"):
+        assert f'href="{href}"' in header, href
     for href in ("/collections/high-jewelry", "/collections/high-jewelry-rings",
                  "/collections/fancy-yellow-diamonds", "/collections/fancy-pink-diamonds"):
         assert f'href="{href}"' in header, href
