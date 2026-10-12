@@ -8,11 +8,13 @@
 
 import {
   EBAY_WATCH_FEE,
+  WATCH_MARKET,
+  WATCH_MARKET_ANCHORS,
   WATCH_RETAIL_CAP_BY_STOCK,
   WATCH_SALE,
 } from '../config/pricing.js';
 
-export { EBAY_WATCH_FEE, WATCH_RETAIL_CAP_BY_STOCK, WATCH_SALE };
+export { EBAY_WATCH_FEE, WATCH_MARKET, WATCH_MARKET_ANCHORS, WATCH_RETAIL_CAP_BY_STOCK, WATCH_SALE };
 
 export type WatchPricingOutcome =
   | { status: 'priced'; retailUsd: number }
@@ -26,6 +28,57 @@ export interface WatchPricingInput {
   stockRef?: string | null;
   /** Feed condition aftermarket — excluded entirely. */
   aftermarket?: boolean;
+  /** Watch reference (e.g. 126613LB). With `state`, a market anchor may lift the price. */
+  reference?: string | null;
+  /** Known condition tier. Unknown → no market anchor. */
+  state?: WatchMarketState | null;
+  /** Clock for anchor expiry. Defaults to now. */
+  now?: Date;
+}
+
+export type WatchMarketState = 'preowned' | 'unworn';
+
+/** Reference key: upper case, no spaces, no leading M, no `-0002` dial suffix. */
+export function normalizeWatchReference(reference: string | null | undefined): string {
+  if (!reference) return '';
+  return reference
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/-\d{3,4}$/, '')
+    .replace(/^M(?=\d)/, '');
+}
+
+/** Condition tier from a listing title: leading Unworn / Pre-Owned, else unknown. */
+export function watchStateFromTitle(title: string | null | undefined): WatchMarketState | null {
+  const t = (title ?? '').trim();
+  if (/^unworn\b/i.test(t)) return 'unworn';
+  if (/^pre-owned\b/i.test(t)) return 'preowned';
+  return null;
+}
+
+/** The reference a listing carries, found among its tags. Null when none has an anchor. */
+export function watchReferenceFromTags(tags: readonly string[]): string | null {
+  for (const tag of tags) {
+    const key = normalizeWatchReference(tag);
+    if (key && WATCH_MARKET_ANCHORS[key]) return key;
+  }
+  return null;
+}
+
+/** Market anchor in USD for a reference and tier, or null (none, too thin, or expired). */
+export function marketAnchorUsd(
+  reference: string | null | undefined,
+  state: WatchMarketState | null | undefined,
+  now: Date = new Date(),
+): number | null {
+  if (!state) return null;
+  const anchor = WATCH_MARKET_ANCHORS[normalizeWatchReference(reference)];
+  if (!anchor || anchor.samples < WATCH_MARKET.minSamples) return null;
+  const asOf = Date.parse(WATCH_MARKET.asOf);
+  if (!Number.isFinite(asOf) || now.getTime() - asOf > WATCH_MARKET.maxAgeDays * 86_400_000) return null;
+  const usd = state === 'unworn' ? anchor.unwornUsd : anchor.preownedUsd;
+  return usd != null && usd > 0 ? usd : null;
 }
 
 /** Round up to the next $100 (already on a hundred stays put). */
@@ -133,16 +186,27 @@ export function retailFromCost(costUsd: number): number {
 }
 
 /**
- * Standard retail, then a stock-number ceiling when that ceiling still nets
- * at least cost after the eBay watch fee and shipping. A ceiling that would
- * not is ignored.
+ * Standard retail, lifted toward the market anchor when one applies (raise
+ * only, at most `maxRaisePct`), then a stock-number ceiling when that ceiling
+ * still nets at least cost after the eBay watch fee and shipping. A ceiling
+ * that would not is ignored.
  */
-export function retailForWatch(costUsd: number, stockRef?: string | null): number {
+export function retailForWatch(
+  costUsd: number,
+  stockRef?: string | null,
+  market?: { reference?: string | null; state?: WatchMarketState | null; now?: Date },
+): number {
   const standard = retailFromCost(costUsd);
+  let candidate = standard;
+  const anchor = marketAnchorUsd(market?.reference, market?.state, market?.now);
+  if (anchor != null && anchor > standard) {
+    const limit = Math.floor((standard * (1 + WATCH_MARKET.maxRaisePct)) / 100) * 100;
+    candidate = Math.max(standard, Math.min(anchor, limit));
+  }
   const floor = minRetailLeavingMargin(costUsd, 0);
   const cap = stockRef ? WATCH_RETAIL_CAP_BY_STOCK[stockRef] : undefined;
-  if (cap != null && cap < standard && cap >= floor) return cap;
-  return standard;
+  if (cap != null && cap < candidate && cap >= floor) return cap;
+  return candidate;
 }
 
 /**
@@ -163,5 +227,12 @@ export function priceWatchFromCost(input: WatchPricingInput): WatchPricingOutcom
     return { status: 'no_cost' };
   }
 
-  return { status: 'priced', retailUsd: retailForWatch(cost, input.stockRef) };
+  return {
+    status: 'priced',
+    retailUsd: retailForWatch(cost, input.stockRef, {
+      reference: input.reference,
+      state: input.state,
+      now: input.now,
+    }),
+  };
 }
