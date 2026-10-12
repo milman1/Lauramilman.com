@@ -102,7 +102,8 @@ describe('theme SEO integration', () => {
     expect(note).toContain('{%- if text != blank and until != blank -%}');
     expect(filter.match(/render 'price-comparison-note'/g)).toHaveLength(2);
     expect(lab).toMatch(/"price_note_until": "\d{4}-\d{2}-\d{2}"/);
-    expect(lab).toContain('Checked October 8, 2026');
+    expect(lab).toContain('priced well below the large online sellers');
+    expect(lab).toContain('Last checked October 8, 2026');
     expect(lab).not.toMatch(/rare ?carat|blue ?nile|michael gabriels|j\.?r\.? dunn/i);
   });
 });
