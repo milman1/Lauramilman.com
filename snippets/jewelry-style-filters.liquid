@@ -15,6 +15,7 @@
   assign jf_style_label = ''
   assign jf_styles = ''
   assign jf_show_carat = true
+  assign jf_carat_label = 'Total Carat Weight'
   assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
 
   case jf_handle
@@ -75,6 +76,10 @@
       assign jf_style_label = 'Jewelry Style'
       assign jf_styles = 'Stud::Studs||Drop::Drop||Huggie::Huggie||Hoop::Hoops||Tennis::Tennis||Solitaire::Solitaire||Halo::Halo||Statement::Statement'
   endcase
+  if jf_handle == 'diamond-rings'
+    assign jf_carat_label = 'Diamond Weight'
+    assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Fashion::Fashion||Cocktail::Cocktail||Stackable::Stackable||Eternity::Eternity'
+  endif
 -%}
 
 {%- if jf_enabled -%}
@@ -159,7 +164,7 @@
     <button type="button" class="refine__group-head" aria-expanded="true">
       <span class="refine__group-label">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
-        Total Carat Weight
+        {{ jf_carat_label }}
       </span>
       <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>

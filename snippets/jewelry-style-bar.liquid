@@ -41,6 +41,9 @@
       assign jsb_label = 'Jewelry Style'
       assign jsb_styles = 'Stud::Studs||Drop::Drop||Huggie::Huggie||Hoop::Hoops||Tennis::Tennis||Solitaire::Solitaire||Halo::Halo||Statement::Statement'
   endcase
+  if jsb_handle == 'diamond-rings'
+    assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Fashion::Fashion||Cocktail::Cocktail||Stackable::Stackable||Eternity::Eternity'
+  endif
 -%}
 
 {%- if jsb_styles != blank -%}

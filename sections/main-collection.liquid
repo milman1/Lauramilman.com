@@ -12,6 +12,10 @@
   assign navy_mode = section.settings.navy_mode
   assign jewelry_only = false
   assign schema_include_products = true
+  assign collection_page_size = section.settings.products_per_page
+  if collection.handle == 'diamond-rings'
+    assign collection_page_size = 250
+  endif
   if collection.handle == 'all' or collection.handle == 'all-jewelry'
     assign jewelry_only = true
   endif
@@ -72,7 +76,7 @@
   endfor
 -%}
 
-{%- paginate collection.products by section.settings.products_per_page -%}
+{%- paginate collection.products by collection_page_size -%}
 
 <section class="lm-collection{% if navy_mode %} lm-collection--navy{% endif %}" aria-label="{{ collection.title | escape }}">
   <div class="lm-collection__container">
