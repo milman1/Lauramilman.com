@@ -158,9 +158,28 @@
           </a>
         {%- endif -%}
 
+        <ul class="dpdp__trust" role="list">
+          <li>Free insured U.S. shipping</li>
+          <li>7-day returns</li>
+          <li>1-year warranty</li>
+          <li>{%- if m.lab != blank -%}Certified by {{ m.lab }}{%- else -%}Independently certified{%- endif -%}</li>
+        </ul>
+
+        {%- assign g_url = section.settings.google_reviews_url -%}
+        {%- if g_url != blank -%}
+          <a class="dpdp__reviews" href="{{ g_url }}" target="_blank" rel="noopener">
+            {%- if section.settings.google_rating != blank and section.settings.google_review_count > 0 -%}
+              <span class="dpdp__reviews-stars" aria-hidden="true">★★★★★</span>
+              <span>{{ section.settings.google_rating }} · {{ section.settings.google_review_count }} Google reviews</span>
+            {%- else -%}
+              <span>Read our reviews on Google</span>
+            {%- endif -%}
+          </a>
+        {%- endif -%}
+
         <p class="dpdp__assurance">
           One stone, one owner — each is unique, so once it's gone it's gone.
-          Every purchase ships insured and fully certified.
+          <a href="/pages/shipping-returns">Shipping, returns &amp; warranty</a>
         </p>
 
         <!-- Full spec table -->
@@ -489,6 +508,41 @@
     color: var(--gold-dark, #A88340);
   }
 
+  .dpdp__trust {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    color: var(--text, #2A2218);
+  }
+
+  .dpdp__trust li::before {
+    content: '✓';
+    margin-right: 0.4rem;
+    color: var(--gold-dark, #A88340);
+  }
+
+  .dpdp__reviews {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    color: var(--text-muted, #8A8070);
+    text-decoration: none;
+  }
+
+  .dpdp__reviews:hover { color: var(--gold-dark, #A88340); }
+
+  .dpdp__reviews-stars { color: var(--gold, #C9A050); letter-spacing: 0.1em; }
+
+  .dpdp__assurance a { color: inherit; text-decoration: underline; }
+
   .dpdp__assurance {
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.78rem;
@@ -651,7 +705,29 @@
   "name": "Diamond Product",
   "tag": "section",
   "class": "section-diamond-product",
-  "settings": [],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Google reviews"
+    },
+    {
+      "type": "url",
+      "id": "google_reviews_url",
+      "label": "Google reviews link",
+      "info": "Link to your Google Business reviews. Leave empty to hide the reviews line."
+    },
+    {
+      "type": "text",
+      "id": "google_rating",
+      "label": "Rating (copy from Google)",
+      "info": "For example 4.9. Shown only when the review count below is also set."
+    },
+    {
+      "type": "number",
+      "id": "google_review_count",
+      "label": "Review count (copy from Google)"
+    }
+  ],
   "presets": [{ "name": "Diamond Product" }]
 }
 {% endschema %}
