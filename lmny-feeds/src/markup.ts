@@ -5,6 +5,7 @@ import {
   STONE_TIERS as FALLBACK_RULES,
 } from '../config/pricing.js';
 import type { Hold, Priced, StoneItem, WatchItem } from './types.js';
+import { classifyWatchCondition } from './ebayCondition.js';
 import { priceWatchFromCost } from './watchPricing.js';
 
 export { FALLBACK_RULES };
@@ -150,14 +151,17 @@ export interface WatchComp {
  * Watches: `WATCH_SALE` via watchPricing.ts. No Hours mid. Retail is the
  * lowest $100 that leaves 10% of the price after the eBay watch fee and
  * seller-paid shipping when that price is $10,000 or under, and 5% above
- * that. A stock number in `WATCH_RETAIL_CAP_BY_STOCK` may lower it only
- * while the sale still nets at least cost after shipping.
+ * that. A market anchor (`WATCH_MARKET_ANCHORS`) may lift it, never lower it.
+ * A stock number in `WATCH_RETAIL_CAP_BY_STOCK` may lower it only while the
+ * sale still nets at least cost after shipping.
  */
 export function priceWatch(item: WatchItem): PriceResult {
   const outcome = priceWatchFromCost({
     costUsd: item.costUsd,
     stockRef: item.stockRef,
     aftermarket: false, // normalize already excludes aftermarket
+    reference: item.reference,
+    state: classifyWatchCondition(item.condition ?? '')?.state ?? null,
   });
 
   if (outcome.status === 'no_cost') {

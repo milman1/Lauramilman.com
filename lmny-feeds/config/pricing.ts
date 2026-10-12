@@ -179,11 +179,62 @@ export const WATCH_RETAIL_CAP_BY_STOCK: Readonly<Record<string, number>> = {
   RW3100: 49_000, // 126618LB
 };
 
+/**
+ * Market anchors for feed watches: the median US dealer asking price for the
+ * same reference and condition tier (Bob's, The 1916 Company, Watchfinder,
+ * WatchGuys, Chrono24 US dealers, eBay Buy It Now), collected 2026-10-12.
+ * Merchant decision 2026-10-12: price at the median dealer ask, raise-only.
+ *
+ *   retail = max(cost-rule retail, min(anchor, cost-rule retail × (1 + maxRaisePct)))
+ *
+ * The cost rule (`WATCH_SALE`) stays the floor, so an anchor can only lift a
+ * price, never lower it. A stock-number ceiling in `WATCH_RETAIL_CAP_BY_STOCK`
+ * still wins. An anchor needs at least `minSamples` asks behind it, expires
+ * after `maxAgeDays`, and applies only to a watch with a known condition
+ * (Unworn or Pre-Owned); anything else keeps the cost rule.
+ *
+ * Keyed by reference with no case, spaces, or `-0002` dial suffix. Refresh the
+ * table by pull request against this file; stale anchors stop applying.
+ */
+export interface WatchMarketAnchor {
+  /** Median dealer ask in USD, rounded to $100. */
+  preownedUsd?: number;
+  unwornUsd?: number;
+  /** Asks behind the median (smallest tier). */
+  samples: number;
+}
+
+export const WATCH_MARKET = {
+  asOf: '2026-10-12',
+  maxAgeDays: 45,
+  minSamples: 4,
+  /** An anchor lifts a price by at most this share of the cost-rule price. */
+  maxRaisePct: 0.15,
+} as const;
+
+export const WATCH_MARKET_ANCHORS: Readonly<Record<string, WatchMarketAnchor>> = {
+  '124060': { preownedUsd: 13_500, samples: 11 },
+  '126231': { preownedUsd: 16_300, samples: 7 },
+  '126331': { preownedUsd: 18_400, samples: 7 },
+  '126333': { preownedUsd: 17_200, samples: 6 },
+  '126334': { preownedUsd: 14_200, samples: 6 },
+  '116610LN': { preownedUsd: 12_700, samples: 20 },
+  '116610LV': { preownedUsd: 23_500, samples: 4 },
+  '116613LB': { preownedUsd: 15_700, samples: 5 },
+  '126710BLNR': { preownedUsd: 19_200, samples: 5 },
+  '126713GRNR': { preownedUsd: 22_400, samples: 7 },
+  '326933': { preownedUsd: 24_000, samples: 5 },
+  '336934': { preownedUsd: 25_000, unwornUsd: 24_900, samples: 6 },
+  '126500LN': { unwornUsd: 38_100, samples: 6 },
+};
+
 export const WATCH = {
   /** Tag applied when pricing returns no_cost. */
   reviewTag: 'pricing-review',
   sale: WATCH_SALE,
   retailCapByStock: WATCH_RETAIL_CAP_BY_STOCK,
+  market: WATCH_MARKET,
+  marketAnchors: WATCH_MARKET_ANCHORS,
 } as const;
 
 /**

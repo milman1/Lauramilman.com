@@ -18,7 +18,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { FEED_TAG, PRICING_REVIEW_TAG, PRODUCT_TYPES } from '../src/product.js';
 import { ShopifyClient, downloadJsonl, exchangeClientCredentials } from '../src/shopify.js';
-import { priceWatchFromCost } from '../src/watchPricing.js';
+import { priceWatchFromCost, watchReferenceFromTags, watchStateFromTitle } from '../src/watchPricing.js';
 
 const OUT_DIR = 'out';
 const REVIEW_CSV = 'needs_review.csv';
@@ -188,6 +188,8 @@ async function main() {
     const outcome = priceWatchFromCost({
       costUsd: row.costUsd,
       stockRef: row.sku,
+      reference: watchReferenceFromTags(row.tags),
+      state: watchStateFromTitle(row.title),
     });
     if (outcome.status === 'priced') {
       counts.priced += 1;

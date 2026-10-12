@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { WATCH_RETAIL_CAP_BY_STOCK, WATCH_SALE } from '../config/pricing.js';
+import { WATCH_MARKET, WATCH_MARKET_ANCHORS, WATCH_RETAIL_CAP_BY_STOCK, WATCH_SALE } from '../config/pricing.js';
 import {
   ebayWatchFeeUsd,
   minRetailLeavingMargin,
+  normalizeWatchReference,
   priceWatchFromCost,
   retailFromCost,
   roundUpTo100,
   watchNetAfterSaleUsd,
+  watchReferenceFromTags,
   watchShippingUsd,
+  watchStateFromTitle,
 } from '../src/watchPricing.js';
 
 function netsAtLeast(price: number, cost: number, margin: number): boolean {
@@ -177,6 +180,69 @@ describe('priceWatchFromCost', () => {
     if (r.status === 'priced') {
       expect(r.retailUsd).toBe(46_700);
       expect(watchNetAfterSaleUsd(r.retailUsd, costUsd)).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('market anchor (raise-only)', () => {
+  const now = new Date('2026-10-12T12:00:00Z');
+  const lift = (cost: number, reference: string, state: 'preowned' | 'unworn' | null, stockRef?: string, at = now) =>
+    priceWatchFromCost({ costUsd: cost, reference, state, stockRef, now: at });
+
+  it('lifts a price toward the anchor', () => {
+    // 336934 pre-owned anchor $25,000; cost rule on $20,100 is $22,700 (+10.1%).
+    expect(lift(20_100, '336934', 'preowned')).toEqual({ status: 'priced', retailUsd: 25_000 });
+  });
+
+  it('never lowers a price below the cost rule', () => {
+    // 124060 anchor $13,500 sits under the cost rule for $12,300 ($14,100).
+    expect(lift(12_300, '124060', 'preowned')).toEqual({ status: 'priced', retailUsd: 14_100 });
+  });
+
+  it('limits the lift to maxRaisePct of the cost-rule price', () => {
+    // Cost rule for $15,000 is $17,000; +15% allows $19,550 → $19,500, under the $23,500 anchor.
+    const r = lift(15_000, '116610LV', 'preowned');
+    expect(r.status === 'priced' && r.retailUsd).toBe(19_500);
+  });
+
+  it('ignores the anchor without a known condition', () => {
+    expect(lift(20_100, '336934', null)).toEqual(priceWatchFromCost({ costUsd: 20_100 }));
+  });
+
+  it('ignores an unknown reference, an untiered anchor, and an expired anchor', () => {
+    expect(lift(20_100, '999999', 'preowned')).toEqual(priceWatchFromCost({ costUsd: 20_100 }));
+    expect(lift(36_000, '126500LN', 'preowned')).toEqual(priceWatchFromCost({ costUsd: 36_000 }));
+    expect(lift(20_100, '336934', 'preowned', undefined, new Date('2026-12-01T00:00:00Z'))).toEqual(
+      priceWatchFromCost({ costUsd: 20_100 }),
+    );
+  });
+
+  it('lets a stock-number ceiling still win', () => {
+    // T3590 is capped at $26,400 for a 116610LV; the anchor cannot lift past it.
+    expect(lift(24_300, '116610LV', 'preowned', 'T3590')).toEqual({ status: 'priced', retailUsd: 26_400 });
+  });
+
+  it('never prices below the cost-rule floor, so margin only grows', () => {
+    for (const cost of [10_000, 20_100, 30_000]) {
+      const base = priceWatchFromCost({ costUsd: cost });
+      const anchored = lift(cost, '336934', 'preowned');
+      if (base.status === 'priced' && anchored.status === 'priced') {
+        expect(anchored.retailUsd).toBeGreaterThanOrEqual(base.retailUsd);
+      }
+    }
+  });
+
+  it('normalizes references, titles and tags', () => {
+    expect(normalizeWatchReference(' m126613LB-0002 ')).toBe('126613LB');
+    expect(watchStateFromTitle('Unworn Rolex Daytona 126500LN')).toBe('unworn');
+    expect(watchStateFromTitle('Pre-Owned Rolex Submariner')).toBe('preowned');
+    expect(watchStateFromTitle('Rolex Sky Dweller 336934')).toBeNull();
+    expect(watchReferenceFromTags(['ebay', '336934', 'Rolex'])).toBe('336934');
+  });
+
+  it('only keeps anchors with enough asks behind them', () => {
+    for (const a of Object.values(WATCH_MARKET_ANCHORS)) {
+      expect(a.samples).toBeGreaterThanOrEqual(WATCH_MARKET.minSamples);
     }
   });
 });
