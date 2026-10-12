@@ -744,17 +744,21 @@
         "link_url": "/pages/about"
       }
     },
-    "diamond-search": {
-      "type": "diamond-filter",
+    "loose-stones": {
+      "type": "lmh-stones",
+      "blocks": {
+        "size-1": { "type": "size", "settings": { "label": "1 to 2 ct", "query": "?min_carat=1&max_carat=2" } },
+        "size-2": { "type": "size", "settings": { "label": "2 to 3 ct", "query": "?min_carat=2&max_carat=3" } },
+        "size-3": { "type": "size", "settings": { "label": "3 ct and up", "query": "?min_carat=3" } },
+        "size-4": { "type": "size", "settings": { "label": "Under $1,000", "query": "?max_price=1000" } }
+      },
+      "block_order": ["size-1", "size-2", "size-3", "size-4"],
       "settings": {
-        "heading": "Find a diamond that feels like you.",
-        "subheading": "Search every lab-grown stone by shape, carat, price, color, clarity and cut. Each one is listed with its IGI or GIA certificate.",
-        "search_only": true,
-        "navy_mode": true,
-        "stone_kind": "lab",
+        "eyebrow": "Loose lab-grown diamonds",
+        "title": "Start with the stone.",
+        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
         "search_url": "/collections/lab-grown-diamonds",
-        "show_ask_line": false,
-        "products_per_page": 24,
+        "link_text": "See all lab-grown diamonds",
         "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
         "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
       }
@@ -903,7 +907,7 @@
   "order": [
     "hero",
     "meet-laura",
-    "diamond-search",
+    "loose-stones",
     "rings-your-way",
     "worlds",
     "trust-strip",

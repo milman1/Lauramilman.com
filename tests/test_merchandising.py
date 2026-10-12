@@ -198,7 +198,7 @@ def test_homepage_walks_stones_rings_then_the_house() -> None:
     order = data["order"]
     sections = data["sections"]
     assert order == [
-        "hero", "meet-laura", "diamond-search", "rings-your-way", "worlds",
+        "hero", "meet-laura", "loose-stones", "rings-your-way", "worlds",
         "trust-strip", "shelf", "reviews", "gold", "rolex", "wear-together",
         "pre-owned", "lab-grown", "loose-diamonds", "private-clients",
         "engagement", "brand-story",
@@ -206,8 +206,7 @@ def test_homepage_walks_stones_rings_then_the_house() -> None:
     types = {key: sections[key]["type"] for key in order}
     assert types["hero"] == "lmh-hero"
     assert types["meet-laura"] == "lmh-meet"
-    assert types["diamond-search"] == "diamond-filter"
-    assert sections["diamond-search"]["settings"]["search_only"] is True
+    assert types["loose-stones"] == "lmh-stones"
     assert types["rings-your-way"] == "lmh-split-tiles"
     assert types["shelf"] == "lmh-shelf"
     assert types["worlds"] == "lmh-worlds"
