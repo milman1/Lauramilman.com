@@ -516,3 +516,17 @@ def test_lab_grown_sections_are_not_merchant_labeled_peaceful() -> None:
     assert feature_schema["name"] == "Lab-Grown Diamonds Feature"
     assert not (ROOT / "sections/peaceful-hero.liquid").exists()
     assert not (ROOT / "sections/peaceful-diamonds.liquid").exists()
+
+
+def test_render_tags_never_use_filters_in_arguments():
+    """Shopify rejects a filter inside a render tag's arguments (the file then
+    fails to upload and the theme does not update). Assign the value first."""
+    import re
+    bad = re.compile(r"\{%-?\s*render\b[^%]*:[^%|]*\|[^%]*-?%\}")
+    offenders = [
+        str(path.relative_to(ROOT))
+        for folder in ("sections", "snippets", "layout", "templates")
+        for path in (ROOT / folder).glob("*.liquid")
+        if bad.search(path.read_text())
+    ]
+    assert offenders == [], offenders
