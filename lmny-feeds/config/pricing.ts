@@ -59,7 +59,9 @@ export const STONE_TIERS: LabTier[] = [
  * $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 3.15× cost (68.3% gross before fees).
+ * is 3.15× cost (68.3% gross before fees). A pairing checkout discount
+ * (an additional 10% when a setting or ring is bought with a loose stone)
+ * is specified in SHOPIFY_SETUP.md and is not part of this multiple.
  *
  * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
  * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,

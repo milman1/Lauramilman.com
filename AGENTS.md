@@ -114,6 +114,12 @@ Chain item already in the store (`MZ003379`, a 14K franco chain under the
 house vendor) was priced by hand at ×2.8 before the ×3 rule existed; the
 rule, not the precedent, applies from now on.
 
+Pairing checkout discount (2026-10-12): an additional 10% when a setting or
+ring is in the cart with any loose stone. The specification, collection
+ids, and automatic discount mutation are in `SHOPIFY_SETUP.md` section 6a.
+It is not live until the app has discount scopes. It is not a retail
+multiple and must not be folded into `config/pricing.ts`.
+
 ---
 
 ## 3. Model roster
