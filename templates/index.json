@@ -431,6 +431,70 @@
         "mobile_button_url": "/collections/rolex-watches"
       }
     },
+    "lab-grown": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "lab-1": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Solitaire Pendant",
+            "subtitle": "Prong · Made to order"
+          }
+        },
+        "lab-2": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-oval-studs-earring-prong-north-south",
+            "title": "Lab-Grown Oval Diamond Stud Earrings",
+            "subtitle": "Prong · Made to order"
+          }
+        },
+        "lab-3": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
+            "title": "Lab-Grown Round Diamond Tennis Bracelet",
+            "subtitle": "14K White Gold"
+          }
+        },
+        "lab-4": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Eternity Band",
+            "subtitle": "Prong · Made to order"
+          }
+        }
+      },
+      "block_order": [
+        "lab-1",
+        "lab-2",
+        "lab-3",
+        "lab-4"
+      ],
+      "settings": {
+        "style": "navy",
+        "columns": "4",
+        "ratio": "1.04",
+        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
+        "title": "For the push present,",
+        "title_emphasis": "or the promotion you bought yourself.",
+        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "all_text": "",
+        "all_url": "",
+        "button_1_text": "Shop Under $1,000",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
+        "button_2_text": "All Lab-Grown Jewelry",
+        "button_2_url": "/collections/lab-grown-diamond-jewelry",
+        "feature_image_asset": "",
+        "feature_image_alt": "",
+        "collection": "",
+        "collection_limit": 5,
+        "mobile_button_text": "",
+        "mobile_button_url": ""
+      }
+    },
     "reviews": {
       "type": "lmh-reviews",
       "settings": {
@@ -662,70 +726,6 @@
         "jewelry_all_url": "/collections/estate-jewelry"
       }
     },
-    "lab-grown": {
-      "type": "lmh-product-row",
-      "blocks": {
-        "lab-1": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
-            "title": "Lab-Grown Round Diamond Solitaire Pendant",
-            "subtitle": "Prong · Made to order"
-          }
-        },
-        "lab-2": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-oval-studs-earring-prong-north-south",
-            "title": "Lab-Grown Oval Diamond Stud Earrings",
-            "subtitle": "Prong · Made to order"
-          }
-        },
-        "lab-3": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
-            "title": "Lab-Grown Round Diamond Tennis Bracelet",
-            "subtitle": "14K White Gold"
-          }
-        },
-        "lab-4": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
-            "title": "Lab-Grown Round Diamond Eternity Band",
-            "subtitle": "Prong · Made to order"
-          }
-        }
-      },
-      "block_order": [
-        "lab-1",
-        "lab-2",
-        "lab-3",
-        "lab-4"
-      ],
-      "settings": {
-        "style": "navy",
-        "columns": "4",
-        "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
-        "title": "For the push present,",
-        "title_emphasis": "or the promotion you bought yourself.",
-        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
-        "all_text": "",
-        "all_url": "",
-        "button_1_text": "Shop Under $1,000",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
-        "button_2_text": "All Lab-Grown Jewelry",
-        "button_2_url": "/collections/lab-grown-diamond-jewelry",
-        "feature_image_asset": "",
-        "feature_image_alt": "",
-        "collection": "",
-        "collection_limit": 5,
-        "mobile_button_text": "",
-        "mobile_button_url": ""
-      }
-    },
     "private-clients": {
       "type": "lmh-private-band",
       "settings": {
@@ -809,11 +809,11 @@
     "rings-your-way",
     "shelf",
     "gold",
+    "lab-grown",
     "rolex",
     "reviews",
     "wear-together",
     "pre-owned",
-    "lab-grown",
     "private-clients",
     "engagement",
     "brand-story"
