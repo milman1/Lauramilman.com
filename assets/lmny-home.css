@@ -641,8 +641,8 @@
 .lmh-stones .lmh-h2 { color: #fff; margin-top: 10px; }
 .lmh-stones .lmh-lede { max-width: 560px; margin: 14px auto 0; color: var(--lmh-on-dark); }
 .lmh-stones__shapes { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; }
-.lmh-stones .lmh-shape { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 6px 14px; background: var(--lmh-navy-tile); border: 1px solid rgba(201,160,80,.22); color: var(--lmh-gold-light); text-decoration: none; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: border-color .2s, background .2s; }
-.lmh-stones .lmh-shape:hover { border-color: var(--lmh-gold); background: var(--lmh-navy-deep); }
+.lmh-stones .lmh-shape { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 6px 14px; background: transparent; border: 1px solid rgba(201,160,80,.35); color: var(--lmh-gold-light); text-decoration: none; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: border-color .25s, box-shadow .25s, color .25s; }
+.lmh-stones .lmh-shape:hover, .lmh-stones .lmh-shape:focus-visible { border-color: var(--lmh-gold); color: #fff; box-shadow: 0 0 22px rgba(201,160,80,.22); }
 .lmh-stones .lmh-shape svg { width: 44px; height: 44px; }
 .lmh-stones__sizes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
 .lmh-stones .lmh-chip { background: transparent; color: #fff !important; border-color: rgba(255,255,255,.35); text-decoration: none; }
