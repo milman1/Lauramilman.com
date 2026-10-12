@@ -181,7 +181,7 @@
 .lmh-hero .lmh-btn--dark:hover { background: var(--lmh-gold-light); border-color: var(--lmh-gold-light); }
 .lmh-hero .lmh-btn--outline { border-color: rgba(250, 246, 240, 0.6); color: var(--lmh-cream) !important; }
 .lmh-hero .lmh-btn--outline:hover { background: rgba(250, 246, 240, 0.12); color: var(--lmh-cream) !important; }
-.lmh-hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 26%; }
+.lmh-hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 68% 26%; }
 
 /* mobile pills under the header (phones only) */
 .lmh-pills { display: none; }
@@ -421,7 +421,7 @@
   /* hero */
   .lmh-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .lmh-hero__media { order: -1; min-height: 360px; }
-  .lmh-hero__media img { object-position: 50% 24%; }
+  .lmh-hero__media img { object-position: 68% 24%; }
   .lmh-hero__copy { padding: 28px 20px 32px; gap: 16px; }
   .lmh-hero__text { font-size: 15px; line-height: 1.65; }
   .lmh-hero__ctas { flex-direction: column; gap: 10px; }
