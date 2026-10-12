@@ -59,7 +59,7 @@
         "eyebrow": "Lab-grown diamonds & rings",
         "title": "Your diamond.",
         "title_emphasis": "Your story.",
-        "text": "For love, personal milestones, and the pleasure of choosing something for yourself.",
+        "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in the Diamond District.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
         "secondary_text": "Shop Rings",
@@ -326,7 +326,8 @@
         "button_url": "/collections/time-pieces",
         "link_text": "Tennis bracelets",
         "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery."
+        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery.",
+        "style": "light"
       }
     },
     "pre-owned": {
@@ -661,7 +662,8 @@
         "email": "hello@lauramilman.com",
         "button_text": "Book a Consultation",
         "button_url": "/pages/private-clients",
-        "note": "Complimentary · No obligation"
+        "note": "Complimentary · No obligation",
+        "style": "light"
       }
     },
     "engagement": {

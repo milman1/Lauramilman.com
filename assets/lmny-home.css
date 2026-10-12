@@ -616,3 +616,21 @@
   .lmh-shelf .lmh-card__title { font-size: 17px; }
 }
 
+/* warm variants: espresso is kept for the banner and the footer */
+.lmh-wear--light { background: var(--lmh-cream); color: var(--lmh-ink); }
+.lmh-wear--light .lmh-h2 { color: var(--lmh-espresso); }
+.lmh-wear--light .lmh-h2 em { color: var(--lmh-bronze); }
+.lmh-wear--light .lmh-lede { color: var(--lmh-body); }
+.lmh-wear--light .lmh-eyebrow { color: var(--lmh-bronze); }
+.lmh-wear--light .lmh-wear__item { color: var(--lmh-ink) !important; }
+.lmh-wear--light .lmh-wear__thumb { background: var(--lmh-tile); }
+.lmh-wear--light .lmh-wear__name span, .lmh-wear--light .lmh-wear__note { color: var(--lmh-muted); }
+.lmh-private--light { background: var(--lmh-sand); color: var(--lmh-ink); border-top: 1px solid var(--lmh-line); border-bottom: 1px solid var(--lmh-line); }
+.lmh-private--light .lmh-eyebrow { color: var(--lmh-bronze); }
+.lmh-private--light .lmh-h2 { color: var(--wine, #4A1428); }
+.lmh-private--light .lmh-h2 em { color: var(--lmh-bronze); }
+.lmh-private--light .lmh-private__l p { color: var(--lmh-body); }
+.lmh-private--light .lmh-private__r address { color: var(--lmh-ink); }
+.lmh-private--light .lmh-private__mail { color: var(--lmh-bronze) !important; }
+.lmh-private--light .lmh-private__cta span { color: var(--lmh-muted); }
+

@@ -168,3 +168,26 @@ New live collection `lab-grown-tennis-necklaces` (smart: tags "Tennis Necklace" 
 R8 is a proposal awaiting the merchant's choice (see chat).
 - [x] R9. Meet Laura on the homepage: portrait removed; heading, line and the
       "Read Laura's Story" link centered. Phone rules for the section restored.
+- [x] R10. Espresso kept only for the banner and footer (merchant 2026-10-11):
+      "Wear it together" and the private-clients band now default to a warm
+      style; each has a Color setting (Espresso still available). The navy
+      lab-grown row stays.
+- [x] R11. Menu and dropdowns follow the homepage: Loose Diamonds | Rings | Fine
+      Jewelry | Watches & Estate | Our Story. Lab-grown and natural stones share
+      one dropdown; gold and lab-grown jewelry sit under Fine Jewelry. Dropdown
+      photos are the approved real/campaign images; the watch card pulls a real
+      in-stock Rolex photo (w-t3757). The AI-generated Rolex asset is not used.
+      Python tests updated to the new homepage and menu (1 older failure remains:
+      "backvault-feed" tag name in main-product.liquid, not customer-facing).
+- [x] R12. Menu (2026-10-12): no "pre-owned" wording in the dropdowns ("All watches",
+      "All estate jewelry", "How watches are listed" — condition is named in the
+      copy and on every listing). New High Jewelry dropdown (by piece, by color,
+      by appointment; camera-original ring photo from fc-j1133 with a fallback).
+      The header search shortcuts still say "Pre-Owned Cartier / Pre-Owned & Estate".
+- [x] R13. (Built, NOT yet published.) "Shop by occasion" column in the Fine Jewelry menu:
+      For work, For a night out, Wedding & engagement, A push present (under $1,000),
+      Everyday basics. New hand-picked collections `for-work` (43 pieces) and
+      `for-a-night-out` (69), created 2026-10-12 with no sales channels; publish to
+      the Online Store only together with the menu merge. Manual collections: sold
+      pieces do not drop out on their own. Banner subtext now: "...Designed in New
+      York, crafted in Italy, by a house with 30+ years in the Diamond District."

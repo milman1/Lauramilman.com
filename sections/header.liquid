@@ -297,11 +297,15 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 .header .nav__card-title { font-family: 'Cormorant Garamond', Garamond, serif; font-size: 22px; font-weight: 500; color: var(--lmhh-espresso); }
 .header .nav__card-text { font-size: 12.5px; line-height: 1.55; color: var(--lmhh-muted); }
 
+.header .nav__dropdown--five { grid-template-columns: repeat(5, minmax(0, 1fr)) 250px; gap: 28px; padding-left: clamp(24px, 4.4vw, 64px); padding-right: clamp(24px, 4.4vw, 64px); }
+.header .nav__card--product img { object-fit: contain; background: var(--lmhh-sand, #F5F0E8); mix-blend-mode: multiply; padding: 14px; box-sizing: border-box; }
+
 .header .nav-overlay { display: none; }
 
 /* Narrow desktops: drop the photo card so the link columns keep their width. */
 @media (min-width: 1200px) and (max-width: 1379px) {
   .header .nav__dropdown { grid-template-columns: repeat(3, minmax(0, 1fr)) 1.3fr; gap: 32px; }
+  .header .nav__dropdown--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .header .nav__card { display: none; }
 }
 
@@ -545,7 +549,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     </form>
 
     {%- comment -%}
-      Four pillars, in the order the homepage walks them. Style links use
+      Menu pillars, in the order the homepage walks them. Style links use
       ?type=, which the collection page reads to pre-select its style chips;
       shape links use ?shape=, which the diamond search reads the same way.
       Gold links land on chains until the gold-jewelry collection has pieces.
@@ -558,25 +562,100 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     {%- capture caret -%}<svg class="dropdown-arrow" viewBox="0 0 9 6" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1"/></svg>{%- endcapture -%}
     {%- capture arrow -%}{% render 'lmh-arrow' %}{%- endcapture -%}
 
+    {%- comment -%}
+      Loose diamonds, rings, fine jewelry, then watches and estate: the order of
+      the homepage. Lab-grown and natural stones share one menu; lab-grown jewelry
+      and gold live under Fine Jewelry.
+    {%- endcomment -%}
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">Gold Jewelry {{ caret }}</button>
+      <button type="button" aria-expanded="false" class="nav__item-link">Loose Diamonds {{ caret }}</button>
       <div class="nav__dropdown">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Most popular</span>
-          <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chains</a>
-          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
-          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking Rings</a>
-          <a href="/collections/huggie-earrings" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-          <a href="/collections/bangles" class="nav__dropdown-link">Bangles</a>
-          <a href="{{ gold_all_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop all gold</a>
+          <span class="nav__dropdown-label">Lab-grown</span>
+          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
+          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
+          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
+          <a href="/collections/lab-grown-diamonds?shape=Cushion" class="nav__dropdown-link">Cushion</a>
+          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">Colored lab-grown</a>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all lab-grown</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Chains by style</span>
-          <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
-          <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
-          <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
-          <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
-          <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
+          <span class="nav__dropdown-label">Natural</span>
+          <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
+          <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
+          <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
+          <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Before you choose</span>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
+          <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">How diamonds are listed</span>
+          <p class="nav__intro-line">Every stone is listed with its grading lab and certificate.</p>
+          <p>Search by shape, carat, price, color and clarity, or book a viewing in Midtown to compare stones side by side.</p>
+          <a class="nav__arrow" href="/pages/buying-guide">Buying guide {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="/pages/ring-builder">
+          <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Start with the stone</span>
+          <span class="nav__card-text">Choose a diamond, pick a setting, and our goldsmiths in Italy craft the ring.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">Rings {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Shop rings</span>
+          <a href="/collections/rings" class="nav__dropdown-link">All rings</a>
+          <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement rings</a>
+          <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding bands</a>
+          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking rings</a>
+          <a href="/collections/gold-rings" class="nav__dropdown-link">Gold rings</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Build your own</span>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <a href="/collections/ring-settings" class="nav__dropdown-link">Ring settings</a>
+          <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-grown engagement rings</a>
+          <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-grown rings</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Size &amp; care</span>
+          <a href="/pages/ring-size-guide" class="nav__dropdown-link">Ring size guide</a>
+          <a href="/pages/care-guide" class="nav__dropdown-link">Care guide</a>
+          <a href="/pages/private-clients" class="nav__dropdown-link">Book an appointment</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">Rings, your way</span>
+          <p class="nav__intro-line">For your forever, for work, for play.</p>
+          <p>Many engagement rings wear just as well every day. Free insured shipping and 7-day jewelry returns.</p>
+          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
+        </div>
+        <a class="nav__card" href="/collections/rings">
+          <img src="{{ 'home-rings-work.webp' | asset_url }}" alt="Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet" loading="lazy" width="300" height="236">
+          <span class="nav__card-title">Rings for work</span>
+          <span class="nav__card-text">Solitaires, bands and stacking rings made to wear every day.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">Fine Jewelry {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--five">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Shop by occasion</span>
+          <a href="/collections/for-work" class="nav__dropdown-link">For work</a>
+          <a href="/collections/for-a-night-out" class="nav__dropdown-link">For a night out</a>
+          <a href="/collections/engagement-rings" class="nav__dropdown-link">Wedding &amp; engagement</a>
+          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">A push present, under $1,000</a>
+          <a href="/collections/lab-grown-earrings?type=Stud,Huggie,Hoop" class="nav__dropdown-link">Everyday basics</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Shop by piece</span>
@@ -587,14 +666,34 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
           <a href="/collections/all" class="nav__dropdown-link nav__dropdown-link--all">All jewelry</a>
         </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">Gold for the office</span>
-          <p class="nav__intro-line">A weekday uniform that survives a noon lunch and a 7 p.m. drink.</p>
-          <p>Free insured shipping and 7-day jewelry returns.</p>
-          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Gold</span>
+          <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chains</a>
+          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
+          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking Rings</a>
+          <a href="/collections/huggie-earrings" class="nav__dropdown-link">Huggies &amp; Hoops</a>
+          <a href="/collections/bangles" class="nav__dropdown-link">Bangles</a>
+          <a href="{{ gold_all_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop all gold</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Lab-grown diamond jewelry</span>
+          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
+          <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
+          <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
+          <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
+          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">Under $1,000</a>
+          <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">All lab-grown jewelry</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">Chains by style</span>
+          <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
+          <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
+          <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
+          <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
+          <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
         </div>
         <a class="nav__card" href="{{ gold_all_url }}">
-          <img src="{{ 'shop-world-fine-jewelry.webp' | asset_url }}" alt="Gold station necklace on ivory satin" loading="lazy" width="300" height="236">
+          <img src="{{ 'home-gold-editorial.webp' | asset_url }}" alt="Woman in a black blazer wearing layered gold chain necklaces" loading="lazy" width="300" height="236">
           <span class="nav__card-title">Gold for the office, and after</span>
           <span class="nav__card-text">Chains, stacking rings, huggies and bangles in yellow gold.</span>
         </a>
@@ -602,7 +701,48 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.estate_label | default: 'Pre-Owned Watches &amp; Jewelry' }} {{ caret }}</button>
+      <button type="button" aria-expanded="false" class="nav__item-link">High Jewelry {{ caret }}</button>
+      <div class="nav__dropdown">
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By piece</span>
+          <a href="/collections/high-jewelry-rings" class="nav__dropdown-link">Rings</a>
+          <a href="/collections/high-jewelry-earrings" class="nav__dropdown-link">Earrings</a>
+          <a href="/collections/high-jewelry-bracelets" class="nav__dropdown-link">Bracelets</a>
+          <a href="/collections/high-jewelry-necklaces" class="nav__dropdown-link">Pendants &amp; Necklaces</a>
+          <a href="/collections/high-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All high jewelry</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By color</span>
+          <a href="/collections/fancy-yellow-diamonds" class="nav__dropdown-link">Fancy yellow</a>
+          <a href="/collections/fancy-pink-diamonds" class="nav__dropdown-link">Fancy pink</a>
+          <a href="/collections/fancy-green-diamonds" class="nav__dropdown-link">Fancy green</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">By appointment</span>
+          <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
+          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
+        </div>
+        <div class="nav__intro">
+          <span class="nav__dropdown-label">High jewelry</span>
+          <p class="nav__intro-line">Fancy color diamonds set in platinum and gold.</p>
+          <p>Private viewings in Midtown, in person or by video. Free insured shipping and 7-day jewelry returns.</p>
+          <a class="nav__arrow" href="/pages/private-clients">Book a viewing {{ arrow }}</a>
+        </div>
+        {%- assign hj_card = all_products['fc-j1133'] -%}
+        <a class="nav__card{% if hj_card.featured_image != blank %} nav__card--product{% endif %}" href="/collections/high-jewelry">
+          {%- if hj_card.featured_image != blank -%}
+            {{ hj_card.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: hj_card.title, widths: '300, 600', sizes: '300px' }}
+          {%- else -%}
+            <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
+          {%- endif -%}
+          <span class="nav__card-title">Fancy color diamonds</span>
+          <span class="nav__card-text">Yellow, pink, green and more, set in platinum and gold.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.estate_label | default: 'Watches &amp; Estate' }} {{ caret }}</button>
       <div class="nav__dropdown">
         <div class="nav__group">
           <span class="nav__dropdown-label">Watches</span>
@@ -611,7 +751,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
           <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
           <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
-          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned watches</a>
+          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All watches</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Signed jewelry</span>
@@ -620,7 +760,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
           <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
           <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All pre-owned &amp; estate</a>
+          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All estate jewelry</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Start here</span>
@@ -629,98 +769,20 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/pages/authentication" class="nav__dropdown-link">Estate authentication</a>
         </div>
         <div class="nav__intro">
-          <span class="nav__dropdown-label">How pre-owned is listed</span>
+          <span class="nav__dropdown-label">How watches are listed</span>
           <p class="nav__intro-line">Every watch listing states what its record confirms.</p>
-          <p>Reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
+          <p>Condition, reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
           <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
         </div>
-        <a class="nav__card" href="/collections/time-pieces">
-          <img src="{{ 'shop-world-preowned-timepieces.webp' | asset_url }}" alt="Steel watch on a suede display cushion" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">Wear it together</span>
-          <span class="nav__card-text">A pre-owned watch, a tennis bracelet and a gold chain bracelet.</span>
-        </a>
-      </div>
-    </div>
-
-    {%- comment -%}
-      Ring settings, eternity bands and wedding bands are deliberately absent:
-      the house holds no lab-grown stock in those three.
-    {%- endcomment -%}
-    <div class="nav__item nav__item--peaceful">
-      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.peaceful_label | default: 'Lab-Grown Diamonds' }} {{ caret }}</button>
-      <div class="nav__dropdown">
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Most popular</span>
-          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
-          <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-          <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
-          <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
-          <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
-          <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">All lab-grown jewelry</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">By category</span>
-          <a href="/collections/lab-grown-bracelets" class="nav__dropdown-link">Bracelets</a>
-          <a href="/collections/lab-grown-necklaces" class="nav__dropdown-link">Necklaces</a>
-          <a href="/collections/lab-grown-earrings" class="nav__dropdown-link">Earrings</a>
-          <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Rings</a>
-          <a href="/collections/lab-grown-pendants" class="nav__dropdown-link">Pendants</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Loose lab-grown</span>
-          <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">Colored Lab-Grown Diamonds</a>
-          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
-          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search loose lab-grown</a>
-        </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">How lab-grown is listed</span>
-          <p class="nav__intro-line">Every loose stone is listed with its grading lab and certificate.</p>
-          <p>Huggies, station pieces and tennis bracelets in 14K gold, set with lab-grown diamonds.</p>
-          <a class="nav__arrow" href="/pages/buying-guide">Buying guide {{ arrow }}</a>
-        </div>
-        <a class="nav__card" href="{{ peaceful_url }}">
-          <img src="{{ 'shop-channel-cover.jpg' | asset_url }}" alt="Gold tennis bracelet, diamond studs and an eternity band on navy velvet" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">Diamonds for the week</span>
-          <span class="nav__card-text">Tennis bracelets, huggies and studs, plus loose lab-grown stones.</span>
-        </a>
-      </div>
-    </div>
-
-    <div class="nav__item nav__item--end">
-      <button type="button" aria-expanded="false" class="nav__item-link">Natural Diamonds {{ caret }}</button>
-      <div class="nav__dropdown">
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Most popular shapes</span>
-          <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
-          <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Engagement</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
-          <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement Rings</a>
-          <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding Bands</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Before you choose</span>
-          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying Guide</a>
-          <a href="/pages/private-clients" class="nav__dropdown-link">Book a Private Viewing</a>
-        </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">How natural is listed</span>
-          <p class="nav__intro-line">Every natural diamond is listed with its grading lab.</p>
-          <p>GIA on nearly every stone. Book a private viewing in Midtown to compare stones side by side.</p>
-          <a class="nav__arrow" href="/pages/private-clients">Book a viewing {{ arrow }}</a>
-        </div>
-        <a class="nav__card" href="/pages/ring-builder">
-          <img src="{{ 'shop-world-loose-diamonds.webp' | asset_url }}" alt="Oval diamond resting on champagne satin" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">Start with the stone</span>
-          <span class="nav__card-text">Choose a lab-grown or natural diamond, pick a setting, and our goldsmiths in Italy craft the ring.</span>
+        {%- assign rolex_card = all_products['w-t3757'] -%}
+        <a class="nav__card{% if rolex_card.featured_image != blank %} nav__card--product{% endif %}" href="/collections/rolex-watches">
+          {%- if rolex_card.featured_image != blank -%}
+            {{ rolex_card.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: rolex_card.title, widths: '300, 600', sizes: '300px' }}
+          {%- else -%}
+            <img src="{{ 'home-gold-editorial.webp' | asset_url }}" alt="Woman wearing layered gold chain necklaces" loading="lazy" width="300" height="236">
+          {%- endif -%}
+          <span class="nav__card-title">The Rolex edit</span>
+          <span class="nav__card-text">Daytona, Submariner, GMT-Master II, Datejust and Day-Date, authenticity guaranteed.</span>
         </a>
       </div>
     </div>
@@ -1318,8 +1380,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     {
       "type": "text",
       "id": "estate_label",
-      "label": "Pre-owned menu label",
-      "default": "Pre-Owned Watches & Jewelry"
+      "label": "Watches and estate menu label",
+      "default": "Watches & Estate"
     },
     {
       "type": "text",

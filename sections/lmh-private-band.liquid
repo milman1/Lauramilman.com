@@ -1,10 +1,10 @@
 {%- comment -%}
-  "Bespoke, by appointment": espresso band with the showroom address,
+  "Bespoke, by appointment": band (warm by default; espresso optional) with the showroom address,
   email and the consultation button.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-private lmh-dark" aria-labelledby="LmhPrivate-{{ section.id }}">
+<section class="lmh lmh-private{% if section.settings.style == 'dark' %} lmh-dark{% else %} lmh-private--light{% endif %}" aria-labelledby="LmhPrivate-{{ section.id }}">
   <div class="lmh-private__l">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
     <h2 class="lmh-h2" id="LmhPrivate-{{ section.id }}">
@@ -30,6 +30,7 @@
   "name": "LM private clients band",
   "tag": "div",
   "settings": [
+    { "type": "select", "id": "style", "label": "Color", "default": "light", "options": [ { "value": "light", "label": "Warm (sand)" }, { "value": "dark", "label": "Espresso" } ] },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Private Clients" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Bespoke," },
     { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "by appointment." },
