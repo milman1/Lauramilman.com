@@ -10,6 +10,9 @@
 {%- liquid
   assign pc_tags = product.tags | join: '|||' | downcase
   assign pc_metal = product.metafields.custom.metal_type.value | default: '' | downcase
+  if product.tags contains 'Diamond Rings'
+    assign pc_metal = product.metafields.custom.metal.value | default: product.metafields.custom.metal_type.value | default: '' | downcase
+  endif
   assign pc_carat = product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value | default: ''
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
   assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
