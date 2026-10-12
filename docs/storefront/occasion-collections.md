@@ -3,7 +3,7 @@
 Two hand-picked collections, created 2026-10-12 and **not published** (no sales channels).
 Prices are the lowest option on each piece. Nothing here goes live until approved.
 
-## For Work: 43 pieces
+## For Work: 51 pieces (43 + 8 rings from the engagement collection)
 
 Everyday pieces that go from the office to dinner: studs, huggies and small hoops, tennis and station bracelets, gold chain bracelets and necklaces, pendants, stacking rings. Capped at about $2,500.
 
@@ -67,7 +67,7 @@ By kind: Earrings 16, Bracelets 11, Necklaces 7, Rings 6, Pendants 3. Prices $53
 - $1,700  Lab-Grown Round Diamond Fashion Ring in 14K or 18K Yellow Gold - 0.85 ct
 - $1,850  Channel Set Diamond Stackable Eternity Band
 
-## For a Night Out: 69 pieces
+## For a Night Out: 81 pieces (69 + 12 rings from the engagement collection)
 
 Pieces made to be noticed: drop and chandelier earrings, tennis, station and statement necklaces, tennis bracelets, cocktail and statement rings. No price cap.
 
@@ -163,3 +163,11 @@ Men's rings and wedding bands, kids' items, estate and Back Vault pieces, high j
 ## Notes
 - Both are manual lists: a sold piece will not drop out on its own, and new pieces will not join. They can be rebuilt as rules later.
 - "Marquise East-West ring" (night out) and "Round Diamond Infinity Ring" (work) are engagement-style rings that also wear every day.
+
+## Rings added from the engagement collection (2026-10-12)
+
+For Work (8): Moissanite and Diamond ring in 18K white gold $995; Lab-Grown Pear Diamond-Shank ring $1,500; Petite Diamond ring in 14K white gold $2,100; Petite Diamond ring in 18K rose gold $2,750; Lab-Grown Marquise ring in 14K yellow gold $2,850; Lab-Grown Round Hidden Halo ring $2,900; Lab-Grown Round Solitaire ring $4,600; Lab-Grown Oval Solitaire ring in 14K yellow gold $4,650.
+
+For a Night Out (12): Lab-Grown Marquise Three-Stone ring $1,300; Lab-Grown Diamond Halo ring in 18K white gold $1,490; Lab-Grown Emerald Hidden-Halo ring $1,600; Lab-Grown Radiant, Oval and Emerald Hidden Halo rings $4,500 to $4,700; Cushion and Emerald solitaires $4,650 to $4,700; Halo Diamond ring in 18K white gold $5,500; Green Emerald and Diamond vintage-style ring $5,500; Lab-Grown Dutch Marquise ring set $8,500; Pear Diamond ring in 18K white gold $9,750.
+
+Left out: the Blue Sapphire, Green Emerald and Pink Sapphire Halo rings (drafts: not touched), and engagement rings over $10,000.
