@@ -20,7 +20,8 @@
 
   <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
     {%- for name in shape_list -%}
-      <li><a class="lmh-shape" href="{{ base }}?shape={{ name }}">{%- render 'diamond-shape-icon', shape: name | downcase -%}<span>{{ name }}</span></a></li>
+      {%- assign icon_key = name | downcase -%}
+      <li><a class="lmh-shape" href="{{ base }}?shape={{ name }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
     {%- endfor -%}
   </ul>
 
