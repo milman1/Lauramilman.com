@@ -55,11 +55,12 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 3.5× invoice cost at every size. Fail-closed
- * $/ct guards still apply.
+ * Loose lab-grown diamonds: 2× invoice cost, never less than cost + $250,
+ * at every size. Fail-closed $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 3.15× cost (68.3% gross before fees).
+ * is 1.8× cost (44.4% gross before fees) once the multiple binds; the $250
+ * minimum covers small stones, where 2× would leave a few dollars.
  *
  * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
  * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
@@ -67,13 +68,20 @@ export const STONE_TIERS: LabTier[] = [
  * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
  * so a stone plus setting totals less while stones stay below the large
  * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
+ * Merchant decision 2026-10-12: 3.5× → 2× with a $250 minimum margin, to
+ * match Diyona and the other resellers of the same IGI stones. Their sale
+ * prices sit at 1.9–2.0× our cost (Diyona: 1.89×, 1.96×, 1.98×, 2.04× on four
+ * certificates checked 2026-10-12). Their list prices are about 4×; the sale
+ * is shown as a standing 50% off, so this follows the price shoppers see.
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 3.5,
+  costMultiple: 2,
+  /** Retail is never below cost + this, so a small stone still earns real money. */
+  minGrossUsd: 250,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
+/** Invoice-cost multiple for a loose lab stone. Flat 2× at every size. */
 export function labRetailMultipleFromCost(_costUsd: number): number {
   return LOOSE_LAB_GROWN.costMultiple;
 }
@@ -92,9 +100,10 @@ export const LAB_GUARDS = {
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
    * total). Scaled with the multiple so the same invoices stay held:
-   * at 3.5×, 1ct Amount $70 → $245 is held; Amount $72 → $252 publishes.
+   * at 2×, 1ct Amount $70 → $140 is held; Amount $72 → $144 passes. Tested
+   * against the multiple ticket, before the $250 minimum margin is added.
    */
-  minRetailUsd: 252,
+  minRetailUsd: 144,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.

@@ -41,29 +41,29 @@ describe('natural pricing', () => {
 });
 
 describe('lab pricing', () => {
-  it('applies 3.5× at every size', () => {
+  it('applies 2× at every size, with a $250 minimum margin', () => {
     const cheap = priceLab(labStone({ carat: 1.0, costUsd: 400, pricePerCaratUsd: 400 }));
     const sold = priceLab(labStone({ carat: 2.0, costUsd: 182, pricePerCaratUsd: 91 }));
     const mid = priceLab(labStone({ carat: 2.0, costUsd: 1200, pricePerCaratUsd: 600 }));
     const big = priceLab(labStone({ carat: 10.26, costUsd: 1662.12, pricePerCaratUsd: 162 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(1400);
-    expect(sold.ok && sold.priced.retailUsd).toBe(637);
-    expect(mid.ok && mid.priced.retailUsd).toBe(4200);
-    expect(big.ok && big.priced.retailUsd).toBe(5817);
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(800); // 400 × 2
+    expect(sold.ok && sold.priced.retailUsd).toBe(432); // 182 + 250 beats 364
+    expect(mid.ok && mid.priced.retailUsd).toBe(2400);
+    expect(big.ok && big.priced.retailUsd).toBe(3324);
   });
 
   it('does not compress markup on high-value lab stones', () => {
     const r = priceLab(labStone({ carat: 12, costUsd: 50_000, pricePerCaratUsd: 4000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(175_000);
+    expect(r.ok && r.priced.retailUsd).toBe(100_000);
   });
 
   it('keeps a representative 5.01ct stone profitable after the 10% welcome discount', () => {
     const r = priceLab(labStone({ carat: 5.01, costUsd: 590, pricePerCaratUsd: 117.76 }));
-    expect(r.ok && r.priced.retailUsd).toBe(2065);
+    expect(r.ok && r.priced.retailUsd).toBe(1180);
     if (r.ok) {
       const discountedRevenue = r.priced.retailUsd * 0.9;
-      expect(discountedRevenue).toBeCloseTo(1858.5);
-      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.683, 2);
+      expect(discountedRevenue).toBeCloseTo(1062);
+      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.444, 2);
     }
   });
 
@@ -81,23 +81,23 @@ describe('lab pricing', () => {
 
   it('holds when retail is below the absolute floor for ≥1ct', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 40, pricePerCaratUsd: 40 }));
-    // 40 × 3.5 = 140 < $252 retail floor
+    // 40 × 2 = 80 < $144 ticket floor
     expect(!r.ok && (r.hold.reason === 'lab_retail_floor' || r.hold.reason === 'lab_cost_per_carat_floor')).toBe(true);
   });
 
-  it('publishes a 1ct lab once its 3.5× ticket reaches the $252 floor', () => {
+  it('publishes a 1ct lab once its 2× ticket reaches the $144 floor, at cost + $250', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 72, pricePerCaratUsd: 72 }));
-    expect(r.ok && r.priced.retailUsd).toBe(252);
+    expect(r.ok && r.priced.retailUsd).toBe(322); // 72 + 250 beats 144
   });
 
-  it('holds a 1ct lab whose 3.5× ticket is just under the $252 floor', () => {
+  it('holds a 1ct lab whose 2× ticket is just under the $144 floor, even though cost + $250 would clear it', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 70, pricePerCaratUsd: 70 }));
     expect(!r.ok && r.hold.reason).toBe('lab_retail_floor');
   });
 
-  it('publishes a 1ct lab once the ticket clears $252', () => {
+  it('prices a 1ct lab at cost + $250 when that beats 2×', () => {
     const r = priceLab(labStone({ carat: 1.0, costUsd: 130, pricePerCaratUsd: 130 }));
-    expect(r.ok && r.priced.retailUsd).toBe(455);
+    expect(r.ok && r.priced.retailUsd).toBe(380); // 130 + 250 beats 260
   });
 
   it('holds when retail < cost (structurally impossible)', () => {
@@ -117,7 +117,7 @@ describe('lab retail increases with carat when grade & $/ct held constant', () =
    * and grade are fixed, larger stones must retail for more — never less.
    */
   it('is monotonic across 0.5 → 10ct', () => {
-    const ppc = 130; // fixed $/ct; 1ct × 3.5 = $455, above the $252 floor
+    const ppc = 130; // fixed $/ct; 1ct × 2 = $260, above the $144 floor
     const carats = [0.5, 1, 2, 3, 6, 10];
     const retails: number[] = [];
     for (const carat of carats) {

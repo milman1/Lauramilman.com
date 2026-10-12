@@ -1,6 +1,7 @@
 import {
   DIAMOND,
   LAB_GUARDS,
+  LOOSE_LAB_GROWN,
   labRetailMultipleFromCost,
   STONE_TIERS as FALLBACK_RULES,
 } from '../config/pricing.js';
@@ -29,7 +30,7 @@ function minCostPerCaratFloor(carat: number): number {
 /**
  * Ticket = round(Amount × chart multiple). Amount is invoice cost.
  */
-function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
+function priceFromLmnyCost(item: StoneItem, multiple: number, minGrossUsd = 0): PriceResult {
   if (!(item.costUsd > 0)) {
     return {
       ok: false,
@@ -40,7 +41,7 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
       },
     };
   }
-  const retailUsd = round(item.costUsd * multiple);
+  const retailUsd = Math.max(round(item.costUsd * multiple), minGrossUsd > 0 ? round(item.costUsd + minGrossUsd) : 0);
   if (retailUsd < item.costUsd) {
     return {
       ok: false,
@@ -82,7 +83,7 @@ export function priceNatural(item: StoneItem): PriceResult {
 }
 
 /**
- * Lab-grown: 3.5× invoice cost at every size, after fail-closed mapping guards.
+ * Lab-grown: 2× invoice cost, never under cost + $250, after fail-closed mapping guards.
  */
 export function priceLab(item: StoneItem): PriceResult {
   const ppc = item.pricePerCaratUsd ?? (item.carat > 0 ? item.costUsd / item.carat : 0);
@@ -116,20 +117,21 @@ export function priceLab(item: StoneItem): PriceResult {
     }
   }
 
-  const priced = priceFromLmnyCost(item, labRetailMultipleFromCost(item.costUsd));
+  const multiple = labRetailMultipleFromCost(item.costUsd);
+  const priced = priceFromLmnyCost(item, multiple, LOOSE_LAB_GROWN.minGrossUsd);
   if (!priced.ok) return priced;
 
-  if (
-    item.carat >= LAB_GUARDS.minCaratForRetailFloor &&
-    priced.priced.retailUsd < LAB_GUARDS.minRetailUsd
-  ) {
+  // The $/ct-as-total guard looks at the multiple ticket, not the final price:
+  // the $250 minimum would otherwise lift a mis-mapped $70 cost over the floor.
+  const ticketUsd = round(item.costUsd * multiple);
+  if (item.carat >= LAB_GUARDS.minCaratForRetailFloor && ticketUsd < LAB_GUARDS.minRetailUsd) {
     return {
       ok: false,
       hold: {
         kind: item.kind,
         stockRef: item.stockRef,
         reason: 'lab_retail_floor',
-        detail: `retail ${priced.priced.retailUsd} < $${LAB_GUARDS.minRetailUsd} at ${item.carat}ct`,
+        detail: `ticket ${ticketUsd} < $${LAB_GUARDS.minRetailUsd} at ${item.carat}ct`,
       },
     };
   }
