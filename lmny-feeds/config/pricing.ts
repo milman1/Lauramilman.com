@@ -67,14 +67,26 @@ export const STONE_TIERS: LabTier[] = [
  * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
  * so a stone plus setting totals less while stones stay below the large
  * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
+ * Merchant decision 2026-10-13: stones of 5.00 ct and up drop to 2.5×
+ * (see `largeStoneCostMultiple`). Same-certificate checks showed the cheapest
+ * other sellers 32–49% below us at 5 ct and up. Review after 60 days.
  */
 export const LOOSE_LAB_GROWN = {
   costMultiple: 3.5,
+  /** Stones at or above this weight use `largeStoneCostMultiple`. */
+  largeStoneMinCarat: 5,
+  largeStoneCostMultiple: 2.5,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
-export function labRetailMultipleFromCost(_costUsd: number): number {
+/**
+ * Invoice-cost multiple for a loose lab stone: 3.5×, or 2.5× from 5.00 ct up.
+ * `carat` is optional so cost-only callers keep the standard multiple.
+ */
+export function labRetailMultipleFromCost(_costUsd: number, carat?: number): number {
+  if (carat !== undefined && carat >= LOOSE_LAB_GROWN.largeStoneMinCarat) {
+    return LOOSE_LAB_GROWN.largeStoneCostMultiple;
+  }
   return LOOSE_LAB_GROWN.costMultiple;
 }
 
