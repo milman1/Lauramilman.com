@@ -9,8 +9,16 @@
 }
 
 .article-template__hero-container {
-  max-width: 130rem;
-  margin: 0 auto;
+  max-width: 90rem;
+  margin: 2.4rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.article-template__hero-adapt {
+  height: clamp(22rem, 34vw, 42rem);
+  padding-bottom: 0 !important;
+  border-radius: 0.4rem;
+  overflow: hidden;
 }
 
 .article-template__hero-small {
