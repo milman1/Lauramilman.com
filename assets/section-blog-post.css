@@ -1,3 +1,8 @@
+.shopify-section.section:has(> .article-template) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .article-template__hero-container {
   width: 100%;
   max-width: 960px;
@@ -244,9 +249,9 @@
 
   .article-template > header {
     grid-column: 1;
-    align-self: center;
+    align-self: start;
     max-width: none;
-    margin: 0;
+    margin: 64px 0 0;
     padding: 0;
   }
 
