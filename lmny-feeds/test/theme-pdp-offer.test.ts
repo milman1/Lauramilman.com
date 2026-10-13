@@ -11,14 +11,15 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps Ask and Direct message on every product, and Make an offer only for natural diamonds, maison vintage, and watches', () => {
+  it('keeps Ask and Direct message on every product, and Make an offer only for watches', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
     expect(inquiry).toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
     expect(inquiry).toContain('Direct message');
     expect(inquiry).toContain("render 'product-is-watch', product: product");
-    expect(inquiry).toContain("render 'product-is-vintage', product: product");
-    expect(inquiry).toContain("type_l == 'natural diamond' or is_watch == 'true' or is_vintage == 'true'");
+    expect(inquiry).not.toContain("render 'product-is-vintage'");
+    expect(inquiry).toContain("if is_watch == 'true'");
+    expect(inquiry).not.toContain("type_l == 'natural diamond'");
     expect(inquiry).toContain("type_l == 'lab-grown diamond'");
     expect(inquiry).toContain('assign offer_ok = false');
     const offerStart = inquiry.indexOf('{%- if offer_ok -%}');
@@ -36,18 +37,26 @@ describe('product-page inquiry pills', () => {
     expect(inquiry).not.toContain('Book a call');
   });
 
-  it('removes Reserve this diamond from natural and lab diamond search', () => {
+  it('puts Reserve this diamond on lab, colored, and natural search tiles', () => {
     const filter = themeFile('sections/diamond-filter.liquid');
     const cards = themeFile('assets/diamond-storefront.js');
-    const natural = themeFile('templates/collection.diamonds.json');
-    const lab = themeFile('templates/collection.diamonds-lab.json');
-    for (const file of [filter, cards, natural, lab]) {
-      expect(file).not.toContain('Reserve this diamond');
-      expect(file).not.toContain('Reserve instead');
-      expect(file).not.toContain('reserve_url');
-      expect(file).not.toContain('reserve-diamond');
-      expect(file).not.toContain('data-reserve');
+    const coloredCards = themeFile('assets/colored-diamond-filter.js');
+    const colored = themeFile('sections/colored-diamond-filter.liquid');
+    const form = themeFile('snippets/diamond-reserve-form.liquid');
+    const productCard = themeFile('snippets/product-card.liquid');
+    for (const file of [cards, coloredCards, productCard, form]) {
+      expect(file).toContain('Reserve this diamond');
     }
+    expect(cards).toContain('data-reserve-stone');
+    expect(coloredCards).toContain('data-reserve-stone');
+    expect(productCard).toContain('show_reserve');
+    expect(form).toContain("form 'contact', id: 'DiamondReserveForm'");
+    expect(form).toContain('value="Diamond reserve"');
+    expect(form).not.toContain('reserve-diamond');
+    expect(filter.split("render 'diamond-reserve-form'").length - 1).toBe(2);
+    expect(colored).toContain("render 'diamond-reserve-form'");
+    expect(filter).toContain('show_reserve: true');
+    expect(colored).toContain('show_reserve: true');
     expect(cards).toContain('Add to cart');
     expect(cards).toContain('Buy now');
   });
@@ -128,24 +137,17 @@ describe('product-page inquiry pills', () => {
   });
 });
 
-describe('lab-grown search help line', () => {
-  const line = themeFile('snippets/collection-ask-line.liquid');
+describe('lab-grown search heading', () => {
   const filter = themeFile('sections/diamond-filter.liquid');
+  const guide = themeFile('snippets/collection-guide.liquid');
 
-  it('offers one general help form on lab-grown search, never a reserve or an offer', () => {
-    expect(line).toContain("form 'contact', id: 'CollectionAskForm'");
-    expect(line).toContain('Stone search help');
-    expect(line).toContain('contact[body]');
-    expect(line).toContain('contact[email]');
-    expect(line).not.toMatch(/reserve/i);
-    expect(line).not.toMatch(/offer/i);
-  });
-
-  it('renders under both diamond-filter headings, lab-grown only, behind a setting', () => {
-    const guard = "{%- if origin_is_lab and section.settings.show_ask_line -%}";
-    expect(filter.split(guard).length - 1).toBe(2);
-    expect(filter.split("render 'collection-ask-line'").length - 1).toBe(2);
-    expect(filter).toContain('"id": "show_ask_line"');
+  it('does not show the price note, the stone-help line, or the IGI guide on loose lab search', () => {
+    expect(filter).not.toContain("render 'price-comparison-note'");
+    expect(filter).not.toContain("render 'collection-ask-line'");
+    expect(filter).not.toContain('"id": "show_ask_line"');
+    expect(filter).not.toContain('"id": "price_note"');
+    expect(guide).not.toContain("'lab-grown-diamonds'");
+    expect(guide).toContain('/blogs/journal/igi-vs-gia-certified-lab-diamonds');
   });
 });
 

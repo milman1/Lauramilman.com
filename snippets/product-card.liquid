@@ -87,5 +87,16 @@
         <span class="product-card__type">{{ product.type }}</span>
       {%- endif -%}
     </div>
+    {%- if show_reserve -%}
+      <button
+        type="button"
+        class="lm-stone-card__reserve"
+        data-reserve-stone
+        data-reserve-title="{{ display_title | escape }}"
+        data-reserve-url="{{ product.url }}"
+        data-reserve-stock="{{ product.metafields.lmny_feed.stock_ref.value | default: product.metafields.lmny_feed.cert_number.value | escape }}"
+        data-reserve-price="{{ product.price | money_without_trailing_zeros | strip_html | escape }}"
+      >Reserve this diamond</button>
+    {%- endif -%}
   </div>
 </div>

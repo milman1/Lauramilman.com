@@ -192,6 +192,16 @@
       '<button type="button" class="lm-stone-card__buy" data-buy-handle="' +
       escapeAttr(href.replace('/products/', '')) +
       '">Buy now</button>' +
+      '<button type="button" class="lm-stone-card__reserve" data-reserve-stone' +
+      ' data-reserve-title="' +
+      escapeAttr(title) +
+      '" data-reserve-url="' +
+      escapeAttr(href) +
+      '" data-reserve-stock="' +
+      escapeAttr(stone.stock_ref || '') +
+      '" data-reserve-price="' +
+      escapeAttr(money(stone.retail_usd)) +
+      '">Reserve this diamond</button>' +
       '</div>' +
       '</div></div>'
     );
