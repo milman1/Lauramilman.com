@@ -53,6 +53,9 @@
     assign carat_ceil = 30
     assign price_ceil = 250000
   endif
+  if origin_is_lab
+    assign carat_floor = 1
+  endif
 -%}
 
 {%- unless search_only -%}
