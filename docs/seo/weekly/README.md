@@ -36,10 +36,9 @@ To connect Google data, the merchant does one of these:
 Once a month (first report of the month), re-run the price check: read each
 site's public listing pages through Firecrawl, match round stones by carat
 (±0.06), color and clarity against the live catalog, and save the matches as
-`docs/seo/YYYY-MM-DD-lab-price-comparison.csv`. If the lab-grown search note
-(`templates/collection.diamonds-lab.json`, `price_note`) is still true,
-propose new text and a new `price_note_until`; if it is not, propose removing
-it. Never name a competitor on the storefront.
+`docs/seo/YYYY-MM-DD-lab-price-comparison.csv`. Keep the comparison in that
+file. The lab-grown search page no longer shows a price note (removed
+2026-10-13). Never name a competitor on the storefront.
 
 ## Queries (ShopifyQL)
 

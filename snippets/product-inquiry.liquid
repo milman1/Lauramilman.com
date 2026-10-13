@@ -3,8 +3,7 @@
   this product pinned beside it on every product. Make an offer opens a
   short form that posts through Shopify's contact form, so the offer
   reaches the store's email with the piece attached. That form is only
-  for loose natural diamonds, maison / vintage / estate pieces, and
-  watches. Lab-grown loose diamonds and other jewelry do not get it.
+  for watches. Lab-grown loose diamonds and other jewelry do not get it.
   Loose lab-grown diamonds get "Ask about this stone" instead of the chat
   "Ask" pill: a short question form through the same contact form, so the
   stone and the shopper's email reach the store's inbox. It makes no
@@ -24,17 +23,14 @@
   assign type_l = product.type | downcase | strip
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
-{%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
 {%- liquid
   assign is_watch = is_watch | strip
-  assign is_vintage = is_vintage | strip
   assign offer_ok = false
-  if type_l == 'natural diamond' or is_watch == 'true' or is_vintage == 'true'
+  if is_watch == 'true'
     assign offer_ok = true
   endif
   assign ask_form_ok = false
   if type_l == 'lab-grown diamond'
-    assign offer_ok = false
     assign ask_form_ok = true
   endif
 -%}

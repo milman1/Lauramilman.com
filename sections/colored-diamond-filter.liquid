@@ -96,9 +96,10 @@
       </div>
     </div>
     <div class="products-grid lm-dfilter__results" data-colored-results aria-live="polite">
-      {%- for product in collection.products limit: 24 -%}{% render 'product-card', product: product %}{%- endfor -%}
+      {%- for product in collection.products limit: 24 -%}{% render 'product-card', product: product, show_reserve: true %}{%- endfor -%}
     </div>
     <div data-colored-pager data-prev="{{ 'colored_diamonds.previous' | t | escape }}" data-next="{{ 'colored_diamonds.next' | t | escape }}" data-page="{{ 'colored_diamonds.page' | t | escape }}"></div>
+    {%- render 'diamond-reserve-form' -%}
     <noscript>{{ paginate | default_pagination }}</noscript>
     <script type="application/json" data-colored-data>
       {"page":{{ paginate.current_page }},"pages":{{ paginate.pages }},"stones":[

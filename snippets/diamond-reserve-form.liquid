@@ -1,0 +1,211 @@
+{%- comment -%}
+  One reserve form for a loose-diamond search. Each tile's "Reserve this diamond"
+  button opens it and fills the stone. The form posts through Shopify's contact
+  form, so the request lands in the store inbox as "Diamond reserve".
+{%- endcomment -%}
+<dialog class="lm-reserve__dialog" id="DiamondReserveDialog" aria-labelledby="DiamondReserveTitle">
+  {%- form 'contact', id: 'DiamondReserveForm', class: 'lm-reserve__form' -%}
+    <div class="lm-reserve__bar">
+      <h2 id="DiamondReserveTitle" class="lm-reserve__title">Reserve this diamond</h2>
+      <button type="button" class="lm-reserve__close" data-reserve-close aria-label="Close">&times;</button>
+    </div>
+    {%- if form.posted_successfully? -%}
+      <p class="lm-reserve__status" role="status" data-reserve-result>Thank you — your request to reserve this diamond was sent. We will reply by email.</p>
+    {%- else -%}
+      {%- if form.errors -%}
+        <p class="lm-reserve__status lm-reserve__status--error" role="alert" data-reserve-result>Your request did not send. Please check your email address and try again.</p>
+      {%- endif -%}
+      <p class="lm-reserve__intro">Reserve <strong data-reserve-label>this diamond</strong>. We reply by email to confirm it is still available.</p>
+      <input type="hidden" name="contact[request_type]" value="Diamond reserve">
+      <input type="hidden" name="contact[product]" value="" data-reserve-product>
+      <input type="hidden" name="contact[product_url]" value="" data-reserve-url-field>
+      <input type="hidden" name="contact[stock_number]" value="" data-reserve-stock-field>
+      <input type="hidden" name="contact[listed_price]" value="" data-reserve-price-field>
+      <div class="lm-reserve__row">
+        <div class="lm-reserve__field">
+          <label for="DiamondReserve-name">Name</label>
+          <input type="text" id="DiamondReserve-name" name="contact[name]" autocomplete="name" value="{{ form.name | default: customer.name | escape }}" required>
+        </div>
+        <div class="lm-reserve__field">
+          <label for="DiamondReserve-email">Email</label>
+          <input type="email" id="DiamondReserve-email" name="contact[email]" autocomplete="email" value="{{ form.email | default: customer.email | escape }}" required>
+        </div>
+      </div>
+      <div class="lm-reserve__field">
+        <label for="DiamondReserve-phone">Phone (optional)</label>
+        <input type="tel" id="DiamondReserve-phone" name="contact[phone]" autocomplete="tel">
+      </div>
+      <button type="submit" class="lm-reserve__submit">Reserve this diamond</button>
+    {%- endif -%}
+  {%- endform -%}
+</dialog>
+<style>
+  .lm-dfilter .lm-stone-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+  .lm-dfilter .lm-stone-card__reserve {
+    flex: 1 0 100%;
+    width: 100%;
+    margin-top: 0.7rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.55rem 0.4rem;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    background: transparent;
+    color: var(--espresso, #1E1109);
+    border: 1px solid var(--espresso, #1E1109);
+  }
+  .lm-dfilter .lm-stone-card__actions .lm-stone-card__reserve {
+    margin-top: 0;
+  }
+  .lm-dfilter--navy .lm-stone-card__reserve {
+    color: var(--wine, #4A1428);
+    border-color: var(--wine, #4A1428);
+  }
+  .lm-dfilter .lm-stone-card__reserve:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+  .lm-reserve__dialog {
+    width: min(440px, calc(100vw - 2rem));
+    padding: 0;
+    border: 1px solid #DDD5C5;
+    border-radius: 6px;
+    background: #FDFAF6;
+    color: #2C1810;
+  }
+  .lm-reserve__dialog::backdrop {
+    background: rgba(30, 17, 9, 0.45);
+  }
+  .lm-reserve__form { padding: 1.1rem 1.15rem 1.2rem; }
+  .lm-reserve__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .lm-reserve__title {
+    margin: 0;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.45rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .lm-reserve__close {
+    border: 0;
+    background: transparent;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #2C1810;
+  }
+  .lm-reserve__intro,
+  .lm-reserve__status {
+    margin: 0 0 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .lm-reserve__status--error { color: #9B2C2C; }
+  .lm-reserve__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .lm-reserve__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+  }
+  .lm-reserve__field label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .lm-reserve__field input {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    font-size: 16px;
+    color: #2C1810;
+    background: #fff;
+    border: 1px solid #CFC7B8;
+    border-radius: 4px;
+  }
+  .lm-reserve__submit {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.7rem 1rem;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #FAF6F0;
+    background: #4A1428;
+    border: 1px solid #4A1428;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  @media (max-width: 480px) {
+    .lm-reserve__row { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>
+<script>
+  (function () {
+    var dialog = document.getElementById('DiamondReserveDialog');
+    if (!dialog || dialog.dataset.ready) return;
+    dialog.dataset.ready = 'true';
+    function field(name) { return dialog.querySelector('[data-reserve-' + name + ']'); }
+    function absoluteUrl(url) {
+      if (!url) return window.location.href;
+      if (url.charAt(0) === '/') return window.location.origin + url;
+      return url;
+    }
+    function openReserve(btn) {
+      var title = btn.getAttribute('data-reserve-title') || 'this diamond';
+      var label = dialog.querySelector('[data-reserve-label]');
+      if (label) label.textContent = title;
+      var product = field('product');
+      var url = field('url-field');
+      var stock = field('stock-field');
+      var price = field('price-field');
+      if (product) product.value = title;
+      if (url) url.value = absoluteUrl(btn.getAttribute('data-reserve-url') || '');
+      if (stock) stock.value = btn.getAttribute('data-reserve-stock') || '';
+      if (price) price.value = btn.getAttribute('data-reserve-price') || '';
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+      var name = dialog.querySelector('#DiamondReserve-name');
+      if (name) name.focus();
+    }
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-reserve-stone]');
+      if (btn) {
+        event.preventDefault();
+        openReserve(btn);
+        return;
+      }
+      if (event.target.closest('[data-reserve-close]')) {
+        if (typeof dialog.close === 'function') dialog.close();
+        else dialog.removeAttribute('open');
+      }
+    });
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog && typeof dialog.close === 'function') dialog.close();
+    });
+    if (dialog.querySelector('[data-reserve-result]')) {
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+    }
+  })();
+</script>

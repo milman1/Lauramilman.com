@@ -81,10 +81,6 @@
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
       {%- endif -%}
       {%- unless search_only -%}
-        {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
-        {%- if origin_is_lab and section.settings.show_ask_line -%}
-          {%- render 'collection-ask-line', collection: collection -%}
-        {%- endif -%}
         {%- render 'collection-guide', collection: collection -%}
       {%- endunless -%}
       {%- render 'diamond-origin-tabs', current: origin_tab -%}
@@ -184,12 +180,13 @@
       {%- if collection.products.size > 0 -%}
         <div class="products-grid lm-dfilter__results">
           {%- for product in collection.products limit: section.settings.products_per_page -%}
-            {%- render 'product-card', product: product -%}
+            {%- render 'product-card', product: product, show_reserve: true -%}
           {%- endfor -%}
         </div>
       {%- endif -%}
     </div>
     <div id="lm-diamond-pager"></div>
+    {%- render 'diamond-reserve-form' -%}
   {%- endunless -%}
   </div>
 </section>
@@ -243,10 +240,6 @@
         <p class="lm-dfilter__subtitle">{{ section.settings.subheading }}</p>
       {%- elsif collection.description != blank -%}
         <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
-      {%- endif -%}
-      {%- render 'price-comparison-note', text: section.settings.price_note, until: section.settings.price_note_until -%}
-      {%- if origin_is_lab and section.settings.show_ask_line -%}
-        {%- render 'collection-ask-line', collection: collection -%}
       {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
       {%- render 'diamond-origin-tabs', current: origin_tab -%}
@@ -496,7 +489,7 @@
     {%- if collection.products.size > 0 -%}
       <div class="products-grid lm-dfilter__results">
         {%- for product in collection.products -%}
-          {%- render 'product-card', product: product -%}
+          {%- render 'product-card', product: product, show_reserve: true -%}
         {%- endfor -%}
       </div>
 
@@ -531,6 +524,7 @@
       </div>
     {%- endif -%}
 
+    {%- render 'diamond-reserve-form' -%}
   </div>
 </section>
 
@@ -1313,6 +1307,7 @@
   }
   .lm-dfilter__results-host .lm-stone-card__actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.4rem;
     margin-top: 0.7rem;
   }
@@ -1477,25 +1472,6 @@
       "id": "subheading",
       "label": "Subheading",
       "info": "Falls back to the collection description."
-    },
-    {
-      "type": "textarea",
-      "id": "price_note",
-      "label": "Price comparison note",
-      "info": "Plain text shown under the subheading. Only state a comparison you have checked and recorded in the docs."
-    },
-    {
-      "type": "text",
-      "id": "price_note_until",
-      "label": "Hide the note after (YYYY-MM-DD)",
-      "info": "Required. The note disappears after this date so an old comparison is never shown. Re-check prices before extending it."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_ask_line",
-      "label": "Show the \"Not sure which stone?\" help form",
-      "info": "Lab-grown search only. Questions arrive in the store inbox as \"Stone search help\".",
-      "default": true
     },
     {
       "type": "range",
