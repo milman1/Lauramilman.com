@@ -16,6 +16,7 @@ import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
 import { fetchAllowedWatchStocks, fetchTlvWatchStocks } from './feeds/watchPartners.js';
 import { FEED_FETCH_ORDER, parseEnabledFeeds } from './feeds-config.js';
+import { EMPTY_FEED_ERROR, emptyFeedRetryDelayMs, feedsNeedingRetry, sleep } from './feedRetry.js';
 import { channelsFor } from '../config/channels.js';
 import { isUnavailableProductHandle } from '../config/unavailable.js';
 import {
@@ -229,12 +230,8 @@ async function main() {
     watch: { fetched: 0, publishable: 0, held: 0 },
   };
 
-  for (const kind of FEED_FETCH_ORDER) {
-    if (!enabledFeeds.has(kind)) {
-      feeds[kind].skipped = true;
-      console.log(`Feed ${kind}: skipped (not in SYNC_FEEDS)`);
-      continue;
-    }
+  const loadFeed = async (kind: Kind): Promise<void> => {
+    delete feeds[kind].fetchError;
     try {
       let rows = await fetchBelgiumDiaFeed(kind);
       if (flags.limit) rows = rows.slice(0, flags.limit);
@@ -243,9 +240,9 @@ async function main() {
       // it as a soft failure so it never archives the whole catalog segment.
       if (rows.length === 0) {
         feeds[kind].fetched = 0;
-        feeds[kind].fetchError = 'returned 0 rows (likely rate-limit/outage) — segment protected, not archived';
+        feeds[kind].fetchError = EMPTY_FEED_ERROR;
         console.error(`Feed ${kind}: 0 rows — treating as outage; catalog segment will NOT be archived`);
-        continue;
+        return;
       }
       const result = await (async () => {
         if (kind !== 'watch') return normalizeStones(rows, kind);
@@ -261,6 +258,36 @@ async function main() {
     } catch (err) {
       feeds[kind].fetchError = err instanceof Error ? err.message : String(err);
       console.error(`Feed ${kind} failed: ${feeds[kind].fetchError} — its catalog segment will not be archived`);
+    }
+  };
+
+  for (const kind of FEED_FETCH_ORDER) {
+    if (!enabledFeeds.has(kind)) {
+      feeds[kind].skipped = true;
+      console.log(`Feed ${kind}: skipped (not in SYNC_FEEDS)`);
+      continue;
+    }
+    await loadFeed(kind);
+  }
+
+  // Direct belgiumdia.com calls share one ~15-minute slot. Watch and natural
+  // can both land, and lab — last in FEED_FETCH_ORDER — comes back empty.
+  // Wait out the window and retry each empty feed once before giving up.
+  const retryKinds = feedsNeedingRetry(feeds);
+  if (retryKinds.length > 0) {
+    const delay = emptyFeedRetryDelayMs();
+    const waitMsg =
+      `Supplier rate limit: ${retryKinds.join(', ')} returned 0 rows. ` +
+      `Waiting ${Math.round(delay / 1000)}s, then retrying each once.`;
+    console.warn(waitMsg);
+    notes.push(waitMsg);
+    for (const kind of retryKinds) {
+      await sleep(delay);
+      console.warn(`Retrying feed ${kind}`);
+      await loadFeed(kind);
+      if (feeds[kind].fetched > 0) {
+        notes.push(`${kind} succeeded on retry (${feeds[kind].fetched} rows).`);
+      }
     }
   }
 
@@ -1141,10 +1168,17 @@ async function main() {
   // empty (rate-limit / outage), so the run is red until data actually moves.
   const enabledList = FEED_FETCH_ORDER.filter((k) => enabledFeeds.has(k));
   const anyFetched = enabledList.some((k) => feeds[k].fetched > 0);
+  const stillEmpty = enabledList.filter((k) => feeds[k].fetchError);
   if (!anyFetched && enabledList.length > 0) {
     console.error(
       'No enabled feed returned rows — likely Belgium Dia rate-limit or cache miss. ' +
         'Shopify was not updated. Re-run in 15+ minutes, or set BELGIUMDIA_API_URL to the feed-cache Worker.',
+    );
+    process.exitCode = 1;
+  } else if (stillEmpty.length > 0) {
+    console.error(
+      `Feed(s) still unavailable after retry: ${stillEmpty.join(', ')}. ` +
+        'Those segments were not archived and were not repriced.',
     );
     process.exitCode = 1;
   }
