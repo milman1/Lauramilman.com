@@ -169,4 +169,12 @@ describe('loose-stone trust block', () => {
     expect(schema).toContain('"id": "google_rating"');
     expect(schema).not.toMatch(/"id": "google_(rating|review_count|reviews_url)"[^}]*"default"/);
   });
+
+  it('opens the grading certificate in a popup window', () => {
+    expect(diamondProduct.match(/href="\{\{ m\.cert_url \}\}" data-cert-popout/g)).toHaveLength(2);
+    expect(diamondProduct).toContain("window.open(url, 'lmny-certificate'");
+    expect(diamondProduct).toContain('popup=yes,width=');
+    expect(diamondProduct).toContain('event.preventDefault()');
+    expect(diamondProduct).not.toContain('Certificate ↗');
+  });
 });
