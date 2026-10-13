@@ -42,7 +42,7 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     // reads ?shape= (and still accepts the older filter.p.m.custom.diamond_shape).
     expect(ringSide).toContain('/collections/natural-diamonds?shape={{ shape_q }}');
     expect(ringSide).toContain('/collections/lab-grown-diamonds?shape={{ shape_q }}');
-    expect(ringSide).toContain("{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' -%}");
+    expect(ringSide).toContain("{%- if is_er == 'true' and ring_shape != '' and is_watch != 'true' and product.tags contains 'ring-setting' -%}");
   });
 
   it('only pairs an available loose diamond of the same shape', () => {

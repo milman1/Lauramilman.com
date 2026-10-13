@@ -41,14 +41,12 @@ describe('lab-grown jewelry merchandising', () => {
     expect(labGrown.sections.hero.settings?.secondary_url).toBe('/collections/lab-grown-diamonds');
   });
 
-  it('gives the homepage a lab-grown world and a product row', () => {
+  it('keeps the lab-grown product row in the homepage shopping sequence', () => {
     const home = themeJson('templates/index.json');
-    const worlds = home.sections.worlds;
-    const titles = (worlds.block_order ?? []).map((id) => worlds.blocks?.[id]?.settings?.title);
-    expect(titles).toContain('Lab-Grown Diamonds');
     expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
-    expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('worlds'));
-    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('loose-diamonds'));
+    expect(home.sections['lab-grown'].settings?.eyebrow).toBe('Lab-Grown Diamonds · Under $1,000');
+    expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('gold'));
+    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('rolex'));
   });
 });
 

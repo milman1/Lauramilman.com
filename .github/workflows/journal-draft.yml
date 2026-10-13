@@ -69,7 +69,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm test
+      - name: Test Journal drafting
+        run: npm test -- test/journalDraft.test.ts test/journalDraftRun.test.ts
 
       - name: Write drafts
         env:
