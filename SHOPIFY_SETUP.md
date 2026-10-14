@@ -224,6 +224,137 @@ The storefront popup and newsletter reveal this code after signup.
 
 ---
 
+## 6a. Pairing discount: a setting or ring with a loose stone
+
+Merchant request 2026-10-12: people who buy a setting or a ring together
+with any loose stone get an additional 10% off.
+
+**Not created yet.** On 2026-10-12 the installed app could write products,
+inventory, and themes, and it did not have `read_discounts` or
+`write_discounts` (`discountAutomaticBxgyCreate` requires both). Admin
+sign-in stopped at Google verification. Do not print a 10% pairing total
+on the product page until a cart that contains both item types shows the
+discount. A stone alone, or a ring or setting alone, stays full price.
+Watches are not in the collections below.
+
+One automatic Buy X Get Y discount only reduces the "get" items. Two
+automatic discounts, each 10% (`percentage` 0.1), combine with each other
+so both lines of the pair are reduced. Each allows one use per order and
+discounts up to 10 get items. All customers. No end date. They combine
+with product discounts and order discounts, and not with shipping
+discounts.
+
+| Title | Customer buys (quantity 1) | Customer gets 10% off (up to 10) |
+|---|---|---|
+| Pairing 10% off the setting or ring | Natural Diamonds, Lab-Grown Diamonds, Colored Lab-Grown Diamonds | Engagement Ring Settings, Engagement Rings, Rings |
+| Pairing 10% off the loose stone | Engagement Ring Settings, Engagement Rings, Rings | Natural Diamonds, Lab-Grown Diamonds, Colored Lab-Grown Diamonds |
+
+"Ring" uses the Rings collection, which is product type Rings and includes
+engagement rings, wedding bands, and other rings. Engagement Ring Settings
+and Engagement Rings are included as well so a setting or engagement ring
+still qualifies if it is not also in Rings. Counts read 2026-10-12:
+Natural Diamonds 3,518, Lab-Grown Diamonds 24,602, Colored Lab-Grown
+Diamonds 640, Engagement Ring Settings 9, Engagement Rings 56, Rings 378.
+
+Collection ids from that read:
+
+- `natural-diamonds` `gid://shopify/Collection/296278163527`
+- `lab-grown-diamonds` `gid://shopify/Collection/296278196295`
+- `colored-lab-grown-diamonds` `gid://shopify/Collection/350000775239`
+- `ring-settings` `gid://shopify/Collection/349387194439`
+- `engagement-rings` `gid://shopify/Collection/272451960903`
+- `rings` `gid://shopify/Collection/168312406087`
+
+Additional means this stacks with `LMNYWELCOME`. That code is documented
+above with combinations off. When these discounts are created, turn on
+product-discount combinations on `LMNYWELCOME` and leave its 10% and its
+other limits as they are. Shopify takes the product discount first and
+the order discount second, so the pair is 19% off when the welcome code
+is also used, not 20% off. This does not change the loose-lab retail
+multiple. The 3.15× figure is the welcome code only.
+
+Shape match still does not confirm that a loose stone fits the head.
+
+Create each discount with `discountAutomaticBxgyCreate` (Admin API
+2026-01). Swap the two collection lists for the second title. Validated
+against the 2026-01 schema. Do not run it until the app has
+`write_discounts`.
+
+```graphql
+mutation CreatePairingDiscount($automaticBxgyDiscount: DiscountAutomaticBxgyInput!) {
+  discountAutomaticBxgyCreate(automaticBxgyDiscount: $automaticBxgyDiscount) {
+    automaticDiscountNode {
+      id
+      automaticDiscount {
+        ... on DiscountAutomaticBxgy {
+          title
+          status
+          startsAt
+          combinesWith {
+            productDiscounts
+            orderDiscounts
+            shippingDiscounts
+          }
+        }
+      }
+    }
+    userErrors { field message }
+  }
+}
+```
+
+```json
+{
+  "automaticBxgyDiscount": {
+    "title": "Pairing 10% off the setting or ring",
+    "startsAt": "2026-10-12T00:00:00Z",
+    "usesPerOrderLimit": "1",
+    "combinesWith": {
+      "productDiscounts": true,
+      "orderDiscounts": true,
+      "shippingDiscounts": false
+    },
+    "customerBuys": {
+      "value": { "quantity": "1" },
+      "items": {
+        "collections": {
+          "add": [
+            "gid://shopify/Collection/296278163527",
+            "gid://shopify/Collection/296278196295",
+            "gid://shopify/Collection/350000775239"
+          ]
+        }
+      }
+    },
+    "customerGets": {
+      "value": {
+        "discountOnQuantity": {
+          "quantity": "10",
+          "effect": { "percentage": 0.1 }
+        }
+      },
+      "items": {
+        "collections": {
+          "add": [
+            "gid://shopify/Collection/349387194439",
+            "gid://shopify/Collection/272451960903",
+            "gid://shopify/Collection/168312406087"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Afterward, read both discounts back and put one available setting and one
+available loose stone in a throwaway cart. `/cart.js` should show 10% on
+each of those lines, and a cart with only one of them should show no
+pairing discount. Remove the lines when the check is done. Do not complete
+a paid checkout.
+
+---
+
 ## 7. Branded emails
 
 HTML to paste lives in `/emails`:
