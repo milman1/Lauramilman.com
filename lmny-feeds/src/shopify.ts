@@ -670,20 +670,23 @@ export class ShopifyClient {
   }
 
   /**
-   * Lab-grown finished jewelry and the gold-chains collection. Loose diamonds
-   * can appear in the lab-grown tag query; the caller drops them. Paginated
-   * on purpose so this does not start a second bulk operation.
+   * Lab-grown finished jewelry, the gold-chains collection, and Jacob & Co
+   * boutique watches. The Jacob tag is read only so the sync can leave those
+   * products alone. Loose diamonds can appear in the lab-grown tag query;
+   * the caller drops them. Paginated on purpose so this does not start a
+   * second bulk operation.
    */
   async fetchUploadifyJewelry(): Promise<UploadifyJewelryCandidate[]> {
     const chains = await this.pageUploadifyJewelry(`collection handle`, 'chains');
     const chainIds = new Set(chains.map((product) => product.id));
-    const [peaceful, tagged] = await Promise.all([
+    const [peaceful, tagged, jacob] = await Promise.all([
       this.pageUploadifyJewelry('vendor', `vendor:'Peaceful Diamonds'`),
       this.pageUploadifyJewelry('tag', 'tag:lab-grown'),
+      this.pageUploadifyJewelry('tag', 'tag:jacob-co-boutique'),
     ]);
     const byId = new Map<string, UploadifyJewelryCandidate>();
     for (const product of chains) byId.set(product.id, { ...product, inChainsCollection: true });
-    for (const product of [...peaceful, ...tagged]) {
+    for (const product of [...peaceful, ...tagged, ...jacob]) {
       const existing = byId.get(product.id);
       if (existing) continue;
       byId.set(product.id, { ...product, inChainsCollection: chainIds.has(product.id) });
