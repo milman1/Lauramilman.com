@@ -15,11 +15,26 @@
 {%- endif -%}
 <section class="lmh lmh-hero{% if section.settings.style == 'light' %} lmh-hero--light{% endif %}" aria-labelledby="LmhHero-{{ section.id }}">
   <div class="lmh-hero__copy">
-    {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
-    <h1 class="lmh-h1 lmh-em-bronze" id="LmhHero-{{ section.id }}">
-      {{- section.settings.title | escape -}}
-      {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
-    </h1>
+    {%- comment -%}
+      With eyebrow_is_h1 on, the eyebrow line is the page's one h1 (it names
+      what the store sells and where, which search engines and AI answers
+      read) and the large display line becomes a paragraph. Looks unchanged.
+    {%- endcomment -%}
+    {%- assign eyebrow_h1 = false -%}
+    {%- if section.settings.eyebrow_is_h1 and section.settings.eyebrow != blank -%}{%- assign eyebrow_h1 = true -%}{%- endif -%}
+    {%- if eyebrow_h1 -%}
+      <h1 class="lmh-eyebrow" id="LmhHero-{{ section.id }}">{{ section.settings.eyebrow | escape }}</h1>
+      <p class="lmh-h1 lmh-em-bronze">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </p>
+    {%- else -%}
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h1 class="lmh-h1 lmh-em-bronze" id="LmhHero-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h1>
+    {%- endif -%}
     {%- if section.settings.text != blank -%}<p class="lmh-hero__text">{{ section.settings.text | escape }}</p>{%- endif -%}
     <div class="lmh-hero__ctas">
       {%- if section.settings.primary_text != blank -%}
@@ -43,6 +58,7 @@
   "settings": [
     { "type": "select", "id": "style", "label": "Color", "options": [{ "value": "dark", "label": "Espresso" }, { "value": "light", "label": "Cream" }], "default": "dark" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Fine jewelry · Pre-owned watches · Diamonds" },
+    { "type": "checkbox", "id": "eyebrow_is_h1", "label": "Use the eyebrow as the page heading (h1)", "info": "For search engines and AI answers. Keep the eyebrow descriptive: what you sell and where.", "default": false },
     { "type": "text", "id": "title", "label": "Heading", "default": "Jewelry for the week" },
     { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "you work." },
     { "type": "textarea", "id": "text", "label": "Text" },
