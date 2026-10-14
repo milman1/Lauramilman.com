@@ -18,7 +18,17 @@ export function view(p) {
     readyImage:p.media.nodes.some(m=>m.mediaContentType==='IMAGE' && m.status==='READY'),
     variantId:v?.id, variantCount:p.variants.nodes.length, sku:v?.sku, price:v?.price};
 }
-export function planFor(stones, catalog, {limit=null, activate=false, locationId}={}) {
+// Stones the supplier explicitly marks unavailable are sales, not a truncated feed, so they skip
+// the 10% brake. A 50% ceiling on all withdrawals still catches a feed that flags everything.
+export function assertSafeWithdrawals(holds, activeOwned, unavailable=new Set()) {
+  const unexplained=holds.filter(h=>!unavailable.has(h.handle)).length;
+  const limit=Math.max(5,activeOwned*0.1), ceiling=Math.max(5,activeOwned*0.5);
+  if (unexplained>limit || holds.length>ceiling) {
+    console.error(JSON.stringify({stage:'withdrawal_brake',activeOwned,withdrawals:holds.length,confirmedUnavailable:holds.length-unexplained,unexplained,unexplainedLimit:Math.floor(limit),totalCeiling:Math.floor(ceiling)}));
+    throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  }
+}
+export function planFor(stones, catalog, {limit=null, activate=false, locationId, unavailable=new Set()}={}) {
   const owned = catalog.filter(p=>p.tags.includes(FEED_TAG) && p.handle.startsWith(PREFIX));
   const byHandle = new Map(catalog.map(p=>[p.handle,p])), byCert = new Map();
   for (const p of catalog) if(p.certificate) { const key=p.certificate.toUpperCase().replace(/^LG/,''); const a=byCert.get(key)||[]; a.push(p); byCert.set(key,a); }
@@ -37,7 +47,7 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
   // Always use the complete snapshot for removals; a five-item preview never removes inventory.
   const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}}));
   const activeOwned=owned.filter(p=>p.status==='ACTIVE').length;
-  if (holds.length>Math.max(5,activeOwned*0.1)) throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  assertSafeWithdrawals(holds,activeOwned,unavailable);
   return {writes:limit?writes.slice(0,limit):writes,holds,skipped};
 }
 async function tokenFor(domain) {
@@ -121,7 +131,7 @@ export async function main(argv=process.argv.slice(2)) {
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
   stage='plan';
-  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id});
+  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,unavailable:normalized.unavailable});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
@@ -136,7 +146,7 @@ export async function main(argv=process.argv.slice(2)) {
     const existingHolds=new Set(plan.holds.map(line=>line.handle));
     for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
     const activeOwned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&p.status==='ACTIVE').length;
-    if(plan.holds.length>Math.max(5,activeOwned*0.1))throw new Error('Availability withdrawal exceeds safety threshold; review required');
+    assertSafeWithdrawals(plan.holds,activeOwned,normalized.unavailable);
   }
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
   const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawals:plan.holds.map(l=>l.handle),skipped:plan.skipped};

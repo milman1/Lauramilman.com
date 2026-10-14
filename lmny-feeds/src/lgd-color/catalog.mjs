@@ -31,7 +31,7 @@ export function normalizeRow(r) {
   const certificate = certificateFromUrl(r.CertificateLink);
   if (!/^[a-z0-9_-]+$/i.test(stock)) return { reason: 'stock' };
   if (text(r.Diamond_Type) !== 'Lab Grown' || text(r.Lab) !== 'IGI' || !shape || !COLORS.has(color)) return { reason: 'scope' };
-  if (text(r.Availability) !== 'Available') return { reason: 'unavailable' };
+  if (text(r.Availability) !== 'Available') return { reason: 'unavailable', handle: PREFIX + stock.toLowerCase() };
   if (!INTENSITIES.has(intensity) || !CLARITIES.has(clarity) || !certificate) return { reason: 'grading_or_certificate' };
   if (!Number.isFinite(carat) || carat <= 0 || !Number.isFinite(cost) || cost <= 0 || !Number.isFinite(perCarat) || perCarat <= 0 || Math.abs(cost - carat * perCarat) > Math.max(0.02, cost * 0.001)) return { reason: 'cost_mismatch' };
   const image = safeUrl(r.ImageLink, /\.(jpg|jpeg|png|webp)$/i);
@@ -43,17 +43,18 @@ export function normalizeRow(r) {
   return { stone };
 }
 export function normalizeFeed(rows) {
-  const stones = [], holds = {}, stocks = new Set(), certs = new Set();
+  const stones = [], holds = {}, stocks = new Set(), certs = new Set(), unavailable = new Set();
   for (const row of rows) {
     const stock = text(row.Stock_No);
     if (stocks.has(stock)) throw new Error('Duplicate stock number in source snapshot');
     stocks.add(stock);
     const result = normalizeRow(row);
-    if (!result.stone) { holds[result.reason] = (holds[result.reason] || 0) + 1; continue; }
+    if (!result.stone) { holds[result.reason] = (holds[result.reason] || 0) + 1; if (result.reason === 'unavailable') unavailable.add(result.handle); continue; }
     if (certs.has(result.stone.certificate)) throw new Error('Duplicate certificate in source snapshot');
     certs.add(result.stone.certificate); stones.push(result.stone);
   }
-  return { stones, holds };
+  // Handles the supplier explicitly lists as not Available; a sale signal, not a missing row.
+  return { stones, holds, unavailable };
 }
 const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function payloadFor(s, existing, status = 'DRAFT', locationId) {
