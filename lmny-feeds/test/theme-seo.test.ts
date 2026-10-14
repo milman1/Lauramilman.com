@@ -103,3 +103,16 @@ describe('theme SEO integration', () => {
     expect(lab).not.toMatch(/rare ?carat|blue ?nile|michael gabriels|j\.?r\.? dunn/i);
   });
 });
+
+describe('homepage heading', () => {
+  const hero = readFileSync(new URL('../../sections/lmh-hero.liquid', import.meta.url), 'utf8');
+  const index = readFileSync(new URL('../../templates/index.json', import.meta.url), 'utf8');
+
+  it('makes the descriptive eyebrow the h1 and keeps a single h1 per branch', () => {
+    expect(hero).toContain('<h1 class="lmh-eyebrow" id="LmhHero-{{ section.id }}">');
+    expect(hero.match(/<h1\b/g)).toHaveLength(2);
+    expect(hero).toContain('"id": "eyebrow_is_h1"');
+    expect(index).toContain('"eyebrow_is_h1": true');
+    expect(index).toContain('"eyebrow": "New York fine jeweler');
+  });
+});

@@ -227,3 +227,30 @@ receive the stone's details.
 - Section setting `show_ask_line` (default on) turns it off without code. No Reserve, no Make an offer.
 - Chosen over a button on every tile: 30+ tiles would crowd the grid, and a stone-specific question belongs on the stone page (PR #231), where the certificate and video are.
 - Tests added in `theme-pdp-offer.test.ts`; 826/826 pass.
+
+## 2026-10-14 — SEO and AI audit, first fixes (merchant: "Yes and go")
+
+Audit: `docs/audits/2026-10-14-seo-ai-audit.md`. Applied items 4, 5 and 10.
+
+- **Homepage h1** (theme): `sections/lmh-hero.liquid` gains `eyebrow_is_h1`;
+  `templates/index.json` sets it and changes the eyebrow from "Lab-grown
+  diamonds & rings" to "New York fine jeweler · Lab-grown diamonds & rings".
+  Undo: set `eyebrow_is_h1` false and restore the old eyebrow.
+- **Page SEO fields** (Admin API, `global.title_tag` / `global.description_tag`,
+  all previously empty): faq, buying-guide, authentication, care-guide,
+  ring-size-guide, private-clients, ring-builder, contact, google-reviews
+  (title and description); shipping-returns (title only; its description was
+  kept). Undo: delete the metafields.
+- **Collection SEO** (previously empty): diamond-rings, for-work,
+  for-a-night-out, lab-grown-tennis-necklaces.
+- **lab-grown-diamonds:** SEO title was "Lab-Grown Diamonds | Laura Milman",
+  description "Lab-grown diamonds filtered by shape, carat, color, clarity,
+  and cut, priced per stone."; now "Lab-Grown Diamonds, Loose Stones | Laura
+  Milman New York" and "Loose lab-grown diamonds from Laura Milman New York.
+  Filter by shape, carat, color, clarity and cut, with a live price on every
+  stone." Description (was empty) set to the same sentence; the page still
+  shows the section subheading, so the visible page is unchanged.
+- **natural-diamonds:** description (was empty) set to the natural version
+  of that sentence. SEO fields unchanged.
+- No copy claims every stone is IGI or GIA graded: the feed holds a few
+  uncertified and GCAL stones (see the audit's "Claims to check").
