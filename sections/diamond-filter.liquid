@@ -61,7 +61,11 @@
 -%}
 
 {%- unless search_only -%}
-  {% render 'structured-data-collection', collection: collection, include_products: true %}
+  {%- if api_mode -%}
+    {% render 'structured-data-collection', collection: collection, include_products: false %}
+  {%- else -%}
+    {% render 'structured-data-collection', collection: collection, include_products: true %}
+  {%- endif -%}
 {%- endunless -%}
 
 {%- if api_mode -%}
@@ -74,7 +78,7 @@
   data-anon-key="{{ section.settings.api_anon_key | escape }}"
   data-kind="{{ stone_kind | escape }}"
   data-per-page="{{ section.settings.products_per_page }}"
-  data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
+  data-currency="USD"
   {% if search_only %}data-search-only="true" data-search-url="{{ form_url | escape }}"{% endif %}
   {%- if preset_shape != blank %} data-preset-shape="{{ preset_shape | escape }}"{% endif -%}
   {%- if collection.metafields.custom.preset_min_carat.value != blank %} data-preset-min-carat="{{ collection.metafields.custom.preset_min_carat.value }}"{% endif -%}
@@ -178,7 +182,7 @@
 
   {%- unless search_only -%}
     <div class="lm-dfilter__toolbar">
-      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">{{ collection.products_count }} {{ collection.products_count | pluralize: 'diamond', 'diamonds' }}</span>
+      <span class="lm-dfilter__count" id="lm-diamond-count" role="status">Loading diamonds…</span>
       <div class="lm-dfilter__sort">
         <label for="lm-diamond-sort">Sort by</label>
         <select id="lm-diamond-sort">
@@ -191,16 +195,11 @@
     </div>
 
     <div id="lm-diamond-results" class="lm-dfilter__results-host" aria-live="polite">
-      {%- comment -%} server-rendered diamond links: the filter script replaces this node after load {%- endcomment -%}
-      {%- if collection.products.size > 0 -%}
-        <div class="products-grid lm-dfilter__results">
-          {%- for product in collection.products limit: section.settings.products_per_page -%}
-            {%- render 'product-card', product: product, show_reserve: true -%}
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
+      <p>Loading diamonds matching your selection…</p>
+      <noscript><p>Enable JavaScript to use diamond search, or browse the collections below.</p></noscript>
     </div>
     <div id="lm-diamond-pager"></div>
+    {%- render 'diamond-search-links' -%}
     {%- render 'diamond-reserve-form' -%}
     {%- if collection.handle == 'lab-grown-diamonds' -%}
       {%- render 'lab-landing-links' -%}

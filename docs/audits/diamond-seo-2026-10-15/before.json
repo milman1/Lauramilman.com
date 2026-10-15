@@ -1,0 +1,69 @@
+{
+  "checked_at_utc": "2026-10-15T04:55:47.562130+00:00",
+  "base": "https://www.lauramilman.com",
+  "results": [
+    {
+      "check": "crawlable filter shape=Oval",
+      "status": "FAIL",
+      "detail": "Unfiltered product links in API fallback"
+    },
+    {
+      "check": "crawlable filter min_carat=2&max_carat=3",
+      "status": "FAIL",
+      "detail": "Unfiltered product links in API fallback"
+    },
+    {
+      "check": "crawlable filter shape=Oval&min_carat=2&max_carat=2.49",
+      "status": "FAIL",
+      "detail": "Unfiltered product links in API fallback"
+    },
+    {
+      "check": "indexable supplier-backed landing",
+      "status": "FAIL",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "check": "Product/Offer lg-416419",
+      "status": "PASS",
+      "detail": {
+        "handle": "lg-416419",
+        "sku": "416419",
+        "price": 637.0,
+        "currency": "USD",
+        "availability": "https://schema.org/InStock"
+      }
+    },
+    {
+      "check": "Product/Offer lg-929885",
+      "status": "PASS",
+      "detail": {
+        "handle": "lg-929885",
+        "sku": "929885",
+        "price": 505.0,
+        "currency": "USD",
+        "availability": "https://schema.org/InStock"
+      }
+    },
+    {
+      "check": "Product/Offer lg-100742831311",
+      "status": "PASS",
+      "detail": {
+        "handle": "lg-100742831311",
+        "sku": "100742831311",
+        "price": 665.0,
+        "currency": "USD",
+        "availability": "https://schema.org/InStock"
+      }
+    },
+    {
+      "check": "crawler access Googlebot",
+      "status": "PASS",
+      "detail": "HTTP 200 for robots, sitemap, filter and product (UA simulation, not verified bot IP)"
+    },
+    {
+      "check": "crawler access OAI-SearchBot",
+      "status": "PASS",
+      "detail": "HTTP 200 for robots, sitemap, filter and product (UA simulation, not verified bot IP)"
+    }
+  ]
+}

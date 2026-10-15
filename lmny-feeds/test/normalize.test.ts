@@ -49,6 +49,18 @@ describe('stone normalization', () => {
     expect(okay.items).toHaveLength(1);
   });
 
+  it('lists only IGI and GIA graded stones', () => {
+    for (const kind of ['lab', 'natural'] as const) {
+      expect(normalizeStones([{ ...stoneRow, lab: 'igi' }], kind).items).toHaveLength(1);
+      expect(normalizeStones([{ ...stoneRow, lab: ' GIA ' }], kind).items).toHaveLength(1);
+      for (const lab of ['GCAL', 'UNCERTIFIED', 'HRD', 'IGIC']) {
+        const { items, holds } = normalizeStones([{ ...stoneRow, lab }], kind);
+        expect(items).toEqual([]);
+        expect(holds[0]).toMatchObject({ reason: 'lab_not_igi_gia', stockRef: 'BD-1', detail: lab });
+      }
+    }
+  });
+
   it('holds rows missing grading fields or cost', () => {
     expect(normalizeStones([{ ...stoneRow, lab: '' }], 'lab').holds[0]?.reason).toBe('missing_grading_fields');
     expect(normalizeStones([{ ...stoneRow, cost: '' }], 'lab').holds[0]?.reason).toBe('missing_cost');

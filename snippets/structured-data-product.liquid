@@ -132,7 +132,7 @@ nothing is parsed or inferred from the title.
       {%- for def in feed_defs -%}
         {%- assign def_parts = def | split: ':' -%}
         {%- assign prop_value = product.metafields.lmny_feed[def_parts[0]].value | strip -%}
-        {%- if prop_value != blank -%}
+        {%- if prop_value != blank and prop_value != 'UNCERTIFIED' and prop_value != '—' and prop_value != '-' -%}
           {%- if prop_written %},{% endif -%}
           { "@type": "PropertyValue", "name": {{ def_parts[1] | json }}, "value": {{ prop_value | json }} }
           {%- assign prop_written = true -%}

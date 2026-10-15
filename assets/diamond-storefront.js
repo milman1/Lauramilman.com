@@ -27,7 +27,7 @@
   var state = {
     page: 1,
     sort: 'price_asc',
-    loading: false,
+    requestId: 0,
   };
 
   var form = document.getElementById('DiamondFilterForm');
@@ -41,7 +41,8 @@
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: cfg.currency,
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }).format(Number(n) || 0);
     } catch (e) {
       return '$' + Math.round(Number(n) || 0).toLocaleString('en-US');
@@ -115,6 +116,19 @@
     if (price.max !== null) params.set('max_price', String(price.max));
 
     return params;
+  }
+
+  function syncURL() {
+    var params = new URLSearchParams(window.location.search);
+    ['shape', 'shapes', 'filter.p.m.custom.diamond_shape', 'color', 'colors', 'clarity', 'clarities', 'cut', 'cuts', 'min_carat', 'max_carat', 'min_price', 'max_price', 'page', 'sort'].forEach(function (key) { params.delete(key); });
+    var filters = buildQuery();
+    filters.delete('kind');
+    filters.delete('per_page');
+    filters.forEach(function (value, key) { params.set(key, value); });
+    if (state.page === 1) params.delete('page');
+    if (state.sort === 'price_asc') params.delete('sort');
+    var query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? '?' + query : ''));
   }
 
   function productHandle(stone) {
@@ -253,13 +267,20 @@
   }
 
   async function load() {
-    if (searchOnly || !cfg.apiBase || state.loading) return;
-    state.loading = true;
-    if (resultsEl) resultsEl.classList.add('is-loading');
+    if (searchOnly || !cfg.apiBase) return;
+    var requestId = ++state.requestId;
+    syncURL();
+    if (resultsEl) {
+      resultsEl.classList.add('is-loading');
+      resultsEl.innerHTML = '<p>Loading diamonds matching your selection…</p>';
+    }
+    if (countEl) countEl.textContent = 'Loading diamonds…';
+    if (pagerEl) pagerEl.innerHTML = '';
     try {
       var url = cfg.apiBase + '?' + buildQuery().toString();
       var res = await fetch(url, { headers: headers() });
       var data = await res.json();
+      if (requestId !== state.requestId) return;
       if (!res.ok) throw new Error(data.error || 'Request failed');
       if (countEl) {
         countEl.textContent =
@@ -281,16 +302,18 @@
       }
       renderPager(data.total_pages || 1);
     } catch (err) {
+      if (requestId !== state.requestId) return;
+      if (countEl) countEl.textContent = 'Diamonds unavailable';
+      if (pagerEl) pagerEl.innerHTML = '';
       if (resultsEl) {
         resultsEl.innerHTML =
           '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">Unable to load stones</p>' +
           '<p class="lm-dfilter__empty-copy">' +
-          escapeHtml(err.message || String(err)) +
+          'Please try again or browse the diamond collections below.' +
           '</p></div>';
       }
     } finally {
-      state.loading = false;
-      if (resultsEl) resultsEl.classList.remove('is-loading');
+      if (requestId === state.requestId && resultsEl) resultsEl.classList.remove('is-loading');
     }
   }
 
@@ -353,7 +376,7 @@
     }
     // Landing pages (a collection with a preset) open already filtered to their
     // shape and size, unless the link itself carries filters.
-    var urlHasFilters = ['shape', 'color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price']
+    var urlHasFilters = ['shape', 'shapes', 'filter.p.m.custom.diamond_shape', 'color', 'colors', 'clarity', 'clarities', 'cut', 'cuts', 'min_carat', 'max_carat', 'min_price', 'max_price']
       .some(function (key) { return params.has(key); });
     if (!urlHasFilters) {
       var presetShape = root.dataset.presetShape || '';
@@ -361,13 +384,21 @@
       if (root.dataset.presetMinCarat) params.set('min_carat', root.dataset.presetMinCarat);
       if (root.dataset.presetMaxCarat) params.set('max_carat', root.dataset.presetMaxCarat);
     }
+    var page = Number(params.get('page'));
+    if (Number.isInteger(page) && page > 0) state.page = page;
+    var sort = params.get('sort');
+    if (['price_asc', 'price_desc', 'carat_asc', 'carat_desc'].indexOf(sort) !== -1) {
+      state.sort = sort;
+      if (sortEl) sortEl.value = sort;
+    }
     // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
-    var shapes = list('shape').concat(list('filter.p.m.custom.diamond_shape'));
+    var shapes = list('shape').concat(list('shapes'), list('filter.p.m.custom.diamond_shape'));
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
       if (shapes.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
     });
     ['color', 'clarity', 'cut'].forEach(function (name) {
-      var wanted = list(name);
+      var plural = { color: 'colors', clarity: 'clarities', cut: 'cuts' }[name];
+      var wanted = list(name).concat(list(plural));
       if (!wanted.length) return;
       form.querySelectorAll('[data-scale="' + name + '"] input').forEach(function (input) {
         if (wanted.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
@@ -524,7 +555,7 @@
         .then(function (product) {
           var variant = (product.variants || []).filter(function (v) {
             return v.available !== false;
-          })[0] || (product.variants || [])[0];
+          })[0];
           if (!variant || !variant.id) throw new Error('This stone cannot be added to cart');
           if (typeof window.lmAddToCart === 'function') {
             return window.lmAddToCart(variant.id, { checkout: checkout });

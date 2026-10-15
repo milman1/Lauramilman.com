@@ -228,6 +228,26 @@ receive the stone's details.
 - Chosen over a button on every tile: 30+ tiles would crowd the grid, and a stone-specific question belongs on the stone page (PR #231), where the certificate and video are.
 - Tests added in `theme-pdp-offer.test.ts`; 826/826 pass.
 
+## 2026-10-15 — loose stones: IGI and GIA only (merchant decision)
+
+Merchant: every stone the store lists carries an IGI or GIA report. A check of
+the live store found 7 of 19,710 lab-grown stones (4 GCAL, 3 uncertified, the
+latter titled "UNCERTIFIED Certified") and 1 of 3,575 natural stones outside
+that rule.
+
+- `config/pricing.ts` `STONE_GATES.allowedLabs = ['IGI','GIA']`;
+  `src/normalize.ts` `passesLabGate` holds any other lab as
+  `lab_not_igi_gia` for both lab-grown and natural feeds, before cost is read.
+- On the next live sync those stones are held: archived in Shopify (a held
+  stone keeps its URL; it is not deleted) and marked unavailable in Supabase so
+  they leave the lab-grown search too. To undo, remove the lab from the gate
+  or add it to `allowedLabs`; the next sync reactivates them.
+- Natural: HRD is also held (no HRD stones were checked beyond the single live
+  one). Add `'HRD'` to `allowedLabs` if HRD-graded stones should be sold.
+- Stones outside the rule also in the Supabase table (about 15 lab, 6 natural)
+  are marked unavailable by the same sync.
+- Guide copy can now say "every stone is graded by IGI or GIA".
+
 ## 2026-10-15 — lab-grown guide and 12 shape and size landing pages (merchant approved)
 
 Merchant approved the guide wording, the 12 pages and "all twelve together".

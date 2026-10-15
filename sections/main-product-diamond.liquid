@@ -162,7 +162,7 @@
           <li>Free insured U.S. shipping</li>
           <li>7-day returns</li>
           <li>1-year warranty</li>
-          <li>{%- if m.lab != blank -%}Certified by {{ m.lab }}{%- else -%}Independently certified{%- endif -%}</li>
+          {%- if m.lab == 'IGI' or m.lab == 'GIA' -%}<li>Graded by {{ m.lab }}</li>{%- endif -%}
         </ul>
 
         {%- assign g_url = section.settings.google_reviews_url -%}

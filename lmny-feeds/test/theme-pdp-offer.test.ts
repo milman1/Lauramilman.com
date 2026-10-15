@@ -158,7 +158,8 @@ describe('loose-stone trust block', () => {
     expect(diamondProduct).toContain('Free insured U.S. shipping');
     expect(diamondProduct).toContain('7-day returns');
     expect(diamondProduct).toContain('1-year warranty');
-    expect(diamondProduct).toContain('Certified by {{ m.lab }}');
+    expect(diamondProduct).toContain('Graded by {{ m.lab }}');
+    expect(diamondProduct).not.toContain('Independently certified');
     expect(diamondProduct).toContain('/pages/shipping-returns');
   });
 
