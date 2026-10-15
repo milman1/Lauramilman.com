@@ -112,7 +112,7 @@ The four UNCERTIFIED product titles still contain “UNCERTIFIED Certified”; l
 - An initial repository test expected the removed “Certified by” text; updated to assert the supported badge and reject invented fallback certification, then all tests passed.
 - An initial browser fixture failed visibility-dependent actions; controlled DOM events now test the actual production handlers. Public mobile/desktop layout was checked separately.
 - A browser wait for network-idle timed out on the live site; DOM-content-loaded plus bounded settling succeeded. Do not treat persistent third-party network activity as a page-render failure.
-- PR #281's Cloudflare build passed. Its supplier dry-run CI was still in progress at the last available connector read; local tests and the deployed theme were verified independently.
+- PR #281's Cloudflare build and supplier dry-run CI both passed. The connector independently confirmed run 38684460938 completed successfully; this was a pull-request dry run, not a live inventory cleanup.
 
 ## Remaining work / handoff
 
