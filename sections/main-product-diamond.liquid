@@ -94,7 +94,7 @@
             tab rather than leaving a broken player sitting there.
           {%- endcomment -%}
           <div class="dpdp__stage" data-pane-body="video" hidden>
-            <video data-src="{{ m.video_url }}" controls playsinline preload="none"
+            <video data-src="{{ m.video_url }}" controls playsinline muted loop preload="none"
                    aria-label="360° view of {{ product.title | escape }}"></video>
           </div>
         {%- endif -%}
@@ -668,19 +668,29 @@
         root.querySelectorAll('[data-pane-body]').forEach(function (pane) {
           var show = pane.dataset.paneBody === tab.dataset.pane;
           pane.hidden = !show;
-          if (!show) return;
-          var video = pane.querySelector('video[data-src]');
+          var video = pane.querySelector('video');
           if (!video) return;
-          video.src = video.dataset.src;
-          video.removeAttribute('data-src');
-          /* A dead supplier link should drop the tab, not leave a broken
-             player on a $14,000 product page. */
-          video.addEventListener('error', function () {
-            tab.remove();
-            pane.remove();
-            var img = root.querySelector('.dpdp__tab[data-pane="image"]');
-            if (img) img.click();
-          });
+          if (!show) {
+            video.pause();
+            return;
+          }
+          if (video.dataset.src) {
+            video.src = video.dataset.src;
+            video.removeAttribute('data-src');
+            /* A dead supplier link should drop the tab, not leave a broken
+               player on a $14,000 product page. */
+            video.addEventListener('error', function () {
+              tab.remove();
+              pane.remove();
+              var img = root.querySelector('.dpdp__tab[data-pane="image"]');
+              if (img) img.click();
+            });
+          }
+          /* Opening the tab is the request to watch: start right away,
+             muted and looping (browsers only autoplay muted video). */
+          video.muted = true;
+          var playing = video.play();
+          if (playing && playing.catch) playing.catch(function () {});
         });
       });
     });
