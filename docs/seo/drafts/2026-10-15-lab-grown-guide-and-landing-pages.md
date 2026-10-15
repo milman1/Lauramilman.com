@@ -22,8 +22,8 @@ that exist today.
 
 ```html
 <p>Every stone in this search is a loose lab-grown diamond with a grading
-report, listed with its own photos, its report and its live price. Almost all
-are graded by IGI, a few by GIA. Choose a stone here and set it in a ring with
+report, listed with its own photos, its report and its live price. Every
+stone is graded by IGI or GIA. Choose a stone here and set it in a ring with
 the <a href="/pages/ring-builder">ring builder</a>, or keep it loose.</p>
 
 <h2>What a lab-grown diamond is</h2>
@@ -89,7 +89,7 @@ engagement rings under $3,000</a>.</p>
   {"question": "Are lab-grown diamonds real diamonds?",
    "answer": "Yes. A lab-grown diamond is carbon in the same crystal structure as a mined diamond, with the same hardness and brilliance. Only its origin differs, and the grading report states that it is laboratory-grown."},
   {"question": "Who grades your lab-grown diamonds?",
-   "answer": "Almost every stone here is graded by IGI, and a few by GIA. The report number is on each listing and the report opens from the stone's page, so you can check it on the lab's website."},
+   "answer": "Every stone here is graded by IGI or GIA. The report number is on each listing and the report opens from the stone's page, so you can check it on the lab's website."},
   {"question": "Can I see the actual stone before buying?",
    "answer": "Each listing shows photos of that stone, and most also have a video. To ask about a specific stone, use Ask about this stone on its page and we reply by email."},
   {"question": "What if the stone isn't right for me?",
@@ -105,10 +105,9 @@ engagement rings under $3,000</a>.</p>
 
 ### Claims for the merchant to confirm before it goes live
 
-1. "Almost all are graded by IGI, a few by GIA." True of the feed on
-   2026-10-15: 23,932 of 23,947 available lab stones are IGI or GIA. The other
-   15 are GCAL or uncertified; whether any are listed was not checked. If the
-   store should list only IGI and GIA stones, that is a feed rule to add.
+1. "Every stone is graded by IGI or GIA." True only once the feed rule in PR #277
+   is live: on 2026-10-15 the store still had 7 lab-grown stones (4 GCAL,
+   3 uncertified) outside it. Publish this guide after #277's next sync.
 2. "Every stone carries a 1-year warranty." From the shipping and returns page
    ("Every piece, including loose diamonds, carries a 1-year warranty").
 3. "The question reaches our team in New York." The Ask form sends to the store
