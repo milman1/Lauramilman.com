@@ -99,6 +99,9 @@
       {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
     </header>
+    {%- if template.suffix == 'diamond-seo' -%}
+      {%- render 'diamond-search-links' -%}
+    {%- endif -%}
 
     {%- if jewelry_only -%}
       <nav class="lm-collection__chips" aria-label="Jewelry categories">
