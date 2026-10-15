@@ -66,7 +66,7 @@ describe('theme SEO integration', () => {
     expect(themeFile('templates/page.google-reviews.liquid')).toContain('published on Google');
     expect(themeFile('templates/page.google-reviews.liquid')).toContain('data-embed-id="25717519"');
     expect(layout).toContain('AggregateRating');
-    expect(diamondCollection).toContain('server-rendered diamond links');
+    expect(diamondCollection).toContain('include_products: false');
     expect(diamondCollection).toContain("render 'product-card'");
     expect(collection).toContain("render 'collection-guide'");
     expect(themeFile('sections/header.liquid')).toContain('>All jewelry</a>');

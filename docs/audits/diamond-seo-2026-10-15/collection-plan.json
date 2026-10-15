@@ -1,0 +1,34 @@
+{
+  "id": "gid://shopify/Collection/350222221383",
+  "templateSuffix": "diamond-seo",
+  "descriptionHtml": "<p>Find your oval diamond. Explore loose lab-grown stones from 2.00 to 2.49 carats, with current prices and individual grading details. Compare color, clarity and measurements, then open a stone to view its imagery and available report.</p><p><a href=\"/collections/lab-grown-diamonds?shape=Oval\">Explore all oval sizes</a> or <a href=\"/pages/buying-guide\">read the diamond buying guide</a>.</p>",
+  "seo": {
+    "title": "2 Carat Oval Lab-Grown Diamonds | Laura Milman New York",
+    "description": "Explore 2.00\u20132.49 carat oval lab-grown diamonds. Compare current prices, color, clarity and individual grading details at Laura Milman New York."
+  },
+  "ruleSet": {
+    "appliedDisjunctively": false,
+    "rules": [
+      {
+        "column": "TYPE",
+        "relation": "EQUALS",
+        "condition": "Lab-Grown Diamond"
+      },
+      {
+        "column": "TAG",
+        "relation": "EQUALS",
+        "condition": "Oval"
+      },
+      {
+        "column": "TAG",
+        "relation": "EQUALS",
+        "condition": "2.0-2.5ct"
+      },
+      {
+        "column": "TAG",
+        "relation": "EQUALS",
+        "condition": "lmny-feed"
+      }
+    ]
+  }
+}

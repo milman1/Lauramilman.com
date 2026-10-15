@@ -1,0 +1,8 @@
+<nav class="lm-collection__desc" aria-label="Diamond collections">
+  <a href="{{ routes.collections_url }}/lab-grown-diamonds">All lab-grown diamonds</a>
+  {%- assign oval_landing = collections['2-carat-oval-lab-grown-diamonds'] -%}
+  {%- if oval_landing != blank -%}
+    · <a href="{{ oval_landing.url }}">2 carat oval lab-grown diamonds</a>
+  {%- endif -%}
+  · <a href="{{ routes.root_url }}pages/buying-guide">Diamond buying guide</a>
+</nav>
