@@ -2,6 +2,17 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
+// Errors whose message carries only counts or fixed text, safe to print in CI logs.
+export class SafeError extends Error {}
+// Hourly runs may withdraw at most 10% of live stones (min 5). A reviewed manual
+// run may pass --max-withdrawals=N to clear a larger backlog of sold stones.
+export function withdrawalLimit(activeOwned, maxWithdrawals=null) {
+  return maxWithdrawals ?? Math.max(5, Math.floor(activeOwned*0.1));
+}
+function checkWithdrawals(count, activeOwned, maxWithdrawals) {
+  const allowed=withdrawalLimit(activeOwned,maxWithdrawals);
+  if(count>allowed)throw new SafeError(`Availability withdrawal of ${count} stones exceeds the limit of ${allowed} (${activeOwned} live); review required`);
+}
 
 export const OPS = {
   "verify": "query VerifyColoredIds($ids:[ID!]!){nodes(ids:$ids){...on Product{id handle title status tags descriptionHtml templateSuffix vendor productType seo { title description } certificate:metafield(namespace:\"lmny_feed\",key:\"cert_number\"){value} video:metafield(namespace:\"lmny_feed\",key:\"video_url\"){value} hash:metafield(namespace:\"colored_feed\",key:\"content_hash\"){value} media(first:10){nodes{status mediaContentType}} variants(first:2){nodes{id sku price inventoryPolicy inventoryQuantity inventoryItem{tracked unitCost{amount currencyCode}}}}}}}",
@@ -18,7 +29,7 @@ export function view(p) {
     readyImage:p.media.nodes.some(m=>m.mediaContentType==='IMAGE' && m.status==='READY'),
     variantId:v?.id, variantCount:p.variants.nodes.length, sku:v?.sku, price:v?.price};
 }
-export function planFor(stones, catalog, {limit=null, activate=false, locationId}={}) {
+export function planFor(stones, catalog, {limit=null, activate=false, locationId, maxWithdrawals=null, checkLimit=true}={}) {
   const owned = catalog.filter(p=>p.tags.includes(FEED_TAG) && p.handle.startsWith(PREFIX));
   const byHandle = new Map(catalog.map(p=>[p.handle,p])), byCert = new Map();
   for (const p of catalog) if(p.certificate) { const key=p.certificate.toUpperCase().replace(/^LG/,''); const a=byCert.get(key)||[]; a.push(p); byCert.set(key,a); }
@@ -37,7 +48,7 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
   // Always use the complete snapshot for removals; a five-item preview never removes inventory.
   const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}}));
   const activeOwned=owned.filter(p=>p.status==='ACTIVE').length;
-  if (holds.length>Math.max(5,activeOwned*0.1)) throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  if (checkLimit) checkWithdrawals(holds.length, activeOwned, maxWithdrawals);
   return {writes:limit?writes.slice(0,limit):writes,holds,skipped};
 }
 async function tokenFor(domain) {
@@ -103,6 +114,9 @@ export async function main(argv=process.argv.slice(2)) {
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
   if(activate && !process.env.LGD_ACTIVATION_HANDLES)throw new Error('Activation requires explicit reviewed LGD_ACTIVATION_HANDLES');
+  const maxArg=argv.find(a=>a.startsWith('--max-withdrawals=')),maxWithdrawals=maxArg?Number(maxArg.split('=')[1]):null;
+  if(maxArg && (!Number.isInteger(maxWithdrawals)||maxWithdrawals<1||maxWithdrawals>500))throw new SafeError('--max-withdrawals must be a whole number from 1 to 500');
+  if(maxArg && (limitArg||activate))throw new SafeError('--max-withdrawals applies only to a full sync or full preview');
   stage='supplier_fetch';
   const rows=await fetchInventory(process.env.LGD_API_KEY);
   stage='normalize';
@@ -121,7 +135,7 @@ export async function main(argv=process.argv.slice(2)) {
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
   stage='plan';
-  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id});
+  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,maxWithdrawals,checkLimit:!dry});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
@@ -136,13 +150,15 @@ export async function main(argv=process.argv.slice(2)) {
     const existingHolds=new Set(plan.holds.map(line=>line.handle));
     for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
     const activeOwned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&p.status==='ACTIVE').length;
-    if(plan.holds.length>Math.max(5,activeOwned*0.1))throw new Error('Availability withdrawal exceeds safety threshold; review required');
+    plan.withdrawalLimit=withdrawalLimit(activeOwned,maxWithdrawals);
+    // A preview reports an over-limit withdrawal instead of stopping, so it can be reviewed.
+    if(!dry)checkWithdrawals(plan.holds.length,activeOwned,maxWithdrawals);
   }
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
-  const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawals:plan.holds.map(l=>l.handle),skipped:plan.skipped};
+  const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawalLimit:plan.withdrawalLimit??null,withdrawals:plan.holds.map(l=>{const p=catalog.find(c=>c.handle===l.handle);return {handle:l.handle,title:p?.title??null,reason:failedMedia.has(l.handle)?'media_unavailable':'not_in_supplier_feed'};}),skipped:plan.skipped};
   await mkdir('out',{recursive:true});
   await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
-  if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,skipped:plan.skipped.length}));return;}
+  if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,withdrawalLimit:plan.withdrawalLimit??null,overLimit:plan.withdrawalLimit!=null&&plan.holds.length>plan.withdrawalLimit,skipped:plan.skipped.length}));return;}
   let publications=[];
   if(activate){publications=(await paginate(gql,OPS.publications,'publications')).filter(p=>p.name==='Online Store'||p.name==='Shop');if(!publications.some(p=>p.name==='Online Store'))throw new Error('Online Store publication unavailable');}
   const writtenIds=new Map();
@@ -169,5 +185,5 @@ export async function main(argv=process.argv.slice(2)) {
   sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }
-if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(()=>{console.error(JSON.stringify({failedStage:stage,message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError?{reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
 
