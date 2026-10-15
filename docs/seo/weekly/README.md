@@ -10,7 +10,7 @@ replying with the numbers. Nothing in a proposal is applied until then.
 | Source | What it gives | Access today |
 |---|---|---|
 | Shopify analytics (ShopifyQL through the Shopify connector) | Sessions, landing pages, referrers, device, cart and checkout, orders, sales | Working |
-| Google Search Console | Queries, impressions, clicks, position (Search Analytics); index status per URL (URL Inspection) | `docs/seo/weekly/gsc_query.py`. Service account `lmny-search-reader@lmny-seo.iam.gserviceaccount.com`, stored as a GCP service-account network secret: the proxy supplies short-lived tokens, nothing is in the repo. URL Inspection works on `https://www.lauramilman.com/` (Restricted). Search Analytics needs the service account added to the Domain property `sc-domain:lauramilman.com` too, because the proxy refuses the encoded "/" in a URL-prefix property id |
+| Google Search Console | Index status per URL (URL Inspection); queries and pages (Search Analytics) | `docs/seo/weekly/gsc_query.py`, service account `lmny-search-reader@lmny-seo.iam.gserviceaccount.com` (Restricted on `https://www.lauramilman.com/`, the only property), stored as a GCP service-account network secret; nothing in the repo. **URL Inspection works.** **Search Analytics does not run here** (2026-10-15): the egress proxy does not pass the encoded "/" in the property id. Until that changes, the merchant exports Performance (queries and pages) to Google Sheets in Drive weekly and the report reads it with the Drive connector |
 | Google Analytics 4 | Engaged sessions, organic sessions, bot-filtered traffic, conversions | **Not connected.** Same |
 | Shopify Admin API | Articles, collections, SEO fields, redirects, alt text | Working |
 
@@ -57,7 +57,7 @@ FROM sales SHOW orders, net_sales GROUP BY order_referrer_source, order_referrer
 
 ## Queries (Search Console)
 
-If a command fails, say so in the report and skip it; never estimate.
+If a command fails, say so in the report and skip it; never estimate. The `query` commands currently fail by design (see Sources); read the Drive export instead.
 
 ```
 python3 docs/seo/weekly/gsc_query.py sites

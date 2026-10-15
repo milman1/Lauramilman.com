@@ -27,13 +27,13 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-# URL-prefix property (what the service account can see) and, for Search
-# Analytics, the Domain property. The proxy refuses paths with encoded "/" and
-# a URL-prefix property id carries them, so analytics needs the slash-free
-# sc-domain id (service account added there too). URL Inspection takes the
-# site in the body and works with the URL-prefix property.
+# The URL-prefix property is the only one (no Domain property exists).
+# Known limit, 2026-10-15: Search Analytics puts the property id in the URL
+# path, and this environment's egress proxy does not pass an encoded "/"
+# through (double-encoded is refused; single-encoded reaches Google altered
+# and 404s). URL Inspection takes the site in the request body and works.
 SITE = os.environ.get("GSC_SITE", "https://www.lauramilman.com/")
-ANALYTICS_SITE = os.environ.get("GSC_ANALYTICS_SITE", "sc-domain:lauramilman.com")
+ANALYTICS_SITE = os.environ.get("GSC_ANALYTICS_SITE", SITE)
 API = "https://searchconsole.googleapis.com/webmasters/v3"
 INSPECT_API = "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect"
 
@@ -106,7 +106,14 @@ def main():
     if filters:
         body["dimensionFilterGroups"] = [{"filters": filters}]
     url = f"{API}/sites/{urllib.parse.quote(ANALYTICS_SITE, safe='')}/searchAnalytics/query"
-    res = call(url, body)
+    try:
+        res = call(url, body)
+    except SystemExit as e:
+        if "HTTP 404" in str(e) and "/" in ANALYTICS_SITE:
+            sys.exit("Search Analytics unavailable here: the proxy does not pass the encoded '/' in the property id "
+                     f"{ANALYTICS_SITE!r}, so Google returns 404. Use the Drive export for queries and pages; "
+                     "URL Inspection ('inspect') still works.")
+        raise
     print(json.dumps({"site": ANALYTICS_SITE, "startDate": body["startDate"], "endDate": body["endDate"],
                       "dimensions": body["dimensions"], "rows": res.get("rows", [])}, indent=1))
 
