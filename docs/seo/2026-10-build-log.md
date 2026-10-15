@@ -247,3 +247,51 @@ that rule.
 - Stones outside the rule also in the Supabase table (about 15 lab, 6 natural)
   are marked unavailable by the same sync.
 - Guide copy can now say "every stone is graded by IGI or GIA".
+
+## 2026-10-15 — lab-grown guide and 12 shape and size landing pages (merchant approved)
+
+Merchant approved the guide wording, the 12 pages and "all twelve together".
+Content: `docs/seo/landing/lab-grown-landing-pages.json` (page text) and
+`docs/seo/drafts/2026-10-15-lab-grown-guide-and-landing-pages.md` (the guide,
+PR #276). Facts come from the live catalog (Supabase `stones`) and the
+shipping and returns page; no prices, no supplier names, no hype words.
+
+**Store writes (Admin API), all invisible until the theme PR merges and, for
+the collections, until published:**
+
+- 3 collection metafield definitions: `custom.preset_shape`,
+  `custom.preset_min_carat`, `custom.preset_max_carat`.
+- 12 smart collections, **unpublished** (0 sales channels), template
+  `diamonds-lab`, sorted by price low to high. Rules: product type
+  Lab-Grown Diamond + shape tag + carat-band tag. Stone counts read back on
+  creation equal the catalog: 2 ct round 1,689; 1.5 ct round 1,391; 1 ct round
+  1,214; 2 ct oval 837; 3 ct round 771; 1.5 ct oval 619; 3 ct oval 579;
+  3 ct radiant 449; 4 ct round 221; 4 ct oval 352; 5+ ct round 441; 5+ ct oval 340.
+  Each has an SEO title (≤ 60) and description (≤ 160), a short description,
+  the preset metafields, and a guide plus three FAQs.
+- 4 ct = 4.00–4.49 and 5+ = everything from 5.00 up, because stone tags are
+  half-carat bands (`4.0-4.5ct`) with one open band (`5.0ct+`).
+- `lab-grown-diamonds`: `custom.guide_html` and `custom.guide_faq` set (the
+  guide above). Undo any of this by deleting the collections or metafields.
+
+**Theme (PR):** the guide block renders on the lab-grown search page and the
+landing pages only (the four guides stored on 2026-10-05 for David Webb,
+Cartier, Rolex and natural diamonds stay hidden, as decided then). A collection
+with a preset opens the stone search on its shape and size; a link that carries
+its own filters wins. Landing pages show their own title and description.
+"Popular lab-grown searches" links show only for collections that exist and
+have stones.
+
+**Publish order:** merge the IGI and GIA feed rule and let one sync run (the
+copy says every stone is graded by IGI or GIA), merge the theme PR, then
+publish the 12 collections to the Online Store.
+
+### 2026-10-15 (later) — copy aligned with the 2026-10-13 tile changes
+
+Main had changed since the guide was written (PR #271, 2026-10-13): the lab
+search "Not sure which stone?" line and price note were removed, and lab,
+colored and natural tiles gained Reserve. "Ask about this stone" on each stone's
+page is unchanged. The guide on `lab-grown-diamonds` and the guide text of all
+12 landing pages (store metafields `custom.guide_html` and the JSON file) no
+longer point to the removed line; they now say "Questions about a stone? Use
+Ask about this stone on its page and we will reply by email."

@@ -374,6 +374,16 @@
     function list(key) {
       return params.getAll(key).join(',').split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
     }
+    // Landing pages (a collection with a preset) open already filtered to their
+    // shape and size, unless the link itself carries filters.
+    var urlHasFilters = ['shape', 'shapes', 'filter.p.m.custom.diamond_shape', 'color', 'colors', 'clarity', 'clarities', 'cut', 'cuts', 'min_carat', 'max_carat', 'min_price', 'max_price']
+      .some(function (key) { return params.has(key); });
+    if (!urlHasFilters) {
+      var presetShape = root.dataset.presetShape || '';
+      if (presetShape) params.set('shape', presetShape);
+      if (root.dataset.presetMinCarat) params.set('min_carat', root.dataset.presetMinCarat);
+      if (root.dataset.presetMaxCarat) params.set('max_carat', root.dataset.presetMaxCarat);
+    }
     var page = Number(params.get('page'));
     if (Number.isInteger(page) && page > 0) state.page = page;
     var sort = params.get('sort');
