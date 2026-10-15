@@ -215,7 +215,7 @@
       escapeAttr(stone.stock_ref || '') +
       '" data-reserve-price="' +
       escapeAttr(money(stone.retail_usd)) +
-      '">Reserve this diamond</button>' +
+      '">Ask about this stone</button>' +
       '</div>' +
       '</div></div>'
     );

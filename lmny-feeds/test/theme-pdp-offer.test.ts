@@ -37,7 +37,7 @@ describe('product-page inquiry pills', () => {
     expect(inquiry).not.toContain('Book a call');
   });
 
-  it('puts Reserve this diamond on lab, colored, and natural search tiles', () => {
+  it('puts Ask about this stone on lab, colored, and natural search tiles', () => {
     const filter = themeFile('sections/diamond-filter.liquid');
     const cards = themeFile('assets/diamond-storefront.js');
     const coloredCards = themeFile('assets/colored-diamond-filter.js');
@@ -45,13 +45,15 @@ describe('product-page inquiry pills', () => {
     const form = themeFile('snippets/diamond-reserve-form.liquid');
     const productCard = themeFile('snippets/product-card.liquid');
     for (const file of [cards, coloredCards, productCard, form]) {
-      expect(file).toContain('Reserve this diamond');
+      expect(file).toContain('Ask about this stone');
+      expect(file).not.toContain('Reserve this diamond');
     }
     expect(cards).toContain('data-reserve-stone');
     expect(coloredCards).toContain('data-reserve-stone');
     expect(productCard).toContain('show_reserve');
     expect(form).toContain("form 'contact', id: 'DiamondReserveForm'");
-    expect(form).toContain('value="Diamond reserve"');
+    expect(form).toContain('value="Diamond question"');
+    expect(form).toContain('name="contact[body]"');
     expect(form).not.toContain('reserve-diamond');
     expect(filter.split("render 'diamond-reserve-form'").length - 1).toBe(2);
     expect(colored).toContain("render 'diamond-reserve-form'");
