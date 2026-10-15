@@ -17,7 +17,8 @@ holds a stones table — Shopify products are the only live copy.
 1. **Fetch** all three feeds (`src/feeds/belgiumdia.ts`), usually via the
    Cloudflare feed-cache Worker (`lmny-feeds/cloudflare-worker/feed-cache.js`).
 2. **Normalize + gate** (`src/normalize.ts`): L colour / SI2 clarity floors for
-   stones. Watches are held out unless they have **papers**, are not
+   stones, and only IGI- or GIA-graded stones are listed (hold reason
+   `lab_not_igi_gia`; merchant decision 2026-10-15). Watches are held out unless they have **papers**, are not
    aftermarket (Condition field), do not say **naked** or **iced out** in
    Comment, and belong to **Belgium Watch (ROMAN)** or **TLV Watches**
    (`TLV WATCHES LLC`). Vivid Watches, Power Watch LLC, Uncle Manny LLC, and

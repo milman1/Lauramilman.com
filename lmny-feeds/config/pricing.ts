@@ -269,6 +269,8 @@ export function labGrownJewelryRetailFromCost(costUsd: number): number {
 export const STONE_GATES = {
   worstColor: 'L',
   worstClarity: 'SI2',
+  /** Grading labs we list (merchant decision 2026-10-15: every loose stone carries IGI or GIA). */
+  allowedLabs: ['IGI', 'GIA'],
 } as const;
 
 /**

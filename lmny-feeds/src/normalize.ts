@@ -278,6 +278,11 @@ export function passesColorGate(color: string): boolean {
   return idx !== -1 && idx <= floor;
 }
 
+/** Loose stones are listed only when graded by IGI or GIA. */
+export function passesLabGate(lab: string): boolean {
+  return (STONE_GATES.allowedLabs as readonly string[]).includes(lab.trim().toUpperCase());
+}
+
 export function passesClarityGate(clarity: string): boolean {
   const idx = CLARITY_ORDER.indexOf(normalizeClarityGrade(clarity));
   const floor = CLARITY_ORDER.indexOf(STONE_GATES.worstClarity);
@@ -517,6 +522,10 @@ export function normalizeStones(rows: Raw[], kind: 'natural' | 'lab'): Normalize
     const rapPriceUsd = num(raw, ['rap_price', 'rap', 'rapaport', 'rap_total', 'rap_price_total', 'list_price']);
     if (!carat || !shape || !color || !clarity || !lab) {
       holds.push({ kind, stockRef, reason: 'missing_grading_fields' });
+      continue;
+    }
+    if (!passesLabGate(lab)) {
+      holds.push({ kind, stockRef, reason: 'lab_not_igi_gia', detail: lab });
       continue;
     }
     const resolved = resolveStoneCost(raw, kind, carat, rapPriceUsd);
