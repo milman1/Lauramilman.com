@@ -5,12 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Preview, create five drafts, sync, or activate reviewed handles'
+        description: 'Preview, create five drafts, sync, activate reviewed handles, or review/apply a withdrawal backlog'
         type: choice
-        options: [dry-run, sample, sync, activate]
+        options: [dry-run, sample, sync, activate, review-withdrawals, sync-with-withdrawals]
         default: dry-run
       handles:
         description: 'Exact comma-separated reviewed handles; activation only'
+        type: string
+        default: ''
+      max_withdrawals:
+        description: 'Most stones this run may move to draft (1-500); review-withdrawals and sync-with-withdrawals only'
         type: string
         default: ''
   pull_request:
@@ -56,6 +60,7 @@ jobs:
           SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
           LGD_ACTIVATION_HANDLES: ${{ inputs.handles }}
           MODE: ${{ inputs.mode }}
+          MAX_WITHDRAWALS: ${{ inputs.max_withdrawals }}
           EVENT: ${{ github.event_name }}
         run: |
           if [ "$EVENT" = "schedule" ]; then
@@ -65,6 +70,8 @@ jobs:
               sample) node --experimental-strip-types src/lgd-color/sync.mjs --limit=5 ;;
               sync) node --experimental-strip-types src/lgd-color/sync.mjs ;;
               activate) node --experimental-strip-types src/lgd-color/sync.mjs --activate ;;
+              review-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run --max-withdrawals="$MAX_WITHDRAWALS" ;;
+              sync-with-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --max-withdrawals="$MAX_WITHDRAWALS" ;;
               *) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run --limit=5 ;;
             esac
           fi

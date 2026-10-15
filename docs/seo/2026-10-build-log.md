@@ -295,3 +295,8 @@ page is unchanged. The guide on `lab-grown-diamonds` and the guide text of all
 12 landing pages (store metafields `custom.guide_html` and the JSON file) no
 longer point to the removed line; they now say "Questions about a stone? Use
 Ask about this stone on its page and we will reply by email."
+
+## 2026-10-15: colored-stone sync stuck on its withdrawal limit
+
+- Every scheduled colored sync since Oct 12 stopped at the plan stage: 634 live colored stones, 569 eligible in the supplier feed, so 65+ would move to draft against a limit of 63 (10% of live).
+- Failures now print the counts. A full preview (`review-withdrawals`) lists each stone that would move to draft with its title and reason. `sync-with-withdrawals` takes a reviewed maximum (1-500) for one manual run; hourly runs keep the 10% limit. Withdrawn stones become drafts, not deletions.
