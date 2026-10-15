@@ -15,7 +15,7 @@ describe('lab-grown landing pages', () => {
     shape: string;
     tags: string[];
     preset_min_carat: number;
-    preset_max_carat: number;
+    preset_max_carat: number | null;
     seo_title: string;
     seo_description: string;
     guide_html: string;
@@ -47,14 +47,14 @@ describe('lab-grown landing pages', () => {
     for (const page of pages) expect(links).toContain(page.handle);
   });
 
-  it('defines 8 pages with unique handles, tight SEO text and an FAQ', () => {
-    expect(pages).toHaveLength(8);
-    expect(new Set(pages.map((p) => p.handle)).size).toBe(8);
+  it('defines 12 pages with unique handles, tight SEO text and an FAQ', () => {
+    expect(pages).toHaveLength(12);
+    expect(new Set(pages.map((p) => p.handle)).size).toBe(12);
     for (const p of pages) {
       expect(p.seo_title.length).toBeLessThanOrEqual(60);
       expect(p.seo_description.length).toBeLessThanOrEqual(160);
       expect(p.tags).toHaveLength(2);
-      expect(p.preset_min_carat).toBeLessThan(p.preset_max_carat);
+      if (p.preset_max_carat !== null) expect(p.preset_min_carat).toBeLessThan(p.preset_max_carat);
       expect(p.guide_faq).toHaveLength(3);
       expect(p.guide_html).toContain('/pages/ring-builder');
       // Facts the page text may not contain: prices, supplier names, hype, long return windows.
