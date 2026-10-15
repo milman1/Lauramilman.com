@@ -10,7 +10,7 @@ replying with the numbers. Nothing in a proposal is applied until then.
 | Source | What it gives | Access today |
 |---|---|---|
 | Shopify analytics (ShopifyQL through the Shopify connector) | Sessions, landing pages, referrers, device, cart and checkout, orders, sales | Working |
-| Google Search Console | Queries, impressions, clicks, average position | **Read-only API** (2026-10-15): `docs/seo/weekly/gsc_query.py`, service account `lmny-search-reader@lmny-seo.iam.gserviceaccount.com` with Restricted access to `https://www.lauramilman.com/`. Key from the environment variable `GSC_SERVICE_ACCOUNT_JSON`, never the repo. Indexing (Pages report) is not in the API; export it to Drive |
+| Google Search Console | Queries, impressions, clicks, position (Search Analytics); index status per URL (URL Inspection) | `docs/seo/weekly/gsc_query.py`. Service account `lmny-search-reader@lmny-seo.iam.gserviceaccount.com`, stored as a GCP service-account network secret: the proxy supplies short-lived tokens, nothing is in the repo. URL Inspection works on `https://www.lauramilman.com/` (Restricted). Search Analytics needs the service account added to the Domain property `sc-domain:lauramilman.com` too, because the proxy refuses the encoded "/" in a URL-prefix property id |
 | Google Analytics 4 | Engaged sessions, organic sessions, bot-filtered traffic, conversions | **Not connected.** Same |
 | Shopify Admin API | Articles, collections, SEO fields, redirects, alt text | Working |
 
@@ -57,14 +57,18 @@ FROM sales SHOW orders, net_sales GROUP BY order_referrer_source, order_referrer
 
 ## Queries (Search Console)
 
-Skip with a note in the report if `GSC_SERVICE_ACCOUNT_JSON` is not set.
+If a command fails, say so in the report and skip it; never estimate.
 
 ```
+python3 docs/seo/weekly/gsc_query.py sites
 python3 docs/seo/weekly/gsc_query.py query --days 28 --dims query --rows 25
 python3 docs/seo/weekly/gsc_query.py query --days 28 --dims page --rows 40
 python3 docs/seo/weekly/gsc_query.py query --days 28 --dims page --page-contains /products/lg- --rows 25
 python3 docs/seo/weekly/gsc_query.py query --days 90 --dims date --rows 100
+python3 docs/seo/weekly/gsc_query.py inspect <up to 20 URLs: homepage, top collections, new articles, a sample of stones>
 ```
+
+URL Inspection allows 2,000 checks a day; keep weekly samples small.
 
 ## Report shape
 
