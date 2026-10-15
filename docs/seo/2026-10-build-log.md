@@ -265,3 +265,13 @@ have stones.
 **Publish order:** merge the IGI and GIA feed rule and let one sync run (the
 copy says every stone is graded by IGI or GIA), merge the theme PR, then
 publish the 12 collections to the Online Store.
+
+### 2026-10-15 (later) — copy aligned with the 2026-10-13 tile changes
+
+Main had changed since the guide was written (PR #271, 2026-10-13): the lab
+search "Not sure which stone?" line and price note were removed, and lab,
+colored and natural tiles gained Reserve. "Ask about this stone" on each stone's
+page is unchanged. The guide on `lab-grown-diamonds` and the guide text of all
+12 landing pages (store metafields `custom.guide_html` and the JSON file) no
+longer point to the removed line; they now say "Questions about a stone? Use
+Ask about this stone on its page and we will reply by email."
