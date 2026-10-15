@@ -5,3 +5,8 @@ theme_export__*/
 lmny-feeds/node_modules/
 lmny-feeds/out/
 out/
+
+# Google service account keys (Search Console reader): never commit
+lmny-seo-*.json
+*service-account*.json
+*-sa-key*.json

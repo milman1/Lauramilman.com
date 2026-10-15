@@ -10,7 +10,7 @@ replying with the numbers. Nothing in a proposal is applied until then.
 | Source | What it gives | Access today |
 |---|---|---|
 | Shopify analytics (ShopifyQL through the Shopify connector) | Sessions, landing pages, referrers, device, cart and checkout, orders, sales | Working |
-| Google Search Console | Queries, impressions, clicks, average position, indexing | **Not connected.** Needs an export to Google Drive or a connector (below) |
+| Google Search Console | Queries, impressions, clicks, average position | **Read-only API** (2026-10-15): `docs/seo/weekly/gsc_query.py`, service account `lmny-search-reader@lmny-seo.iam.gserviceaccount.com` with Restricted access to `https://www.lauramilman.com/`. Key from the environment variable `GSC_SERVICE_ACCOUNT_JSON`, never the repo. Indexing (Pages report) is not in the API; export it to Drive |
 | Google Analytics 4 | Engaged sessions, organic sessions, bot-filtered traffic, conversions | **Not connected.** Same |
 | Shopify Admin API | Articles, collections, SEO fields, redirects, alt text | Working |
 
@@ -53,6 +53,17 @@ FROM sessions SHOW sessions GROUP BY landing_page_path WHERE landing_page_path S
 FROM sessions SHOW sessions, sessions_with_cart_additions GROUP BY session_device_type SINCE -28d UNTIL today
 FROM sales SHOW orders, net_sales TIMESERIES week SINCE -56d UNTIL today
 FROM sales SHOW orders, net_sales GROUP BY order_referrer_source, order_referrer_name SINCE -56d UNTIL today ORDER BY net_sales DESC LIMIT 15
+```
+
+## Queries (Search Console)
+
+Skip with a note in the report if `GSC_SERVICE_ACCOUNT_JSON` is not set.
+
+```
+python3 docs/seo/weekly/gsc_query.py query --days 28 --dims query --rows 25
+python3 docs/seo/weekly/gsc_query.py query --days 28 --dims page --rows 40
+python3 docs/seo/weekly/gsc_query.py query --days 28 --dims page --page-contains /products/lg- --rows 25
+python3 docs/seo/weekly/gsc_query.py query --days 90 --dims date --rows 100
 ```
 
 ## Report shape
