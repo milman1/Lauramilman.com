@@ -1,0 +1,46 @@
+{%- comment -%}
+  "Popular searches" links to the lab-grown shape and size pages, so
+  visitors and crawlers can reach them. A link shows only when its collection
+  exists and has stones, so nothing points at a page that is not live yet.
+{%- endcomment -%}
+{%- liquid
+  assign handles = '2-carat-round-lab-grown-diamonds,1-5-carat-round-lab-grown-diamonds,1-carat-round-lab-grown-diamonds,2-carat-oval-lab-grown-diamonds,3-carat-round-lab-grown-diamonds,1-5-carat-oval-lab-grown-diamonds,3-carat-oval-lab-grown-diamonds,3-carat-radiant-lab-grown-diamonds' | split: ','
+  assign shown = 0
+-%}
+{%- capture links -%}
+  {%- for handle in handles -%}
+    {%- assign c = collections[handle] -%}
+    {%- if c.handle != blank and c.products_count > 0 -%}
+      {%- assign shown = shown | plus: 1 -%}
+      <li><a href="{{ c.url }}">{{ c.title | escape }}</a></li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- if shown > 0 -%}
+  <nav class="lm-popular" aria-labelledby="lm-popular-title">
+    <h2 class="lm-popular__title" id="lm-popular-title">Popular lab-grown searches</h2>
+    <ul class="lm-popular__list" role="list">{{ links }}</ul>
+  </nav>
+  <style>
+    .lm-popular { margin: 2.5rem 0 0; }
+    .lm-popular__title {
+      font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+      font-weight: 400;
+      font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+      color: var(--text-dark, #2C1810);
+      margin: 0 0 0.9rem;
+    }
+    .lm-popular__list { display: flex; flex-wrap: wrap; gap: 0.6rem; list-style: none; margin: 0; padding: 0; }
+    .lm-popular__list a {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border-medium, #CFC7B8);
+      border-radius: 999px;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.82rem;
+      color: var(--text-dark, #2C1810);
+      text-decoration: none;
+    }
+    .lm-popular__list a:hover, .lm-popular__list a:focus-visible { border-color: var(--gold, #C9A050); }
+  </style>
+{%- endif -%}

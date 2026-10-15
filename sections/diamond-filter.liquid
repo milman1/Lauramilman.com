@@ -21,6 +21,11 @@
     assign search_only = true
   endif
   assign title_tag = 'h1'
+  assign preset_shape = collection.metafields.custom.preset_shape.value
+  assign is_landing = false
+  if api_mode and preset_shape != blank
+    assign is_landing = true
+  endif
   assign form_url = collection.url
   if search_only
     assign title_tag = 'h2'
@@ -71,14 +76,24 @@
   data-per-page="{{ section.settings.products_per_page }}"
   data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
   {% if search_only %}data-search-only="true" data-search-url="{{ form_url | escape }}"{% endif %}
+  {%- if preset_shape != blank %} data-preset-shape="{{ preset_shape | escape }}"{% endif -%}
+  {%- if collection.metafields.custom.preset_min_carat.value != blank %} data-preset-min-carat="{{ collection.metafields.custom.preset_min_carat.value }}"{% endif -%}
+  {%- if collection.metafields.custom.preset_max_carat.value != blank %} data-preset-max-carat="{{ collection.metafields.custom.preset_max_carat.value }}"{% endif %}
 >
   <div class="lm-dfilter__container">
     <header class="lm-dfilter__header">
-      <{{ title_tag }} class="lm-dfilter__title">{{ section.settings.heading | default: collection.title }}</{{ title_tag }}>
-      {%- if section.settings.subheading != blank -%}
-        <p class="lm-dfilter__subtitle">{{ section.settings.subheading }}</p>
-      {%- elsif collection.description != blank -%}
-        <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+      {%- if is_landing -%}
+        <{{ title_tag }} class="lm-dfilter__title">{{ collection.title | escape }}</{{ title_tag }}>
+        {%- if collection.description != blank -%}
+          <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+        {%- endif -%}
+      {%- else -%}
+        <{{ title_tag }} class="lm-dfilter__title">{{ section.settings.heading | default: collection.title }}</{{ title_tag }}>
+        {%- if section.settings.subheading != blank -%}
+          <p class="lm-dfilter__subtitle">{{ section.settings.subheading }}</p>
+        {%- elsif collection.description != blank -%}
+          <div class="lm-dfilter__subtitle">{{ collection.description }}</div>
+        {%- endif -%}
       {%- endif -%}
       {%- unless search_only -%}
         {%- render 'collection-guide', collection: collection -%}
@@ -187,6 +202,16 @@
     </div>
     <div id="lm-diamond-pager"></div>
     {%- render 'diamond-reserve-form' -%}
+    {%- if collection.handle == 'lab-grown-diamonds' -%}
+      {%- render 'lab-landing-links' -%}
+    {%- endif -%}
+    {%- comment -%}
+      Guide + FAQ only on the lab-grown search and its landing pages. Other
+      collections that already store a guide stay hidden until approved.
+    {%- endcomment -%}
+    {%- if collection.handle == 'lab-grown-diamonds' or is_landing -%}
+      {%- render 'collection-longform', collection: collection -%}
+    {%- endif -%}
   {%- endunless -%}
   </div>
 </section>

@@ -351,6 +351,16 @@
     function list(key) {
       return params.getAll(key).join(',').split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
     }
+    // Landing pages (a collection with a preset) open already filtered to their
+    // shape and size, unless the link itself carries filters.
+    var urlHasFilters = ['shape', 'color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price']
+      .some(function (key) { return params.has(key); });
+    if (!urlHasFilters) {
+      var presetShape = root.dataset.presetShape || '';
+      if (presetShape) params.set('shape', presetShape);
+      if (root.dataset.presetMinCarat) params.set('min_carat', root.dataset.presetMinCarat);
+      if (root.dataset.presetMaxCarat) params.set('max_carat', root.dataset.presetMaxCarat);
+    }
     // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
     var shapes = list('shape').concat(list('filter.p.m.custom.diamond_shape'));
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
