@@ -37,7 +37,10 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
   // Always use the complete snapshot for removals; a five-item preview never removes inventory.
   const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}}));
   const activeOwned=owned.filter(p=>p.status==='ACTIVE').length;
-  if (holds.length>Math.max(5,activeOwned*0.1)) throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  if (holds.length>Math.max(5,activeOwned*0.1)) {
+    console.error(JSON.stringify({stage:'withdrawal_guard',activeOwned,eligibleSupplierStones:stones.length,proposedWithdrawals:holds.length,threshold:Math.max(5,activeOwned*0.1),sampleHandles:holds.slice(0,20).map(p=>p.handle)}));
+    throw new Error('Availability withdrawal exceeds safety threshold; review required');
+  }
   return {writes:limit?writes.slice(0,limit):writes,holds,skipped};
 }
 async function tokenFor(domain) {
