@@ -71,7 +71,10 @@ function priceFromLmnyCost(item: StoneItem, multiple: number): PriceResult {
 }
 
 function retailMultipleForCost(costUsd: number): number | undefined {
-  return FALLBACK_RULES.find((t) => costUsd <= t.maxCostUsd)?.multiplier;
+  const tier = FALLBACK_RULES.find((t) => costUsd <= t.maxCostUsd);
+  if (!tier) return undefined;
+  // Prevent a more expensive stone becoming cheaper at the $4,000 boundary.
+  return Math.max(tier.multiplier, 4000 * 1.6 / costUsd);
 }
 
 export function priceNatural(item: StoneItem): PriceResult {
