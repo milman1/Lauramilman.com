@@ -44,14 +44,18 @@ holds a stones table — Shopify products are the only live copy.
      |---|---|---|
      | ≤ $4,000 | 1.40× | ~29% |
      | above $4,000 | 1.25× | 20% |
-   - lab: retail = round(Amount × 3) for cost ≤ $500; × 2 above $500. Mapping guards still catch
+   - lab: retail = round(Amount × the graduated effective multiplier), with monotonic price protection. Mapping guards still catch
      a Buy_Price used as a total. The 10% welcome discount remains eligible
-     (realized 2.70× or 1.80× cost by tier).
+     (10% welcome discount applies; effective multiplier varies by cost).
 
      | Amount (cost) | Multiplier | After 10% welcome |
      |---|---|---|
-     | ≤ $500 | 3× | 2.70× |
-     | > $500 | 2× | 1.80× |
+     | ≤ $200 | 2.5× target | 2.25× target |
+     | $200–$500 | 2.25× target | 2.025× target |
+     | $500–$1,000 | 2× target | 1.8× target |
+     | > $1,000 | 1.75× target | 1.575× target |
+
+     Boundary price floors can raise the effective multiplier to prevent price inversions.
    - watches: supplier cost through `config/pricing.ts` `WATCH_SALE`, applied
      in `src/watchPricing.ts`. **No Hours mid.** Aftermarket, no-papers,
      iced-out, naked-comment, Power Watch, and Uncle Manny are excluded at
