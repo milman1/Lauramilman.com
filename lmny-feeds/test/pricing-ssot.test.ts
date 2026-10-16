@@ -16,14 +16,15 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
   });
 
-  it('prices every loose lab at 3.5×', () => {
-    expect(LOOSE_LAB_GROWN.costMultiple).toBe(3.5);
-    expect(labRetailMultipleFromCost(182)).toBe(3.5);
-    expect(labRetailMultipleFromCost(500)).toBe(3.5);
-    expect(labRetailMultipleFromCost(501)).toBe(3.5);
-    expect(labRetailMultipleFromCost(1662.12)).toBe(3.5);
+  it('uses graduated tiers with monotonic boundary prices', () => {
+    expect(LOOSE_LAB_GROWN.tiers.map(t => t.multiplier)).toEqual([2.5, 2.25, 2, 1.75]);
+    for (const [cost, multiple] of [[100,2.5],[400,2.25],[750,2],[1500,1.75]]) {
+      expect(labRetailMultipleFromCost(cost)).toBe(multiple);
+    }
+    for (const cost of [200,500,1000]) {
+      expect((cost + 0.01) * labRetailMultipleFromCost(cost + 0.01)).toBeGreaterThanOrEqual(cost * labRetailMultipleFromCost(cost));
+    }
     expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
-    expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(3.15);
   });
 
   it('exposes the Belgium Dia watch sale rule on pricing.ts', () => {
