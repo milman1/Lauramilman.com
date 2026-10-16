@@ -36,7 +36,7 @@ describe('natural pricing', () => {
 
   it('prices a typical 1ct natural at 1.60× (through $4,000 Amount)', () => {
     const r = priceNatural(naturalStone({ costUsd: 3101.71 }));
-    expect(r.ok && r.priced.retailUsd).toBe(6400);
+    expect(r.ok && r.priced.retailUsd).toBe(4963);
   });
 });
 
