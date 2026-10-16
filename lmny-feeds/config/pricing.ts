@@ -55,21 +55,21 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 2.50× when invoice cost is ≤ $500, otherwise
- * the 1.50× default. Fail-closed $/ct guards still apply.
+ * Loose lab-grown diamonds: 3× when invoice cost is ≤ $500, otherwise
+ * the 2× default. Fail-closed $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 2.25× cost on the small band (55.6% gross before fees) and 1.35× cost
- * above $500 (25.9% gross before fees).
+ * is 2.70× cost on the small band (63.0% gross before fees) and 1.80× cost
+ * above $500 (44.4% gross before fees).
  *
  * Merchant decision 2026-09-17: raise only cheap labs (cost ≤ $500). Larger
- * lab tickets stay at 1.50× so high-carat stones do not reprice with the
+ * lab tickets stay at 2× so high-carat stones do not reprice with the
  * small-stone lift.
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 1.5,
+  costMultiple: 2,
   smallCostMaxUsd: 500,
-  smallCostMultiple: 2.5,
+  smallCostMultiple: 3,
   welcomeDiscountPct: 0.1,
 } as const;
 
@@ -94,9 +94,9 @@ export const LAB_GUARDS = {
   /**
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
-   * total). 1ct Amount $70 → $175 is held; Amount $72 → $180 publishes.
+   * total). 1ct Amount $70 → $210 is held; Amount $72 → $216 publishes.
    */
-  minRetailUsd: 180,
+  minRetailUsd: 216,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
