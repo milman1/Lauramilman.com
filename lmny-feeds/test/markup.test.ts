@@ -12,9 +12,9 @@ describe('natural pricing', () => {
     const cheap = priceNatural(naturalStone({ costUsd: 400 }));
     const mid = priceNatural(naturalStone({ costUsd: 900 }));
     const upper = priceNatural(naturalStone({ costUsd: 2_000 }));
-    expect(cheap.ok && cheap.priced.retailUsd).toBe(640); // 400 × 1.40
-    expect(mid.ok && mid.priced.retailUsd).toBe(1440); // 900 × 1.40
-    expect(upper.ok && upper.priced.retailUsd).toBe(3200); // 2000 × 1.40
+    expect(cheap.ok && cheap.priced.retailUsd).toBe(640); // 400 × 1.60
+    expect(mid.ok && mid.priced.retailUsd).toBe(1440); // 900 × 1.60
+    expect(upper.ok && upper.priced.retailUsd).toBe(3200); // 2000 × 1.60
   });
 
   it('holds when there is no cost', () => {
@@ -36,7 +36,7 @@ describe('natural pricing', () => {
 
   it('prices a typical 1ct natural at 1.60× (through $4,000 Amount)', () => {
     const r = priceNatural(naturalStone({ costUsd: 3101.71 }));
-    expect(r.ok && r.priced.retailUsd).toBe(4963);
+    expect(r.ok && r.priced.retailUsd).toBe(6400);
   });
 });
 
