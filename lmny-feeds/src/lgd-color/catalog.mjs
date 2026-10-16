@@ -33,7 +33,8 @@ export function normalizeRow(r) {
   if (!/^[a-z0-9_-]+$/i.test(stock)) return { reason: 'stock' };
   if (text(r.Diamond_Type) !== 'Lab Grown' || text(r.Lab) !== 'IGI' || !shape || !COLORS.has(color)) return { reason: 'scope' };
   if (text(r.Availability) !== 'Available') return { reason: 'unavailable' };
-  if (!INTENSITIES.has(intensity) || !CLARITIES.has(clarity) || !certificate) return { reason: 'grading_or_certificate' };
+  const gradingChecks=[...(!INTENSITIES.has(intensity)?['unrecognized_intensity']:[]),...(!CLARITIES.has(clarity)?['unrecognized_clarity']:[]),...(!certificate?['unrecognized_certificate_link']:[])];
+  if (gradingChecks.length) return { reason: 'grading_or_certificate',checks:gradingChecks };
   if (!Number.isFinite(carat) || carat <= 0 || !Number.isFinite(cost) || cost <= 0 || !Number.isFinite(perCarat) || perCarat <= 0 || Math.abs(cost - carat * perCarat) > Math.max(0.02, cost * 0.001)) return { reason: 'cost_mismatch' };
   const image = safeUrl(r.ImageLink, /\.(jpg|jpeg|png|webp)$/i);
   const video = safeUrl(r.Video_HTML, /\.(mp4|webm)$/i) || safeUrl(r.VideoLink, /\.(mp4|webm)$/i);
@@ -52,7 +53,7 @@ export function normalizeFeed(rows) {
     const result = normalizeRow(row);
     if (!result.stone) {
       holds[result.reason] = (holds[result.reason] || 0) + 1;
-      if (/^[a-z0-9_-]+$/i.test(stock)) exclusions.push({handle:PREFIX+stock.toLowerCase(),reason:result.reason});
+      if (/^[a-z0-9_-]+$/i.test(stock)) exclusions.push({handle:PREFIX+stock.toLowerCase(),reason:result.reason,...(result.checks?{checks:result.checks}:{})});
       continue;
     }
     if (certs.has(result.stone.certificate)) throw new SyncError('duplicate_source_certificate');

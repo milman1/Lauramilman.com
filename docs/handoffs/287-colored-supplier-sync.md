@@ -3,7 +3,7 @@
 - Issue: https://github.com/milman1/Lauramilman.com/issues/287
 - Updated: 2026-10-16 UTC
 - Owner: Codex, branch `repair/colored-supplier-sync-20261016`
-- Status: implementation prepared; live evidence pending. Do not merge or recover yet.
+- Status: full credentialed dry-run passed; inventory guard verified. Recovery and rollout remain blocked for merchant review and grading/certificate exclusions. Do not merge or recover yet.
 - Base: `bbedfb2e74087efa83c2f64b026aed6926f4455d` (latest main verified through GitHub API).
 - Scope: colored supplier sync, diagnostics, recovery controls, approved natural/colored pricing, tests. No Shopify writes performed.
 
@@ -30,10 +30,10 @@ White loose lab configuration from #285 is unchanged: 2.50/2.25/2.00/1.75 target
 ## Validation
 
 - Local full Vitest: 76 files, **873 tests pass**, including normalization and integration checks.
-- Colored Node checks: **26 pass**, including end-to-end injected supplier/Shopify previews, exact colored reprices/draft arrivals with white source isolation, exact-plan recovery and independent withdrawal verification, over-limit and payload-plan failure report persistence, recovery rejection before mutations, media and exclusion reconciliation and sanitized supplier failure categories.
+- Colored Node checks: **27 pass**, including end-to-end injected supplier/Shopify previews, exact colored reprices/draft arrivals with white source isolation, exact-plan recovery and independent withdrawal verification, over-limit and payload-plan failure report persistence, recovery rejection before mutations, exact grading-exclusion checks, media and exclusion reconciliation and sanitized supplier failure categories.
 - Typecheck was run on both this repair and an archived copy of untouched main using the same dependencies. Both report the same 19 TypeScript diagnostics (shopify.ts, uploadifyMetafields.ts, pricing-ssot.test.ts and existing theme tests). Diagnostic outputs match exactly; no new type errors. These remain baseline debt, not a passing typecheck claim.
 - White config/guards and affected white test sections compared byte-for-byte with latest main and match.
-- Synthetic end-to-end runs are not live supplier evidence. Definition of done remains blocked until a successful full credentialed dry run and catalog reconciliation are recorded.
+- Synthetic end-to-end runs are separate from the successful credentialed CI dry-run evidence below.
 
 ## Production recovery procedure
 
@@ -55,3 +55,16 @@ Inspect replacement draft PR #288 CI and its credentialed colored full dry run. 
 Read-only Admin GraphQL verified an active 10% welcome discount scoped to 27 collections, including natural-diamonds and lab-grown-diamonds. Its list does **not** include colored-lab-grown-diamonds. All 640 colored products were paginated, including all collection memberships; **zero currently belong to an eligible collection**. Thus the configured colored 10% constant and profitability tests do not establish live eligibility. No discount was changed. Merchant must decide whether colored stones should be added to discount scope; that would be a separately authorized live discount change. Existing natural/white eligibility and all live discount configuration are preserved.
 
 Replacement PR: https://github.com/milman1/Lauramilman.com/pull/288 (draft). Initial remote commit aa99b4a227ea94bfccde019cea0f48b6443687a9. CI runs: [colored full read-only](https://github.com/milman1/Lauramilman.com/actions/runs/38973539507), [regular feed tests/dry run](https://github.com/milman1/Lauramilman.com/actions/runs/38973539436). Record outcomes below before treating either as passing evidence.
+
+## Verified full source/catalog dry run, 22:05–22:09 UTC
+
+Both initial CI runs above completed **successfully**, including the full credentialed colored dry run and regular feed tests/dry run (zero writes). Colored artifact [12077927749](https://github.com/milman1/Lauramilman.com/actions/runs/38973539507/artifacts/12077927749), ZIP SHA256 `66cd21d604927984e054ab61e0bb7b92e1716426b6f6b62977702356bd364a5b`, expires 2026-10-23. Durable sanitized copies: [full report](../audits/2026-10-16-colored-sync/dry-run-38973539507.json) and [every proposed withdrawal](../audits/2026-10-16-colored-sync/withdrawals-38973539507.csv).
+
+- Source: **1,326 fetched, 539 eligible**, exclusions scope 128, unavailable 558, grading/certificate 90, photo/video 11. Actual media checks: **0 failures**.
+- Shopify: **24,957 read**, 640 owned, **634 active / 6 draft / 0 archived**, unchanged withdrawal limit **63**.
+- **135 withdrawals**: 74 supplier-unavailable, 56 grading/certificate-ineligible, 5 absent from supplier snapshot. Exact handles and reasons are in the CSV. A return from supplier-fetch failure demonstrates recovery of that request, but does not retrospectively identify the hidden exception in run 38959215520.
+- Eligible supplier reconciliation: **499 active updates**, **4 draft updates**, **36 new drafts**, **0 skips**, total **539**, matching the eligible count. Catalog reconciliation: 503 updates + 135 withdrawals + 2 unchanged = all **640 existing owned**. Adding 36 new drafts yields **676 report rows**. All writes are colored-owned or new colored handles; no white write appears. The expected post-plan owned active count is **499**, draft **177** (6 existing + 135 withdrawals + 36 creations), owned total **676**, if this exact plan were approved/applied.
+- Verified root cause of recurring planning failures: **withdrawal backlog exceeds the safety limit (135 > 63)**. The old report was written only after the guard, so failures lost the proposed plan and prevented review/recovery. Reports now survive both guard and payload-planning errors. Latest historical supplier-fetch failure is a distinct event; its precise original HTTP/transport cause cannot be recovered from generic old logs.
+- Review fingerprint `64c86f68e0fac4f31b6ec11a71e39a51a34d92a51942cf4ec7ea50f5b1d0e6e1` identifies this snapshot **only**. It is evidence, not recovery authorization. Later reports/code may change the hash; use a fresh full final-commit report for actual approval.
+
+**Production remains blocked:** 56 active products fail grading/certificate normalization; confirm whether the supplier changed intensity, clarity or certificate-link format before approving withdrawals. New fixed diagnostic checks distinguish those causes without recording raw source fields. No normalization gate was relaxed. Merchant must approve any corrected eligibility interpretation, exact withdrawals, price rollout and whether colored welcome-discount scope should change. Passing CI and a dry run do not approve these decisions.

@@ -107,6 +107,11 @@ test('supplier HTTP, transport, invalid JSON and pagination errors have safe fix
 test('case-insensitive stock collisions cannot generate duplicate Shopify handles',()=>{
   assert.throws(()=>normalizeFeed([fixture(),fixture({Stock_No:'test1'})]),/duplicate_source_stock/);
 });
+test('grading exclusions identify exact fixed checks without leaking supplier fields',()=>{
+  const result=normalizeFeed([fixture({Fancy_Color_Intensity:'UNKNOWN',Clarity:'UNKNOWN',CertificateLink:'https://example.com/PRIVATE_SOURCE_URL.pdf'})]);
+  assert.deepEqual(result.exclusions,[{handle:'lg-color-test1',reason:'grading_or_certificate',checks:['unrecognized_intensity','unrecognized_clarity','unrecognized_certificate_link']}]);
+  assert.ok(!JSON.stringify(result).includes('PRIVATE_SOURCE_URL'));
+});
 test('reviewed recovery applies exactly the matching plan and verifies withdrawals independently',async()=>{
   const outputDir=await mkdtemp(join(tmpdir(),'colored-recovery-'));
   const stone=normalizeRow(fixture()).stone;
