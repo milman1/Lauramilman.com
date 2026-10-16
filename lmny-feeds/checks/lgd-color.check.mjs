@@ -92,6 +92,16 @@ test('recovery requires explicit maximum and unchanged reviewed plan before any 
     assert.equal((await read()).withdrawals.length,10);assert.ok(calls.every(q=>q.startsWith('query ')));
   },{products:Array.from({length:10},(_,i)=>product('lg-color-gone'+i))});
 });
+test('recovery detects prior-price drift even when the proposed target price is unchanged',async()=>{
+  const active=product('lg-color-test1');
+  await harness(async(deps,read,calls)=>{
+    const preview=await main(['--dry-run'],deps);
+    active.variants.nodes[0].price='701';
+    await assert.rejects(()=>main(['--max-withdrawals=10','--approved-plan-hash='+preview.planHash],deps),/reviewed_plan_changed/);
+    assert.equal((await read()).writes[0].price,preview.writes[0].price);
+    assert.ok(calls.every(q=>q.startsWith('query ')));
+  },{products:[active,...Array.from({length:10},(_,i)=>product('lg-color-gone'+i))]});
+});
 test('scheduled thresholds are unchanged and malformed recovery inputs fail closed',async()=>{
   assert.equal(withdrawalLimit(634),63);assert.equal(withdrawalLimit(20),5);
   for(const value of [0,-1,501,NaN,1.5])assert.throws(()=>withdrawalLimit(634,value));

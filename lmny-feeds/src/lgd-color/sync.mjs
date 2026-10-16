@@ -174,7 +174,9 @@ async function runSync(argv, report, dependencies) {
   }
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
   const sanitized=report;
-  Object.assign(report,{scope:limit?'sample':activate?'activation':'full',planHash:snapshotHash(plan),withdrawalLimit:withdrawalLimit(plan.activeOwned),reviewedMaximum:maxWithdrawals,
+  const reviewSnapshot={plan,prior:owned.map(p=>({id:p.id,handle:p.handle,status:p.status,price:p.price,variantId:p.variantId,variantCount:p.variantCount,tags:p.tags,certificate:p.certificate})).sort((a,b)=>a.handle.localeCompare(b.handle)),
+    withdrawalChecks:plan.holds.map(l=>normalized.exclusions.find(e=>e.handle===l.handle)??{handle:l.handle,reason:l.reason})};
+  Object.assign(report,{scope:limit?'sample':activate?'activation':'full',planHash:snapshotHash(reviewSnapshot),withdrawalLimit:withdrawalLimit(plan.activeOwned),reviewedMaximum:maxWithdrawals,
     overLimit:plan.holds.length>withdrawalLimit(plan.activeOwned),
     writes:plan.writes.map(l=>({action:l.action,handle:l.handle,previousPrice:catalog.find(p=>p.handle===l.handle)?.price??null,price:l.input.variants[0].price,status:l.input.status})),
     withdrawals:plan.holds.map(l=>({handle:l.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:l.reason,...(l.exclusionReason?{exclusionReason:l.exclusionReason}:{})})),skipped:plan.skipped});
