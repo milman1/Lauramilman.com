@@ -134,13 +134,14 @@
         <div class="pdp-pair__row"><span>Setting, without center stone</span><span data-pair-setting-price></span></div>
         <div class="pdp-pair__row"><span>Your diamond</span><span data-pair-diamond-price></span></div>
         <div class="pdp-pair__row"><span>Setting your diamond</span><span>Included</span></div>
+        <div class="pdp-pair__row"><span>20% off the higher price</span><span data-pair-off></span></div>
         <div class="pdp-pair__row pdp-pair__row--total"><span>Total</span><span data-pair-total></span></div>
       </div>
-      <p class="pdp-pair__text" data-pair-buy-note hidden>We set your diamond by hand and confirm every detail with you before your ring is made.</p>
+      <p class="pdp-pair__text" data-pair-buy-note hidden>We set your diamond by hand and confirm every detail with you before your ring is made. Checkout takes 20% off the higher price. Either piece on its own stays at full price.</p>
       {%- if is_setting -%}
         <p class="pdp-pair__text" data-pair-quote-note>This setting is sold without a center stone. Request the pairing and we will confirm availability and every detail before anything is made.</p>
       {%- else -%}
-        <p class="pdp-pair__text" data-pair-quote-note>The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made.</p>
+        <p class="pdp-pair__text" data-pair-quote-note>The ring price above includes our own center stone. We will quote this setting with your diamond and confirm every detail before anything is made. If both pieces are in the cart, checkout takes 20% off the higher price.</p>
       {%- endif -%}
       <p class="pdp-pair__warn" data-pair-error role="alert" hidden></p>
       <div class="pdp-inquire__actions">
@@ -287,6 +288,25 @@
         }
       }
 
+      // Checkout discounts the higher-priced piece by 20% and leaves the other at full price.
+      function pairingDue(settingPrice, stonePrice) {
+        var off = Math.round(Math.max(settingPrice, stonePrice) * 0.2);
+        return { off: off, due: settingPrice + stonePrice - off };
+      }
+
+      function moneyExact(cents) {
+        try {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: root.getAttribute('data-currency') || 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          }).format(cents / 100);
+        } catch (e) {
+          return money(cents);
+        }
+      }
+
       function showBrowse(note) {
         chosen.hidden = true;
         browse.hidden = false;
@@ -340,9 +360,11 @@
         buy.hidden = !canBuy;
         request.classList.toggle('pdp-inquire__btn--ghost', canBuy);
         if (!canBuy) return;
+        var due = pairingDue(setting.price, stone.price);
         root.querySelector('[data-pair-setting-price]').textContent = money(setting.price);
         root.querySelector('[data-pair-diamond-price]').textContent = money(stone.price);
-        root.querySelector('[data-pair-total]').textContent = money(setting.price + stone.price);
+        root.querySelector('[data-pair-off]').textContent = '−' + moneyExact(due.off);
+        root.querySelector('[data-pair-total]').textContent = moneyExact(due.due);
       }
 
       function showChosen(p) {

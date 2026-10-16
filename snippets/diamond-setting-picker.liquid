@@ -4,8 +4,9 @@
   Matches on center-stone shape only (snippets/center-stone-shape.liquid).
 
   Settings sold without a center stone (collection ring-settings, tag
-  ring-setting) come first and show their price plus the total with this
-  diamond. Finished engagement rings follow without a price: they carry
+  ring-setting) come first and show their price plus the checkout total
+  with this diamond: 20% off whichever piece costs more. Finished
+  engagement rings follow without a price: they carry
   their own center stone, so a pairing with this diamond is quoted.
   Each card opens the ring with ?diamond=<handle>, where the pairing panel
   takes over.
@@ -55,8 +56,14 @@
                 </span>
                 <span class="dsp__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' | remove: ' Engagement Ring' }}</span>
                 {%- if is_setting -%}
+                  {%- assign pair_list = ring.price | plus: stone_price -%}
+                  {%- assign pair_cut = ring.price -%}
+                  {%- if stone_price > pair_cut -%}{%- assign pair_cut = stone_price -%}{%- endif -%}
+                  {%- assign pair_off = pair_cut | times: 0.2 | round -%}
+                  {%- assign pair_due = pair_list | minus: pair_off -%}
                   <span class="dsp__price">Setting {{ ring.price | money_without_trailing_zeros }}</span>
-                  <span class="dsp__total">With this diamond {{ ring.price | plus: stone_price | money_without_trailing_zeros }}</span>
+                  <span class="dsp__total">With this diamond {{ pair_due | money_without_trailing_zeros }}</span>
+                  <span class="dsp__price">20% off the higher price</span>
                 {%- else -%}
                   <span class="dsp__price">Finished ring</span>
                   <span class="dsp__total">Quoted with this diamond</span>
@@ -81,7 +88,7 @@
 
     {%- if matches > 0 -%}
       <ul class="dsp__row" role="list">{{ cards }}</ul>
-      <p class="dsp__note">We set this diamond in your setting by hand, labor included, and confirm every detail before it is made.</p>
+      <p class="dsp__note">We set this diamond in your setting by hand, labor included, and confirm every detail before it is made. Checkout takes 20% off the higher price when this diamond and a setting or engagement ring are in the cart. Either piece on its own stays at full price.</p>
       {%- if setting_collection != blank -%}
         <a class="dsp__all" href="{{ setting_collection.url }}">See all settings</a>
       {%- endif -%}

@@ -61,6 +61,10 @@ export const STONE_TIERS: LabTier[] = [
  * The storefront's 10% welcome discount remains eligible. Realized revenue
  * is 3.15× cost (68.3% gross before fees).
  *
+ * A pairing checkout discount is separate and is not applied here: when an
+ * engagement ring or setting is in the cart with a loose diamond, checkout
+ * takes 20% off the higher-priced piece only. See SHOPIFY_SETUP.md section 6a.
+ *
  * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
  * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
  * which cross $500 on weight alone, at a thinner markup than small stones.

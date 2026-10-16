@@ -31,8 +31,13 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(diamondSide).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(diamondSide).toContain('{%- if ring_shape == stone_shape -%}');
     expect(diamondSide).toContain('{{ ring.url }}?diamond={{ product.handle | url_encode }}');
-    // Settings show their price and the total with this diamond; finished rings are quoted.
-    expect(diamondSide).toContain('With this diamond {{ ring.price | plus: stone_price | money_without_trailing_zeros }}');
+    // Settings show list price and the checkout total: 20% off whichever piece costs more.
+    expect(diamondSide).toContain('assign pair_off = pair_cut | times: 0.2 | round');
+    expect(diamondSide).toContain('if stone_price > pair_cut');
+    expect(diamondSide).toContain('With this diamond {{ pair_due | money_without_trailing_zeros }}');
+    expect(diamondSide).toContain('20% off the higher price');
+    expect(diamondSide).toContain('Either piece on its own stays at full price.');
+    expect(diamondSide).not.toContain('ring.price | plus: stone_price | money_without_trailing_zeros');
     expect(diamondSide).toContain('Quoted with this diamond');
   });
 
@@ -59,6 +64,9 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(ringSide).toContain("assign sku_base = 'SET-' | append: product.handle | downcase");
     expect(ringSide).toContain('assign v_match = v.available');
     expect(ringSide).toContain('<span>Setting your diamond</span><span>Included</span>');
+    expect(ringSide).toContain('<span>20% off the higher price</span><span data-pair-off></span>');
+    expect(ringSide).toContain('Math.round(Math.max(settingPrice, stonePrice) * 0.2)');
+    expect(ringSide).toContain("root.querySelector('[data-pair-off]').textContent = '−' + moneyExact(due.off)");
     expect(ringSide).toContain('var canBuy = !!(setting && stone.variants && stone.variants[0]);');
     expect(ringSide).toContain("{ id: setting.id, quantity: 1, properties: props }");
     expect(ringSide).toContain("{ id: stone.variants[0].id, quantity: 1, properties: { 'Set in': ringTitle } }");

@@ -222,6 +222,38 @@ Create an Online Store page with handle `shop` and template **shop**.
 
 The storefront popup and newsletter reveal this code after signup.
 
+Combinations stay off, so this code does not stack with the pairing discount in section 6a.
+
+---
+
+## 6a. Pairing discount: ring or setting with a loose diamond
+
+Created 2026-10-14. Two automatic Buy X Get Y discounts. Shopify applies one of them, the one that saves more, so checkout takes 20% off the higher-priced piece. The other piece stays at its listed price. A diamond alone, or a ring alone, is full price.
+
+| Discount | Admin id | Customer buys 1 from | Customer gets 1 at 20% from |
+|---|---|---|---|
+| Pairing 20% off the setting or ring | `gid://shopify/DiscountAutomaticNode/1499999436871` | `natural-diamonds`, `lab-grown-diamonds`, `colored-lab-grown-diamonds` | `engagement-rings`, `ring-settings` |
+| Pairing 20% off the loose stone | `gid://shopify/DiscountAutomaticNode/1499999469639` | `engagement-rings`, `ring-settings` | `natural-diamonds`, `lab-grown-diamonds`, `colored-lab-grown-diamonds` |
+
+- Effect: percentage `0.2`, get quantity `1`. No per-order cap, so a second pair can qualify. No end date. All customers.
+- Combines with product discounts and order discounts, not shipping. The two discounts still do not both reduce the same cart: each piece can only fill one role, so Shopify keeps the larger saving.
+- The general `rings` collection is not included. Wedding bands stay full price next to a loose diamond. Watches are not in these collections.
+- `LMNYWELCOME` keeps combinations off, so the 10% welcome code does not stack with this offer.
+- This is not a retail multiple. `lmny-feeds/config/pricing.ts` is unchanged.
+
+Margin when the loose diamond is the higher price: a natural above a $4,000 cost (retail 1.25×) comes back at cost, and one at or under $4,000 (retail 1.40×) comes back at 1.12× cost. A lab diamond (retail 3.5×) comes back at 2.8× cost. When the ring or setting is the higher price, the diamond stays at its listed multiple.
+
+Checked on the storefront cart on 2026-10-14, then the cart was cleared:
+
+| Cart | Result |
+|---|---|
+| Setting $1,350 + lab diamond $726 | $1,806. 20% off the setting. |
+| Setting $1,350 + natural diamond $4,830 | $5,214. 20% off the diamond. |
+| Finished engagement ring $1,450 + lab diamond $726 | $1,886. 20% off the ring. |
+| Stackable band $1,850 + lab diamond $726 | $2,576. No discount. |
+
+The pairing panels show this checkout total. Shape match still does not confirm that a stone fits the head.
+
 ---
 
 ## 7. Branded emails
