@@ -51,4 +51,40 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(() => labGrownJewelryRetailFromCost(0)).toThrow(/invalid cost/);
     expect(() => labGrownJewelryRetailFromCost(-10)).toThrow(/invalid cost/);
   });
+});  it('uses the approved graduated tiers and prevents boundary price inversions', () => {
+    expect(LOOSE_LAB_GROWN.tiers.map(t => t.multiplier)).toEqual([2.5, 2.25, 2, 1.75]);
+    expect(labRetailMultipleFromCost(100)).toBe(2.5);
+    expect(labRetailMultipleFromCost(400)).toBe(2.25);
+    expect(labRetailMultipleFromCost(750)).toBe(2);
+    expect(labRetailMultipleFromCost(1500)).toBe(1.75);
+    for (const cost of [200, 500, 1000]) {
+      expect((cost + 0.01) * labRetailMultipleFromCost(cost + 0.01))
+        .toBeGreaterThanOrEqual(cost * labRetailMultipleFromCost(cost));
+    }
+    expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
+  });
+
+  it('exposes the Belgium Dia watch sale rule on pricing.ts', () => {
+    expect(WATCH.sale).toBe(WATCH_SALE);
+    expect(WATCH.retailCapByStock).toBe(WATCH_RETAIL_CAP_BY_STOCK);
+    expect(WATCH.sale.minNetMarginOfPrice).toBe(0.05);
+    expect(WATCH.sale.higherMinNetMarginOfPrice).toBe(0.1);
+    expect(WATCH.sale.higherMarginMaxPriceUsd).toBe(10_000);
+    expect(WATCH.sale.shippingFlatUsd).toBe(120);
+    expect(WATCH.sale.shippingInsuranceRate).toBe(0.01);
+    expect(WATCH.reviewTag).toBe('pricing-review');
+  });
+
+  it('prices lab-grown jewelry at cost × 2', () => {
+    expect(LAB_GROWN_JEWELRY.costMultiple).toBe(2);
+    expect(LAB_GROWN_JEWELRY.vendors).toContain('Peaceful Diamonds');
+    expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
+    expect(labGrownJewelryRetailFromCost(250)).toBe(500);
+    expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
+  });
+
+  it('rejects non-positive lab jewelry cost', () => {
+    expect(() => labGrownJewelryRetailFromCost(0)).toThrow(/invalid cost/);
+    expect(() => labGrownJewelryRetailFromCost(-10)).toThrow(/invalid cost/);
+  });
 });
