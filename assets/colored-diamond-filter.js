@@ -70,7 +70,7 @@
         var title = document.createElement('h2'); title.className = 'product-card__title'; var titleLink = document.createElement('a'); titleLink.href = s.url; titleLink.textContent = s.title; title.append(titleLink);
         var price = document.createElement('p'); price.className = 'product-card__price'; price.textContent = money.format(s.price);
         var actions = document.createElement('div'); actions.className = 'lm-stone-card__actions';
-        var reserve = document.createElement('button'); reserve.type = 'button'; reserve.className = 'lm-stone-card__reserve'; reserve.textContent = 'Reserve this diamond';
+        var reserve = document.createElement('button'); reserve.type = 'button'; reserve.className = 'lm-stone-card__reserve'; reserve.textContent = 'Ask about this stone';
         reserve.setAttribute('data-reserve-stone', '');
         reserve.setAttribute('data-reserve-title', s.title || '');
         reserve.setAttribute('data-reserve-url', s.url || '');

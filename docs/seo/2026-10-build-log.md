@@ -295,3 +295,7 @@ page is unchanged. The guide on `lab-grown-diamonds` and the guide text of all
 12 landing pages (store metafields `custom.guide_html` and the JSON file) no
 longer point to the removed line; they now say "Questions about a stone? Use
 Ask about this stone on its page and we will reply by email."
+
+## 2026-10-15: "Ask about this stone" replaces "Reserve this diamond" on search tiles
+
+- Merchant request: most recent inquiries came from ChatGPT and Claude visitors. Lab, natural and colored search tiles now say "Ask about this stone", matching the stone page. The dialog asks for name, email, optional phone and an optional question, and reaches the inbox as "Diamond question" with the stone, link, stock number and listed price. It makes no promise to hold the stone.
