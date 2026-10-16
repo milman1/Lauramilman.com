@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { normalizeRow, normalizeFeed, payloadFor, fetchInventory, FEED_TAG, snapshotHash } from '../src/lgd-color/catalog.mjs';
 import { planFor, mediaReady, requestShopify } from '../src/lgd-color/sync.mjs';
 import { main, OPS, withdrawalLimit } from '../src/lgd-color/sync.mjs';
+import { KEEP_ACTIVE_HANDLES } from '../src/lgd-color/retention.mjs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -127,9 +128,10 @@ test('reviewed recovery applies exactly the matching plan and verifies withdrawa
   const stone=normalizeRow(fixture()).stone;
   const kept={...product(stone.handle),hash:{value:snapshotHash(stone)},video:{value:stone.video}};
   kept.variants.nodes[0].price=String(stone.retail);
-  const products=[kept,...Array.from({length:10},(_,i)=>product('lg-color-gone'+i))];
+  const retained=product(KEEP_ACTIVE_HANDLES[0]);
+  const products=[kept,...Array.from({length:10},(_,i)=>product('lg-color-gone'+i)),retained];
   const mutations=[];
-  const deps={outputDir,fetchInventory:async()=>[fixture()],mediaReady:async()=>true,client:async()=>async(query,variables)=>{
+  const deps={outputDir,fetchInventory:async()=>[fixture(),fixture({Stock_No:KEEP_ACTIVE_HANDLES[0].slice('lg-color-'.length),Fancy_Color_Intensity:'UNKNOWN',CertificateLink:'https://example.com/LG9999999.pdf'})],mediaReady:async()=>true,client:async()=>async(query,variables)=>{
     if(query===OPS.catalog)return {products:{nodes:products,pageInfo:{hasNextPage:false}}};
     if(query===OPS.location)return {locations:{nodes:[{id:'location',isActive:true}],pageInfo:{hasNextPage:false}}};
     if(query===OPS.hold){const p=products.find(p=>p.id===variables.product.id);p.status='DRAFT';mutations.push(p.handle);return {productUpdate:{product:{id:p.id,status:p.status},userErrors:[]}};}
@@ -140,6 +142,47 @@ test('reviewed recovery applies exactly the matching plan and verifies withdrawa
     const preview=await main(['--dry-run'],deps);assert.equal(mutations.length,0);assert.equal(preview.writes.length,0);
     await assert.rejects(()=>main(['--max-withdrawals=9','--approved-plan-hash='+preview.planHash],deps),/withdrawal_limit_exceeded/);assert.equal(mutations.length,0);
     const result=await main(['--max-withdrawals=10','--approved-plan-hash='+preview.planHash],deps);
-    assert.equal(result.status,'verified');assert.equal(mutations.length,10);assert.ok(products.slice(1).every(p=>p.status==='DRAFT'));assert.equal(kept.status,'ACTIVE');
+    assert.equal(result.status,'verified');assert.equal(mutations.length,10);assert.ok(products.slice(1,11).every(p=>p.status==='DRAFT'));assert.equal(kept.status,'ACTIVE');assert.equal(retained.status,'ACTIVE');assert.equal(retained.variants.nodes[0].price,'700');
   } finally {await rm(outputDir,{recursive:true,force:true});}
+});
+test('merchant retention is the exact reviewed 56 and never expands source eligibility',async()=>{
+  const evidence=JSON.parse(await readFile(new URL('../../docs/audits/2026-10-16-colored-sync/dry-run-38975746337.json',import.meta.url),'utf8'));
+  const exclusions=new Map(evidence.excludedRows.map(p=>[p.handle,p]));
+  const expected=evidence.withdrawals.filter(p=>exclusions.get(p.handle)?.checks?.join(',')==='unrecognized_intensity').map(p=>p.handle).sort();
+  assert.equal(KEEP_ACTIVE_HANDLES.length,56);assert.deepEqual([...KEEP_ACTIVE_HANDLES].sort(),expected);
+  const rows=KEEP_ACTIVE_HANDLES.map((handle,i)=>fixture({Stock_No:handle.slice('lg-color-'.length),Fancy_Color_Intensity:'UNKNOWN',CertificateLink:`https://example.com/LG${900000+i}.pdf`}));
+  const normalized=normalizeFeed(rows);assert.equal(normalized.stones.length,0);
+  const plan=planFor([],[...KEEP_ACTIVE_HANDLES.map(h=>product(h)),product('lg-color-not-approved')],{exclusions:[...normalized.exclusions,{handle:'lg-color-not-approved',reason:'grading_or_certificate',checks:['unrecognized_intensity']}]});
+  assert.equal(plan.retained.length,56);assert.equal(plan.writes.length,0);assert.deepEqual(plan.holds.map(p=>p.handle),['lg-color-not-approved']);
+});
+test('full preview keeps all 56 active with existing data and reports remaining withdrawals separately',async()=>{
+  const rows=[fixture(),...KEEP_ACTIVE_HANDLES.map((handle,i)=>fixture({Stock_No:handle.slice('lg-color-'.length),Fancy_Color_Intensity:'UNKNOWN',CertificateLink:`https://example.com/LG${900000+i}.pdf`})),fixture({Stock_No:'sold',Availability:'Memo'})];
+  await harness(async(deps,read,calls)=>{
+    const report=await main(['--dry-run'],deps);
+    assert.equal(report.retained.length,56);assert.equal(report.retentionReviewRequired,false);assert.equal(report.withdrawals.length,1);
+    assert.equal(report.reconciliation.filter(p=>p.action==='retain').length,56);
+    assert.ok(!report.writes.some(p=>KEEP_ACTIVE_HANDLES.includes(p.handle)));assert.ok(!report.withdrawals.some(p=>KEEP_ACTIVE_HANDLES.includes(p.handle)));
+    assert.equal(report.eligible,1);assert.ok(calls.every(q=>q.startsWith('query ')));
+  },{rows,products:[product('lg-color-test1'),...KEEP_ACTIVE_HANDLES.map(h=>product(h)),product('lg-color-sold')]});
+});
+test('changed availability of a retained stone blocks all writes even with a recovery ceiling',async()=>{
+  for(const rows of [[fixture()],[fixture(),fixture({Stock_No:KEEP_ACTIVE_HANDLES[0].slice('lg-color-'.length),Availability:'Memo'})]]){
+    await harness(async(deps,read,calls)=>{
+      const preview=await main(['--dry-run'],deps);assert.equal(preview.retained.length,1);assert.equal(preview.retentionReviewRequired,true);assert.equal(preview.withdrawals.length,0);
+      await assert.rejects(()=>main(['--max-withdrawals=100','--approved-plan-hash='+preview.planHash],deps),/retained_inventory_requires_review/);
+      assert.ok(calls.every(q=>q.startsWith('query ')));
+    },{rows,products:[product(KEEP_ACTIVE_HANDLES[0])]});
+  }
+});
+test('retention never activates drafts or archived products, or owns another source',()=>{
+  const handle=KEEP_ACTIVE_HANDLES[0],exclusions=[{handle,reason:'grading_or_certificate',checks:['unrecognized_intensity']}];
+  for(const p of [product(handle,'DRAFT'),product(handle,'ARCHIVED'),{...product(handle),tags:['lmny-feed']}]){
+    const plan=planFor([],[p],{exclusions});assert.equal(plan.retained.length,0);assert.equal(plan.writes.length,0);assert.equal(plan.holds.length,0);
+  }
+});
+test('media failure on a now-eligible retained stone cannot withdraw it automatically',async()=>{
+  await harness(async(deps,read,calls)=>{
+    const preview=await main(['--dry-run'],deps);assert.equal(preview.retained.length,1);assert.equal(preview.retained[0].sourceReason,'media_unavailable');assert.equal(preview.withdrawals.length,0);
+    await assert.rejects(()=>main([],deps),/retained_inventory_requires_review/);assert.ok(calls.every(q=>q.startsWith('query ')));
+  },{rows:[fixture({Stock_No:KEEP_ACTIVE_HANDLES[0].slice('lg-color-'.length)})],products:[product(KEEP_ACTIVE_HANDLES[0])],media:false});
 });

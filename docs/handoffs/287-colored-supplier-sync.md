@@ -1,5 +1,15 @@
 # Colored-stone supplier sync repair
 
+## Current merchant decision: keep the 56 (supersedes earlier withdrawal proposals)
+
+The merchant explicitly instructed **"Keep 56"** on 2026-10-16 after clarification identified the intensity-excluded group. `src/lgd-color/retention.mjs` records the exact 56 reviewed handles from report 38975746337. They remain ACTIVE with existing Shopify data while rejected only for unrecognized intensity. They receive no payload, reprice, invented intensity, activation or withdrawal. Other unrecognized-intensity products are not covered by this decision; source eligibility gates remain unchanged.
+
+If a retained active product later disappears, becomes unavailable, fails another source check or fails media checks after becoming eligible, previews keep it separate and flag `retentionReviewRequired`. Live sync stops before **all** writes, even with a reviewed ceiling; the merchant must review the changed inventory evidence. Retention never reactivates a draft/archive or takes ownership of another source. If source grading becomes valid again, ordinary eligible processing can resume without changing activation rules. Live read-back also verifies retained statuses, prices and source identifiers remain unchanged.
+
+Reports now enumerate `retained` products and mark them `retain` in catalog reconciliation. The retention policy and retained reasons are covered by the plan hash. Historical reports below with 132/135 withdrawals **are not current approval scopes**. Replaying the latest business snapshot implies **56 retained and 76 remaining withdrawals** (68 unavailable + 8 missing), against the same limit **63**. With the previously observed arrivals/updates, expected post-plan inventory would be 558 active / 234 draft (792 owned), if separately approved/applied. A fresh credentialed preview must verify these counts.
+
+This decision approves keeping those 56 only. It does **not** approve the remaining withdrawals, prices, merge/deployment, discount changes, or a higher ceiling. All earlier fingerprints are obsolete. Current checks: 873 Vitest tests and 33 colored checks locally; remote CI/dry-run evidence will be linked from PR #288. No live changes or merge performed.
+
 - Issue: https://github.com/milman1/Lauramilman.com/issues/287
 - Updated: 2026-10-16 UTC
 - Owner: Codex, branch `repair/colored-supplier-sync-20261016`

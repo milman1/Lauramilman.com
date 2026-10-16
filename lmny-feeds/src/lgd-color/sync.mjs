@@ -1,14 +1,25 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { SyncError, safeFailure } from './errors.mjs';
+import { KEEP_ACTIVE_HANDLES } from './retention.mjs';
 import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
+const keepActive=new Set(KEEP_ACTIVE_HANDLES);
+
+export function retainedFor(stones,catalog,exclusions=[]) {
+  const eligible=new Set(stones.map(s=>s.handle)),excluded=new Map(exclusions.map(e=>[e.handle,e]));
+  return catalog.filter(p=>keepActive.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&!eligible.has(p.handle)).map(p=>{
+    const source=excluded.get(p.handle),intensityOnly=source?.reason==='grading_or_certificate'&&source.checks?.length===1&&source.checks[0]==='unrecognized_intensity';
+    return {handle:p.handle,status:'ACTIVE',reason:intensityOnly?'merchant_keep_intensity':'merchant_keep_requires_review',sourceReason:source?.reason??'not_in_supplier_feed',checks:source?.checks??[],reviewRequired:!intensityOnly};
+  });
+}
 
 export function withdrawalLimit(activeOwned, maxWithdrawals=null) {
   if(maxWithdrawals!==null && (!Number.isInteger(maxWithdrawals)||maxWithdrawals<1||maxWithdrawals>500))throw new SyncError('invalid_withdrawal_maximum');
   return maxWithdrawals ?? Math.max(5,Math.floor(activeOwned*0.1));
 }
 export function checkWithdrawals(plan, maxWithdrawals=null) {
+  if(plan.retained?.some(p=>p.reviewRequired))throw new SyncError('retained_inventory_requires_review',{products:plan.retained.filter(p=>p.reviewRequired).length});
   const allowed=withdrawalLimit(plan.activeOwned,maxWithdrawals);
   if(plan.holds.length>allowed)throw new SyncError('withdrawal_limit_exceeded',{proposedWithdrawals:plan.holds.length,activeOwned:plan.activeOwned,withdrawalLimit:allowed});
 }
@@ -33,6 +44,8 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
   const byHandle = new Map(catalog.map(p=>[p.handle,p])), byCert = new Map();
   for (const p of catalog) if(p.certificate) { const key=p.certificate.toUpperCase().replace(/^LG/,''); const a=byCert.get(key)||[]; a.push(p); byCert.set(key,a); }
   const desired = new Set(), writes=[], skipped=[];
+  const retained=limit||activate?[]:retainedFor(stones,catalog,exclusions);
+  for(const p of retained)desired.add(p.handle);
   for (const s of stones) {
     const existing=byHandle.get(s.handle), certOwners=byCert.get(s.certificate.replace(/^LG/,'').toUpperCase())||[];
     desired.add(s.handle);
@@ -50,7 +63,7 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
   const excluded=new Map(exclusions.map(e=>[e.handle,e.reason]));
   const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,reason:excluded.has(p.handle)?'supplier_ineligible':'not_in_supplier_feed',...(excluded.has(p.handle)?{exclusionReason:excluded.get(p.handle)}:{}),input:{id:p.id,status:'DRAFT'}}));
   const activeOwned=owned.filter(p=>p.status==='ACTIVE').length;
-  const plan={writes:limit?writes.slice(0,limit):writes,holds,skipped,activeOwned};
+  const plan={writes:limit?writes.slice(0,limit):writes,holds,skipped,activeOwned,retained};
   if(checkLimit)checkWithdrawals(plan);
   return plan;
 }
@@ -154,6 +167,8 @@ async function runSync(argv, report, dependencies) {
   stage='plan';
   // Persist availability evidence before payload planning can fail on a product.
   const desiredHandles=new Set(stones.map(s=>s.handle)),excludedByHandle=new Map(normalized.exclusions.map(e=>[e.handle,e.reason]));
+  report.retained=limit||activate?[]:retainedFor(stones,catalog,normalized.exclusions);
+  for(const p of report.retained)desiredHandles.add(p.handle);
   report.withdrawalLimit=withdrawalLimit(report.catalog.activeOwned);
   report.withdrawals=limit||activate?[]:owned.filter(p=>p.status==='ACTIVE'&&!desiredHandles.has(p.handle)).map(p=>({handle:p.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:excludedByHandle.has(p.handle)?'supplier_ineligible':'not_in_supplier_feed',...(excludedByHandle.has(p.handle)?{exclusionReason:excludedByHandle.get(p.handle)}:{})}));
   await dependencies.save(report);
@@ -170,20 +185,24 @@ async function runSync(argv, report, dependencies) {
   plan.skipped.push(...Array.from(failedMedia,handle=>({handle,reason:'media_unavailable'})));
   if(!limit && !activate){
     const existingHolds=new Set(plan.holds.map(line=>line.handle));
-    for(const p of owned)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,reason:'media_unavailable',input:{id:p.id,status:'DRAFT'}});
+    for(const p of owned)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&!existingHolds.has(p.handle)){
+      if(keepActive.has(p.handle))plan.retained.push({handle:p.handle,status:'ACTIVE',reason:'merchant_keep_requires_review',sourceReason:'media_unavailable',checks:[],reviewRequired:true});
+      else plan.holds.push({action:'hold',handle:p.handle,reason:'media_unavailable',input:{id:p.id,status:'DRAFT'}});
+    }
   }
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
   const sanitized=report;
   const reviewSnapshot={plan,prior:owned.map(p=>({id:p.id,handle:p.handle,status:p.status,price:p.price,variantId:p.variantId,variantCount:p.variantCount,tags:p.tags,certificate:p.certificate})).sort((a,b)=>a.handle.localeCompare(b.handle)),
     withdrawalChecks:plan.holds.map(l=>normalized.exclusions.find(e=>e.handle===l.handle)??{handle:l.handle,reason:l.reason})};
   Object.assign(report,{scope:limit?'sample':activate?'activation':'full',planHash:snapshotHash(reviewSnapshot),withdrawalLimit:withdrawalLimit(plan.activeOwned),reviewedMaximum:maxWithdrawals,
-    overLimit:plan.holds.length>withdrawalLimit(plan.activeOwned),
+    overLimit:plan.holds.length>withdrawalLimit(plan.activeOwned),retained:plan.retained,retentionReviewRequired:plan.retained.some(p=>p.reviewRequired),
     writes:plan.writes.map(l=>({action:l.action,handle:l.handle,previousPrice:catalog.find(p=>p.handle===l.handle)?.price??null,price:l.input.variants[0].price,status:l.input.status})),
     withdrawals:plan.holds.map(l=>({handle:l.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:l.reason,...(l.exclusionReason?{exclusionReason:l.exclusionReason}:{})})),skipped:plan.skipped});
   const writes=new Map(report.writes.map(w=>[w.handle,w])), withdrawals=new Map(report.withdrawals.map(w=>[w.handle,w])), skips=new Map(plan.skipped.map(s=>[s.handle,s]));
-  report.reconciliation=owned.map(p=>({handle:p.handle,status:p.status,action:withdrawals.has(p.handle)?'withdraw':writes.get(p.handle)?.action??(skips.has(p.handle)?'skip':'unchanged'),reason:withdrawals.get(p.handle)?.reason??skips.get(p.handle)?.reason??null}));
+  const retainedByHandle=new Map(plan.retained.map(p=>[p.handle,p]));
+  report.reconciliation=owned.map(p=>({handle:p.handle,status:p.status,action:retainedByHandle.has(p.handle)?'retain':withdrawals.has(p.handle)?'withdraw':writes.get(p.handle)?.action??(skips.has(p.handle)?'skip':'unchanged'),reason:retainedByHandle.get(p.handle)?.reason??withdrawals.get(p.handle)?.reason??skips.get(p.handle)?.reason??null}));
   report.reconciliation.push(...report.writes.filter(w=>w.action==='create').map(w=>({handle:w.handle,status:null,action:'create',reason:'new_eligible_stone'})));
-  report.supplierReconciliation=stones.map(s=>({handle:s.handle,inCatalog:catalog.some(p=>p.handle===s.handle),action:skips.has(s.handle)?'skip':writes.get(s.handle)?.action??'unchanged',reason:skips.get(s.handle)?.reason??null}));
+  report.supplierReconciliation=stones.map(s=>({handle:s.handle,inCatalog:catalog.some(p=>p.handle===s.handle),action:retainedByHandle.has(s.handle)?'retain':skips.has(s.handle)?'skip':writes.get(s.handle)?.action??'unchanged',reason:retainedByHandle.get(s.handle)?.reason??skips.get(s.handle)?.reason??null}));
   report.excludedRows=normalized.exclusions;
   report.planningComplete=true;
   await dependencies.save(report);
@@ -203,7 +222,7 @@ async function runSync(argv, report, dependencies) {
     if(activate)requireNoErrors((await gql(OPS.publish,{id:data.product.id,input:publications.map(p=>({publicationId:p.id}))})).publishablePublish);
   }
   stage='shopify_verify';
-  const verificationIds=[...new Set([...writtenIds.values(),...plan.holds.map(line=>line.input.id)])];
+  const verificationIds=[...new Set([...writtenIds.values(),...plan.holds.map(line=>line.input.id),...plan.retained.map(p=>owned.find(q=>q.handle===p.handle)?.id).filter(Boolean)])];
   const verified=[];
   for(let offset=0;offset<verificationIds.length;offset+=100){
     const data=await gql(OPS.verify,{ids:verificationIds.slice(offset,offset+100)});
@@ -214,6 +233,10 @@ async function runSync(argv, report, dependencies) {
     if(!p || p.status!==line.input.status || Number(p.price)!==Number(line.input.variants[0].price) || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
   }
   for(const line of plan.holds)if(verified.find(p=>p.handle===line.handle)?.status!=='DRAFT')throw new Error('Withdrawal verification mismatch');
+  for(const line of plan.retained){
+    const prior=owned.find(p=>p.handle===line.handle),current=verified.find(p=>p.handle===line.handle);
+    if(!current||current.status!=='ACTIVE'||current.price!==prior.price||current.hash!==prior.hash||current.certificate!==prior.certificate||current.video!==prior.video)throw new SyncError('retained_product_verification_mismatch');
+  }
   sanitized.verified=plan.writes.length;sanitized.status='verified';
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }

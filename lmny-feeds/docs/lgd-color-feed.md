@@ -54,3 +54,10 @@ Manual `sync-with-withdrawals` requires an explicit maximum (1–500) and an
 exact reviewed full `planHash`. Any fresh plan drift stops before all writes.
 Never use it without merchant approval of the complete report. Scheduled runs
 keep their original guard. See [recovery procedure](../../docs/handoffs/287-colored-supplier-sync.md).
+
+Merchant decision "Keep 56" retains only the exact reviewed active handles in
+`src/lgd-color/retention.mjs` while source intensity is unrecognized, preserving
+existing data without making rejected rows eligible. Reports distinguish these
+`retained` products from withdrawals. Changed availability or other validation
+failures on a retained product stop live writes for review; a recovery ceiling
+cannot bypass that review. Drafts/archives are never activated by retention.
