@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { LGD_COLOR_DIAMONDS } from '../../config/pricing.ts';
+import { coloredLabRetailFromCost } from '../../config/pricing.ts';
 
 // Separate ownership from the Belgium feed; its removal pass must never own these.
 export const FEED_TAG = 'colored-stone-feed';
@@ -39,7 +39,7 @@ export function normalizeRow(r) {
   if (!image || !video) return { reason: 'photo_or_video' };
   const stone = { stock, handle: PREFIX + stock.toLowerCase(), shape, color: titleCase(color), intensity, clarity, carat, cost, certificate, certUrl: safeUrl(r.CertificateLink, /\.pdf$/i), image,
     video, measurements: text(r.Measurements), polish: text(r.Polish), symmetry: text(r.Symmetry), fluorescence: text(r.Fluorescence_Intensity), table: number(r.TABLE_PER), depth: number(r.DEPTH_PER) };
-  stone.retail = Math.round(cost * LGD_COLOR_DIAMONDS.costMultiple * 100) / 100;
+  stone.retail = coloredLabRetailFromCost(cost);
   return { stone };
 }
 export function normalizeFeed(rows) {

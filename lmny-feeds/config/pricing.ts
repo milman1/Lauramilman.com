@@ -50,8 +50,8 @@ export interface LabTier {
  * 1.25× so large-carat naturals do not jump with the small-stone lift.
  */
 export const STONE_TIERS: LabTier[] = [
-  { maxCostUsd: 4000, multiplier: 1.4 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
+  { maxCostUsd: 4000, multiplier: 1.6 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.45 },
 ];
 
 /**
@@ -388,6 +388,22 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }
 
-/** LGD certified colored loose lab diamonds; merchant approved 2026-10-11. */
-export const LGD_COLOR_DIAMONDS = { costMultiple: 3.5, welcomeDiscountPct: 0.1 } as const;
+/** LGD colored loose lab diamonds: graduated cost-based pricing. */
+export const LGD_COLOR_DIAMONDS = {
+  costMultiple: 2.25,
+  tiers: [
+    { maxCostUsd: 500, multiplier: 2.75 },
+    { maxCostUsd: 1500, multiplier: 2.5 },
+    { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 2.25 },
+  ],
+  welcomeDiscountPct: 0.1,
+} as const;
+
+export function coloredLabRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) throw new Error('Invalid colored lab cost');
+  if (costUsd <= 500) return Math.round(costUsd * 2.75);
+  if (costUsd <= 1500) return Math.round(Math.max(costUsd * 2.5, 500 * 2.75));
+  return Math.round(Math.max(costUsd * 2.25, 1500 * 2.5));
+}
+
 
