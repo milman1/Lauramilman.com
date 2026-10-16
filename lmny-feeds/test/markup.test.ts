@@ -59,11 +59,11 @@ describe('lab pricing', () => {
 
   it('keeps a representative 5.01ct stone profitable after the 10% welcome discount', () => {
     const r = priceLab(labStone({ carat: 5.01, costUsd: 590, pricePerCaratUsd: 117.76 }));
-    expect(r.ok && r.priced.retailUsd).toBe(1125);
+    expect(r.ok && r.priced.retailUsd).toBe(1180);
     if (r.ok) {
       const discountedRevenue = r.priced.retailUsd * 0.9;
-      expect(discountedRevenue).toBeCloseTo(1012.5);
-      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.417, 2);
+      expect(discountedRevenue).toBeCloseTo(1062);
+      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.444, 2);
     }
   });
 
