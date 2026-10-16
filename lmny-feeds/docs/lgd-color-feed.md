@@ -41,3 +41,16 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 Reports contain counts, handles and retail prices; no API key or supplier costs.
 Only the sanitized report is uploaded as an Actions artifact. No raw source
 records, private plan inputs, credentials, or actual-cost fixtures are committed.
+
+Full `dry-run` and `review-withdrawals` inspect the entire catalog and report
+over-limit proposals without writing. Every invocation creates a sanitized
+artifact before fetching; failures retain the stage and fixed diagnostic code.
+Missing source/catalog counts are null, not zero. Reports include the active
+owned count, unchanged automatic limit, every withdrawal and its reason,
+before/after retail changes, skips and a complete owned-product reconciliation.
+Supplier exclusions retain their normalized reason rather than being called sold.
+
+Manual `sync-with-withdrawals` requires an explicit maximum (1–500) and an
+exact reviewed full `planHash`. Any fresh plan drift stops before all writes.
+Never use it without merchant approval of the complete report. Scheduled runs
+keep their original guard. See [recovery procedure](../../docs/handoffs/287-colored-supplier-sync.md).

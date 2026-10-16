@@ -11,8 +11,8 @@ import {
 } from '../config/pricing.js';
 
 describe('pricing SSOT — API + lab jewelry', () => {
-  it('keeps 1.40× through $4,000 Amount and 1.25× above', () => {
-    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.4, 1.25]);
+  it('uses approved 1.60× through $4,000 Amount and 1.45× above', () => {
+    expect(STONE_TIERS.map((t) => t.multiplier)).toEqual([1.6, 1.45]);
     expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
   });
 

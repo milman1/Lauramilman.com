@@ -1,0 +1,2573 @@
+{
+  "observedAt": "2026-10-16T21:16Z",
+  "source": "Shopify Admin GraphQL, complete cursor pagination; tag:colored-stone-feed with exact tag and handle prefix filtering",
+  "complete": true,
+  "total": 640,
+  "active": 634,
+  "draft": 6,
+  "archived": 0,
+  "defaultWithdrawalLimit": 63,
+  "supplierReconciled": false,
+  "products": [
+    {
+      "handle": "lg-color-1010055",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010079",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010101",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010103",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010424",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010446",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010457",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010460",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010461",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010491",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010663",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010668",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010670",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010673",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010679",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010681",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010682",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010694",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010902",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010913",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010918",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010919",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010920",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010922",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010924",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010925",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010926",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010933",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010938",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1010942",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011016",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011041",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011042",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011049",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011064",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011065",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011124",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011136",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011138",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011295",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011298",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011302",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011356",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011357",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011358",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011378",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011380",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011386",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011389",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011391",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011413",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011415",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011419",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011420",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011421",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011422",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011485",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011487",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011587",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011588",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011589",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011590",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011700",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011701",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011703",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011704",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011711",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011729",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011751",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011753",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011757",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011761",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011762",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011773",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011780",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011782",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011783",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011790",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011792",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011797",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011800",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012035",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012045",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012061",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012065",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012082",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012085",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012090",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012105",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012106",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012765",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012781",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012839",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012842",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012843",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012852",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012853",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012861",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012862",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012866",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012870",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012875",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012876",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012879",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012884",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012888",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012889",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012954",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012955",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012957",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012976",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012979",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012989",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1012990",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013038",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013045",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013046",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013048",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013050",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013053",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013081",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013083",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013084",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013086",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013288",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013302",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013325",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013327",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013328",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013329",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013330",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013331",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013349",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013570",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013836",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1013839",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014207",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014211",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014652",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014660",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014673",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014677",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014678",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014679",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014683",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014691",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014692",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014693",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014694",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014697",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1014698",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015201",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015203",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015209",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015259",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015263",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015267",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015268",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015269",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015274",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015309",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015347",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015350",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015351",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015352",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015353",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015354",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015357",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015358",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015741",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015743",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015824",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015827",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015828",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015831",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015832",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1015833",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016347",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016348",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016350",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016351",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016380",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016383",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016384",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016385",
+      "status": "DRAFT"
+    },
+    {
+      "handle": "lg-color-1016386",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016489",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016490",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016491",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016492",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016497",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016511",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016517",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016518",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016519",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016522",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016523",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016524",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016525",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016526",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016527",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016528",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016550",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016557",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016559",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016562",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016564",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016565",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016568",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016570",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016571",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016572",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016574",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016582",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016583",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016585",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016586",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016932",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016933",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016936",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1016937",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017029",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017032",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017037",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017038",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017039",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017044",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017051",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017052",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017053",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017055",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017057",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017078",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017079",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017080",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017084",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017095",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017099",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017100",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017109",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017110",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017112",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017123",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017132",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017133",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017134",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017248",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017339",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017691",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017693",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017694",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017698",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017699",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017701",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017702",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017703",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017704",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017710",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017722",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017725",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017798",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017811",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017859",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1017861",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018081",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018096",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018103",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018553",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018554",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018628",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018634",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018635",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018637",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018639",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018640",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018641",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018643",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018649",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018658",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018661",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018664",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018665",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018666",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018670",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018671",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018673",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018674",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018675",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018676",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018960",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018962",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018966",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018967",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018968",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018970",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018971",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018972",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018973",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018974",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018975",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018976",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018977",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018979",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018981",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018982",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018983",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018984",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018985",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018986",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018987",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018988",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018989",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018990",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018991",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018992",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018993",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1018994",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019029",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019045",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019124",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019125",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019299",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019300",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019301",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019304",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019305",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019307",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019431",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019432",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019433",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019434",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019436",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019437",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019438",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019439",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019440",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019443",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019445",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019446",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019448",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019449",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019670",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019691",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019692",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019693",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019697",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019700",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019701",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019705",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019706",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019707",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019708",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019709",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019712",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019713",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019716",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019722",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019724",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019725",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019726",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019728",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019731",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019732",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019742",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019743",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019744",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019745",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019746",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019747",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019748",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019750",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019751",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019752",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019755",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019757",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019758",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019759",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019761",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019764",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019765",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019766",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019767",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019863",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019864",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019865",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019905",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019906",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019907",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1019908",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020350",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020351",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020716",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020718",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020773",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020774",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020775",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020776",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020777",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020778",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020779",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020780",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020781",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020784",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020785",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020932",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020933",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020934",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020935",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020936",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020937",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020951",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020952",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020953",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020954",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020955",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020956",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020957",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020960",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020961",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020962",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020963",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020981",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020983",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020984",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020985",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020986",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020987",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020988",
+      "status": "DRAFT"
+    },
+    {
+      "handle": "lg-color-1020989",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020990",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020991",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020992",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020993",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020994",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1020995",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1021115",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1021116",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1021117",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-21394",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-21859",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-22100",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-22768",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-22918",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-22926",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-24634",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-24637",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-24644",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-25130",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-25498",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-25609",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-25613",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-25617",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-26574",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-28993",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29660",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29711",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29747",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29748",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29752",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29758",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29762",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29764",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29771",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29776",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29778",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29894",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29909",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29924",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29945",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-29965",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-30380",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-30437",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-30746",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-31608",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-32412n",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-32413n",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-34162",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-34234",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35012",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35381",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35385",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35390a",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35390b",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35691",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35692",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35714",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35727",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35755",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-35893",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-36036",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-36215",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-36724",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-36743",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-36793",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-37011",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-37438",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-38204",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-38207",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-38210",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-38998",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-39106",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-39152",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-39186",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-39686",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-39945",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70375",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70388",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70390",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70394",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70396",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70397",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70400",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70401",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70403",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70412",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70415",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70428",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70430",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70432",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70903",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-70907",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-71310",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-71515",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-71525",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-71529",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-71539",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72053",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72054",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72055",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72056",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72058",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72060",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-72061",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-73918b",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-73940",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-73941",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-73947",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-74196",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-74203",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-74204",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-74205",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75039",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75051",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75079",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75443",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75445",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75447",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75495",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75934",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75936",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75941",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75945",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-75946",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76174",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76175",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76177",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76181",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76183",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76185",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76186",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76197",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76216",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76218",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76221",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76224",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76474",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76475",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76476",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76478",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76483",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76486",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76497",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76500",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76502",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76504",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76506",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76525",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76527",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76540",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76542",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76546",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76547",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76598",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76602",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76606",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76612",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-76673",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77106",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77248",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77249",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77250",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77251",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77273",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77274",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77276",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77277",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77278",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77316",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77815",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77920",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77933",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77934",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77936",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77942",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77947",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77956",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77965",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77966",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-77967",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-78468",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-78469",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-78866",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-78867",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-78873",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79059",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79388",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79390",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79424",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79427",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79689",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79697",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79698",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79706",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79707",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79718",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-79719",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj106",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj114",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj119",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj132",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj135",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj138",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj139",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj144",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj157",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-vj165",
+      "status": "ACTIVE"
+    },
+    {
+      "handle": "lg-color-1011613",
+      "status": "DRAFT"
+    },
+    {
+      "handle": "lg-color-1015272",
+      "status": "DRAFT"
+    },
+    {
+      "handle": "lg-color-1019727",
+      "status": "DRAFT"
+    },
+    {
+      "handle": "lg-color-1019736",
+      "status": "DRAFT"
+    }
+  ]
+}
