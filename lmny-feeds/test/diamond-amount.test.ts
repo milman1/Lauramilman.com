@@ -53,7 +53,7 @@ describe('LMNY Amount-as-cost diamond pricing', () => {
     expect(priced.ok && priced.priced.retailUsd).not.toBe(88_719);
   });
 
-  it('applies the 3x/2x tiered markup to a mid-priced lab', () => {
+  it('applies the graduated markup to a mid-priced lab', () => {
     const { items, holds } = normalizeStones(
       [
         {
