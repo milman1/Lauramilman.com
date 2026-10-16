@@ -16,12 +16,17 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(STONE_TIERS[0]?.maxCostUsd).toBe(4000);
   });
 
-  it('prices every loose lab at 3.5×', () => {
+  it('prices loose labs at 3.5×, and 2.5× from 5 ct up', () => {
     expect(LOOSE_LAB_GROWN.costMultiple).toBe(3.5);
     expect(labRetailMultipleFromCost(182)).toBe(3.5);
     expect(labRetailMultipleFromCost(500)).toBe(3.5);
     expect(labRetailMultipleFromCost(501)).toBe(3.5);
     expect(labRetailMultipleFromCost(1662.12)).toBe(3.5);
+    expect(labRetailMultipleFromCost(900, 4.99)).toBe(3.5);
+    expect(labRetailMultipleFromCost(900, 5)).toBe(2.5);
+    expect(labRetailMultipleFromCost(5000, 10.26)).toBe(2.5);
+    expect(LOOSE_LAB_GROWN.largeStoneMinCarat).toBe(5);
+    expect(LOOSE_LAB_GROWN.largeStoneCostMultiple).toBe(2.5);
     expect(LOOSE_LAB_GROWN.welcomeDiscountPct).toBe(0.1);
     expect(LOOSE_LAB_GROWN.costMultiple * (1 - LOOSE_LAB_GROWN.welcomeDiscountPct)).toBeCloseTo(3.15);
   });

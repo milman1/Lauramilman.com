@@ -41,7 +41,7 @@ describe('natural pricing', () => {
 });
 
 describe('lab pricing', () => {
-  it('applies 3.5× at every size', () => {
+  it('applies 3.5× below 5 ct and 2.5× from 5 ct up', () => {
     const cheap = priceLab(labStone({ carat: 1.0, costUsd: 400, pricePerCaratUsd: 400 }));
     const sold = priceLab(labStone({ carat: 2.0, costUsd: 182, pricePerCaratUsd: 91 }));
     const mid = priceLab(labStone({ carat: 2.0, costUsd: 1200, pricePerCaratUsd: 600 }));
@@ -49,21 +49,29 @@ describe('lab pricing', () => {
     expect(cheap.ok && cheap.priced.retailUsd).toBe(1400);
     expect(sold.ok && sold.priced.retailUsd).toBe(637);
     expect(mid.ok && mid.priced.retailUsd).toBe(4200);
-    expect(big.ok && big.priced.retailUsd).toBe(5817);
+    expect(big.ok && big.priced.retailUsd).toBe(4155); // 1662.12 × 2.5, 10.26 ct
+  });
+
+  it('switches multiple exactly at 5.00 ct', () => {
+    const below = priceLab(labStone({ carat: 4.99, costUsd: 600, pricePerCaratUsd: 120.24 }));
+    const at = priceLab(labStone({ carat: 5.0, costUsd: 600, pricePerCaratUsd: 120 }));
+    expect(below.ok && below.priced.retailUsd).toBe(2100); // 600 × 3.5
+    expect(at.ok && at.priced.retailUsd).toBe(1500); // 600 × 2.5
   });
 
   it('does not compress markup on high-value lab stones', () => {
     const r = priceLab(labStone({ carat: 12, costUsd: 50_000, pricePerCaratUsd: 4000 }));
-    expect(r.ok && r.priced.retailUsd).toBe(175_000);
+    expect(r.ok && r.priced.retailUsd).toBe(125_000); // 50,000 × 2.5
   });
 
   it('keeps a representative 5.01ct stone profitable after the 10% welcome discount', () => {
+    // 5.01 ct is at 2.5×: revenue after the 10% discount is 2.25× cost.
     const r = priceLab(labStone({ carat: 5.01, costUsd: 590, pricePerCaratUsd: 117.76 }));
-    expect(r.ok && r.priced.retailUsd).toBe(2065);
+    expect(r.ok && r.priced.retailUsd).toBe(1475); // 590 × 2.5
     if (r.ok) {
       const discountedRevenue = r.priced.retailUsd * 0.9;
-      expect(discountedRevenue).toBeCloseTo(1858.5);
-      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.683, 2);
+      expect(discountedRevenue).toBeCloseTo(1327.5);
+      expect((discountedRevenue - 590) / discountedRevenue).toBeCloseTo(0.556, 2);
     }
   });
 
