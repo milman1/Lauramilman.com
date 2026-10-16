@@ -44,14 +44,14 @@ holds a stones table — Shopify products are the only live copy.
      |---|---|---|
      | ≤ $4,000 | 1.40× | ~29% |
      | above $4,000 | 1.25× | 20% |
-   - lab: retail = round(Amount × 2.5) for cost ≤ $500; × 1.5 above $500. Mapping guards still catch
+   - lab: retail = round(Amount × 3) for cost ≤ $500; × 2 above $500. Mapping guards still catch
      a Buy_Price used as a total. The 10% welcome discount remains eligible
-     (realized 2.25× or 1.35× cost by tier).
+     (realized 2.70× or 1.80× cost by tier).
 
      | Amount (cost) | Multiplier | After 10% welcome |
      |---|---|---|
-     | ≤ $500 | 2.50× | 2.25× |
-     | > $500 | 1.50× | 1.35× |
+     | ≤ $500 | 3× | 2.70× |
+     | > $500 | 2× | 1.80× |
    - watches: supplier cost through `config/pricing.ts` `WATCH_SALE`, applied
      in `src/watchPricing.ts`. **No Hours mid.** Aftermarket, no-papers,
      iced-out, naked-comment, Power Watch, and Uncle Manny are excluded at
