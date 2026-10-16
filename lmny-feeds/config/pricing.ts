@@ -55,31 +55,34 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 3.5× invoice cost at every size. Fail-closed
- * $/ct guards still apply.
+ * Loose lab-grown diamonds: 2.50× when invoice cost is ≤ $500, otherwise
+ * the 1.50× default. Fail-closed $/ct guards still apply.
  *
  * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 3.15× cost (68.3% gross before fees).
+ * is 2.25× cost on the small band (55.6% gross before fees) and 1.35× cost
+ * above $500 (25.9% gross before fees).
  *
- * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
- * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
- * which cross $500 on weight alone, at a thinner markup than small stones.
- * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
- * so a stone plus setting totals less while stones stay below the large
- * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
+ * Merchant decision 2026-09-17: raise only cheap labs (cost ≤ $500). Larger
+ * lab tickets stay at 1.50× so high-carat stones do not reprice with the
+ * small-stone lift.
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 3.5,
+  costMultiple: 1.5,
+  smallCostMaxUsd: 500,
+  smallCostMultiple: 2.5,
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
-export function labRetailMultipleFromCost(_costUsd: number): number {
-  return LOOSE_LAB_GROWN.costMultiple;
+/** Invoice-cost multiple for a loose lab stone. First matching LAB_TIERS row. */
+export function labRetailMultipleFromCost(costUsd: number): number {
+  return costUsd <= LOOSE_LAB_GROWN.smallCostMaxUsd
+    ? LOOSE_LAB_GROWN.smallCostMultiple
+    : LOOSE_LAB_GROWN.costMultiple;
 }
 
 /** @deprecated Use labRetailMultipleFromCost for loose lab stones. */
 export const LAB_TIERS: LabTier[] = [
+  { maxCostUsd: LOOSE_LAB_GROWN.smallCostMaxUsd, multiplier: LOOSE_LAB_GROWN.smallCostMultiple },
   { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: LOOSE_LAB_GROWN.costMultiple },
 ];
 
@@ -91,10 +94,9 @@ export const LAB_GUARDS = {
   /**
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
-   * total). Scaled with the multiple so the same invoices stay held:
-   * at 3.5×, 1ct Amount $70 → $245 is held; Amount $72 → $252 publishes.
+   * total). 1ct Amount $70 → $175 is held; Amount $72 → $180 publishes.
    */
-  minRetailUsd: 252,
+  minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
