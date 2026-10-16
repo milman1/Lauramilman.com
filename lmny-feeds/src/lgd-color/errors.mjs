@@ -8,5 +8,6 @@ export class SyncError extends Error {
 }
 export function safeFailure(error, stage) {
   return {stage,code:error instanceof SyncError ? error.code : 'operation_failed',
+    ...(error instanceof SyncError && /^lg-color-[a-z0-9_-]+$/.test(error.handle??'') ? {handle:error.handle}:{}),
     ...(error instanceof SyncError ? error.details : {})};
 }

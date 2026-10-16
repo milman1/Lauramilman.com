@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeRow, normalizeFeed, payloadFor, fetchInventory, FEED_TAG } from '../src/lgd-color/catalog.mjs';
+import { normalizeRow, normalizeFeed, payloadFor, fetchInventory, FEED_TAG, snapshotHash } from '../src/lgd-color/catalog.mjs';
 import { planFor, mediaReady, requestShopify } from '../src/lgd-color/sync.mjs';
 import { main, OPS, withdrawalLimit } from '../src/lgd-color/sync.mjs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -57,12 +57,32 @@ test('live guard saves the complete withdrawal report before failing without mut
     assert.ok(calls.every(q=>q.startsWith('query ')));
   },{products:Array.from({length:10},(_,i)=>product('lg-color-gone'+i))});
 });
+test('full preview reports exact colored reprices and draft arrivals while leaving white products outside its scope',async()=>{
+  const white={...product('lg-white'),tags:['lmny-feed']};
+  await harness(async(deps,read,calls)=>{
+    const report=await main(['--dry-run'],deps);
+    assert.equal(report.catalog.owned,1);assert.equal(report.withdrawals.length,0);assert.equal(report.overLimit,false);
+    assert.deepEqual(report.writes.map(w=>({handle:w.handle,previousPrice:w.previousPrice,price:w.price,status:w.status})),[
+      {handle:'lg-color-test1',previousPrice:'700',price:'550.00',status:'ACTIVE'},
+      {handle:'lg-color-test2',previousPrice:null,price:'550.00',status:'DRAFT'}]);
+    assert.equal(report.supplierReconciliation.length,2);assert.equal(report.reconciliation.length,2);
+    assert.ok(!report.reconciliation.some(p=>p.handle==='lg-white'));assert.ok(calls.every(q=>q.startsWith('query ')));
+  },{products:[product('lg-color-test1'),white],rows:[fixture(),fixture({Stock_No:'TEST2',CertificateLink:'https://example.com/LG12345679.pdf'})]});
+});
 test('supplier failure always saves a sanitized artifact, never unknown counts as zero',async()=>{
   await harness(async(deps,read,calls)=>{
     await assert.rejects(()=>main(['--dry-run'],deps));const report=await read();
     assert.equal(report.failure.stage,'supplier_fetch');assert.equal(report.failure.code,'operation_failed');assert.equal(report.fetched,null);assert.equal(report.withdrawals,null);assert.equal(report.planningComplete,false);
     assert.equal(calls.length,0);assert.ok(!JSON.stringify(report).includes('PRIVATE_URL_KEY_COST'));
   },{fetchFailure:new Error('PRIVATE_URL_KEY_COST')});
+});
+test('payload planning failures retain counted withdrawal candidates and catalog evidence',async()=>{
+  const active=product('lg-color-test1');active.media.nodes=[];
+  await harness(async(deps,read,calls)=>{
+    await assert.rejects(()=>main([],deps),/active_product_requires_ready_owned_media/);
+    const report=await read();assert.equal(report.failure.stage,'plan');assert.equal(report.failure.handle,'lg-color-test1');assert.equal(report.catalog.activeOwned,11);assert.equal(report.withdrawalLimit,5);assert.equal(report.withdrawals.length,10);assert.equal(report.planningComplete,false);
+    assert.ok(calls.every(q=>q.startsWith('query ')));
+  },{products:[active,...Array.from({length:10},(_,i)=>product('lg-color-gone'+i))]});
 });
 test('recovery requires explicit maximum and unchanged reviewed plan before any writes',async()=>{
   await harness(async(deps,read,calls)=>{
@@ -86,4 +106,25 @@ test('supplier HTTP, transport, invalid JSON and pagination errors have safe fix
 });
 test('case-insensitive stock collisions cannot generate duplicate Shopify handles',()=>{
   assert.throws(()=>normalizeFeed([fixture(),fixture({Stock_No:'test1'})]),/duplicate_source_stock/);
+});
+test('reviewed recovery applies exactly the matching plan and verifies withdrawals independently',async()=>{
+  const outputDir=await mkdtemp(join(tmpdir(),'colored-recovery-'));
+  const stone=normalizeRow(fixture()).stone;
+  const kept={...product(stone.handle),hash:{value:snapshotHash(stone)},video:{value:stone.video}};
+  kept.variants.nodes[0].price=String(stone.retail);
+  const products=[kept,...Array.from({length:10},(_,i)=>product('lg-color-gone'+i))];
+  const mutations=[];
+  const deps={outputDir,fetchInventory:async()=>[fixture()],mediaReady:async()=>true,client:async()=>async(query,variables)=>{
+    if(query===OPS.catalog)return {products:{nodes:products,pageInfo:{hasNextPage:false}}};
+    if(query===OPS.location)return {locations:{nodes:[{id:'location',isActive:true}],pageInfo:{hasNextPage:false}}};
+    if(query===OPS.hold){const p=products.find(p=>p.id===variables.product.id);p.status='DRAFT';mutations.push(p.handle);return {productUpdate:{product:{id:p.id,status:p.status},userErrors:[]}};}
+    if(query===OPS.verify)return {nodes:products.filter(p=>variables.ids.includes(p.id))};
+    throw new Error('Unexpected operation');
+  }};
+  try {
+    const preview=await main(['--dry-run'],deps);assert.equal(mutations.length,0);assert.equal(preview.writes.length,0);
+    await assert.rejects(()=>main(['--max-withdrawals=9','--approved-plan-hash='+preview.planHash],deps),/withdrawal_limit_exceeded/);assert.equal(mutations.length,0);
+    const result=await main(['--max-withdrawals=10','--approved-plan-hash='+preview.planHash],deps);
+    assert.equal(result.status,'verified');assert.equal(mutations.length,10);assert.ok(products.slice(1).every(p=>p.status==='DRAFT'));assert.equal(kept.status,'ACTIVE');
+  } finally {await rm(outputDir,{recursive:true,force:true});}
 });

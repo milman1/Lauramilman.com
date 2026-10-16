@@ -30,8 +30,9 @@ White loose lab configuration from #285 is unchanged: 2.50/2.25/2.00/1.75 target
 ## Validation
 
 - Local full Vitest: 76 files, **873 tests pass**, including normalization and integration checks.
-- Colored Node checks: **23 pass**, including end-to-end injected supplier/Shopify previews, over-limit report persistence, recovery rejection before mutations, media and exclusion reconciliation, source isolation and sanitized supplier failure categories.
-- Typecheck was run; baseline comparison and CI/live dry-run results must be recorded below.
+- Colored Node checks: **26 pass**, including end-to-end injected supplier/Shopify previews, exact colored reprices/draft arrivals with white source isolation, exact-plan recovery and independent withdrawal verification, over-limit and payload-plan failure report persistence, recovery rejection before mutations, media and exclusion reconciliation and sanitized supplier failure categories.
+- Typecheck was run on both this repair and an archived copy of untouched main using the same dependencies. Both report the same 19 TypeScript diagnostics (shopify.ts, uploadifyMetafields.ts, pricing-ssot.test.ts and existing theme tests). Diagnostic outputs match exactly; no new type errors. These remain baseline debt, not a passing typecheck claim.
+- White config/guards and affected white test sections compared byte-for-byte with latest main and match.
 - Synthetic end-to-end runs are not live supplier evidence. Definition of done remains blocked until a successful full credentialed dry run and catalog reconciliation are recorded.
 
 ## Production recovery procedure
@@ -47,4 +48,10 @@ White loose lab configuration from #285 is unchanged: 2.50/2.25/2.00/1.75 target
 
 ## Remaining work / exact next action
 
-Open the replacement draft PR, inspect CI and the credentialed colored full dry run. If it fails at supplier fetch, use its sanitized code/status to establish the actual cause. Obtain a successful full source snapshot before claiming reconciliation or proposing exact withdrawal approval. Merchant approval is required for production recovery and rollout; no live mutation is authorized in this session.
+Inspect replacement draft PR #288 CI and its credentialed colored full dry run. If it fails at supplier fetch, use its sanitized code/status to establish the actual cause. Obtain a successful full source snapshot before claiming reconciliation or proposing exact withdrawal approval. Merchant approval is required for production recovery and rollout; no live mutation is authorized in this session.
+
+## Live welcome-discount audit (22:06 UTC)
+
+Read-only Admin GraphQL verified an active 10% welcome discount scoped to 27 collections, including natural-diamonds and lab-grown-diamonds. Its list does **not** include colored-lab-grown-diamonds. All 640 colored products were paginated, including all collection memberships; **zero currently belong to an eligible collection**. Thus the configured colored 10% constant and profitability tests do not establish live eligibility. No discount was changed. Merchant must decide whether colored stones should be added to discount scope; that would be a separately authorized live discount change. Existing natural/white eligibility and all live discount configuration are preserved.
+
+Replacement PR: https://github.com/milman1/Lauramilman.com/pull/288 (draft). Initial remote commit aa99b4a227ea94bfccde019cea0f48b6443687a9. CI runs: [colored full read-only](https://github.com/milman1/Lauramilman.com/actions/runs/38973539507), [regular feed tests/dry run](https://github.com/milman1/Lauramilman.com/actions/runs/38973539436). Record outcomes below before treating either as passing evidence.

@@ -55,14 +55,14 @@ export function normalizeFeed(rows) {
       if (/^[a-z0-9_-]+$/i.test(stock)) exclusions.push({handle:PREFIX+stock.toLowerCase(),reason:result.reason});
       continue;
     }
-    if (certs.has(result.stone.certificate)) throw new Error('Duplicate certificate in source snapshot');
+    if (certs.has(result.stone.certificate)) throw new SyncError('duplicate_source_certificate');
     certs.add(result.stone.certificate); stones.push(result.stone);
   }
   return { stones, holds, exclusions };
 }
 const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function payloadFor(s, existing, status = 'DRAFT', locationId) {
-  if (status === 'ACTIVE' && (!existing || existing.status === 'ARCHIVED' || !existing.readyImage)) throw new Error('Activation requires an existing reviewed draft with ready image');
+  if (status === 'ACTIVE' && (!existing || existing.status === 'ARCHIVED' || !existing.readyImage)) throw new SyncError('active_product_requires_ready_owned_media');
   const color = `${s.intensity} ${s.color}`;
   const title = `${s.carat.toFixed(2)}ct ${s.shape} ${color} Lab-Grown Diamond — ${s.clarity} | IGI`;
   const seoTitle = `${s.carat.toFixed(2)}ct ${s.color} ${s.shape} Lab-Grown Diamond | IGI`.slice(0,60);

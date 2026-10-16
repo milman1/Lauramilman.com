@@ -41,7 +41,9 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
     if (activate && (!existing || !existing.readyImage)) { skipped.push({handle:s.handle,reason:'draft_media_not_ready'}); continue; }
     const status = activate || existing?.status==='ACTIVE' ? 'ACTIVE' : 'DRAFT';
     if (existing?.hash === snapshotHash(s) && existing.status===status && existing.readyImage && existing.video===s.video && Number(existing.price)===s.retail) continue;
-    const input=payloadFor(s,existing,status,locationId);
+    let input;
+    try {input=payloadFor(s,existing,status,locationId);}
+    catch(error){if(error instanceof SyncError)error.handle=s.handle;throw error;}
     writes.push({action:existing?'update':'create',handle:s.handle,identifier:existing?{id:existing.id}:null,input,stone:s});
   }
   // Always use the complete snapshot for removals; a five-item preview never removes inventory.
@@ -112,7 +114,7 @@ export async function mediaReady(stone,fetcher=fetch) {
 }
 async function runSync(argv, report, dependencies) {
   const dry=argv.includes('--dry-run'), activate=argv.includes('--activate');
-  const unknown=argv.filter(a=>!['--dry-run','--activate'].includes(a)&&!/^--(limit|max-withdrawals|approved-plan-hash)=/.test(a));
+  const unknown=argv.filter(a=>!['--dry-run','--activate'].includes(a)&&!/^--(limit|max-withdrawals)=[0-9]+$/.test(a)&&!/^--approved-plan-hash=[a-f0-9]{64}$/.test(a));
   if(unknown.length || new Set(argv.map(a=>a.split('=')[0])).size!==argv.length)throw new SyncError('invalid_arguments');
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
@@ -150,6 +152,11 @@ async function runSync(argv, report, dependencies) {
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
   stage='plan';
+  // Persist availability evidence before payload planning can fail on a product.
+  const desiredHandles=new Set(stones.map(s=>s.handle)),excludedByHandle=new Map(normalized.exclusions.map(e=>[e.handle,e.reason]));
+  report.withdrawalLimit=withdrawalLimit(report.catalog.activeOwned);
+  report.withdrawals=limit||activate?[]:owned.filter(p=>p.status==='ACTIVE'&&!desiredHandles.has(p.handle)).map(p=>({handle:p.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:excludedByHandle.has(p.handle)?'supplier_ineligible':'not_in_supplier_feed',...(excludedByHandle.has(p.handle)?{exclusionReason:excludedByHandle.get(p.handle)}:{})}));
+  await dependencies.save(report);
   const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,checkLimit:false,exclusions:normalized.exclusions});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
@@ -174,6 +181,8 @@ async function runSync(argv, report, dependencies) {
   const writes=new Map(report.writes.map(w=>[w.handle,w])), withdrawals=new Map(report.withdrawals.map(w=>[w.handle,w])), skips=new Map(plan.skipped.map(s=>[s.handle,s]));
   report.reconciliation=owned.map(p=>({handle:p.handle,status:p.status,action:withdrawals.has(p.handle)?'withdraw':writes.get(p.handle)?.action??(skips.has(p.handle)?'skip':'unchanged'),reason:withdrawals.get(p.handle)?.reason??skips.get(p.handle)?.reason??null}));
   report.reconciliation.push(...report.writes.filter(w=>w.action==='create').map(w=>({handle:w.handle,status:null,action:'create',reason:'new_eligible_stone'})));
+  report.supplierReconciliation=stones.map(s=>({handle:s.handle,inCatalog:catalog.some(p=>p.handle===s.handle),action:skips.has(s.handle)?'skip':writes.get(s.handle)?.action??'unchanged',reason:skips.get(s.handle)?.reason??null}));
+  report.excludedRows=normalized.exclusions;
   report.planningComplete=true;
   await dependencies.save(report);
   stage='withdrawal_guard';
