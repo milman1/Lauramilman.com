@@ -42,16 +42,13 @@ export interface LabTier {
 /**
  * Natural-diamond markup on **Amount** (invoice cost). First match wins.
  *
- *   ≤ $4,000   1.40×  ~29% margin
- *   above      1.25×  20% margin
- *
- * Merchant decision 2026-09-17: collapse the old 1.35× / 1.30× bands into
- * 1.40× through $4,000 (typical 1ct tickets). Stones above $4,000 stay at
- * 1.25× so large-carat naturals do not jump with the small-stone lift.
+ *   ≤ $4,000   1.60×
+ *   above      1.45× with a $6,400 boundary floor.
+ * Merchant-approved tiers recorded in PR #286. Welcome discount stays 10%.
  */
 export const STONE_TIERS: LabTier[] = [
-  { maxCostUsd: 4000, multiplier: 1.4 },
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: DIAMOND.amountMultiple },
+  { maxCostUsd: 4000, multiplier: 1.6 },
+  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.45 },
 ];
 
 /**
@@ -388,6 +385,21 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }
 
-/** LGD certified colored loose lab diamonds; merchant approved 2026-10-11. */
-export const LGD_COLOR_DIAMONDS = { costMultiple: 3.5, welcomeDiscountPct: 0.1 } as const;
+/** LGD colored loose lab diamonds: graduated cost-based pricing. */
+export const LGD_COLOR_DIAMONDS = {
+  costMultiple: 2.25,
+  tiers: [
+    { maxCostUsd: 500, multiplier: 2.75 },
+    { maxCostUsd: 1500, multiplier: 2.5 },
+    { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 2.25 },
+  ],
+  welcomeDiscountPct: 0.1,
+} as const;
+
+export function coloredLabRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) throw new Error('Invalid colored lab cost');
+  if (costUsd <= 500) return Math.round(costUsd * 2.75);
+  if (costUsd <= 1500) return Math.round(Math.max(costUsd * 2.5, 500 * 2.75));
+  return Math.round(Math.max(costUsd * 2.25, 1500 * 2.5));
+}
 
