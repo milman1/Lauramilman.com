@@ -3,7 +3,7 @@
 - Issue: https://github.com/milman1/Lauramilman.com/issues/287
 - Updated: 2026-10-16 UTC
 - Owner: Codex, branch `repair/colored-supplier-sync-20261016`
-- Status: full credentialed dry-run passed; inventory guard verified. Recovery and rollout remain blocked for merchant review and grading/certificate exclusions. Do not merge or recover yet.
+- Status: code CI and full credentialed dry-runs passed; inventory guard verified. Recovery and rollout remain blocked for merchant review and 56 unrecognized-intensity exclusions. Do not merge or recover yet.
 - Base: `bbedfb2e74087efa83c2f64b026aed6926f4455d` (latest main verified through GitHub API).
 - Scope: colored supplier sync, diagnostics, recovery controls, approved natural/colored pricing, tests. No Shopify writes performed.
 
@@ -48,13 +48,13 @@ White loose lab configuration from #285 is unchanged: 2.50/2.25/2.00/1.75 target
 
 ## Remaining work / exact next action
 
-Inspect replacement draft PR #288 CI and its credentialed colored full dry run. If it fails at supplier fetch, use its sanitized code/status to establish the actual cause. Obtain a successful full source snapshot before claiming reconciliation or proposing exact withdrawal approval. Merchant approval is required for production recovery and rollout; no live mutation is authorized in this session.
+Review the final evidence below, resolve the 56 intensity exclusions with the supplier/merchant, and decide the intended colored welcome-discount scope. Then obtain a fresh full final-commit preview for approval of every withdrawal, price change, plan hash, ceiling and rollout window. Merchant approval is required for production recovery and rollout; no live mutation is authorized in this session.
 
 ## Live welcome-discount audit (22:06 UTC)
 
 Read-only Admin GraphQL verified an active 10% welcome discount scoped to 27 collections, including natural-diamonds and lab-grown-diamonds. Its list does **not** include colored-lab-grown-diamonds. All 640 colored products were paginated, including all collection memberships; **zero currently belong to an eligible collection**. Thus the configured colored 10% constant and profitability tests do not establish live eligibility. No discount was changed. Merchant must decide whether colored stones should be added to discount scope; that would be a separately authorized live discount change. Existing natural/white eligibility and all live discount configuration are preserved.
 
-Replacement PR: https://github.com/milman1/Lauramilman.com/pull/288 (draft). Initial remote commit aa99b4a227ea94bfccde019cea0f48b6443687a9. CI runs: [colored full read-only](https://github.com/milman1/Lauramilman.com/actions/runs/38973539507), [regular feed tests/dry run](https://github.com/milman1/Lauramilman.com/actions/runs/38973539436). Record outcomes below before treating either as passing evidence.
+Replacement PR: https://github.com/milman1/Lauramilman.com/pull/288 (draft). Initial remote commit aa99b4a227ea94bfccde019cea0f48b6443687a9. CI runs: [colored full read-only](https://github.com/milman1/Lauramilman.com/actions/runs/38973539507), [regular feed tests/dry run](https://github.com/milman1/Lauramilman.com/actions/runs/38973539436); both passed. Updated code evidence follows below.
 
 ## Verified full source/catalog dry run, 22:05–22:09 UTC
 
@@ -68,3 +68,28 @@ Both initial CI runs above completed **successfully**, including the full creden
 - Review fingerprint `64c86f68e0fac4f31b6ec11a71e39a51a34d92a51942cf4ec7ea50f5b1d0e6e1` identifies this snapshot **only**. It is evidence, not recovery authorization. Later reports/code may change the hash; use a fresh full final-commit report for actual approval.
 
 **Production remains blocked:** 56 active products fail grading/certificate normalization; confirm whether the supplier changed intensity, clarity or certificate-link format before approving withdrawals. New fixed diagnostic checks distinguish those causes without recording raw source fields. No normalization gate was relaxed. Merchant must approve any corrected eligibility interpretation, exact withdrawals, price rollout and whether colored welcome-discount scope should change. Passing CI and a dry run do not approve these decisions.
+
+## Latest verified code evidence (22:26–22:31 UTC)
+
+Code commit `1466d6f35b09805ae2e330a12186f15f4093e2f5`: [colored checks + full dry-run 38975746337](https://github.com/milman1/Lauramilman.com/actions/runs/38975746337) **passed** (27 checks); [regular feed 38975746312](https://github.com/milman1/Lauramilman.com/actions/runs/38975746312) **passed** (873 tests + full dry run). Prior commit cf46d48 also passed both workflows ([colored](https://github.com/milman1/Lauramilman.com/actions/runs/38975243322), [regular](https://github.com/milman1/Lauramilman.com/actions/runs/38975243262)). All were read-only. [Independent natural/white sample checks](../audits/2026-10-16-colored-sync/natural-white-dry-run-checks.json): all five natural and eight white sample retails match the approved formulas; zero write errors/publications. The raw regular-feed artifact contains existing supplier-cost data and was not copied into this repository; only this allowlisted summary was retained.
+
+Latest colored report: [durable full report](../audits/2026-10-16-colored-sync/dry-run-38975746337.json), [complete 132-handle withdrawal CSV with exact checks](../audits/2026-10-16-colored-sync/withdrawals-38975746337.csv), [original artifact](https://github.com/milman1/Lauramilman.com/actions/runs/38975746337/artifacts/12078917423), ZIP SHA256 `6068e7434408d69fa4b2622a1e9d1f93b4b0b1aaaf32478706f96367c6a2b7b1`, expires 2026-10-23. Durable copies do not expire with the artifact.
+
+| Reconciliation | Verified count |
+| --- | ---: |
+| Complete supplier snapshot | 1,455 |
+| Eligible supplier stones | 658 |
+| Owned existing products | 640 (634 active, 6 draft) |
+| Proposed existing updates | 506 (502 active, 4 draft) |
+| Proposed new products | 152, all draft |
+| Proposed withdrawals | 132 (68 unavailable, 56 intensity-ineligible, 8 missing) |
+| Existing products unchanged | 2 drafts |
+| Media failures / other skipped eligible stones | 0 / 0 |
+| Default withdrawal limit | 63; over limit |
+| Expected owned catalog if this plan were approved/applied | 792 (502 active, 290 draft) |
+
+Independent set checks prove that all 640 existing handles equal the separately captured Shopify audit and all 658 eligible supplier handles equal the planned writes. The full report enumerates all 792 existing/new dispositions, all 658 supplier dispositions and excluded source handles/reasons. No white handle is in writes or withdrawals. The previous snapshot's 539 eligible / 135 withdrawals changed to 658 / 132; source turnover invalidates approvals based on old totals.
+
+**Precise exclusion finding:** all 56 active grading exclusions are `unrecognized_intensity`, with no failed clarity or certificate-link check on those 56. Existing aggregate label `grading_or_certificate` is retained for compatibility; join `excludedRows` by handle for the exact checks (already included in the latest CSV). Investigate supplier intensity data or confirm each withdrawal before production recovery; no accepted-intensity list or eligibility gate was relaxed.
+
+Latest plan hash: `af8f11f1f21affa82ba8d3e94361245096b9535ce56cf0bbf17f4f8bfd4ef10f`. This remains **evidence only**, never approval. Live recovery still requires fresh matching evidence and explicit merchant approval. Read-only diagnostics and controlled recovery code are prepared for review; deploying the combined pricing package or executing recovery remains blocked pending those decisions. The old supplier-fetch exception remains unrecoverable from historical logs, despite three successful subsequent credentialed snapshots.
