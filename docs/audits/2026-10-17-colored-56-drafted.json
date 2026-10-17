@@ -1,0 +1,2704 @@
+{
+  "action": "merchant-approved exact 56 ACTIVE to DRAFT; supersedes previous keep-active instruction",
+  "verifiedAt": "2026-10-17T23:47:33.451Z",
+  "activeOwnedBefore": 634,
+  "safetyLimitBefore": 63,
+  "changed": 56,
+  "countsAfter": {
+    "total": 640,
+    "active": 578,
+    "draft": 62
+  },
+  "nonTargetDifferences": [],
+  "products": [
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089398210631",
+        "handle": "lg-color-1010446",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748614545479",
+              "price": "1843.63",
+              "sku": "1010446"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089398210631",
+        "handle": "lg-color-1010446",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748614545479",
+              "price": "1843.63",
+              "sku": "1010446"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089420886087",
+        "handle": "lg-color-1010919",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748729724999",
+              "price": "1767.50",
+              "sku": "1010919"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089420886087",
+        "handle": "lg-color-1010919",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748729724999",
+              "price": "1767.50",
+              "sku": "1010919"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089420951623",
+        "handle": "lg-color-1010920",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748729823303",
+              "price": "1371.83",
+              "sku": "1010920"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089420951623",
+        "handle": "lg-color-1010920",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748729823303",
+              "price": "1371.83",
+              "sku": "1010920"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089421410375",
+        "handle": "lg-color-1010933",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730282055",
+              "price": "1405.95",
+              "sku": "1010933"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089421410375",
+        "handle": "lg-color-1010933",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Radiant",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730282055",
+              "price": "1405.95",
+              "sku": "1010933"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089421770823",
+        "handle": "lg-color-1011041",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Heart",
+          "IGI",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730609735",
+              "price": "6143.38",
+              "sku": "1011041"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089421770823",
+        "handle": "lg-color-1011041",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Heart",
+          "IGI",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730609735",
+              "price": "6143.38",
+              "sku": "1011041"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089421836359",
+        "handle": "lg-color-1011042",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "IGI",
+          "Round",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730675271",
+              "price": "1978.90",
+              "sku": "1011042"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089421836359",
+        "handle": "lg-color-1011042",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "IGI",
+          "Round",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748730675271",
+              "price": "1978.90",
+              "sku": "1011042"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089422295111",
+        "handle": "lg-color-1011136",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748731134023",
+              "price": "886.41",
+              "sku": "1011136"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089422295111",
+        "handle": "lg-color-1011136",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748731134023",
+              "price": "886.41",
+              "sku": "1011136"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089424261191",
+        "handle": "lg-color-1011590",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Vivid",
+          "IGI",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733100103",
+              "price": "2327.33",
+              "sku": "1011590"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089424261191",
+        "handle": "lg-color-1011590",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Vivid",
+          "IGI",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733100103",
+              "price": "2327.33",
+              "sku": "1011590"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089424490567",
+        "handle": "lg-color-1011703",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733329479",
+              "price": "1106.11",
+              "sku": "1011703"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089424490567",
+        "handle": "lg-color-1011703",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733329479",
+              "price": "1106.11",
+              "sku": "1011703"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089424556103",
+        "handle": "lg-color-1011704",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733427783",
+              "price": "1016.02",
+              "sku": "1011704"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089424556103",
+        "handle": "lg-color-1011704",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748733427783",
+              "price": "1016.02",
+              "sku": "1011704"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089425178695",
+        "handle": "lg-color-1011762",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734246983",
+              "price": "1614.38",
+              "sku": "1011762"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089425178695",
+        "handle": "lg-color-1011762",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734246983",
+              "price": "1614.38",
+              "sku": "1011762"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089425637447",
+        "handle": "lg-color-1011790",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Light",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734705735",
+              "price": "803.25",
+              "sku": "1011790"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089425637447",
+        "handle": "lg-color-1011790",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Light",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734705735",
+              "price": "803.25",
+              "sku": "1011790"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089425735751",
+        "handle": "lg-color-1011792",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734804039",
+              "price": "866.25",
+              "sku": "1011792"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089425735751",
+        "handle": "lg-color-1011792",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748734804039",
+              "price": "866.25",
+              "sku": "1011792"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089428357191",
+        "handle": "lg-color-1012954",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Marquise",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748737851463",
+              "price": "3426.15",
+              "sku": "1012954"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089428357191",
+        "handle": "lg-color-1012954",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Marquise",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748737851463",
+              "price": "3426.15",
+              "sku": "1012954"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089433763911",
+        "handle": "lg-color-1015357",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744470599",
+              "price": "673.40",
+              "sku": "1015357"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089433763911",
+        "handle": "lg-color-1015357",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744470599",
+              "price": "673.40",
+              "sku": "1015357"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089433960519",
+        "handle": "lg-color-1015741",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744667207",
+              "price": "3693.38",
+              "sku": "1015741"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089433960519",
+        "handle": "lg-color-1015741",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744667207",
+              "price": "3693.38",
+              "sku": "1015741"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089434058823",
+        "handle": "lg-color-1015743",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744765511",
+              "price": "6475.00",
+              "sku": "1015743"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089434058823",
+        "handle": "lg-color-1015743",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748744765511",
+              "price": "6475.00",
+              "sku": "1015743"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089436844103",
+        "handle": "lg-color-1016550",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748747550791",
+              "price": "545.55",
+              "sku": "1016550"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089436844103",
+        "handle": "lg-color-1016550",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748747550791",
+              "price": "545.55",
+              "sku": "1016550"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089437302855",
+        "handle": "lg-color-1016565",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Oval",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748748009543",
+              "price": "577.50",
+              "sku": "1016565"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089437302855",
+        "handle": "lg-color-1016565",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Oval",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748748009543",
+              "price": "577.50",
+              "sku": "1016565"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089437794375",
+        "handle": "lg-color-1016574",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Pear",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748748533831",
+              "price": "567.00",
+              "sku": "1016574"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089437794375",
+        "handle": "lg-color-1016574",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Pear",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748748533831",
+              "price": "567.00",
+              "sku": "1016574"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089438777415",
+        "handle": "lg-color-1017032",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Pear",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748749484103",
+              "price": "2770.95",
+              "sku": "1017032"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089438777415",
+        "handle": "lg-color-1017032",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Intense",
+          "IGI",
+          "Pear",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748749484103",
+              "price": "2770.95",
+              "sku": "1017032"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089439268935",
+        "handle": "lg-color-1017052",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748749975623",
+              "price": "3419.33",
+              "sku": "1017052"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089439268935",
+        "handle": "lg-color-1017052",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748749975623",
+              "price": "3419.33",
+              "sku": "1017052"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089439662151",
+        "handle": "lg-color-1017078",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Intense",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750368839",
+              "price": "8247.54",
+              "sku": "1017078"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089439662151",
+        "handle": "lg-color-1017078",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Intense",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750368839",
+              "price": "8247.54",
+              "sku": "1017078"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089440120903",
+        "handle": "lg-color-1017100",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Marquise",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750860359",
+              "price": "699.93",
+              "sku": "1017100"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089440120903",
+        "handle": "lg-color-1017100",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Marquise",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750860359",
+              "price": "699.93",
+              "sku": "1017100"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089440219207",
+        "handle": "lg-color-1017109",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750925895",
+              "price": "2784.60",
+              "sku": "1017109"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089440219207",
+        "handle": "lg-color-1017109",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748750925895",
+              "price": "2784.60",
+              "sku": "1017109"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089440514119",
+        "handle": "lg-color-1017123",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748751220807",
+              "price": "5290.08",
+              "sku": "1017123"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089440514119",
+        "handle": "lg-color-1017123",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748751220807",
+              "price": "5290.08",
+              "sku": "1017123"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089440710727",
+        "handle": "lg-color-1017133",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748751417415",
+              "price": "3111.50",
+              "sku": "1017133"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089440710727",
+        "handle": "lg-color-1017133",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748751417415",
+              "price": "3111.50",
+              "sku": "1017133"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089443070023",
+        "handle": "lg-color-1018635",
+        "status": "ACTIVE",
+        "tags": [
+          "Asscher",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748753776711",
+              "price": "1345.68",
+              "sku": "1018635"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089443070023",
+        "handle": "lg-color-1018635",
+        "status": "DRAFT",
+        "tags": [
+          "Asscher",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "VS1",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748753776711",
+              "price": "1345.68",
+              "sku": "1018635"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089443233863",
+        "handle": "lg-color-1018639",
+        "status": "ACTIVE",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748753973319",
+              "price": "2533.30",
+              "sku": "1018639"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089443233863",
+        "handle": "lg-color-1018639",
+        "status": "DRAFT",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748753973319",
+              "price": "2533.30",
+              "sku": "1018639"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089443364935",
+        "handle": "lg-color-1018640",
+        "status": "ACTIVE",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754071623",
+              "price": "2549.75",
+              "sku": "1018640"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089443364935",
+        "handle": "lg-color-1018640",
+        "status": "DRAFT",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754071623",
+              "price": "2549.75",
+              "sku": "1018640"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089443659847",
+        "handle": "lg-color-1018649",
+        "status": "ACTIVE",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Pear",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754366535",
+              "price": "4795.88",
+              "sku": "1018649"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089443659847",
+        "handle": "lg-color-1018649",
+        "status": "DRAFT",
+        "tags": [
+          "Brown",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Pear",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754366535",
+              "price": "4795.88",
+              "sku": "1018649"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089443725383",
+        "handle": "lg-color-1018658",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754464839",
+              "price": "1423.45",
+              "sku": "1018658"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089443725383",
+        "handle": "lg-color-1018658",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754464839",
+              "price": "1423.45",
+              "sku": "1018658"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089444020295",
+        "handle": "lg-color-1018665",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754726983",
+              "price": "1406.30",
+              "sku": "1018665"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089444020295",
+        "handle": "lg-color-1018665",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VVS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754726983",
+              "price": "1406.30",
+              "sku": "1018665"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089444085831",
+        "handle": "lg-color-1018666",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754792519",
+              "price": "1337.70",
+              "sku": "1018666"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089444085831",
+        "handle": "lg-color-1018666",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Round",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748754792519",
+              "price": "1337.70",
+              "sku": "1018666"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089444413511",
+        "handle": "lg-color-1018675",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755120199",
+              "price": "696.15",
+              "sku": "1018675"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089444413511",
+        "handle": "lg-color-1018675",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755120199",
+              "price": "696.15",
+              "sku": "1018675"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089444479047",
+        "handle": "lg-color-1018676",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755218503",
+              "price": "696.15",
+              "sku": "1018676"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089444479047",
+        "handle": "lg-color-1018676",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "VS2",
+          "Yellow"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755218503",
+              "price": "696.15",
+              "sku": "1018676"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089444708423",
+        "handle": "lg-color-1018962",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755415111",
+              "price": "4614.22",
+              "sku": "1018962"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089444708423",
+        "handle": "lg-color-1018962",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755415111",
+              "price": "4614.22",
+              "sku": "1018962"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089445167175",
+        "handle": "lg-color-1018971",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755906631",
+              "price": "575.05",
+              "sku": "1018971"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089445167175",
+        "handle": "lg-color-1018971",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755906631",
+              "price": "575.05",
+              "sku": "1018971"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089445232711",
+        "handle": "lg-color-1018972",
+        "status": "ACTIVE",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755939399",
+              "price": "507.15",
+              "sku": "1018972"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089445232711",
+        "handle": "lg-color-1018972",
+        "status": "DRAFT",
+        "tags": [
+          "Blue",
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748755939399",
+              "price": "507.15",
+              "sku": "1018972"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089448214599",
+        "handle": "lg-color-1019436",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759216199",
+              "price": "3467.10",
+              "sku": "1019436"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089448214599",
+        "handle": "lg-color-1019436",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Intense",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759216199",
+              "price": "3467.10",
+              "sku": "1019436"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089448542279",
+        "handle": "lg-color-1019440",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759543879",
+              "price": "5203.80",
+              "sku": "1019440"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089448542279",
+        "handle": "lg-color-1019440",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Emerald",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759543879",
+              "price": "5203.80",
+              "sku": "1019440"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089448902727",
+        "handle": "lg-color-1019448",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759937095",
+              "price": "4889.43",
+              "sku": "1019448"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089448902727",
+        "handle": "lg-color-1019448",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748759937095",
+              "price": "4889.43",
+              "sku": "1019448"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089449001031",
+        "handle": "lg-color-1019449",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760002631",
+              "price": "8433.60",
+              "sku": "1019449"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089449001031",
+        "handle": "lg-color-1019449",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760002631",
+              "price": "8433.60",
+              "sku": "1019449"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089449427015",
+        "handle": "lg-color-1019697",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Orange",
+          "Round",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760428615",
+              "price": "1189.13",
+              "sku": "1019697"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089449427015",
+        "handle": "lg-color-1019697",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Orange",
+          "Round",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760428615",
+              "price": "1189.13",
+              "sku": "1019697"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089449558087",
+        "handle": "lg-color-1019701",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Orange",
+          "Round",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760559687",
+              "price": "1197.00",
+              "sku": "1019701"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089449558087",
+        "handle": "lg-color-1019701",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy",
+          "IGI",
+          "Orange",
+          "Round",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760559687",
+              "price": "1197.00",
+              "sku": "1019701"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089449656391",
+        "handle": "lg-color-1019706",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760690759",
+              "price": "1330.00",
+              "sku": "1019706"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089449656391",
+        "handle": "lg-color-1019706",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748760690759",
+              "price": "1330.00",
+              "sku": "1019706"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089458176071",
+        "handle": "lg-color-25130",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748769243207",
+              "price": "540.54",
+              "sku": "25130"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089458176071",
+        "handle": "lg-color-25130",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748769243207",
+              "price": "540.54",
+              "sku": "25130"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089459028039",
+        "handle": "lg-color-29894",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748770193479",
+              "price": "787.36",
+              "sku": "29894"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089459028039",
+        "handle": "lg-color-29894",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748770193479",
+              "price": "787.36",
+              "sku": "29894"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089460338759",
+        "handle": "lg-color-38210",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748771733575",
+              "price": "2600.36",
+              "sku": "38210"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089460338759",
+        "handle": "lg-color-38210",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Cushion",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "VVS2"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748771733575",
+              "price": "2600.36",
+              "sku": "38210"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089460961351",
+        "handle": "lg-color-70428",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748773011527",
+              "price": "2889.78",
+              "sku": "70428"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089460961351",
+        "handle": "lg-color-70428",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748773011527",
+              "price": "2889.78",
+              "sku": "70428"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089460994119",
+        "handle": "lg-color-70430",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748773044295",
+              "price": "3902.50",
+              "sku": "70430"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089460994119",
+        "handle": "lg-color-70430",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Oval",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748773044295",
+              "price": "3902.50",
+              "sku": "70430"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089462173767",
+        "handle": "lg-color-76174",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Princess",
+          "VVS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748774223943",
+              "price": "945.00",
+              "sku": "76174"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089462173767",
+        "handle": "lg-color-76174",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Princess",
+          "VVS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748774223943",
+              "price": "945.00",
+              "sku": "76174"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089463287879",
+        "handle": "lg-color-77106",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748775338055",
+              "price": "4530.40",
+              "sku": "77106"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089463287879",
+        "handle": "lg-color-77106",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pink",
+          "Radiant",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748775338055",
+              "price": "4530.40",
+              "sku": "77106"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089464008775",
+        "handle": "lg-color-78468",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776058951",
+              "price": "4381.65",
+              "sku": "78468"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089464008775",
+        "handle": "lg-color-78468",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "IGI",
+          "Pear",
+          "Pink",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776058951",
+              "price": "4381.65",
+              "sku": "78468"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089464107079",
+        "handle": "lg-color-78867",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "Heart",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776157255",
+              "price": "3981.25",
+              "sku": "78867"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089464107079",
+        "handle": "lg-color-78867",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "Heart",
+          "IGI",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776157255",
+              "price": "3981.25",
+              "sku": "78867"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "before": {
+        "id": "gid://shopify/Product/9089464139847",
+        "handle": "lg-color-78873",
+        "status": "ACTIVE",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "IGI",
+          "Pear",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776190023",
+              "price": "5320.00",
+              "sku": "78873"
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "gid://shopify/Product/9089464139847",
+        "handle": "lg-color-78873",
+        "status": "DRAFT",
+        "tags": [
+          "Colored Lab-Grown Diamond",
+          "colored-stone-feed",
+          "Fancy Vivid",
+          "Green",
+          "IGI",
+          "Pear",
+          "VS1"
+        ],
+        "variants": {
+          "nodes": [
+            {
+              "id": "gid://shopify/ProductVariant/49748776190023",
+              "price": "5320.00",
+              "sku": "78873"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "verification": "Independent fresh reads: status DRAFT; product/variant IDs, handle, tags, SKU and retail prices unchanged. No deletes, archives, activations or supplier sync recovery."
+}

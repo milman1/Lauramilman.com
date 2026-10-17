@@ -1,6 +1,14 @@
 # Colored-stone supplier sync repair
 
-## Current merchant decision: keep the 56 (supersedes earlier withdrawal proposals)
+## Current merchant decision: move the exact 56 to DRAFT (2026-10-17)
+
+The merchant accepted the proposed reversible DRAFT action with "Okay, let's do that." This supersedes the earlier Keep 56 instruction for these exact handles. All 56 were changed from ACTIVE to DRAFT, within the pre-action withdrawal limit of 63 (634 active owned). The status tool processed 50 initially; an independent read identified the remaining six, which were then processed separately. Final fresh reads verified all 56 DRAFT, unchanged retail prices, handles, product/variant IDs, SKUs and tags. A fresh full 640-product catalog read found zero differences for the other 584 products. Current owned catalog: **578 ACTIVE / 62 DRAFT**; the unchanged automatic limit is now **57**.
+
+Evidence: `docs/audits/2026-10-17-colored-56-drafted.json` contains the exact before/after list and verification. No deletion, archive, activation, repricing, other withdrawal, threshold change or merge was performed. No further production recovery or pricing rollout is approved. Earlier plan hashes and counts are stale; obtain a fresh full supplier/catalog dry run before reviewing remaining withdrawals. The latest scheduled failure before this action was run 39075619466, on main dd69048, at planning: 133 proposed withdrawals versus limit 63 (634 active); fetched 1,491 / eligible 656. Only #283 was merged when checked; #286 and #288 remained open, and #288 conflicted with main. Drafting these 56 alone does not prove the remaining backlog fits the guard.
+
+The unmerged repair's retention code applies only to ACTIVE products and cannot reactivate these drafts. Its earlier keep-active policy and historical approval wording below are superseded. Reconcile that policy and refresh evidence before deployment.
+
+## Historical merchant decision: keep the 56 (superseded 2026-10-17)
 
 The merchant explicitly instructed **"Keep 56"** on 2026-10-16 after clarification identified the intensity-excluded group. `src/lgd-color/retention.mjs` records the exact 56 reviewed handles from report 38975746337. They remain ACTIVE with existing Shopify data while rejected only for unrecognized intensity. They receive no payload, reprice, invented intensity, activation or withdrawal. Other unrecognized-intensity products are not covered by this decision; source eligibility gates remain unchanged.
 
