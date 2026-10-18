@@ -7,6 +7,7 @@
  */
 
 import type { Publishable, StoneItem } from './types.js';
+import { handleFor } from './product.js';
 
 export interface StoneRow {
   stock_ref: string;
@@ -85,11 +86,18 @@ export async function dualWriteStones(
   publishable: Publishable[],
   contentHashByStockRef: Map<string, string>,
   syncedAt: string,
-  opts: { url: string; key: string; fetchImpl?: typeof fetch } = supabaseConfigured()!,
+  opts: { url: string; key: string; fetchImpl?: typeof fetch; shopifyStatusByHandle?: ReadonlyMap<string, string> } = supabaseConfigured()!,
 ): Promise<{ upserted: number; markedUnavailable: number }> {
   const stones = publishable.filter((p): p is Publishable & { item: StoneItem } => p.item.kind !== 'watch');
   const rows = stones.map((p) =>
-    stoneRowFor(p.item, p.priced.retailUsd, contentHashByStockRef.get(p.item.stockRef) ?? '', syncedAt),
+    ({
+      ...stoneRowFor(p.item, p.priced.retailUsd, contentHashByStockRef.get(p.item.stockRef) ?? '', syncedAt),
+      // Supplier eligibility does not override Shopify's media quarantine.
+      // Unknown/new records stay hidden until their Shopify write and publication succeed.
+      available: opts.shopifyStatusByHandle
+        ? opts.shopifyStatusByHandle.get(handleFor(p.item)) === 'ACTIVE'
+        : true,
+    }),
   );
   const fetchFn = opts.fetchImpl ?? fetch;
   const headers = {
