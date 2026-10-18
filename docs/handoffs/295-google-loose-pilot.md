@@ -2,8 +2,9 @@
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/295
 - Owner: Codex, 2026-10-18
-- Status: implementation merged in PR #296; live publication paused by the
-  production flag after automatic approval review rejected channel changes.
+- Status: explicit approval received; five products published and independently
+  verified in Shopify. Ongoing pilot reconciliation enabled. Merchant Center
+  ingestion and approval remain unverified.
 - Merchant authorized the controlled Google feed fix in the current session.
 - Scope: five 2.00–2.03 ct oval lab-grown diamonds selected from the committed
   241-stone shortlist. `lmny-feeds/config/googleLoose.ts` is the rollout list.
@@ -61,9 +62,16 @@ restriction against channel changes despite the later instruction to implement
 the feed fix. Do not bypass that rejection through the hourly sync. Production
 publication is disabled by GOOGLE_LOOSE_PUBLICATION_ENABLED=false.
 
-Ask for explicit approval to publish these five products to Google & YouTube.
-Then enable the flag through a PR, apply the already prepared pilot, and verify
-with a fresh read before checking Merchant Center. No prices were written.
+The merchant subsequently answered "Yes" to the exact request to publish these
+five products to Google & YouTube. The publication mutation succeeded for all
+five with zero user errors. A fresh Shopify read independently confirmed all
+five publishedOnPublication=true. Prices remain $475, $480, $482, $482, $485;
+tracked qty 0 and CONTINUE policies are unchanged. Google custom-product and
+new-condition attributes remain present. The production flag is enabled by
+codex/enable-approved-google-pilot-295; see the linked Issue for the final PR.
+No price writes were performed. The earlier pause above is historical.
+
+Next: verify Merchant Center ingestion/approval before expanding the pilot.
 
 Inspect the next existing LMNY feed sync run and its google-loose artifacts.
 Then verify one pilot listing in Merchant Center account 117613711: source
