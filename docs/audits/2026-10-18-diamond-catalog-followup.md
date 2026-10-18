@@ -1,6 +1,6 @@
 # Diamond catalog follow-up — 2026-10-18 UTC
 
-Follow-up to issue #280 and the October 15 SEO audit. Read-only live checks were taken around 16:09–16:12 UTC, before the repair in this change. No product price, pricing rule, handle, imagery, checkout or channel inclusion policy was changed.
+Follow-up to issue #280 and the October 15 SEO audit. Repair: [PR #292](https://github.com/milman1/Lauramilman.com/pull/292), merged as `27a96e83776e28cdf82176c5fe300508ef2ae8ad`. Read-only live checks were taken around 16:09–16:12 UTC, before the repair in this change. No product price, pricing rule, handle, imagery, checkout or channel inclusion policy was changed.
 
 ## Catalog-wide results
 
@@ -16,7 +16,7 @@ Follow-up to issue #280 and the October 15 SEO audit. Read-only live checks were
 
 The supplier sync previously upserted every supplier-approved stone with `available: true`, even when Shopify had quarantined its product as DRAFT. The repair carries the observed Shopify status through media quarantine/rescue and successful product write/publication results. Search rows for drafts, archived products, unknown products and failed/unpublished new writes are written unavailable. Active successful records retain their supplier price and identifiers. No Shopify product is activated by this repair.
 
-The repair uses the existing sync; it adds no workflow or recurring infrastructure. It takes effect on a successful live sync after merge. Until the three records are independently reread as absent from public search, deployment is **not live-verified**. Existing active-product publication and supplier freshness still require their respective checks; an ACTIVE status alone is not a complete Catalog eligibility determination.
+The repair uses the existing sync; it adds no workflow or recurring infrastructure. **Live-verified after successful run `39144506690` on merged commit `27a96e8`.** All three stock lookups changed from HTTP 200 before repair to HTTP 404 afterward. A fresh Shopify Admin read confirmed all three remain DRAFT with unchanged prices ($500, $43,601 and $45,879 respectively). Existing active-product publication and supplier freshness still require their respective checks; an ACTIVE status alone is not a complete Catalog eligibility determination.
 
 ## Earlier outstanding items rechecked
 
@@ -33,7 +33,7 @@ The connected Shopify Admin API exposes product/channel/market records; those ar
 1. **Shopify Admin → Agentic → Sources → Shopify Catalog:** verify access/eligibility, eligible product count, exclusion reasons and ChatGPT access. Inspect actual Catalog mapping for shape, numeric carat, origin, color, clarity, grading report and category. The sampled Shopify category is the broad `Apparel & Accessories > Jewelry`; no more specific taxonomy was guessed.
 2. **Google & YouTube / Merchant Center:** linked account, sync/data-source processing time, item approvals, identifier policy, country/language, shipping/returns and price/availability diagnostics. Product publication is not Merchant Center approval.
 3. **Search Console / Rich Results Test:** actual URL Inspection, selected canonicals, indexing and Merchant Listing diagnostics. The programmatic checks are not Google's validation output.
-4. **Supabase/supplier reconciliation:** explain the 421 regular-feed gaps, confirm the intended treatment of 578 colored-feed products, and verify removal of draft results after the corrected sync. No service-role database credential is attached to this execution environment.
+4. **Supabase/supplier reconciliation:** explain the 421 regular-feed gaps, confirm the intended treatment of 578 colored-feed products, The three draft-result removals are now verified; broader supplier freshness remains a separate check. No service-role database credential is attached to this execution environment.
 
 The latest inspected feed run (39142780929) succeeded and logged Supabase upserts; its watch source returned zero rows and was protected from archival. Its artifact download failed with HTTP 403. Neither run success nor the upsert count proves public search/catalog completeness.
 
@@ -44,3 +44,10 @@ The latest inspected feed run (39142780929) succeeded and logged Supabase upsert
 - `git diff --check`: pass.
 - Typecheck: **fails in unchanged files** `src/shopify.ts`, `src/uploadifyMetafields.ts`, `test/pricing-ssot.test.ts`, `test/theme-chat-opener.test.ts`, and `test/theme-storefront-fixes.test.ts`; no diagnostics name the files changed by this repair.
 - Full comparison evidence lists the coverage gaps in `diamond-catalog-2026-10-18/comparison.json`; basic public catalog checks are in `public-scan.json`.
+
+- PR build and supplier dry run **passed** (run `39144110744`). The dry run planned zero creates, updates, deletes or archives; 29,300 unchanged feed-managed records.
+- Public `/agents.md` and `/.well-known/ucp` return HTTP 200 and advertise merchant-scoped catalog search/lookup. This establishes public discovery capability advertisement, not ChatGPT Catalog eligibility or successful agent-authenticated lookup.
+
+- Live repair evidence: `diamond-catalog-2026-10-18/draft-before.json` and `draft-after.json`. The live sync completed successfully with zero product creates, updates, deletes or archives.
+- After the live sync, all **10/10 public SEO regression checks pass again** (`live-after.json`).
+- A second complete public-search-table read after deployment finds **22,891 available records**, all matching public Shopify products and prices. **Zero draft/unpublished-product leaks remain** in this comparison; the 999 Shopify-only coverage gaps remain unchanged (`comparison-after.json`). Shopify data for this comparison is the same public snapshot; the three repaired statuses were separately reread live through Admin.
