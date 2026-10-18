@@ -9,11 +9,10 @@
  * Google Shopping, Instagram and Facebook Shops, and Pinterest
  * (`docs/audits/2026-09-09-site-audit.md` section 6).
  *
- * Loose diamonds are deliberately excluded from the full list by
- * `LOOSE_DIAMOND_CHANNELS` below: about 10,000 one-of-one stones without
- * GTINs would swamp Merchant Center and Meta's catalog limits for little
- * return. They stay on Online Store and Shop until a curated rule exists
- * (say, GIA rounds over one carat).
+ * Loose diamonds keep the narrow base list below. Google is an explicit
+ * curated exception reconciled in src/googleLoose.ts, configured in
+ * config/googleLoose.ts (merchant authorization 2026-10-18). It does not
+ * grant Meta, Pinterest, eBay, or Uploadify eligibility.
  *
  * Changing this list is a pull request against this file — never a
  * hardcoded publication name in a sync, and never a one-off publish in
@@ -41,8 +40,8 @@ export const SALES_CHANNELS = [
 ] as const;
 
 /**
- * Loose stones (natural and lab-grown) stay on these two only. See the
- * header: ~10,000 one-of-one SKUs would swamp Merchant Center and Meta.
+ * Base channels for loose stones. The curated Google pilot is reconciled
+ * independently so hash-skipped products and withdrawals are covered.
  */
 export const LOOSE_DIAMOND_CHANNELS = ['Online Store', 'Shop'] as const;
 
@@ -71,3 +70,4 @@ export function publicationMatchesChannel(channel: string, publicationName: stri
   if (channel === 'Online Store') return ONLINE_STORE_ALIASES.includes(publicationName);
   return channel === publicationName;
 }
+
