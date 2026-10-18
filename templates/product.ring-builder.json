@@ -1,0 +1,167 @@
+{
+  "sections": {
+    "ring-bar": {
+      "type": "ring-builder-bar",
+      "settings": {
+        "start_url": "/pages/ring-builder?view=ring-builder-start"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "trust-shipping": {
+          "type": "trust_item",
+          "settings": {
+            "icon": "shipping",
+            "label": "Free Insured Shipping"
+          }
+        },
+        "trust-warranty": {
+          "type": "trust_item",
+          "settings": {
+            "icon": "warranty",
+            "label": "1-Year Warranty"
+          }
+        },
+        "trust-returns": {
+          "type": "trust_item",
+          "settings": {
+            "icon": "returns",
+            "label": "7-Day Jewelry Returns"
+          }
+        }
+      },
+      "block_order": [
+        "trust-shipping",
+        "trust-warranty",
+        "trust-returns"
+      ],
+      "settings": {
+        "show_vendor": true,
+        "ring_builder_enabled": true,
+        "ring_builder_api_base": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "ring_builder_api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
+        "ring_builder_view": "ring-builder"
+      }
+    },
+    "education": {
+      "type": "product-education",
+      "blocks": {
+        "lab-1": {
+          "type": "lab_point",
+          "settings": {
+            "title": "Identical Brilliance",
+            "text": "Same fire, same hardness, same sparkle as a mined diamond — because it is a diamond."
+          }
+        },
+        "lab-2": {
+          "type": "lab_point",
+          "settings": {
+            "title": "Certified & Transparent",
+            "text": "Every stone arrives with an independent grading certificate documenting its cut, color, clarity and carat."
+          }
+        },
+        "lab-3": {
+          "type": "lab_point",
+          "settings": {
+            "title": "Exceptional Value",
+            "text": "Larger, finer stones for your budget — typically 60–85% less than comparable mined diamonds."
+          }
+        },
+        "estate-1": {
+          "type": "estate_point",
+          "settings": {
+            "title": "Authenticated by Specialists",
+            "text": "Hallmarks, serial numbers and construction verified against each maison's conventions before a piece is ever listed."
+          }
+        },
+        "estate-2": {
+          "type": "estate_point",
+          "settings": {
+            "title": "Provenance & Papers",
+            "text": "Original boxes and certificates included where they exist; our own authentication documentation ships either way."
+          }
+        },
+        "estate-3": {
+          "type": "estate_point",
+          "settings": {
+            "title": "Condition, Honestly Graded",
+            "text": "Every piece is condition-graded and photographed as it truly is — wear is described, never hidden."
+          }
+        },
+        "heritage-1": {
+          "type": "heritage_point",
+          "settings": {
+            "title": "Designed in New York",
+            "text": "Every piece begins in the city that trained Laura's eye, drawn and refined in-house."
+          }
+        },
+        "heritage-2": {
+          "type": "heritage_point",
+          "settings": {
+            "title": "Crafted in Italy",
+            "text": "Master goldsmiths finish each piece by hand — old-world technique, modern precision."
+          }
+        },
+        "heritage-3": {
+          "type": "heritage_point",
+          "settings": {
+            "title": "Made to Be Inherited",
+            "text": "Built for decades of wear, with a 1-year warranty against manufacturing defects."
+          }
+        },
+        "watch-1": {
+          "type": "watch_point",
+          "settings": {
+            "title": "Reference on Every Listing",
+            "text": "Brand, model and reference number are stated on every watch, with case size and year when the record includes them."
+          }
+        },
+        "watch-2": {
+          "type": "watch_point",
+          "settings": {
+            "title": "Box and Papers, Stated Plainly",
+            "text": "Each listing says whether the original box and papers are included. Missing items are never implied."
+          }
+        },
+        "watch-3": {
+          "type": "watch_point",
+          "settings": {
+            "title": "Exchanges on Watches",
+            "text": "Watches can be exchanged rather than returned for a refund. Every order ships free and fully insured."
+          }
+        }
+      },
+      "block_order": [
+        "lab-1",
+        "lab-2",
+        "lab-3",
+        "estate-1",
+        "estate-2",
+        "estate-3",
+        "heritage-1",
+        "heritage-2",
+        "heritage-3",
+        "watch-1",
+        "watch-2",
+        "watch-3"
+      ],
+      "settings": {}
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "eyebrow": "Keep Exploring",
+        "title": "You May Also Like",
+        "subtitle": "Explore similar pieces from our collection",
+        "product_count": 4
+      }
+    }
+  },
+  "order": [
+    "ring-bar",
+    "main",
+    "education",
+    "recommendations"
+  ]
+}

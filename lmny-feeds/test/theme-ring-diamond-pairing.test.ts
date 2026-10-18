@@ -37,7 +37,7 @@ describe('engagement ring ↔ loose diamond pairing', () => {
   });
 
   it('links a ring to loose diamonds of its shape through the native filter', () => {
-    expect(mainProduct).toContain("{% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}");
+    expect(mainProduct).toMatch(/\{% render 'ring-diamond-pairing',\s+product: product,\s+is_watch: is_watch,\s+setting_product: section\.settings\.setting_only_product,/);
     // The lab-grown and natural collections use the API-backed search, which
     // reads ?shape= (and still accepts the older filter.p.m.custom.diamond_shape).
     expect(ringSide).toContain('/collections/natural-diamonds?shape={{ shape_q }}');

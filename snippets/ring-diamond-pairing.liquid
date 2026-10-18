@@ -23,6 +23,11 @@
   - product: the ring
   - is_watch: 'true' for watches
   - setting_product: the hidden setting-only product (optional)
+  - builder: true on the ring-builder template. The panel then lists matching
+    diamonds from the stone search API on the page (builder_api_base,
+    builder_api_key), each with the ring total, and keeps the setting and
+    chosen diamond in sessionStorage lmBuilder for the "Your ring" bar and the
+    builder diamond search (collection template suffix builder_view).
 {%- endcomment -%}
 
 {%- capture is_er -%}{% render 'is-engagement-ring', product: product %}{%- endcapture -%}
@@ -89,9 +94,20 @@
 
     # Ring option names, to record the shopper's choices (size, metal) on the order.
     assign option_names = product.options | json
+
+    assign builder_on = false
+    if builder and is_setting and builder_api_base != blank
+      assign builder_on = true
+    endif
+    assign builder_view = builder_view | default: 'ring-builder' | handleize
+    assign search_extra = ''
+    if builder_on
+      assign search_extra = '&view=' | append: builder_view | append: '&ring=' | append: product.handle
+    endif
   -%}
   <div
     class="pdp-pair"
+    id="RingPairing"
     data-pair
     data-ring-shape="{{ ring_shape }}"
     data-ring-handle="{{ product.handle }}"
@@ -101,6 +117,12 @@
     data-currency="{{ cart.currency.iso_code | default: 'USD' }}"
     data-setting-base="{{ sku_base | escape }}"
     data-option-names="{{ option_names | escape }}"
+    {%- if builder_on %}
+    data-builder="true"
+    data-builder-view="{{ builder_view }}"
+    data-api-base="{{ builder_api_base | escape }}"
+    data-api-key="{{ builder_api_key | escape }}"
+    {%- endif %}
   >
     <script type="application/json" data-pair-settings>[{{ setting_json }}]</script>
     <p class="pdp-inquire__label">Choose your own diamond</p>
@@ -116,9 +138,27 @@
         <p class="pdp-pair__text">This setting takes {{ shape_l }}-cut center stones. Pick the {{ shape_l }} diamond you want and we will set it for you.</p>
       {%- endif -%}
       <p class="pdp-pair__warn" data-pair-mismatch hidden></p>
+      {%- if builder_on -%}
+        <div class="rbc" data-rbc>
+          <div class="rbc__tabs" role="group" aria-label="Diamond origin">
+            <button type="button" class="rbc__tab is-active" data-rbc-kind="lab" aria-pressed="true">Lab-grown</button>
+            <button type="button" class="rbc__tab" data-rbc-kind="natural" aria-pressed="false">Natural</button>
+          </div>
+          <div class="rbc__bands" role="group" aria-label="Carat">
+            <button type="button" class="rbc__band is-active" data-rbc-band="" aria-pressed="true">Any carat</button>
+            <button type="button" class="rbc__band" data-rbc-band="0.3-0.99" aria-pressed="false">Under 1 ct</button>
+            <button type="button" class="rbc__band" data-rbc-band="1-1.49" aria-pressed="false">1–1.49 ct</button>
+            <button type="button" class="rbc__band" data-rbc-band="1.5-1.99" aria-pressed="false">1.5–1.99 ct</button>
+            <button type="button" class="rbc__band" data-rbc-band="2-2.99" aria-pressed="false">2–2.99 ct</button>
+            <button type="button" class="rbc__band" data-rbc-band="3-" aria-pressed="false">3 ct +</button>
+          </div>
+          <p class="rbc__status" data-rbc-status role="status">Loading {{ shape_l }} diamonds…</p>
+          <ul class="rbc__list" role="list" data-rbc-list></ul>
+        </div>
+      {%- endif -%}
       <div class="pdp-inquire__actions">
-        <a class="pdp-inquire__btn" href="/collections/lab-grown-diamonds?shape={{ shape_q }}">{{ ring_shape }} lab-grown diamonds</a>
-        <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/collections/natural-diamonds?shape={{ shape_q }}">{{ ring_shape }} natural diamonds</a>
+        <a class="pdp-inquire__btn" href="/collections/lab-grown-diamonds?shape={{ shape_q }}{{ search_extra }}" data-rbc-search>{% if builder_on %}All {{ shape_l }} lab-grown diamonds{% else %}{{ ring_shape }} lab-grown diamonds{% endif %}</a>
+        <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/collections/natural-diamonds?shape={{ shape_q }}{{ search_extra }}" data-rbc-search>{% if builder_on %}All {{ shape_l }} natural diamonds{% else %}{{ ring_shape }} natural diamonds{% endif %}</a>
       </div>
     </div>
 
@@ -228,6 +268,44 @@
     }
     .pdp-pair__row span:last-child { white-space: nowrap; }
     .pdp-pair__row--total { font-weight: 600; border-bottom: 0; padding-top: 0.6rem; }
+    .rbc { margin: 0 0 1rem; font-family: var(--font-body, 'Montserrat', sans-serif); }
+    .rbc__tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border-light, #E8E2D8); margin-bottom: 0.75rem; }
+    .rbc__tab {
+      min-height: 44px; padding: 0 1rem; border: 0; border-bottom: 2px solid transparent; background: none;
+      font: inherit; font-size: 0.8rem; letter-spacing: 0.04em; color: var(--text-muted-dark, #6B6152); cursor: pointer;
+    }
+    .rbc__tab.is-active { border-bottom-color: var(--text-dark, #2C1810); color: var(--text-dark, #2C1810); font-weight: 600; }
+    .rbc__bands { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .rbc__band {
+      min-height: 40px; padding: 0 0.8rem; border: 1px solid var(--rule-light, #DDD5C5); border-radius: var(--radius-sm, 4px);
+      background: #fff; font: inherit; font-size: 0.75rem; color: var(--text-dark, #2C1810); cursor: pointer;
+    }
+    .rbc__band:hover { border-color: var(--gold, #C9A050); }
+    .rbc__band.is-active { border-color: var(--text-dark, #2C1810); box-shadow: inset 0 0 0 1px var(--text-dark, #2C1810); font-weight: 600; }
+    .rbc__status { margin: 0 0 0.6rem; font-size: 0.78rem; color: var(--text-muted-dark, #6B6152); }
+    .rbc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .rbc__item {
+      display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; grid-template-areas: "img text prices" "img text choose";
+      gap: 0.25rem 0.85rem; align-items: center; padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border-light, #E8E2D8); border-radius: var(--radius-md, 8px); background: #fff;
+    }
+    @media (min-width: 600px) {
+      .rbc__item { grid-template-columns: 56px minmax(0, 1fr) auto auto; grid-template-areas: "img text prices choose"; }
+    }
+    .rbc__img { grid-area: img; width: 56px; height: 56px; object-fit: cover; border-radius: var(--radius-sm, 4px); background: var(--cream, #FAF6F0); }
+    .rbc__text { grid-area: text; display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+    .rbc__title { font-size: 0.85rem; font-weight: 600; color: var(--text-dark, #2C1810); text-decoration: none; }
+    .rbc__title:hover { text-decoration: underline; }
+    .rbc__meta { font-size: 0.74rem; color: var(--text-muted-dark, #6B6152); }
+    .rbc__prices { grid-area: prices; display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; font-size: 0.8rem; white-space: nowrap; }
+    .rbc__ring { font-weight: 600; color: var(--text-dark, #2C1810); }
+    .rbc__choose {
+      grid-area: choose; justify-self: end; min-height: 44px; padding: 0 1.1rem; border: 1px solid var(--text-dark, #2C1810);
+      border-radius: 999px; background: var(--text-dark, #2C1810); color: var(--warm-white, #FDFAF6);
+      font: inherit; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    }
+    .rbc__choose:hover { background: #4a2c1f; }
+    .rbc__choose:disabled { opacity: 0.6; cursor: wait; }
   </style>
 
   <script>
@@ -285,6 +363,36 @@
         } catch (e) {
           return '$' + Math.round(cents / 100).toLocaleString('en-US');
         }
+      }
+
+      var builderOn = root.getAttribute('data-builder') === 'true';
+      var ringHandle = root.getAttribute('data-ring-handle');
+
+      // Ring builder: the setting (with the chosen size/metal variant) and the
+      // diamond, kept for the visit so the "Your ring" bar and the builder
+      // diamond search can show them. diamond undefined keeps the stored one
+      // when it still fits this ring's shape.
+      function saveBuilder(diamond) {
+        if (!builderOn) return;
+        var prev = read('lmBuilder') || {};
+        if (diamond === undefined) {
+          diamond = prev.diamond && prev.ring && prev.ring.shape === ringShape ? prev.diamond : null;
+        }
+        var setting = settingVariant();
+        store('lmBuilder', {
+          ring: {
+            handle: ringHandle,
+            title: root.getAttribute('data-ring-title'),
+            shape: ringShape,
+            image: root.getAttribute('data-ring-image'),
+            path: '/products/' + ringHandle + '?view=' + encodeURIComponent(root.getAttribute('data-builder-view') || 'ring-builder'),
+            variant: setting ? setting.id : null,
+            options: ringChoices().map(function (c) { return c.value; }).join(' · '),
+            price: setting ? setting.price : null
+          },
+          diamond: diamond || null
+        });
+        try { document.dispatchEvent(new CustomEvent('lm:builder-change')); } catch (e) {}
       }
 
       function showBrowse(note) {
@@ -363,11 +471,20 @@
         browse.hidden = true;
         chosen.hidden = false;
         renderSum();
+        saveBuilder({ handle: p.handle, title: p.title, price: p.price, image: p.featured_image || '' });
+      }
+
+      function refresh() {
+        renderSum();
+        if (!builderOn) return;
+        renderStones();
+        updateSearchLinks();
+        saveBuilder();
       }
 
       if (ringForm) {
         ringForm.addEventListener('click', function (e) {
-          if (e.target.closest('[data-option-group]')) setTimeout(renderSum, 0);
+          if (e.target.closest('[data-option-group]')) setTimeout(refresh, 0);
         });
       }
 
@@ -405,39 +522,198 @@
           });
       });
 
+      // fromUser: the shopper just picked this stone (link or chooser), so a
+      // stone that does not fit gets an explanation instead of silence.
+      function loadStone(handle, fromUser, done) {
+        return fetch('/products/' + handle + '.js', { headers: { Accept: 'application/json' } })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (p) {
+            if (!p || DIAMOND_TYPES.indexOf(p.type) === -1) {
+              store('lmPairDiamond', null);
+              saveBuilder(null);
+              if (fromUser) showBrowse('That diamond is no longer available. Choose another below.');
+              return false;
+            }
+            var stoneShape = shapeOf(p.title);
+            if (stoneShape !== ringShape) {
+              // A remembered stone that doesn't fit this ring is left quietly;
+              // one the shopper just sent here gets an explanation.
+              if (fromUser) {
+                showBrowse('The diamond you chose is ' + (stoneShape ? stoneShape.toLowerCase() + '-cut' : 'a different shape') + '. This setting takes ' + ringShape.toLowerCase() + '-cut center stones.');
+              }
+              return false;
+            }
+            if (!p.available) {
+              store('lmPairDiamond', null);
+              saveBuilder(null);
+              if (fromUser) showBrowse('That diamond is no longer available. Choose another below.');
+              return false;
+            }
+            store('lmPairDiamond', { handle: p.handle });
+            showChosen(p);
+            return true;
+          })
+          .catch(function () { return false; });
+      }
+
+      /* ── Ring builder: matching diamonds listed on the page ── */
+      var rbc = builderOn ? root.querySelector('[data-rbc]') : null;
+      var rbcState = { kind: 'lab', band: '', stones: [], total: 0, req: 0 };
+
+      function stoneHandle(stone) {
+        var ref = String(stone.stock_ref || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return (stone.kind === 'natural' ? 'nd-' : 'lg-') + ref;
+      }
+
+      function updateSearchLinks() {
+        var setting = settingVariant();
+        root.querySelectorAll('[data-rbc-search]').forEach(function (a) {
+          var u = new URL(a.getAttribute('href'), window.location.origin);
+          if (setting) u.searchParams.set('variant', setting.id);
+          else u.searchParams.delete('variant');
+          a.setAttribute('href', u.pathname + u.search);
+        });
+      }
+
+      function renderStones() {
+        if (!rbc) return;
+        var list = rbc.querySelector('[data-rbc-list]');
+        var status = rbc.querySelector('[data-rbc-status]');
+        var setting = settingVariant();
+        var shapeL = ringShape.toLowerCase();
+        var noun = rbcState.kind === 'natural' ? 'natural' : 'lab-grown';
+        list.textContent = '';
+        if (rbcState.error) {
+          status.textContent = 'Diamonds could not load. Use the search links below.';
+          return;
+        }
+        if (!rbcState.stones.length) {
+          status.textContent = rbcState.loading ? 'Loading ' + shapeL + ' diamonds…' : 'No ' + noun + ' ' + shapeL + ' diamonds in this carat range. Try another range.';
+          return;
+        }
+        status.textContent = rbcState.total.toLocaleString('en-US') + ' ' + noun + ' ' + shapeL + ' diamonds fit this setting. Lowest prices first.' + (setting ? '' : ' Choose a size to see ring totals.');
+        rbcState.stones.slice(0, 8).forEach(function (stone) {
+          var handle = stoneHandle(stone);
+          var cents = Math.round(Number(stone.retail_usd) * 100);
+          var title = Number(stone.carat).toFixed(2) + ' ct ' + (stone.shape || ringShape);
+          var li = document.createElement('li');
+          li.className = 'rbc__item';
+          var img = document.createElement('img');
+          img.className = 'rbc__img';
+          img.width = 56;
+          img.height = 56;
+          img.loading = 'lazy';
+          img.alt = '';
+          if (stone.image_urls && stone.image_urls[0]) img.src = stone.image_urls[0];
+          li.appendChild(img);
+          var text = document.createElement('span');
+          text.className = 'rbc__text';
+          var link = document.createElement('a');
+          link.className = 'rbc__title';
+          link.href = '/products/' + handle;
+          link.textContent = title;
+          var meta = document.createElement('span');
+          meta.className = 'rbc__meta';
+          meta.textContent = [stone.color, stone.clarity, stone.cut, stone.lab].filter(Boolean).join(' · ');
+          text.appendChild(link);
+          text.appendChild(meta);
+          li.appendChild(text);
+          var prices = document.createElement('span');
+          prices.className = 'rbc__prices';
+          var price = document.createElement('span');
+          price.textContent = 'Diamond ' + money(cents);
+          prices.appendChild(price);
+          if (setting) {
+            var ring = document.createElement('span');
+            ring.className = 'rbc__ring';
+            ring.textContent = 'Ring ' + money(cents + setting.price);
+            prices.appendChild(ring);
+          }
+          li.appendChild(prices);
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'rbc__choose';
+          btn.setAttribute('data-rbc-choose', handle);
+          btn.setAttribute('aria-label', 'Choose the ' + title + ', ' + meta.textContent);
+          btn.textContent = 'Choose';
+          li.appendChild(btn);
+          list.appendChild(li);
+        });
+      }
+
+      function loadStones() {
+        if (!rbc) return;
+        var base = (root.getAttribute('data-api-base') || '').replace(/\/+$/, '');
+        var key = root.getAttribute('data-api-key') || '';
+        var params = new URLSearchParams({ kind: rbcState.kind, shapes: ringShape, sort: 'price_asc', per_page: '12', page: '1' });
+        var band = rbcState.band.split('-');
+        if (band[0]) params.set('min_carat', band[0]);
+        if (band[1]) params.set('max_carat', band[1]);
+        var headers = { Accept: 'application/json' };
+        if (key) { headers.apikey = key; headers.Authorization = 'Bearer ' + key; }
+        var req = ++rbcState.req;
+        rbcState.loading = true;
+        rbcState.error = false;
+        rbcState.stones = [];
+        renderStones();
+        fetch(base + '?' + params.toString(), { headers: headers })
+          .then(function (res) { return res.json().then(function (data) { if (!res.ok) throw new Error('api'); return data; }); })
+          .then(function (data) {
+            if (req !== rbcState.req) return;
+            rbcState.stones = data.stones || [];
+            rbcState.total = data.total || rbcState.stones.length;
+          })
+          .catch(function () { if (req === rbcState.req) rbcState.error = true; })
+          .then(function () {
+            if (req !== rbcState.req) return;
+            rbcState.loading = false;
+            renderStones();
+          });
+      }
+
+      if (rbc) {
+        rbc.addEventListener('click', function (e) {
+          var kindBtn = e.target.closest('[data-rbc-kind]');
+          var bandBtn = e.target.closest('[data-rbc-band]');
+          var chooseBtn = e.target.closest('[data-rbc-choose]');
+          if (kindBtn || bandBtn) {
+            var attr = kindBtn ? 'data-rbc-kind' : 'data-rbc-band';
+            var btn = kindBtn || bandBtn;
+            rbc.querySelectorAll('[' + attr + ']').forEach(function (b) {
+              var on = b === btn;
+              b.classList.toggle('is-active', on);
+              b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            if (kindBtn) rbcState.kind = btn.getAttribute(attr);
+            else rbcState.band = btn.getAttribute(attr);
+            loadStones();
+            return;
+          }
+          if (chooseBtn) {
+            var handle = chooseBtn.getAttribute('data-rbc-choose');
+            if (!HANDLE.test(handle)) return;
+            chooseBtn.disabled = true;
+            chooseBtn.textContent = '…';
+            loadStone(handle, true).then(function (ok) {
+              chooseBtn.disabled = false;
+              chooseBtn.textContent = 'Choose';
+              if (ok) root.querySelector('[data-pair-stone-link]').focus();
+            });
+          }
+        });
+        updateSearchLinks();
+        loadStones();
+      }
+      saveBuilder();
+
       var fromUrl = new URLSearchParams(window.location.search).get('diamond');
       var remembered = read('lmPairDiamond');
       var handle = (fromUrl || (remembered && remembered.handle) || '').toLowerCase();
-      if (!HANDLE.test(handle)) return;
-
-      fetch('/products/' + handle + '.js', { headers: { Accept: 'application/json' } })
-        .then(function (res) { return res.ok ? res.json() : null; })
-        .then(function (p) {
-          if (!p || DIAMOND_TYPES.indexOf(p.type) === -1) {
-            store('lmPairDiamond', null);
-            return;
-          }
-          var stoneShape = shapeOf(p.title);
-          if (stoneShape !== ringShape) {
-            // A remembered stone that doesn't fit this ring is left quietly;
-            // one the shopper just sent here gets an explanation.
-            if (fromUrl) {
-              showBrowse('The diamond you chose is ' + (stoneShape ? stoneShape.toLowerCase() + '-cut' : 'a different shape') + '. This setting takes ' + ringShape.toLowerCase() + '-cut center stones.');
-            }
-            return;
-          }
-          if (!p.available) {
-            store('lmPairDiamond', null);
-            if (fromUrl) showBrowse('That diamond is no longer available. Choose another below.');
-            return;
-          }
-          store('lmPairDiamond', { handle: p.handle });
-          showChosen(p);
-        })
-        .catch(function () {});
+      if (HANDLE.test(handle)) loadStone(handle, !!fromUrl);
 
       root.querySelector('[data-pair-clear]').addEventListener('click', function () {
         store('lmPairDiamond', null);
+        saveBuilder(null);
         stone = null;
         if (fromUrl && window.history && window.history.replaceState) {
           var u = new URL(window.location.href);
