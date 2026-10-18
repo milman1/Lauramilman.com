@@ -332,7 +332,7 @@ export const BACKVAULT = {
  * merchant's Royal Chain trade account. Only trending items are imported,
  * never a whole category.
  *
- *   retail = roundUpTo5(cost × 2)
+ *   retail = roundToCents(cost × 2)
  *
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
@@ -343,7 +343,6 @@ export const BACKVAULT = {
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
   costMultiple: 2,
-  roundUpToUsd: 5,
 } as const;
 
 export function supplierRetailFromCost(costUsd: number): number {
@@ -351,7 +350,7 @@ export function supplierRetailFromCost(costUsd: number): number {
     throw new Error(`Supplier pricing: invalid cost ${costUsd}`);
   }
   const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
-  return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+  return Math.round((raw + Number.EPSILON) * 100) / 100;
 }
 
 /**
