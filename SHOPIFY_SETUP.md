@@ -222,6 +222,28 @@ Create an Online Store page with handle `shop` and template **shop**.
 
 The storefront popup and newsletter reveal this code after signup.
 
+The live code is 10% off 28 collections and does not combine with product, order, or shipping discounts. Creator codes in section 6a follow that same non-stacking rule.
+
+---
+
+## 6a. Influencer program
+
+Public page: `/pages/influencer-program`, theme template `creator-program`.
+Applications email hello@lauramilman.com and tag the customer `creator-applicant`.
+Operating steps, including how to issue a code and what may be gifted, are in
+`docs/marketing/creator-program.md`.
+
+The offer is fixed by margin, not by a store-wide rate:
+
+- Customer code: 10% off, one use per customer, combinations off.
+- Collections on the code: Lab-Grown Diamond Jewelry (`lab-grown-diamond-jewelry`), Chains (`chains`), and Lab-Grown Diamonds (`lab-grown-diamonds`).
+- Left off the code: watches, estate jewelry, and natural diamonds.
+- Creator earns 10% of what the customer paid for those eligible pieces, after the code, before tax and shipping.
+- Paid once a month after the 7-day return window, once the balance reaches $50.
+- Gift, on acceptance: one piece from lab-grown jewelry or chains. Watches, estate pieces, and loose stones are not gifted.
+
+Each accepted creator gets their own code. There is no shared program code.
+
 ---
 
 ## 7. Branded emails
