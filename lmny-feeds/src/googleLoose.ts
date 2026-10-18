@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { CatalogEntry, Publishable, StoneItem } from './types.js';
 import type { ShopifyClient } from './shopify.js';
 import { handleFor } from './product.js';
@@ -114,6 +114,7 @@ export async function reconcileGoogleLoose(shopify: ShopifyClient, publishable: 
   const products = await readProducts(shopify, scope, publicationId);
   const plan = planGoogleLoose(products, publishable, selected);
   const missing = [...selected].filter(handle => !products.some(p => p.handle === handle));
+  await mkdir(options.outDir, { recursive: true });
   await writeFile(`${options.outDir}/google-loose-plan.json`, JSON.stringify({ dryRun: options.dryRun, createdAt: new Date().toISOString(), selected: selected.size, missing, plan }, null, 2));
   const counts = Object.fromEntries(['publish', 'refresh', 'unpublish', 'skip'].map(action => [action, plan.filter(p => p.action === action).length]));
   if (options.dryRun) return `Google loose dry-run: ${JSON.stringify(counts)}, ${missing.length} shortlist products absent; plan only`;

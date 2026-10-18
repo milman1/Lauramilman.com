@@ -72,8 +72,8 @@ describe('Google loose reconciliation',()=>{
   });
   it('writes a sanitized dry-run plan and makes no mutations',async()=>{
     const dir=await mkdtemp(path.join(os.tmpdir(),'google-loose-'));
-    try{const {client,mutations}=fakeClient(product());await reconcileGoogleLoose(client,source,[],{supplierHealthy:true,dryRun:true,outDir:dir});
-      const plan=await readFile(path.join(dir,'google-loose-plan.json'),'utf8');expect(plan).toContain('publish');expect(plan).not.toContain('cost');expect(mutations).toEqual([]);
+    try{const {client,mutations}=fakeClient(product());const output=path.join(dir,'new-output');await reconcileGoogleLoose(client,source,[],{supplierHealthy:true,dryRun:true,outDir:output});
+      const plan=await readFile(path.join(output,'google-loose-plan.json'),'utf8');expect(plan).toContain('publish');expect(plan).not.toContain('cost');expect(mutations).toEqual([]);
     }finally{await rm(dir,{recursive:true,force:true});}
   });
   it('publishes only after attributes and ownership, then verifies with a fresh query',async()=>{
