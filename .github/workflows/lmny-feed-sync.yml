@@ -113,4 +113,7 @@ jobs:
           path: |
             lmny-feeds/out/report.json
             lmny-feeds/out/report.md
+            lmny-feeds/out/google-loose-plan.json
+            lmny-feeds/out/google-loose-verification.json
           if-no-files-found: ignore
+

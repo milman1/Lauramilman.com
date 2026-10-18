@@ -1,7 +1,8 @@
 import { WATCH } from '../config/pricing.js';
 import { contentHash } from './hash.js';
 import { isCuratedWatchBrand } from './normalize.js';
-import { googleShoppingMetafields } from './googleShopping.js';
+import { googleShoppingMetafields, GOOGLE_LOOSE_FIELDS } from './googleShopping.js';
+import { GOOGLE_LOOSE_PILOT_HANDLES } from '../config/googleLoose.js';
 import { taxonomyGidForFeedKind } from './taxonomy.js';
 import type { FeedItem, Priced, WatchItem } from './types.js';
 import { classifyWatchCondition } from './ebayCondition.js';
@@ -276,6 +277,10 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     { namespace: APP_NAMESPACE, key: 'cost_cents', type: 'number_integer', value: String(Math.round(item.costUsd * 100)) },
   ];
   if (item.kind !== 'watch') {
+    // Preserve Google attributes on normal productSet updates of the pilot.
+    // Do not change the pricing/content hash just to backfill channel fields:
+    // the independent Google reconciliation handles unchanged products.
+    if (item.kind === 'lab' && GOOGLE_LOOSE_PILOT_HANDLES.includes(handleFor(item))) fields.push(...GOOGLE_LOOSE_FIELDS);
     if (item.certNumber) fields.push({ namespace: ns, key: 'cert_number', type: 'single_line_text_field', value: item.certNumber });
     if (item.certUrl) fields.push({ namespace: ns, key: 'cert_url', type: 'url', value: item.certUrl });
     // The gemological PDP renders these as its own spec table rather than
@@ -328,7 +333,7 @@ export function metafieldsFor(item: FeedItem, priced: Priced, hash: string, sync
     // a value that still matched the pre-write read — Uploadify then reports
     // "eBay: SKU not found". Qualifying watches carry both fields here.
     fields.push(...uploadifyMetafieldsFor(item, priced));
-    // Google keys ride along for the same reason. Loose stones never get them.
+    // Google keys ride along for the same reason.
     appendGoogleShopping(fields, {
       title: titleFor(item),
       productType: 'Watch',
@@ -627,3 +632,4 @@ export function quarantineProductSetInput(input: Record<string, unknown>): Recor
     : rest.variants;
   return { ...rest, status: 'DRAFT', tags: [...tags].sort(), variants };
 }
+

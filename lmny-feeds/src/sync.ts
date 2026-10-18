@@ -11,6 +11,7 @@
  */
 
 import { assertSafeDiamondRemovals } from './feedSafety.js';
+import { reconcileGoogleLoose } from './googleLoose.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
@@ -1069,6 +1070,14 @@ async function main() {
     notes.push('supabase dual-write skipped (SUPABASE_URL / SERVICE_KEY unset) — Shopify is still the only stone store');
   }
 
+  // Google is deliberately a curated reconciliation, independent of Uploadify
+  // qty-zero rules and of create/update hash decisions. It never writes prices.
+  notes.push(await reconcileGoogleLoose(shopify, publishable, catalog, {
+    dryRun: flags.dryRun,
+    supplierHealthy: fetchedKinds.has('lab') && flags.limit === null,
+    outDir: OUT_DIR,
+  }));
+
   // 5. Report — run summary plus JSON artifact as the audit trail.
   const report: SyncReport = {
     dryRun: flags.dryRun,
@@ -1217,3 +1226,4 @@ function csvEscape(value: string): string {
   if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
   return value;
 }
+
