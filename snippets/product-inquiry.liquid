@@ -4,10 +4,11 @@
   short form that posts through Shopify's contact form, so the offer
   reaches the store's email with the piece attached. That form is only
   for watches. Lab-grown loose diamonds and other jewelry do not get it.
-  Loose lab-grown diamonds get "Ask about this stone" instead of the chat
-  "Ask" pill: a short question form through the same contact form, so the
-  stone and the shopper's email reach the store's inbox. It makes no
-  promise to keep the stone for the shopper and does not take offers.
+  Loose lab-grown and natural diamonds get "Ask about this stone" instead
+  of the chat "Ask" pill: a short question form through the same contact
+  form, so the stone and the shopper's email reach the store's inbox. It
+  makes no promise to keep the stone for the shopper and does not take
+  offers.
   Shopify chat is now an AI agent in a cross-origin iframe the theme
   cannot type into, so offers never depend on it. Hold is intentionally
   not rendered.
@@ -30,7 +31,7 @@
     assign offer_ok = true
   endif
   assign ask_form_ok = false
-  if type_l == 'lab-grown diamond'
+  if type_l == 'lab-grown diamond' or type_l == 'natural diamond'
     assign ask_form_ok = true
   endif
 -%}
