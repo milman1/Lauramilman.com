@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Preview, create five drafts, sync, activate reviewed handles, or review/apply a withdrawal backlog'
+        description: 'Preview, create five drafts, sync, or activate reviewed handles'
         type: choice
         options: [dry-run, sample, sync, activate, review-withdrawals, sync-with-withdrawals]
         default: dry-run
@@ -14,7 +14,11 @@ on:
         type: string
         default: ''
       max_withdrawals:
-        description: 'Most stones this run may move to draft (1-500); review-withdrawals and sync-with-withdrawals only'
+        description: 'Optional ceiling (1-500) for reviewed recovery; normal availability sync has no count cap'
+        type: string
+        default: ''
+      approved_plan_hash:
+        description: 'Exact planHash from a full reviewed dry-run; required for recovery writes'
         type: string
         default: ''
   pull_request:
@@ -39,7 +43,7 @@ jobs:
       - run: node --experimental-strip-types --test lmny-feeds/checks/lgd-color.check.mjs
   sync:
     needs: test
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.LGD_COLOR_SYNC_LIVE != 'false')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'schedule' && vars.LGD_COLOR_SYNC_LIVE != 'false')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:
@@ -60,19 +64,22 @@ jobs:
           SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
           LGD_ACTIVATION_HANDLES: ${{ inputs.handles }}
           MODE: ${{ inputs.mode }}
-          MAX_WITHDRAWALS: ${{ inputs.max_withdrawals }}
           EVENT: ${{ github.event_name }}
+          MAX_WITHDRAWALS: ${{ inputs.max_withdrawals }}
+          APPROVED_PLAN_HASH: ${{ inputs.approved_plan_hash }}
         run: |
-          if [ "$EVENT" = "schedule" ]; then
+          if [ "$EVENT" = "pull_request" ]; then
+            node --experimental-strip-types src/lgd-color/sync.mjs --dry-run
+          elif [ "$EVENT" = "schedule" ]; then
             node --experimental-strip-types src/lgd-color/sync.mjs
           else
             case "$MODE" in
               sample) node --experimental-strip-types src/lgd-color/sync.mjs --limit=5 ;;
               sync) node --experimental-strip-types src/lgd-color/sync.mjs ;;
               activate) node --experimental-strip-types src/lgd-color/sync.mjs --activate ;;
-              review-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run --max-withdrawals="$MAX_WITHDRAWALS" ;;
-              sync-with-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --max-withdrawals="$MAX_WITHDRAWALS" ;;
-              *) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run --limit=5 ;;
+              dry-run|review-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --dry-run ;;
+              sync-with-withdrawals) node --experimental-strip-types src/lgd-color/sync.mjs --max-withdrawals="$MAX_WITHDRAWALS" --approved-plan-hash="$APPROVED_PLAN_HASH" ;;
+              *) exit 1 ;;
             esac
           fi
       - name: Upload sanitized report
@@ -82,4 +89,5 @@ jobs:
           name: colored-stone-report-${{ github.run_id }}
           path: lmny-feeds/out/lgd-color-report.json
           retention-days: 7
+          if-no-files-found: error
 

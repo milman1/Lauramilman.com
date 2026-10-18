@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { SyncError } from './errors.mjs';
 import { LGD_COLOR_DIAMONDS } from '../../config/pricing.ts';
 
 // Separate ownership from the Belgium feed; its removal pass must never own these.
@@ -32,7 +33,8 @@ export function normalizeRow(r) {
   if (!/^[a-z0-9_-]+$/i.test(stock)) return { reason: 'stock' };
   if (text(r.Diamond_Type) !== 'Lab Grown' || text(r.Lab) !== 'IGI' || !shape || !COLORS.has(color)) return { reason: 'scope' };
   if (text(r.Availability) !== 'Available') return { reason: 'unavailable' };
-  if (!INTENSITIES.has(intensity) || !CLARITIES.has(clarity) || !certificate) return { reason: 'grading_or_certificate' };
+  const gradingChecks=[...(!INTENSITIES.has(intensity)?['unrecognized_intensity']:[]),...(!CLARITIES.has(clarity)?['unrecognized_clarity']:[]),...(!certificate?['unrecognized_certificate_link']:[])];
+  if (gradingChecks.length) return { reason: 'grading_or_certificate',checks:gradingChecks };
   if (!Number.isFinite(carat) || carat <= 0 || !Number.isFinite(cost) || cost <= 0 || !Number.isFinite(perCarat) || perCarat <= 0 || Math.abs(cost - carat * perCarat) > Math.max(0.02, cost * 0.001)) return { reason: 'cost_mismatch' };
   const image = safeUrl(r.ImageLink, /\.(jpg|jpeg|png|webp)$/i);
   const video = safeUrl(r.Video_HTML, /\.(mp4|webm)$/i) || safeUrl(r.VideoLink, /\.(mp4|webm)$/i);
@@ -43,21 +45,25 @@ export function normalizeRow(r) {
   return { stone };
 }
 export function normalizeFeed(rows) {
-  const stones = [], holds = {}, stocks = new Set(), certs = new Set();
+  const stones = [], holds = {}, exclusions = [], stocks = new Set(), certs = new Set();
   for (const row of rows) {
     const stock = text(row.Stock_No);
-    if (stocks.has(stock)) throw new Error('Duplicate stock number in source snapshot');
-    stocks.add(stock);
+    if (stocks.has(stock.toLowerCase())) throw new SyncError('duplicate_source_stock');
+    stocks.add(stock.toLowerCase());
     const result = normalizeRow(row);
-    if (!result.stone) { holds[result.reason] = (holds[result.reason] || 0) + 1; continue; }
-    if (certs.has(result.stone.certificate)) throw new Error('Duplicate certificate in source snapshot');
+    if (!result.stone) {
+      holds[result.reason] = (holds[result.reason] || 0) + 1;
+      if (/^[a-z0-9_-]+$/i.test(stock)) exclusions.push({handle:PREFIX+stock.toLowerCase(),reason:result.reason,...(result.checks?{checks:result.checks}:{})});
+      continue;
+    }
+    if (certs.has(result.stone.certificate)) throw new SyncError('duplicate_source_certificate');
     certs.add(result.stone.certificate); stones.push(result.stone);
   }
-  return { stones, holds };
+  return { stones, holds, exclusions };
 }
 const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function payloadFor(s, existing, status = 'DRAFT', locationId) {
-  if (status === 'ACTIVE' && (!existing || existing.status === 'ARCHIVED' || !existing.readyImage)) throw new Error('Activation requires an existing reviewed draft with ready image');
+  if (status === 'ACTIVE' && (!existing || existing.status === 'ARCHIVED' || !existing.readyImage)) throw new SyncError('active_product_requires_ready_owned_media');
   const color = `${s.intensity} ${s.color}`;
   const title = `${s.carat.toFixed(2)}ct ${s.shape} ${color} Lab-Grown Diamond — ${s.clarity} | IGI`;
   const seoTitle = `${s.carat.toFixed(2)}ct ${s.color} ${s.shape} Lab-Grown Diamond | IGI`.slice(0,60);
@@ -79,21 +85,21 @@ export function payloadFor(s, existing, status = 'DRAFT', locationId) {
 }
 export function snapshotHash(value) { return createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
 export async function fetchInventory(key, fetcher = fetch) {
-  if (!key) throw new Error('LGD_API_KEY is not set');
+  if (!key) throw new SyncError('supplier_credentials_missing');
   const rows = []; let totalPages, totalResults;
   for (let page=1; page<=100; page++) {
     const u = new URL('https://api.lgdusallc.com/api/v1/inventory/diamond');
     u.search = new URLSearchParams({type:'certified_color',page:String(page),key}).toString();
     let response;
     try { response = await fetcher(u, {headers:{Accept:'application/json'},signal:AbortSignal.timeout(60000),redirect:'error'}); }
-    catch { throw new Error('LGD feed request failed; no inventory changes are safe'); }
-    if (!response.ok) throw new Error(`LGD feed HTTP ${response.status}`);
-    let data; try { data = await response.json(); } catch { throw new Error('LGD returned invalid JSON'); }
-    if (!Array.isArray(data.data) || Number(data.page_no)!==page || !Number.isInteger(Number(data.total_page)) || Number(data.total_page)<1 || Number(data.total_page)>100 || !Number.isInteger(Number(data.total_results)) || Number(data.total_results)<=0) throw new Error('Invalid or empty feed snapshot');
+    catch (error) { throw new SyncError(error?.name==='TimeoutError' ? 'supplier_timeout' : 'supplier_transport_failed',{page}); }
+    if (!response.ok) throw new SyncError('supplier_http_error',{httpStatus:response.status,page});
+    let data; try { data = await response.json(); } catch { throw new SyncError('supplier_invalid_json',{page}); }
+    if (!data || !Array.isArray(data.data) || Number(data.page_no)!==page || !Number.isInteger(Number(data.total_page)) || Number(data.total_page)<1 || Number(data.total_page)>100 || !Number.isInteger(Number(data.total_results)) || Number(data.total_results)<=0) throw new SyncError('supplier_invalid_snapshot',{page});
     if (page===1) { totalPages=Number(data.total_page); totalResults=Number(data.total_results); }
-    if (Number(data.total_page)!==totalPages || Number(data.total_results)!==totalResults || !data.data.length) throw new Error('Feed snapshot changed during pagination');
+    if (Number(data.total_page)!==totalPages || Number(data.total_results)!==totalResults || !data.data.length) throw new SyncError('supplier_snapshot_changed',{page});
     rows.push(...data.data);
-    if (page===totalPages) { if (rows.length!==totalResults) throw new Error('Incomplete feed snapshot'); return rows; }
+    if (page===totalPages) { if (rows.length!==totalResults) throw new SyncError('supplier_snapshot_incomplete',{fetched:rows.length,expected:totalResults}); return rows; }
   }
   throw new Error('Feed page limit exceeded');
 }

@@ -1,17 +1,24 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
+import { SyncError, safeFailure } from './errors.mjs';
 import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
-// Errors whose message carries only counts or fixed text, safe to print in CI logs.
-export class SafeError extends Error {}
-// Hourly runs may withdraw at most 10% of live stones (min 5). A reviewed manual
-// run may pass --max-withdrawals=N to clear a larger backlog of sold stones.
+
 export function withdrawalLimit(activeOwned, maxWithdrawals=null) {
-  return maxWithdrawals ?? Math.max(5, Math.floor(activeOwned*0.1));
+  if(maxWithdrawals!==null && (!Number.isInteger(maxWithdrawals)||maxWithdrawals<1||maxWithdrawals>500))throw new SyncError('invalid_withdrawal_maximum');
+  // Merchant decision 2026-10-18: colored availability has no automatic count cap.
+  // An explicit reviewed recovery can still choose its own maximum.
+  return maxWithdrawals;
 }
-function checkWithdrawals(count, activeOwned, maxWithdrawals) {
-  const allowed=withdrawalLimit(activeOwned,maxWithdrawals);
-  if(count>allowed)throw new SafeError(`Availability withdrawal of ${count} stones exceeds the limit of ${allowed} (${activeOwned} live); review required`);
+export function automaticWithdrawal(line) {
+  return line.reason==='not_in_supplier_feed' || (line.reason==='supplier_ineligible' && line.exclusionReason==='unavailable');
+}
+export function checkWithdrawals(plan, maxWithdrawals=null) {
+  const allowed=withdrawalLimit(plan.activeOwned,maxWithdrawals);
+  const reviewRequired=plan.holds.filter(line=>!automaticWithdrawal(line)).length;
+  // Malformed grading, costs or media do not prove that inventory is unavailable.
+  if(allowed===null && reviewRequired)throw new SyncError('withdrawal_reason_requires_review',{proposedWithdrawals:plan.holds.length,reviewRequired});
+  if(allowed!==null && plan.holds.length>allowed)throw new SyncError('withdrawal_limit_exceeded',{proposedWithdrawals:plan.holds.length,activeOwned:plan.activeOwned,withdrawalLimit:allowed});
 }
 
 export const OPS = {
@@ -29,7 +36,7 @@ export function view(p) {
     readyImage:p.media.nodes.some(m=>m.mediaContentType==='IMAGE' && m.status==='READY'),
     variantId:v?.id, variantCount:p.variants.nodes.length, sku:v?.sku, price:v?.price};
 }
-export function planFor(stones, catalog, {limit=null, activate=false, locationId, maxWithdrawals=null, checkLimit=true}={}) {
+export function planFor(stones, catalog, {limit=null, activate=false, locationId, checkLimit=true, exclusions=[]}={}) {
   const owned = catalog.filter(p=>p.tags.includes(FEED_TAG) && p.handle.startsWith(PREFIX));
   const byHandle = new Map(catalog.map(p=>[p.handle,p])), byCert = new Map();
   for (const p of catalog) if(p.certificate) { const key=p.certificate.toUpperCase().replace(/^LG/,''); const a=byCert.get(key)||[]; a.push(p); byCert.set(key,a); }
@@ -42,14 +49,18 @@ export function planFor(stones, catalog, {limit=null, activate=false, locationId
     if (activate && (!existing || !existing.readyImage)) { skipped.push({handle:s.handle,reason:'draft_media_not_ready'}); continue; }
     const status = activate || existing?.status==='ACTIVE' ? 'ACTIVE' : 'DRAFT';
     if (existing?.hash === snapshotHash(s) && existing.status===status && existing.readyImage && existing.video===s.video && Number(existing.price)===s.retail) continue;
-    const input=payloadFor(s,existing,status,locationId);
+    let input;
+    try {input=payloadFor(s,existing,status,locationId);}
+    catch(error){if(error instanceof SyncError)error.handle=s.handle;throw error;}
     writes.push({action:existing?'update':'create',handle:s.handle,identifier:existing?{id:existing.id}:null,input,stone:s});
   }
   // Always use the complete snapshot for removals; a five-item preview never removes inventory.
-  const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}}));
+  const excluded=new Map(exclusions.map(e=>[e.handle,e.reason]));
+  const holds = limit || activate ? [] : owned.filter(p=>p.status==='ACTIVE' && !desired.has(p.handle)).map(p=>({action:'hold',handle:p.handle,reason:excluded.has(p.handle)?'supplier_ineligible':'not_in_supplier_feed',...(excluded.has(p.handle)?{exclusionReason:excluded.get(p.handle)}:{}),input:{id:p.id,status:'DRAFT'}}));
   const activeOwned=owned.filter(p=>p.status==='ACTIVE').length;
-  if (checkLimit) checkWithdrawals(holds.length, activeOwned, maxWithdrawals);
-  return {writes:limit?writes.slice(0,limit):writes,holds,skipped};
+  const plan={writes:limit?writes.slice(0,limit):writes,holds,skipped,activeOwned};
+  if(checkLimit)checkWithdrawals(plan);
+  return plan;
 }
 async function tokenFor(domain) {
   if (process.env.SHOPIFY_ADMIN_TOKEN) return process.env.SHOPIFY_ADMIN_TOKEN;
@@ -109,24 +120,38 @@ export async function mediaReady(stone,fetcher=fetch) {
   }
   return true;
 }
-export async function main(argv=process.argv.slice(2)) {
+async function runSync(argv, report, dependencies) {
   const dry=argv.includes('--dry-run'), activate=argv.includes('--activate');
+  const unknown=argv.filter(a=>!['--dry-run','--activate'].includes(a)&&!/^--(limit|max-withdrawals)=[0-9]+$/.test(a)&&!/^--approved-plan-hash=[a-f0-9]{64}$/.test(a));
+  if(unknown.length || new Set(argv.map(a=>a.split('=')[0])).size!==argv.length)throw new SyncError('invalid_arguments');
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
   if(activate && !process.env.LGD_ACTIVATION_HANDLES)throw new Error('Activation requires explicit reviewed LGD_ACTIVATION_HANDLES');
   const maxArg=argv.find(a=>a.startsWith('--max-withdrawals=')),maxWithdrawals=maxArg?Number(maxArg.split('=')[1]):null;
-  if(maxArg && (!Number.isInteger(maxWithdrawals)||maxWithdrawals<1||maxWithdrawals>500))throw new SafeError('--max-withdrawals must be a whole number from 1 to 500');
-  if(maxArg && (limitArg||activate))throw new SafeError('--max-withdrawals applies only to a full sync or full preview');
+  withdrawalLimit(0,maxWithdrawals);
+  const approvedHash=argv.find(a=>a.startsWith('--approved-plan-hash='))?.split('=')[1];
+  if((maxArg||approvedHash)&&(limitArg||activate))throw new SyncError('recovery_requires_full_sync');
+  if(maxArg && !dry && !/^[a-f0-9]{64}$/.test(approvedHash||''))throw new SyncError('recovery_requires_reviewed_plan_hash');
+  if(approvedHash && !maxArg)throw new SyncError('recovery_requires_explicit_maximum');
   stage='supplier_fetch';
-  const rows=await fetchInventory(process.env.LGD_API_KEY);
+  const rows=await (dependencies.fetchInventory??fetchInventory)(process.env.LGD_API_KEY);
+  report.fetched=rows.length;
   stage='normalize';
   const normalized=normalizeFeed(rows);
+  report.eligible=normalized.stones.length;report.holds=normalized.holds;
   console.log(JSON.stringify({stage,fetched:rows.length,eligible:normalized.stones.length,excluded:normalized.holds}));
   if(!normalized.stones.length)throw new Error('No eligible stones; availability writes are unsafe');
   stage='shopify_auth';
-  const gql=await client();
+  const api=await (dependencies.client??client)();
+  // Defence in depth: a preview cannot invoke a Shopify mutation.
+  const gql=(query,variables)=>{
+    if(dry && !query.trimStart().startsWith('query '))throw new SyncError('dry_run_mutation_blocked');
+    return api(query,variables);
+  };
   stage='shopify_catalog';
   const catalog=(await paginate(gql,OPS.catalog,'products',{query:'product_type:"Lab-Grown Diamond" OR tag:'+FEED_TAG})).map(view);
+  const owned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX));
+  report.catalog={complete:true,totalRead:catalog.length,owned:owned.length,activeOwned:owned.filter(p=>p.status==='ACTIVE').length,draftOwned:owned.filter(p=>p.status==='DRAFT').length,archivedOwned:owned.filter(p=>p.status==='ARCHIVED').length};
   stage='shopify_locations';
   const locations=await paginate(gql,OPS.location,'locations');
   const location=process.env.SHOPIFY_LOCATION_ID ? locations.find(l=>l.id===process.env.SHOPIFY_LOCATION_ID&&l.isActive):locations.filter(l=>l.isActive)[0];
@@ -135,30 +160,47 @@ export async function main(argv=process.argv.slice(2)) {
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
   stage='plan';
-  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,maxWithdrawals,checkLimit:!dry});
+  // Persist availability evidence before payload planning can fail on a product.
+  const desiredHandles=new Set(stones.map(s=>s.handle)),excludedByHandle=new Map(normalized.exclusions.map(e=>[e.handle,e.reason]));
+  report.withdrawalLimit=withdrawalLimit(report.catalog.activeOwned);
+  report.withdrawals=limit||activate?[]:owned.filter(p=>p.status==='ACTIVE'&&!desiredHandles.has(p.handle)).map(p=>({handle:p.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:excludedByHandle.has(p.handle)?'supplier_ineligible':'not_in_supplier_feed',...(excludedByHandle.has(p.handle)?{exclusionReason:excludedByHandle.get(p.handle)}:{})}));
+  await dependencies.save(report);
+  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,checkLimit:false,exclusions:normalized.exclusions});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
   const failedMedia=new Set();
   const pendingMedia=stones.map(stone=>({handle:stone.handle,stone})); let mediaCursor=0;
   await Promise.all(Array.from({length:Math.min(4,pendingMedia.length)},async()=>{
-    while(mediaCursor<pendingMedia.length){const line=pendingMedia[mediaCursor++];if(!(await mediaReady(line.stone)))failedMedia.add(line.handle);}
+    while(mediaCursor<pendingMedia.length){const line=pendingMedia[mediaCursor++];if(!(await (dependencies.mediaReady??mediaReady)(line.stone)))failedMedia.add(line.handle);}
   }));
   plan.writes=plan.writes.filter(line=>!failedMedia.has(line.handle));
   plan.skipped.push(...Array.from(failedMedia,handle=>({handle,reason:'media_unavailable'})));
   if(!limit && !activate){
     const existingHolds=new Set(plan.holds.map(line=>line.handle));
-    for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
-    const activeOwned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&p.status==='ACTIVE').length;
-    plan.withdrawalLimit=withdrawalLimit(activeOwned,maxWithdrawals);
-    // A preview reports an over-limit withdrawal instead of stopping, so it can be reviewed.
-    if(!dry)checkWithdrawals(plan.holds.length,activeOwned,maxWithdrawals);
+    for(const p of owned)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,reason:'media_unavailable',input:{id:p.id,status:'DRAFT'}});
   }
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
-  const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawalLimit:plan.withdrawalLimit??null,withdrawals:plan.holds.map(l=>{const p=catalog.find(c=>c.handle===l.handle);return {handle:l.handle,title:p?.title??null,reason:failedMedia.has(l.handle)?'media_unavailable':'not_in_supplier_feed'};}),skipped:plan.skipped};
-  await mkdir('out',{recursive:true});
-  await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
-  if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,withdrawalLimit:plan.withdrawalLimit??null,overLimit:plan.withdrawalLimit!=null&&plan.holds.length>plan.withdrawalLimit,skipped:plan.skipped.length}));return;}
+  const sanitized=report;
+  const reviewSnapshot={plan,prior:owned.map(p=>({id:p.id,handle:p.handle,status:p.status,price:p.price,variantId:p.variantId,variantCount:p.variantCount,tags:p.tags,certificate:p.certificate})).sort((a,b)=>a.handle.localeCompare(b.handle)),
+    withdrawalChecks:plan.holds.map(l=>normalized.exclusions.find(e=>e.handle===l.handle)??{handle:l.handle,reason:l.reason})};
+  Object.assign(report,{scope:limit?'sample':activate?'activation':'full',planHash:snapshotHash(reviewSnapshot),withdrawalLimit:withdrawalLimit(plan.activeOwned,maxWithdrawals),reviewedMaximum:maxWithdrawals,
+    withdrawalPolicy:'colored_availability_without_count_cap',
+    reviewRequired:plan.holds.some(line=>!automaticWithdrawal(line)),
+    overLimit:maxWithdrawals!==null && plan.holds.length>maxWithdrawals,
+    writes:plan.writes.map(l=>({action:l.action,handle:l.handle,previousPrice:catalog.find(p=>p.handle===l.handle)?.price??null,price:l.input.variants[0].price,status:l.input.status})),
+    withdrawals:plan.holds.map(l=>({handle:l.handle,status:'ACTIVE',proposedStatus:'DRAFT',reason:l.reason,automatic:automaticWithdrawal(l),...(l.exclusionReason?{exclusionReason:l.exclusionReason}:{})})),skipped:plan.skipped});
+  const writes=new Map(report.writes.map(w=>[w.handle,w])), withdrawals=new Map(report.withdrawals.map(w=>[w.handle,w])), skips=new Map(plan.skipped.map(s=>[s.handle,s]));
+  report.reconciliation=owned.map(p=>({handle:p.handle,status:p.status,action:withdrawals.has(p.handle)?'withdraw':writes.get(p.handle)?.action??(skips.has(p.handle)?'skip':'unchanged'),reason:withdrawals.get(p.handle)?.reason??skips.get(p.handle)?.reason??null}));
+  report.reconciliation.push(...report.writes.filter(w=>w.action==='create').map(w=>({handle:w.handle,status:null,action:'create',reason:'new_eligible_stone'})));
+  report.supplierReconciliation=stones.map(s=>({handle:s.handle,inCatalog:catalog.some(p=>p.handle===s.handle),action:skips.has(s.handle)?'skip':writes.get(s.handle)?.action??'unchanged',reason:skips.get(s.handle)?.reason??null}));
+  report.excludedRows=normalized.exclusions;
+  report.planningComplete=true;
+  await dependencies.save(report);
+  stage='withdrawal_guard';
+  if(dry){report.status='dry_run_complete';console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,activeOwned:plan.activeOwned,withdrawals:plan.holds.length,withdrawalLimit:report.withdrawalLimit,overLimit:report.overLimit,reviewRequired:report.reviewRequired,planHash:report.planHash}));return;}
+  if(maxArg && approvedHash!==report.planHash)throw new SyncError('reviewed_plan_changed');
+  checkWithdrawals(plan,maxWithdrawals);
   let publications=[];
   if(activate){publications=(await paginate(gql,OPS.publications,'publications')).filter(p=>p.name==='Online Store'||p.name==='Shop');if(!publications.some(p=>p.name==='Online Store'))throw new Error('Online Store publication unavailable');}
   const writtenIds=new Map();
@@ -181,9 +223,22 @@ export async function main(argv=process.argv.slice(2)) {
     const p=verified.find(p=>p.handle===line.handle);
     if(!p || p.status!==line.input.status || Number(p.price)!==Number(line.input.variants[0].price) || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
   }
-  for(const line of plan.holds)if(verified.find(p=>p.handle===line.handle)?.status!=='DRAFT')throw new Error('Withdrawal verification mismatch');
-  sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
+  for(const line of plan.holds){
+    const prior=owned.find(p=>p.id===line.input.id),current=verified.find(p=>p.id===line.input.id);
+    if(!current || current.status!=='DRAFT' || current.handle!==prior.handle || current.price!==prior.price || current.variantId!==prior.variantId || current.sku!==prior.sku || current.certificate!==prior.certificate || current.video!==prior.video)throw new Error('Withdrawal verification mismatch');
+  }
+  sanitized.verified=plan.writes.length;sanitized.status='verified';
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }
-if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError?{reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
+export async function main(argv=process.argv.slice(2),dependencies={}) {
+  stage='startup';
+  const report={schemaVersion:1,generatedAt:new Date().toISOString(),dryRun:argv.includes('--dry-run'),status:'started',planningComplete:false,fetched:null,eligible:null,catalog:null,withdrawalLimit:null,withdrawals:null,writes:null};
+  const outputDir=dependencies.outputDir??'out';
+  const save=async value=>{await mkdir(outputDir,{recursive:true});await writeFile(outputDir+'/lgd-color-report.json',JSON.stringify(value,null,2));};
+  await save(report); // Guarantees an artifact even when supplier fetching fails.
+  try {await runSync(argv,report,{...dependencies,save});return report;}
+  catch(error){report.status='failed';report.failure=safeFailure(error,stage);throw error;}
+  finally {await save(report);}
+}
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(error=>{console.error(JSON.stringify({failedStage:stage,...safeFailure(error,stage),message:'Colored-diamond sync failed; inspect the sanitized report.'}));process.exitCode=1;});
 
