@@ -300,3 +300,28 @@ Ask about this stone on its page and we will reply by email."
 
 - Every scheduled colored sync since Oct 12 stopped at the plan stage: 634 live colored stones, 569 eligible in the supplier feed, so 65+ would move to draft against a limit of 63 (10% of live).
 - Failures now print the counts. A full preview (`review-withdrawals`) lists each stone that would move to draft with its title and reason. `sync-with-withdrawals` takes a reviewed maximum (1-500) for one manual run; hourly runs keep the 10% limit. Withdrawn stones become drafts, not deletions.
+
+## 2026-10-18: loose-stone inquiries — natural stones get the ask form; Google Shopping shortlist
+
+- Why no loose-stone inquiries: the stone pages get almost no real visitors.
+  Google sent 19 sessions to stone pages in 45 days (216 a month to the whole
+  site). URL inspection: a natural stone listed since 2026-07-28 is "unknown
+  to Google", another is "crawled, not indexed", the 2 ct oval landing page is
+  "discovered, not indexed"; only `lab-grown-diamonds` and `natural-diamonds`
+  are indexed. 6,886 of 20,325 active lab stones were created in the last 30
+  days. Loose stones are not on Google & YouTube (channel policy). One
+  loose-stone order since June, so the late-September price change is not
+  what moved inquiries.
+- Natural stones (`product.type` Natural Diamond) lost their only form when
+  Make an offer became watch-only on 2026-10-13 (#271), leaving the AI chat,
+  which cannot receive the stone. They now get the same **Ask about this
+  stone** form as lab stones (`snippets/product-inquiry.liquid`). No offer, no
+  hold.
+- Proposal, not applied: `docs/seo/2026-10-18-google-shopping-lab-shortlist.csv`
+  lists 240 lab stones (the 10 lowest-priced per shape and size: Round, Oval,
+  Emerald, Pear, Cushion, Radiant at 1.5, 2, 2.5 and 3 ct; D–G, VS2 or
+  better, IGI, photo and video, Excellent or Ideal cut for rounds), all
+  ACTIVE with the Shopify price matching the stones table on 2026-10-18.
+  Publishing them to Google & YouTube reverses the channel policy in
+  `lmny-feeds/config/channels.ts` and needs a merchant decision. Stones sell
+  out, so the list must be refreshed from the stones table before use.
