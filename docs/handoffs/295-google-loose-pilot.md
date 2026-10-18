@@ -37,7 +37,7 @@ backfill does not change content hashes or force product/price rewrites.
 
 ## Verification and deployment
 
-- 181 focused tests pass, including 15 new gate/reconciliation tests.
+- 183 focused tests pass, including 17 new gate/reconciliation tests.
 - Three new GraphQL operations validate against Shopify Admin 2026-01.
 - Focused TypeScript compilation encounters existing errors in unchanged
   shopify.ts; no new-module errors remain.

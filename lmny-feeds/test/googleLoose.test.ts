@@ -88,4 +88,18 @@ describe('Google loose reconciliation',()=>{
     try{const {client,mutations}=fakeClient(product(),true);await expect(reconcileGoogleLoose(client,source,[],{supplierHealthy:true,dryRun:false,outDir:dir})).rejects.toThrow('reconciliation failed');expect(mutations).toEqual(['metafieldsSet']);
     }finally{await rm(dir,{recursive:true,force:true});}
   });
+  it('withdraws a former shortlist member even if productSet replaced its marker tag',async()=>{
+    const dir=await mkdtemp(path.join(os.tmpdir(),'google-loose-'));
+    try{const p={...product(),handle:'lg-removed',publishedOnPublication:true};const {client,mutations}=fakeClient(p);
+      const prior={id:p.id,handle:p.handle,status:'ACTIVE',contentHash:'same',tags:[GOOGLE_LOOSE_TAG],mediaCount:1,imageCount:1,videoCount:0};
+      await reconcileGoogleLoose(client,[],[prior],{supplierHealthy:true,dryRun:false,outDir:dir});
+      expect(mutations).toHaveLength(1);expect(mutations[0]).toContain('publishableUnpublish');expect(p.publishedOnPublication).toBe(false);
+    }finally{await rm(dir,{recursive:true,force:true});}
+  });
+  it('rejects a successful publish response when the independent read still shows unpublished',async()=>{
+    const dir=await mkdtemp(path.join(os.tmpdir(),'google-loose-'));
+    try{const {client}=fakeClient(product());vi.mocked(client.publishToChannels).mockImplementation(async()=>[]);
+      await expect(reconcileGoogleLoose(client,source,[],{supplierHealthy:true,dryRun:false,outDir:dir})).rejects.toThrow('1 mismatches');
+    }finally{await rm(dir,{recursive:true,force:true});}
+  });
 });
