@@ -2,7 +2,7 @@
 #
 # Logs into the merchant's Royal Chain trade account with Playwright, reads
 # the cost for every item on a shortlist CSV, and uploads
-# out/supplier-costs.csv (cost and retail = cost x 2, rounded up to $5) as
+# out/supplier-costs.csv (cost and retail = cost x 2, rounded to cents) as
 # an artifact. Never writes to Shopify. Credentials live only in repository
 # secrets and never appear in logs or artifacts (a failed login uploads a
 # screenshot of the login page, which shows no secret).
