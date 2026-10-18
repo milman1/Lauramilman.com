@@ -4,7 +4,7 @@ const domain=process.env.SHOPIFY_STORE_DOMAIN;
 const token=process.env.SHOPIFY_ADMIN_TOKEN;
 const client=process.env.SHOPIFY_CLIENT_ID;
 const secret=process.env.SHOPIFY_CLIENT_SECRET;
-if(!domain || !/^[a-z0-9-]+\\.myshopify\\.com$/i.test(domain)) throw Error('Valid Shopify domain required');
+if(!domain || !/^[a-z0-9-]+\.myshopify\.com$/i.test(domain)) throw Error('Valid Shopify domain required');
 let auth=token;
 if(!auth){
   if(!client||!secret) throw Error('Shopify authentication missing');
@@ -25,7 +25,7 @@ for(const handle of handles){
   const url=p.onlineStoreUrl;
   if(!url){console.log(handle+' missing storefront URL');mismatches++;continue;}
   let html;try{const response=await fetch(url,{headers:{'User-Agent':'LMNYPriceAudit/1.0'},signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('HTTP '+response.status);html=await response.text()}catch(e){console.log(handle+' public page inaccessible: '+e.message);mismatches++;continue;}
-  const blocks=[...html.matchAll(/<script[^>]*type=["']application\\/ld\\+json["'][^>]*>([\\s\\S]*?)<\\/script>/gi)].flatMap(m=>{try{const x=JSON.parse(m[1]);return Array.isArray(x)?x:[x]}catch{return []}});
+  const blocks=[...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(m=>{try{const x=JSON.parse(m[1]);return Array.isArray(x)?x:[x]}catch{return []}});
   const products=blocks.flatMap(x=>x['@graph']||[x]).filter(x=>{const t=x['@type'];return t==='Product'||(Array.isArray(t)&&t.includes('Product'))});
   const offers=products.flatMap(x=>Array.isArray(x.offers)?x.offers:[x.offers]).filter(Boolean);
   const prices=offers.map(x=>Number(x.price||x.lowPrice)).filter(Number.isFinite);
