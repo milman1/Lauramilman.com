@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
+  SUPPLIER_INTAKE,
+  supplierRetailFromCost,
   LOOSE_LAB_GROWN,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
@@ -44,6 +46,15 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
     expect(labGrownJewelryRetailFromCost(250)).toBe(500);
     expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
+  });
+
+  it('prices all Royal Chain sourced jewelry at 2x wholesale rounded up to $5', () => {
+    expect(SUPPLIER_INTAKE.supplier).toBe('Royal Chain');
+    expect(SUPPLIER_INTAKE.costMultiple).toBe(2);
+    expect(SUPPLIER_INTAKE.roundUpToUsd).toBe(5);
+    expect(supplierRetailFromCost(100)).toBe(200);
+    expect(supplierRetailFromCost(123.45)).toBe(250);
+    expect(() => supplierRetailFromCost(0)).toThrow(/invalid cost/);
   });
 
   it('rejects non-positive lab jewelry cost', () => {
