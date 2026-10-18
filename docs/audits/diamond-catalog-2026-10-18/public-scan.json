@@ -1,0 +1,13 @@
+{
+  "checked_at": "2026-10-18T16:10:15.359025+00:00",
+  "public_products": 25000,
+  "unique_products": 25000,
+  "loose_diamonds": 23890,
+  "types": {
+    "Natural Diamond": 3565,
+    "Lab-Grown Diamond": 20325
+  },
+  "issues": {},
+  "duplicate_skus": {},
+  "scope": "First 25,000 public products (Shopify page cap); diamond count reconciled against exact Admin active count 23,890. Not an audit of all non-diamond products or private Catalog eligibility."
+}
