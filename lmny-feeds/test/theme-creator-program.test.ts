@@ -17,13 +17,15 @@ describe('influencer program', () => {
     const section = themeFile('sections/creator-program.liquid');
     const setup = themeFile('SHOPIFY_SETUP.md');
 
-    expect(page).toContain('10% off lab-grown jewelry, gold chains, and loose lab-grown diamonds');
-    expect(page).toContain('does not apply to watches, estate jewelry, or natural diamonds');
+    expect(page).toContain('10% off loose lab-grown diamonds and gold jewelry');
+    expect(page).toContain('lab-grown diamonds and gold jewelry');
+    expect(page).not.toContain('watches, style, or New York');
     expect(page).toContain('does not combine with LMNYWELCOME');
     expect(page).toContain('You earn 10% of what your audience pays');
     expect(page).toContain('after the 7-day return window closes');
     expect(page).toContain('until it reaches $50');
-    expect(page).toContain('Watches, estate jewelry, and loose stones are not gifted');
+    expect(page).toContain('Loose lab-grown diamonds stay in the store');
+    expect(page).toContain('gold chains');
     expect(page).toContain('@laurasgemsnyc');
     expect(page).toContain('There is no follower minimum');
 

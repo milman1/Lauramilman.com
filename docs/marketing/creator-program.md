@@ -10,14 +10,14 @@ The page states the offer. This file is how to run it. Do not put a supplier nam
 
 | | |
 |---|---|
+| Scope | Loose lab-grown diamonds and gold jewelry only |
 | Customer discount | 10% off, one use per customer, does not combine with any other discount |
-| Collections | Lab-Grown Diamond Jewelry, Chains, Lab-Grown Diamonds |
-| Left off the code | Watches, estate jewelry, natural diamonds |
+| Collections | Lab-Grown Diamonds, Lab-Grown Diamond Jewelry, Chains |
 | Creator commission | 10% of what the customer paid for eligible pieces, after the code, before tax and shipping |
 | Payment | Once a month, after the 7-day return window. Balance carries until it reaches $50. A return is deducted. |
-| Gift | One piece from lab-grown jewelry or chains, chosen with the creator, kept by them |
-| Not gifted | Watches, estate pieces, loose stones, one-of-one pieces |
-| Post | One feed post or Reel and two Stories in the 14 days after the piece arrives. Tag @laurasgemsnyc. Disclose the gift and the code. |
+| Gift | One gold piece the creator chooses, from lab-grown jewelry or chains, kept by them |
+| Not gifted | Loose stones, and the sterling silver lab-grown hoops SKU `ERSLHPRD200P` |
+| Post | If they take a piece: one feed post or Reel and two Stories in the 14 days after it arrives. Tag @laurasgemsnyc. Disclose the gift and the code. A code alone does not require a post. |
 
 `LMNYWELCOME` is 10% off 28 collections and does not combine with other discounts. A creator code uses the same rule, so a customer can use one code, not both.
 
@@ -33,7 +33,7 @@ There is no commission cap. A large loose lab-grown diamond pays 10% of the disc
    - Combinations: off for product, order, and shipping discounts.
    - Limit to one use per customer. No minimum purchase. No end date.
 3. Tag the customer `creator-active`. Write the code and the payout method in the customer note.
-4. Gift one lab-grown jewelry piece or one chain. Create a draft order, discount that line to zero, and write `creator gift` in the order note. Do not write what the house paid in the note or on the page. Do not gift a watch, an estate piece, or a loose stone.
+4. If they want a piece, let them choose one gold piece from lab-grown jewelry or chains. Create a draft order, discount that line to zero, and write `creator gift` in the order note. Do not write what the house paid in the note or on the page. Do not gift a loose stone, or the sterling silver hoops SKU `ERSLHPRD200P`. A code with no gift is allowed.
 5. If the creator's own email uses the code, do not pay commission on that order.
 
 ## When you pay
@@ -45,6 +45,10 @@ Once a month, filter orders by that discount code.
 - Commission is 10% of the discounted merchandise total on eligible lines only.
 - Pay when the unpaid balance is at least $50.
 - Write the payout date and amount in the customer note.
+
+## Who to look for
+
+Instagram and TikTok only. Search `lab grown diamond`, `gold chain`, and `gold jewelry`, and open the videos. Save accounts whose recent posts show lab-grown diamonds or gold on a person, with comments asking where to buy. Skip watch and estate accounts.
 
 ## What the page already does
 
