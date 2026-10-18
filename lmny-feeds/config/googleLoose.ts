@@ -3,6 +3,11 @@
  * image, live price, availability and destination approval. No automatic ramp.
  * This list grants Google eligibility only; inventory and Uploadify stay separate.
  */
+/** Paused after automatic approval review rejected the live publication.
+ * Enable only after explicit approval to change Google channel publication.
+ */
+export const GOOGLE_LOOSE_PUBLICATION_ENABLED = false;
+
 export const GOOGLE_LOOSE_PILOT_HANDLES: readonly string[] = [
   'lg-100742831311',
   'lg-100752861398',

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { CatalogEntry, Publishable, StoneItem } from './types.js';
 import type { ShopifyClient } from './shopify.js';
 import { handleFor } from './product.js';
-import { GOOGLE_LOOSE_PILOT_HANDLES } from '../config/googleLoose.js';
+import { GOOGLE_LOOSE_PILOT_HANDLES, GOOGLE_LOOSE_PUBLICATION_ENABLED } from '../config/googleLoose.js';
 import { GOOGLE_LOOSE_FIELDS } from './googleShopping.js';
 export { GOOGLE_LOOSE_FIELDS } from './googleShopping.js';
 
@@ -102,6 +102,7 @@ async function readProducts(shopify: ShopifyClient, handles: Set<string>, public
 export async function reconcileGoogleLoose(shopify: ShopifyClient, publishable: Publishable[], catalog: CatalogEntry[],
   options: { dryRun: boolean; supplierHealthy: boolean; outDir: string }): Promise<string> {
   if (!options.supplierHealthy) return 'Google loose stones deferred: lab supplier fetch unavailable or disabled; no publication changes';
+  if (!options.dryRun && !GOOGLE_LOOSE_PUBLICATION_ENABLED) return 'Google loose publication paused pending explicit channel-change approval; no writes';
   const shortlist = shortlistHandles(await readFile(new URL('../../docs/seo/2026-10-18-google-shopping-lab-shortlist.csv', import.meta.url), 'utf8'));
   if (GOOGLE_LOOSE_PILOT_HANDLES.some(handle => !shortlist.has(handle))) throw new Error('Google pilot handle absent from reviewed shortlist');
   const selected = new Set(GOOGLE_LOOSE_PILOT_HANDLES);

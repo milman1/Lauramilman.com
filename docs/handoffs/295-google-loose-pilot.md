@@ -2,6 +2,8 @@
 
 - Issue: https://github.com/milman1/Lauramilman.com/issues/295
 - Owner: Codex, 2026-10-18
+- Status: implementation merged in PR #296; live publication paused by the
+  production flag after automatic approval review rejected channel changes.
 - Merchant authorized the controlled Google feed fix in the current session.
 - Scope: five 2.00–2.03 ct oval lab-grown diamonds selected from the committed
   241-stone shortlist. `lmny-feeds/config/googleLoose.ts` is the rollout list.
@@ -48,6 +50,20 @@ backfill does not change content hashes or force product/price rewrites.
 - Plan and verification JSON are included in the existing Actions artifact.
 
 ## Exact next action after merge
+
+On 2026-10-18, all 873 CI tests and the supplier-backed dry run passed:
+exactly five publish actions, zero missing/refresh/unpublish/skip records.
+PR #296 merged as 95d6206606b2cce718f141c5fc9b96a95c4acb5f.
+Google custom-product/new-condition attributes and the managed marker were
+written successfully to the five pilot products. The publication mutation was
+rejected twice by automatic approval review, citing the user's original audit
+restriction against channel changes despite the later instruction to implement
+the feed fix. Do not bypass that rejection through the hourly sync. Production
+publication is disabled by GOOGLE_LOOSE_PUBLICATION_ENABLED=false.
+
+Ask for explicit approval to publish these five products to Google & YouTube.
+Then enable the flag through a PR, apply the already prepared pilot, and verify
+with a fresh read before checking Merchant Center. No prices were written.
 
 Inspect the next existing LMNY feed sync run and its google-loose artifacts.
 Then verify one pilot listing in Merchant Center account 117613711: source
