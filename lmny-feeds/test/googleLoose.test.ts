@@ -6,6 +6,12 @@ import { GOOGLE_LOOSE_FIELDS, GOOGLE_LOOSE_TAG, planGoogleLoose, reconcileGoogle
 import type { Publishable, StoneItem } from '../src/types.js';
 import type { ShopifyClient } from '../src/shopify.js';
 
+// Exercise the implementation without enabling production publication.
+vi.mock('../config/googleLoose.js', async importOriginal => ({
+  ...await importOriginal<typeof import('../config/googleLoose.js')>(),
+  GOOGLE_LOOSE_PUBLICATION_ENABLED: true,
+}));
+
 const item: StoneItem = { kind:'lab', stockRef:'100742831311', shape:'Oval', carat:2.02, color:'F', clarity:'VS1', lab:'IGI', certNumber:'LG764638091', costUsd:100, imageUrls:['https://example.com/stone.jpg'], videoUrls:[] };
 const source: Publishable[] = [{item, priced:{retailUsd:475,marginPct:0.7}}];
 const handle = 'lg-100742831311';
