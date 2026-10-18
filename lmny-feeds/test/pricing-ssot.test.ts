@@ -48,12 +48,12 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
   });
 
-  it('prices all Royal Chain sourced jewelry at 2x wholesale rounded up to $5', () => {
+  it('prices all Royal Chain sourced jewelry at 2x wholesale rounded to cents', () => {
     expect(SUPPLIER_INTAKE.supplier).toBe('Royal Chain');
     expect(SUPPLIER_INTAKE.costMultiple).toBe(2);
-    expect(SUPPLIER_INTAKE.roundUpToUsd).toBe(5);
     expect(supplierRetailFromCost(100)).toBe(200);
-    expect(supplierRetailFromCost(123.45)).toBe(250);
+    expect(supplierRetailFromCost(419.93)).toBe(839.86);
+    expect(supplierRetailFromCost(123.45)).toBe(246.9);
     expect(() => supplierRetailFromCost(0)).toThrow(/invalid cost/);
   });
 
