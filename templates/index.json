@@ -70,6 +70,20 @@
         "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
       }
     },
+    "ring-builder": {
+      "type": "ring-builder-start",
+      "settings": {
+        "eyebrow": "Ring Builder",
+        "title": "Build your ring",
+        "heading_level": "h2",
+        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
+        "card_limit": 4,
+        "more_url": "/pages/ring-builder",
+        "settings_collection": "ring-settings",
+        "builder_view": "ring-builder",
+        "contact_url": "/pages/contact"
+      }
+    },
     "meet-laura": {
       "type": "lmh-meet",
       "settings": {
@@ -803,6 +817,7 @@
   },
   "order": [
     "hero",
+    "ring-builder",
     "meet-laura",
     "trust-strip",
     "loose-stones",
