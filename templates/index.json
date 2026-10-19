@@ -817,9 +817,9 @@
   },
   "order": [
     "hero",
+    "trust-strip",
     "ring-builder",
     "meet-laura",
-    "trust-strip",
     "loose-stones",
     "rings-your-way",
     "shelf",
