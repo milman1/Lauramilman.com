@@ -81,7 +81,8 @@
         "more_url": "/pages/ring-builder",
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
-        "contact_url": "/pages/contact"
+        "contact_url": "/pages/contact",
+        "show_diamond_path": false
       }
     },
     "meet-laura": {

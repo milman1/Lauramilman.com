@@ -5,8 +5,9 @@
   never the title) show below, each opening the ring-builder setting page.
   The diamond path links to the stone searches for that shape.
   ?shape=Oval preselects a shape; otherwise the shape with the most settings.
-  On the homepage: heading level h2 (the banner holds the page's h1) and a
-  card limit, with "See all" opening the full start page on the same shape.
+  On the homepage: heading level h2 (the banner holds the page's h1), a
+  card limit with "See all" opening the full start page on the same shape,
+  and no "Start with a diamond" panel when the loose-diamond section follows.
 {%- endcomment -%}
 
 {%- liquid
@@ -85,6 +86,7 @@
         <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
       </article>
 
+      {%- if section.settings.show_diamond_path -%}
       <article class="rbs__path">
         <div class="rbs__path-head">
           <h2 class="rbs__path-title">Start with a diamond</h2>
@@ -102,6 +104,7 @@
         </div>
         <p class="rbs__note">Pick a stone, then choose a setting on its page. Every stone has its own certificate.</p>
       </article>
+      {%- endif -%}
     </div>
   </div>
 </section>
@@ -253,6 +256,13 @@
       "label": "Setting page template name",
       "info": "Setting cards open this product template, such as ring-builder.",
       "default": "ring-builder"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_diamond_path",
+      "label": "Show \"Start with a diamond\"",
+      "info": "Turn off where the loose-diamond section already follows, as on the homepage.",
+      "default": true
     },
     { "type": "text", "id": "contact_url", "label": "Custom setting link", "default": "/pages/contact" }
   ],
