@@ -40,11 +40,7 @@
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
         "contact_url": "/pages/contact",
-        "featured_settings": [
-          "hidden-halo-ring-setting-in-18k-yellow-gold-and-platinum-0-09-ct",
-          "oval-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-11-ct",
-          "north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold"
-        ]
+        "featured_handles": "hidden-halo-ring-setting-in-18k-yellow-gold-and-platinum-0-09-ct,oval-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-11-ct,north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold"
       }
     },
     "meet-laura": {
