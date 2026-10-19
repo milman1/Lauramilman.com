@@ -15,9 +15,6 @@
   assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
   assign setting_collection = collections[section.settings.settings_collection]
   assign setting_products = setting_collection.products
-  if section.settings.featured_settings != blank
-    assign setting_products = section.settings.featured_settings | concat: setting_products | uniq
-  endif
   assign builder_view = section.settings.builder_view | default: 'ring-builder' | handleize
   assign heading_tag = 'h1'
   if section.settings.heading_level == 'h2'
@@ -26,7 +23,7 @@
   assign card_limit = section.settings.card_limit | default: 12
 -%}
 
-<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}">
+<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}" data-featured-handles="{{ section.settings.featured_handles | escape }}">
   <div class="rbs__container">
     <header class="rbs__header">
       {%- if section.settings.eyebrow != blank -%}<p class="rbs__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
@@ -71,7 +68,7 @@
               {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
               {%- assign ring_shape = ring_shape | strip -%}
               {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
-              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" hidden>
+              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" data-handle="{{ ring.handle }}" hidden>
                 <a class="rbs__card-link" href="{{ ring.url }}?view={{ builder_view }}">
                   <span class="rbs__media">
                     {%- if ring.featured_image -%}
@@ -184,6 +181,12 @@
     if (!root) return;
     var radios = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-shape]'));
     var cards = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-card]'));
+    var featured = (root.getAttribute('data-featured-handles') || '').split(',').map(function (h) { return h.trim(); });
+    cards.sort(function (a, b) {
+      var ai = featured.indexOf(a.getAttribute('data-handle'));
+      var bi = featured.indexOf(b.getAttribute('data-handle'));
+      return (ai < 0 ? featured.length : ai) - (bi < 0 ? featured.length : bi);
+    });
     var counts = {};
     cards.forEach(function (c) { var s = c.getAttribute('data-shape'); counts[s] = (counts[s] || 0) + 1; });
 
@@ -282,11 +285,10 @@
       "default": "ring-settings"
     },
     {
-      "type": "product_list",
-      "id": "featured_settings",
+      "type": "textarea",
+      "id": "featured_handles",
       "label": "Settings to show first",
-      "limit": 8,
-      "info": "Optional. Other available settings from the collection follow these picks."
+      "info": "Optional comma-separated product handles. Other available settings from the collection follow these picks."
     },
     {
       "type": "text",
