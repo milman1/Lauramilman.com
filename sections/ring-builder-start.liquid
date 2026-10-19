@@ -9,12 +9,9 @@
   card limit, with "See all" opening the full start page on the same shape.
 {%- endcomment -%}
 
-{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
-
 {%- liquid
   assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
   assign setting_collection = collections[section.settings.settings_collection]
-  assign setting_products = setting_collection.products
   assign builder_view = section.settings.builder_view | default: 'ring-builder' | handleize
   assign heading_tag = 'h1'
   if section.settings.heading_level == 'h2'
@@ -23,7 +20,7 @@
   assign card_limit = section.settings.card_limit | default: 12
 -%}
 
-<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}" data-featured-handles="{{ section.settings.featured_handles | escape }}">
+<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}">
   <div class="rbs__container">
     <header class="rbs__header">
       {%- if section.settings.eyebrow != blank -%}<p class="rbs__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
@@ -31,26 +28,17 @@
       {%- if section.settings.description != blank -%}<p class="rbs__desc">{{ section.settings.description }}</p>{%- endif -%}
     </header>
 
-    <ol class="rbs__steps" aria-label="{{ 'ring_builder.steps_label' | t }}">
-      <li aria-current="step">{{ 'ring_builder.step_setting' | t }}</li>
-      <li>{{ 'ring_builder.step_diamond' | t }}</li>
-      <li>{{ 'ring_builder.step_review' | t }}</li>
-    </ol>
-
     <fieldset class="rbs__shapes">
       <legend class="rbs__legend">Which shape?</legend>
       <div class="rbs__shape-row">
         {%- for name in shape_order -%}
           {%- assign key = name | downcase -%}
-          <label class="rbs__shape"{% if heading_tag == 'h2' and forloop.index > 5 %} data-rbs-extra hidden{% endif %}>
+          <label class="rbs__shape">
             <input type="radio" name="rbs-shape-{{ section.id }}" value="{{ name }}" data-rbs-shape>
             {%- render 'diamond-shape-icon', shape: key -%}
             <span>{{ name }}</span>
           </label>
         {%- endfor -%}
-        {%- if heading_tag == 'h2' -%}
-          <button class="rbs__shape rbs__shape-toggle" type="button" data-rbs-toggle aria-expanded="false">{{ 'ring_builder.more_shapes' | t }}</button>
-        {%- endif -%}
       </div>
       <p class="rbs__hint" data-rbs-hint role="status"></p>
     </fieldset>
@@ -63,19 +51,19 @@
         </div>
         <ul class="rbs__grid" role="list">
           {%- if setting_collection != blank -%}
-            {%- for ring in setting_products limit: 50 -%}
+            {%- for ring in setting_collection.products limit: 50 -%}
               {%- unless ring.available and ring.tags contains 'ring-setting' -%}{%- continue -%}{%- endunless -%}
               {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
               {%- assign ring_shape = ring_shape | strip -%}
               {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
-              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" data-handle="{{ ring.handle }}" hidden>
+              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" hidden>
                 <a class="rbs__card-link" href="{{ ring.url }}?view={{ builder_view }}">
                   <span class="rbs__media">
                     {%- if ring.featured_image -%}
                       <img
                         src="{{ ring.featured_image | image_url: width: 400 }}"
                         srcset="{{ ring.featured_image | image_url: width: 240 }} 240w, {{ ring.featured_image | image_url: width: 400 }} 400w"
-                        sizes="(min-width: 750px) 250px, 45vw"
+                        sizes="(min-width: 750px) 180px, 45vw"
                         alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
                         width="400"
                         height="400"
@@ -84,28 +72,17 @@
                     {%- endif -%}
                   </span>
                   <span class="rbs__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' }}</span>
-                  <span class="rbs__price">{% if ring.price_varies %}From {% endif %}{{ ring.price_min | money_without_trailing_zeros }} · {{ 'ring_builder.setting_only' | t }}</span>
-                  <span class="rbs__choose">{{ 'ring_builder.choose_setting' | t }} <span aria-hidden="true">→</span></span>
+                  <span class="rbs__price">{% if ring.price_varies %}From {% endif %}{{ ring.price_min | money_without_trailing_zeros }} setting</span>
                 </a>
               </li>
             {%- endfor -%}
-          {%- endif -%}
-          {%- if heading_tag == 'h2' -%}
-            <li class="rbs__card rbs__custom">
-              <a class="rbs__card-link" href="{{ section.settings.contact_url | default: '/pages/contact' }}">
-                <span class="rbs__media"><img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="{{ 'ring_builder.custom_image_alt' | t }}" width="400" height="400" loading="lazy"></span>
-                <span class="rbs__name">{{ 'ring_builder.custom_title' | t }}</span>
-                <span class="rbs__price">{{ 'ring_builder.custom_note' | t }}</span>
-                <span class="rbs__choose">{{ 'ring_builder.custom_cta' | t }} <span aria-hidden="true">→</span></span>
-              </a>
-            </li>
           {%- endif -%}
         </ul>
         {%- if section.settings.more_url != blank -%}
           <a class="rbs__more" href="{{ section.settings.more_url }}" data-rbs-more data-base="{{ section.settings.more_url }}" hidden></a>
         {%- endif -%}
         <p class="rbs__empty" data-rbs-empty hidden>No ready-made setting takes this shape yet. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
-        <p class="rbs__note">{{ 'ring_builder.pricing_note' | t }}</p>
+        <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
       </article>
 
       <article class="rbs__path">
@@ -169,7 +146,7 @@
   .rbs__stone:hover { border-color: var(--gold, #C9A050); }
   .rbs__stone-kind { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted-dark, #6B6152); }
   .rbs__stone-name { font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.35rem; }
-  .rbs--embedded { padding-top: 44px; padding-bottom: 44px; }
+  .rbs--embedded { padding-top: clamp(40px, 5vw, 72px); padding-bottom: clamp(40px, 5vw, 72px); }
   .rbs__more { align-self: flex-start; font-size: 0.8rem; font-weight: 600; color: var(--text-dark, #2C1810); text-underline-offset: 3px; }
   .rbs__note, .rbs__empty { margin: 0; font-size: 0.8rem; line-height: 1.7; color: var(--text-muted-dark, #6B6152); }
   .rbs__empty a { color: var(--text-dark, #2C1810); }
@@ -181,12 +158,6 @@
     if (!root) return;
     var radios = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-shape]'));
     var cards = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-card]'));
-    var featured = (root.getAttribute('data-featured-handles') || '').split(',').map(function (h) { return h.trim(); });
-    cards.sort(function (a, b) {
-      var ai = featured.indexOf(a.getAttribute('data-handle'));
-      var bi = featured.indexOf(b.getAttribute('data-handle'));
-      return (ai < 0 ? featured.length : ai) - (bi < 0 ? featured.length : bi);
-    });
     var counts = {};
     cards.forEach(function (c) { var s = c.getAttribute('data-shape'); counts[s] = (counts[s] || 0) + 1; });
 
@@ -212,17 +183,9 @@
         : 'No ready-made ' + shape.toLowerCase() + ' setting yet. You can still choose a ' + shape.toLowerCase() + ' diamond.';
       root.querySelectorAll('[data-rbs-shape-name]').forEach(function (el) { el.textContent = shape; });
       root.querySelectorAll('[data-rbs-diamond]').forEach(function (a) {
-        a.href = a.getAttribute('data-rbs-diamond') + '?view={{ builder_view }}&shape=' + encodeURIComponent(shape);
+        a.href = a.getAttribute('data-rbs-diamond') + '?shape=' + encodeURIComponent(shape);
       });
-      if (radios.some(function (r) { return r.checked && r.closest('[data-rbs-extra]'); })) showExtra(true);
     }
-
-    var toggle = root.querySelector('[data-rbs-toggle]');
-    function showExtra(expanded) {
-      root.querySelectorAll('[data-rbs-extra]').forEach(function (el) { el.hidden = !expanded; });
-      if (toggle) toggle.setAttribute('aria-expanded', String(expanded));
-    }
-    if (toggle) toggle.addEventListener('click', function () { showExtra(toggle.getAttribute('aria-expanded') !== 'true'); });
 
     radios.forEach(function (r) {
       r.addEventListener('change', function () { if (r.checked) pick(r.value); });
@@ -276,19 +239,13 @@
       "type": "textarea",
       "id": "description",
       "label": "Description",
-      "default": "Start with a shape, then choose your setting or diamond. We confirm the final fit before your ring is made."
+      "default": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made."
     },
     {
       "type": "text",
       "id": "settings_collection",
       "label": "Settings collection handle",
       "default": "ring-settings"
-    },
-    {
-      "type": "textarea",
-      "id": "featured_handles",
-      "label": "Settings to show first",
-      "info": "Optional comma-separated product handles. Other available settings from the collection follow these picks."
     },
     {
       "type": "text",
