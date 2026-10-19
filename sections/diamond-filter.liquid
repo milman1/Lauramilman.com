@@ -46,6 +46,9 @@
   if stone_kind == 'lab'
     assign origin_is_lab = true
   endif
+  if section.settings.ring_builder_mode
+    assign navy_mode = origin_is_lab
+  endif
   assign origin_tab = 'natural'
   if origin_is_lab
     assign origin_tab = 'lab'
@@ -80,6 +83,7 @@
   data-per-page="{{ section.settings.products_per_page }}"
   data-currency="USD"
   {% if search_only %}data-search-only="true" data-search-url="{{ form_url | escape }}"{% endif %}
+  {%- if section.settings.ring_builder_mode and search_only == false %} data-ring-builder="true" data-builder-view="{{ template.suffix | default: 'ring-builder' | escape }}"{% endif -%}
   {%- if preset_shape != blank %} data-preset-shape="{{ preset_shape | escape }}"{% endif -%}
   {%- if collection.metafields.custom.preset_min_carat.value != blank %} data-preset-min-carat="{{ collection.metafields.custom.preset_min_carat.value }}"{% endif -%}
   {%- if collection.metafields.custom.preset_max_carat.value != blank %} data-preset-max-carat="{{ collection.metafields.custom.preset_max_carat.value }}"{% endif %}
@@ -1367,6 +1371,50 @@
     border-color: var(--gold, #C9A050);
     color: var(--espresso, #1E1109);
   }
+
+  /* Ring builder mode (template collection.ring-builder) */
+  .lm-builder-note {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--gold, #C9A050);
+    border-radius: var(--radius-md, 8px);
+    background: var(--warm-white, #FDFAF6);
+    color: var(--text-dark, #2C1810);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .lm-builder-note a { color: var(--text-dark, #2C1810); font-weight: 600; margin-left: 0.35rem; }
+  .lm-shape-lock {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+  }
+  .lm-dfilter[data-ring-builder] .lm-shape:has(input:disabled:not(:checked)) { opacity: 0.35; }
+  .lm-dfilter__results-host .lm-stone-card__ring {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .lm-dfilter__results-host .lm-stone-card__choose {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-sm, 4px);
+    background: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+    border: 1px solid var(--gold, #C9A050);
+  }
+  .lm-dfilter__results-host .lm-stone-card__choose:hover { background: #b88f42; }
 </style>
 
 <script>
@@ -1518,6 +1566,13 @@
       "id": "search_only",
       "label": "Search only (for the homepage)",
       "info": "Shows just the filter. View Diamonds opens the stone search below with the choices applied. Needs the API data source.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_builder_mode",
+      "label": "Ring builder mode",
+      "info": "With a setting chosen (link from a ring-builder setting page), the shape is fixed to the setting's, each stone shows the ring total, and Choose returns to the setting. Use only on the ring-builder template. Needs the API data source.",
       "default": false
     },
     {

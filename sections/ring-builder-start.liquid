@@ -1,0 +1,214 @@
+{%- comment -%}
+  Ring builder — shape-first start (template page.ring-builder-start).
+  The shopper picks a center-stone shape; the settings that take it (from the
+  ring-settings collection, matched by snippets/center-stone-shape.liquid,
+  never the title) show below, each opening the ring-builder setting page.
+  The diamond path links to the stone searches for that shape.
+  ?shape=Oval preselects a shape; otherwise the shape with the most settings.
+{%- endcomment -%}
+
+{%- liquid
+  assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
+  assign setting_collection = collections[section.settings.settings_collection]
+  assign builder_view = section.settings.builder_view | default: 'ring-builder' | handleize
+-%}
+
+<section class="rbs" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs>
+  <div class="rbs__container">
+    <header class="rbs__header">
+      {%- if section.settings.eyebrow != blank -%}<p class="rbs__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+      <h1 class="rbs__title" id="RbsTitle-{{ section.id }}">{{ section.settings.title }}</h1>
+      {%- if section.settings.description != blank -%}<p class="rbs__desc">{{ section.settings.description }}</p>{%- endif -%}
+    </header>
+
+    <fieldset class="rbs__shapes">
+      <legend class="rbs__legend">Which shape?</legend>
+      <div class="rbs__shape-row">
+        {%- for name in shape_order -%}
+          {%- assign key = name | downcase -%}
+          <label class="rbs__shape">
+            <input type="radio" name="rbs-shape-{{ section.id }}" value="{{ name }}" data-rbs-shape>
+            {%- render 'diamond-shape-icon', shape: key -%}
+            <span>{{ name }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+      <p class="rbs__hint" data-rbs-hint role="status"></p>
+    </fieldset>
+
+    <div class="rbs__paths">
+      <article class="rbs__path">
+        <div class="rbs__path-head">
+          <h2 class="rbs__path-title">Start with a setting</h2>
+          <span class="rbs__count" data-rbs-count></span>
+        </div>
+        <ul class="rbs__grid" role="list">
+          {%- if setting_collection != blank -%}
+            {%- for ring in setting_collection.products limit: 50 -%}
+              {%- unless ring.available and ring.tags contains 'ring-setting' -%}{%- continue -%}{%- endunless -%}
+              {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
+              {%- assign ring_shape = ring_shape | strip -%}
+              {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
+              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" hidden>
+                <a class="rbs__card-link" href="{{ ring.url }}?view={{ builder_view }}">
+                  <span class="rbs__media">
+                    {%- if ring.featured_image -%}
+                      <img
+                        src="{{ ring.featured_image | image_url: width: 400 }}"
+                        srcset="{{ ring.featured_image | image_url: width: 240 }} 240w, {{ ring.featured_image | image_url: width: 400 }} 400w"
+                        sizes="(min-width: 750px) 180px, 45vw"
+                        alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
+                        width="400"
+                        height="400"
+                        loading="lazy"
+                      >
+                    {%- endif -%}
+                  </span>
+                  <span class="rbs__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' }}</span>
+                  <span class="rbs__price">{% if ring.price_varies %}From {% endif %}{{ ring.price_min | money_without_trailing_zeros }} setting</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          {%- endif -%}
+        </ul>
+        <p class="rbs__empty" data-rbs-empty hidden>No ready-made setting takes this shape yet. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
+        <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
+      </article>
+
+      <article class="rbs__path">
+        <div class="rbs__path-head">
+          <h2 class="rbs__path-title">Start with a diamond</h2>
+          <span class="rbs__count">Lab-grown or natural</span>
+        </div>
+        <div class="rbs__stones">
+          <a class="rbs__stone" href="{{ routes.collections_url }}/lab-grown-diamonds" data-rbs-diamond="{{ routes.collections_url }}/lab-grown-diamonds">
+            <span class="rbs__stone-kind">Lab-grown</span>
+            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          </a>
+          <a class="rbs__stone" href="{{ routes.collections_url }}/natural-diamonds" data-rbs-diamond="{{ routes.collections_url }}/natural-diamonds">
+            <span class="rbs__stone-kind">Natural</span>
+            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          </a>
+        </div>
+        <p class="rbs__note">Pick a stone, then choose a setting on its page. Every stone has its own certificate.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rbs { background: var(--warm-white, #FDFAF6); padding: 2.5rem 1.25rem 4rem; color: var(--text-dark, #2C1810); font-family: var(--font-body, 'Montserrat', sans-serif); }
+  .rbs [hidden] { display: none !important; }
+  .rbs__container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.25rem; }
+  .rbs__header { text-align: center; max-width: 640px; margin: 0 auto; }
+  .rbs__eyebrow { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-dark, #A88340); }
+  .rbs__title { margin: 0.4rem 0 0.8rem; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: clamp(2.2rem, 4.5vw, 3.2rem); font-weight: 400; }
+  .rbs__desc { margin: 0; font-size: 0.95rem; font-weight: 300; line-height: 1.75; color: var(--text-muted-dark, #6B6152); }
+  .rbs__shapes { border: 0; margin: 0; padding: 0; text-align: center; }
+  .rbs__legend { margin: 0 auto 1rem; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.6rem; font-weight: 500; }
+  .rbs__shape-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+  .rbs__shape {
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+    min-width: 84px; min-height: 88px; padding: 0.7rem 0.5rem; border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px); background: #fff; font-size: 0.78rem; cursor: pointer;
+  }
+  .rbs__shape:hover { border-color: var(--gold, #C9A050); }
+  .rbs__shape input { position: absolute; opacity: 0; pointer-events: none; }
+  .rbs__shape:has(input:checked) { border-color: var(--text-dark, #2C1810); box-shadow: inset 0 0 0 1px var(--text-dark, #2C1810); background: var(--cream, #FAF6F0); font-weight: 600; }
+  .rbs__shape:has(input:focus-visible) { outline: 2px solid var(--text-dark, #2C1810); outline-offset: 2px; }
+  .rbs__shape .shape-btn__icon { width: 30px; height: 30px; }
+  .rbs__hint { margin: 0.9rem 0 0; font-size: 0.82rem; color: var(--text-muted-dark, #6B6152); }
+  .rbs__paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .rbs__path { background: var(--cream, #FAF6F0); border: 1px solid var(--rule-light, #DDD5C5); border-radius: var(--radius-lg, 12px); padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
+  .rbs__path-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+  .rbs__path-title { margin: 0; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.7rem; font-weight: 500; }
+  .rbs__count { font-size: 0.8rem; color: var(--text-muted-dark, #6B6152); }
+  .rbs__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.85rem; }
+  .rbs__card-link { display: flex; flex-direction: column; gap: 0.3rem; color: var(--text-dark, #2C1810); text-decoration: none; }
+  .rbs__media { display: block; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-sm, 4px); border: 1px solid var(--border-light, #E8E2D8); background: #fff; }
+  .rbs__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  .rbs__card-link:hover .rbs__media { border-color: var(--gold, #C9A050); }
+  .rbs__card-link:hover .rbs__media img { transform: scale(1.04); }
+  .rbs__name { font-size: 0.8rem; line-height: 1.4; }
+  .rbs__price { font-size: 0.76rem; color: var(--text-muted-dark, #6B6152); }
+  .rbs__stones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+  .rbs__stone { display: flex; flex-direction: column; gap: 0.35rem; padding: 1.1rem; min-height: 44px; background: #fff; border: 1px solid var(--border-light, #E8E2D8); border-radius: var(--radius-md, 8px); color: var(--text-dark, #2C1810); text-decoration: none; }
+  .rbs__stone:hover { border-color: var(--gold, #C9A050); }
+  .rbs__stone-kind { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted-dark, #6B6152); }
+  .rbs__stone-name { font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.35rem; }
+  .rbs__note, .rbs__empty { margin: 0; font-size: 0.8rem; line-height: 1.7; color: var(--text-muted-dark, #6B6152); }
+  .rbs__empty a { color: var(--text-dark, #2C1810); }
+</style>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-rbs]');
+    if (!root) return;
+    var radios = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-shape]'));
+    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-card]'));
+    var counts = {};
+    cards.forEach(function (c) { var s = c.getAttribute('data-shape'); counts[s] = (counts[s] || 0) + 1; });
+
+    function pick(shape) {
+      var n = counts[shape] || 0;
+      cards.forEach(function (c) { c.hidden = c.getAttribute('data-shape') !== shape; });
+      root.querySelector('[data-rbs-empty]').hidden = n > 0;
+      root.querySelector('[data-rbs-count]').textContent = n ? n + (n === 1 ? ' setting takes ' : ' settings take ') + shape.toLowerCase() : '';
+      root.querySelector('[data-rbs-hint]').textContent = n
+        ? 'Showing settings and diamonds for ' + shape.toLowerCase() + ' center stones.'
+        : 'No ready-made ' + shape.toLowerCase() + ' setting yet. You can still choose a ' + shape.toLowerCase() + ' diamond.';
+      root.querySelectorAll('[data-rbs-shape-name]').forEach(function (el) { el.textContent = shape; });
+      root.querySelectorAll('[data-rbs-diamond]').forEach(function (a) {
+        a.href = a.getAttribute('data-rbs-diamond') + '?shape=' + encodeURIComponent(shape);
+      });
+    }
+
+    radios.forEach(function (r) {
+      r.addEventListener('change', function () { if (r.checked) pick(r.value); });
+    });
+
+    var wanted = '';
+    try { wanted = new URLSearchParams(window.location.search).get('shape') || ''; } catch (e) {}
+    var start = radios.filter(function (r) { return r.value.toLowerCase() === wanted.toLowerCase(); })[0];
+    if (!start) {
+      start = radios.slice().sort(function (a, b) { return (counts[b.value] || 0) - (counts[a.value] || 0); })[0];
+    }
+    if (start) {
+      start.checked = true;
+      pick(start.value);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Ring builder start",
+  "tag": "section",
+  "class": "section-ring-builder-start",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Ring Builder" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Build your ring" },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made."
+    },
+    {
+      "type": "text",
+      "id": "settings_collection",
+      "label": "Settings collection handle",
+      "default": "ring-settings"
+    },
+    {
+      "type": "text",
+      "id": "builder_view",
+      "label": "Setting page template name",
+      "info": "Setting cards open this product template, such as ring-builder.",
+      "default": "ring-builder"
+    },
+    { "type": "text", "id": "contact_url", "label": "Custom setting link", "default": "/pages/contact" }
+  ],
+  "presets": [{ "name": "Ring builder start" }]
+}
+{% endschema %}

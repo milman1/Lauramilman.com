@@ -1,0 +1,223 @@
+{%- comment -%}
+  Ring builder — "Your ring" bar.
+  Shown at the top of the ring-builder templates (setting page and diamond
+  search). Reads sessionStorage lmBuilder, which the setting page's pairing
+  panel (snippets/ring-diamond-pairing.liquid) and the builder diamond search
+  (assets/diamond-storefront.js) write, and repaints on lm:builder-change.
+  Nothing is stored server-side; without a setting it shows where to start.
+{%- endcomment -%}
+
+<nav class="rbb" aria-label="Your ring" data-rbb data-start-url="{{ section.settings.start_url | default: '/collections/ring-settings' | escape }}" data-currency="{{ cart.currency.iso_code | default: 'USD' }}">
+  <ol class="rbb__steps" role="list">
+    <li class="rbb__step">
+      <span class="rbb__thumb" data-rbb-ring-thumb aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 120 120" fill="none"><ellipse cx="60" cy="78" rx="34" ry="28" stroke="currentColor" stroke-width="7"/><ellipse cx="60" cy="36" rx="12" ry="16" stroke="currentColor" stroke-width="5"/></svg>
+      </span>
+      <span class="rbb__text">
+        <span class="rbb__label">1 · Setting <a class="rbb__change" href="{{ section.settings.start_url | default: '/collections/ring-settings' | escape }}" data-rbb-ring-change hidden>Change</a></span>
+        <a class="rbb__value" href="{{ section.settings.start_url | default: '/collections/ring-settings' | escape }}" data-rbb-ring>Choose a setting</a>
+      </span>
+    </li>
+    <li class="rbb__step">
+      <span class="rbb__thumb rbb__thumb--empty" data-rbb-diamond-thumb aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg>
+      </span>
+      <span class="rbb__text">
+        <span class="rbb__label">2 · Diamond</span>
+        <span class="rbb__value" data-rbb-diamond>Choose a diamond</span>
+      </span>
+    </li>
+    <li class="rbb__step rbb__step--total">
+      <span class="rbb__text">
+        <span class="rbb__label">3 · Ring total</span>
+        <span class="rbb__value rbb__value--total" data-rbb-total>—</span>
+      </span>
+      <a class="rbb__review" href="#" data-rbb-review hidden>Review ring</a>
+    </li>
+  </ol>
+</nav>
+
+<style>
+  .rbb {
+    background: #fff;
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    color: var(--text-dark, #2C1810);
+  }
+  .rbb [hidden] { display: none !important; }
+  .rbb__steps {
+    list-style: none;
+    margin: 0 auto;
+    max-width: 1280px;
+    padding: 0 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .rbb__step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    min-width: 0;
+  }
+  .rbb__step + .rbb__step { border-left: 1px solid var(--border-light, #E8E2D8); }
+  .rbb__step:first-child { padding-left: 0; }
+  .rbb__step--total { justify-content: space-between; padding-right: 0; }
+  .rbb__thumb {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--border-light, #E8E2D8);
+    background: var(--cream, #FAF6F0);
+    color: var(--gold-dark, #A88340);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .rbb__thumb--empty { border-style: dashed; border-color: var(--gold, #C9A050); background: #fff; }
+  .rbb__thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .rbb__text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+  .rbb__label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted-dark, #6B6152);
+  }
+  .rbb__change { margin-left: 0.4rem; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--text-dark, #2C1810); }
+  .rbb__value {
+    font-size: 0.8rem;
+    color: var(--text-dark, #2C1810);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  a.rbb__value { text-decoration: underline; text-underline-offset: 3px; }
+  .rbb__value--total { font-size: 0.95rem; font-weight: 600; }
+  .rbb__review {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    background: var(--text-dark, #2C1810);
+    color: var(--warm-white, #FDFAF6);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .rbb__review:hover { background: #4a2c1f; color: var(--warm-white, #FDFAF6); }
+  @media (max-width: 749px) {
+    .rbb__steps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 0 1rem; }
+    .rbb__step { padding: 0.6rem 0.5rem; gap: 0.5rem; }
+    .rbb__step--total { grid-column: 1 / -1; border-left: 0 !important; border-top: 1px solid var(--border-light, #E8E2D8); padding: 0.5rem 0; }
+    .rbb__thumb { width: 32px; height: 32px; }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-rbb]');
+    if (!root) return;
+    var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
+
+    function money(cents) {
+      try {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: root.getAttribute('data-currency') || 'USD',
+          maximumFractionDigits: 0
+        }).format(cents / 100);
+      } catch (e) {
+        return '$' + Math.round(cents / 100).toLocaleString('en-US');
+      }
+    }
+
+    function thumb(el, src) {
+      var img = el.querySelector('img');
+      if (!src) {
+        if (img) img.remove();
+        el.querySelectorAll('svg').forEach(function (s) { s.style.display = ''; });
+        return;
+      }
+      if (!img) {
+        img = document.createElement('img');
+        img.alt = '';
+        img.width = 40;
+        img.height = 40;
+        el.appendChild(img);
+      }
+      img.src = src;
+      el.querySelectorAll('svg').forEach(function (s) { s.style.display = 'none'; });
+    }
+
+    function paint() {
+      var b = null;
+      try { b = JSON.parse(sessionStorage.getItem('lmBuilder') || 'null'); } catch (e) {}
+      var ring = b && b.ring && HANDLE.test(String(b.ring.handle || '')) ? b.ring : null;
+      var diamond = ring && b.diamond && HANDLE.test(String(b.diamond.handle || '')) ? b.diamond : null;
+
+      var ringEl = root.querySelector('[data-rbb-ring]');
+      var change = root.querySelector('[data-rbb-ring-change]');
+      var diamondEl = root.querySelector('[data-rbb-diamond]');
+      var totalEl = root.querySelector('[data-rbb-total]');
+      var review = root.querySelector('[data-rbb-review]');
+      var view = ring && (String(ring.path || '').match(/[?&]view=([a-z0-9-]+)/) || [])[1];
+      var ringPath = ring ? '/products/' + ring.handle + '?view=' + (view || 'ring-builder') + (ring.variant ? '&variant=' + encodeURIComponent(ring.variant) : '') : '';
+
+      if (ring) {
+        var parts = [ring.title, ring.options, ring.price != null ? money(ring.price) : ''].filter(Boolean);
+        ringEl.textContent = parts.join(' · ');
+        ringEl.href = ringPath;
+        change.hidden = false;
+      } else {
+        ringEl.textContent = 'Choose a setting';
+        ringEl.href = root.getAttribute('data-start-url');
+        change.hidden = true;
+      }
+      thumb(root.querySelector('[data-rbb-ring-thumb]'), ring && ring.image);
+
+      if (diamond) {
+        diamondEl.textContent = [diamond.title, diamond.price != null ? money(diamond.price) : ''].filter(Boolean).join(' · ');
+      } else {
+        var shape = ring ? String(ring.shape || '').toLowerCase() : '';
+        diamondEl.textContent = shape ? 'Choose ' + (/^[aeiou]/.test(shape) ? 'an ' : 'a ') + shape + ' diamond' : 'Choose a diamond';
+      }
+      thumb(root.querySelector('[data-rbb-diamond-thumb]'), diamond && diamond.image);
+
+      if (ring && diamond && ring.price != null && diamond.price != null) {
+        totalEl.textContent = money(ring.price + diamond.price);
+        review.href = ringPath + '&diamond=' + encodeURIComponent(diamond.handle) + '#RingPairing';
+        review.hidden = false;
+      } else {
+        totalEl.textContent = ring && ring.price != null ? money(ring.price) + ' + diamond' : '—';
+        review.hidden = true;
+      }
+    }
+
+    paint();
+    document.addEventListener('lm:builder-change', paint);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Ring builder bar",
+  "tag": "section",
+  "class": "section-ring-builder-bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "start_url",
+      "label": "Where \"Choose a setting\" goes",
+      "default": "/collections/ring-settings"
+    }
+  ],
+  "presets": [{ "name": "Ring builder bar" }]
+}
+{% endschema %}

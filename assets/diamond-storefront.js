@@ -30,6 +30,20 @@
     requestId: 0,
   };
 
+  /**
+   * Ring builder mode (collection template ring-builder, section setting
+   * "Ring builder mode"). With a setting chosen (?ring=<handle> from the
+   * setting page, or the one kept in sessionStorage lmBuilder), the shape is
+   * fixed to the setting's, each card shows the ring total, and Choose goes
+   * back to the setting with ?diamond=<stone handle>, where the pairing
+   * panel checks fit and availability again before anything is added.
+   */
+  var builderOn = root.dataset.ringBuilder === 'true' && !searchOnly;
+  var builderView = root.dataset.builderView || 'ring-builder';
+  var builder = null;
+  var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
+  var SHAPES = ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear'];
+
   var form = document.getElementById('DiamondFilterForm');
   var resultsEl = document.getElementById('lm-diamond-results');
   var countEl = document.getElementById('lm-diamond-count');
@@ -199,6 +213,7 @@
         [stone.shape, stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · '),
       ) +
       '</span></div>' +
+      (builder ? builderActions(stone, href.replace('/products/', '')) :
       '<div class="lm-stone-card__actions">' +
       '<button type="button" class="lm-stone-card__atc" data-add-handle="' +
       escapeAttr(href.replace('/products/', '')) +
@@ -216,9 +231,132 @@
       '" data-reserve-price="' +
       escapeAttr(money(stone.retail_usd)) +
       '">Reserve this diamond</button>' +
-      '</div>' +
+      '</div>') +
       '</div></div>'
     );
+  }
+
+  function ringPath(extra) {
+    var q = '?view=' + encodeURIComponent(builderView);
+    if (builder.variant) q += '&variant=' + encodeURIComponent(builder.variant);
+    return '/products/' + builder.handle + q + (extra || '');
+  }
+
+  function builderActions(stone, handle) {
+    var total = builder.price != null ? Number(stone.retail_usd) + builder.price / 100 : null;
+    return (
+      (total != null
+        ? '<p class="lm-stone-card__ring">Ring total ' + money(total) + '</p>'
+        : '') +
+      '<div class="lm-stone-card__actions">' +
+      '<a class="lm-stone-card__choose" href="' +
+      escapeAttr(ringPath('&diamond=' + encodeURIComponent(handle) + '#RingPairing')) +
+      '">Choose this diamond</a>' +
+      '</div>'
+    );
+  }
+
+  function readBuilder() {
+    try {
+      return JSON.parse(sessionStorage.getItem('lmBuilder') || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /** Resolves the chosen setting from ?ring= (checked against the store) or the visit's lmBuilder. */
+  function initBuilder() {
+    if (!builderOn) return Promise.resolve(null);
+    var params = new URLSearchParams(window.location.search);
+    var stored = readBuilder();
+    var storedRing = stored && stored.ring && HANDLE.test(String(stored.ring.handle || '')) ? stored.ring : null;
+    var handle = String(params.get('ring') || (storedRing && storedRing.handle) || '').toLowerCase();
+    if (!HANDLE.test(handle)) return Promise.resolve(null);
+    var sameRing = storedRing && storedRing.handle === handle;
+    var urlShapes = (params.get('shape') || '').split(',').filter(function (v) { return SHAPES.indexOf(v) !== -1; });
+    var shape = sameRing && storedRing.shape ? storedRing.shape : urlShapes.length === 1 ? urlShapes[0] : '';
+    if (!shape) return Promise.resolve(null);
+    var wanted = String(params.get('variant') || (sameRing && storedRing.variant) || '');
+    return fetch('/products/' + handle + '.js', { headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (p) {
+        if (!p || (p.tags || []).indexOf('ring-setting') === -1) return null;
+        var variants = (p.variants || []).filter(function (v) { return v.available; });
+        var variant = variants.filter(function (v) { return String(v.id) === wanted; })[0] || variants[0];
+        if (!variant) return null;
+        var ring = {
+          handle: p.handle,
+          title: p.title,
+          shape: shape,
+          image: p.featured_image || '',
+          path: '/products/' + p.handle + '?view=' + builderView,
+          variant: variant.id,
+          options: (variant.options || [])
+            .filter(function (v) { return v && v !== 'Default Title'; })
+            .map(function (v, i) {
+              var name = (p.options || [])[i];
+              name = name && name.name ? name.name : String(name || '');
+              return /size/i.test(name) ? 'Size ' + v : v;
+            })
+            .join(' · '),
+          price: variant.price,
+        };
+        var keep = stored && stored.diamond && sameRing ? stored.diamond : null;
+        try {
+          sessionStorage.setItem('lmBuilder', JSON.stringify({ ring: ring, diamond: keep }));
+          document.dispatchEvent(new CustomEvent('lm:builder-change'));
+        } catch (e) {}
+        return ring;
+      })
+      .catch(function () { return null; });
+  }
+
+  function lockShape() {
+    if (!builder || !form) return;
+    form.querySelectorAll('.lm-shape input').forEach(function (input) {
+      input.checked = input.value === builder.shape;
+      input.disabled = true;
+      var label = input.closest('.lm-shape');
+      if (label) label.classList.toggle('is-active', input.checked);
+    });
+  }
+
+  function showBuilder() {
+    lockShape();
+    var group = form && form.querySelector('.lm-dfilter__shapes');
+    if (group && !form.querySelector('.lm-shape-lock')) {
+      var lock = document.createElement('p');
+      lock.className = 'lm-shape-lock';
+      lock.textContent = builder.shape + ' only: your setting takes ' + builder.shape.toLowerCase() + ' center stones.';
+      group.parentNode.appendChild(lock);
+    }
+    if (resultsEl && !root.querySelector('.lm-builder-note')) {
+      var note = document.createElement('p');
+      note.className = 'lm-builder-note';
+      note.textContent =
+        'Showing ' + builder.shape.toLowerCase() + ' diamonds that fit the ' + builder.title +
+        (builder.options ? ' (' + builder.options + ')' : '') +
+        '. Each stone shows your ring total.';
+      var back = document.createElement('a');
+      back.href = ringPath('#RingPairing');
+      back.textContent = 'Back to the setting';
+      note.appendChild(back);
+      var toolbar = root.querySelector('.lm-dfilter__toolbar');
+      (toolbar || resultsEl).parentNode.insertBefore(note, toolbar || resultsEl);
+    }
+    // Switching between natural and lab-grown keeps the setting.
+    root.querySelectorAll('.lm-dfilter__origin-btn').forEach(function (a) {
+      var u = new URL(a.getAttribute('href'), window.location.origin);
+      if (!/^\/collections\/(natural|lab-grown)-diamonds$/.test(u.pathname)) {
+        a.hidden = true;
+        return;
+      }
+      u.searchParams.set('view', builderView);
+      u.searchParams.set('ring', builder.handle);
+      u.searchParams.set('shape', builder.shape);
+      if (builder.variant) u.searchParams.set('variant', builder.variant);
+      a.setAttribute('href', u.pathname + u.search);
+    });
   }
 
   function escapeHtml(s) {
@@ -506,6 +644,7 @@
         form.querySelectorAll('.lm-shape').forEach(function (l) {
           l.classList.remove('is-active');
         });
+        lockShape();
         wireScales();
         wireRanges();
         state.page = 1;
@@ -590,5 +729,9 @@
     });
   }
 
-  load();
+  initBuilder().then(function (ring) {
+    builder = ring;
+    if (builder) showBuilder();
+    load();
+  });
 })();
