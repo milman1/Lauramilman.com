@@ -70,32 +70,6 @@
         "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
       }
     },
-    "ring-builder": {
-      "type": "ring-builder-start",
-      "settings": {
-        "eyebrow": "Ring Builder",
-        "title": "Build your ring",
-        "heading_level": "h2",
-        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
-        "card_limit": 4,
-        "more_url": "/pages/ring-builder",
-        "settings_collection": "ring-settings",
-        "builder_view": "ring-builder",
-        "contact_url": "/pages/contact",
-        "show_diamond_path": false
-      }
-    },
-    "meet-laura": {
-      "type": "lmh-meet",
-      "settings": {
-        "image_asset": "",
-        "image_alt": "Laura Milman",
-        "title": "Meet Laura Milman",
-        "text": "Discover the story behind the jewelry.",
-        "link_text": "Read Laura's Story",
-        "link_url": "/pages/about"
-      }
-    },
     "trust-strip": {
       "type": "lmh-trust",
       "blocks": {
@@ -135,6 +109,21 @@
         "promise-4"
       ],
       "settings": {}
+    },
+    "ring-builder": {
+      "type": "ring-builder-start",
+      "settings": {
+        "eyebrow": "Ring Builder",
+        "title": "Build your ring",
+        "heading_level": "h2",
+        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
+        "card_limit": 4,
+        "more_url": "/pages/ring-builder",
+        "settings_collection": "ring-settings",
+        "builder_view": "ring-builder",
+        "contact_url": "/pages/contact",
+        "show_diamond_path": false
+      }
     },
     "loose-stones": {
       "type": "lmh-stones",
@@ -196,6 +185,16 @@
         "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
       }
     },
+    "reviews": {
+      "type": "lmh-reviews",
+      "settings": {
+        "eyebrow": "Google reviews · shown unedited",
+        "title": "Recent reviews",
+        "link_text": "Read all reviews",
+        "link_url": "/pages/google-reviews",
+        "embed_id": "25717519"
+      }
+    },
     "rings-your-way": {
       "type": "lmh-split-tiles",
       "blocks": {
@@ -243,67 +242,6 @@
         "style": "warm",
         "footer_text": "Shop all fine jewelry",
         "footer_url": "/collections/all"
-      }
-    },
-    "shelf": {
-      "type": "lmh-shelf",
-      "blocks": {
-        "tab-1": {
-          "type": "shelf",
-          "settings": {
-            "label": "Rings",
-            "collection": "rings",
-            "limit": 10,
-            "link_text": "Shop all rings"
-          }
-        },
-        "tab-2": {
-          "type": "shelf",
-          "settings": {
-            "label": "Gold bracelets",
-            "collection": "gold-bracelets",
-            "limit": 10,
-            "link_text": "Shop gold bracelets"
-          }
-        },
-        "tab-3": {
-          "type": "shelf",
-          "settings": {
-            "label": "Tennis necklaces",
-            "collection": "lab-grown-tennis-necklaces",
-            "limit": 10,
-            "link_text": "Shop tennis necklaces"
-          }
-        },
-        "tab-4": {
-          "type": "shelf",
-          "settings": {
-            "label": "Earrings",
-            "collection": "all-earrings",
-            "limit": 10,
-            "link_text": "Shop earrings"
-          }
-        },
-        "tab-5": {
-          "type": "shelf",
-          "settings": {
-            "label": "Gold chains",
-            "collection": "chain-necklaces",
-            "limit": 10,
-            "link_text": "Shop gold chains"
-          }
-        }
-      },
-      "block_order": [
-        "tab-1",
-        "tab-2",
-        "tab-3",
-        "tab-4",
-        "tab-5"
-      ],
-      "settings": {
-        "eyebrow": "Scroll the house",
-        "title": "Shop by piece"
       }
     },
     "gold": {
@@ -410,42 +348,6 @@
         "mobile_button_url": "/collections/chains"
       }
     },
-    "rolex": {
-      "type": "lmh-product-row",
-      "blocks": {
-        "chip-1": {
-          "type": "chip",
-          "settings": {
-            "text": "All Watches",
-            "url": "/collections/time-pieces"
-          }
-        }
-      },
-      "block_order": [
-        "chip-1"
-      ],
-      "settings": {
-        "style": "cream",
-        "columns": "5",
-        "ratio": "0.84",
-        "eyebrow": "Rolex",
-        "title": "The Rolex edit,",
-        "title_emphasis": "authenticity guaranteed.",
-        "text": "Daytona, Submariner, GMT-Master II, Datejust and Day-Date. Each listing gives the reference, the year and whether it is pre-owned or unworn.",
-        "all_text": "Shop all Rolex",
-        "all_url": "/collections/rolex-watches",
-        "button_1_text": "",
-        "button_1_url": "",
-        "button_2_text": "",
-        "button_2_url": "",
-        "feature_image_asset": "",
-        "feature_image_alt": "",
-        "collection": "rolex-watches",
-        "collection_limit": 5,
-        "mobile_button_text": "Shop All Rolex",
-        "mobile_button_url": "/collections/rolex-watches"
-      }
-    },
     "lab-grown": {
       "type": "lmh-product-row",
       "blocks": {
@@ -508,64 +410,6 @@
         "collection_limit": 5,
         "mobile_button_text": "",
         "mobile_button_url": ""
-      }
-    },
-    "reviews": {
-      "type": "lmh-reviews",
-      "settings": {
-        "eyebrow": "Google reviews · shown unedited",
-        "title": "Recent reviews",
-        "link_text": "Read all reviews",
-        "link_url": "/pages/google-reviews",
-        "embed_id": "25717519"
-      }
-    },
-    "wear-together": {
-      "type": "lmh-wear-together",
-      "blocks": {
-        "wear-1": {
-          "type": "product",
-          "settings": {
-            "product": "w-t3492",
-            "title": "Pre-Owned Rolex Lady Date Just",
-            "subtitle": "Ref. 179174 · 26mm"
-          }
-        },
-        "wear-2": {
-          "type": "product",
-          "settings": {
-            "product": "lab-diamond-tennis-bracelet-round-1-92ct-bc14wtsrd175p",
-            "title": "Lab Grown Round Brilliant Diamond Tennis Bracelet",
-            "subtitle": "1.92 CT · 14K White Gold"
-          }
-        },
-        "wear-3": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-herringbone-2-8-mm-sf030-bracelet",
-            "title": "2.8mm Herringbone Chain Bracelet",
-            "subtitle": "14K Yellow Gold · 7 in"
-          }
-        }
-      },
-      "block_order": [
-        "wear-1",
-        "wear-2",
-        "wear-3"
-      ],
-      "settings": {
-        "style": "light",
-        "image_asset": "shop-world-preowned-maison.webp",
-        "image_alt": "Gold diamond link bracelet on travertine and ivory satin",
-        "eyebrow": "Wear it together",
-        "title": "The watch you earned, and",
-        "title_emphasis": "what you wear with it.",
-        "text": "Start with a pre-owned watch, add a lab-grown tennis bracelet, and finish with a gold chain bracelet.",
-        "button_text": "Shop Pre-Owned Watches",
-        "button_url": "/collections/time-pieces",
-        "link_text": "Tennis bracelets",
-        "link_url": "/collections/lab-grown-bracelets",
-        "note": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Watches are exchange-only within 7 days of delivery."
       }
     },
     "pre-owned": {
@@ -730,7 +574,7 @@
         "eyebrow": "Pre-Owned",
         "title": "Pre-owned watches and",
         "title_emphasis": "signed jewelry.",
-        "text": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Missing items are never implied. Signed jewelry is authenticated and hand-inspected by Laura Milman New York.",
+        "text": "Every watch listing states what its record confirms: reference, case size, and whether the box and papers are included. Missing items are never implied. Signed jewelry is authenticated and hand-inspected by Laura Milman New York. Watches are exchange-only within 7 days of delivery.",
         "watch_title": "Watches",
         "watch_all_text": "All watches",
         "watch_all_short": "All watches",
@@ -756,62 +600,14 @@
         "note": "Complimentary · No obligation"
       }
     },
-    "engagement": {
-      "type": "lmh-engagement",
-      "disabled": true,
+    "meet-laura": {
+      "type": "lmh-meet",
       "settings": {
-        "image_asset": "peaceful-hero-diamonds.jpg",
-        "image_alt": "Loose diamonds of several shapes on navy velvet",
-        "eyebrow": "Engagement",
-        "title": "Start with",
-        "title_emphasis": "the stone.",
-        "text": "Choose a lab-grown or natural diamond, pick a setting, and our goldsmiths in Italy craft the ring.",
-        "primary_text": "Build Your Ring",
-        "primary_url": "/pages/ring-builder",
-        "secondary_text": "Engagement Rings",
-        "secondary_url": "/collections/engagement-rings"
-      }
-    },
-    "brand-story": {
-      "type": "lmh-story",
-      "blocks": {
-        "stat-1": {
-          "type": "stat",
-          "settings": {
-            "value": "30+",
-            "label": "Years in the Diamond District"
-          }
-        },
-        "stat-2": {
-          "type": "stat",
-          "settings": {
-            "value": "NYC",
-            "label": "House jewelry designed in New York"
-          }
-        },
-        "stat-3": {
-          "type": "stat",
-          "settings": {
-            "value": "Italy",
-            "label": "Crafted by master goldsmiths"
-          }
-        }
-      },
-      "block_order": [
-        "stat-1",
-        "stat-2",
-        "stat-3"
-      ],
-      "disabled": true,
-      "settings": {
-        "image": "shopify://shop_images/laura-milman-portrait.jpg",
         "image_asset": "",
         "image_alt": "Laura Milman",
-        "eyebrow": "The Woman Behind It",
-        "title": "Thirty years in the making.",
-        "quote": "“I did the thing that women like me were not expected to do in that industry, in those years. I opened my own company.”",
-        "text": "Laura worked alongside her brother Jacob Arabo in the early years of what became Jacob & Co. She still sees clients in Midtown.",
-        "link_text": "Read Laura's story",
+        "title": "Meet Laura Milman",
+        "text": "Discover the story behind the jewelry.",
+        "link_text": "Read Laura's Story",
         "link_url": "/pages/about"
       }
     }
@@ -820,18 +616,13 @@
     "hero",
     "trust-strip",
     "ring-builder",
-    "meet-laura",
     "loose-stones",
+    "reviews",
     "rings-your-way",
-    "shelf",
     "gold",
     "lab-grown",
-    "rolex",
-    "reviews",
-    "wear-together",
     "pre-owned",
     "private-clients",
-    "engagement",
-    "brand-story"
+    "meet-laura"
   ]
 }
