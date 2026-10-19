@@ -751,7 +751,7 @@
   .lmh-hero { min-height: 500px; }
   .lmh-hero__media { min-height: 500px; }
 }
-.rbs__custom .rbs__media img { object-position: 100% 50%; }
+.rbs__custom .rbs__media img { object-position: 82% 50%; }
 @media (max-width: 749px) {
   .rbs--embedded .rbs__shape { min-width: 0; min-height: 44px; padding: 10px 14px; }
 }
