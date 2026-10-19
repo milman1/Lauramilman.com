@@ -5,19 +5,26 @@
   never the title) show below, each opening the ring-builder setting page.
   The diamond path links to the stone searches for that shape.
   ?shape=Oval preselects a shape; otherwise the shape with the most settings.
+  On the homepage: heading level h2 (the banner holds the page's h1) and a
+  card limit, with "See all" opening the full start page on the same shape.
 {%- endcomment -%}
 
 {%- liquid
   assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
   assign setting_collection = collections[section.settings.settings_collection]
   assign builder_view = section.settings.builder_view | default: 'ring-builder' | handleize
+  assign heading_tag = 'h1'
+  if section.settings.heading_level == 'h2'
+    assign heading_tag = 'h2'
+  endif
+  assign card_limit = section.settings.card_limit | default: 12
 -%}
 
-<section class="rbs" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs>
+<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}">
   <div class="rbs__container">
     <header class="rbs__header">
       {%- if section.settings.eyebrow != blank -%}<p class="rbs__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
-      <h1 class="rbs__title" id="RbsTitle-{{ section.id }}">{{ section.settings.title }}</h1>
+      <{{ heading_tag }} class="rbs__title" id="RbsTitle-{{ section.id }}">{{ section.settings.title }}</{{ heading_tag }}>
       {%- if section.settings.description != blank -%}<p class="rbs__desc">{{ section.settings.description }}</p>{%- endif -%}
     </header>
 
@@ -71,6 +78,9 @@
             {%- endfor -%}
           {%- endif -%}
         </ul>
+        {%- if section.settings.more_url != blank -%}
+          <a class="rbs__more" href="{{ section.settings.more_url }}" data-rbs-more data-base="{{ section.settings.more_url }}" hidden></a>
+        {%- endif -%}
         <p class="rbs__empty" data-rbs-empty hidden>No ready-made setting takes this shape yet. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
         <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
       </article>
@@ -136,13 +146,15 @@
   .rbs__stone:hover { border-color: var(--gold, #C9A050); }
   .rbs__stone-kind { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted-dark, #6B6152); }
   .rbs__stone-name { font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.35rem; }
+  .rbs--embedded { padding-top: clamp(40px, 5vw, 72px); padding-bottom: clamp(40px, 5vw, 72px); }
+  .rbs__more { align-self: flex-start; font-size: 0.8rem; font-weight: 600; color: var(--text-dark, #2C1810); text-underline-offset: 3px; }
   .rbs__note, .rbs__empty { margin: 0; font-size: 0.8rem; line-height: 1.7; color: var(--text-muted-dark, #6B6152); }
   .rbs__empty a { color: var(--text-dark, #2C1810); }
 </style>
 
 <script>
   (function () {
-    var root = document.querySelector('[data-rbs]');
+    var root = document.getElementById('Rbs-{{ section.id }}');
     if (!root) return;
     var radios = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-shape]'));
     var cards = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-card]'));
@@ -151,7 +163,19 @@
 
     function pick(shape) {
       var n = counts[shape] || 0;
-      cards.forEach(function (c) { c.hidden = c.getAttribute('data-shape') !== shape; });
+      var limit = parseInt(root.getAttribute('data-limit'), 10) || 12;
+      var shown = 0;
+      cards.forEach(function (c) {
+        var match = c.getAttribute('data-shape') === shape;
+        c.hidden = !match || shown >= limit;
+        if (match && shown < limit) shown += 1;
+      });
+      var more = root.querySelector('[data-rbs-more]');
+      if (more) {
+        more.hidden = n <= limit;
+        more.textContent = 'See all ' + n + ' ' + shape.toLowerCase() + ' settings';
+        more.href = more.getAttribute('data-base') + (more.getAttribute('data-base').indexOf('?') === -1 ? '?' : '&') + 'shape=' + encodeURIComponent(shape);
+      }
       root.querySelector('[data-rbs-empty]').hidden = n > 0;
       root.querySelector('[data-rbs-count]').textContent = n ? n + (n === 1 ? ' setting takes ' : ' settings take ') + shape.toLowerCase() : '';
       root.querySelector('[data-rbs-hint]').textContent = n
@@ -188,6 +212,29 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Ring Builder" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Build your ring" },
+    {
+      "type": "select",
+      "id": "heading_level",
+      "label": "Heading level",
+      "info": "H1 on the ring builder page; H2 on the homepage, where the banner holds the page title.",
+      "options": [{ "value": "h1", "label": "H1" }, { "value": "h2", "label": "H2" }],
+      "default": "h1"
+    },
+    {
+      "type": "range",
+      "id": "card_limit",
+      "label": "Most settings shown per shape",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "text",
+      "id": "more_url",
+      "label": "\"See all\" link",
+      "info": "Shown when a shape has more settings than the limit, such as /pages/ring-builder. Leave blank to hide."
+    },
     {
       "type": "textarea",
       "id": "description",
