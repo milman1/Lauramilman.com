@@ -46,7 +46,7 @@ describe('lab-grown jewelry merchandising', () => {
     expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
     expect(home.sections['lab-grown'].settings?.eyebrow).toBe('Lab-Grown Diamonds · Under $1,000');
     expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('gold'));
-    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('rolex'));
+    expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('pre-owned'));
   });
 });
 
@@ -57,7 +57,7 @@ describe('homepage consultation and reviews', () => {
 
     expect(home.sections['private-clients'].type).toBe('lmh-private-band');
     expect(home.sections['private-clients'].settings?.button_text).toBe('Book a Consultation');
-    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('brand-story'));
+    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('meet-laura'));
     expect(home.sections.reviews.type).toBe('lmh-reviews');
     expect(home.sections.reviews.settings?.title).toBe('Recent reviews');
     expect(home.sections.reviews.settings?.embed_id).toBe('25717519');
