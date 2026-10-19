@@ -291,7 +291,14 @@
           image: p.featured_image || '',
           path: '/products/' + p.handle + '?view=' + builderView,
           variant: variant.id,
-          options: variant.title && variant.title !== 'Default Title' ? variant.title.split(' / ').join(' · ') : '',
+          options: (variant.options || [])
+            .filter(function (v) { return v && v !== 'Default Title'; })
+            .map(function (v, i) {
+              var name = (p.options || [])[i];
+              name = name && name.name ? name.name : String(name || '');
+              return /size/i.test(name) ? 'Size ' + v : v;
+            })
+            .join(' · '),
           price: variant.price,
         };
         var keep = stored && stored.diamond && sameRing ? stored.diamond : null;

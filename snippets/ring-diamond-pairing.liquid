@@ -387,7 +387,7 @@
             image: root.getAttribute('data-ring-image'),
             path: '/products/' + ringHandle + '?view=' + encodeURIComponent(root.getAttribute('data-builder-view') || 'ring-builder'),
             variant: setting ? setting.id : null,
-            options: ringChoices().map(function (c) { return c.value; }).join(' · '),
+            options: ringChoices().map(function (c) { return /size/i.test(c.name) ? 'Size ' + c.value : c.value; }).join(' · '),
             price: setting ? setting.price : null
           },
           diamond: diamond || null
