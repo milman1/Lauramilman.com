@@ -18,7 +18,7 @@
         "eyebrow": "Lab-grown diamonds & fine jewelry",
         "title": "Your diamond.",
         "title_emphasis": "Your story.",
-        "text": "For love, milestones, and something just for you. Discover your stone. Make it your own.",
+        "text": "Lab-grown diamonds, everyday gold, and rings made around you.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
         "secondary_text": "Build Your Ring",
@@ -34,7 +34,7 @@
         "eyebrow": "Made around you",
         "title": "Build your ring.",
         "heading_level": "h2",
-        "description": "Start with a shape, then choose your setting or diamond. We confirm the final fit before your ring is made.",
+        "description": "Choose a shape. Find a setting. Make it yours.",
         "card_limit": 3,
         "more_url": "/pages/ring-builder?view=ring-builder-start",
         "settings_collection": "ring-settings",
@@ -135,10 +135,10 @@
       ],
       "settings": {
         "eyebrow": "Loose diamonds",
-        "title": "Start with the stone.",
-        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
+        "title": "Find your stone.",
+        "text": "",
         "search_url": "/collections/lab-grown-diamonds",
-        "link_text": "See all lab-grown diamonds",
+        "link_text": "Shop lab-grown diamonds",
         "natural_url": "/collections/natural-diamonds",
         "colored_url": "/collections/colored-lab-grown-diamonds",
         "strip_text": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA.",
@@ -152,9 +152,9 @@
         ],
         "colored_collection": "colored-lab-grown-diamonds",
         "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
-        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
-      },
-      "disabled": true
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
+        "compact": true
+      }
     },
     "rings-your-way": {
       "type": "lmh-split-tiles",
@@ -271,47 +271,12 @@
     "gold": {
       "type": "lmh-product-row",
       "blocks": {
-        "gold-1": {
-          "type": "chip",
-          "settings": {
-            "text": "Chains",
-            "url": "/collections/chain-necklaces"
-          }
-        },
-        "gold-2": {
-          "type": "chip",
-          "settings": {
-            "text": "Chain Bracelets",
-            "url": "/collections/chain-bracelets"
-          }
-        },
-        "gold-3": {
-          "type": "chip",
-          "settings": {
-            "text": "Stacking Rings",
-            "url": "/collections/stackable-rings"
-          }
-        },
-        "gold-4": {
-          "type": "chip",
-          "settings": {
-            "text": "Huggies & Hoops",
-            "url": "/collections/huggie-earrings"
-          }
-        },
-        "gold-5": {
-          "type": "chip",
-          "settings": {
-            "text": "Bangles",
-            "url": "/collections/bangles"
-          }
-        },
         "gold-6": {
           "type": "product",
           "settings": {
             "product": "copy-of-band-gold-ring-sizable",
             "title": "Nut Style Ring, Sizeable",
-            "subtitle": "14K Yellow Gold · Stackable"
+            "subtitle": ""
           }
         },
         "gold-7": {
@@ -319,7 +284,7 @@
           "settings": {
             "product": "lmny-paperclip-2-5-mm-pclip060-bracelet",
             "title": "2.5mm Paperclip Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
         "gold-8": {
@@ -327,7 +292,7 @@
           "settings": {
             "product": "lmny-herringbone-2-8-mm-sf030",
             "title": "2.8mm Herringbone Chain Necklace",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
         "gold-9": {
@@ -335,16 +300,11 @@
           "settings": {
             "product": "yellow-gold-bowtie-huggie-earrings-1",
             "title": "Yellow Gold Bowtie Huggie Earrings",
-            "subtitle": "Yellow Gold"
+            "subtitle": ""
           }
         }
       },
       "block_order": [
-        "gold-1",
-        "gold-2",
-        "gold-3",
-        "gold-4",
-        "gold-5",
         "gold-6",
         "gold-7",
         "gold-8",
@@ -352,26 +312,26 @@
       ],
       "settings": {
         "style": "cream",
-        "columns": "5",
-        "ratio": "0.84",
-        "eyebrow": "Gold Jewelry",
-        "title": "Gold for the office,",
-        "title_emphasis": "and after.",
-        "text": "A weekday uniform that survives a noon lunch in Midtown, a 4 p.m. deck and a 7 p.m. drink without a costume change.",
+        "columns": "4",
+        "ratio": "1",
+        "eyebrow": "",
+        "title": "Gold for every day.",
+        "title_emphasis": "",
+        "text": "",
         "all_text": "Shop all",
         "all_url": "/collections/chains",
-        "button_1_text": "",
-        "button_1_url": "",
+        "button_1_text": "Shop gold jewelry",
+        "button_1_url": "/collections/gold-jewelry",
         "button_2_text": "",
         "button_2_url": "",
         "feature_image_asset": "home-gold-editorial.webp",
-        "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets",
+        "feature_image_alt": "Woman wearing gold and diamond jewelry",
         "collection": "",
         "collection_limit": 5,
-        "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/chains"
-      },
-      "disabled": true
+        "mobile_button_text": "",
+        "mobile_button_url": "/collections/chains",
+        "compact": true
+      }
     },
     "rolex": {
       "type": "lmh-product-row",
@@ -418,7 +378,7 @@
           "settings": {
             "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
             "title": "Lab-Grown Round Diamond Solitaire Pendant",
-            "subtitle": "Prong · Made to order"
+            "subtitle": ""
           }
         },
         "lab-2": {
@@ -426,7 +386,7 @@
           "settings": {
             "product": "lab-grown-oval-studs-earring-prong-north-south",
             "title": "Lab-Grown Oval Diamond Stud Earrings",
-            "subtitle": "Prong · Made to order"
+            "subtitle": ""
           }
         },
         "lab-3": {
@@ -434,7 +394,7 @@
           "settings": {
             "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
             "title": "Lab-Grown Round Diamond Tennis Bracelet",
-            "subtitle": "14K White Gold"
+            "subtitle": ""
           }
         },
         "lab-4": {
@@ -442,7 +402,7 @@
           "settings": {
             "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
             "title": "Lab-Grown Round Diamond Eternity Band",
-            "subtitle": "Prong · Made to order"
+            "subtitle": ""
           }
         }
       },
@@ -453,27 +413,27 @@
         "lab-4"
       ],
       "settings": {
-        "style": "navy",
+        "style": "cream",
         "columns": "4",
-        "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
-        "title": "For the push present,",
-        "title_emphasis": "or the promotion you bought yourself.",
-        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "ratio": "1",
+        "eyebrow": "",
+        "title": "Lab-grown favorites.",
+        "title_emphasis": "",
+        "text": "",
         "all_text": "",
         "all_url": "",
-        "button_1_text": "Shop Under $1,000",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
-        "button_2_text": "All Lab-Grown Jewelry",
+        "button_1_text": "Shop lab-grown jewelry",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry",
+        "button_2_text": "",
         "button_2_url": "/collections/lab-grown-diamond-jewelry",
-        "feature_image_asset": "",
-        "feature_image_alt": "",
+        "feature_image_asset": "home-rings-work.webp",
+        "feature_image_alt": "Woman wearing gold and diamond jewelry",
         "collection": "",
         "collection_limit": 5,
         "mobile_button_text": "",
-        "mobile_button_url": ""
-      },
-      "disabled": true
+        "mobile_button_url": "",
+        "compact": true
+      }
     },
     "reviews": {
       "type": "lmh-reviews",
@@ -837,7 +797,8 @@
         "oval",
         "emerald",
         "colored"
-      ]
+      ],
+      "disabled": true
     },
     "everyday": {
       "type": "lmh-split-tiles",
@@ -876,15 +837,16 @@
       "block_order": [
         "gold",
         "lab"
-      ]
+      ],
+      "disabled": true
     },
     "laura-story": {
       "type": "lmh-link-band",
       "settings": {
         "style": "sand",
         "eyebrow": "Meet Laura Milman",
-        "title": "A New York story. A personal approach.",
-        "text": "Over 30 years in the Diamond District, with personal guidance for your next stone, everyday piece, or custom ring."
+        "title": "Meet Laura Milman.",
+        "text": "Personal guidance from New York’s Diamond District."
       },
       "blocks": {
         "link-1": {
@@ -926,25 +888,85 @@
       "block_order": [
         "link-1",
         "link-2"
+      ],
+      "disabled": true
+    },
+    "estate-products": {
+      "type": "lmh-product-row",
+      "settings": {
+        "compact": true,
+        "style": "cream",
+        "columns": "4",
+        "ratio": "1",
+        "eyebrow": "Watches & estate",
+        "title": "The estate edit.",
+        "title_emphasis": "",
+        "text": "",
+        "button_1_text": "Shop watches",
+        "button_1_url": "/collections/time-pieces",
+        "button_2_text": "Shop signed jewelry",
+        "button_2_url": "/collections/estate-jewelry",
+        "collection": ""
+      },
+      "blocks": {
+        "estate-1": {
+          "type": "product",
+          "settings": {
+            "product": "bv-cartier-18k-yellow-gold-tank-francaise-25-ref-1821-ladies-diamond-watch-rr8601",
+            "title": "Pre-Owned Cartier Tank Francaise 25",
+            "subtitle": ""
+          }
+        },
+        "estate-2": {
+          "type": "product",
+          "settings": {
+            "product": "w-t3614",
+            "title": "Unworn Rolex Lady Date Just 28mm",
+            "subtitle": ""
+          }
+        },
+        "estate-3": {
+          "type": "product",
+          "settings": {
+            "product": "bv-tiffany-co-18k-white-gold-t-collection-bangle-bracelet-j10468",
+            "title": "Tiffany & Co. T Collection Bangle",
+            "subtitle": ""
+          }
+        },
+        "estate-4": {
+          "type": "product",
+          "settings": {
+            "product": "bv-cartier-juste-un-clou-18k-rose-gold-diamond-ring-j10183",
+            "title": "Cartier Juste Un Clou Diamond Ring",
+            "subtitle": ""
+          }
+        }
+      },
+      "block_order": [
+        "estate-1",
+        "estate-2",
+        "estate-3",
+        "estate-4"
       ]
     }
   },
   "order": [
     "hero",
     "trust-strip",
-    "diamond-entry",
-    "ring-builder",
-    "reviews",
-    "everyday",
-    "laura-story",
-    "estate-edit",
-    "private-clients",
-    "meet-laura",
     "loose-stones",
-    "rings-your-way",
-    "shelf",
+    "ring-builder",
     "gold",
     "lab-grown",
+    "reviews",
+    "estate-products",
+    "laura-story",
+    "private-clients",
+    "diamond-entry",
+    "everyday",
+    "estate-edit",
+    "meet-laura",
+    "rings-your-way",
+    "shelf",
     "rolex",
     "wear-together",
     "pre-owned",
