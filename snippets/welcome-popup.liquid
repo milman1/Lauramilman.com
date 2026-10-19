@@ -141,6 +141,13 @@
     if (!root) return;
     var key = 'lmny-welcome-dismissed';
     var success = !!root.querySelector('.lm-welcome__success');
+    var builderActive = new URLSearchParams(window.location.search).get('view') === 'ring-builder' || window.location.pathname.indexOf('/pages/ring-builder') === 0;
+    var builder = document.querySelector('[data-rbs]');
+    if (builder) {
+      function pauseForBuilder() { builderActive = true; }
+      builder.addEventListener('pointerdown', pauseForBuilder, { once: true });
+      builder.addEventListener('focusin', pauseForBuilder, { once: true });
+    }
     function open() { root.hidden = false; }
     function close() {
       root.hidden = true;
@@ -156,7 +163,14 @@
     try {
       if (localStorage.getItem(key)) return;
     } catch (e) {}
-    setTimeout(open, 8000);
+    setTimeout(function () {
+      if (builderActive) return;
+      if (builder) {
+        var bounds = builder.getBoundingClientRect();
+        if (bounds.top < window.innerHeight && bounds.bottom > 0) return;
+      }
+      open();
+    }, 30000);
   })();
 </script>
 {%- endunless -%}

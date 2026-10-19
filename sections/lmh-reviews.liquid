@@ -4,7 +4,7 @@
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lmh lmh-reviews" aria-labelledby="LmhReviews-{{ section.id }}">
+<section class="lmh lmh-reviews{% if section.settings.quote_text != blank %} lmh-reviews--quote{% endif %}" aria-labelledby="LmhReviews-{{ section.id }}">
   <div class="lmh-reviews__head">
     <div>
       {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
@@ -14,10 +14,17 @@
       <a class="lmh-arrow" href="{{ section.settings.link_url | default: '/pages/google-reviews' }}">{{ section.settings.link_text | escape }} {% render 'lmh-arrow' %}</a>
     {%- endif -%}
   </div>
+  {%- if section.settings.quote_text != blank -%}
+    <figure class="lmh-reviews__quote">
+      <blockquote>{{ section.settings.quote_text | escape }}</blockquote>
+      <figcaption>{{ section.settings.quote_author | escape }}</figcaption>
+    </figure>
+  {%- else -%}
   <div class="lmh-reviews__widget">
     <div class="sk-ww-google-reviews" data-embed-id="{{ section.settings.embed_id | default: '25717519' }}"></div>
     <script src="https://widgets.sociablekit.com/google-reviews/widget.js" defer></script>
   </div>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -29,7 +36,9 @@
     { "type": "text", "id": "title", "label": "Heading", "default": "What clients say" },
     { "type": "text", "id": "link_text", "label": "Link", "default": "Read all reviews" },
     { "type": "url", "id": "link_url", "label": "Link URL" },
-    { "type": "text", "id": "embed_id", "label": "SociableKit embed ID", "default": "25717519" }
+    { "type": "text", "id": "embed_id", "label": "SociableKit embed ID", "default": "25717519" },
+    { "type": "textarea", "id": "quote_text", "label": "Verified review excerpt", "info": "Optional. Shows this excerpt instead of the widget. Copy an actual review verbatim." },
+    { "type": "text", "id": "quote_author", "label": "Review attribution" }
   ],
   "presets": [{ "name": "LM Google reviews" }]
 }

@@ -725,5 +725,19 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page"
+  },
+  "ring_builder": {
+    "steps_label": "Build your ring steps",
+    "step_setting": "01 · Choose a setting",
+    "step_diamond": "02 · Choose a diamond",
+    "step_review": "03 · Review your ring",
+    "more_shapes": "More shapes",
+    "setting_only": "setting only",
+    "choose_setting": "Choose setting",
+    "custom_title": "Something entirely yours",
+    "custom_note": "Custom setting · illustration",
+    "custom_image_alt": "Illustrative finished yellow gold solitaire ring",
+    "custom_cta": "Explore custom",
+    "pricing_note": "Center diamond priced separately. Setting labor included. We confirm stone dimensions and setting compatibility before production."
   }
 }

@@ -7,13 +7,14 @@
 
 <section class="lmh lmh-split lmh-split--{{ section.settings.style | default: 'warm' }}" aria-labelledby="LmhSplit-{{ section.id }}">
   <h2 class="lmh-h2 lmh-split__title" id="LmhSplit-{{ section.id }}">{{ section.settings.title | escape }}</h2>
-  <div class="lmh-split__grid">
+  <div class="lmh-split__grid{% if section.blocks.size == 2 %} lmh-split__grid--pair{% endif %}">
     {%- for block in section.blocks -%}
       <a class="lmh-split__tile" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
         <span class="lmh-split__media"{% if block.settings.position != blank %} style="--pos: {{ block.settings.position }}"{% endif %}>
-          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 100vw, 33vw' -%}
+          {%- render 'lmh-img', img: block.settings.image, asset: block.settings.image_asset, alt: block.settings.image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
         </span>
         {%- if block.settings.title != blank -%}<span class="lmh-split__label">{{ block.settings.title | escape }}</span>{%- endif -%}
+        {%- if block.settings.text != blank -%}<span class="lmh-split__text">{{ block.settings.text | escape }}</span>{%- endif -%}
         {%- if block.settings.link_text != blank -%}<span class="lmh-split__link">{{ block.settings.link_text | escape }} {% render 'lmh-arrow' %}</span>{%- endif -%}
       </a>
     {%- endfor -%}
@@ -39,6 +40,7 @@
       "name": "Tile",
       "settings": [
         { "type": "text", "id": "title", "label": "Title under the photo" },
+        { "type": "textarea", "id": "text", "label": "Text under the title" },
         { "type": "text", "id": "link_text", "label": "Link text" },
         { "type": "url", "id": "url", "label": "Link" },
         { "type": "image_picker", "id": "image", "label": "Image" },
