@@ -17,7 +17,7 @@
   endif
 -%}
 
-<section class="lmh lmh-stones{% if section.settings.compact %} lmh-stones--compact{% endif %}" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
+<section class="lmh lmh-stones" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
   data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}">
   <div class="lmh-stones__head">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
@@ -25,7 +25,6 @@
     {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
   </div>
 
-  {%- unless section.settings.compact -%}
   <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
     {%- for name in shape_list -%}
       {%- assign icon_key = name | downcase -%}
@@ -38,10 +37,9 @@
       <a class="lmh-chip" href="{{ base }}{{ block.settings.query }}" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>
     {%- endfor -%}
   </div>
-  {%- endunless -%}
 
   <div class="lmh-stones__strip" data-stones-strip hidden>
-    {%- unless section.settings.compact -%}<p class="lmh-stones__strip-title">In stock today <span>{{ section.settings.strip_text | escape }}</span></p>{%- endunless -%}
+    <p class="lmh-stones__strip-title">In stock today <span>{{ section.settings.strip_text | escape }}</span></p>
     <ul class="lmh-stones__track" role="list" data-stones-track></ul>
   </div>
 
@@ -174,7 +172,6 @@
   "name": "LM loose stones",
   "tag": "div",
   "settings": [
-    { "type": "checkbox", "id": "compact", "label": "Product-first layout", "default": false },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loose diamonds" },
     { "type": "text", "id": "title", "label": "Heading", "default": "Start with the stone." },
     { "type": "textarea", "id": "text", "label": "Text", "default": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA." },

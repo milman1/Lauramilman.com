@@ -18,7 +18,7 @@
   endfor
 -%}
 
-<section class="lmh lmh-row{% if section.settings.compact %} lmh-row--compact{% endif %}{% if navy %} lmh-row--navy lmh-dark lmh-navy{% endif %}" aria-labelledby="LmhRow-{{ section.id }}" style="--lmh-card-ratio: {{ section.settings.ratio | default: 0.84 }};">
+<section class="lmh lmh-row{% if navy %} lmh-row--navy lmh-dark lmh-navy{% endif %}" aria-labelledby="LmhRow-{{ section.id }}" style="--lmh-card-ratio: {{ section.settings.ratio | default: 0.84 }};">
   <div class="lmh-split-head">
     <div class="lmh-split-head__l">
       {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
@@ -69,7 +69,7 @@
   {%- endif -%}
   <ul class="lmh-grid lmh-grid--{{ row_cols }} lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
     {%- for block in section.blocks -%}
-      {%- if block.type == 'product' and block.settings.product.available and block.settings.product.featured_image != blank -%}
+      {%- if block.type == 'product' and block.settings.product != blank -%}
         <li {{ block.shopify_attributes }}>
           {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 20vw' -%}
         </li>
@@ -102,7 +102,6 @@
   "name": "LM product row",
   "tag": "div",
   "settings": [
-    { "type": "checkbox", "id": "compact", "label": "Compact product-first layout", "default": false },
     { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
     { "type": "select", "id": "columns", "label": "Cards per row (desktop)", "default": "5", "options": [ { "value": "4", "label": "4" }, { "value": "5", "label": "5" } ] },
     { "type": "text", "id": "ratio", "label": "Photo shape (width / height)", "default": "0.84" },
