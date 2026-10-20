@@ -1277,7 +1277,10 @@ async function fetchFallbackHeadlines(): Promise<Array<{ title: string; link: st
   return out;
 }
 
-const DRAFT_SCHEMA = {
+// Structured output rejects array minItems other than 0 or 1 (the API
+// answers 400 with "got: [2, 5]" even when the value is 3). Exact FAQ
+// length stays in the prompt and in checkDraft.
+export const DRAFT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   required: [
@@ -1299,8 +1302,6 @@ const DRAFT_SCHEMA = {
     bodyHtml: { type: 'string' },
     faq: {
       type: 'array',
-      minItems: FAQ_QUESTIONS,
-      maxItems: FAQ_QUESTIONS,
       items: {
         type: 'object',
         additionalProperties: false,
