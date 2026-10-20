@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { labGrownJewelryRetailFromCost, settingOnlyRetailFromCost, supplierRetailFromCost } from '../config/pricing.js';
 import { settingShapeIssues } from './settingCenterShape.js';
 
-export const POLICY = 'Free insured shipping and 7-day returns.';
+export const POLICY = 'Free insured shipping and 14-day returns.';
 export const SPEC_KEYS = ['diamond_shape', 'carat_weight', 'color', 'clarity', 'metal', 'setting_style'] as const;
 export const REVIEW_CHECKS = ['sourceFactsAndScope', 'copyAndSpecsAcrossVariants', 'weightBasisAndOrigin', 'categoryAndSkuMapping', 'mediaMatchesProduct', 'shippingReturnsApply', 'desktopAndMobilePreview', 'productOfferSchemaAndCanonical', 'availabilityAndPrice', 'salesChannelsAndMarketplace'] as const;
 export type Kind = 'lab-grown' | 'setting' | 'royal-chain' | 'house';

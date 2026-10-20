@@ -156,9 +156,9 @@ describe('lab-grown search heading', () => {
 describe('loose-stone trust block', () => {
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('states shipping, 7-day returns, warranty and the grading lab on every stone page', () => {
+  it('states shipping, 14-day returns, warranty and the grading lab on every stone page', () => {
     expect(diamondProduct).toContain('Free insured U.S. shipping');
-    expect(diamondProduct).toContain('7-day returns');
+    expect(diamondProduct).toContain('14-day returns');
     expect(diamondProduct).toContain('1-year warranty');
     expect(diamondProduct).toContain('Graded by {{ m.lab }}');
     expect(diamondProduct).not.toContain('Independently certified');
