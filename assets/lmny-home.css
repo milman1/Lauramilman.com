@@ -343,11 +343,68 @@
 /* =============================================================
    REVIEWS
    ============================================================= */
-.lmh-reviews { background: var(--lmh-ivory); padding: 64px var(--lmh-gutter); display: flex; flex-direction: column; gap: 28px; }
+.lmh-reviews { background: var(--lmh-espresso); color: var(--lmh-cream); padding: 64px var(--lmh-gutter); display: flex; flex-direction: column; gap: 28px; }
 .lmh-reviews__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
-.lmh-reviews__head > div { display: flex; flex-direction: column; gap: 12px; }
-.lmh-reviews .lmh-h2 { font-size: clamp(30px, 2.64vw, 38px); line-height: 1.05; }
+.lmh-reviews__head > div { display: flex; flex-direction: column; gap: 12px; max-width: 40rem; }
+.lmh-reviews .lmh-eyebrow { color: var(--lmh-gold); }
+.lmh-reviews .lmh-h2 { font-size: clamp(30px, 2.64vw, 38px); line-height: 1.05; color: var(--lmh-cream); }
+.lmh-reviews .lmh-lede { color: var(--lmh-on-dark); }
+.lmh-reviews .lmh-arrow { color: var(--lmh-gold-light) !important; }
 .lmh-reviews__widget { min-height: 128px; }
+.lmh-reviews__links { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 4px 0 0; }
+.lmh-reviews__links a { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--lmh-gold-light); text-decoration: none; border-bottom: 1px solid transparent; }
+.lmh-reviews__links a:hover { border-bottom-color: currentColor; }
+/* SociableKit paints its theme as inline variables on the host. Important
+   wins over those, and the variables inherit into the widget's shadow tree. */
+.lmh-reviews .sk-ww-google-reviews {
+  --font-family: var(--lmh-sans) !important;
+  --widget-bg-color: transparent !important;
+  --widget-font-color: var(--lmh-body) !important;
+  --widget-link-color: var(--lmh-bronze) !important;
+  --widget-tertiary-font-color: var(--lmh-muted) !important;
+  --widget-border-color: transparent !important;
+  --feed-link-hover-color: var(--lmh-espresso) !important;
+  --details-bg-color: var(--lmh-sand) !important;
+  --details-font-color: var(--lmh-ink) !important;
+  --details-font-size: 15px !important;
+  --details-link-color: var(--lmh-bronze) !important;
+  --details-link-hover-color: var(--lmh-espresso) !important;
+  --details-secondary-font-color: var(--lmh-muted) !important;
+  --reviewer-name-color: var(--lmh-espresso) !important;
+  --profile-name-color: var(--lmh-espresso) !important;
+  --review-rating-star-color: var(--lmh-gold) !important;
+  --star-color: var(--lmh-gold) !important;
+  --item-border-color: var(--lmh-line) !important;
+  --item-border-radius: 0 !important;
+  --show-item-border: 1px solid var(--lmh-line) !important;
+  --show-widget-border: none !important;
+  --show-widget-border-radius: 0 !important;
+  --show-box-shadow: none !important;
+  --sk-card-shadow: none !important;
+  --sk-card-hover-shadow: none !important;
+  --show-circular-main-picture: 0 !important;
+  --arrow-background-color: transparent !important;
+  --arrow-color: var(--lmh-gold-light) !important;
+  --arrow-hover-color: var(--lmh-cream) !important;
+  --button-bg-color: var(--lmh-espresso) !important;
+  --button-text-color: var(--lmh-cream) !important;
+  --button-hover-bg-color: var(--lmh-bronze) !important;
+  --button-hover-text-color: var(--lmh-cream) !important;
+  --button-border-radius: 0 !important;
+  --write-a-review-button-background-color: var(--lmh-espresso) !important;
+  --write-a-review-button-text-color: var(--lmh-cream) !important;
+  --badge-bg-color: transparent !important;
+  --badge-font-color: var(--lmh-espresso) !important;
+  --owners-response-bg-color: var(--lmh-tile) !important;
+  --article-bg-color: var(--lmh-sand) !important;
+  --article-text-color: var(--lmh-ink) !important;
+  --pop-up-bg-color: var(--lmh-ivory) !important;
+  --pop-up-font-color: var(--lmh-ink) !important;
+  --pop-up-link-color: var(--lmh-bronze) !important;
+  --tab-bg-color: var(--lmh-espresso) !important;
+  --tab-text-color: var(--lmh-cream) !important;
+}
+.lmh-reviews .sk-widget-loader circle { stroke: var(--lmh-gold); }
 
 /* =============================================================
    TABLET

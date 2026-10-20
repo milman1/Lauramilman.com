@@ -1,73 +1,28 @@
 {%- comment -%}
   Google Reviews — SociableKit embed migrated from the Shopify page body
-  (handle: google-reviews) so it deploys through git.
+  (handle: google-reviews) so it deploys through git. The widget keeps the
+  live, unedited reviews. Its colors are pulled into the homepage palette
+  by assets/lmny-home.css.
 {%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 
-<section class="lm-reviews">
-  <div class="lm-reviews__inner">
-    <header class="lm-reviews__hero">
-      <p class="eyebrow">Client Words</p>
-      <h1 class="lm-reviews__title">Google Reviews</h1>
-      <p class="lm-reviews__intro">These reviews were written by clients and published on Google. The store does not edit them and does not add a rating of its own.</p>
-      <p class="lm-reviews__links">
+<section class="lmh lmh-reviews" aria-labelledby="GoogleReviewsTitle">
+  <header class="lmh-reviews__head">
+    <div>
+      <p class="lmh-eyebrow">Google reviews · shown unedited</p>
+      <h1 class="lmh-h2" id="GoogleReviewsTitle">Google Reviews</h1>
+      <p class="lmh-lede">These reviews were written by clients and published on Google. The store does not edit them and does not add a rating of its own.</p>
+      <p class="lmh-reviews__links">
         <a href="/collections/lab-grown-diamond-jewelry">Lab-Grown Jewelry</a>
         <a href="/collections/david-webb">David Webb</a>
         <a href="/pages/private-clients">Private Clients</a>
       </p>
-    </header>
+    </div>
+  </header>
 
+  <div class="lmh-reviews__widget">
     <div class="sk-ww-google-reviews" data-embed-id="25717519"></div>
     <script src="https://widgets.sociablekit.com/google-reviews/widget.js" defer></script>
+    {% render 'google-reviews-theme' %}
   </div>
 </section>
-
-<style>
-  .lm-reviews {
-    background: var(--warm-white, #FDFAF6);
-    padding: var(--space-3xl, 4rem) 0 var(--space-4xl, 6rem);
-    min-height: 60vh;
-  }
-
-  .lm-reviews__inner {
-    max-width: var(--container-max);
-    margin: 0 auto;
-    padding: 0 var(--container-padding);
-  }
-
-  .lm-reviews__hero {
-    text-align: center;
-    margin-bottom: var(--space-2xl, 3rem);
-  }
-
-  .lm-reviews__title {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 400;
-    color: var(--text-dark);
-    margin: 0.5rem 0 0;
-  }
-
-  .lm-reviews__intro {
-    max-width: 36rem;
-    margin: 1rem auto 0;
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.95rem;
-    font-weight: 300;
-    line-height: 1.7;
-    color: var(--text-muted, #8A8070);
-  }
-
-  .lm-reviews__links {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.75rem 1.25rem;
-    margin: 1.25rem 0 0;
-    font-size: 0.82rem;
-  }
-
-  .lm-reviews__links a {
-    color: var(--text-dark, #2C1810);
-    text-underline-offset: 0.2em;
-  }
-</style>

@@ -51,17 +51,30 @@ describe('lab-grown jewelry merchandising', () => {
 });
 
 describe('homepage consultation and reviews', () => {
-  it('places the private-client band before the story and shows live Google reviews', () => {
+  it('shows live Google reviews in the homepage palette', () => {
     const home = themeJson('templates/index.json');
     const reviews = themeFile('sections/lmh-reviews.liquid');
 
     expect(home.sections['private-clients'].type).toBe('lmh-private-band');
     expect(home.sections['private-clients'].settings?.button_text).toBe('Book a Consultation');
-    expect(home.order.indexOf('private-clients')).toBeLessThan(home.order.indexOf('meet-laura'));
+    expect(home.order.indexOf('reviews')).toBeGreaterThan(home.order.indexOf('loose-stones'));
+    expect(home.order.at(-1)).toBe('private-clients');
     expect(home.sections.reviews.type).toBe('lmh-reviews');
     expect(home.sections.reviews.settings?.title).toBe('Recent reviews');
     expect(home.sections.reviews.settings?.embed_id).toBe('25717519');
     expect(reviews).toContain('sk-ww-google-reviews');
+    expect(reviews).toContain("render 'google-reviews-theme'");
+    expect(themeFile('snippets/google-reviews-theme.liquid')).toContain('a.google-link');
+    expect(themeFile('snippets/google-reviews-theme.liquid')).toContain('#7A5C22');
     expect(JSON.stringify(home.sections.reviews)).not.toContain('Alexandra K.');
+    const homeCss = themeFile('assets/lmny-home.css');
+    expect(homeCss).toContain('--font-family: var(--lmh-sans) !important');
+    expect(homeCss).toContain('--review-rating-star-color: var(--lmh-gold) !important');
+    expect(homeCss).toContain('--widget-bg-color: transparent !important');
+    expect(homeCss).toContain('--details-bg-color: var(--lmh-sand) !important');
+    expect(homeCss).toContain('.lmh-reviews { background: var(--lmh-espresso);');
+    const page = themeFile('templates/page.google-reviews.liquid');
+    expect(page).toContain("lmny-home.css");
+    expect(page).toContain('class="lmh lmh-reviews"');
   });
 });
