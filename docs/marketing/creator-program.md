@@ -10,18 +10,22 @@ The page states the offer. This file is how to run it. Do not put a supplier nam
 
 | | |
 |---|---|
-| Scope | Loose lab-grown diamonds and gold jewelry only |
+| Scope | Loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry |
 | Customer discount | 10% off, one use per customer, does not combine with any other discount |
-| Collections | Lab-Grown Diamonds, Lab-Grown Diamond Jewelry, Chains |
-| Creator commission | 10% of what the customer paid for eligible pieces, after the code, before tax and shipping |
+| Collections | Lab-Grown Diamonds, Lab-Grown Diamond Jewelry, Gold Jewelry |
+| Creator commission | 10% of what the customer paid for eligible pieces in those three collections, after the code, before tax and shipping |
 | Payment | Once a month, after the 7-day return window. Balance carries until it reaches $50. A return is deducted. |
-| Gift | One gold piece the creator chooses, from lab-grown jewelry or chains, kept by them |
-| Not gifted | Loose stones, and the sterling silver lab-grown hoops SKU `ERSLHPRD200P` |
+| Gift | One piece the creator chooses, from loose lab-grown diamonds, lab-grown diamond jewelry, or gold jewelry, kept by them |
+| Not gifted | The sterling silver lab-grown hoops SKU `ERSLHPRD200P` |
 | Post | If they take a piece: one feed post or Reel and two Stories in the 14 days after it arrives. Tag @laurasgemsnyc. Disclose the gift and the code. A code alone does not require a post. |
 
 `LMNYWELCOME` is 10% off 28 collections and does not combine with other discounts. A creator code uses the same rule, so a customer can use one code, not both.
 
+Gold jewelry on the code is the Gold Jewelry collection (`gold-jewelry`): the gold chains, rings, and bracelets in that collection. One active 14K chain extender, SKU `CH014-03`, sits in Chains and is not tagged `gold-jewelry`. Add Chains to that creator's code, or tag the extender `gold-jewelry`, if that extender should stay eligible.
+
 There is no commission cap. A large loose lab-grown diamond pays 10% of the discounted price. Add a cap in the terms before promising one.
+
+`/influencer` is not a redirect in this theme. Add it in Shopify admin → Online Store → Navigation → URL redirects: path `/influencer`, target `/pages/influencer-program`.
 
 ## When you accept someone
 
@@ -29,11 +33,11 @@ There is no commission cap. A large loose lab-grown diamond pays 10% of the disc
 2. Shopify admin → Discounts → Create discount → Amount off products.
    - Code: their name, letters and numbers only, uppercase, such as `JORDAN10`.
    - 10%.
-   - Specific collections: Lab-Grown Diamond Jewelry, Chains, and Lab-Grown Diamonds. No other collections.
+   - Specific collections: Lab-Grown Diamonds, Lab-Grown Diamond Jewelry, and Gold Jewelry. Add Chains only for the extender note above.
    - Combinations: off for product, order, and shipping discounts.
    - Limit to one use per customer. No minimum purchase. No end date.
 3. Tag the customer `creator-active`. Write the code and the payout method in the customer note.
-4. If they want a piece, let them choose one gold piece from lab-grown jewelry or chains. Create a draft order, discount that line to zero, and write `creator gift` in the order note. Do not write what the house paid in the note or on the page. Do not gift a loose stone, or the sterling silver hoops SKU `ERSLHPRD200P`. A code with no gift is allowed.
+4. If they want a piece, let them choose one piece from loose lab-grown diamonds, lab-grown diamond jewelry, or gold jewelry. Create a draft order, discount that line to zero, and write `creator gift` in the order note. Do not write what the house paid in the note or on the page. Do not gift the sterling silver hoops SKU `ERSLHPRD200P`. A code with no gift is allowed.
 5. If the creator's own email uses the code, do not pay commission on that order.
 
 ## When you pay

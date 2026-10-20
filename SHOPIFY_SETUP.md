@@ -235,11 +235,11 @@ Operating steps, including how to issue a code and what may be gifted, are in
 
 The offer is fixed by margin, not by a store-wide rate:
 
-- Scope: loose lab-grown diamonds and gold jewelry only.
+- Scope: loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry.
 - Customer code: 10% off, one use per customer, combinations off.
-- Collections on the code: Lab-Grown Diamonds (`lab-grown-diamonds`), Lab-Grown Diamond Jewelry (`lab-grown-diamond-jewelry`), and Chains (`chains`).
-- Gift: one gold piece the creator chooses, from lab-grown jewelry or chains. Loose stones are not gifted. The sterling silver lab-grown hoops, SKU `ERSLHPRD200P`, are not a gift.
-- Creator earns 10% of what the customer paid for those eligible pieces, after the code, before tax and shipping.
+- Collections on the code: Lab-Grown Diamonds (`lab-grown-diamonds`), Lab-Grown Diamond Jewelry (`lab-grown-diamond-jewelry`), and Gold Jewelry (`gold-jewelry`). Gold jewelry is every piece in that collection (chains, rings, and bracelets), not only chains.
+- Gift: one piece the creator chooses, from loose lab-grown diamonds, lab-grown diamond jewelry, or gold jewelry. The sterling silver lab-grown hoops, SKU `ERSLHPRD200P`, are not a gift.
+- Creator earns 10% of what the customer paid for those three categories, after the code, before tax and shipping.
 - Paid once a month after the 7-day return window, once the balance reaches $50.
 
 Each accepted creator gets their own code. There is no shared program code.

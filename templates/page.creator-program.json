@@ -13,8 +13,8 @@
         "step-2": {
           "type": "step",
           "settings": {
-            "title": "We send a code for diamonds and gold",
-            "text": "The code covers loose lab-grown diamonds and gold jewelry. Choose one gold piece if you want to post it."
+            "title": "We send a code for stones, jewelry, and gold",
+            "text": "The code covers loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry. Choose one piece from those three if you want to post it."
           }
         },
         "step-3": {
@@ -28,14 +28,14 @@
           "type": "term",
           "settings": {
             "title": "The code",
-            "text": "Your code is 10% off loose lab-grown diamonds and gold jewelry: lab-grown diamond jewelry and gold chains. It does not combine with LMNYWELCOME or any other offer. One use per customer. The code is for your audience, not for your own order."
+            "text": "Your code is 10% off loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry, including chains, rings, and bracelets. It does not combine with LMNYWELCOME or any other offer. One use per customer. The code is for your audience, not for your own order."
           }
         },
         "term-earn": {
           "type": "term",
           "settings": {
             "title": "What you earn",
-            "text": "You earn 10% of what your audience pays for those eligible pieces, after your code and before tax and shipping."
+            "text": "You earn 10% of what your audience pays for loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry, after your code and before tax and shipping."
           }
         },
         "term-pay": {
@@ -49,7 +49,7 @@
           "type": "term",
           "settings": {
             "title": "The piece",
-            "text": "You can choose one gold piece from lab-grown jewelry or our chains. It is yours to keep. Loose lab-grown diamonds stay in the store."
+            "text": "You can choose one piece from loose lab-grown diamonds, lab-grown diamond jewelry, or gold jewelry. It is yours to keep."
           }
         },
         "term-post": {
@@ -81,7 +81,7 @@
       "settings": {
         "eyebrow": "Influencer program",
         "title": "Wear it. Share it.",
-        "intro": "The Laura Milman influencer program is for people who post about lab-grown diamonds and gold jewelry. Accepted creators receive a code for those pieces, and can choose one gold piece to wear and post.",
+        "intro": "The Laura Milman influencer program is for people who post about loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry. Accepted creators receive a code for all three, and can choose one piece from them to wear and post.",
         "expect_title": "How it works",
         "terms_title": "The terms",
         "form_title": "Apply",
