@@ -359,6 +359,77 @@
         "mobile_button_url": "/collections/chains"
       }
     },
+    "chains-carousel": {
+      "type": "lmh-catalog-carousel",
+      "blocks": {
+        "band-1": {
+          "type": "product",
+          "settings": {
+            "product": "polished-chevron-band",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-2": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-band",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-3": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-polished-band-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-4": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-ring-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-5": {
+          "type": "product",
+          "settings": {
+            "product": "chevron-wire-ring",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-6": {
+          "type": "product",
+          "settings": {
+            "product": "double-chevron-wire-ring-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        }
+      },
+      "block_order": [
+        "band-1",
+        "band-2",
+        "band-3",
+        "band-4",
+        "band-5",
+        "band-6"
+      ],
+      "settings": {
+        "eyebrow": "Gold",
+        "title": "Chains and bands,",
+        "title_emphasis": "every one.",
+        "text": "Every 14K yellow gold chain necklace and bracelet, and the stacking bands.",
+        "collection": "chains",
+        "collection_2": "",
+        "link_text": "Shop all chains",
+        "link_url": "/collections/chains"
+      }
+    },
     "lab-grown": {
       "type": "lmh-product-row",
       "blocks": {
@@ -621,6 +692,7 @@
     "reviews",
     "rings-your-way",
     "gold",
+    "chains-carousel",
     "lab-grown",
     "pre-owned",
     "private-clients"
