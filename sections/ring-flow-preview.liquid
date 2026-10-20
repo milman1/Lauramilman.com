@@ -1,0 +1,75 @@
+{{ 'ring-flow-preview.css' | asset_url | stylesheet_tag }}
+<div id="lmny-complete-flow">
+
+<div class="eyebrow" style="padding:18px 5% 0">Ring builder · concept preview</div>
+<div class="intro"><h1 id="flow-title">Your ring starts here.</h1><div class="quiet" id="flow-subtitle">Choose either piece first. Build the rest around it.</div><nav aria-label="Ring builder progress"><span data-stage="1">1 · Choose</span><span data-stage="2">2 · Pair</span><span data-stage="3">3 · Personalize</span><span data-stage="4">4 · Bag</span><span data-stage="5">5 · Checkout</span></nav></div>
+<div class="layout solo"><div id="flow-main"><div class="heading"><h2>Where would you like to begin?</h2></div>
+<div class="paths">
+{% assign first_diamond = all_products['lg-917959'] %}
+{% assign first_setting = all_products['hidden-halo-ring-setting-in-18k-yellow-gold-and-platinum-0-09-ct'] %}
+<button type="button" class="path rb-preview-control" data-action="start-diamond">{{ first_diamond.featured_image | image_url: width: 800 | image_tag: width: 800, height: 800, loading: 'eager', fetchpriority: 'high', alt: 'Oval lab-grown diamond' }}<div><h2>Start with a diamond</h2><p class="quiet">Find your stone, then choose its setting.</p><span class="eyebrow">Choose your diamond →</span></div></button>
+<button type="button" class="path rb-preview-control" data-action="start-setting">{{ first_setting.featured_image | image_url: width: 800 | image_tag: width: 800, height: 800, loading: 'eager', alt: 'Oval ring setting' }}<div><h2>Start with a setting</h2><p class="quiet">Choose your design, then find its stone.</p><span class="eyebrow">Choose your setting →</span></div></button>
+</div><noscript>This interactive concept requires JavaScript.</noscript></div><aside id="flow-summary" hidden aria-label="Your ring" aria-live="polite"></aside></div>
+<footer><span>Concept only · sample oval inventory, prices & checkout · no purchase</span><button class="link rb-preview-control" data-action="restart">Start again</button></footer>
+
+<script type="application/json" data-preview-products>
+{
+"setting": [
+{% assign emitted = false %}
+{% assign preview_product = all_products['hidden-halo-ring-setting-in-18k-yellow-gold-and-platinum-0-09-ct'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "Hidden halo", "spec": "18K yellow gold & platinum \u00b7 oval center", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+{% assign preview_product = all_products['oval-hidden-halo-engagement-ring-setting-in-18k-yellow-gold-0-11-ct'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "Hidden halo", "spec": "18K yellow gold \u00b7 0.11 ct accents", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+{% assign preview_product = all_products['north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "Four-prong solitaire", "spec": "18K yellow gold \u00b7 oval center", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+],
+"diamond": [
+{% assign emitted = false %}
+{% assign preview_product = all_products['lg-917959'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "1.04 ct Oval", "spec": "E \u00b7 VS1 \u00b7 IGI", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+{% assign preview_product = all_products['lg-924390'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "1.01 ct Oval", "spec": "E \u00b7 VVS2 \u00b7 IGI", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+{% assign preview_product = all_products['lg-924091'] %}
+{% if preview_product != blank and preview_product.available and preview_product.featured_image != blank %}
+{% if emitted %},{% endif %}
+{"name": "1.06 ct Oval", "spec": "E \u00b7 VVS2 \u00b7 IGI", "price": {{ preview_product.price | divided_by: 100.0 | json }}, "image": {{ preview_product.featured_image | image_url: width: 800 | json }}}
+{% assign emitted = true %}
+{% endif %}
+]
+}
+</script>
+</div>
+<script src="{{ 'ring-flow-preview.js' | asset_url }}" defer="defer"></script>
+{% schema %}
+{
+  "name": "Ring flow preview",
+  "tag": "section",
+  "limit": 1,
+  "settings": [],
+  "presets": [
+    {
+      "name": "Ring flow preview"
+    }
+  ]
+}
+{% endschema %}

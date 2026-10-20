@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "ring-flow-preview",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
