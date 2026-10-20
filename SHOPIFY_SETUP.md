@@ -377,3 +377,18 @@ Expect exit 0 and `Jewelry CSV OK`. Fix every listed row before Shopify
 Admin → Products → Import. This is the same idea as the Back Vault scrub
 in §3b: catch blanks before they go live.
 
+---
+
+## 12. House invoice
+
+Staff print a bill from the page **Invoice** (`/pages/invoice`), theme
+template `templates/page.invoice.liquid`. It is a blank sheet in the house
+colors: type the customer, the piece, and the amount, then **Print / Save
+PDF**. The store does not save what is typed, and the page is not in the
+menu or the search index.
+
+The page is created unpublished, with template suffix `invoice`. Publish it
+in Admin → Pages only after this template is on the live theme. Until then
+the live theme has no invoice layout, and a published page would render as
+an ordinary empty page. The page body is not the invoice; the template is.
+
