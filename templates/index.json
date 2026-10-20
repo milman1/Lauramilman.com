@@ -116,13 +116,24 @@
         "eyebrow": "Ring Builder",
         "title": "Build your ring",
         "heading_level": "h2",
-        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
         "card_limit": 4,
         "more_url": "/pages/ring-builder",
+        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
-        "contact_url": "/pages/contact",
-        "show_diamond_path": false
+        "show_diamond_path": false,
+        "contact_url": "/pages/contact"
+      }
+    },
+    "meet-laura": {
+      "type": "lmh-meet",
+      "settings": {
+        "image_asset": "",
+        "image_alt": "Laura Milman",
+        "title": "Meet Laura Milman",
+        "text": "Discover the story behind the jewelry.",
+        "link_text": "Read Laura's Story",
+        "link_url": "/pages/about"
       }
     },
     "loose-stones": {
@@ -599,30 +610,19 @@
         "button_url": "/pages/private-clients",
         "note": "Complimentary · No obligation"
       }
-    },
-    "meet-laura": {
-      "type": "lmh-meet",
-      "settings": {
-        "image_asset": "",
-        "image_alt": "Laura Milman",
-        "title": "Meet Laura Milman",
-        "text": "Discover the story behind the jewelry.",
-        "link_text": "Read Laura's Story",
-        "link_url": "/pages/about"
-      }
     }
   },
   "order": [
     "hero",
     "trust-strip",
     "ring-builder",
+    "meet-laura",
     "loose-stones",
     "reviews",
     "rings-your-way",
     "gold",
     "lab-grown",
     "pre-owned",
-    "private-clients",
-    "meet-laura"
+    "private-clients"
   ]
 }
