@@ -11,7 +11,8 @@
     const shapes = ['Round', 'Oval', 'Cushion', 'Emerald', 'Pear', 'Princess', 'Radiant', 'Asscher', 'Marquise', 'Heart'];
     const handlePattern = /^[a-z0-9][a-z0-9-]{0,99}$/;
     const storageKey = 'lmRingFlowV1';
-    const t = (key, values = {}) => Object.entries(values).reduce((s, [k, v]) => s.replaceAll('{{ ' + k + ' }}', String(v)).replaceAll('__' + k + '__', String(v)), cfg.copy[key] || key);
+    const translations = Object.fromEntries(Object.entries(cfg.copy).map(([key, value]) => [key, String(value).replace(/&(amp|lt|gt|quot|#39|#x27);/g, entity => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&#x27;': "'" }[entity]))]));
+    const t = (key, values = {}) => Object.entries(values).reduce((s, [k, v]) => s.replaceAll('{{ ' + k + ' }}', String(v)).replaceAll('__' + k + '__', String(v)), translations[key] || key);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const base = (cfg.root || '/').replace(/\/?$/, '/');
     const route = path => base + path;
@@ -68,7 +69,7 @@
     }
     async function product(handle) {
       if (!handlePattern.test(handle || '')) throw new Error(t('unavailable'));
-      const p = await request(route('products/' + handle + '?view=ring-flow-data'), { headers: { Accept: 'application/json' } });
+      const p = await request(route('products/' + handle + '?view=ring-flow-data'), { headers: { Accept: 'text/html' } });
       if (p.handle !== handle || !p.available || !Array.isArray(p.variants) || !p.variants.some(v => v.available && Number.isFinite(v.price) && v.price > 0)) throw new Error(t('unavailable'));
       return p;
     }
