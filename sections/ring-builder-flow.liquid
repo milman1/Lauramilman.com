@@ -28,13 +28,13 @@
           <div><h2>{{ 'ring_flow.start_setting' | t }}</h2><p class="quiet">{{ 'ring_flow.setting_intro' | t }}</p><span class="eyebrow">{{ 'ring_flow.choose_setting' | t }} →</span></div>
         </button>
       </div>
-      <noscript><p>{{ 'ring_flow.no_javascript' | t }} <a href="{{ section.settings.contact_url }}">{{ 'ring_flow.help' | t }}</a></p></noscript>
+      <noscript><p>{{ 'ring_flow.no_javascript' | t }} <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">{{ 'ring_flow.help' | t }}</a></p></noscript>
     </div>
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
   </div>
   <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>
   <script type="application/json" data-flow-config>
-    {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | json }},"settings":[
+    {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | default: '/pages/contact' | json }},"settings":[
       {% assign setting_emitted = false %}
       {% for ring in settings_collection.products limit: 50 %}
         {% capture ring_shape %}{% render 'center-stone-shape', product: ring %}{% endcapture %}
@@ -189,7 +189,7 @@
     {"type":"product","id":"diamond_product","label":"Diamond entry photograph"},
     {"type":"text","id":"api_base_url","label":"Diamond search URL"},
     {"type":"text","id":"api_anon_key","label":"Public diamond search key"},
-    {"type":"url","id":"contact_url","label":"Contact page","default":"/pages/contact"}
+    {"type":"url","id":"contact_url","label":"Contact page"}
   ],
   "presets":[{"name":"Ring builder flow"}]
 }
