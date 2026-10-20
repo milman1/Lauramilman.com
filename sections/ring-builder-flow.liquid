@@ -1,4 +1,5 @@
 {{ 'ring-builder-flow.css' | asset_url | stylesheet_tag }}
+{{ 'diamond-filter.css' | asset_url | stylesheet_tag }}
 {%- assign settings_collection = section.settings.settings_collection -%}
 {%- assign first_setting = settings_collection.products.first -%}
 {%- assign first_diamond = section.settings.diamond_product -%}
@@ -33,6 +34,16 @@
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
   </div>
   <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>
+  <template data-diamond-filter-template>
+    <div class="diamond-search lm-dfilter lm-dfilter--navy" data-ring-builder="true">
+      {% render 'diamond-origin-tabs', current: 'lab' %}
+      {% assign filter_shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ',' %}
+      {% assign filter_clarity = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
+      {% assign filter_color = 'M,L,K,J,I,H,G,F,E,D' | split: ',' %}
+      {% assign filter_cut = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ',' %}
+      {% render 'diamond-api-filter-form', form_url: request.path, carat_floor: 0.3, carat_ceil: 15, price_floor: 0, price_ceil: 50000, shape_order: filter_shapes, clarity_order: filter_clarity, color_order: filter_color, cut_order: filter_cut %}
+    </div>
+  </template>
   <script type="application/json" data-flow-config>
     {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | default: '/pages/contact' | json }},"settings":[
       {% assign setting_emitted = false %}

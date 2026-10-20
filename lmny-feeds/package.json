@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Belgium Dia feed \u2192 Shopify catalog sync for Laura Milman New York. Optional Supabase stones dual-write prepares moving diamonds off Shopify products.",
+  "description": "Belgium Dia feed → Shopify catalog sync for Laura Milman New York. Optional Supabase stones dual-write prepares moving diamonds off Shopify products.",
   "scripts": {
     "sync": "tsx src/sync.ts",
     "sync:dry": "tsx src/sync.ts --dry-run",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "liquidjs": "^10.30.0",
     "playwright": "^1.55.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",

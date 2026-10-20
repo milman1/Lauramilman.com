@@ -130,13 +130,78 @@
       const lock = state.kind === 'diamond' ? state.setting : state.diamond;
       const shapeOptions = shapes.map(s => [s, s]);
       const shape = lock?.shape || state.filters.shape;
-      const all = ['', t('all')];
       if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}</div>${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
-      return `<details class="filter-panel" open><summary>${esc(t('filters'))}</summary><form data-search-form><div class="filter-grid">${selectField('origin', 'origin', [['lab', t('lab')], ['natural', t('natural')]], state.filters.origin)}${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${selectField('color', 'color', [all, ...'D,E,F,G,H,I,J,K,L,M'.split(',').map(v => [v, v])], state.filters.color)}${selectField('clarity', 'clarity', [all, ...'FL,IF,VVS1,VVS2,VS1,VS2,SI1,SI2,I1'.split(',').map(v => [v, v])], state.filters.clarity)}${selectField('cut', 'cut', [all, ...['Ideal', 'Excellent', 'Very Good', 'Good'].map(v => [v, v])], state.filters.cut)}${['min_carat', 'max_carat', 'min_price', 'max_price'].map(key => `<label>${esc(t({ min_carat: 'carat_min', max_carat: 'carat_max', min_price: 'price_min', max_price: 'price_max' }[key]))}<input data-filter="${key}" type="number" min="0" step="${key.includes('carat') ? '.01' : '1'}" value="${esc(state.filters[key])}"></label>`).join('')}</div>${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : ''}<div class="filter-actions"><button class="primary" type="submit">${esc(t('apply'))}</button>${button('reset', 'reset', 'link')}</div></form></details>`;
+      return root.querySelector('[data-diamond-filter-template]').innerHTML + (lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : '');
     }
+    function paintDiamondFilters() {
+      const form = main.querySelector('#DiamondFilterForm');
+      if (!form) return;
+      form.dataset.searchForm = '';
+      const isNatural = state.filters.origin === 'natural';
+      main.querySelector('.diamond-search').classList.toggle('lm-dfilter--navy', !isNatural);
+      main.querySelectorAll('.lm-dfilter__origin-btn').forEach(link => {
+        const origin = link.getAttribute('href').includes('/natural-') ? 'natural' : link.getAttribute('href').includes('/lab-grown-') ? 'lab' : '';
+        if (!origin) return;
+        link.dataset.origin = origin;
+        link.classList.toggle('is-active', state.filters.origin === origin);
+        if (state.filters.origin === origin) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+      });
+      form.querySelector('.lm-dfilter__reset').dataset.action = 'reset';
+      form.querySelectorAll('.lm-shape input').forEach(input => {
+        input.checked = (state.setting?.shape || state.filters.shape).split(',').includes(input.value);
+        input.disabled = !!state.setting;
+        input.parentElement.classList.toggle('is-active', input.checked);
+      });
+      form.querySelectorAll('[data-scale]').forEach(scale => {
+        const picked = state.filters[scale.dataset.scale].split(',').filter(Boolean);
+        scale.querySelectorAll('input').forEach(input => {
+          input.checked = picked.includes(input.value);
+          input.parentElement.classList.toggle('is-in-range', input.checked);
+          input.parentElement.classList.toggle('is-floor', input.checked);
+        });
+        scale.querySelector('[data-scale-fill]').style.right = '100%';
+        const hint = scale.parentElement.querySelector('[data-scale-hint]');
+        if (!hint.dataset.any) hint.dataset.any = hint.textContent;
+        hint.textContent = picked.length ? picked.join(', ') : hint.dataset.any;
+      });
+      form.querySelectorAll('[data-range]').forEach(range => {
+        const key = range.dataset.rangeKey;
+        const floor = key === 'carat' ? 0.3 : 0;
+        const ceil = key === 'carat' ? (isNatural ? 30 : 15) : (isNatural ? 250000 : 50000);
+        range.dataset.ceil = ceil;
+        ['min', 'max'].forEach(side => {
+          const input = range.querySelector('[data-range-' + side + ']');
+          input.dataset.filter = side + '_' + key;
+          input.max = ceil;
+          if (document.activeElement !== input) input.value = state.filters[side + '_' + key] || (side === 'min' ? floor : ceil);
+        });
+        const low = Number(range.querySelector('[data-range-min]').value);
+        const high = Number(range.querySelector('[data-range-max]').value);
+        const pct = n => Math.max(0, Math.min(100, (n - floor) / (ceil - floor) * 100));
+        const fill = range.querySelector('[data-range-fill]');
+        fill.style.left = Math.min(pct(low), pct(high)) + '%';
+        fill.style.right = (100 - Math.max(pct(low), pct(high))) + '%';
+      });
+    }
+    function readDiamondFilters() {
+      const form = main.querySelector('#DiamondFilterForm');
+      if (!form) return;
+      if (!state.setting) state.filters.shape = [...form.querySelectorAll('.lm-shape input:checked')].map(input => input.value).join(',');
+      for (const key of ['color', 'clarity', 'cut']) state.filters[key] = [...form.querySelectorAll('[data-scale="' + key + '"] input:checked')].map(input => input.value).join(',');
+      form.querySelectorAll('[data-range]').forEach(range => {
+        const key = range.dataset.rangeKey;
+        for (const side of ['min', 'max']) {
+          const value = range.querySelector('[data-range-' + side + ']').value;
+          const bound = side === 'min' ? range.dataset.floor : range.dataset.ceil;
+          state.filters[side + '_' + key] = Number(value) === Number(bound) ? '' : value;
+        }
+      });
+    }
+
     function catalogShell() {
       const k = state.kind;
       main.innerHTML = `<div class="heading"><h2>${esc(t('choose_' + k))}.</h2>${button('back', 'start', 'link')}</div>${filters()}<div class="toolbar"><span class="quiet" data-count>${esc(t('loading'))}</span>${k === 'diamond' ? `<label>${esc(t('sort'))}<select data-sort>${['price_asc', 'price_desc', 'carat_asc', 'carat_desc'].map(s => `<option value="${s}" ${state.filters.sort === s ? 'selected' : ''}>${esc(t(s))}</option>`).join('')}</select></label>` : ''}</div><div data-results></div><div class="pager" data-pager></div><p class="quiet rule">${esc(t(k === 'diamond' ? 'unit_usd' : 'setting_only'))}</p>`;
+      if (k === 'diamond') paintDiamondFilters();
     }
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
@@ -227,6 +292,7 @@
       render();
     }
     function resetSearch() {
+      if (state.kind === 'diamond') state.filters.shape = state.setting?.shape || '';
       for (const key of ['color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price']) state.filters[key] = '';
       state.page = 1;
       notice('');
@@ -289,6 +355,15 @@
       }
     }
     root.addEventListener('click', async event => {
+      const originLink = event.target.closest('[data-origin]');
+      if (originLink) {
+        event.preventDefault();
+        if (state.busy) return;
+        readDiamondFilters(); state.filters.origin = originLink.dataset.origin;
+        state.page = 1; paintDiamondFilters(); search(); persist(); return;
+      }
+      const resetLink = event.target.closest('.lm-dfilter__reset');
+      if (resetLink) event.preventDefault();
       const el = event.target.closest('[data-action]');
       if (!el || el.disabled || state.busy) return;
       const action = el.dataset.action;
@@ -325,6 +400,7 @@
       if (!event.target.matches('[data-search-form]')) return;
       event.preventDefault();
       if (state.busy) return;
+      readDiamondFilters();
       for (const pair of [['min_carat', 'max_carat'], ['min_price', 'max_price']]) {
         const [low, high] = pair.map(k => state.filters[k]);
         if ((low !== '' && (!Number.isFinite(Number(low)) || Number(low) < 0)) || (high !== '' && (!Number.isFinite(Number(high)) || Number(high) < 0)) || (low !== '' && high !== '' && Number(low) > Number(high))) { notice(t('range_error'), true); return; }
@@ -334,6 +410,7 @@
     root.addEventListener('change', event => {
       if (state.busy) return;
       const el = event.target;
+      if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); persist(); return; }
       if (el.dataset.filter) {
         state.filters[el.dataset.filter] = el.value;
         if (state.kind === 'setting') { state.page = 1; settingResults(); persist(); }
@@ -350,6 +427,7 @@
     root.addEventListener('input', event => {
       if (state.busy) return;
       const el = event.target;
+      if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); return; }
       if (el.dataset.filter) state.filters[el.dataset.filter] = el.value;
       if (el.dataset.field === 'engraving') { state.engraving = el.value.slice(0, 20); state.group = ''; main.querySelector('[data-inscription]').textContent = state.engraving; persist(); }
     });
@@ -371,7 +449,7 @@
         state.date = /^\d{4}-\d{2}-\d{2}$/.test(stored.date || '') ? stored.date : '';
         state.font = stored.font === 'script' ? 'script' : 'block';
         state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
-        if (stored.filters && shapes.includes(stored.filters.shape)) state.filters = { ...state.filters, ...stored.filters };
+        if (stored.filters && String(stored.filters.shape).split(',').every(shape => !shape || shapes.includes(shape))) state.filters = { ...state.filters, ...stored.filters };
       }
       if (!settingHandle && !diamondHandle) { main.dataset.initialStart = 'true'; root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || ''; return; }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';

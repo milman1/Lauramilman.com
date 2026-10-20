@@ -1,0 +1,740 @@
+
+.lm-dfilter {
+    background: var(--warm-white, #FDFAF6);
+    padding: 2.5rem 0 0.5rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.85rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__subtitle {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted, #8A8070);
+    margin: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__form {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    padding: 2rem;
+    
+    overflow: visible;
+    min-width: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__origin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 1.25rem auto 0;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 100px;
+    overflow: hidden;
+    background: var(--warm-white, #FDFAF6);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__origin-btn {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted, #8A8070);
+    padding: 0.55rem 1.15rem;
+    transition: all 0.2s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__origin-btn:hover {
+    color: var(--text-dark, #2C1810);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__origin-btn.is-active {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__origin-btn.is-active {
+    background: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 3rem;
+    min-width: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__group--wide {
+    grid-column: 1 / -1;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__group {
+    position: relative;
+    min-width: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    border-radius: 50%;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    background: transparent;
+    color: var(--text-muted, #8A8070);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+    
+    position: static;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info:hover,:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info:focus-visible {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    
+    width: 260px;
+    max-width: calc(100vw - 3rem);
+    box-sizing: border-box;
+    padding: 0.65rem 0.8rem;
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: left;
+    white-space: normal;
+    border-radius: var(--radius-sm, 4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 5;
+    pointer-events: none;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info:hover::after,:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__info:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__shapes {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.7rem 0.25rem 0.55rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape:hover {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.06);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape.is-active {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.14);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape.is-empty {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape .shape-btn__icon {
+    width: 34px;
+    height: 34px;
+    color: currentColor;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape__name {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.6rem;
+    color: var(--text-muted, #8A8070);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field span {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field input {
+    box-sizing: border-box;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    color: var(--text-dark, #2C1810);
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--warm-white, #FDFAF6);
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    -moz-appearance: textfield;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field input::-webkit-outer-spin-button,:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__field input:focus {
+    outline: none;
+    border-color: var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__dash {
+    color: var(--text-muted, #8A8070);
+    padding-bottom: 0.7rem;
+    flex: 0 0 auto;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__track {
+    position: relative;
+    height: 3px;
+    margin: 1.1rem 0 0.25rem;
+    background: var(--rule-light, #DDD5C5);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-range__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    background: var(--gold, #C9A050);
+    border-radius: 3px;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale {
+    position: relative;
+    padding-top: 0.35rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0.85rem;
+    height: 3px;
+    background: var(--rule-light, #DDD5C5);
+    border-radius: 3px;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--gold, #C9A050);
+    border-radius: 3px;
+    transition: left 0.18s ease, right 0.18s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stops {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.15rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--warm-white, #FDFAF6);
+    border: 2px solid var(--rule-light, #DDD5C5);
+    transition: all 0.18s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop:hover .lm-scale__dot {
+    border-color: var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop.is-in-range .lm-scale__dot {
+    background: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop.is-floor .lm-scale__dot {
+    width: 17px;
+    height: 17px;
+    box-shadow: 0 0 0 4px rgba(201, 160, 80, 0.22);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__name {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--text-muted, #8A8070);
+    white-space: nowrap;
+    transition: color 0.18s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__stop.is-in-range .lm-scale__name {
+    color: var(--text-dark, #2C1810);
+    font-weight: 600;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.56rem;
+    color: var(--text-muted, #8A8070);
+    font-variant-numeric: tabular-nums;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__hint {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    color: var(--text-muted, #8A8070);
+    margin: 0.75rem 0 0;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-bands {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    padding: 0.55rem 0.4rem;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-band:hover {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.06);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-band.is-active {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.14);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-band__label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-band__count {
+    font-size: 0.58rem;
+    color: var(--text-muted, #8A8070);
+    font-variant-numeric: tabular-nums;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__apply {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2.25rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: none;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__apply:hover {
+    background: var(--text-dark, #2C1810);
+    box-shadow: var(--shadow-md);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__reset {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--wine, #4A1428);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    margin: 2rem 0 1.5rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__count {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-muted, #8A8070);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__sort label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__sort select {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    color: var(--text-dark, #2C1810);
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    padding: 8px 32px 8px 12px;
+    background: transparent;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A8070' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+    padding-bottom: 3rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__empty {
+    text-align: center;
+    padding: 4rem 1rem 5rem;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__empty-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 0.5rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__empty-text {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+    margin: 0 0 1.75rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    padding: 2rem 0 4rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__page,:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__arrow {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--text-dark, #2C1810);
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.2s ease;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__page:hover,:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__arrow:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--gold-dark, #A88340);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__page--current {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter .lm-pagination__ellipsis {
+    color: var(--text-muted, #8A8070);
+    padding: 0 0.25rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-pagination__page--current {
+    background: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-pagination__page:hover,:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-pagination__arrow:hover {
+    border-color: var(--gold, #C9A050);
+    color: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__setup {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border: 1px dashed var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-muted, #8A8070);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__setup code {
+    background: rgba(201, 160, 80, 0.12);
+    padding: 0 0.25rem;
+    border-radius: 3px;
+  }
+.lm-dfilter--navy {
+    background: linear-gradient(180deg, #F8F1EA 0%, var(--warm-white, #FDFAF6) 100%);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__title {
+    color: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-shape:hover,:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-grade:hover {
+    border-color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.06);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-shape.is-active {
+    border-color: var(--gold, #C9A050);
+    background: rgba(201, 160, 80, 0.16);
+    box-shadow: inset 0 0 0 1px var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-grade.is-in-range,:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-chip.is-active {
+    border-color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.08);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-range__fill {
+    background: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__apply {
+    background: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__apply:hover {
+    background: #2E0C18;
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__reset {
+    color: var(--wine, #4A1428);
+  }
+
+  @media (max-width: 1024px) {
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.75rem;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__shapes {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+      text-align: center;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__sort label {
+      display: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+.lm-dfilter {
+      padding-top: 1.5rem;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__form {
+      padding: 1.25rem;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__shapes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-scale__row {
+      flex-wrap: wrap;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-grade {
+      flex: 0 0 calc(25% - 0.3rem);
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__apply {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__atc,:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__buy {
+    flex: 1;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.55rem 0.4rem;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__atc {
+    background: var(--espresso, #1E1109);
+    color: var(--cream, #FAF6F0);
+    border-color: var(--espresso, #1E1109);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__buy {
+    background: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+    border-color: var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__atc {
+    background: var(--wine, #4A1428);
+    border-color: var(--wine, #4A1428);
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter--navy .lm-dfilter__results-host .lm-stone-card__buy {
+    background: var(--gold, #C9A050);
+    border-color: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-builder-note {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--gold, #C9A050);
+    border-radius: var(--radius-md, 8px);
+    background: var(--warm-white, #FDFAF6);
+    color: var(--text-dark, #2C1810);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-builder-note a { color: var(--text-dark, #2C1810); font-weight: 600; margin-left: 0.35rem; }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-shape-lock {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+  }
+:is(#lmny-ring-builder,.lm-dfilter).lm-dfilter[data-ring-builder] .lm-shape:has(input:disabled:not(:checked)) { opacity: 0.35; }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__ring {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__choose {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-sm, 4px);
+    background: var(--gold, #C9A050);
+    color: var(--espresso, #1E1109);
+    border: 1px solid var(--gold, #C9A050);
+  }
+:is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__results-host .lm-stone-card__choose:hover { background: #b88f42; }
