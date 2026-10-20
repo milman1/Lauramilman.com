@@ -79,32 +79,26 @@ function ageInDays(readAt: string | null, now: number): number | null {
 }
 
 /**
- * Price an unmatched piece from what the last matching run remembered about it.
+ * Count what the last matching run remembered about an unmatched piece.
  *
  * The competitor's catalogue is larger than the page-based pagination its
  * endpoint allows (src/backvault/competitor.ts), so a COMPLETE index is not
- * reachable and some run will always fail to match a piece that is really
- * there. Pricing that piece flat would cut its ticket this week and the next
- * good match would raise it again — the churn the whole competitor rule exists
- * to avoid.
+ * reachable. That no longer changes the ticket: retail is the supplier
+ * listed price times BACKVAULT.listedPriceFactor either way.
  *
- * So each matched piece remembers the competitor price and the date it was
- * read (`backvault_feed.competitor_price` / `competitor_price_at`), and on a
- * run whose index is incomplete an unmatched piece is handled by that memory:
+ * Each matched piece still remembers the competitor price and the date it was
+ * read (`backvault_feed.competitor_price` / `competitor_price_at`). Retail is
+ * always the supplier listed price times BACKVAULT.listedPriceFactor, so a
+ * remembered comparison does not change `priceUsd`.
  *
- *  - Remembered, and no older than COMPETITOR_MEMORY_DAYS: the remembered
- *    price becomes this run's `competitorPriceUsd` and the ORDINARY pricing
- *    rule computes the midpoint against the CURRENT cost. A supplier markdown
- *    therefore still reaches the storefront, at the same midpoint premium, and
- *    the price is stable week to week because the content hash already carries
- *    `competitorPrice`.
- *  - Nothing remembered, a memory with no readable date, one read too long
- *    ago, or one whose midpoint loses to the floor: flat, cost + markup —
- *    exactly what the rule says for a piece that is not on the competitor.
- *    Nothing is protected and nothing is frozen. The four are counted apart,
- *    because "we never knew", "we have forgotten", "we cannot tell how old
- *    this is" and "the comparison was too cheap to matter" are different
- *    facts about the same price.
+ *  - Remembered, and no older than COMPETITOR_MEMORY_DAYS: counted. The
+ *    listed-price rule is at or under any midpoint the old code would have
+ *    written, so the memory is a `flooredToFlat` and the item is left at
+ *    10% under the current listed price.
+ *  - Nothing remembered, a memory with no readable date, or one read too long
+ *    ago: the same listed-price ticket. The counts stay apart, because "we
+ *    never knew", "we have forgotten", and "we cannot tell how old this is"
+ *    are different facts. None of them changes the number on the store.
  *
  * A complete index always wins over memory: with the whole catalogue read, an
  * unmatched piece is genuinely unmatched. A fresh match always wins too, and

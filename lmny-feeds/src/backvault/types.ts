@@ -64,7 +64,7 @@ export interface BackVaultItem {
    * piece every week.
    */
   competitorPriceReadAt?: string;
-  /** Retail on the store: midpoint with the competitor, else cost + BACKVAULT.markupUsd. */
+  /** Retail on the store: the supplier listed price times BACKVAULT.listedPriceFactor. */
   priceUsd: number;
   available: boolean;
   sku?: string;
