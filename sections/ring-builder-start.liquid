@@ -13,7 +13,6 @@
 {%- liquid
   assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
   assign setting_collection = collections[section.settings.settings_collection]
-  assign builder_view = section.settings.builder_view | default: 'ring-builder' | handleize
   assign heading_tag = 'h1'
   if section.settings.heading_level == 'h2'
     assign heading_tag = 'h2'
@@ -58,7 +57,7 @@
               {%- assign ring_shape = ring_shape | strip -%}
               {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
               <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" hidden>
-                <a class="rbs__card-link" href="{{ ring.url }}?view={{ builder_view }}">
+                <a class="rbs__card-link" href="/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;shape={{ ring_shape | url_encode }}">
                   <span class="rbs__media">
                     {%- if ring.featured_image -%}
                       <img

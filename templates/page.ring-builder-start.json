@@ -1,8 +1,13 @@
 {
   "sections": {
     "main": {
-      "type": "ring-builder-start",
-      "settings": {}
+      "type": "ring-builder-flow",
+      "settings": {
+        "settings_collection": "ring-settings",
+        "diamond_product": "lg-917959",
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
+      }
     },
     "trust": {
       "type": "trust-strip",

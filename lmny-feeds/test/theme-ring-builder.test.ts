@@ -42,7 +42,8 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     expect(search.sections.main.settings).toMatchObject({ ring_builder_mode: true });
 
     const start = template('templates/page.ring-builder-start.json');
-    expect(start.sections.main.type).toBe('ring-builder-start');
+    expect(start.sections.main.type).toBe('ring-builder-flow');
+    expect(template('templates/page.ring-builder.json').sections.main.type).toBe('ring-builder-flow');
   });
 
   it('lists diamonds only on settings sold without a center stone, by the ring shape', () => {
@@ -66,6 +67,7 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     const start = themeFile('sections/ring-builder-start.liquid');
     expect(start).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(start).toContain("ring.tags contains 'ring-setting'");
-    expect(start).toContain('?view={{ builder_view }}');
+    expect(start).toContain('/pages/ring-builder?setting={{ ring.handle | url_encode }}');
+    expect(start).toContain('shape={{ ring_shape | url_encode }}');
   });
 });
