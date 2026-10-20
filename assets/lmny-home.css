@@ -616,6 +616,16 @@
   .lmh-shelf .lmh-card__title { font-size: 17px; }
 }
 
+/* jewelry carousel: the shelf track, on sand, with the homepage heading */
+.lmh-carousel { background: var(--lmh-sand); }
+.lmh-carousel .lmh-shelf__head > div { display: flex; flex-direction: column; gap: 12px; max-width: 40rem; }
+.lmh-carousel .lmh-shelf__head .lmh-h2 { color: var(--lmh-espresso); }
+.lmh-carousel .lmh-shelf__head .lmh-h2 em { color: var(--lmh-bronze); }
+.lmh-carousel .lmh-shelf__arrow { background: var(--lmh-sand); }
+@media (max-width: 749px) {
+  .lmh-carousel .lmh-shelf__arrows { display: none; }
+}
+
 /* warm variants: espresso is kept for the banner and the footer */
 .lmh-wear--light { background: var(--lmh-cream); color: var(--lmh-ink); }
 .lmh-wear--light .lmh-h2 { color: var(--lmh-espresso); }
