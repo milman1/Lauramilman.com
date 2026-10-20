@@ -25,24 +25,24 @@
     "color_navy_deep": "#12162B",
     "color_pd_blue": "#5B7FBD",
     "color_pd_ice": "#A9BEE3",
+    "favicon": "shopify://shop_images/favicon_LMNY.png",
     "social_instagram": "https://www.instagram.com/laurasgemsnyc",
+    "social_pinterest": "https://www.pinterest.com/laurasgemsny/",
     "social_facebook": "https://www.facebook.com/laurasgemsnyc",
     "social_tiktok": "https://www.tiktok.com/@laurasgemsnyc",
-    "social_pinterest": "https://www.pinterest.com/laurasgemsny/",
-    "favicon": "shopify://shop_images/favicon_LMNY.png",
     "sections": {
       "header": {
         "type": "header",
         "settings": {
+          "announce_text": "Private appointments in NYC",
+          "announce_link_text": "Book a viewing",
+          "announce_link_short": "Book",
+          "announce_url": "/pages/private-clients",
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "estate_label": "Watches & Estate",
           "peaceful_label": "Lab-Grown Diamonds",
           "peaceful_url": "",
-          "enable_sticky": true,
-          "announce_text": "Private appointments in Midtown",
-          "announce_link_text": "Book a viewing",
-          "announce_link_short": "Book",
-          "announce_url": "/pages/private-clients"
+          "enable_sticky": true
         }
       },
       "footer": {
@@ -57,9 +57,12 @@
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "description": "House jewelry is designed in New York and crafted in Italy. Signed estate pieces and watches are authenticated in New York.",
           "social_instagram": "https://www.instagram.com/laurasgemsnyc",
+          "social_pinterest": "https://www.pinterest.com/laurasgemsny/",
           "social_facebook": "https://www.facebook.com/laurasgemsnyc",
           "social_tiktok": "https://www.tiktok.com/@laurasgemsnyc",
-          "social_pinterest": "https://www.pinterest.com/laurasgemsny/"
+          "signup_title": "10% off your first piece",
+          "signup_text": "",
+          "signup_success": "Welcome. Your code is LMNYWELCOME — jewelry only."
         }
       },
       "popular-searches": {
