@@ -1,0 +1,33 @@
+{%- comment -%}
+  The Google reviews widget keeps its own colors inside a shadow tree.
+  Homepage variables cover the cards. These rules cover the links and the
+  summary card, which ignore those variables.
+{%- endcomment -%}
+<script>
+  (function () {
+    var css = ''
+      + 'a.google-link,a.sk-card__source,a.tutorial_link,.sk_branding a{color:#7A5C22 !important;text-decoration:none}'
+      + '.sk-button,.sk-review-card,.sk-card,.review-card,.sk-badge,.sk-badge__inner{border-radius:0 !important}'
+      + '.sk-review-card,.sk-card,.review-card,.sk-badge,.sk-badge__inner{background:#F5F0E8 !important}'
+      + '.sk-badge__name{font-family:"Cormorant Garamond",Georgia,serif !important;font-weight:500;font-size:28px;color:#1E1109}'
+      + '.sk-card__text,.sk-review-content__text{color:#2C1810}';
+    function paint(host) {
+      var root = host.shadowRoot;
+      if (!root || root.getElementById('lmh-review-theme')) return;
+      var style = document.createElement('style');
+      style.id = 'lmh-review-theme';
+      style.textContent = css;
+      root.appendChild(style);
+    }
+    function sweep() {
+      var hosts = document.querySelectorAll('.lmh-reviews .sk-ww-google-reviews');
+      for (var i = 0; i < hosts.length; i++) paint(hosts[i]);
+    }
+    sweep();
+    var tries = 0;
+    var timer = setInterval(function () {
+      sweep();
+      if (++tries > 24) clearInterval(timer);
+    }, 250);
+  })();
+</script>
