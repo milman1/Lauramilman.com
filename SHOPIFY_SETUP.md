@@ -286,7 +286,7 @@ also appear at `/blogs/journal`.
 
 The homepage reviews block and `/pages/google-reviews` embed the SociableKit
 widget (id `25717519`). The words stay the live Google reviews. `assets/lmny-home.css`
-restyles that widget to the homepage palette: sand cards, gold stars, bronze
+restyles that widget to the homepage palette: an espresso ground, sand cards, gold stars, bronze
 links, and the site type, instead of the widget's white Inter theme.
 Shopify Product Reviews (`spr`) appears on product pages when that
 app is installed. To collect on-site reviews: Shopify Admin → Apps →

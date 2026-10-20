@@ -72,6 +72,7 @@ describe('homepage consultation and reviews', () => {
     expect(homeCss).toContain('--review-rating-star-color: var(--lmh-gold) !important');
     expect(homeCss).toContain('--widget-bg-color: transparent !important');
     expect(homeCss).toContain('--details-bg-color: var(--lmh-sand) !important');
+    expect(homeCss).toContain('.lmh-reviews { background: var(--lmh-espresso);');
     const page = themeFile('templates/page.google-reviews.liquid');
     expect(page).toContain("lmny-home.css");
     expect(page).toContain('class="lmh lmh-reviews"');
