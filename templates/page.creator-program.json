@@ -42,7 +42,7 @@
           "type": "term",
           "settings": {
             "title": "When we pay",
-            "text": "We pay once a month, after the 7-day return window closes. A return comes off the balance. The balance carries until it reaches $50."
+            "text": "We pay once a month, after the 14-day return window closes. A return comes off the balance. The balance carries until it reaches $50."
           }
         },
         "term-piece": {

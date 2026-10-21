@@ -76,8 +76,8 @@
         "promise-1": {
           "type": "item",
           "settings": {
-            "text": "Authenticity Guaranteed",
-            "short": "Authenticity"
+            "text": "Inspected in New York",
+            "short": "Hand-Inspected"
           }
         },
         "promise-2": {
@@ -97,7 +97,7 @@
         "promise-4": {
           "type": "item",
           "settings": {
-            "text": "7-Day Jewelry Returns",
+            "text": "14-Day Returns",
             "short": ""
           }
         }
