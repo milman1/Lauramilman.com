@@ -506,7 +506,7 @@
       let failed = false;
       if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); } catch (_) { failed = true; state.setting = null; } }
       if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
-      if (editBand || (sameSelection && stored.band)) {
+      if (editBand || (!state.editGroup && sameSelection && stored.band)) {
         try {
           await selectBand(editBand?.handle || stored.band, Array.isArray(stored.bandOptions) ? stored.bandOptions : []);
           if (editBand) state.bandOptions = state.band.variants.find(v => Number(v.id) === Number(editBand.variant_id || editBand.id))?.options.slice() || [];
