@@ -22,7 +22,11 @@ that Necklace handle and creates only `${existing_handle}-bracelet` for the new
 Bracelet. Every distinct source image becomes a
 Shopify `files` input with descriptive alt text. Shopify imports those source
 URLs and serves completed media from its CDN; only the post-import Shopify CDN
-URLs are retained by a media verifier. Source URLs are proposed media only:
+URLs are retained by a media verifier. On the live product, the on-model still
+(on-body for necklaces, on-wrist for split bracelets) is featured media —
+position 0 — so `/collections/chains` cards and the PDP gallery open on the
+worn shot. Remaining stills keep their previous relative order. The one-time
+reorder plan is `docs/suppliers/chain-onmodel-first-plan-2026-09.csv`. Source URLs are proposed media only:
 eBay eligibility requires three successful Shopify CDN URLs supplied in
 `shopify_cdn_image_urls`. Fewer than three verified CDN images means the
 product stays DRAFT and carries `media-missing`.
