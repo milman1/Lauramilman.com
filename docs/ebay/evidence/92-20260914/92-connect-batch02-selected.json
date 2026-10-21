@@ -1,0 +1,27 @@
+[
+  {
+    "sku": "8701",
+    "row": "0",
+    "before": "Enabled"
+  },
+  {
+    "sku": "8913",
+    "row": "0",
+    "before": "Enabled"
+  },
+  {
+    "sku": "9084",
+    "before": "Enabled",
+    "action": "disabled"
+  },
+  {
+    "sku": "8852",
+    "before": "Enabled",
+    "action": "disabled"
+  },
+  {
+    "sku": "3492",
+    "before": "Enabled",
+    "action": "disabled"
+  }
+]
