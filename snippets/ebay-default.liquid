@@ -9,7 +9,7 @@
 -->
 <style>
   #ebay-description.lm-ebay { background: #FDFAF6; color: #2C1810; font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.6; }
-  #ebay-description.lm-ebay .container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  #ebay-description.lm-ebay .lm-inner .tabs { margin-left: 0; margin-right: 0; }
   #ebay-description.lm-ebay a { color: #4A1428; }
   #ebay-description.lm-ebay a:hover { color: #C9A050; }
 
@@ -82,26 +82,24 @@
 		</div>
 	</div>
 
-	<div class="container">
+	<div class="lm-inner-wrap" style="width:100%;max-width:992px;margin:0 auto;">
+	<table class="lm-inner" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;table-layout:fixed;border-collapse:collapse;border-spacing:0;"><tbody>
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 		<div class="block lm-card">
-			<div class="row">
-				<div class="span12">
+
 					<p class="lm-eyebrow">Laura Milman New York</p>
 					<h2 class="lm-title">{Title}</h2>
 					<p class="lm-guarantee">Authenticated and hand-inspected in New York. Thirty years in the Diamond District taught us the difference between a piece that's bought and a piece that's kept.</p>
-				</div>
-			</div>
-			<div class="row">
-				<div class="span12 lm-description">
+
+				<div class="lm-description">
 					<!--startcodistodescription - DO NOT REMOVE-->
 					{include field="EbayDescription"}
 					<!--endcodistodescription - DO NOT REMOVE-->
 				</div>
-			</div>
-			<div class="row">
-				<div class="span12 text-center">
-					<a href="#img1">
-						<img class="lm-hero" src="{DefaultProductImage}&amp;width=720" alt="{Title}" />
+
+				<div class="lm-product-image" style="width:100%;margin:0;padding:0;text-align:left;">
+					<a href="#img1" style="display:block;width:100%;margin:0;text-align:left;">
+						<img class="lm-hero" style="display:block;width:100%;max-width:100%;height:auto;box-sizing:border-box;margin:0;" src="{DefaultProductImage}&amp;width=720" alt="{Title}" />
 					</a>
 					<a href="#_" class="lightbox" id="img1">
 						<div class="close-img">&times;</div>
@@ -118,7 +116,7 @@
 					<div class="clearfix"></div>
 					{if count(images) > 1}<hr class="lm-rule" />{/if}
 					{for images step=4}
-						<div class="row image-row text-center">
+						<div class="row-fluid image-row" style="margin:0;text-align:left;">
 							{for Images count=4 start={position}}
 								<div class="span2"><a class="image fancybox" href="#img{position+1}"><img src="{images.Source}&amp;width=200&amp;height=200" alt="{Title}" /></a></div>
 							{/for}
@@ -126,36 +124,34 @@
 					{/for}
 					<br />
 				</div>
-			</div>
-			<div class="row">
-				<div class="span5 buy-now">
+
+				<div class="buy-now" style="width:100%;margin:0;">
 				{if !MultiVariant}
 					<a href="https://offer.{EbaySiteURL}/ws/eBayISAPI.dll?BinConfirm&amp;quantity=1&amp;fb=1&amp;item={EbayItemID}" target="_blank" class="btn btn-large btn-primary lm-btn">Purchase this piece</a>
 				{/if}
 				</div>
-			</div>
 		</div>
-	</div>
+	</td></tr>
 
-	<div class="container">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 		<div class="lm-trust">
 			<div class="lm-trust__item">Authenticity guaranteed</div>
 			<div class="lm-trust__item">Complimentary insured shipping</div>
 			<div class="lm-trust__item">Watches: exchanges only</div>
 			<div class="lm-trust__item">Specialists in New York</div>
 		</div>
-	</div>
+	</td></tr>
 
 	{if overviewhtml}
-	<div class="container">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 	<div class="block lm-card">
-		<div class="row">
+		<div class="row-fluid">
 			<div class="span12">
 				<p class="lm-eyebrow">The piece</p>
 				<h2>Overview</h2>
 			</div>
 		</div>
-		<div class="row">
+		<div class="row-fluid">
 			<div class="span7">
 				{include field="overviewhtml"}
 			</div>
@@ -169,25 +165,25 @@
 			</div>
 		</div>
 	</div>
-	</div>
+	</td></tr>
 	{/if}
 
 	{if productspecshtml}
-	<div class="container">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 		<div class="block lm-card">
-			<div class="row">
+			<div class="row-fluid">
 				<div class="span12">
 					<p class="lm-eyebrow">Details</p>
 					<h2>Specifications</h2>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row-fluid">
 				<div class="span6">
 					{include field="productspecshtml"}
 				</div>
 				<div class="span6">
 				{for specimage step=2}
-				<div class="row">
+				<div class="row-fluid">
 					{for specimage count=2 start={position}}
 						<div class="span3">
 							<a class="fancybox image" href="{CDNUrl}{specimage.src}"><img src="{CDNUrl}{specimage.src}" alt="" /></a>
@@ -198,18 +194,18 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</td></tr>
 	{/if}
 
-	<div class="container">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 		<div class="block lm-card">
-			<div class="row">
+			<div class="row-fluid">
 				<div class="span12">
 					<p class="lm-eyebrow">Buying with us</p>
 					<h2>Shipping {if ShippingDomesticServiceType = "CalculatedMerchant" AND ShippingQuoteSupported}calculator{else if ShippingDomesticServiceType = "CalculatedEbay" OR ShippingRateTable}info{else}&amp; payment{/if}</h2>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row-fluid">
 				<div class="span4">
 					{if ShippingDomesticServiceType = "CalculatedMerchant" AND ShippingQuoteSupported}
 					<div class="quote">
@@ -325,18 +321,18 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</td></tr>
 
 	{if SuggestedProducts}
-		<div class="container">
+		<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 			<div class="block lm-card" id="you_like">
-				<div class="row">
+				<div class="row-fluid">
 					<div class="span12">
 						<p class="lm-eyebrow">From the maison</p>
 						<h2>You may also like</h2>
 					</div>
 				</div>
-				<div class="row">
+				<div class="row-fluid">
 					{for SuggestedProducts}
 						<div class="span3">
 							<div class="imagecenter">
@@ -347,10 +343,10 @@
 					{/for}
 				</div>
 			</div>
-		</div>
+		</td></tr>
 	{/if}
 
-	<div class="container">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;">
 	<div class="tabs">
 
 		<div class="tab">
@@ -358,7 +354,7 @@
 			<label for="tab-1" style="margin-left: 2px;">Contact</label>
 
 			<div class="content">
-				<div class="row">
+				<div class="row-fluid">
 					 <div class="span6">
 						 <p>Message our New York specialists with questions about this piece, measurements, or shipping. We answer through eBay.</p>
 						 <p><a target="_blank" href="https://contact.{EbaySiteURL}/ws/eBayISAPI.dll?FindAnswers&frm=284&requested={EbayUserID}&iid={EbayItemID}" class="btn btn-primary btn-large lm-btn">Ask a specialist</a></p>
@@ -460,9 +456,9 @@
 	   </div>
 
 	</div>
-	</div>
+	</td></tr>
 
-	<div class="container" id="footer">
+	<tr><td align="left" valign="top" style="padding:0 16px;text-align:left;"><div id="footer">
 		<div class="lm-footer">
 			<div class="lm-wordmark lm-wordmark--footer">Laura <span>Milman</span></div>
 			<p class="lm-footer__tag">New York · Authenticated jewelry &amp; timepieces</p>
@@ -472,5 +468,7 @@
 			<span class="muted"> eBay integration</span> by
 			<img class="baseline" src="{CDNUrl}/images/codisto-connect.png?width=200&amp;nostretch&amp;v=2022" alt="Codisto" />
 		</div>
+	</div></td></tr>
+	</tbody></table>
 	</div>
 </div>
