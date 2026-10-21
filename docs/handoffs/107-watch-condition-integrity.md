@@ -71,3 +71,7 @@ condition may be inferred from title, description, or SKU.
 - No listings ended and no condition, price, quantity, inventory, product, mapping, or template fields edited. No agents were spawned.
 - Deliverables: [25 mismatch rows](../ebay/evidence/107-20260914/107-condition-mismatches.csv), [all 30 checked rows with evidence and timestamps](../ebay/evidence/107-20260914/107-watch-audit-all-30.csv), and one screenshot per checked item in the same directory (`107-watch-<item_id>.png`). CSV item IDs, SKUs, conditions, and URLs were checked for completeness and uniqueness; 25 flagged plus 5 unflagged reconciles to 30.
 - Branch: `codex/107-watch-spot-audit-20260914`. This documentation-only PR records the completed spot audit; it does not close the source-backed repair issue.
+
+
+### 2026-09-14 — merchant-requested keeper refresh
+Condition mapping confirmed custom.ebay_condition, unchanged. RW3035 passed live condition/7%/brown-template check. RW3065 remains New despite mapped Pre-owned–Good and saved 7% offer. RW3085 update reports invalid/missing package weight; no weight correction made outside scope. See [work log](../ebay/evidence/keeper-refresh-20260914/keeper-refresh-work-log.md). Live synchronization/publication acceptance remains blocked.

@@ -42,3 +42,7 @@
 - 2026-09-11T05:38:21Z: Draft PR #100 opened for the incomplete handoff; issue #91 remains open and marked blocked. Do not merge or close #91.
 
 - 2026-09-11: The merchant explicitly requested “push and merge” for PR #100, superseding the earlier hold on merging this documentation. Issue #91 remains open and blocked; publication outcome and full-template/post-publish acceptance remain unverified.
+
+
+### 2026-09-14 — merchant-requested keeper refresh
+Current template Publish clicked once under renewed merchant authorization. No confirmation; publication remains unverified. PR #130 unmerged. RW3035 live brown template verified; RW3065 still old template. See [work log](../ebay/evidence/keeper-refresh-20260914/keeper-refresh-work-log.md). Live synchronization/publication acceptance remains blocked.
