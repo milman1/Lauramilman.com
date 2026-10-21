@@ -1,8 +1,9 @@
 {%- comment -%}
   Laura Milman New York — Influencer program
   Application page. Codes and gifts are issued by hand after a reply.
-  Eligible pieces are loose lab-grown diamonds and gold jewelry
-  (lab-grown diamond jewelry and gold chains).
+  Eligible pieces are loose lab-grown diamonds, lab-grown diamond jewelry,
+  and gold jewelry (chains, rings, and bracelets). A creator may choose
+  one piece from any of the three.
 {%- endcomment -%}
 
 <section class="lm-creator" aria-label="Influencer program">
@@ -149,9 +150,9 @@
       {%- endfor -%}
     </ul>
     <p class="lm-creator__links">
-      <a href="{{ routes.collections_url }}/lab-grown-diamond-jewelry">Lab-grown jewelry</a>
-      <a href="{{ routes.collections_url }}/chains">Chains</a>
       <a href="{{ routes.collections_url }}/lab-grown-diamonds">Loose lab-grown diamonds</a>
+      <a href="{{ routes.collections_url }}/lab-grown-diamond-jewelry">Lab-grown diamond jewelry</a>
+      <a href="{{ routes.collections_url }}/gold-jewelry">Gold jewelry</a>
     </p>
   </div>
 </section>
@@ -527,7 +528,7 @@
       "type": "textarea",
       "id": "intro",
       "label": "Intro",
-      "default": "The Laura Milman influencer program is for people who post about lab-grown diamonds and gold jewelry. Accepted creators receive a code for those pieces, and can choose one gold piece to wear and post."
+      "default": "The Laura Milman influencer program is for people who post about loose lab-grown diamonds, lab-grown diamond jewelry, and gold jewelry. Accepted creators receive a code for all three, and can choose one piece from them to wear and post."
     },
     {
       "type": "text",
