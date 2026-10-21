@@ -1,7 +1,7 @@
 {%- comment -%}
-  Titled product row. "Cream" is the gold row (chips at right, five cards);
-  "Navy" is the lab-grown row (buttons at right, four cards). On phones the
-  cards scroll sideways and a full-width button closes the row.
+  Titled product row. "Cream" is the gold row (chips at right, a feature
+  photo with four cards, then a longer row of rings and chains). "Navy" is
+  the lab-grown row. On phones the cards scroll sideways.
 {%- endcomment -%}
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 {%- liquid
@@ -60,7 +60,43 @@
       assign has_feature = true
       assign row_cols = 2
     endif
+    assign feature_cap = 4
+    assign use_scroll = false
+    if section.settings.scroll_row
+      assign use_scroll = true
+    endif
+    assign use_more = false
+    if has_feature and section.settings.more_row
+      assign use_more = true
+    endif
   -%}
+  {%- if use_scroll -%}
+    <div class="lmh-row__extra" data-lmh-row-scroll>
+      <div class="lmh-row__scrollnav">
+        <button type="button" class="lmh-shelf__arrow" data-row-prev aria-label="Previous">&#8592;</button>
+        <button type="button" class="lmh-shelf__arrow" data-row-next aria-label="Next">&#8594;</button>
+      </div>
+      <ul class="lmh-row__extra-track" role="list" data-lmh-track>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'product' and block.settings.product != blank -%}
+            <li {{ block.shopify_attributes }}>
+              {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 22vw' -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if section.settings.collection != blank -%}
+          {%- assign shown = 0 -%}
+          {%- for product in section.settings.collection.products -%}
+            {%- if shown >= section.settings.collection_limit -%}{%- break -%}{%- endif -%}
+            {%- if product.available -%}
+              {%- assign shown = shown | plus: 1 -%}
+              <li>{%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 22vw' -%}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    </div>
+  {%- else -%}
   {%- if has_feature -%}
   <div class="lmh-row__feature-wrap">
     <a class="lmh-row__feature" href="{{ section.settings.all_url | default: section.settings.button_1_url | default: '#' }}">
@@ -68,11 +104,15 @@
     </a>
   {%- endif -%}
   <ul class="lmh-grid lmh-grid--{{ row_cols }} lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+    {%- assign feature_shown = 0 -%}
     {%- for block in section.blocks -%}
       {%- if block.type == 'product' and block.settings.product != blank -%}
+        {%- if use_more == false or feature_shown < feature_cap -%}
+        {%- assign feature_shown = feature_shown | plus: 1 -%}
         <li {{ block.shopify_attributes }}>
           {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 20vw' -%}
         </li>
+        {%- endif -%}
       {%- endif -%}
     {%- endfor -%}
     {%- if section.settings.collection != blank -%}
@@ -89,6 +129,28 @@
     {%- endif -%}
   </ul>
   {%- if has_feature -%}</div>{%- endif -%}
+  {%- if use_more -%}
+    <div class="lmh-row__extra" data-lmh-row-scroll>
+      <div class="lmh-row__scrollnav">
+        <button type="button" class="lmh-shelf__arrow" data-row-prev aria-label="Previous">&#8592;</button>
+        <button type="button" class="lmh-shelf__arrow" data-row-next aria-label="Next">&#8594;</button>
+      </div>
+      <ul class="lmh-row__extra-track" role="list" data-lmh-track>
+        {%- assign extra_seen = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'product' and block.settings.product != blank -%}
+            {%- assign extra_seen = extra_seen | plus: 1 -%}
+            {%- if extra_seen > feature_cap -%}
+              <li {{ block.shopify_attributes }}>
+                {%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 18vw' -%}
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+  {%- endif -%}
 
   {%- if section.settings.mobile_button_text != blank -%}
     <div class="lmh-row__more">
@@ -97,6 +159,24 @@
   {%- endif -%}
 </section>
 
+<script>
+  (function () {
+    var root = document.currentScript.previousElementSibling;
+    if (!root) return;
+    root.querySelectorAll('[data-lmh-row-scroll]').forEach(function (box) {
+      var track = box.querySelector('[data-lmh-track]');
+      if (!track) return;
+      function move(dir) {
+        track.scrollBy({ left: dir * Math.max(track.clientWidth * 0.8, 200), behavior: 'smooth' });
+      }
+      var prev = box.querySelector('[data-row-prev]');
+      var next = box.querySelector('[data-row-next]');
+      if (prev) prev.addEventListener('click', function () { move(-1); });
+      if (next) next.addEventListener('click', function () { move(1); });
+    });
+  })();
+</script>
+
 {% schema %}
 {
   "name": "LM product row",
@@ -104,6 +184,8 @@
   "settings": [
     { "type": "select", "id": "style", "label": "Style", "default": "cream", "options": [ { "value": "cream", "label": "Cream" }, { "value": "navy", "label": "Navy" } ] },
     { "type": "select", "id": "columns", "label": "Cards per row (desktop)", "default": "5", "options": [ { "value": "4", "label": "4" }, { "value": "5", "label": "5" } ] },
+    { "type": "checkbox", "id": "more_row", "label": "Extra product row", "default": false, "info": "With a feature photo, the first four products stay beside it. Further products scroll in a row underneath. Drafts stay blank until they are published." },
+    { "type": "checkbox", "id": "scroll_row", "label": "Scroll the cards", "default": false, "info": "Desktop shows about four cards and scrolls for the rest. Phones already swipe." },
     { "type": "text", "id": "ratio", "label": "Photo shape (width / height)", "default": "0.84" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
     { "type": "text", "id": "title", "label": "Heading" },
@@ -115,7 +197,7 @@
     { "type": "url", "id": "button_1_url", "label": "Button 1 link" },
     { "type": "text", "id": "button_2_text", "label": "Button 2" },
     { "type": "url", "id": "button_2_url", "label": "Button 2 link" },
-    { "type": "image_picker", "id": "feature_image", "label": "Feature photo", "info": "Optional. Shown at left with the products in a two-by-two grid beside it; on phones it sits above the products. Use four products." },
+    { "type": "image_picker", "id": "feature_image", "label": "Feature photo", "info": "Optional. Shown at left with the first four products in a two-by-two grid beside it. Turn on Extra product row for anything after those four." },
     { "type": "text", "id": "feature_image_asset", "label": "Feature photo, theme asset" },
     { "type": "text", "id": "feature_image_alt", "label": "Feature photo alt text" },
     { "type": "collection", "id": "collection", "label": "Also show products from a collection", "info": "Shows in-stock products from this collection after any picked products, so sold pieces drop off on their own." },
