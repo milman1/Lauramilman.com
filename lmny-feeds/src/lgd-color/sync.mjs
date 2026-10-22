@@ -4,10 +4,11 @@ import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHa
 let stage = 'startup';
 // Errors whose message carries only counts or fixed text, safe to print in CI logs.
 export class SafeError extends Error {}
-// Hourly runs may withdraw at most 10% of live stones (min 5). A reviewed manual
-// run may pass --max-withdrawals=N to clear a larger backlog of sold stones.
+// Hourly runs may withdraw at most 150 stones, or 10% of live stones if that is
+// larger (merchant decision 2026-10-22, was 10% with a minimum of 5). A reviewed
+// manual run may pass --max-withdrawals=N to clear a larger backlog of sold stones.
 export function withdrawalLimit(activeOwned, maxWithdrawals=null) {
-  return maxWithdrawals ?? Math.max(5, Math.floor(activeOwned*0.1));
+  return maxWithdrawals ?? Math.max(150, Math.floor(activeOwned*0.1));
 }
 function checkWithdrawals(count, activeOwned, maxWithdrawals) {
   const allowed=withdrawalLimit(activeOwned,maxWithdrawals);
