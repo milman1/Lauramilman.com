@@ -1,0 +1,32 @@
+# One-off diagnostic: dump raw Belgium Dia watch feed field keys.
+# Does not write to Shopify. Safe to re-run.
+name: LMNY watch feed keys probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - name: Dump watch feed keys
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+        run: npx tsx scripts/dump-watch-feed-keys.ts
