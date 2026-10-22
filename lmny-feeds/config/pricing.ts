@@ -388,6 +388,14 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }
 
-/** LGD certified colored loose lab diamonds; merchant approved 2026-10-11. */
-export const LGD_COLOR_DIAMONDS = { costMultiple: 3.5, welcomeDiscountPct: 0.1 } as const;
+/**
+ * LGD certified colored loose lab diamonds. Merchant decision 2026-10-22: the
+ * same graduated tiers as white loose lab-grown (`labRetailMultipleFromCost`),
+ * rounded to the dollar; was 3.5x cost from 2026-10-11.
+ */
+export const LGD_COLOR_DIAMONDS = { welcomeDiscountPct: 0.1 } as const;
+
+export function coloredLabRetailFromCost(costUsd: number): number {
+  return Math.round(costUsd * labRetailMultipleFromCost(costUsd));
+}
 
