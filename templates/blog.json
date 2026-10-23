@@ -1,1 +1,11 @@
-{"sections":{"main":{"type":"main-blog","settings":{}}},"order":["main"]}
+{
+  "sections": {
+    "main": {
+      "type": "main-blog",
+      "settings": {
+        "intro": "Buying guides for diamonds, watches, gold chains, and estate jewelry."
+      }
+    }
+  },
+  "order": ["main"]
+}
