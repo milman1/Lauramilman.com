@@ -358,3 +358,33 @@ Not done: Search Console query data could not be read for topic selection
 (the agent proxy rejects the URL-encoded site path). The two job drafts from
 the drafting workflow (Bulgari Pink, Sotheby's Italy sapphire necklace) are
 still unpublished and were not reviewed.
+
+## 2026-10-22 (late evening, New York) — seven pop-culture Journal articles published
+
+Merchant asked for pop-culture articles (the editorial direction in recipe F),
+released that night. Five new articles, plus the two job drafts, reviewed and
+published. New articles passed `checkDraft`; the only remaining flags were
+links to other live journal articles. Every linked product was ACTIVE and on
+the Online Store and every linked collection was published (the pearl,
+sapphire, emerald and ruby collections are not, so they are not linked).
+Sources were read for each news hook. No article claims a celebrity owns or
+wore a piece we sell.
+
+| Handle | Hook | Source checked |
+|---|---|---|
+| `emmys-2026-red-carpet-jewelry-trends` | 2026 Emmys red carpet jewelry | Glam, Oct 1 2026 |
+| `brooch-trend-2026-how-to-wear-a-brooch` | Flower-brooch revival, Olivia Rodrigo at a Liberty game | Harper's Bazaar, Oct 10 2026 |
+| `knicks-championship-ring-2026` | Knicks ring unveiled at MSG | INSTORE, Oct 22 2026 |
+| `watches-worn-as-jewelry-2026` | Tyla's Chopard ankle watch at the VMAs | INSTORE, Sep 29 2026 |
+| `art-basel-miami-beach-2026-what-jewelry-to-wear` | Art Basel Miami Beach, Dec 4–6 | artbasel.com |
+| `the-1965-sapphire-ribbon-necklace-at-sothebys-italy-...` (job draft) | Sotheby's Milan, Oct 28 | Rapaport |
+| `the-bulgari-pink-and-what-makes-a-pink-diamond-rare` (job draft) | Christie's Geneva, Nov 10 | Christie's press release, JCK |
+
+Job drafts: `journal-draft` tag removed, SEO titles given the "| Laura Milman"
+suffix, featured images added. The Bulgari opening now states the confirmed
+grade (24.00 ct Fancy Intense Pink, emerald cut, set by Bulgari in the 1950s)
+and links the fancy color guide.
+
+Time-sensitive: the Sotheby's piece is about an Oct 28 sale and the Bulgari
+piece about a Nov 10 sale. Both read as previews and will need a results line
+after those dates.
