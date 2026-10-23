@@ -393,8 +393,8 @@ after those dates.
 
 Merchant asked for more articles for the core customer (women buying for
 themselves, engagement and bridal, men buying for her) and fewer on watches,
-then asked for photos. Six new articles published; all 20 articles from
-2026-10-22 and 2026-10-23 now carry in-article product photos.
+then asked for photos. Six new articles published; all 19 articles from
+2026-10-22 and 2026-10-23 (including the two auction pieces) now carry in-article product photos.
 
 | Handle | Audience |
 |---|---|
