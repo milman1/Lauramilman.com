@@ -325,3 +325,102 @@ Ask about this stone on its page and we will reply by email."
   Publishing them to Google & YouTube reverses the channel policy in
   `lmny-feeds/config/channels.ts` and needs a merchant decision. Stones sell
   out, so the list must be refreshed from the stones table before use.
+
+## 2026-10-22 (evening, New York) — six new Journal articles published
+
+Merchant asked for more relevant articles, released that night. Published
+directly on blog `journal` (not as `journal-draft`), author Laura Milman New
+York, SEO title and description set, featured image from a linked product.
+Each body passed `checkDraft` from `lmny-feeds/scripts/journal-draft.ts`
+(prices, supplier names, celebrity claims, HTML allow-list, SEO lengths,
+900–1,400 words, three FAQs). Its only remaining flags were links to other
+live journal articles, which it counts as external, and the `Rolex` tag that
+the live Rolex article already uses. All 18 linked products were ACTIVE and on
+the Online Store, and all 25 linked collections were published, on
+2026-10-22. Verified afterwards: all six are on the live `/blogs/journal` index,
+and SEO fields and images were read back from the Admin API.
+
+| Handle | Topic | Why |
+|---|---|---|
+| `lab-grown-tennis-bracelet-total-carat-weight` | Total vs per-stone carat weight, with real stone counts | Plan P12 |
+| `pre-owned-cartier-love-bracelet-size-condition` | Love bracelet sizing, screws, condition | Plan P12; 303 Cartier pieces |
+| `rolex-datejust-buying-guide-reference-numbers` | Reading Datejust references, sizes, metals | Largest watch inventory |
+| `engagement-ring-diamond-shapes-guide` | Nine shapes, settings, ring builder | Settings and diamond pairing |
+| `fancy-color-diamonds-grading-guide` | Fancy color grades and modifiers, natural vs lab | New colored lab-grown catalog |
+| `holiday-jewelry-gift-guide-2026` | Gifts by recipient, sizing, policy timing | Holiday season |
+
+Policy lines used: free insured shipping, 14-day returns on unworn jewelry and
+loose diamonds, watch exchanges within 7 days, one complimentary resizing on
+house rings, complimentary engraving on engagement rings, the "Not sure" ring
+size option, and lab-grown savings of 60–85%. No prices.
+
+Not done: Search Console query data could not be read for topic selection
+(the agent proxy rejects the URL-encoded site path). The two job drafts from
+the drafting workflow (Bulgari Pink, Sotheby's Italy sapphire necklace) are
+still unpublished and were not reviewed.
+
+## 2026-10-22 (late evening, New York) — seven pop-culture Journal articles published
+
+Merchant asked for pop-culture articles (the editorial direction in recipe F),
+released that night. Five new articles, plus the two job drafts, reviewed and
+published. New articles passed `checkDraft`; the only remaining flags were
+links to other live journal articles. Every linked product was ACTIVE and on
+the Online Store and every linked collection was published (the pearl,
+sapphire, emerald and ruby collections are not, so they are not linked).
+Sources were read for each news hook. No article claims a celebrity owns or
+wore a piece we sell.
+
+| Handle | Hook | Source checked |
+|---|---|---|
+| `emmys-2026-red-carpet-jewelry-trends` | 2026 Emmys red carpet jewelry | Glam, Oct 1 2026 |
+| `brooch-trend-2026-how-to-wear-a-brooch` | Flower-brooch revival, Olivia Rodrigo at a Liberty game | Harper's Bazaar, Oct 10 2026 |
+| `knicks-championship-ring-2026` | Knicks ring unveiled at MSG | INSTORE, Oct 22 2026 |
+| `watches-worn-as-jewelry-2026` | Tyla's Chopard ankle watch at the VMAs | INSTORE, Sep 29 2026 |
+| `art-basel-miami-beach-2026-what-jewelry-to-wear` | Art Basel Miami Beach, Dec 4–6 | artbasel.com |
+| `the-1965-sapphire-ribbon-necklace-at-sothebys-italy-...` (job draft) | Sotheby's Milan, Oct 28 | Rapaport |
+| `the-bulgari-pink-and-what-makes-a-pink-diamond-rare` (job draft) | Christie's Geneva, Nov 10 | Christie's press release, JCK |
+
+Job drafts: `journal-draft` tag removed, SEO titles given the "| Laura Milman"
+suffix, featured images added. The Bulgari opening now states the confirmed
+grade (24.00 ct Fancy Intense Pink, emerald cut, set by Bulgari in the 1950s)
+and links the fancy color guide.
+
+Time-sensitive: the Sotheby's piece is about an Oct 28 sale and the Bulgari
+piece about a Nov 10 sale. Both read as previews and will need a results line
+after those dates.
+
+## 2026-10-23 (early morning, New York) — six audience articles, and photos in every article
+
+Merchant asked for more articles for the core customer (women buying for
+themselves, engagement and bridal, men buying for her) and fewer on watches,
+then asked for photos. Six new articles published; all 19 articles from
+2026-10-22 and 2026-10-23 (including the two auction pieces) now carry in-article product photos.
+
+| Handle | Audience |
+|---|---|
+| `right-hand-ring-buying-diamonds-for-yourself` | Women buying for themselves |
+| `milestone-jewelry-what-to-buy-yourself` | Women buying for themselves |
+| `proposal-season-engagement-ring-timeline` | Engagement (December is the most popular month to propose, The Knot) |
+| `how-to-match-a-wedding-band-to-an-engagement-ring` | Bridal |
+| `how-to-buy-jewelry-for-her-a-guide-for-men` | Men buying for her |
+| `anniversary-jewelry-gifts-by-year` | Gifting |
+
+**Photos.** Each article has a featured image plus 2 or 3 product photos in
+the body (`<img>` inside a link to the product, `width=900`, `loading="lazy"`,
+descriptive alt text). All images are the products' own Shopify CDN photos,
+chosen from products the article links to; no generated images. Eight articles
+also gained a product link or two so every article reaches at least two photos.
+Applied with `articleUpdate` on the published articles; nothing else changed.
+The holiday gift guide's closing line and two other small wording fixes made at
+publish time are in the live copies (for example, the guide no longer calls the
+first-gold-piece edit "solid").
+
+Notes for next time:
+- `lmny-feeds/scripts/journal-draft.ts` allows no `<img>` in a body
+  (`ALLOWED_HTML_TAGS`) and rejects any `src`. The weekly job therefore
+  cannot produce in-body photos. Changing that is a code change for a pull
+  request, not done here.
+- Pearl, sapphire, emerald and ruby collections are not on the Online Store,
+  so they are not linked.
+- Several estate products exist twice (a `bv-` handle and a plain one) with the
+  same title. Not changed.
