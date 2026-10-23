@@ -92,6 +92,7 @@ export const JOURNAL_TAGS = [
   'Engagement Rings',
   'NYC',
   'Diamond Guide',
+  'Rolex',
 ] as const;
 
 /** lmny-feeds/docs/seo-title-formulas.md. */
@@ -144,6 +145,12 @@ export interface StoreCatalog {
   productHandles: Set<string>;
   /** Collection handles that exist. */
   collectionHandles: Set<string>;
+  /**
+   * Handles of published Journal articles. When present, a `/blogs/journal/…`
+   * link must point at one of them; when absent, any well-formed Journal link
+   * passes.
+   */
+  articleHandles?: Set<string>;
 }
 
 export type ViolationKind =
@@ -273,9 +280,19 @@ export function extractStoreLinks(html: string): StoreLink[] {
   return out;
 }
 
-/** Hrefs that are not links to a product or collection on our own store. */
+/**
+ * Handle of a link to another Journal article on our own store, or null.
+ * Journal links are internal but are neither products nor collections, so they
+ * do not count toward the store-link minimum.
+ */
+export function parseJournalLink(href: string): string | null {
+  const m = /^(?:https?:\/\/(?:www\.)?lauramilman\.com)?\/blogs\/journal\/([A-Za-z0-9][A-Za-z0-9_-]*)\/?(?:[?#].*)?$/i.exec(href);
+  return m ? (m[1] ?? '').toLowerCase() : null;
+}
+
+/** Hrefs that are not links to a product, collection or Journal article on our own store. */
 export function findExternalLinks(html: string): string[] {
-  return extractHrefs(html).filter((href) => parseStoreLink(href) === null);
+  return extractHrefs(html).filter((href) => parseStoreLink(href) === null && parseJournalLink(href) === null);
 }
 
 // --- prices ---------------------------------------------------------------
@@ -580,6 +597,14 @@ export function checkDraft(draft: JournalDraft, catalog: StoreCatalog): Violatio
       violations.push({ kind: 'unknown-handle', detail: `/${link.kind}s/${link.handle}` });
     }
   }
+  if (catalog.articleHandles) {
+    for (const href of extractHrefs(draft.bodyHtml)) {
+      const handle = parseJournalLink(href);
+      if (handle !== null && !catalog.articleHandles.has(handle)) {
+        violations.push({ kind: 'unknown-handle', detail: `/blogs/journal/${handle}` });
+      }
+    }
+  }
   if (links.length < MIN_STORE_LINKS) {
     violations.push({ kind: 'too-few-links', detail: `${links.length} store links, need ${MIN_STORE_LINKS}` });
   }
@@ -676,18 +701,76 @@ export function canonicalizeTags(tags: string[]): string[] {
   return out;
 }
 
+// --- in-body photos -------------------------------------------------------
+
+/** Photos placed in one article body. */
+export const MAX_BODY_PHOTOS = 3;
+
+/**
+ * Add product photos to a validated body. The model never writes an <img>
+ * (findHtmlViolations rejects it); this runs afterwards, in code, and the only
+ * image it can emit is the catalogue photo of a product the article already
+ * links to, served from the Shopify CDN. Each photo is wrapped in a link to that
+ * product and placed after the paragraph or list that first links to it, in
+ * link order, at most `max` and never two in a row.
+ */
+export function insertProductPhotos(
+  bodyHtml: string,
+  productsById: Map<string, ProductRow>,
+  max: number = MAX_BODY_PHOTOS,
+): string {
+  const blockRe = /<(p|ul|ol)\b[^>]*>[\s\S]*?<\/\1>/gi;
+  const blocks: Array<{ end: number; handles: string[] }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = blockRe.exec(bodyHtml)) !== null) {
+    const handles = extractStoreLinks(m[0])
+      .filter((l) => l.kind === 'product')
+      .map((l) => l.handle);
+    blocks.push({ end: m.index + m[0].length, handles });
+  }
+
+  const used = new Set<string>();
+  const inserts: Array<{ at: number; html: string }> = [];
+  let lastIndex = -2;
+  blocks.forEach((block, index) => {
+    if (inserts.length >= max || index === lastIndex + 1) return;
+    for (const handle of block.handles) {
+      const product = productsById.get(handle);
+      if (used.has(handle) || !product?.imageUrl) continue;
+      if (!/^https:\/\/cdn\.shopify\.com\//.test(product.imageUrl)) continue;
+      const scrubbed = scrubText(product.imageAlt ?? '');
+      const alt = scrubbed.length > 0 && scrubbed === (product.imageAlt ?? '').trim() ? scrubbed : scrubText(product.title);
+      if (alt.length === 0) continue;
+      const src = `${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}width=900`.replace(/&/g, '&amp;');
+      used.add(handle);
+      lastIndex = index;
+      inserts.push({
+        at: block.end,
+        html: `\n<p><a href="/products/${handle}"><img src="${src}" alt="${escapeHtml(alt).replace(/"/g, '&quot;')}" width="900" loading="lazy"></a></p>`,
+      });
+      return;
+    }
+  });
+
+  let out = bodyHtml;
+  for (const { at, html } of inserts.reverse()) out = out.slice(0, at) + html + out.slice(at);
+  return out;
+}
+
 /** The exact `articleCreate` input, `isPublished: false`, never a publish date. */
 export function buildArticleCreateInput(
   draft: JournalDraft,
   blogId: string,
   image: { url: string; altText: string; fallbackAltText: string } | null,
+  productsById: Map<string, ProductRow> | null = null,
 ): Record<string, unknown> {
   const tags = canonicalizeTags([...draft.tags, JOURNAL_DRAFT_TAG]);
+  const withPhotos = productsById ? { ...draft, bodyHtml: insertProductPhotos(draft.bodyHtml, productsById) } : draft;
   const input: Record<string, unknown> = {
     blogId,
     title: draft.title,
     author: { name: AUTHOR_NAME },
-    body: renderBodyHtml(draft),
+    body: renderBodyHtml(withPhotos),
     summary: draft.summary,
     isPublished: false,
     tags,
@@ -730,7 +813,11 @@ export function renderBodyHtml(draft: JournalDraft): string {
   return `${draft.bodyHtml.trim()}\n<section class="journal-faq">\n  <h2>Frequently asked</h2>\n${faq}\n</section>\n`;
 }
 
-export function renderDraftMarkdown(draft: JournalDraft, violations: Violation[]): string {
+export function renderDraftMarkdown(
+  draft: JournalDraft,
+  violations: Violation[],
+  productsById: Map<string, ProductRow> | null = null,
+): string {
   const lines = [
     `# ${draft.title}`,
     '',
@@ -749,7 +836,7 @@ export function renderDraftMarkdown(draft: JournalDraft, violations: Violation[]
     '',
     '## Body',
     '',
-    renderBodyHtml(draft),
+    renderBodyHtml(productsById ? { ...draft, bodyHtml: insertProductPhotos(draft.bodyHtml, productsById) } : draft),
     '',
   ];
   return lines.join('\n');
@@ -1091,6 +1178,10 @@ Find what happened in the LAST SEVEN DAYS in these areas, and only these:
 - jewelry and watch auction results
 - brand launches and new collections from the maisons (Cartier, Tiffany, Van Cleef & Arpels, Rolex, Patek Philippe, and peers)
 - notable nightlife and restaurant openings in New York, Miami, Los Angeles, and Las Vegas
+- engagement and wedding news: celebrity engagements and weddings, bridal and engagement ring trends, proposal-season timing
+- gifting and self-purchase moments: holidays, Valentine's Day, anniversaries, milestone birthdays, women buying jewelry for themselves, men shopping for her
+
+Our customers are mostly women buying for themselves, couples buying engagement and wedding jewelry, and men buying gifts. Watches are a smaller part of the audience: of the ten items, no more than two may be watch-led.
 
 Shortlist exactly ten items. Each must be real, dated in the last seven days, and carry a source URL you actually retrieved. Never invent a headline, a date, or a URL.
 
@@ -1329,6 +1420,8 @@ function articleSystemPrompt(
     .join('\n\n');
   return `You write the Journal for Laura Milman New York, a New York store selling estate and signed jewelry, fine jewelry made in house, lab-grown jewelry, and pre-owned watches.
 
+Audience: women buying jewelry for themselves, couples choosing engagement and wedding jewelry, and men buying gifts for her. Write for them first. Watches are a smaller part of the store, so write a watch-led piece only when the hook is clearly about a watch.
+
 Voice: the live articles below are the reference. Match their register — informed, specific, unhurried, no hype words ("stunning", "must-have"), no exclamation marks, no second-person sales patter, no invented provenance.
 
 ${samples || '(No published articles were readable; write in a plain, factual editorial register.)'}
@@ -1337,19 +1430,28 @@ Hard rules, checked in code after you answer. A draft that breaks one is thrown 
 1. Never claim that a named person owns, wore, bought, or was given a piece we sell. Report what a person wore in public and write about the category, never about our specific object being theirs.
 2. Never name a supplier, wholesaler, or source. Write only as Laura Milman New York.
 3. Never state a price, a price range, or a dollar figure of any kind, in the body, the FAQ, the summary, or the SEO fields.
-4. Every link must be a relative link on our own store: <a href="/products/HANDLE"> or <a href="/collections/HANDLE">, using only handles from the list you are given. No external links, no http links, no invented handles. At least three links.
+4. Every link must be a relative link on our own store: <a href="/products/HANDLE"> or <a href="/collections/HANDLE">, using only handles from the list you are given. No external links, no http links, no invented handles. At least three links to products or collections. You may also link to a published Journal article as <a href="/blogs/journal/HANDLE"> using only the article handles you are given; those do not count toward the three.
 5. SEO title at or below ${SEO_TITLE_MAX} characters. SEO description at or below ${SEO_DESCRIPTION_MAX} characters. Neither repeats "Laura Milman New York" (the theme adds the store name).
 6. Body between ${WORD_COUNT_MIN} and ${WORD_COUNT_MAX} words including the FAQ answers.
 7. Exactly ${FAQ_QUESTIONS} FAQ questions, returned in the "faq" field. Do not also write a FAQ section inside bodyHtml.
 8. Tags only from this list, two to four of them: ${JOURNAL_TAGS.join(', ')}.
-9. bodyHtml uses only these tags: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <a>, <strong>, <em>, <blockquote>. The only attribute allowed anywhere is href on an anchor. No <img>, no <script>, no <div>, no src, no class, no style, no id, no target.
+9. bodyHtml uses only these tags: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <a>, <strong>, <em>, <blockquote>. The only attribute allowed anywhere is href on an anchor. No <img>, no <script>, no <div>, no src, no class, no style, no id, no target. Do not add photos: the job inserts the photo of each product you link, after your text is checked.
 10. "featuredProductHandle" is one product handle from the list; its photo becomes the article image, so pick a piece the article actually discusses.`;
 }
 
-function catalogPrompt(products: ProductRow[], collections: CollectionRow[]): string {
+function catalogPrompt(
+  products: ProductRow[],
+  collections: CollectionRow[],
+  articles: JournalArticle[] = [],
+): string {
   const productLines = products.map((p) => `${p.handle} :: ${p.title} :: ${p.productType || 'n/a'} :: ${p.segment}`);
   const collectionLines = collections.map((c) => `${c.handle} :: ${c.title}`);
-  return `LIVE PRODUCT HANDLES (handle :: title :: type :: segment) — link only to these:\n${productLines.join('\n')}\n\nLIVE COLLECTION HANDLES (handle :: title) — link only to these:\n${collectionLines.join('\n')}`;
+  const articleLines = articles.map((a) => `${a.handle} :: ${a.title}`);
+  const articleBlock =
+    articleLines.length > 0
+      ? `\n\nPUBLISHED JOURNAL ARTICLE HANDLES (handle :: title) — link as /blogs/journal/HANDLE, only to these:\n${articleLines.join('\n')}`
+      : '';
+  return `LIVE PRODUCT HANDLES (handle :: title :: type :: segment) — link only to these:\n${productLines.join('\n')}\n\nLIVE COLLECTION HANDLES (handle :: title) — link only to these:\n${collectionLines.join('\n')}${articleBlock}`;
 }
 
 /**
@@ -1496,12 +1598,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   //    ahead of any Anthropic call: the blog lookup above, the existing
   //    articles read for voice reference, and the product and collection
   //    catalogue.
-  const [products, collections, voiceSamples] = await Promise.all([
+  const [products, collections, voiceSamples, publishedArticles] = await Promise.all([
     fetchProducts(shopify),
     fetchCollections(shopify),
     fetchVoiceSamples(shopify, blogId),
+    fetchArticles(shopify, `blog_id:${blogNumericId(blogId)} AND published_status:published`),
   ]);
   const catalog: StoreCatalog = {
+    articleHandles: new Set(publishedArticles.map((a) => a.handle.toLowerCase())),
     productHandles: new Set(products.map((p) => p.handle.toLowerCase())),
     collectionHandles: new Set(collections.map((c) => c.handle.toLowerCase())),
   };
@@ -1512,7 +1616,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
 
   const system = articleSystemPrompt(voiceSamples);
   const promptProducts = sampleProductsForPrompt(products);
-  const catalogText = catalogPrompt(promptProducts, collections);
+  const catalogText = catalogPrompt(promptProducts, collections, publishedArticles);
 
   // 2. Hooks — the first Anthropic spend of the run, only after every
   //    Shopify read above has succeeded.
@@ -1587,10 +1691,10 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     if (!accepted) {
       console.warn(`Draft ${i + 1} rejected: ${violations.map((v) => v.kind).join(', ')}`);
     } else if (opts.dryRun) {
-      await writeFile(`${OUT_DIR}/journal-draft-${i + 1}.md`, renderDraftMarkdown(draft, violations));
+      await writeFile(`${OUT_DIR}/journal-draft-${i + 1}.md`, renderDraftMarkdown(draft, violations, productsById));
       console.log(`Draft ${i + 1} written to out/journal-draft-${i + 1}.md (dry run, nothing created)`);
     } else {
-      const input = buildArticleCreateInput(draft, blogId, image);
+      const input = buildArticleCreateInput(draft, blogId, image, productsById);
       const res = await shopify.gql<{
         articleCreate: {
           article: { id: string; isPublished: boolean } | null;

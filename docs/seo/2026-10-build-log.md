@@ -424,3 +424,23 @@ Notes for next time:
   so they are not linked.
 - Several estate products exist twice (a `bv-` handle and a plain one) with the
   same title. Not changed.
+
+## 2026-10-23 Weekly Journal drafting job: audience focus and in-body photos
+
+`lmny-feeds/scripts/journal-draft.ts` changed (the weekly job, Monday 13:23 UTC):
+
+- Hooks and the writing prompt now lead with the store's audience: women buying
+  for themselves, engagement and bridal, men buying gifts. At most two of the
+  ten hooks may be watch-led. New hook areas: engagement and wedding news,
+  gifting and self-purchase moments.
+- Photos: after a draft passes every check, `insertProductPhotos` adds up to
+  three catalogue photos (Shopify CDN only, linked to the product, alt text
+  scrubbed, never two in a row). The model still may not write `<img>`, and the
+  checked draft is unchanged, so the HTML allow-list is not loosened.
+- `/blogs/journal/<handle>` links are internal. They no longer fail as
+  `external-link`; the handle must be a published article (list passed to the
+  model) and they do not count toward the three store links.
+- Added the `Rolex` tag the live Journal already uses.
+
+The workflow was not run from this environment; the first live run is Monday.
+A dry run from the Actions tab (dry_run=true) shows the photos in the report.

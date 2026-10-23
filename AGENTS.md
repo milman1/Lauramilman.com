@@ -492,9 +492,13 @@ Current recurring jobs:
 - Journal drafting job, weekly, Monday 13:23 UTC
   (`.github/workflows/journal-draft.yml`,
   `lmny-feeds/scripts/journal-draft.ts`). Sonnet 5 gathers ten hooks by web
-  search (RSS fallback); Opus 5 writes two drafts with SEO fields, live
-  product links, and a FAQ; drafts are created UNPUBLISHED on the journal
-  blog with tag `journal-draft`. It never publishes and never deletes;
+  search (RSS fallback), weighted to the store's audience (women buying for
+  themselves, engagement and bridal, men buying gifts; at most two of the ten
+  watch-led); Opus 5 writes two drafts with SEO fields, live product links,
+  links to published Journal articles, and a FAQ; the job then adds up to
+  three product photos in code (Shopify CDN photo of a product the article
+  links to; the model itself may not write `<img>`); drafts are created
+  UNPUBLISHED on the journal blog with tag `journal-draft`. It never publishes and never deletes;
   stale drafts are only listed in the report for a person to act on. See
   recipe F and the audit doc section 3.
 

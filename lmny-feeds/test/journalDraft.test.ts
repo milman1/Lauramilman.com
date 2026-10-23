@@ -13,19 +13,23 @@ import {
   findHtmlViolations,
   findPrices,
   findUnknownTags,
+  insertProductPhotos,
   JOURNAL_DRAFT_TAG,
   JOURNAL_TAGS,
   normalizeHooks,
   parseArgs,
   parseFeedItems,
+  parseJournalLink,
   parseStoreLink,
   PRODUCT_SEGMENTS,
+  renderBodyHtml,
   selectStaleDrafts,
   SEO_DESCRIPTION_MAX,
   SEO_TITLE_MAX,
   wordCount,
   type JournalArticle,
   type JournalDraft,
+  type ProductRow,
   type StoreCatalog,
 } from '../scripts/journal-draft.js';
 
@@ -574,5 +578,105 @@ describe('hook parsing', () => {
     const xml =
       '<feed><entry><title>New maison launch</title><link href="https://example.com/c"/></entry></feed>';
     expect(parseFeedItems(xml)).toEqual([{ title: 'New maison launch', link: 'https://example.com/c' }]);
+  });
+});
+
+describe('journal links', () => {
+  it('parses a Journal article link and ignores everything else', () => {
+    expect(parseJournalLink('/blogs/journal/gold-chain-guide')).toBe('gold-chain-guide');
+    expect(parseJournalLink('https://www.lauramilman.com/blogs/journal/Gold-Chain-Guide/')).toBe('gold-chain-guide');
+    expect(parseJournalLink('https://example.com/blogs/journal/x')).toBeNull();
+    expect(parseJournalLink('/blogs/news/x')).toBeNull();
+  });
+
+  it('is not an external link, and does not count as a store link', () => {
+    const html = '<a href="/blogs/journal/gold-chain-guide">guide</a><a href="https://wwd.com/x">c</a>';
+    expect(findExternalLinks(html)).toEqual(['https://wwd.com/x']);
+    expect(extractStoreLinks(html)).toEqual([]);
+  });
+
+  it('rejects a Journal handle that is not published when the set is known', () => {
+    const body = longBody('<p>See our <a href="/blogs/journal/made-up-article">guide</a>.</p>');
+    const known: StoreCatalog = { ...CATALOG, articleHandles: new Set(['gold-chain-guide']) };
+    const violations = checkDraft(draft({ bodyHtml: body }), known);
+    expect(violations.find((v) => v.kind === 'unknown-handle')?.detail).toBe('/blogs/journal/made-up-article');
+    expect(checkDraft(draft({ bodyHtml: body }), CATALOG).map((v) => v.kind)).not.toContain('unknown-handle');
+  });
+
+  it('accepts a published Journal handle', () => {
+    const body = longBody('<p>See our <a href="/blogs/journal/gold-chain-guide">guide</a>.</p>');
+    const known: StoreCatalog = { ...CATALOG, articleHandles: new Set(['gold-chain-guide']) };
+    expect(checkDraft(draft({ bodyHtml: body }), known)).toEqual([]);
+  });
+});
+
+describe('insertProductPhotos', () => {
+  const row = (handle: string, imageUrl: string | null, imageAlt: string | null = null): ProductRow => ({
+    handle,
+    title: `Title of ${handle}`,
+    productType: 'Ring',
+    vendor: 'LMNY',
+    tags: [],
+    imageUrl,
+    imageAlt,
+    segment: 'house',
+  });
+  const products = new Map<string, ProductRow>([
+    ['a', row('a', 'https://cdn.shopify.com/s/files/a.png?v=1', 'Ring A')],
+    ['b', row('b', 'https://cdn.shopify.com/s/files/b.png', null)],
+    ['c', row('c', 'https://cdn.shopify.com/s/files/c.png?v=3', 'Ring C')],
+    ['d', row('d', 'https://cdn.shopify.com/s/files/d.png?v=4', 'Ring D')],
+    ['nophoto', row('nophoto', null)],
+    ['offsite', row('offsite', 'https://example.com/x.png', 'Off')],
+  ]);
+
+  it('places the photo after the block that links the product, in link order', () => {
+    const body =
+      '<p>One <a href="/products/a">a</a>.</p><p>Gap.</p><p>Two <a href="/products/b">b</a>.</p><p>Gap.</p><p>Three <a href="/products/c">c</a>.</p>';
+    const out = insertProductPhotos(body, products);
+    const order = [...out.matchAll(/href="\/products\/([abc])"><img/g)].map((m) => m[1]);
+    expect(order).toEqual(['a', 'b', 'c']);
+    expect(out).toContain('<img src="https://cdn.shopify.com/s/files/a.png?v=1&amp;width=900" alt="Ring A" width="900" loading="lazy">');
+    expect(out).toContain('b.png?width=900');
+    expect(out).toContain('alt="Title of b"');
+  });
+
+  it('caps the count, skips products without a usable photo and repeats nothing', () => {
+    const body =
+      '<p><a href="/products/nophoto">x</a></p><p><a href="/products/offsite">y</a></p><p><a href="/products/a">a</a></p><p>.</p><p><a href="/products/a">a again</a></p><p><a href="/products/b">b</a></p><p>.</p><p><a href="/products/c">c</a></p><p>.</p><p><a href="/products/d">d</a></p>';
+    const out = insertProductPhotos(body, products);
+    expect((out.match(/<img /g) ?? []).length).toBe(3);
+    expect(out).not.toContain('example.com');
+    expect(out).not.toContain('d.png');
+    expect((out.match(/a\.png/g) ?? []).length).toBe(1);
+  });
+
+  it('never places two photos back to back', () => {
+    const out = insertProductPhotos('<p><a href="/products/a">a</a></p><p><a href="/products/b">b</a></p>', products);
+    expect((out.match(/<img /g) ?? []).length).toBe(1);
+  });
+
+  it('returns the body unchanged with no product links, and the draft still fails validation if the model writes an img', () => {
+    const body = '<p>Text <a href="/collections/estate-jewelry">estate</a>.</p>';
+    expect(insertProductPhotos(body, products)).toBe(body);
+    expect(findHtmlViolations('<p><img src="https://cdn.shopify.com/x.png"></p>').length).toBeGreaterThan(0);
+  });
+
+  it('is wired into the article body but leaves the checked draft untouched', () => {
+    const d = draft();
+    const map = new Map<string, ProductRow>([
+      ['bv-cartier-tank-1962', row('bv-cartier-tank-1962', 'https://cdn.shopify.com/s/files/tank.png?v=1', 'Cartier Tank')],
+    ]);
+    const input = buildArticleCreateInput(d, 'gid://shopify/Blog/123', null, map);
+    expect(String(input.body)).toContain('<img src="https://cdn.shopify.com/s/files/tank.png?v=1&amp;width=900"');
+    expect(d.bodyHtml).not.toContain('<img');
+    expect(String(buildArticleCreateInput(d, 'gid://shopify/Blog/123', null).body)).not.toContain('<img');
+    expect(String(input.body)).toContain(renderBodyHtml(d).split('\n<section')[1] ?? '');
+  });
+});
+
+describe('tags', () => {
+  it('allows the Rolex tag the live Journal already uses', () => {
+    expect(findUnknownTags(['Rolex'])).toEqual([]);
   });
 });
