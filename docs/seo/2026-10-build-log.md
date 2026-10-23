@@ -325,3 +325,36 @@ Ask about this stone on its page and we will reply by email."
   Publishing them to Google & YouTube reverses the channel policy in
   `lmny-feeds/config/channels.ts` and needs a merchant decision. Stones sell
   out, so the list must be refreshed from the stones table before use.
+
+## 2026-10-22 (evening, New York) — six new Journal articles published
+
+Merchant asked for more relevant articles, released that night. Published
+directly on blog `journal` (not as `journal-draft`), author Laura Milman New
+York, SEO title and description set, featured image from a linked product.
+Each body passed `checkDraft` from `lmny-feeds/scripts/journal-draft.ts`
+(prices, supplier names, celebrity claims, HTML allow-list, SEO lengths,
+900–1,400 words, three FAQs). Its only remaining flags were links to other
+live journal articles, which it counts as external, and the `Rolex` tag that
+the live Rolex article already uses. All 18 linked products were ACTIVE and on
+the Online Store, and all 25 linked collections were published, on
+2026-10-22. Verified afterwards: all six are on the live `/blogs/journal` index,
+and SEO fields and images were read back from the Admin API.
+
+| Handle | Topic | Why |
+|---|---|---|
+| `lab-grown-tennis-bracelet-total-carat-weight` | Total vs per-stone carat weight, with real stone counts | Plan P12 |
+| `pre-owned-cartier-love-bracelet-size-condition` | Love bracelet sizing, screws, condition | Plan P12; 303 Cartier pieces |
+| `rolex-datejust-buying-guide-reference-numbers` | Reading Datejust references, sizes, metals | Largest watch inventory |
+| `engagement-ring-diamond-shapes-guide` | Nine shapes, settings, ring builder | Settings and diamond pairing |
+| `fancy-color-diamonds-grading-guide` | Fancy color grades and modifiers, natural vs lab | New colored lab-grown catalog |
+| `holiday-jewelry-gift-guide-2026` | Gifts by recipient, sizing, policy timing | Holiday season |
+
+Policy lines used: free insured shipping, 14-day returns on unworn jewelry and
+loose diamonds, watch exchanges within 7 days, one complimentary resizing on
+house rings, complimentary engraving on engagement rings, the "Not sure" ring
+size option, and lab-grown savings of 60–85%. No prices.
+
+Not done: Search Console query data could not be read for topic selection
+(the agent proxy rejects the URL-encoded site path). The two job drafts from
+the drafting workflow (Bulgari Pink, Sotheby's Italy sapphire necklace) are
+still unpublished and were not reviewed.
