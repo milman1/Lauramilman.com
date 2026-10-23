@@ -388,3 +388,39 @@ and links the fancy color guide.
 Time-sensitive: the Sotheby's piece is about an Oct 28 sale and the Bulgari
 piece about a Nov 10 sale. Both read as previews and will need a results line
 after those dates.
+
+## 2026-10-23 (early morning, New York) — six audience articles, and photos in every article
+
+Merchant asked for more articles for the core customer (women buying for
+themselves, engagement and bridal, men buying for her) and fewer on watches,
+then asked for photos. Six new articles published; all 20 articles from
+2026-10-22 and 2026-10-23 now carry in-article product photos.
+
+| Handle | Audience |
+|---|---|
+| `right-hand-ring-buying-diamonds-for-yourself` | Women buying for themselves |
+| `milestone-jewelry-what-to-buy-yourself` | Women buying for themselves |
+| `proposal-season-engagement-ring-timeline` | Engagement (December is the most popular month to propose, The Knot) |
+| `how-to-match-a-wedding-band-to-an-engagement-ring` | Bridal |
+| `how-to-buy-jewelry-for-her-a-guide-for-men` | Men buying for her |
+| `anniversary-jewelry-gifts-by-year` | Gifting |
+
+**Photos.** Each article has a featured image plus 2 or 3 product photos in
+the body (`<img>` inside a link to the product, `width=900`, `loading="lazy"`,
+descriptive alt text). All images are the products' own Shopify CDN photos,
+chosen from products the article links to; no generated images. Eight articles
+also gained a product link or two so every article reaches at least two photos.
+Applied with `articleUpdate` on the published articles; nothing else changed.
+The holiday gift guide's closing line and two other small wording fixes made at
+publish time are in the live copies (for example, the guide no longer calls the
+first-gold-piece edit "solid").
+
+Notes for next time:
+- `lmny-feeds/scripts/journal-draft.ts` allows no `<img>` in a body
+  (`ALLOWED_HTML_TAGS`) and rejects any `src`. The weekly job therefore
+  cannot produce in-body photos. Changing that is a code change for a pull
+  request, not done here.
+- Pearl, sapphire, emerald and ruby collections are not on the Online Store,
+  so they are not linked.
+- Several estate products exist twice (a `bv-` handle and a plain one) with the
+  same title. Not changed.
