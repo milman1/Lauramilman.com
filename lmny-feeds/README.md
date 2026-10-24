@@ -424,12 +424,12 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
-   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is the
-   **midpoint between cost and Robinson's Jewelers' price** when the same
-   supplier stock number is found in their public catalog
-   (`src/backvault/competitor.ts`; exact stock-number match only, ambiguous
-   numbers dropped), floored at the flat rule; otherwise a flat
-   **cost + $500**. The cost is written to Shopify **Cost per item**
+   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is
+   **10% under that listed price** (`listedPriceFactor` 0.9). Robinson's
+   Jewelers is still indexed by supplier stock number
+   (`src/backvault/competitor.ts`; exact match only, ambiguous numbers
+   dropped) and a match is still remembered, but that price does not set
+   the ticket. The cost is written to Shopify **Cost per item**
    (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
    the markup is a pull request against `config/pricing.ts`; the next run
    reprices every listed piece because price and cost are in the content
@@ -454,10 +454,8 @@ npm run sync:backvault       # live (needs Shopify env vars)
 
    **If the competitor fetch is partial** — the pagination cap above, or the
    fetch deadline below — the rows that did come back are **indexed and used**,
-   so a piece found in them gets its midpoint price as normal. A piece that is
-   *not* found may still have a match on a page that was never read, so it is
-   priced from what the store already remembers about it (below) rather than
-   dropped straight to the flat markup. A partial read is a **warning**, never
+   so a piece found in them still has its Robinson's price recorded. The
+   store ticket is 10% under the supplier's listed price either way. A partial read is a **warning**, never
    an error, and the report and Done line say how many rows over how many pages
    were read, why the walk stopped, how many pieces were priced from a match,
    how many from a remembered comparison, and how many fell back to flat. One
@@ -486,17 +484,18 @@ npm run sync:backvault       # live (needs Shopify env vars)
    competitor's price and the date it was read to that product, as
    `backvault_feed.competitor_price` (`number_decimal`) and
    `backvault_feed.competitor_price_at` (`date_time`). On a run whose index is
-   **not complete**, an unmatched piece is then priced by what is remembered:
+   **not complete**, an unmatched piece keeps the ordinary ticket, 10% under
+   the supplier's listed price. A remembered Robinson's price does not
+   raise or lower it. The counts below still say whether a comparison was
+   fresh, expired, unreadable, or unused:
 
-   - a comparison **no older than 90 days**, whose midpoint beats the flat
-     floor: it becomes this run's competitor price and the ordinary midpoint
-     rule runs against the **current** cost, so the ticket follows the supplier
-     down or up and keeps the midpoint premium;
-   - **nothing remembered**, a comparison **older than 90 days**, one with **no
+   - a comparison **no older than 90 days** is still eligible to be
+     remembered, and the ticket is recomputed from this run's supplier
+     price at 10% under;
+   - **nothing remembered**, a comparison **older than 90 days**, or one with **no
      readable date** (never usable rather than expired — with no date there is
-     nothing to age), or one whose **midpoint loses to the floor**: flat,
-     cost + $500 — exactly what the rule says for a piece that is not on the
-     competitor. Nothing is protected, nothing is frozen. The four are counted
+     nothing to age): the same 10% under the listed price. Nothing is
+     protected, nothing is frozen. The four are counted
      apart in the report, because a piece written at the flat price was not
      "priced from a remembered comparison" whatever is stored on it.
 

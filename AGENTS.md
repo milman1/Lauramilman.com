@@ -90,7 +90,7 @@ its row; if the row says "merchant-set", ask, never assume.
 | Loose lab-grown diamonds (Belgium Dia API, type `Lab-Grown Diamond`, handle `lg-`) | Belgium Dia Amount $ | **Cost × 2.5** through $200, **× 2.25** through $500, **× 2** through $1,000, **× 1.75** above (merchant decision, #285 merged 2026-10-16; was × 3.5 at every size), rounded to the dollar. Boundary floors keep a higher cost from producing a lower price. Fail-closed guards against a $/ct read as a total (retail floor $180 at ≥1 ct). The 10% welcome discount remains eligible. | `LOOSE_LAB_GROWN`, `labRetailMultipleFromCost`, `LAB_GUARDS`, `src/markup.ts` |
 | Colored loose lab-grown diamonds (LGD certified-color API, tag `colored-stone-feed`, handle `lg-color-`) | LGD Buy_Price_Total | The same tiers as white loose lab-grown, rounded to the dollar (merchant decision 2026-10-22; was × 3.5 from 2026-10-11). Total cost must match carat × per-carat cost. The 10% welcome discount remains eligible. | `config/pricing.ts` `coloredLabRetailFromCost`, `src/lgd-color/catalog.mjs` |
 | Watches (Belgium Dia API, type `Watch`, handle `w-`) | Supplier cost in the feed | Lowest $100 price that leaves 10% of the selling price after the eBay watch fee and seller-paid shipping when the price is $10,000 or under, and 5% above that. Shipping is free to the buyer ($120 postage, signature, and packing, plus 1% of the sale for jewelry insurance). The price does not step down as cost rises. A market anchor (median US dealer ask for the same reference and Unworn or Pre-Owned tier, at least 4 asks, dated, 45-day shelf life) may lift the price by up to 15% and never lowers it (merchant decision 2026-10-12). No cost → tag `pricing-review`, price untouched. Eight stock numbers in `WATCH_RETAIL_CAP_BY_STOCK` use that retail ceiling when the ceiling still nets at least cost after the fee and shipping. | `config/pricing.ts` `WATCH_SALE`, `WATCH_MARKET_ANCHORS`, `WATCH_RETAIL_CAP_BY_STOCK`, `EBAY_WATCH_FEE`, `src/watchPricing.ts` |
-| Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | Midpoint with Robinson's Jewelers when the same stock number is on their site, floored at cost + $500; otherwise cost + $500. Their catalogue is larger than the 25,000 products their pagination allows, so a run often cannot see the whole of it: each match is remembered on the product (`backvault_feed.competitor_price` + `competitor_price_at`), and on a run whose index is incomplete an unmatched piece is priced from a remembered comparison **under 90 days old** — the same midpoint rule, against that run's cost, so a supplier markdown still reaches the storefront. Nothing remembered, or older than 90 days: cost + $500, as for any piece that is not on their site. A complete index always wins over memory. | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts`, `competitor.ts`, `diff.ts` |
+| Vintage and estate designer pieces (The Back Vault, tag `backvault-feed`, handle `bv-`) | The Back Vault listed price | **10% under that listed price** (merchant decision 2026-10-20): retail = listed price × 0.9. The listed price is still the cost, so the ticket is under cost. Robinson's Jewelers is still read and a match is still remembered (`backvault_feed.competitor_price` + `competitor_price_at`); that price does not set the ticket. | `config/pricing.ts` `BACKVAULT`, `src/backvault/pricing.ts` |
 | Royal Chain basic chains (trade account; house-brand vendor, SKU = Royal Chain item number) | Trade-account wholesale price read by the "Royal Chain costs" job | **Cost × 3**, rounded up to $5. **Royal Chain only.** | `config/pricing.ts` `SUPPLIER_INTAKE` |
 | Jacob & Co. watches (vendor `Jacob & Co`, tag `jacob-co-boutique`; sourced from Bucherer and Exquisite Timepieces; 13 products on 2026-09-09) | Merchant's purchase price, not in Shopify | **Retailer list price as scraped from Bucherer or Exquisite Timepieces (the lower when both list the reference) unless uploaded by hand.** Unworn boutique pieces (tag `new-unworn`, SKU = reference such as `PC400.10.AA.AE.A`) carry the retailer's list price as scraped and stay DRAFT with `price-unconfirmed` until the merchant confirms; hand-uploaded pieces keep the price the merchant typed. No multiplier. Condition `1000` when unworn, else `3000`. | Not in code; no formula exists in the repo |
 | Laura Milman fine jewelry (vendors Laura Milman New York, Milman New York, Laura's Gems; made in house) | Merchant's own cost sheet | **Merchant-set.** No formula exists in the repo. Evidence only: the few pieces with a cost recorded sit at ×2.0 (two `TM`-prefixed supplier items) and ×2.8 (one `TM` item); treat as observations, not a rule. Do not reprice without an explicit instruction. | Not in code |
@@ -286,22 +286,18 @@ it runs every week without an agent:
    found in titles, handles, SKUs, body copy, and image file names. Their
    catalogue is at least that large and its full size is unknown, so the
    index may be partial. When it is partial, the matches it did find are
-   still used, and an unmatched piece is priced from the comparison
-   remembered on the product (step 2).
-2. A piece whose stock number is found prices at the midpoint between our
-   cost and Robinson's price, floored at cost + $500. No match: cost + $500.
-   Ambiguous numbers (two rows, two prices) are dropped, never guessed.
-   There is deliberately no fuzzy title matching: a wrong match is a
-   wrong public price.
+   still used. The ticket does not come from that match (step 2).
+2. Retail is 10% under the supplier's listed price (merchant decision
+   2026-10-20). Robinson's price is not the ticket. Ambiguous numbers
+   (two rows, two prices) are dropped, never guessed. There is
+   deliberately no fuzzy title matching: a wrong match is a wrong
+   public price.
 
    Every match is written back to the product as
-   `backvault_feed.competitor_price` and `competitor_price_at`. On a run
-   whose index is incomplete, an unmatched piece is priced from that
-   memory while it is **under 90 days old** — the midpoint rule again,
-   against the current cost, so the piece tracks the supplier instead of
-   holding last season's ticket. Past 90 days, or with nothing
-   remembered, it prices flat at cost + $500. A complete index always
-   wins over memory, and a fresh match refreshes both the value and the
+   `backvault_feed.competitor_price` and `competitor_price_at`. Since
+   2026-10-20 that memory does not change the ticket: the store price
+   follows the supplier's listed price down or up at 10% under. A fresh
+   match refreshes both the value and the
    date; a piece that matches but is otherwise unchanged is rewritten
    once every 30 days so its memory does not age out.
 3. On 2026-09-09 Robinson's carried none of the signed pieces (their 1,130
