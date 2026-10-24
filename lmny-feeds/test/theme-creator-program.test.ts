@@ -22,7 +22,7 @@ describe('influencer program', () => {
     expect(page).not.toContain('watches, style, or New York');
     expect(page).toContain('does not combine with LMNYWELCOME');
     expect(page).toContain('You earn 10% of what your audience pays');
-    expect(page).toContain('after the 7-day return window closes');
+    expect(page).toContain('after the 14-day return window closes');
     expect(page).toContain('until it reaches $50');
     expect(page).toContain('Loose lab-grown diamonds stay in the store');
     expect(page).toContain('gold chains');

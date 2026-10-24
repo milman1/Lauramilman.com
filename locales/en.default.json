@@ -736,6 +736,16 @@
     "page": "Page"
   },
   "ring_flow": {
+    "order_subtotal": "Order subtotal",
+    "add_with_band": "Add ring and band to bag",
+    "band_builder": "Build your ring and add an optional wedding band",
+    "band": "Wedding band",
+    "band_heading": "Add a wedding band (optional)",
+    "band_note": "Choose a separate size and gold option for your band. We will confirm how it sits beside your setting before manufacture.",
+    "no_band": "No wedding band",
+    "choose_option": "Choose an option",
+    "band_options_required": "Choose an available size and gold combination for your wedding band.",
+
     "title": "Your ring starts here.",
     "intro": "Choose your diamond and setting. See your complete price as you go.",
     "choose": "Choose",

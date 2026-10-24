@@ -76,8 +76,8 @@
         "promise-1": {
           "type": "item",
           "settings": {
-            "text": "Authenticity Guaranteed",
-            "short": "Authenticity"
+            "text": "Inspected in New York",
+            "short": "Hand-Inspected"
           }
         },
         "promise-2": {
@@ -97,7 +97,7 @@
         "promise-4": {
           "type": "item",
           "settings": {
-            "text": "7-Day Jewelry Returns",
+            "text": "14-Day Returns",
             "short": ""
           }
         }
@@ -324,6 +324,174 @@
             "title": "Yellow Gold Bowtie Huggie Earrings",
             "subtitle": "Yellow Gold"
           }
+        },
+        "gold-10": {
+          "type": "product",
+          "settings": {
+            "product": "mini-signet-ring-14k-yellow-gold",
+            "title": "Mini Signet Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-11": {
+          "type": "product",
+          "settings": {
+            "product": "mini-curb-stackable-ring-14k-yellow-gold",
+            "title": "Mini Curb Stackable Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-12": {
+          "type": "product",
+          "settings": {
+            "product": "polished-band-ring-14k-yellow-gold",
+            "title": "Polished Band Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-13": {
+          "type": "product",
+          "settings": {
+            "product": "rectangular-signet-ring-in-14k-yellow-gold",
+            "title": "Rectangular Signet Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-14": {
+          "type": "product",
+          "settings": {
+            "product": "copy-of-circle-shape-diamond-rose-gold-ring-sizable",
+            "title": "Round Diamond Stackable Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-15": {
+          "type": "product",
+          "settings": {
+            "product": "bar-set-diamond-stackable-band",
+            "title": "Bar Set Diamond Band",
+            "subtitle": "Stackable"
+          }
+        },
+        "gold-16": {
+          "type": "product",
+          "settings": {
+            "product": "channel-set-diamond-stackable-eternity-band",
+            "title": "Channel Set Diamond Band",
+            "subtitle": "Stackable"
+          }
+        },
+        "gold-17": {
+          "type": "product",
+          "settings": {
+            "product": "graduated-tubogas-ring-14k-yellow-gold",
+            "title": "Graduated Tubogas Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-18": {
+          "type": "product",
+          "settings": {
+            "product": "thick-tubogas-ring-14k-yellow-gold",
+            "title": "Thick Tubogas Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-19": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-raindrop-ring-14k-yellow-gold",
+            "title": "Diamond Raindrop Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-20": {
+          "type": "product",
+          "settings": {
+            "product": "polished-5mm-bangle-14k-yellow-gold",
+            "title": "Polished 5mm Bangle",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-21": {
+          "type": "product",
+          "settings": {
+            "product": "lmny-snake-2-6-mm-ovsn260-bracelet",
+            "title": "2.6mm Snake Chain Bracelet",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-22": {
+          "type": "product",
+          "settings": {
+            "product": "lmny-cuban-5-mm-nhmc150-bracelet",
+            "title": "5mm Cuban Chain Bracelet",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-23": {
+          "type": "product",
+          "settings": {
+            "product": "lmny-rope-2-5-mm-hsr018",
+            "title": "2.7mm Rope Chain Necklace",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-24": {
+          "type": "product",
+          "settings": {
+            "product": "mini-initial-necklace-in-14k-yellow-gold",
+            "title": "Mini Initial Necklace",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-25": {
+          "type": "product",
+          "settings": {
+            "product": "polished-chevron-band",
+            "title": "Polished Chevron Band",
+            "subtitle": "14K Yellow Gold · Stackable"
+          }
+        },
+        "gold-26": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-band",
+            "title": "Diamond Chevron Band",
+            "subtitle": "Stackable"
+          }
+        },
+        "gold-27": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-polished-band-in-14k-yellow-gold",
+            "title": "Diamond Chevron Polished Band",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-28": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-ring-in-14k-yellow-gold",
+            "title": "Diamond Chevron Ring",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "gold-29": {
+          "type": "product",
+          "settings": {
+            "product": "chevron-wire-ring",
+            "title": "Chevron Wire Ring",
+            "subtitle": "Stackable"
+          }
+        },
+        "gold-30": {
+          "type": "product",
+          "settings": {
+            "product": "double-chevron-wire-ring-in-14k-yellow-gold",
+            "title": "Double Chevron Wire Ring",
+            "subtitle": "14K Yellow Gold"
+          }
         }
       },
       "block_order": [
@@ -335,18 +503,40 @@
         "gold-6",
         "gold-7",
         "gold-8",
-        "gold-9"
+        "gold-9",
+        "gold-10",
+        "gold-11",
+        "gold-12",
+        "gold-13",
+        "gold-14",
+        "gold-15",
+        "gold-16",
+        "gold-17",
+        "gold-18",
+        "gold-19",
+        "gold-20",
+        "gold-21",
+        "gold-22",
+        "gold-23",
+        "gold-24",
+        "gold-25",
+        "gold-26",
+        "gold-27",
+        "gold-28",
+        "gold-29",
+        "gold-30"
       ],
       "settings": {
         "style": "cream",
         "columns": "5",
         "ratio": "0.84",
         "eyebrow": "Gold Jewelry",
-        "title": "Gold for the office,",
-        "title_emphasis": "and after.",
-        "text": "A weekday uniform that survives a noon lunch in Midtown, a 4 p.m. deck and a 7 p.m. drink without a costume change.",
+        "title": "The gold you reach for,",
+        "title_emphasis": "rings, chains, and bands.",
+        "text": "Stacking rings, 14K chain necklaces and bracelets, and bands. The same gold from a desk to dinner.",
         "all_text": "Shop all",
-        "all_url": "/collections/chains",
+        "all_url": "/collections/gold-jewelry",
+        "more_row": true,
         "button_1_text": "",
         "button_1_url": "",
         "button_2_text": "",
@@ -356,7 +546,78 @@
         "collection": "",
         "collection_limit": 5,
         "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/chains"
+        "mobile_button_url": "/collections/gold-jewelry"
+      }
+    },
+    "chains-carousel": {
+      "type": "lmh-catalog-carousel",
+      "blocks": {
+        "band-1": {
+          "type": "product",
+          "settings": {
+            "product": "polished-chevron-band",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-2": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-band",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-3": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-polished-band-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-4": {
+          "type": "product",
+          "settings": {
+            "product": "diamond-chevron-ring-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-5": {
+          "type": "product",
+          "settings": {
+            "product": "chevron-wire-ring",
+            "title": "",
+            "subtitle": ""
+          }
+        },
+        "band-6": {
+          "type": "product",
+          "settings": {
+            "product": "double-chevron-wire-ring-in-14k-yellow-gold",
+            "title": "",
+            "subtitle": ""
+          }
+        }
+      },
+      "block_order": [
+        "band-1",
+        "band-2",
+        "band-3",
+        "band-4",
+        "band-5",
+        "band-6"
+      ],
+      "settings": {
+        "eyebrow": "Gold",
+        "title": "Chains and bands,",
+        "title_emphasis": "every one.",
+        "text": "Every 14K yellow gold chain necklace and bracelet, and the stacking bands.",
+        "collection": "chains",
+        "collection_2": "",
+        "link_text": "Shop all chains",
+        "link_url": "/collections/chains"
       }
     },
     "lab-grown": {
@@ -389,6 +650,30 @@
         "lab-4": {
           "type": "product",
           "settings": {
+            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
+            "title": "Lab-Grown Emerald Huggie Earrings",
+            "subtitle": "14K Yellow Gold"
+          }
+        },
+        "lab-5": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-pear-diamond-drop-earrings-056-ct-14k-two-tone-er10454",
+            "title": "Lab-Grown Pear Drop Earrings",
+            "subtitle": "14K Two-Tone Gold"
+          }
+        },
+        "lab-6": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-marquise-diamond-stud-earrings-067-ct-14k-white-gold-er18519",
+            "title": "Lab-Grown Marquise Stud Earrings",
+            "subtitle": "14K White Gold"
+          }
+        },
+        "lab-8": {
+          "type": "product",
+          "settings": {
             "product": "lab-grown-round-eternity-band-eternity-band-prong-not-applicable",
             "title": "Lab-Grown Round Diamond Eternity Band",
             "subtitle": "Prong · Made to order"
@@ -398,17 +683,21 @@
       "block_order": [
         "lab-1",
         "lab-2",
+        "lab-4",
+        "lab-5",
+        "lab-6",
         "lab-3",
-        "lab-4"
+        "lab-8"
       ],
       "settings": {
         "style": "navy",
         "columns": "4",
+        "scroll_row": true,
         "ratio": "1.04",
         "eyebrow": "Lab-Grown Diamonds · Under $1,000",
         "title": "For the push present,",
         "title_emphasis": "or the promotion you bought yourself.",
-        "text": "Pendants, studs, eternity bands and tennis bracelets set with lab-grown diamonds, each starting under $1,000.",
+        "text": "Pendants, studs, huggies, eternity bands, and a tennis bracelet set with lab-grown diamonds, each under $1,000.",
         "all_text": "",
         "all_url": "",
         "button_1_text": "Shop Under $1,000",
@@ -581,6 +870,7 @@
         "pre-17",
         "pre-18"
       ],
+      "disabled": true,
       "settings": {
         "eyebrow": "Pre-Owned",
         "title": "Pre-owned watches and",
@@ -621,6 +911,7 @@
     "reviews",
     "rings-your-way",
     "gold",
+    "chains-carousel",
     "lab-grown",
     "pre-owned",
     "private-clients"

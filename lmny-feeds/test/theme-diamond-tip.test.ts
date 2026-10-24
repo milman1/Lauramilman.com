@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('diamond grade tips', () => {
   it('keeps the info bubble inside the filter panel', () => {
-    const css = readFileSync(new URL('../../sections/diamond-filter.liquid', import.meta.url), 'utf8');
+    const css = readFileSync(new URL('../../assets/diamond-filter.css', import.meta.url), 'utf8');
     const tip = css.slice(css.indexOf('.lm-dfilter__info::after {'), css.indexOf('.lm-dfilter__info:hover::after'));
     expect(tip).toContain('left: 0;');
     expect(tip).toContain('width: 260px;');
