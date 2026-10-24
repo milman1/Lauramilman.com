@@ -3,13 +3,15 @@ import fs from 'node:fs';import assert from 'node:assert/strict';
 const repo = new URL('../../../', import.meta.url).pathname.replace(/\/$/, '');
 const fixtures=JSON.parse(fs.readFileSync(new URL('./ring-flow-fixtures.json',import.meta.url),'utf8'));
 const settings=fixtures.settings,baseStones=fixtures.stones,raw=fixtures.diamonds;
-const cfg={settings,copy:JSON.parse(fs.readFileSync(repo+'/locales/en.default.json','utf8')).ring_flow,apiBase:'https://fixtures.supabase.co/functions/v1/diamonds',apiKey:'',root:'/',cartUrl:'/cart',contact:'/pages/contact',currency:'USD'};
+const cfg={settings,copy:JSON.parse(fs.readFileSync(repo+'/locales/en.default.json','utf8').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow,apiBase:'https://fixtures.supabase.co/functions/v1/diamonds',apiKey:'',root:'/',cartUrl:'/cart',contact:'/pages/contact',currency:'USD'};
 const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
 const fixtureImages={setting:[{image:pixel}],diamond:[{image:pixel},{image:pixel},{image:pixel}]};
 cfg.copy.tax_shipping = 'Tax &amp; shipping calculated at checkout.';
 const diamonds=raw.map((p,i)=>({handle:p.handle,title:p.title,type:p.type,shape:'Oval',available:true,setting:false,url:'/products/'+p.handle,image:"https://images.test/diamond-"+i+".jpg",images:["https://images.test/diamond-"+i+".jpg","https://images.test/diamond-alt.jpg"],videos:['https://media.example/video.mp4'],options:p.options,variants:p.variants.map(v=>({id:v.id,price:v.price,available:v.available,options:v.options}))}));
 const round={...structuredClone(diamonds[0]),handle:'lg-round-test',shape:'Round',title:'Round lab-grown diamond'};round.variants[0].id=100001;const stoneRound={...baseStones[0],stock_ref:'round-test',shape:'Round'};
-const products=new Map([...settings,...diamonds,round].map(p=>[p.handle,structuredClone(p)]));
+const band={handle:'test-wedding-band',title:'Round lab-grown diamond wedding band',type:'Rings',band:true,setting:false,available:true,image:'https://images.test/band.jpg',url:'/products/test-wedding-band',options:[{name:'Size',values:['6.25','7']},{name:'Metal',values:['14K White Gold','18K White Gold']}],variants:[{id:80001,price:90000,available:true,options:['6.25','14K White Gold']},{id:80002,price:115000,available:true,options:['6.25','18K White Gold']},{id:80003,price:90000,available:false,options:['7','14K White Gold']}]};
+cfg.bands=[{handle:band.handle,title:band.title}];
+const products=new Map([...settings,...diamonds,round,band].map(p=>[p.handle,structuredClone(p)]));
 const b=await chromium.launch({executablePath:process.env.LMNY_TEST_CHROMIUM || undefined,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 let mode='normal',cartItems=[],posts=[],searches=[],failSearch=false,priceBump=false,productUnavailable=false;
 const { Liquid } = await import(process.env.LMNY_TEST_LIQUIDJS || 'liquidjs');
@@ -25,7 +27,7 @@ async function newPage(){const p=await b.newPage({viewport:{width:1024,height:95
  if(u.hostname==='lmny.test'&&u.pathname.startsWith('/products/')){const handle=u.pathname.split('/')[2];let product=structuredClone(products.get(handle));if(product && r.request().headers().accept?.includes('application/json'))return json({product:{id:1,title:product.title}});if(!product)return r.fulfill({status:404,contentType:'application/json',body:'{}'});if(productUnavailable&&product.setting)product.available=false;if(priceBump&&product.setting)product.variants.forEach(v=>v.price+=1000);return json(product);}
  if(u.hostname.endsWith('supabase.co')){if(failSearch)return r.fulfill({status:503,contentType:'application/json',body:'{}'});if(u.searchParams.has('stock_ref')){const ref=u.searchParams.get('stock_ref');const s=baseStones.find(s=>s.stock_ref===ref)||stoneRound;return json({stone:{...s,polish:'Excellent',symmetry:'Excellent',fluorescence:'None',measurements:'8 × 5 mm',table_pct:59,depth_pct:62}});}searches.push(Object.fromEntries(u.searchParams));const shape=u.searchParams.get('shape');const rows=shape==='Round'?[stoneRound]:shape==='Oval'?baseStones.filter(s=>diamonds.some(p=>p.handle==='lg-'+s.stock_ref)).slice(0,3):[];return json({stones:rows,total:rows.length,total_pages:rows.length?2:1});}
  if(u.pathname==='/cart.js')return json({items:cartItems});
- if(u.pathname==='/cart/add.js'&&method==='POST'){const payload=r.request().postDataJSON();posts.push(payload);const lines=payload.items.map((item,i)=>({...item,key:'line-'+posts.length+'-'+i,variant_id:item.id,handle:i===0?item.properties._lm_setting_handle:item.properties._lm_diamond_handle}));if(mode==='partial'){cartItems.push(lines[0]);return r.fulfill({status:422,contentType:'application/json',body:JSON.stringify({status:422,description:'Sold out'})});}cartItems.push(...lines);if(mode==='lost_response')return r.abort('failed');return json({items:lines});}
+ if(u.pathname==='/cart/add.js'&&method==='POST'){const payload=r.request().postDataJSON();posts.push(payload);const lines=payload.items.map((item,i)=>({...item,key:'line-'+posts.length+'-'+i,variant_id:item.id,handle:i===0?item.properties._lm_setting_handle:i===2?item.properties._lm_band_handle:item.properties._lm_diamond_handle}));if(mode==='partial'){cartItems.push(lines[0]);return r.fulfill({status:422,contentType:'application/json',body:JSON.stringify({status:422,description:'Sold out'})});}cartItems.push(...lines);if(mode==='lost_response')return r.abort('failed');return json({items:lines});}
  if(u.pathname==='/cart/update.js'){const {updates}=r.request().postDataJSON();cartItems=cartItems.filter(i=>updates[i.key]!==0);return json({items:cartItems});}
  if(u.hostname==='lmny.test'&&u.pathname==='/cart')return r.fulfill({contentType:'text/html; charset=utf-8',body:'<h1>Native Shopify bag</h1><button>Checkout</button>'});
  if(u.hostname==='lmny.test')return r.fulfill({contentType:'text/html; charset=utf-8',body:html});
@@ -57,4 +59,24 @@ await p.locator('[data-filter="min_carat"]').fill('');await p.locator('[data-fil
 await click(p,'reset');await p.waitForTimeout(50);assert.equal(await p.locator('[data-scale] input:checked').count(),0);assert.equal(await p.locator('.lm-shape input:checked').inputValue(),'Oval');assert.ok((await p.locator('[data-flow-summary]').innerText()).includes(settings[0].title));await p.close();}
 console.log('PASS original shared filter controls, multiple grades, origin ranges, locked setting, reset and responsive filter layout.');
 
+for (const failure of ['normal','partial','lost_response']) {
+ const p=await newPage();await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');
+ const oldTotal=await p.locator('[data-flow-summary] .total').innerText();
+ await p.locator('[data-band-product]').selectOption(band.handle);await p.locator('[data-band-option="0"]').waitFor();
+ assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
+ await p.locator('[data-band-option="0"]').selectOption('7');await p.locator('[data-band-option="1"]').selectOption('14K White Gold');
+ assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
+ await p.locator('[data-band-option="0"]').selectOption('6.25');await p.locator('[data-band-option="1"]').selectOption('18K White Gold');
+ assert.notEqual(await p.locator('[data-flow-summary] .total').innerText(),oldTotal);
+ await p.reload();await p.locator('[data-band-option="0"]').waitFor();assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'6.25');
+ for(const width of [320,390,1024]) {await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
+ if(failure==='normal' && process.env.LMNY_BAND_PREVIEW) await p.screenshot({path:process.env.LMNY_BAND_PREVIEW,fullPage:true});
+ mode=failure;cartItems=[{key:'unrelated',id:999,quantity:1,properties:{}}];await click(p,'add');
+ if(failure==='partial'){await p.getByRole('alert').waitFor();assert.deepEqual(cartItems.map(i=>i.key),['unrelated']);}
+ else {await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items.length,3);assert.equal(payload.items[2].id,80002);assert.equal(cartItems.length,4);
+  if(failure==='normal') {const props=payload.items[0].properties;mode='normal';await p.goto('https://lmny.test/pages/ring-builder?setting='+props._lm_setting_handle+'&diamond='+props._lm_diamond_handle+'&edit_group='+props._lm_ring_id);await p.locator('[data-band-option="0"]').waitFor();assert.equal(await p.locator('[data-band-option="1"]').inputValue(),'18K White Gold');await click(p,'remove-band');await click(p,'add');await p.waitForURL('**/cart');assert.equal(cartItems.length,3);assert.equal(posts.at(-1).items.length,2);}
+ }
+ mode='normal';cartItems=[];await p.close();
+}
+console.log('PASS optional band size/metal, unavailable combination, subtotal, reload, responsive layout, three-line add, rollback, lost response and editing/removal.');
 await b.close();

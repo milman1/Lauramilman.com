@@ -1,0 +1,104 @@
+{%- comment -%}
+  One horizontal row of every product in up to two collections, then any
+  products picked as blocks. A product that appears twice is shown once.
+  Shopify returns at most 50 products per collection. Draft products stay
+  blank here until they are published.
+{%- endcomment -%}
+{{ 'lmny-home.css' | asset_url | stylesheet_tag }}
+
+<section class="lmh lmh-shelf lmh-carousel" aria-labelledby="LmhCarousel-{{ section.id }}" data-lmh-carousel>
+  <div class="lmh-shelf__head">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="lmh-h2" id="LmhCarousel-{{ section.id }}">
+        {{- section.settings.title | escape -}}
+        {%- if section.settings.title_emphasis != blank %} <em>{{ section.settings.title_emphasis | escape }}</em>{% endif -%}
+      </h2>
+      {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
+    </div>
+    <div class="lmh-shelf__arrows">
+      <button type="button" class="lmh-shelf__arrow" data-carousel-prev aria-label="Previous">&#8592;</button>
+      <button type="button" class="lmh-shelf__arrow" data-carousel-next aria-label="Next">&#8594;</button>
+    </div>
+  </div>
+
+  {%- assign seen = '|' -%}
+  <ul class="lmh-shelf__track" role="list" data-lmh-track>
+    {%- if section.settings.collection != blank -%}
+      {%- for product in section.settings.collection.products -%}
+        {%- assign mark = product.id | prepend: '|' | append: '|' -%}
+        {%- unless seen contains mark -%}
+          {%- assign seen = seen | append: product.id | append: '|' -%}
+          <li class="lmh-shelf__item">{%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 20vw' -%}</li>
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- if section.settings.collection_2 != blank -%}
+      {%- for product in section.settings.collection_2.products -%}
+        {%- assign mark = product.id | prepend: '|' | append: '|' -%}
+        {%- unless seen contains mark -%}
+          {%- assign seen = seen | append: product.id | append: '|' -%}
+          <li class="lmh-shelf__item">{%- render 'lmh-card', card_product: product, card_title: '', card_sub: '', sizes: '(max-width: 749px) 168px, 20vw' -%}</li>
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'product' and block.settings.product != blank -%}
+        {%- assign mark = block.settings.product.id | prepend: '|' | append: '|' -%}
+        {%- unless seen contains mark -%}
+          {%- assign seen = seen | append: block.settings.product.id | append: '|' -%}
+          <li class="lmh-shelf__item" {{ block.shopify_attributes }}>{%- render 'lmh-card', card_product: block.settings.product, card_title: block.settings.title, card_sub: block.settings.subtitle, sizes: '(max-width: 749px) 168px, 20vw' -%}</li>
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if section.settings.link_text != blank and section.settings.link_url != blank -%}
+      <li class="lmh-shelf__item lmh-shelf__item--all"><a class="lmh-shelf__all" href="{{ section.settings.link_url }}">{{ section.settings.link_text | escape }} {% render 'lmh-arrow' %}</a></li>
+    {%- endif -%}
+  </ul>
+</section>
+
+<script>
+  (function () {
+    var root = document.currentScript.previousElementSibling;
+    if (!root || !root.hasAttribute('data-lmh-carousel')) return;
+    var track = root.querySelector('[data-lmh-track]');
+    if (!track) return;
+    function move(dir) {
+      track.scrollBy({ left: dir * Math.max(track.clientWidth * 0.8, 200), behavior: 'smooth' });
+    }
+    var prev = root.querySelector('[data-carousel-prev]');
+    var next = root.querySelector('[data-carousel-next]');
+    if (prev) prev.addEventListener('click', function () { move(-1); });
+    if (next) next.addEventListener('click', function () { move(1); });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "LM jewelry carousel",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Gold" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Chains and bands," },
+    { "type": "text", "id": "title_emphasis", "label": "Heading, italic end", "default": "every one." },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "collection", "id": "collection", "label": "Collection", "info": "Every product in this collection, in its own order. Shopify returns at most 50." },
+    { "type": "collection", "id": "collection_2", "label": "Second collection", "info": "Added after the first. A product already shown is skipped." },
+    { "type": "text", "id": "link_text", "label": "Last card text", "default": "Shop all" },
+    { "type": "url", "id": "link_url", "label": "Last card link" }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "title", "label": "Short name (optional)" },
+        { "type": "text", "id": "subtitle", "label": "Spec line" }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [{ "name": "LM jewelry carousel" }]
+}
+{% endschema %}

@@ -155,7 +155,7 @@ Do not rename established handles to chase keywords.
 SEO description: at most 160 characters. Start with one factual identity
 sentence, then useful known specs, then exactly:
 
-`Free insured shipping and 7-day returns.`
+`Free insured shipping and 14-day returns.`
 
 That closer is an authorized policy phrase, separate from row-only product
 facts, and is permitted only after checking the current policy applies to the

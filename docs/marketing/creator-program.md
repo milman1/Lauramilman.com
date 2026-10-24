@@ -14,7 +14,7 @@ The page states the offer. This file is how to run it. Do not put a supplier nam
 | Customer discount | 10% off, one use per customer, does not combine with any other discount |
 | Collections | Lab-Grown Diamonds, Lab-Grown Diamond Jewelry, Chains |
 | Creator commission | 10% of what the customer paid for eligible pieces, after the code, before tax and shipping |
-| Payment | Once a month, after the 7-day return window. Balance carries until it reaches $50. A return is deducted. |
+| Payment | Once a month, after the 14-day return window. Balance carries until it reaches $50. A return is deducted. |
 | Gift | One gold piece the creator chooses, from lab-grown jewelry or chains, kept by them |
 | Not gifted | Loose stones, and the sterling silver lab-grown hoops SKU `ERSLHPRD200P` |
 | Post | If they take a piece: one feed post or Reel and two Stories in the 14 days after it arrives. Tag @laurasgemsnyc. Disclose the gift and the code. A code alone does not require a post. |
@@ -40,7 +40,7 @@ There is no commission cap. A large loose lab-grown diamond pays 10% of the disc
 
 Once a month, filter orders by that discount code.
 
-- Skip an order still inside 7 days of delivery.
+- Skip an order still inside 14 days of delivery.
 - Skip refunded eligible items.
 - Commission is 10% of the discounted merchandise total on eligible lines only.
 - Pay when the unpaid balance is at least $50.
