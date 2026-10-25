@@ -37,7 +37,8 @@
   <template data-diamond-filter-template>
     <div class="diamond-search lm-dfilter lm-dfilter--navy" data-ring-builder="true">
       {% render 'diamond-origin-tabs', current: 'lab' %}
-      {% assign filter_shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ',' %}
+      {% capture shape_entries_raw %}{% render 'diamond-shape-order' %}{% endcapture %}
+      {% assign filter_shapes = shape_entries_raw | strip | split: ';' %}
       {% assign filter_clarity = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
       {% assign filter_color = 'M,L,K,J,I,H,G,F,E,D' | split: ',' %}
       {% assign filter_cut = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ',' %}
