@@ -121,7 +121,7 @@
     {%- liquid
       assign gold_page = false
       case collection.handle
-        when 'gold-jewelry', 'gold-chains', 'gold-bracelets', 'gold-rings', 'first-gold-piece'
+        when 'gold-jewelry', 'gold-chains', 'gold-bracelets', 'gold-rings', 'first-gold-piece', 'gold-plated-silver', 'work-essentials'
           assign gold_page = true
       endcase
     -%}
@@ -132,6 +132,8 @@
         <a href="/collections/gold-bracelets" class="lm-collection__chip"{% if collection.handle == 'gold-bracelets' %} aria-current="page"{% endif %}>Bracelets</a>
         <a href="/collections/gold-rings" class="lm-collection__chip"{% if collection.handle == 'gold-rings' %} aria-current="page"{% endif %}>Rings</a>
         <a href="/collections/first-gold-piece" class="lm-collection__chip"{% if collection.handle == 'first-gold-piece' %} aria-current="page"{% endif %}>Your First Gold Piece</a>
+        <a href="/collections/work-essentials" class="lm-collection__chip"{% if collection.handle == 'work-essentials' %} aria-current="page"{% endif %}>Work Essentials</a>
+        <a href="/collections/gold-plated-silver" class="lm-collection__chip"{% if collection.handle == 'gold-plated-silver' %} aria-current="page"{% endif %}>Gold-Plated Silver</a>
       </nav>
     {%- endif -%}
 
