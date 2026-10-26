@@ -162,29 +162,24 @@ describe('applyRememberedCompetitorPrices', () => {
   const HANDLE = handleFor(item());
   const FRESH = { price: 72000, at: daysAgo(7) };
 
-  it('prices an unmatched piece from a fresh memory, against THIS run cost', () => {
+  it('does not let a fresh memory change the 10% under the supplier price', () => {
     const one = item();
     const stats = applyRememberedCompetitorPrices([one], [live(FRESH)], { indexComplete: false, now: NOW });
-    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 1, memoryHandles: [HANDLE], expired: 0, unusable: 0, flooredToFlat: 0, unremembered: 0 });
-    // (67,600 + 72,000) / 2 — the ordinary rule, no special case.
-    expect(one.priceUsd).toBe(69800);
-    expect(one.competitorPriceUsd).toBe(72000);
-    // The date the comparison was READ, carried through, not today.
-    expect(one.competitorPriceReadAt).toBe(FRESH.at);
+    expect(stats).toEqual({ matchedThisRun: 0, pricedFromMemory: 0, memoryHandles: [], expired: 0, unusable: 0, flooredToFlat: 1, unremembered: 0 });
+    expect(one.priceUsd).toBe(68100);
+    expect(one.competitorPriceUsd).toBeUndefined();
   });
 
-  it('follows a supplier markdown down instead of freezing the ticket', () => {
-    // The whole reason the pin was wrong: the supplier cut the cost to 60,000,
-    // and the storefront must follow at the same midpoint premium.
-    const markedDown = item({ costUsd: 60000, priceUsd: 60500 });
+  it('does not reprice a supplier markdown from a remembered competitor price', () => {
+    const markedDown = item({ costUsd: 60000, priceUsd: 54000 });
     applyRememberedCompetitorPrices([markedDown], [live(FRESH)], { indexComplete: false, now: NOW });
-    expect(markedDown.priceUsd).toBe(66000); // (60,000 + 72,000) / 2, below the old 69,800
+    expect(markedDown.priceUsd).toBe(54000);
   });
 
-  it('follows the supplier up too', () => {
-    const dearer = item({ costUsd: 70000, priceUsd: 70500 });
+  it('does not reprice a supplier increase from a remembered competitor price', () => {
+    const dearer = item({ costUsd: 70000, priceUsd: 63000 });
     applyRememberedCompetitorPrices([dearer], [live(FRESH)], { indexComplete: false, now: NOW });
-    expect(dearer.priceUsd).toBe(71000);
+    expect(dearer.priceUsd).toBe(63000);
   });
 
   it('expires a memory older than COMPETITOR_MEMORY_DAYS', () => {
@@ -205,7 +200,7 @@ describe('applyRememberedCompetitorPrices', () => {
       indexComplete: false,
       now: NOW,
     });
-    expect(one.priceUsd).toBe(69800);
+    expect(one.priceUsd).toBe(68100);
   });
 
   it('counts a memory with no readable date as unusable, not expired', () => {
@@ -251,8 +246,8 @@ describe('applyRememberedCompetitorPrices', () => {
       { indexComplete: false, now: NOW },
     );
     expect(stats.matchedThisRun).toBe(1);
-    expect(stats.pricedFromMemory).toBe(1);
-    expect(flatFallbackCount(stats)).toBe(0);
+    expect(stats.pricedFromMemory).toBe(0);
+    expect(flatFallbackCount(stats)).toBe(1);
   });
 
   it('counts a piece with nothing remembered and leaves it flat', () => {
