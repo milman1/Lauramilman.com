@@ -74,6 +74,9 @@ describe('loose diamond shape filter', () => {
     // One setting per shape, and a link into the builder's own setting list.
     expect(start).toContain('seen contains seen_key');
     expect(themeFile('templates/index.json')).toContain('"more_url": "/pages/ring-builder?start=setting"');
+    // The jump target is an id the section sets itself; Shopify's wrapper id carries the template id.
+    expect(stones).toContain('id="start-with-the-stone"');
+    expect(themeFile('templates/index.json')).toContain('"shapes_anchor": "#start-with-the-stone"');
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {
