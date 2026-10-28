@@ -1,0 +1,599 @@
+{%- comment -%}
+  Laura Milman New York — Influencer program
+  Application page. Codes and gifts are issued by hand after a reply.
+  Eligible pieces are loose lab-grown diamonds and gold jewelry
+  (lab-grown diamond jewelry and gold chains).
+{%- endcomment -%}
+
+<section class="lm-creator" aria-label="Influencer program">
+  <div class="lm-creator__container">
+
+    <div class="lm-creator__info">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="lm-creator__title">{{ section.settings.title }}</h1>
+      {%- if section.settings.intro != blank -%}
+        <p class="lm-creator__intro">{{ section.settings.intro }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="lm-creator__expect">
+          <h2 class="lm-creator__expect-title">{{ section.settings.expect_title }}</h2>
+          {%- assign step_num = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'step' -%}
+              {%- assign step_num = step_num | plus: 1 -%}
+              <div class="lm-creator__step" {{ block.shopify_attributes }}>
+                <span class="lm-creator__step-num">{{ step_num }}</span>
+                <div>
+                  <span class="lm-creator__step-title">{{ block.settings.title }}</span>
+                  {%- if block.settings.text != blank -%}
+                    <span class="lm-creator__step-text">{{ block.settings.text }}</span>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="lm-creator__contact">
+        {%- if section.settings.contact_email != blank -%}
+          <a href="mailto:{{ section.settings.contact_email }}" class="lm-creator__contact-line">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            {{ section.settings.contact_email }}
+          </a>
+        {%- endif -%}
+        <a href="https://www.instagram.com/laurasgemsnyc" class="lm-creator__contact-line">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>
+          @laurasgemsnyc
+        </a>
+      </div>
+    </div>
+
+    <div class="lm-creator__form-wrap">
+      <h2 class="lm-creator__form-title">{{ section.settings.form_title }}</h2>
+
+      {%- form 'contact', class: 'lm-creator__form', id: 'LmCreatorContact' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="lm-creator__success" role="status">{{ section.settings.success_message }}</p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <p class="lm-creator__error" role="alert">
+            Please check your details — {{ form.errors.messages.email | default: 'something went wrong' }}.
+          </p>
+        {%- endif -%}
+
+        <input type="hidden" name="contact[request_type]" value="Influencer program">
+
+        <div class="lm-creator__row">
+          <div class="lm-creator__field">
+            <label for="CreatorName">Name</label>
+            <input type="text" id="CreatorName" name="contact[name]" autocomplete="name" required>
+          </div>
+          <div class="lm-creator__field">
+            <label for="CreatorEmail">Email</label>
+            <input type="email" id="CreatorEmail" name="contact[email]" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="lm-creator__row">
+          <div class="lm-creator__field">
+            <label for="CreatorCity">City <span>optional</span></label>
+            <input type="text" id="CreatorCity" name="contact[city]" autocomplete="address-level2">
+          </div>
+          <div class="lm-creator__field">
+            <label for="CreatorInstagram">Instagram</label>
+            <input type="text" id="CreatorInstagram" name="contact[instagram]" placeholder="@name" required>
+          </div>
+        </div>
+
+        <div class="lm-creator__field">
+          <label for="CreatorTikTok">TikTok <span>optional</span></label>
+          <input type="text" id="CreatorTikTok" name="contact[tiktok]" placeholder="@name">
+        </div>
+
+        <div class="lm-creator__field">
+          <label for="CreatorAudience">Audience</label>
+          <select id="CreatorAudience" name="contact[audience]" required>
+            <option value="Under 5,000">Under 5,000</option>
+            <option value="5,000 to 25,000">5,000 to 25,000</option>
+            <option value="25,000 to 100,000">25,000 to 100,000</option>
+            <option value="Over 100,000">Over 100,000</option>
+            <option value="I'd rather not say">I'd rather not say</option>
+          </select>
+        </div>
+
+        <div class="lm-creator__field">
+          <label for="CreatorPost">Link to a recent post</label>
+          <input type="text" id="CreatorPost" name="contact[post]" inputmode="url" required>
+        </div>
+
+        <div class="lm-creator__field">
+          <label for="CreatorMessage">What do you want to feature?</label>
+          <textarea id="CreatorMessage" name="contact[body]" rows="5" required></textarea>
+        </div>
+
+        <label class="lm-creator__check" for="CreatorAgree">
+          <input type="checkbox" id="CreatorAgree" name="contact[agreed]" value="Yes" required>
+          <span>I have read the terms. I will say when a piece was gifted, and I will say when I earn from the code.</span>
+        </label>
+
+        <button type="submit" class="btn btn--wine btn--lg lm-creator__submit">
+          {{ section.settings.submit_label }}
+        </button>
+        <p class="lm-creator__privacy">{{ section.settings.privacy_note }}</p>
+      {%- endform -%}
+
+      {%- form 'customer', id: 'LmCreatorCustomer', class: 'lm-creator__customer' -%}
+        <input type="hidden" name="contact[tags]" value="creator-applicant">
+        <input type="email" name="contact[email]" id="LmCreatorCustomerEmail" autocomplete="email">
+      {%- endform -%}
+    </div>
+
+  </div>
+
+  <div class="lm-creator__terms-wrap">
+    <h2 class="lm-creator__expect-title">{{ section.settings.terms_title }}</h2>
+    <ul class="lm-creator__terms">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'term' -%}
+          <li {{ block.shopify_attributes }}>
+            <span class="lm-creator__term-title">{{ block.settings.title }}</span>
+            {%- if block.settings.text != blank -%}
+              <span class="lm-creator__term-text">{{ block.settings.text }}</span>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    <p class="lm-creator__links">
+      <a href="{{ routes.collections_url }}/lab-grown-diamond-jewelry">Lab-grown jewelry</a>
+      <a href="{{ routes.collections_url }}/chains">Chains</a>
+      <a href="{{ routes.collections_url }}/lab-grown-diamonds">Loose lab-grown diamonds</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .lm-creator {
+    background: var(--warm-white, #FDFAF6);
+    padding: 3rem 2rem 5rem;
+  }
+
+  .lm-creator__container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .lm-creator__title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark, #2C1810);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .lm-creator__intro {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted, #8A8070);
+    margin-bottom: 2rem;
+  }
+
+  .lm-creator__expect-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.25rem;
+  }
+
+  .lm-creator__step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .lm-creator__step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(74, 20, 40, 0.08);
+    color: var(--wine, #4A1428);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .lm-creator__step-title,
+  .lm-creator__term-title {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-creator__step-text,
+  .lm-creator__term-text {
+    display: block;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--text-muted, #8A8070);
+    margin-top: 0.15rem;
+  }
+
+  .lm-creator__contact {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lm-creator__contact-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+  }
+
+  .lm-creator__contact-line svg {
+    color: var(--gold, #C9A050);
+    flex-shrink: 0;
+  }
+
+  a.lm-creator__contact-line:hover {
+    color: var(--gold-dark, #A88340);
+  }
+
+  .lm-creator__form-wrap {
+    background: var(--cream, #FAF6F0);
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-lg, 12px);
+    padding: 2.5rem;
+  }
+
+  .lm-creator__form-title {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1.5rem;
+  }
+
+  .lm-creator__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .lm-creator__field {
+    margin-bottom: 1.1rem;
+  }
+
+  .lm-creator__field label,
+  .lm-creator__check {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+  }
+
+  .lm-creator__field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    margin-bottom: 0.4rem;
+  }
+
+  .lm-creator__field label span {
+    color: var(--text-muted, #8A8070);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .lm-creator__field input,
+  .lm-creator__field select,
+  .lm-creator__field textarea {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    color: var(--text-dark, #2C1810);
+    background: var(--warm-white, #FDFAF6);
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: var(--radius-sm, 4px);
+    transition: border-color 0.2s ease;
+  }
+
+  .lm-creator__field input:focus,
+  .lm-creator__field select:focus,
+  .lm-creator__field textarea:focus {
+    outline: none;
+    border-color: var(--gold, #C9A050);
+  }
+
+  .lm-creator__field textarea {
+    resize: vertical;
+  }
+
+  .lm-creator__check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin: 0.4rem 0 1.2rem;
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-muted, #8A8070);
+    cursor: pointer;
+  }
+
+  .lm-creator__check input {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  .lm-creator__submit {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+  }
+
+  .lm-creator__privacy {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    color: var(--text-muted, #8A8070);
+    text-align: center;
+    margin: 1rem 0 0;
+  }
+
+  .lm-creator__customer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .lm-creator__success {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: #2F5D3A;
+    background: rgba(47, 93, 58, 0.08);
+    border: 1px solid rgba(47, 93, 58, 0.25);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-creator__error {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.88rem;
+    color: var(--wine, #4A1428);
+    background: rgba(74, 20, 40, 0.07);
+    border: 1px solid rgba(74, 20, 40, 0.25);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .lm-creator__terms-wrap {
+    max-width: 1100px;
+    margin: 3rem auto 0;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  .lm-creator__terms {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem 2.5rem;
+  }
+
+  .lm-creator__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin: 1.75rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lm-creator__links a {
+    color: var(--wine, #4A1428);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold, #C9A050);
+  }
+
+  @media (max-width: 900px) {
+    .lm-creator__container,
+    .lm-creator__terms {
+      grid-template-columns: 1fr;
+    }
+
+    .lm-creator__container {
+      gap: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lm-creator {
+      padding: 2rem 1.25rem 3.5rem;
+    }
+
+    .lm-creator__form-wrap {
+      padding: 1.5rem;
+    }
+
+    .lm-creator__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var contact = document.getElementById('LmCreatorContact');
+    var customer = document.getElementById('LmCreatorCustomer');
+    if (!contact) return;
+
+    function fieldValue(id) {
+      var el = document.getElementById(id);
+      return el && el.value ? el.value.trim() : '';
+    }
+
+    contact.addEventListener('submit', function () {
+      var message = document.getElementById('CreatorMessage');
+      if (message && message.dataset.packed !== '1') {
+        var note = message.value.trim();
+        message.value = [
+          'Influencer program application',
+          'Instagram: ' + fieldValue('CreatorInstagram'),
+          'TikTok: ' + (fieldValue('CreatorTikTok') || '—'),
+          'Audience: ' + fieldValue('CreatorAudience'),
+          'City: ' + (fieldValue('CreatorCity') || '—'),
+          'Recent post: ' + fieldValue('CreatorPost'),
+          'Agreed to terms: ' + (document.getElementById('CreatorAgree').checked ? 'Yes' : 'No'),
+          '',
+          note
+        ].join('\n');
+        message.dataset.packed = '1';
+      }
+
+      var email = fieldValue('CreatorEmail');
+      var custEmail = document.getElementById('LmCreatorCustomerEmail');
+      if (custEmail) custEmail.value = email;
+      if (customer && email) {
+        fetch(customer.getAttribute('action') || '/contact#contact_form', {
+          method: 'POST',
+          body: new FormData(customer),
+          headers: { 'Accept': 'text/html' }
+        }).catch(function () {});
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Influencer program",
+  "tag": "section",
+  "class": "section-creator-program",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Influencer program"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Wear it. Share it."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "The Laura Milman influencer program is for people who post about lab-grown diamonds and gold jewelry. Accepted creators receive a code for those pieces, and can choose one gold piece to wear and post."
+    },
+    {
+      "type": "text",
+      "id": "expect_title",
+      "label": "Steps heading",
+      "default": "How it works"
+    },
+    {
+      "type": "text",
+      "id": "terms_title",
+      "label": "Terms heading",
+      "default": "The terms"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email",
+      "default": "hello@lauramilman.com"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form heading",
+      "default": "Apply"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit label",
+      "default": "Apply"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Thank you. We read every application and reply from hello@lauramilman.com."
+    },
+    {
+      "type": "text",
+      "id": "privacy_note",
+      "label": "Privacy note",
+      "default": "We use this only to reply about the program."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "term",
+      "name": "Term",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "text", "label": "Text" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Influencer program"
+    }
+  ]
+}
+{% endschema %}

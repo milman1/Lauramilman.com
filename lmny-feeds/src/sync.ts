@@ -11,6 +11,7 @@
  */
 
 import { assertSafeDiamondRemovals } from './feedSafety.js';
+import { reconcileGoogleLoose } from './googleLoose.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fetchBelgiumDiaFeed } from './feeds/belgiumdia.js';
@@ -315,6 +316,7 @@ async function main() {
   //    ones are archived so they can recover. Loose diamonds that left a
   //    successfully fetched feed are deleted; unavailable watches archive.
   const catalog: CatalogEntry[] = await shopify.fetchCatalog();
+  const searchStatusByHandle = new Map(catalog.map((p) => [p.handle, p.status]));
   console.log(`Catalog: ${catalog.length} feed-managed products`);
   const pendingUploadifyDeletes = uploadifyMetafieldDeletesForDiamonds(catalog);
   if (pendingUploadifyDeletes.length > 0) {
@@ -638,7 +640,8 @@ async function main() {
             mediaRehosted.push(p.handle);
             // Bring back anything a previous run had quarantined for this.
             if (p.status !== 'ACTIVE' || p.tags.includes(MEDIA_MISSING_TAG)) {
-              await shopify.unquarantineProduct(p.id, p.tags);
+              const unquarantineErrors = await shopify.unquarantineProduct(p.id, p.tags);
+              if (unquarantineErrors.length === 0) searchStatusByHandle.set(p.handle, 'ACTIVE');
             }
             continue;
           }
@@ -646,7 +649,10 @@ async function main() {
         }
         if (p.status === 'ACTIVE' && !p.tags.includes(MEDIA_MISSING_TAG)) {
           const errors = await shopify.quarantineProduct(p.id, p.tags);
-          if (errors.length === 0) mediaQuarantined.push(p.handle);
+          if (errors.length === 0) {
+            mediaQuarantined.push(p.handle);
+            searchStatusByHandle.set(p.handle, 'DRAFT');
+          }
         }
       }
       if (broken.length > 0) {
@@ -711,6 +717,8 @@ async function main() {
     const statusByHandle = new Map(
       inputs.map((input) => [String(input.handle), String(input.status ?? 'ACTIVE')]),
     );
+    // A failed write must not advertise its new supplier data as purchasable.
+    for (const input of inputs) searchStatusByHandle.delete(String(input.handle));
     let createdRefs: Array<{ id: string; handle: string | null; status: string }> = [];
     if (inputs.length >= BULK_THRESHOLD) {
       console.log(`Writing ${inputs.length} products via bulk productSet…`);
@@ -895,7 +903,10 @@ async function main() {
         if (publicationIds.length === 0) continue;
         const errors = await shopify.publishToChannels(ref.id, publicationIds);
         writeErrors.push(...errors.map((e) => `publish ${ref.handle ?? ref.id}: ${e}`));
-        if (errors.length === 0) publishedToChannels += 1;
+        if (errors.length === 0) {
+          publishedToChannels += 1;
+          if (ref.handle) searchStatusByHandle.set(ref.handle, 'ACTIVE');
+        }
       }
     }
 
@@ -1035,7 +1046,7 @@ async function main() {
       const hashByRef = new Map(
         publishable.map((p) => [p.item.stockRef, contentHashFor(p.item, p.priced)]),
       );
-      const { upserted } = await dualWriteStones(publishable, hashByRef, syncedAt, sb);
+      const { upserted } = await dualWriteStones(publishable, hashByRef, syncedAt, { ...sb, shopifyStatusByHandle: searchStatusByHandle });
       notes.push(`supabase stones upserted: ${upserted}`);
       console.log(`Supabase: upserted ${upserted} stones`);
       if (fetchedKinds.has('natural') && fetchedKinds.has('lab')) {
@@ -1058,6 +1069,14 @@ async function main() {
   } else if (!sb) {
     notes.push('supabase dual-write skipped (SUPABASE_URL / SERVICE_KEY unset) — Shopify is still the only stone store');
   }
+
+  // Google is deliberately a curated reconciliation, independent of Uploadify
+  // qty-zero rules and of create/update hash decisions. It never writes prices.
+  notes.push(await reconcileGoogleLoose(shopify, publishable, catalog, {
+    dryRun: flags.dryRun,
+    supplierHealthy: fetchedKinds.has('lab') && flags.limit === null,
+    outDir: OUT_DIR,
+  }));
 
   // 5. Report — run summary plus JSON artifact as the audit trail.
   const report: SyncReport = {
@@ -1207,3 +1226,4 @@ function csvEscape(value: string): string {
   if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
   return value;
 }
+

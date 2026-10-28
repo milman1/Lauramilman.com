@@ -1,0 +1,720 @@
+{
+  "settings": [
+    {
+      "handle": "oval-setting",
+      "title": "Oval setting",
+      "type": "Rings",
+      "shape": "Oval",
+      "available": true,
+      "setting": true,
+      "url": "/products/oval-setting",
+      "image": "https://images.test/setting.jpg",
+      "images": [
+        "https://images.test/setting.jpg"
+      ],
+      "options": [
+        {
+          "name": "Ring size",
+          "values": [
+            "4",
+            "4.25",
+            "4.5",
+            "4.75",
+            "5",
+            "5.25",
+            "5.5",
+            "5.75",
+            "6",
+            "6.25",
+            "6.5",
+            "6.75",
+            "7",
+            "7.25",
+            "7.5",
+            "7.75",
+            "8",
+            "8.25",
+            "8.5"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 200000,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4"
+          ]
+        },
+        {
+          "id": 200001,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.25"
+          ]
+        },
+        {
+          "id": 200002,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.5"
+          ]
+        },
+        {
+          "id": 200003,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.75"
+          ]
+        },
+        {
+          "id": 200004,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5"
+          ]
+        },
+        {
+          "id": 200005,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.25"
+          ]
+        },
+        {
+          "id": 200006,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.5"
+          ]
+        },
+        {
+          "id": 200007,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.75"
+          ]
+        },
+        {
+          "id": 200008,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6"
+          ]
+        },
+        {
+          "id": 200009,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.25"
+          ]
+        },
+        {
+          "id": 200010,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.5"
+          ]
+        },
+        {
+          "id": 200011,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.75"
+          ]
+        },
+        {
+          "id": 200012,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7"
+          ]
+        },
+        {
+          "id": 200013,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.25"
+          ]
+        },
+        {
+          "id": 200014,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.5"
+          ]
+        },
+        {
+          "id": 200015,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.75"
+          ]
+        },
+        {
+          "id": 200016,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8"
+          ]
+        },
+        {
+          "id": 200017,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8.25"
+          ]
+        },
+        {
+          "id": 200018,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8.5"
+          ]
+        }
+      ],
+      "videos": [
+        "https://cdn.shopify.com/videos/c/vp/48dad1f2da9b4c5d8d25eefcf0759cb5/48dad1f2da9b4c5d8d25eefcf0759cb5.SD-480p-1.5Mbps-96404525.mp4"
+      ]
+    },
+    {
+      "handle": "round-setting",
+      "title": "Round setting",
+      "type": "Rings",
+      "shape": "Round",
+      "available": true,
+      "setting": true,
+      "url": "/products/round-setting",
+      "image": "https://images.test/setting.jpg",
+      "images": [
+        "https://images.test/setting.jpg"
+      ],
+      "options": [
+        {
+          "name": "Ring size",
+          "values": [
+            "4",
+            "4.25",
+            "4.5",
+            "4.75",
+            "5",
+            "5.25",
+            "5.5",
+            "5.75",
+            "6",
+            "6.25",
+            "6.5",
+            "6.75",
+            "7",
+            "7.25",
+            "7.5",
+            "7.75",
+            "8",
+            "8.25",
+            "8.5"
+          ]
+        },
+        {
+          "name": "Metal",
+          "values": [
+            "14K Yellow Gold",
+            "18K Yellow Gold"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 201000,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201001,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.25",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201002,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201003,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "4.75",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201004,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201005,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.25",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201006,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201007,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "5.75",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201008,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201009,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.25",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201010,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201011,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "6.75",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201012,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201013,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.25",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201014,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201015,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "7.75",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201016,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201017,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8.25",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201018,
+          "price": 200000,
+          "available": true,
+          "options": [
+            "8.5",
+            "14K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201019,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "4",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201020,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "4.25",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201021,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "4.5",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201022,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "4.75",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201023,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "5",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201024,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "5.25",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201025,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "5.5",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201026,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "5.75",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201027,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "6",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201028,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "6.25",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201029,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "6.5",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201030,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "6.75",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201031,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "7",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201032,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "7.25",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201033,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "7.5",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201034,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "7.75",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201035,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "8",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201036,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "8.25",
+            "18K Yellow Gold"
+          ]
+        },
+        {
+          "id": 201037,
+          "price": 225000,
+          "available": true,
+          "options": [
+            "8.5",
+            "18K Yellow Gold"
+          ]
+        }
+      ],
+      "videos": [
+        "https://cdn.shopify.com/videos/c/vp/a6f38593c8f44fb79d30ad604d56dc46/a6f38593c8f44fb79d30ad604d56dc46.SD-480p-1.5Mbps-96404884.mp4"
+      ]
+    }
+  ],
+  "stones": [
+    {
+      "stock_ref": "100",
+      "kind": "lab",
+      "shape": "Oval",
+      "carat": 1.0,
+      "color": "E",
+      "clarity": "VS1",
+      "lab": "IGI",
+      "cert_number": "TEST",
+      "cert_url": "https://media.example/certificate.pdf",
+      "retail_usd": 300,
+      "image_urls": [
+        "https://images.test/diamond.jpg"
+      ],
+      "video_urls": [
+        "https://media.example/video.mp4"
+      ]
+    },
+    {
+      "stock_ref": "101",
+      "kind": "lab",
+      "shape": "Oval",
+      "carat": 1.1,
+      "color": "E",
+      "clarity": "VS1",
+      "lab": "IGI",
+      "cert_number": "TEST",
+      "cert_url": "https://media.example/certificate.pdf",
+      "retail_usd": 301,
+      "image_urls": [
+        "https://images.test/diamond.jpg"
+      ],
+      "video_urls": [
+        "https://media.example/video.mp4"
+      ]
+    },
+    {
+      "stock_ref": "102",
+      "kind": "lab",
+      "shape": "Oval",
+      "carat": 1.2,
+      "color": "E",
+      "clarity": "VS1",
+      "lab": "IGI",
+      "cert_number": "TEST",
+      "cert_url": "https://media.example/certificate.pdf",
+      "retail_usd": 302,
+      "image_urls": [
+        "https://images.test/diamond.jpg"
+      ],
+      "video_urls": [
+        "https://media.example/video.mp4"
+      ]
+    }
+  ],
+  "diamonds": [
+    {
+      "handle": "lg-100",
+      "title": "1.0 ct Oval lab-grown diamond",
+      "type": "Lab-Grown Diamond",
+      "options": [
+        {
+          "name": "Title",
+          "values": [
+            "Default Title"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 400000,
+          "price": 30000,
+          "available": true,
+          "options": [
+            "Default Title"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "lg-101",
+      "title": "1.1 ct Oval lab-grown diamond",
+      "type": "Lab-Grown Diamond",
+      "options": [
+        {
+          "name": "Title",
+          "values": [
+            "Default Title"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 400001,
+          "price": 30100,
+          "available": true,
+          "options": [
+            "Default Title"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "lg-102",
+      "title": "1.2 ct Oval lab-grown diamond",
+      "type": "Lab-Grown Diamond",
+      "options": [
+        {
+          "name": "Title",
+          "values": [
+            "Default Title"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 400002,
+          "price": 30200,
+          "available": true,
+          "options": [
+            "Default Title"
+          ]
+        }
+      ]
+    }
+  ]
+}

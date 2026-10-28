@@ -121,7 +121,7 @@
     {%- liquid
       assign gold_page = false
       case collection.handle
-        when 'gold-jewelry', 'gold-chains', 'gold-bracelets', 'gold-rings', 'first-gold-piece'
+        when 'gold-jewelry', 'gold-chains', 'gold-bracelets', 'gold-rings', 'first-gold-piece', 'gold-plated-silver', 'work-essentials'
           assign gold_page = true
       endcase
     -%}
@@ -132,6 +132,8 @@
         <a href="/collections/gold-bracelets" class="lm-collection__chip"{% if collection.handle == 'gold-bracelets' %} aria-current="page"{% endif %}>Bracelets</a>
         <a href="/collections/gold-rings" class="lm-collection__chip"{% if collection.handle == 'gold-rings' %} aria-current="page"{% endif %}>Rings</a>
         <a href="/collections/first-gold-piece" class="lm-collection__chip"{% if collection.handle == 'first-gold-piece' %} aria-current="page"{% endif %}>Your First Gold Piece</a>
+        <a href="/collections/work-essentials" class="lm-collection__chip"{% if collection.handle == 'work-essentials' %} aria-current="page"{% endif %}>Work Essentials</a>
+        <a href="/collections/gold-plated-silver" class="lm-collection__chip"{% if collection.handle == 'gold-plated-silver' %} aria-current="page"{% endif %}>Gold-Plated Silver</a>
       </nav>
     {%- endif -%}
 
@@ -306,6 +308,15 @@
         <p class="lm-collection__empty-text">In the meantime, explore the full Laura Milman New York collection.</p>
         <a href="{{ routes.all_products_collection_url }}" class="btn btn--gold">View All Jewelry</a>
       </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Guide and FAQ (custom.guide_html / custom.guide_faq) on an explicit list of
+      jewelry collections only. Merchant approved Cartier and David Webb on
+      2026-10-28; other collections with stored guides (e.g. Rolex) stay hidden.
+    {%- endcomment -%}
+    {%- if collection.handle == 'cartier' or collection.handle == 'david-webb' -%}
+      {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
     {%- endif -%}
 
   </div>

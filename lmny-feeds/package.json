@@ -24,13 +24,15 @@
     "validate:jewelry-csv": "tsx scripts/validate-jewelry-csv.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "jewelry:gate": "tsx scripts/jewelry-gate.ts"
+    "jewelry:gate": "tsx scripts/jewelry-gate.ts",
+    "test:ring-flow": "node test/browser/ring-builder-flow.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "liquidjs": "^10.30.0",
     "playwright": "^1.55.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",

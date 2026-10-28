@@ -222,6 +222,28 @@ Create an Online Store page with handle `shop` and template **shop**.
 
 The storefront popup and newsletter reveal this code after signup.
 
+The live code is 10% off 28 collections and does not combine with product, order, or shipping discounts. Creator codes in section 6a follow that same non-stacking rule.
+
+---
+
+## 6a. Influencer program
+
+Public page: `/pages/influencer-program`, theme template `creator-program`.
+Applications email hello@lauramilman.com and tag the customer `creator-applicant`.
+Operating steps, including how to issue a code and what may be gifted, are in
+`docs/marketing/creator-program.md`.
+
+The offer is fixed by margin, not by a store-wide rate:
+
+- Scope: loose lab-grown diamonds and gold jewelry only.
+- Customer code: 10% off, one use per customer, combinations off.
+- Collections on the code: Lab-Grown Diamonds (`lab-grown-diamonds`), Lab-Grown Diamond Jewelry (`lab-grown-diamond-jewelry`), and Chains (`chains`).
+- Gift: one gold piece the creator chooses, from lab-grown jewelry or chains. Loose stones are not gifted. The sterling silver lab-grown hoops, SKU `ERSLHPRD200P`, are not a gift.
+- Creator earns 10% of what the customer paid for those eligible pieces, after the code, before tax and shipping.
+- Paid once a month after the 14-day return window, once the balance reaches $50.
+
+Each accepted creator gets their own code. There is no shared program code.
+
 ---
 
 ## 7. Branded emails
@@ -238,10 +260,10 @@ HTML to paste lives in `/emails`:
 
 Replace merge tags (`{{ first_name }}`, `{{ abandoned_checkout_url }}`, etc.)
 with the tags your email app provides. Update **Settings → Policies → Refund
-policy** to match the 7-day jewelry / watches-exchange-only copy on
+policy** to match the 14-day jewelry / watches-exchange-only copy on
 `/pages/shipping-returns`. The Online Store refund policy in
 **Settings → Policies** is not in this repository and must be updated
-in Shopify admin to the same 7-day jewelry / 1-year warranty terms. Loose diamonds follow the same 7-day window and 1-year warranty (merchant decision 2026-10-12); set that in the admin refund policy too.
+in Shopify admin to the same 14-day jewelry return / 7-day watch exchange / 1-year warranty terms. Loose diamonds follow the same 14-day window and 1-year warranty (merchant decision 2026-10-12, return window updated 2026-10-20); set that in the admin refund policy too.
 
 ---
 

@@ -1,0 +1,70 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "ring-builder-flow",
+      "settings": {
+        "settings_collection": "ring-settings",
+        "diamond_product": "lg-917959",
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
+        "contact_url": "/pages/contact"
+      }
+    },
+    "trust": {
+      "type": "trust-strip",
+      "blocks": {
+        "trust-1": {
+          "type": "item",
+          "settings": {
+            "text": "Free Insured Shipping"
+          }
+        },
+        "trust-2": {
+          "type": "item",
+          "settings": {
+            "text": "14-Day Returns"
+          }
+        },
+        "trust-5": {
+          "type": "item",
+          "settings": {
+            "text": "Watches: Exchanges Only"
+          }
+        },
+        "trust-3": {
+          "type": "item",
+          "settings": {
+            "text": "Inspected in New York"
+          }
+        },
+        "trust-4": {
+          "type": "item",
+          "settings": {
+            "text": "1-Year Warranty"
+          }
+        }
+      },
+      "block_order": [
+        "trust-1",
+        "trust-2",
+        "trust-5",
+        "trust-3",
+        "trust-4"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "trust"
+  ]
+}

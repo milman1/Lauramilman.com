@@ -2,7 +2,30 @@
   Diamond Shape SVG Icons
 {%- endcomment -%}
 
-{%- case shape -%}
+{%- liquid
+  assign key = shape | downcase | strip
+  case key
+    when 'trilliant', 'triangle'
+      assign key = 'trillion'
+    when 'cushion brilliant', 'cushion modified'
+      assign key = 'cushion'
+    when 'oval step', 'oval step cut', 'oldmine oval'
+      assign key = 'oval'
+    when 'pear step', 'oldmine pear'
+      assign key = 'pear'
+    when 'marquise step', 'dutch marquise', 'dutch marquise step'
+      assign key = 'marquise'
+    when 'hexagonal step'
+      assign key = 'hexagonal'
+    when 'halfmoon'
+      assign key = 'half moon'
+    when 'europeancut', 'old european'
+      assign key = 'european cut'
+    when 'lady heart'
+      assign key = 'heart'
+  endcase
+-%}
+{%- case key -%}
   {%- when 'round' -%}
     <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="1.5"/>
@@ -75,6 +98,113 @@
     <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M20 5 L35 33 H5 Z" stroke="currentColor" stroke-width="1.5"/>
       <path d="M20 5 L20 33 M5 33 L20 16 L35 33" stroke="currentColor" stroke-width="1"/>
+    </svg>
+
+  {%- when 'ashoka' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 16 L12 8 H28 L34 16 V24 L28 32 H12 L6 24 Z" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M20 8 L26 20 L20 32 L14 20 Z" stroke="currentColor" stroke-width="1" fill="none"/>
+    </svg>
+
+  {%- when 'old miner' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 6 H30 L34 10 V30 L30 34 H10 L6 30 V10 Z" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M14 14 H26 V26 H14 Z" stroke="currentColor" stroke-width="1"/>
+    </svg>
+
+  {%- when 'portuguese' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="20" cy="20" r="10" stroke="currentColor" stroke-width="1"/>
+      <circle cx="20" cy="20" r="4" stroke="currentColor" stroke-width="1"/>
+    </svg>
+
+  {%- when 'moval' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 3 C29 11 31 20 31 24 C31 33 26 37 20 37 C14 37 9 33 9 24 C9 20 11 11 20 3 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'half moon' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 24 A14 14 0 0 1 34 24 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'criss cut' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="7" y="7" width="26" height="26" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M7 7 L33 33 M33 7 L7 33" stroke="currentColor" stroke-width="1"/>
+    </svg>
+
+  {%- when 'shield' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4 L34 10 V22 C34 30 20 36 20 36 C20 36 6 30 6 22 V10 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'cadillac' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 20 L16 8 H24 L32 20 L24 32 H16 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'bullet' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 8 H22 C30 8 34 13 34 20 C34 27 30 32 22 32 H12 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'butterfly' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 8 L20 20 L6 32 Z M34 8 L20 20 L34 32 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'hexagonal' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4 L34 12 V28 L20 36 L6 28 V12 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'kite' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4 L34 16 L20 36 L6 16 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'lozenge' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4 L34 20 L20 36 L6 20 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'trapezoid' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 10 H30 L35 30 H5 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'pentagonal' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4 L35 16 L29 34 H11 L5 16 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'european cut' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="20" cy="20" r="4" stroke="currentColor" stroke-width="1"/>
+    </svg>
+
+  {%- when 'capsule' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="12" y="6" width="16" height="28" rx="8" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+
+  {%- when 'octagonal' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 4 H26 L36 14 V26 L26 36 H14 L4 26 V14 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'horse head' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 34 V18 C16 12 20 7 26 7 C29 7 31 9 31 9 L34 6 L33 13 C35 16 35 20 33 22 L28 24 L30 30 L24 28 L22 34 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </svg>
+
+  {%- when 'horse' -%}
+    <svg class="shape-btn__icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 28 V22 L14 16 L18 18 L22 10 L26 12 L24 18 H32 L34 28" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path d="M12 28 V32 M30 28 V32" stroke="currentColor" stroke-width="1.5"/>
     </svg>
 
   {%- else -%}

@@ -8,12 +8,17 @@ Requirements: LGD certified-color endpoint; Available status; IGI report link
 with a recoverable report number; recognized loose-diamond shape, color and
 clarity; positive total cost consistent with carat × per-carat cost; both
 HTTPS photo and MP4/WebM video URLs. Every eligible stone is checked for actual media
-bytes so HTML error pages cannot pass as photographs or videos. Unrecognized
+bytes so HTML error pages cannot pass as photographs or videos. Shapes follow the storefront shape list
+(`snippets/diamond-shape-order.liquid`): the classic shapes plus Ashoka, step
+cuts, Trilliant, Kite, Hexagonal and the other stocked shapes; the colored
+filter shows an extra shape only when a colored stone carries it. Unrecognized
 or incomplete rows are excluded. Certified feed entries can include rings;
 the scope gate excludes those. Source certificate duplicates fail closed;
 certificate collisions with another catalog supplier are skipped.
 
-Pricing is `LGD_COLOR_DIAMONDS` in `config/pricing.ts`, approved 2026-10-11.
+Pricing is `coloredLabRetailFromCost` in `config/pricing.ts`: the same graduated
+tiers as white loose lab-grown, rounded to the dollar (merchant decision
+2026-10-22; was 3.5x cost from 2026-10-11).
 The existing welcome discount eligibility is unchanged. Videos use the
 existing diamond template's `lmny_feed.video_url` viewer; images use Shopify
 media. Loose stones never carry eBay or Uploadify switches and have tracked
@@ -32,7 +37,8 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 - Hourly runs maintain approved active inventory after the verified initial import;
   new arrivals stay draft. Set `LGD_COLOR_SYNC_LIVE=false` to pause scheduled writes.
 - A complete nonempty paginated source snapshot is mandatory. Withdrawals
-  exceeding 10% of active source-owned inventory (minimum five) fail closed.
+  exceeding 150 stones, or 10% of active source-owned inventory if that is
+  larger, fail closed (merchant decision 2026-10-22; was 10%, minimum five).
   Five-product previews and targeted activation never withdraw other products.
 - Read-back verification checks price, cost, SKU, certificate, video, status,
   image template, inventory, and source isolation. A separate public storefront

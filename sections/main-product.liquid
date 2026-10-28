@@ -333,7 +333,7 @@
                     {%- if block.settings.icon == 'returns' and is_watch == 'true' -%}
                       Exchanges Only
                     {%- elsif block.settings.icon == 'returns' -%}
-                      7-Day Jewelry Returns
+                      14-Day Returns
                     {%- else -%}
                       {{ block.settings.label }}
                     {%- endif -%}
@@ -423,7 +423,15 @@
 
       {%- endform -%}
 
-      {% render 'ring-diamond-pairing', product: product, is_watch: is_watch, setting_product: section.settings.setting_only_product %}
+      {% render 'ring-diamond-pairing',
+        product: product,
+        is_watch: is_watch,
+        setting_product: section.settings.setting_only_product,
+        builder: section.settings.ring_builder_enabled,
+        builder_api_base: section.settings.ring_builder_api_base,
+        builder_api_key: section.settings.ring_builder_api_key,
+        builder_view: section.settings.ring_builder_view
+      %}
       {%- comment -%}
         Engraving sits below the buy area and the diamond panel; its fields are
         tied to the product form by form="{{ product_form_id }}", so Add to Cart
@@ -1084,6 +1092,35 @@
       "id": "setting_only_product",
       "label": "Setting-only product",
       "info": "Hidden product with one variant per engagement ring at its setting-only price (labor included). Variant SKU: SET-<ring handle>, or SET-<ring handle>-<option> such as -14k. Rings without one stay on Request this pairing."
+    },
+    {
+      "type": "header",
+      "content": "Ring builder"
+    },
+    {
+      "type": "checkbox",
+      "id": "ring_builder_enabled",
+      "label": "Choose the diamond on setting pages",
+      "info": "Settings sold without a center stone list matching diamonds on the page, with the ring total on each. Leave off on the default template; the ring-builder template turns it on.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "ring_builder_api_base",
+      "label": "Diamond search API",
+      "info": "Same address as the diamond search sections."
+    },
+    {
+      "type": "text",
+      "id": "ring_builder_api_key",
+      "label": "Diamond search public key"
+    },
+    {
+      "type": "text",
+      "id": "ring_builder_view",
+      "label": "Builder template name",
+      "info": "The collection and product template suffix used by the ring builder, such as ring-builder.",
+      "default": "ring-builder"
     }
   ],
   "blocks": [
@@ -1119,7 +1156,7 @@
       "blocks": [
         { "type": "trust_item", "settings": { "icon": "shipping", "label": "Free Insured Shipping" } },
         { "type": "trust_item", "settings": { "icon": "warranty", "label": "1-Year Warranty" } },
-        { "type": "trust_item", "settings": { "icon": "returns", "label": "7-Day Jewelry Returns" } }
+        { "type": "trust_item", "settings": { "icon": "returns", "label": "14-Day Returns" } }
       ]
     }
   ]

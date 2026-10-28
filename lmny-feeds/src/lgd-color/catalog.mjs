@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { LGD_COLOR_DIAMONDS } from '../../config/pricing.ts';
+import { coloredLabRetailFromCost } from '../../config/pricing.ts';
 
 // Separate ownership from the Belgium feed; its removal pass must never own these.
 export const FEED_TAG = 'colored-stone-feed';
@@ -10,6 +10,18 @@ const CLARITIES = new Set(['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2
 const SHAPES = new Map(['ROUND','PRINCESS','CUSHION','EMERALD','OVAL','RADIANT','ASSCHER','MARQUISE','HEART','PEAR','BAGUETTE','TRILLION'].map(s => [s, titleCase(s)]));
 SHAPES.set('CUSHION MODIFIED', 'Cushion');
 SHAPES.set('SQUARE RADIANT', 'Radiant');
+// Shapes beyond the classic list, named as the storefront shape buttons store
+// them (snippets/diamond-shape-order.liquid), so each stone lands on a button.
+for (const s of ['ASHOKA','OLD MINER','OLDMINE OVAL','OLDMINE PEAR','PORTUGUESE','MOVAL','TRIANGLE','TRILLIANT','CUSHION BRILLIANT',
+  'DUTCH MARQUISE','DUTCH MARQUISE STEP','MARQUISE STEP','OVAL STEP','OVAL STEP CUT','PEAR STEP','HALF MOON','CRISS CUT','SHIELD',
+  'BULLET','BUTTERFLY','HEXAGONAL','HEXAGONAL STEP','LOZENGE','LOZENGE STEP','LOZENGE STEP CUT','CADILLAC','PENTAGONAL','PENTAGONAL STEP',
+  'HORSE','HORSE HEAD','KITE','KITE STEP','KITE STEP CUT','TRAPEZOID','EUROPEAN CUT','OLD EUROPEAN','LADY HEART','CAPSULE','OCTAGONAL']) SHAPES.set(s, titleCase(s));
+SHAPES.set('HALFMOON', 'Half Moon');
+SHAPES.set('EUROPEANCUT', 'European Cut');
+// Supplier abbreviations of shapes the buttons already have.
+SHAPES.set('MARQUISE MODIFIED BRILLI', 'Marquise');
+SHAPES.set('MARQUISE MODIFIED BRILLIANT', 'Marquise');
+SHAPES.set('OCTAGONAL STEP CUT', 'Octagonal');
 function text(v) { return String(v ?? '').trim(); }
 const number = v => Number(text(v));
 export function titleCase(v) { return text(v).toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()); }
@@ -39,7 +51,7 @@ export function normalizeRow(r) {
   if (!image || !video) return { reason: 'photo_or_video' };
   const stone = { stock, handle: PREFIX + stock.toLowerCase(), shape, color: titleCase(color), intensity, clarity, carat, cost, certificate, certUrl: safeUrl(r.CertificateLink, /\.pdf$/i), image,
     video, measurements: text(r.Measurements), polish: text(r.Polish), symmetry: text(r.Symmetry), fluorescence: text(r.Fluorescence_Intensity), table: number(r.TABLE_PER), depth: number(r.DEPTH_PER) };
-  stone.retail = Math.round(cost * LGD_COLOR_DIAMONDS.costMultiple * 100) / 100;
+  stone.retail = coloredLabRetailFromCost(cost);
   return { stone };
 }
 export function normalizeFeed(rows) {

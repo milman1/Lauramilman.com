@@ -1,0 +1,73 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+
+function themeFile(path: string): string {
+  return readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+}
+
+/** Template JSON may open with Shopify's auto-generated comment block. */
+function template(path: string): { sections: Record<string, { type: string; settings?: Record<string, unknown> }>; order: string[] } {
+  const raw = themeFile(path);
+  const start = raw.includes('*/') ? raw.indexOf('{', raw.indexOf('*/')) : raw.indexOf('{');
+  return JSON.parse(raw.slice(start));
+}
+
+function schema(path: string): { settings: Array<{ id?: string; default?: unknown }> } {
+  const m = themeFile(path).match(/\{%-?\s*schema\s*-?%\}([\s\S]*?)\{%-?\s*endschema\s*-?%\}/);
+  if (!m) throw new Error(`no schema in ${path}`);
+  return JSON.parse(m[1]);
+}
+
+describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
+  it('is off unless a ring-builder template turns it on', () => {
+    const product = schema('sections/main-product.liquid').settings.find((s) => s.id === 'ring_builder_enabled');
+    const filter = schema('sections/diamond-filter.liquid').settings.find((s) => s.id === 'ring_builder_mode');
+    expect(product?.default).toBe(false);
+    expect(filter?.default).toBe(false);
+    for (const path of ['templates/product.json', 'templates/product.diamond.json', 'templates/collection.diamonds.json', 'templates/collection.diamonds-lab.json', 'templates/index.json']) {
+      expect(themeFile(path)).not.toMatch(/ring_builder_(enabled|mode)/);
+    }
+  });
+
+  it('turns the chooser on for setting pages and builder mode on for the diamond search', () => {
+    const product = template('templates/product.ring-builder.json');
+    expect(product.order[0]).toBe('ring-bar');
+    expect(product.sections['ring-bar'].type).toBe('ring-builder-bar');
+    expect(product.sections.main.settings).toMatchObject({ ring_builder_enabled: true, ring_builder_view: 'ring-builder' });
+    expect(String(product.sections.main.settings?.ring_builder_api_base)).toMatch(/^https:\/\/.+\/functions\/v1\/diamonds$/);
+
+    const search = template('templates/collection.ring-builder.json');
+    expect(search.order).toEqual(['ring-bar', 'main']);
+    expect(search.sections.main.type).toBe('diamond-filter');
+    expect(search.sections.main.settings).toMatchObject({ ring_builder_mode: true });
+
+    const start = template('templates/page.ring-builder-start.json');
+    expect(start.sections.main.type).toBe('ring-builder-flow');
+    expect(template('templates/page.ring-builder.json').sections.main.type).toBe('ring-builder-flow');
+  });
+
+  it('lists diamonds only on settings sold without a center stone, by the ring shape', () => {
+    const pairing = themeFile('snippets/ring-diamond-pairing.liquid');
+    expect(pairing).toContain('if builder and is_setting and builder_api_base != blank');
+    expect(pairing).toContain("shapes: ringShape");
+    // A stone picked on the page goes through the same shape, type and availability checks as ?diamond=.
+    expect(pairing).toContain('loadStone(handle, true)');
+    expect(pairing).toContain('if (HANDLE.test(handle)) loadStone(handle, !!fromUrl);');
+  });
+
+  it('fixes the search to the setting shape and returns to the setting with the stone', () => {
+    const js = themeFile('assets/diamond-storefront.js');
+    expect(js).toContain("(p.tags || []).indexOf('ring-setting') === -1");
+    expect(js).toContain('input.checked = input.value === builder.shape;');
+    expect(js).toContain("ringPath('&diamond=' + encodeURIComponent(handle) + '#RingPairing')");
+    expect(themeFile('sections/diamond-filter.liquid')).toContain('data-ring-builder="true"');
+  });
+
+  it('start page matches settings by stated center shape, never the title', () => {
+    const start = themeFile('sections/ring-builder-start.liquid');
+    expect(start).toContain("{% render 'center-stone-shape', product: ring %}");
+    expect(start).toContain("ring.tags contains 'ring-setting'");
+    expect(start).toContain('/pages/ring-builder?setting={{ ring.handle | url_encode }}');
+    expect(start).toContain('shape={{ ring_shape | url_encode }}');
+  });
+});

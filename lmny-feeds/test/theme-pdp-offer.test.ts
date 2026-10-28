@@ -19,9 +19,11 @@ describe('product-page inquiry pills', () => {
     expect(inquiry).toContain("render 'product-is-watch', product: product");
     expect(inquiry).not.toContain("render 'product-is-vintage'");
     expect(inquiry).toContain("if is_watch == 'true'");
-    expect(inquiry).not.toContain("type_l == 'natural diamond'");
     expect(inquiry).toContain("type_l == 'lab-grown diamond'");
     expect(inquiry).toContain('assign offer_ok = false');
+    // Natural stones get the ask form, never the watch-only offer.
+    const offerGate = inquiry.indexOf("if is_watch == 'true'");
+    expect(inquiry.slice(offerGate, offerGate + 80)).not.toContain('natural diamond');
     const offerStart = inquiry.indexOf('{%- if offer_ok -%}');
     const offerLabel = inquiry.indexOf('Make an offer', offerStart);
     const offerForm = inquiry.indexOf("form 'contact', id: 'PdpOfferForm'");
@@ -113,9 +115,9 @@ describe('product-page inquiry pills', () => {
     expect(vintage).toContain("tags_l contains 'designer-jewelry'");
   });
 
-  it('gives loose lab-grown diamonds an Ask about this stone form, never a reserve or an offer', () => {
+  it('gives loose lab-grown and natural diamonds an Ask about this stone form, never a reserve or an offer', () => {
     expect(inquiry).toContain("assign ask_form_ok = false");
-    const labBranch = inquiry.indexOf("if type_l == 'lab-grown diamond'");
+    const labBranch = inquiry.indexOf("if type_l == 'lab-grown diamond' or type_l == 'natural diamond'");
     expect(labBranch).toBeGreaterThan(-1);
     expect(inquiry.slice(labBranch, labBranch + 140)).toContain('assign ask_form_ok = true');
     expect(inquiry).toContain('Ask about this stone');
@@ -156,9 +158,9 @@ describe('lab-grown search heading', () => {
 describe('loose-stone trust block', () => {
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('states shipping, 7-day returns, warranty and the grading lab on every stone page', () => {
+  it('states shipping, 14-day returns, warranty and the grading lab on every stone page', () => {
     expect(diamondProduct).toContain('Free insured U.S. shipping');
-    expect(diamondProduct).toContain('7-day returns');
+    expect(diamondProduct).toContain('14-day returns');
     expect(diamondProduct).toContain('1-year warranty');
     expect(diamondProduct).toContain('Graded by {{ m.lab }}');
     expect(diamondProduct).not.toContain('Independently certified');

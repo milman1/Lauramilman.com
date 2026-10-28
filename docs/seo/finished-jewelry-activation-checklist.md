@@ -53,7 +53,13 @@ and verifying an activation guard in every relevant upload path.
 
 ## Future uploads and activation
 
-Use the shared executable workflow in [jewelry-activation-gate.md](jewelry-activation-gate.md). All mandatory checks below remain required; the command automates structural checks and requires evidence for semantic and preview checks. Skylab products require their matching video attached as Shopify media. Finished lab-grown pieces use cost × 2, rounded to cents; settings remain cost × 3, rounded to dollars.
+Use the shared workflow in [jewelry-activation-gate.md](jewelry-activation-gate.md).
+All mandatory checks below remain required. The gate command automates the
+structural checks; its documented Shopify connector path must reproduce them
+with complete reads and retain evidence for the semantic and preview checks.
+Skylab products require their matching video attached as Shopify media.
+Finished lab-grown pieces use cost × 2, rounded to cents; settings remain cost
+× 3, rounded to dollars.
 
 
 Create future uploads as DRAFT. Finish the applicable listing and operational
@@ -155,7 +161,7 @@ Do not rename established handles to chase keywords.
 SEO description: at most 160 characters. Start with one factual identity
 sentence, then useful known specs, then exactly:
 
-`Free insured shipping and 7-day returns.`
+`Free insured shipping and 14-day returns.`
 
 That closer is an authorized policy phrase, separate from row-only product
 facts, and is permitted only after checking the current policy applies to the

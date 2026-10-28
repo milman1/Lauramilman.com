@@ -3,10 +3,17 @@
  * productSet replaces the metafield list, so every feed that rewrites a
  * product must send these keys again or the channel attributes disappear.
  *
- * Loose diamonds are not included. They are not published to Google.
+ * Curated loose diamonds use GOOGLE_LOOSE_FIELDS below; publication is
+ * reconciled separately from inventory and Uploadify.
  */
 
 export const GOOGLE_SHOPPING_NAMESPACE = 'mm-google-shopping';
+
+/** A unique certified stone has no invented GTIN or manufacturer part number. */
+export const GOOGLE_LOOSE_FIELDS = [
+  { namespace: GOOGLE_SHOPPING_NAMESPACE, key: 'custom_product', type: 'boolean', value: 'true' },
+  { namespace: GOOGLE_SHOPPING_NAMESPACE, key: 'condition', type: 'single_line_text_field', value: 'new' },
+];
 
 export interface GoogleShoppingMetafield {
   namespace: string;
@@ -91,3 +98,4 @@ export function googleShoppingMetafields(input: {
   }
   return fields;
 }
+

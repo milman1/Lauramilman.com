@@ -35,13 +35,13 @@
         "trust-2": {
           "type": "item",
           "settings": {
-            "text": "7-Day Jewelry Returns"
+            "text": "14-Day Returns"
           }
         },
         "trust-3": {
           "type": "item",
           "settings": {
-            "text": "Authenticity Guaranteed"
+            "text": "Inspected in New York"
           }
         },
         "trust-4": {
@@ -397,7 +397,7 @@
         "primary_cta_url": "/pages/private-clients",
         "secondary_cta_text": "Email Us",
         "secondary_cta_url": "/pages/contact",
-        "trust_line": "7-day jewelry returns · Watches: exchanges only"
+        "trust_line": "14-day returns · Watches: exchanges only"
       }
     }
   },

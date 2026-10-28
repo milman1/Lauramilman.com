@@ -1,0 +1,93 @@
+{% doc %}
+Renders the existing API diamond filter controls shared by search and the ring builder.
+@param {string} form_url - Search destination
+@param {number} carat_floor - Minimum carat
+@param {number} carat_ceil - Maximum carat
+@param {number} price_floor - Minimum price
+@param {number} price_ceil - Maximum price
+@param {string[]} shape_order - Shape choices
+@param {string[]} clarity_order - Clarity grades
+@param {string[]} color_order - Colour grades
+@param {string[]} cut_order - Cut grades
+{% enddoc %}
+    <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ form_url }}" method="get">
+      <div class="lm-dfilter__grid">
+        <div class="lm-dfilter__group lm-dfilter__group--wide">
+          <span class="lm-dfilter__label">
+            Shape
+            <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
+          </span>
+          <div class="lm-dfilter__shapes">
+            {%- for entry in shape_order -%}
+              {%- assign shape_parts = entry | split: '|' -%}
+              {%- assign shape_label = shape_parts | first | strip -%}
+              {%- if shape_parts.size > 1 -%}
+                {%- assign shape_value = shape_parts | last | strip -%}
+              {%- else -%}
+                {%- assign shape_value = shape_label -%}
+              {%- endif -%}
+              {%- assign icon_key = shape_label | downcase -%}
+              <label class="lm-shape">
+                <input type="checkbox" name="shape" value="{{ shape_value | escape }}">
+                {%- render 'diamond-shape-icon', shape: icon_key -%}
+                <span class="lm-shape__name">{{ shape_label }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            Carat
+            <button type="button" class="lm-dfilter__info" aria-label="About carat" data-tip="Carat is weight, not size: one carat is 200 milligrams.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="carat" data-floor="{{ carat_floor }}" data-ceil="{{ carat_ceil }}" data-step="0.01">
+            <div class="lm-range__inputs">
+              <label class="lm-range__field">
+                <span>Min</span>
+                <input type="number" inputmode="decimal" step="0.01" min="{{ carat_floor }}" max="{{ carat_ceil }}" value="{{ carat_floor }}" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>Max</span>
+                <input type="number" inputmode="decimal" step="0.01" min="{{ carat_floor }}" max="{{ carat_ceil }}" value="{{ carat_ceil }}" data-range-max>
+              </label>
+            </div>
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        <div class="lm-dfilter__group">
+          <span class="lm-dfilter__label">
+            Price
+            <button type="button" class="lm-dfilter__info" aria-label="About price" data-tip="Every stone is priced individually against the current market.">i</button>
+          </span>
+          <div class="lm-range" data-range data-range-key="price" data-floor="{{ price_floor }}" data-ceil="{{ price_ceil }}" data-step="50">
+            <div class="lm-range__inputs">
+              <label class="lm-range__field">
+                <span>Min {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="{{ price_floor }}" max="{{ price_ceil }}" value="{{ price_floor }}" data-range-min>
+              </label>
+              <span class="lm-range__dash" aria-hidden="true">&ndash;</span>
+              <label class="lm-range__field">
+                <span>Max {{ cart.currency.symbol }}</span>
+                <input type="number" inputmode="numeric" step="50" min="{{ price_floor }}" max="{{ price_ceil }}" value="{{ price_ceil }}" data-range-max>
+              </label>
+            </div>
+            <div class="lm-range__track" aria-hidden="true"><div class="lm-range__fill" data-range-fill></div></div>
+          </div>
+        </div>
+
+        {%- render 'diamond-api-scale', name: 'clarity', order: clarity_order, title: 'Clarity', tip: 'Clarity grades the inclusions inside the stone. From SI2 up, most are invisible without magnification; FL is flawless under 10x.' -%}
+        {%- render 'diamond-api-scale', name: 'color', order: color_order, title: 'Colour', tip: 'Colour runs D (completely colourless) down through the alphabet. Warmth becomes noticeable around J and below.' -%}
+        {%- render 'diamond-api-scale', name: 'cut', order: cut_order, title: 'Cut', tip: 'Cut is craftsmanship rather than nature — it governs how much light the stone returns.' -%}
+      </div>
+
+      <div class="lm-dfilter__actions">
+        <button type="submit" class="lm-dfilter__apply">
+          View Diamonds
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <a href="{{ form_url }}" class="lm-dfilter__reset">Reset all</a>
+      </div>
+    </form>

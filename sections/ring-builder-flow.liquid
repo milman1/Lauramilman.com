@@ -1,0 +1,226 @@
+{{ 'ring-builder-flow.css' | asset_url | stylesheet_tag }}
+{{ 'diamond-filter.css' | asset_url | stylesheet_tag }}
+{%- assign settings_collection = section.settings.settings_collection -%}
+{%- assign first_setting = settings_collection.products.first -%}
+{%- assign first_diamond = section.settings.diamond_product -%}
+<div id="lmny-ring-builder">
+  <div class="intro">
+    <h1>{{ 'ring_flow.title' | t }}</h1>
+    <p class="quiet">{{ 'ring_flow.intro' | t }}</p>
+    <nav aria-label="{{ 'ring_flow.title' | t | escape }}">
+      <span data-stage="1" class="active">1 · {{ 'ring_flow.choose' | t }}</span>
+      <span data-stage="2">2 · {{ 'ring_flow.pair' | t }}</span>
+      <span data-stage="3">3 · {{ 'ring_flow.personalize' | t }}</span>
+      <span>4 · {{ 'ring_flow.bag' | t }}</span>
+      <span>5 · {{ 'ring_flow.checkout' | t }}</span>
+    </nav>
+  </div>
+  <div class="status" data-flow-status role="status"></div>
+  <div class="layout solo">
+    <div class="flow-body" data-flow-main>
+      <h2>{{ 'ring_flow.where' | t }}</h2>
+      <div class="paths">
+        <button type="button" class="path" data-action="start-diamond">
+          {% if first_diamond.featured_image %}{{ first_diamond.featured_image | image_url: width: 800 | image_tag: width: 800, height: 800, loading: 'eager', fetchpriority: 'high' }}{% endif %}
+          <div><h2>{{ 'ring_flow.start_diamond' | t }}</h2><p class="quiet">{{ 'ring_flow.diamond_intro' | t }}</p><span class="eyebrow">{{ 'ring_flow.choose_diamond' | t }} →</span></div>
+        </button>
+        <button type="button" class="path" data-action="start-setting">
+          {% if first_setting.featured_image %}{{ first_setting.featured_image | image_url: width: 800 | image_tag: width: 800, height: 800, loading: 'eager' }}{% endif %}
+          <div><h2>{{ 'ring_flow.start_setting' | t }}</h2><p class="quiet">{{ 'ring_flow.setting_intro' | t }}</p><span class="eyebrow">{{ 'ring_flow.choose_setting' | t }} →</span></div>
+        </button>
+      </div>
+      <noscript><p>{{ 'ring_flow.no_javascript' | t }} <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">{{ 'ring_flow.help' | t }}</a></p></noscript>
+    </div>
+    <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
+  </div>
+  <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>
+  <template data-diamond-filter-template>
+    <div class="diamond-search lm-dfilter lm-dfilter--navy" data-ring-builder="true">
+      {% render 'diamond-origin-tabs', current: 'lab' %}
+      {% capture shape_entries_raw %}{% render 'diamond-shape-order' %}{% endcapture %}
+      {% assign filter_shapes = shape_entries_raw | strip | split: ';' %}
+      {% assign filter_clarity = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
+      {% assign filter_color = 'M,L,K,J,I,H,G,F,E,D' | split: ',' %}
+      {% assign filter_cut = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ',' %}
+      {% render 'diamond-api-filter-form', form_url: request.path, carat_floor: 0.3, carat_ceil: 15, price_floor: 0, price_ceil: 50000, shape_order: filter_shapes, clarity_order: filter_clarity, color_order: filter_color, cut_order: filter_cut %}
+    </div>
+  </template>
+  <script type="application/json" data-flow-config>
+    {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | default: '/pages/contact' | json }},"settings":[
+      {% assign setting_emitted = false %}
+      {% for ring in settings_collection.products limit: 50 %}
+        {% capture ring_shape %}{% render 'center-stone-shape', product: ring %}{% endcapture %}
+        {% assign ring_shape = ring_shape | strip %}
+        {% if ring.available and ring.tags contains 'ring-setting' and ring_shape != blank %}
+          {% if setting_emitted %},{% endif %}{% render 'ring-flow-product-data', product: ring %}
+          {% assign setting_emitted = true %}
+        {% endif %}
+      {% endfor %}
+    ],"bands":[
+      {% assign band_emitted = false %}
+      {% for band in collections['wedding-bands'].products limit: 50 %}
+        {% if band.available and band.tags contains 'wedding-band' %}
+          {% if band_emitted %},{% endif %}
+          {"handle":{{ band.handle | json }},"title":{{ band.title | json }}}
+          {% assign band_emitted = true %}
+        {% endif %}
+      {% endfor %}
+    ],"copy":{
+      "order_subtotal":{{ 'ring_flow.order_subtotal' | t | json }},
+      "add_with_band":{{ 'ring_flow.add_with_band' | t | json }},
+      "band":{{ 'ring_flow.band' | t | json }},
+      "band_heading":{{ 'ring_flow.band_heading' | t | json }},
+      "band_note":{{ 'ring_flow.band_note' | t | json }},
+      "no_band":{{ 'ring_flow.no_band' | t | json }},
+      "choose_option":{{ 'ring_flow.choose_option' | t | json }},
+      "band_options_required":{{ 'ring_flow.band_options_required' | t | json }},
+
+      "title":{{ 'ring_flow.title' | t | json }},
+      "intro":{{ 'ring_flow.intro' | t | json }},
+      "choose":{{ 'ring_flow.choose' | t | json }},
+      "pair":{{ 'ring_flow.pair' | t | json }},
+      "personalize":{{ 'ring_flow.personalize' | t | json }},
+      "bag":{{ 'ring_flow.bag' | t | json }},
+      "checkout":{{ 'ring_flow.checkout' | t | json }},
+      "where":{{ 'ring_flow.where' | t | json }},
+      "start_diamond":{{ 'ring_flow.start_diamond' | t | json }},
+      "start_setting":{{ 'ring_flow.start_setting' | t | json }},
+      "diamond_intro":{{ 'ring_flow.diamond_intro' | t | json }},
+      "setting_intro":{{ 'ring_flow.setting_intro' | t | json }},
+      "choose_diamond":{{ 'ring_flow.choose_diamond' | t | json }},
+      "choose_setting":{{ 'ring_flow.choose_setting' | t | json }},
+      "your_ring":{{ 'ring_flow.your_ring' | t | json }},
+      "diamond":{{ 'ring_flow.diamond' | t | json }},
+      "setting":{{ 'ring_flow.setting' | t | json }},
+      "change":{{ 'ring_flow.change' | t | json }},
+      "remove":{{ 'ring_flow.remove' | t | json }},
+      "subtotal":{{ 'ring_flow.subtotal' | t | json }},
+      "selected_total":{{ 'ring_flow.selected_total' | t | json }},
+      "included":{{ 'ring_flow.included' | t | json }},
+      "missing_diamond":{{ 'ring_flow.missing_diamond' | t | json }},
+      "missing_setting":{{ 'ring_flow.missing_setting' | t | json }},
+      "tax_shipping":{{ 'ring_flow.tax_shipping' | t | json }},
+      "review_ring":{{ 'ring_flow.review_ring' | t | json }},
+      "add":{{ 'ring_flow.add' | t | json }},
+      "view_bag":{{ 'ring_flow.view_bag' | t | json }},
+      "continue_checkout":{{ 'ring_flow.continue_checkout' | t | json }},
+      "continue_browsing":{{ 'ring_flow.continue_browsing' | t | json }},
+      "back_results":{{ 'ring_flow.back_results' | t | json }},
+      "back":{{ 'ring_flow.back' | t | json }},
+      "start_again":{{ 'ring_flow.start_again' | t | json }},
+      "reset":{{ 'ring_flow.reset' | t | json }},
+      "apply":{{ 'ring_flow.apply' | t | json }},
+      "shape":{{ 'ring_flow.shape' | t | json }},
+      "origin":{{ 'ring_flow.origin' | t | json }},
+      "lab":{{ 'ring_flow.lab' | t | json }},
+      "natural":{{ 'ring_flow.natural' | t | json }},
+      "color":{{ 'ring_flow.color' | t | json }},
+      "clarity":{{ 'ring_flow.clarity' | t | json }},
+      "cut":{{ 'ring_flow.cut' | t | json }},
+      "polish":{{ 'ring_flow.polish' | t | json }},
+      "symmetry":{{ 'ring_flow.symmetry' | t | json }},
+      "fluorescence":{{ 'ring_flow.fluorescence' | t | json }},
+      "certificate":{{ 'ring_flow.certificate' | t | json }},
+      "measurements":{{ 'ring_flow.measurements' | t | json }},
+      "table":{{ 'ring_flow.table' | t | json }},
+      "depth":{{ 'ring_flow.depth' | t | json }},
+      "carat_min":{{ 'ring_flow.carat_min' | t | json }},
+      "carat_max":{{ 'ring_flow.carat_max' | t | json }},
+      "price_min":{{ 'ring_flow.price_min' | t | json }},
+      "price_max":{{ 'ring_flow.price_max' | t | json }},
+      "all":{{ 'ring_flow.all' | t | json }},
+      "sort":{{ 'ring_flow.sort' | t | json }},
+      "price_asc":{{ 'ring_flow.price_asc' | t | json }},
+      "price_desc":{{ 'ring_flow.price_desc' | t | json }},
+      "carat_asc":{{ 'ring_flow.carat_asc' | t | json }},
+      "carat_desc":{{ 'ring_flow.carat_desc' | t | json }},
+      "searching":{{ 'ring_flow.searching' | t | json }},
+      "loading":{{ 'ring_flow.loading' | t | json }},
+      "loading_piece":{{ 'ring_flow.loading_piece' | t | json }},
+      "results":{{ 'ring_flow.results' | t: count: '__count__' | json }},
+      "settings_results":{{ 'ring_flow.settings_results' | t: count: '__count__' | json }},
+      "no_matches":{{ 'ring_flow.no_matches' | t | json }},
+      "widen":{{ 'ring_flow.widen' | t | json }},
+      "no_settings":{{ 'ring_flow.no_settings' | t | json }},
+      "custom_setting":{{ 'ring_flow.custom_setting' | t | json }},
+      "shape_locked":{{ 'ring_flow.shape_locked' | t: shape: '__shape__' | json }},
+      "clear_diamond":{{ 'ring_flow.clear_diamond' | t | json }},
+      "clear_setting":{{ 'ring_flow.clear_setting' | t | json }},
+      "setting_only":{{ 'ring_flow.setting_only' | t | json }},
+      "diamond_only":{{ 'ring_flow.diamond_only' | t | json }},
+      "view_details":{{ 'ring_flow.view_details' | t | json }},
+      "select_diamond":{{ 'ring_flow.select_diamond' | t | json }},
+      "select_setting":{{ 'ring_flow.select_setting' | t | json }},
+      "next_diamond":{{ 'ring_flow.next_diamond' | t | json }},
+      "next_setting":{{ 'ring_flow.next_setting' | t | json }},
+      "fits_check":{{ 'ring_flow.fits_check' | t | json }},
+      "make_yours":{{ 'ring_flow.make_yours' | t | json }},
+      "size":{{ 'ring_flow.size' | t | json }},
+      "choose_size":{{ 'ring_flow.choose_size' | t | json }},
+      "not_sure":{{ 'ring_flow.not_sure' | t | json }},
+      "size_required":{{ 'ring_flow.size_required' | t | json }},
+      "engraving":{{ 'ring_flow.engraving' | t | json }},
+      "engraving_hint":{{ 'ring_flow.engraving_hint' | t | json }},
+      "engraving_font":{{ 'ring_flow.engraving_font' | t | json }},
+      "block":{{ 'ring_flow.block' | t | json }},
+      "script":{{ 'ring_flow.script' | t | json }},
+      "engraving_preview":{{ 'ring_flow.engraving_preview' | t | json }},
+      "date":{{ 'ring_flow.date' | t | json }},
+      "date_hint":{{ 'ring_flow.date_hint' | t | json }},
+      "made_order":{{ 'ring_flow.made_order' | t | json }},
+      "production_note":{{ 'ring_flow.production_note' | t | json }},
+      "open_product":{{ 'ring_flow.open_product' | t | json }},
+      "photo":{{ 'ring_flow.photo' | t: number: '__number__' | json }},
+      "video":{{ 'ring_flow.video' | t | json }},
+      "report":{{ 'ring_flow.report' | t | json }},
+      "previous":{{ 'ring_flow.previous' | t | json }},
+      "next":{{ 'ring_flow.next' | t | json }},
+      "page":{{ 'ring_flow.page' | t: page: '__page__', pages: '__pages__' | json }},
+      "unavailable":{{ 'ring_flow.unavailable' | t | json }},
+      "load_failed":{{ 'ring_flow.load_failed' | t | json }},
+      "retry":{{ 'ring_flow.retry' | t | json }},
+      "help":{{ 'ring_flow.help' | t | json }},
+      "request_failed":{{ 'ring_flow.request_failed' | t | json }},
+      "wrong_shape":{{ 'ring_flow.wrong_shape' | t | json }},
+      "bad_selection":{{ 'ring_flow.bad_selection' | t | json }},
+      "size_unavailable":{{ 'ring_flow.size_unavailable' | t | json }},
+      "price_changed":{{ 'ring_flow.price_changed' | t | json }},
+      "adding":{{ 'ring_flow.adding' | t | json }},
+      "added":{{ 'ring_flow.added' | t | json }},
+      "cart_failed":{{ 'ring_flow.cart_failed' | t | json }},
+      "cart_uncertain":{{ 'ring_flow.cart_uncertain' | t | json }},
+      "restoring":{{ 'ring_flow.restoring' | t | json }},
+      "restore_failed":{{ 'ring_flow.restore_failed' | t | json }},
+      "variant":{{ 'ring_flow.variant' | t | json }},
+      "size_pending":{{ 'ring_flow.size_pending' | t | json }},
+      "empty_selection":{{ 'ring_flow.empty_selection' | t | json }},
+      "search_unavailable":{{ 'ring_flow.search_unavailable' | t | json }},
+      "browse_diamonds":{{ 'ring_flow.browse_diamonds' | t | json }},
+      "read_more":{{ 'ring_flow.read_more' | t | json }},
+      "current_price":{{ 'ring_flow.current_price' | t | json }},
+      "complete_price":{{ 'ring_flow.complete_price' | t | json }},
+      "unit_usd":{{ 'ring_flow.unit_usd' | t | json }},
+      "filters":{{ 'ring_flow.filters' | t | json }},
+      "range_error":{{ 'ring_flow.range_error' | t | json }},
+      "shape_notice":{{ 'ring_flow.shape_notice' | t | json }},
+      "saved":{{ 'ring_flow.saved' | t | json }},
+      "no_javascript":{{ 'ring_flow.no_javascript' | t | json }},
+      "added_cart":{{ 'ring_flow.added_cart' | t | json }}
+    }}
+  </script>
+</div>
+<script src="{{ 'ring-builder-flow.js' | asset_url }}" defer="defer"></script>
+{% schema %}
+{
+  "name": "Ring builder flow",
+  "tag": "section",
+  "settings": [
+    {"type":"collection","id":"settings_collection","label":"Ring settings collection"},
+    {"type":"product","id":"diamond_product","label":"Diamond entry photograph"},
+    {"type":"text","id":"api_base_url","label":"Diamond search URL"},
+    {"type":"text","id":"api_anon_key","label":"Public diamond search key"},
+    {"type":"url","id":"contact_url","label":"Contact page"}
+  ],
+  "presets":[{"name":"Ring builder flow"}]
+}
+{% endschema %}

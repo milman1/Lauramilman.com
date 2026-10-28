@@ -1,0 +1,27 @@
+{
+  "sections": {
+    "ring-bar": {
+      "type": "ring-builder-bar",
+      "settings": {
+        "start_url": "/pages/ring-builder?view=ring-builder-start"
+      }
+    },
+    "main": {
+      "type": "diamond-filter",
+      "settings": {
+        "heading": "",
+        "subheading": "Choose the center stone for your ring. Every stone here is certified and priced on its own; the ring total includes setting your diamond.",
+        "products_per_page": 24,
+        "navy_mode": false,
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
+        "stone_kind": "lab",
+        "ring_builder_mode": true
+      }
+    }
+  },
+  "order": [
+    "ring-bar",
+    "main"
+  ]
+}

@@ -7,6 +7,8 @@ import {
   checkDraft,
   COLLECTIONS_FILTER,
   DRAFT_MAX_AGE_DAYS,
+  DRAFT_SCHEMA,
+  FAQ_QUESTIONS,
   extractStoreLinks,
   findCelebrityOwnershipClaims,
   findExternalLinks,
@@ -369,6 +371,13 @@ describe('shape checks', () => {
         '<p>Too short. <a href="/products/lmny-emerald-ring">a</a><a href="/collections/estate-jewelry">b</a><a href="/collections/engagement-rings">c</a></p>',
     });
     expect(checkDraft(bad, CATALOG).map((v) => v.kind)).toContain('word-count');
+  });
+
+  it('keeps the article schema inside the structured-output array limits', () => {
+    const faq = DRAFT_SCHEMA.properties.faq as { minItems?: number; maxItems?: number };
+    expect(faq.minItems).toBeUndefined();
+    expect(faq.maxItems).toBeUndefined();
+    expect(FAQ_QUESTIONS).toBe(3);
   });
 
   it('rejects a FAQ block that is not three questions', () => {

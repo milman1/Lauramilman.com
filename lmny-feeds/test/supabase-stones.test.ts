@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { labStone, naturalStone, priced } from './fixtures.js';
-import { contentHashFor } from '../src/product.js';
+import { contentHashFor, handleFor } from '../src/product.js';
 import {
   stoneRowFor,
   supabaseConfigured,
@@ -63,6 +63,25 @@ describe('stoneRowFor', () => {
 });
 
 describe('dualWriteStones', () => {
+  it('hides drafts, archived and failed writes without changing prices or stock references', async () => {
+    const items = ['active', 'draft', 'archived', 'failed', 'new-published'].map(stockRef => labStone({ stockRef }));
+    const statuses = new Map([
+      [handleFor(items[0]!), 'ACTIVE'], [handleFor(items[1]!), 'DRAFT'],
+      [handleFor(items[2]!), 'ARCHIVED'], [handleFor(items[4]!), 'ACTIVE'],
+    ]);
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      const rows = JSON.parse(String(init?.body));
+      expect(rows.map((row: { available: boolean }) => row.available)).toEqual([true, false, false, false, true]);
+      expect(rows.every((row: { retail_usd: number }) => row.retail_usd === 475)).toBe(true);
+      expect(rows.map((row: { stock_ref: string }) => row.stock_ref)).toEqual(items.map(item => item.stockRef));
+      return new Response('', { status: 201 });
+    }) as unknown as typeof fetch;
+    await dualWriteStones(items.map(item => ({ item, priced: priced({ retailUsd: 475 }) })), new Map(), '2026-10-18T00:00:00Z', {
+      url: 'https://example.supabase.co', key: 'service', fetchImpl, shopifyStatusByHandle: statuses,
+    });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
   it('POSTs upsert chunks to PostgREST', async () => {
     const calls: Array<{ url: string; body: unknown }> = [];
     const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {

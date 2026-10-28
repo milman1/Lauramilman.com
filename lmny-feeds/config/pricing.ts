@@ -55,33 +55,33 @@ export const STONE_TIERS: LabTier[] = [
 ];
 
 /**
- * Loose lab-grown diamonds: 3.5× invoice cost at every size. Fail-closed
- * $/ct guards still apply.
- *
- * The storefront's 10% welcome discount remains eligible. Realized revenue
- * is 3.15× cost (68.3% gross before fees).
- *
- * Merchant decision 2026-09-27: replace the 2.50× / 1.50× split (2.50× only
- * at Amount ≤ $500) with a flat 3×. The old split left high-carat stones,
- * which cross $500 on weight alone, at a thinner markup than small stones.
- * Merchant decision 2026-10-08: 3× → 3.5×, paired with settings 3× → 2.25×,
- * so a stone plus setting totals less while stones stay below the large
- * online sellers (docs/seo/2026-10-08-lab-price-comparison.csv).
+ * Loose lab-grown diamonds: target 2.5x below $200, 2.25x through $500,
+ * 2x through $1,000 and 1.75x above. Boundary price floors prevent a
+ * higher supplier cost from producing a lower retail price.
+ * Welcome discount remains 10%. Natural diamonds and jewelry are unchanged.
  */
 export const LOOSE_LAB_GROWN = {
-  costMultiple: 3.5,
+  tiers: [
+    { maxCostUsd: 200, multiplier: 2.5 },
+    { maxCostUsd: 500, multiplier: 2.25 },
+    { maxCostUsd: 1000, multiplier: 2 },
+    { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: 1.75 },
+  ],
   welcomeDiscountPct: 0.1,
 } as const;
 
-/** Invoice-cost multiple for a loose lab stone. Flat 3.5× at every size. */
-export function labRetailMultipleFromCost(_costUsd: number): number {
-  return LOOSE_LAB_GROWN.costMultiple;
+/** Effective cost multiplier including monotonic boundary-price protection. */
+export function labRetailMultipleFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) throw new Error('Invalid lab supplier cost');
+  const t = LOOSE_LAB_GROWN.tiers;
+  if (costUsd <= 200) return 2.5;
+  if (costUsd <= 500) return Math.max(2.25, 200 * 2.5 / costUsd);
+  if (costUsd <= 1000) return Math.max(2, 500 * 2.25 / costUsd);
+  return Math.max(1.75, 1000 * 2 / costUsd);
 }
 
 /** @deprecated Use labRetailMultipleFromCost for loose lab stones. */
-export const LAB_TIERS: LabTier[] = [
-  { maxCostUsd: Number.POSITIVE_INFINITY, multiplier: LOOSE_LAB_GROWN.costMultiple },
-];
+export const LAB_TIERS: LabTier[] = LOOSE_LAB_GROWN.tiers.map(t => ({...t}));
 
 /**
  * Fail-closed floors for lab stones. A mapping bug that treats $/ct as total
@@ -91,10 +91,9 @@ export const LAB_GUARDS = {
   /**
    * Absolute site-price floor for stones ≥ minCaratForRetailFloor.
    * Catches the live bug ($96–$170 tickets when Buy_Price was used as a
-   * total). Scaled with the multiple so the same invoices stay held:
-   * at 3.5×, 1ct Amount $70 → $245 is held; Amount $72 → $252 publishes.
+   * total). 1ct Amount $70 → $175 is held; Amount $72 → $180 publishes.
    */
-  minRetailUsd: 252,
+  minRetailUsd: 180,
   minCaratForRetailFloor: 1.0,
   /**
    * Minimum acceptable Amount $/ct by carat band. First match wins.
@@ -389,6 +388,14 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
 }
 
-/** LGD certified colored loose lab diamonds; merchant approved 2026-10-11. */
-export const LGD_COLOR_DIAMONDS = { costMultiple: 3.5, welcomeDiscountPct: 0.1 } as const;
+/**
+ * LGD certified colored loose lab diamonds. Merchant decision 2026-10-22: the
+ * same graduated tiers as white loose lab-grown (`labRetailMultipleFromCost`),
+ * rounded to the dollar; was 3.5x cost from 2026-10-11.
+ */
+export const LGD_COLOR_DIAMONDS = { welcomeDiscountPct: 0.1 } as const;
+
+export function coloredLabRetailFromCost(costUsd: number): number {
+  return Math.round(costUsd * labRetailMultipleFromCost(costUsd));
+}
 
