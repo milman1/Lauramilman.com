@@ -18,12 +18,19 @@ Renders the existing API diamond filter controls shared by search and the ring b
             <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
           </span>
           <div class="lm-dfilter__shapes">
-            {%- for name in shape_order -%}
-              {%- assign icon_key = name | downcase -%}
+            {%- for entry in shape_order -%}
+              {%- assign shape_parts = entry | split: '|' -%}
+              {%- assign shape_label = shape_parts | first | strip -%}
+              {%- if shape_parts.size > 1 -%}
+                {%- assign shape_value = shape_parts | last | strip -%}
+              {%- else -%}
+                {%- assign shape_value = shape_label -%}
+              {%- endif -%}
+              {%- assign icon_key = shape_label | downcase -%}
               <label class="lm-shape">
-                <input type="checkbox" name="shape" value="{{ name | escape }}">
+                <input type="checkbox" name="shape" value="{{ shape_value | escape }}">
                 {%- render 'diamond-shape-icon', shape: icon_key -%}
-                <span class="lm-shape__name">{{ name }}</span>
+                <span class="lm-shape__name">{{ shape_label }}</span>
               </label>
             {%- endfor -%}
           </div>

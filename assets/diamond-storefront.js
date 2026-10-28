@@ -532,7 +532,9 @@
     // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
     var shapes = list('shape').concat(list('shapes'), list('filter.p.m.custom.diamond_shape'));
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
-      if (shapes.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+      var values = String(input.value).toLowerCase().split(',');
+      var on = values.some(function (value) { return shapes.indexOf(value.trim()) !== -1; });
+      if (on) input.checked = true;
     });
     ['color', 'clarity', 'cut'].forEach(function (name) {
       var plural = { color: 'colors', clarity: 'clarities', cut: 'cuts' }[name];
