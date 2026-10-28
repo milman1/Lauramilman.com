@@ -429,6 +429,12 @@ Notes for next time:
 
 - Merchant approved showing the stored `custom.guide_html` and `custom.guide_faq` on Cartier and David Webb (reverses the 2026-10-05 "not now" for these two only). `sections/main-collection.liquid` renders `collection-longform` for those two handles; Rolex and every other collection stay as they were. The block shows under the product grid on page 1 only and adds FAQPage markup built from the visible FAQ. Both guides say 14-day returns (aligned 2026-10-26).
 
+## 2026-10-28: Pre-Owned headings, intros and FAQs on the other jewelry collections
+
+- Merchant request: do the rest of the jewelry collection pages; leave loose lab-grown and natural stones (and watches) alone. Product titles, descriptions and product SEO were not touched.
+- Store content (applied 2026-10-28, previous values backed up in the session scratchpad): new intros on Hermès, Van Cleef & Arpels, Tiffany, Bvlgari, Chopard, Graff, Buccellati, Harry Winston, Verdura, Seaman Schepps, Estate, Vintage, Gold Jewelry, Chains, Chain Necklaces, Chain Bracelets, Gold Bracelets and Gold Rings. Intros name only pieces in stock; Graff, Buccellati, Harry Winston, Verdura and Seaman Schepps stay generic because stock is thin. Meta descriptions updated on 11 of them (titles unchanged). Four-question `custom.guide_faq` on 17 (not Verdura): how to check a piece, "not an authorized dealer", 14-day returns (watches exchange only within 7 days where the collection has watches), and the new-client 10% sign-up offer on jewelry.
+- Theme: `sections/main-collection.liquid` adds "Pre-Owned … Jewelry" h1s for Hermès, Bvlgari, Chopard, Graff, Buccellati, Harry Winston and Seaman Schepps, and renders `collection-longform` from an allow-list of jewelry handles. Verdura gets neither (its only active item is a watch). Lab-grown, natural, Rolex and time-pieces collections are not on the list; the guard in `lmny-feeds/test/theme-lab-landing.test.ts` checks that.
+
 ## 2026-10-15: "Ask about this stone" replaces "Reserve this diamond" on search tiles
 
 - Merchant request: most recent inquiries came from ChatGPT and Claude visitors. Lab, natural and colored search tiles now say "Ask about this stone", matching the stone page. The dialog asks for name, email, optional phone and an optional question, and reaches the inbox as "Diamond question" with the stone, link, stock number and listed price. It makes no promise to hold the stone.

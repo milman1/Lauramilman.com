@@ -46,8 +46,6 @@
       assign collection_heading = 'Pre-Owned Buccellati Jewelry'
     when 'harry-winston'
       assign collection_heading = 'Pre-Owned Harry Winston Jewelry'
-    when 'verdura'
-      assign collection_heading = 'Pre-Owned Verdura Jewelry'
     when 'seaman-schepps'
       assign collection_heading = 'Pre-Owned Seaman Schepps Jewelry'
     when 'lab-grown-bracelets'
@@ -333,7 +331,7 @@
       watch collections are not on the list (Rolex's stored guide stays hidden).
     {%- endcomment -%}
     {%- liquid
-      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,verdura,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings' | split: ','
+      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings' | split: ','
     -%}
     {%- if longform_handles contains collection.handle -%}
       {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
