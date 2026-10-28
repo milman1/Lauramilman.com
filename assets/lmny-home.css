@@ -381,9 +381,9 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin-inline: calc(-1 * var(--lmh-gutter));
-    padding-inline: var(--lmh-gutter);
-    scroll-padding-inline: var(--lmh-gutter);
+    margin-inline: -20px;
+    padding-inline: 20px;
+    scroll-padding-inline: 20px;
   }
   .lmh-scroll::-webkit-scrollbar { display: none; }
   .lmh-scroll > * { flex: 0 0 168px; scroll-snap-align: start; }
@@ -394,8 +394,8 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    margin-inline: calc(-1 * var(--lmh-gutter));
-    padding-inline: var(--lmh-gutter);
+    margin-inline: -20px;
+    padding-inline: 20px;
   }
   .lmh-chips--scroll::-webkit-scrollbar { display: none; }
   .lmh-chips--scroll .lmh-arrow { display: none; }

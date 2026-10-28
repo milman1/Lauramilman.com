@@ -8,7 +8,7 @@
       <div class="footer__brand">
         <a href="{{ routes.root_url }}" class="footer__logo">
           {%- if section.settings.logo != blank -%}
-            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="{{ section.settings.logo.width }}" height="{{ section.settings.logo.height }}">
           {%- else -%}
             <span class="footer__logo-text">Laura <em>Milman</em></span>
           {%- endif -%}
@@ -144,7 +144,7 @@
     }
 
     .footer__grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 0;
       text-align: left;
     }

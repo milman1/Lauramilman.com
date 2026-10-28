@@ -1077,7 +1077,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 }
 </style>
 
-<script src="{{ 'diamond-query.js' | asset_url }}"></script>
+<script src="{{ 'diamond-query.js' | asset_url }}" defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('header');
@@ -1395,7 +1395,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
               });
               if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';
               if (products.length === 0) {
-                searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + q.replace(/</g, '&lt;') + '\u201d</p>';
+                searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + q.replace(/[<]/g, '&lt;') + '\u201d</p>';
                 return;
               }
               var html = '';
