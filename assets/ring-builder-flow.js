@@ -55,6 +55,7 @@
     const metalName = metal => t('metal_' + metal);
     const settingMetals = p => [...new Set(p.variants.filter(v => v.available).map(v => metalOf(v.options.join(' '))).concat(metalOf(p.title)).filter(Boolean))];
     const caratChips = [['1', '1.49'], ['1.5', '1.99'], ['2', '2.99'], ['3', '']];
+    const gradePick = { color: 'G,F,E,D', clarity: 'VS2,VS1,VVS2,VVS1,IF,FL' };
     let ready = false, searchTimer = 0;
     const bandVariant = () => state.band?.variants.find(v => v.available && v.options.every((value, i) => value === state.bandOptions[i])) || null;
     const both = () => state.setting && state.diamond;
@@ -191,10 +192,11 @@
       });
       const more = form.querySelector('.more-shapes');
       if (more && more.querySelector('input:checked')) more.open = true;
-      form.querySelectorAll('.carat-chips [data-action]').forEach((chip, i) => {
+      form.querySelectorAll('.carat-chips [data-action^="carat-"]').forEach((chip, i) => {
         const [low, high] = caratChips[i];
         chip.setAttribute('aria-pressed', String(state.filters.min_carat === low && state.filters.max_carat === high));
       });
+      form.querySelector('[data-action="pick-grades"]')?.setAttribute('aria-pressed', String(state.filters.color === gradePick.color && state.filters.clarity === gradePick.clarity));
       const toggle = form.querySelector('[data-action="more-filters"]');
       if (toggle) {
         const picked = ['color', 'clarity', 'cut'].filter(key => state.filters[key]).length;
@@ -258,7 +260,7 @@
       chips.className = 'carat-chips';
       chips.setAttribute('role', 'group');
       chips.setAttribute('aria-label', t('carat_sizes'));
-      chips.innerHTML = caratChips.map(([low, high], i) => `<button type="button" class="chip" data-action="carat-${i}" aria-pressed="false">${esc(t(high ? 'carat_value' : 'carat_plus', { carat: low }))}</button>`).join('');
+      chips.innerHTML = caratChips.map(([low, high], i) => `<button type="button" class="chip" data-action="carat-${i}" aria-pressed="false">${esc(t(high ? 'carat_value' : 'carat_plus', { carat: low }))}</button>`).join('') + `<button type="button" class="chip" data-action="pick-grades" aria-pressed="false">${esc(t('pick_grades'))}</button>`;
       carat.before(chips);
       const groups = [...form.querySelectorAll('[data-scale]')].map(scale => scale.closest('.lm-dfilter__group'));
       if (!groups.length) return;
@@ -331,7 +333,7 @@
         state.rows = response.stones || [];
         state.totalPages = Math.max(1, response.total_pages || 1);
         main.querySelector('[data-count]').textContent = counted('results', response.total || 0);
-        result.innerHTML = state.rows.length ? `<div class="products">${state.rows.map((s, i) => `<article class="product"><div class="card-media" ${safeURL(s.video_urls?.[0]) ? `data-video="${esc(safeURL(s.video_urls[0]))}"` : ''}>${image(s.image_urls?.[0], stoneTitle(s))}</div><h3>${esc(stoneTitle(s))}</h3><div class="quiet">${esc([t(s.kind === 'natural' ? 'natural' : 'lab'), s.color, s.clarity, s.cut ? t('cut_value', { cut: s.cut }) : '', s.lab].filter(Boolean).join(' · '))}</div><div class="price">${money(Math.round(s.retail_usd * 100), 'USD')}</div>${cardActions(i)}</article>`).join('')}</div>` : empty();
+        result.innerHTML = state.rows.length ? `<div class="products">${state.rows.map((s, i) => `<article class="product"><div class="card-media" ${safeURL(s.video_urls?.[0]) ? `data-video="${esc(safeURL(s.video_urls[0]))}"` : ''}>${image(s.image_urls?.[0], stoneTitle(s))}</div><h3>${esc(stoneTitle(s))}</h3><div class="quiet">${esc([t(s.kind === 'natural' ? 'natural' : 'lab'), s.color, s.clarity, s.cut ? t('cut_value', { cut: s.cut }) : '', s.lab].filter(Boolean).join(' · '))}</div>${faceUpText(s.measurements) ? `<div class="quiet">${esc(faceUpText(s.measurements))}</div>` : ''}<div class="price">${money(Math.round(s.retail_usd * 100), 'USD')}</div>${cardActions(i)}</article>`).join('')}</div>` : empty();
         returnToCard();
         main.querySelector('[data-pager]').innerHTML = state.totalPages > 1 ? `${button('previous', 'previous', 'secondary', state.page <= 1 ? 'disabled' : '')}<span class="quiet">${esc(t('page', { page: state.page, pages: state.totalPages }))}</span>${button('next', 'next', 'secondary', state.page >= state.totalPages ? 'disabled' : '')}` : '';
       } catch (_) {
@@ -408,6 +410,16 @@
       const sizeOptions = `<option value="">${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
       main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div>${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(cfg.appointment)}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}<div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div>${bandPicker()}`;
     }
+    function faceUp(measurements) {
+      const found = String(measurements || '').match(/(\d+(?:\.\d+)?)\s*(?:mm)?\s*[x×*-]\s*(\d+(?:\.\d+)?)/i);
+      const [length, width] = found ? [Number(found[1]), Number(found[2])].sort((a, b) => b - a) : [];
+      return length > 2 && length < 40 && width > 1 ? [length, width] : [];
+    }
+    function faceUpText(measurements) {
+      const [length, width] = faceUp(measurements);
+      if (!length) return '';
+      return length / width < 1.03 ? t('mm_round', { size: ((length + width) / 2).toFixed(1) }) : t('mm_face', { length: length.toFixed(1), width: width.toFixed(1) });
+    }
     function shapeOutline(shape, w, h) {
       const key = String(shape || '').toLowerCase(), x = w / 2, y = h / 2, cut = Math.min(w, h) * (/asscher/.test(key) ? 0.25 : 0.14);
       if (/pear/.test(key)) return `<path d="M0 ${-y}C${x * 0.7} ${-y * 0.35} ${x} ${y * 0.1} ${x} ${y * 0.4}A${x} ${y * 0.6} 0 0 1 ${-x} ${y * 0.4}C${-x} ${y * 0.1} ${-x * 0.7} ${-y * 0.35} 0 ${-y}Z"/>`;
@@ -419,17 +431,31 @@
       return `<ellipse rx="${x}" ry="${y}"/>`;
     }
     function scaleView() {
-      const found = String(state.diamond?.spec?.measurements || '').match(/(\d+(?:\.\d+)?)\s*(?:mm)?\s*[x×*-]\s*(\d+(?:\.\d+)?)/i);
-      if (!found) return '';
-      const [length, width] = [Number(found[1]), Number(found[2])].sort((a, b) => b - a);
-      if (!(length > 2 && length < 40 && width > 1)) return '';
+      const [length, width] = faceUp(state.diamond?.spec?.measurements);
+      if (!length) return '';
       const size = Number(state.size) || 6, finger = 11.63 + 0.8128 * size, view = Math.max(26, length + 8);
       return `<figure class="scale" data-scale-view><svg viewBox="${-view / 2} ${-view / 2} ${view} ${view}" role="img" aria-label="${esc(t('scale_label'))}"><rect class="finger" x="${-finger / 2}" y="${-view / 2 - 2}" width="${finger}" height="${view + 4}"/><g class="stone">${shapeOutline(state.diamond.shape, width, length)}</g></svg><figcaption>${esc(t('scale_caption', { length: length.toFixed(2), width: width.toFixed(2), size: state.size && state.size !== 'unsure' ? state.size : 6, finger: finger.toFixed(1) }))}</figcaption></figure>`;
     }
-    async function share() {
+    function ringLink() {
       const url = new URL(location.pathname, location.origin);
       url.searchParams.set('setting', state.setting.handle);
       url.searchParams.set('diamond', state.diamond.handle);
+      return url;
+    }
+    function fillRingEmail(form) {
+      const variant = pickedVariant();
+      const values = {
+        link: ringLink().href,
+        setting: state.setting.title,
+        diamond: state.diamond.title,
+        size: state.size === 'unsure' ? t('not_sure') : state.size,
+        options: [...state.setting.options.map((o, i) => /size/i.test(o.name) || o.name === 'Title' || !variant ? '' : o.name + ': ' + variant.options[i]), state.engraving.trim() ? t('engraving') + ': ' + state.engraving.trim() : ''].filter(Boolean).join(' · '),
+        subtotal: money(subtotal())
+      };
+      form.querySelectorAll('[data-ring-email-field]').forEach(input => { input.value = values[input.dataset.ringEmailField] || ''; });
+    }
+    async function share() {
+      const url = ringLink();
       try {
         if (navigator.share) await navigator.share({ title: t('your_ring'), text: [state.setting.title, state.diamond.title].join(' · '), url: url.href });
         else { await navigator.clipboard.writeText(url.href); notice(t('link_copied')); }
@@ -446,6 +472,11 @@
       root.querySelectorAll('[data-stage]').forEach(el => { const on = +el.dataset.stage === stage; el.classList.toggle('active', on); if (on) el.setAttribute('aria-current', 'step'); else el.removeAttribute('aria-current'); });
       summary();
       persist();
+      const mail = root.querySelector('[data-ring-email]');
+      if (mail) {
+        mail.hidden = state.screen !== 'review';
+        mail.querySelectorAll('button,input').forEach(el => { el.disabled = false; });
+      }
     }
     function reveal(target) {
       if (!target) return;
@@ -575,6 +606,12 @@
       else if (action.startsWith('quick-')) openDetails(Number(action.slice(6)), true);
       else if (action === 'select') choose();
       else if (action === 'more-filters') { state.moreFilters = el.getAttribute('aria-expanded') !== 'true'; el.setAttribute('aria-expanded', String(state.moreFilters)); main.querySelector('[data-more-filters]').hidden = !state.moreFilters; paintDiamondFilters(); }
+      else if (action === 'pick-grades') {
+        readDiamondFilters();
+        const on = state.filters.color === gradePick.color && state.filters.clarity === gradePick.clarity;
+        state.filters.color = on ? '' : gradePick.color; state.filters.clarity = on ? '' : gradePick.clarity;
+        paintDiamondFilters(); state.page = 1; search(); persist();
+      }
       else if (action.startsWith('carat-')) {
         readDiamondFilters();
         const [low, high] = caratChips[Number(action.slice(6))];
@@ -610,6 +647,7 @@
       }
     });
     root.addEventListener('submit', event => {
+      if (event.target.id === 'RingEmailForm') { if (both()) fillRingEmail(event.target); else event.preventDefault(); return; }
       if (!event.target.matches('[data-search-form]')) return;
       event.preventDefault();
       if (state.busy) return;

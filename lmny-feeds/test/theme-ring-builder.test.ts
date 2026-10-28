@@ -93,9 +93,12 @@ describe('one ring builder', () => {
     expect(themeFile('snippets/ring-diamond-pairing.liquid')).toContain('href="/pages/ring-builder?setting={{ product.handle | url_encode }}"');
   });
 
-  it('hands the older builder templates over outside the theme editor', () => {
+  it('hands the older diamond search over, never the setting product pages', () => {
     const bar = themeFile('sections/ring-builder-bar.liquid');
     expect(bar).toContain('window.Shopify.designMode');
+    // Every setting product uses product.ring-builder; its page must not redirect.
+    expect(bar).toMatch(/\{%-? if template\.name == 'collection' -?%\}\s*<script>\s*\(function \(\) \{\s*if \(window\.Shopify && window\.Shopify\.designMode\) return;/);
+    expect(bar).not.toContain('product.handle | json');
     expect(bar).toContain("location.replace('/pages/ring-builder?' + to.toString())");
   });
 });
