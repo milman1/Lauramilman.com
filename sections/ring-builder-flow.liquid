@@ -11,8 +11,6 @@
       <span data-stage="1" class="active">1 · {{ 'ring_flow.choose' | t }}</span>
       <span data-stage="2">2 · {{ 'ring_flow.pair' | t }}</span>
       <span data-stage="3">3 · {{ 'ring_flow.personalize' | t }}</span>
-      <span>4 · {{ 'ring_flow.bag' | t }}</span>
-      <span>5 · {{ 'ring_flow.checkout' | t }}</span>
     </nav>
   </div>
   <div class="status" data-flow-status role="status"></div>
@@ -33,6 +31,7 @@
     </div>
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
   </div>
+  <div class="dock" data-flow-dock hidden></div>
   <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>
   <template data-diamond-filter-template>
     <div class="diamond-search lm-dfilter lm-dfilter--navy" data-ring-builder="true">
@@ -205,7 +204,16 @@
       "shape_notice":{{ 'ring_flow.shape_notice' | t | json }},
       "saved":{{ 'ring_flow.saved' | t | json }},
       "no_javascript":{{ 'ring_flow.no_javascript' | t | json }},
-      "added_cart":{{ 'ring_flow.added_cart' | t | json }}
+      "added_cart":{{ 'ring_flow.added_cart' | t | json }},
+      "results_one":{{ 'ring_flow.results_one' | t: count: '__count__' | json }},
+      "settings_results_one":{{ 'ring_flow.settings_results_one' | t: count: '__count__' | json }},
+      "price_from":{{ 'ring_flow.price_from' | t: price: '__price__' | json }},
+      "shape_settings":{{ 'ring_flow.shape_settings' | t: count: '__count__' | json }},
+      "shape_settings_one":{{ 'ring_flow.shape_settings_one' | t: count: '__count__' | json }},
+      "more_shapes":{{ 'ring_flow.more_shapes' | t: count: '__count__' | json }},
+      "no_setting_shape":{{ 'ring_flow.no_setting_shape' | t | json }},
+      "add_short":{{ 'ring_flow.add_short' | t | json }},
+      "view_summary":{{ 'ring_flow.view_summary' | t | json }}
     }}
   </script>
 </div>

@@ -3,9 +3,10 @@
   Rendered from layout/theme.liquid. The discount code is created in
   Shopify Admin (see SHOPIFY_SETUP.md). Kept as a snippet so it cannot
   fail as an invalid section type when included from the layout.
+  Not rendered on ring-builder templates: it would open mid-choice.
 {% endcomment %}
 
-{%- unless customer.tags contains 'welcome10' -%}
+{%- unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder' -%}
 <div class="lm-welcome" id="LmWelcome" hidden>
   <div class="lm-welcome__backdrop" data-welcome-close></div>
   <div class="lm-welcome__card" role="dialog" aria-modal="true" aria-labelledby="LmWelcomeTitle">

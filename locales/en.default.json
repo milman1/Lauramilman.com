@@ -883,6 +883,15 @@
     "incomplete_ring": "A ring is missing one of its pieces. Edit or remove it before checkout.",
     "cart_update_failed": "We could not update your bag. Please try again.",
     "fixed_quantity": "One complete ring",
-    "ring_part": "Part of your custom ring"
+    "ring_part": "Part of your custom ring",
+    "results_one": "{{ count }} diamond",
+    "settings_results_one": "{{ count }} setting",
+    "price_from": "From {{ price }}",
+    "shape_settings": "{{ count }} settings",
+    "shape_settings_one": "{{ count }} setting",
+    "more_shapes": "More shapes · custom setting only ({{ count }})",
+    "no_setting_shape": "No ready-made setting takes this shape yet. Laura can make one; ask before you choose.",
+    "add_short": "Add to bag",
+    "view_summary": "View summary"
   }
 }

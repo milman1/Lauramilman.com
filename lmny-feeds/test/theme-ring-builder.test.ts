@@ -71,3 +71,15 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     expect(start).toContain('shape={{ ring_shape | url_encode }}');
   });
 });
+
+describe('ring builder page chrome', () => {
+  it('keeps the welcome offer off ring-builder templates', () => {
+    expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
+  });
+
+  it('shows only the steps the builder owns and a mobile dock', () => {
+    const flow = themeFile('sections/ring-builder-flow.liquid');
+    expect(flow).not.toContain("ring_flow.checkout' | t }}</span>");
+    expect(flow).toContain('data-flow-dock');
+  });
+});

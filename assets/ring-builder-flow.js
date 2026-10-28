@@ -33,11 +33,24 @@
         return u.protocol === 'https:' || u.origin === window.location.origin ? u.href : '';
       } catch (_) { return ''; }
     };
+    const counted = (key, count) => t(Number(count) === 1 && translations[key + '_one'] ? key + '_one' : key, { count: Number(count).toLocaleString() });
     const button = (key, action, cls = 'primary', extra = '') => `<button type="button" class="${cls}" data-action="${esc(action)}" ${extra}>${esc(t(key))}</button>`;
     const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}">` : '';
     const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, band: null, bandOptions: [], options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
+    const settingCount = shape => [...knownSettings.values()].filter(p => p.available && String(shape || '').split(',').some(s => s.trim().toLowerCase() === p.shape.toLowerCase())).length;
+    const settingShape = shape => {
+      const listed = String(shape || '').split(',').map(s => s.trim()).filter(Boolean);
+      const own = shapes.find(s => listed.some(l => l.toLowerCase() === s.toLowerCase()) && settingCount(s));
+      return own || shapes.slice().sort((a, b) => settingCount(b) - settingCount(a))[0] || listed[0] || '';
+    };
+    const fromPrice = p => {
+      const prices = p.variants.filter(v => v.available).map(v => v.price);
+      const low = Math.min(...prices);
+      return prices.some(price => price !== low) ? t('price_from', { price: money(low) }) : money(low);
+    };
+    let ready = false;
     const bandVariant = () => state.band?.variants.find(v => v.available && v.options.every((value, i) => value === state.bandOptions[i])) || null;
     const both = () => state.setting && state.diamond;
     const sizeIndex = p => p.options.findIndex(o => /size/i.test(o.name));
@@ -114,12 +127,17 @@
     function summary() {
       aside.hidden = state.screen === 'start';
       root.querySelector('.layout').classList.toggle('solo', aside.hidden);
+      root.querySelector('[data-flow-dock]').hidden = aside.hidden;
+      document.body.classList.toggle('has-pdp-sticky', !aside.hidden);
       if (aside.hidden) return;
       aside.innerHTML = `<h2>${esc(t('your_ring'))}</h2><div class="summary-items">${['setting', 'diamond', ...(state.band ? ['band'] : [])].map(k => {
         const p = state[k];
         const price = k === 'setting' ? variantPrice(p) : k === 'band' ? bandVariant()?.price : p?.price;
         return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button(k === 'band' ? 'remove' : 'change', k === 'band' ? 'remove-band' : 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}<br>${price != null ? money(price) : esc(t('size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
       }).join('')}</div><div class="row"><span>${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : 'missing_setting'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${state.screen === 'review' ? button(state.busy ? 'adding' : state.band ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || (state.band && !bandVariant()) ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a>`;
+      const dock = root.querySelector('[data-flow-dock]');
+      const next = state.screen === 'review' ? button('add_short', 'dock-add', 'primary', state.busy || !both() ? 'disabled' : '') : both() ? button('review_ring', 'review') : button('view_summary', 'dock-summary', 'secondary');
+      dock.innerHTML = `<div><span class="eyebrow">${esc(t('your_ring'))}</span><span class="total">${money(subtotal())}</span></div>${next}`;
       if (state.busy) lockControls();
     }
     function lockControls() {
@@ -139,8 +157,8 @@
     }
     function filters() {
       const lock = state.kind === 'diamond' ? state.setting : state.diamond;
-      const shapeOptions = shapes.map(s => [s, s]);
       const shape = lock?.shape || state.filters.shape;
+      const shapeOptions = shapes.filter(s => settingCount(s) || s === shape).map(s => [s, s]);
       if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}</div>${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
       return root.querySelector('[data-diamond-filter-template]').innerHTML + (lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : '');
     }
@@ -152,7 +170,7 @@
       main.querySelector('.diamond-search').classList.toggle('lm-dfilter--navy', !isNatural);
       main.querySelectorAll('.lm-dfilter__origin-btn').forEach(link => {
         const origin = link.getAttribute('href').includes('/natural-') ? 'natural' : link.getAttribute('href').includes('/lab-grown-') ? 'lab' : '';
-        if (!origin) return;
+        if (!origin) { link.hidden = true; return; }
         link.dataset.origin = origin;
         link.classList.toggle('is-active', state.filters.origin === origin);
         if (state.filters.origin === origin) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
@@ -164,6 +182,8 @@
         input.disabled = !!state.setting;
         input.parentElement.classList.toggle('is-active', input.checked);
       });
+      const more = form.querySelector('.more-shapes');
+      if (more && more.querySelector('input:checked')) more.open = true;
       form.querySelectorAll('[data-scale]').forEach(scale => {
         const picked = state.filters[scale.dataset.scale].split(',').filter(Boolean);
         scale.querySelectorAll('input').forEach(input => {
@@ -195,6 +215,25 @@
         fill.style.right = (100 - Math.max(pct(low), pct(high))) + '%';
       });
     }
+    function decorateShapes() {
+      const grid = main.querySelector('#DiamondFilterForm .lm-dfilter__shapes');
+      if (!grid) return;
+      const custom = [];
+      grid.querySelectorAll('.lm-shape').forEach(label => {
+        const n = settingCount([label.querySelector('.lm-shape__name')?.textContent || '', label.querySelector('input').value].join(','));
+        if (!n) { custom.push(label); return; }
+        const fit = document.createElement('span');
+        fit.className = 'lm-shape__fit';
+        fit.textContent = counted('shape_settings', n);
+        label.append(fit);
+      });
+      if (!custom.length) return;
+      const more = document.createElement('details');
+      more.className = 'more-shapes';
+      more.innerHTML = `<summary>${esc(t('more_shapes', { count: custom.length }))}</summary><div class="lm-dfilter__shapes"></div>`;
+      more.lastElementChild.append(...custom);
+      grid.after(more);
+    }
     function readDiamondFilters() {
       const form = main.querySelector('#DiamondFilterForm');
       if (!form) return;
@@ -213,7 +252,7 @@
     function catalogShell() {
       const k = state.kind;
       main.innerHTML = `<div class="heading"><h2>${esc(t('choose_' + k))}.</h2>${button('back', 'start', 'link')}</div>${filters()}<div class="toolbar"><span class="quiet" data-count>${esc(t('loading'))}</span>${k === 'diamond' ? `<label>${esc(t('sort'))}<select data-sort>${['price_asc', 'price_desc', 'carat_asc', 'carat_desc'].map(s => `<option value="${s}" ${state.filters.sort === s ? 'selected' : ''}>${esc(t(s))}</option>`).join('')}</select></label>` : ''}</div><div data-results></div><div class="pager" data-pager></div><p class="quiet rule">${esc(t(k === 'diamond' ? 'unit_usd' : 'setting_only'))}</p>`;
-      if (k === 'diamond') paintDiamondFilters();
+      if (k === 'diamond') { decorateShapes(); paintDiamondFilters(); }
     }
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
@@ -221,8 +260,15 @@
     function settingResults() {
       const shape = state.diamond?.shape || state.filters.shape;
       state.rows = [...knownSettings.values()].filter(p => p.shape === shape && p.available);
-      main.querySelector('[data-count]').textContent = t('settings_results', { count: state.rows.length });
-      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, p.title)}<h3>${esc(p.title)}</h3><div class="quiet">${esc(p.shape)} · ${esc(t('setting_only'))}</div><div class="price">${money(Math.min(...p.variants.filter(v => v.available).map(v => v.price)))}</div>${button('view_details', 'details-' + i)}</article>`).join('')}</div>` : empty(true);
+      main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
+      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, p.title)}<h3>${esc(p.title)}</h3><div class="quiet">${esc(p.shape)} · ${esc(t('setting_only'))}</div><div class="price">${esc(fromPrice(p))}</div>${button('view_details', 'details-' + i)}</article>`).join('')}</div>` : empty(true);
+      returnToCard();
+    }
+    function returnToCard() {
+      if (state.returnIndex == null) return;
+      const card = main.querySelector('[data-action="details-' + state.returnIndex + '"]')?.closest('.product');
+      state.returnIndex = null;
+      if (card) card.scrollIntoView({ block: 'center' });
     }
     async function search() {
       const generation = ++state.generation;
@@ -237,8 +283,9 @@
         if (generation !== state.generation || state.screen !== 'catalog' || state.kind !== 'diamond') return;
         state.rows = response.stones || [];
         state.totalPages = Math.max(1, response.total_pages || 1);
-        main.querySelector('[data-count]').textContent = t('results', { count: Number(response.total || 0).toLocaleString() });
+        main.querySelector('[data-count]').textContent = counted('results', response.total || 0);
         result.innerHTML = state.rows.length ? `<div class="products">${state.rows.map((s, i) => `<article class="product">${image(s.image_urls?.[0], stoneTitle(s))}<h3>${esc(stoneTitle(s))}</h3><div class="quiet">${esc([t(s.kind === 'natural' ? 'natural' : 'lab'), s.color, s.clarity, s.lab].filter(Boolean).join(' · '))}</div><div class="price">${money(Math.round(s.retail_usd * 100), 'USD')}</div>${button('view_details', 'details-' + i)}</article>`).join('')}</div>` : empty();
+        returnToCard();
         main.querySelector('[data-pager]').innerHTML = state.totalPages > 1 ? `${button('previous', 'previous', 'secondary', state.page <= 1 ? 'disabled' : '')}<span class="quiet">${esc(t('page', { page: state.page, pages: state.totalPages }))}</span>${button('next', 'next', 'secondary', state.page >= state.totalPages ? 'disabled' : '')}` : '';
       } catch (_) {
         if (generation !== state.generation || state.screen !== 'catalog') return;
@@ -264,6 +311,7 @@
         }
         state.detail = p;
         state.photo = 0;
+        state.detailIndex = index;
         notice('');
         go('detail');
       } catch (error) { if (generation === state.generation) notice(error.message || t('load_failed'), true); }
@@ -276,7 +324,7 @@
       const s = p.spec || {};
       const facts = [['shape', p.shape], ...(!isSetting ? [['origin', t(p.origin === 'natural' ? 'natural' : 'lab')], ['color', s.color], ['clarity', s.clarity], ['cut', s.cut], ['polish', s.polish], ['symmetry', s.symmetry], ['fluorescence', s.fluorescence], ['measurements', s.measurements], ['table', s.table_pct != null ? s.table_pct + '%' : null], ['depth', s.depth_pct != null ? s.depth_pct + '%' : null], ['certificate', [s.lab, s.cert_number].filter(Boolean).join(' ')]] : [])].filter(([, value]) => value != null && value !== '');
       const videos = [...(p.videos || []), ...(s.video_urls || [])].filter(safeURL);
-      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${money(isSetting ? Math.min(...p.variants.filter(v => v.available).map(v => v.price)) : p.price)}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t('fits_check'))}</p><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
+      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${esc(isSetting ? fromPrice(p) : money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
       state.detailVideos = videos;
     }
     function bandPicker() {
@@ -296,7 +344,7 @@
       const p = state.setting, si = sizeIndex(p), available = p.variants.filter(v => v.available);
       const sizes = si >= 0 ? [...new Set(p.variants.map(v => String(v.options[si])))] : Array.from({ length: 10 }, (_, i) => String(4 + i * .5));
       const sizeOptions = `<option value="">${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
-      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure>${image(state[k].image, state[k].title)}<figcaption>${esc(state[k].title)}</figcaption></figure>`).join('')}</div><p class="quiet">${esc(t('fits_check'))}</p><div class="fields"><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}<div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}">${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div>${bandPicker()}`;
+      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure>${image(state[k].image, state[k].title)}<figcaption>${esc(state[k].title)}</figcaption></figure>`).join('')}</div><p class="quiet">${esc(t('fits_check'))}</p><div class="fields"><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}<div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div>${bandPicker()}`;
     }
     function render() {
       root.removeAttribute('aria-busy');
@@ -310,10 +358,22 @@
       summary();
       persist();
     }
+    function reveal(target) {
+      if (!target) return;
+      const offset = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+      const top = target.getBoundingClientRect().top;
+      if (top < offset || top > window.innerHeight * 0.75) window.scrollTo({ top: Math.max(0, top + window.scrollY - offset - 16), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
     function go(screen) {
+      const moved = ready && screen !== state.screen;
+      const back = screen === 'catalog' && state.returnIndex != null;
       state.generation++;
       state.screen = screen;
       render();
+      if (!moved) return;
+      if (!back) reveal(root.querySelector('.layout'));
+      const heading = main.querySelector('h2');
+      if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
     }
     function resetSearch() {
       if (state.kind === 'diamond') state.filters.shape = state.setting?.shape || '';
@@ -401,8 +461,8 @@
       if (!action.startsWith('photo-') && !action.startsWith('video-')) notice('');
       if (action === 'remove-band') { state.band = null; state.bandOptions = []; state.group = ''; render(); }
       else if (action.startsWith('start-') || action.startsWith('change-')) {
-        state.kind = action.split('-')[1]; state.page = 1;
-        if (state.kind === 'setting' && state.diamond) state.filters.shape = state.diamond.shape;
+        state.kind = action.split('-')[1]; state.page = 1; state.returnIndex = null;
+        if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : settingShape(state.filters.shape);
         if (state.kind === 'diamond' && state.setting) state.filters.shape = state.setting.shape;
         go('catalog');
       } else if (action.startsWith('details-')) openDetails(Number(action.slice(8)));
@@ -415,10 +475,18 @@
         } catch (error) { notice(error.message, true); }
       } else if (action.startsWith('clear-')) { state[action.slice(6)] = null; state.group = ''; go('catalog'); }
       else if (action === 'review') go('review');
-      else if (action === 'catalog' || action === 'start') go(action);
+      else if (action === 'catalog' || action === 'start') { state.returnIndex = action === 'catalog' && state.screen === 'detail' ? state.detailIndex : null; go(action); }
       else if (action === 'reset') resetSearch();
       else if (action === 'retry') search();
-      else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; search(); persist(); }
+      else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); search(); persist(); }
+      else if (action === 'dock-summary') reveal(aside);
+      else if (action === 'dock-add') {
+        const field = main.querySelector('[data-field="size"]');
+        if (!state.size && field) { notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true }); }
+        else if (!pickedVariant()) notice(t('size_unavailable'), true);
+        else if (state.band && !bandVariant()) notice(t('band_options_required'), true);
+        else addRing();
+      }
       else if (action.startsWith('photo-')) { state.photo = Number(action.slice(6)); detail(); }
       else if (action.startsWith('video-')) {
         const src = safeURL(state.detailVideos[Number(action.slice(6))]);
@@ -471,7 +539,7 @@
       const el = event.target;
       if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); return; }
       if (el.dataset.filter) state.filters[el.dataset.filter] = el.value;
-      if (el.dataset.field === 'engraving') { state.engraving = el.value.slice(0, 20); state.group = ''; main.querySelector('[data-inscription]').textContent = state.engraving; persist(); }
+      if (el.dataset.field === 'engraving') { state.engraving = el.value.slice(0, 20); state.group = ''; const inscription = main.querySelector('[data-inscription]'); inscription.textContent = state.engraving; inscription.hidden = !state.engraving; persist(); }
     });
     async function restore() {
       let stored = {};
@@ -493,7 +561,7 @@
         state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
         if (stored.filters && String(stored.filters.shape).split(',').every(shapeKnown)) state.filters = { ...state.filters, ...stored.filters };
       }
-      if (!settingHandle && !diamondHandle) { main.dataset.initialStart = 'true'; root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || ''; return; }
+      if (!settingHandle && !diamondHandle) { main.dataset.initialStart = 'true'; root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || ''; ready = true; return; }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
       notice(t('restoring'));
       state.busy = true; lockControls();
@@ -528,6 +596,7 @@
       if (state.diamond) state.filters.shape = state.diamond.shape;
       go(both() ? 'review' : 'catalog');
       notice(failed ? t('restore_failed') : '', failed);
+      ready = true;
     }
     restore();
   }
