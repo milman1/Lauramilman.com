@@ -8,7 +8,16 @@
     const main = root.querySelector('[data-flow-main]');
     const aside = root.querySelector('[data-flow-summary]');
     const status = root.querySelector('[data-flow-status]');
-    const shapes = ['Round', 'Oval', 'Cushion', 'Emerald', 'Pear', 'Princess', 'Radiant', 'Asscher', 'Marquise', 'Heart'];
+    const shapeSource = root.querySelector('[data-diamond-filter-template]');
+    const shapeDoc = new DOMParser().parseFromString(shapeSource ? shapeSource.innerHTML : '', 'text/html');
+    const listedShapes = [...shapeDoc.querySelectorAll('.lm-shape__name')].map(el => el.textContent.trim()).filter(Boolean);
+    const shapeTokens = [...shapeDoc.querySelectorAll('.lm-shape input')].flatMap(input => String(input.value).toLowerCase().split(',')).map(value => value.trim()).filter(Boolean);
+    const shapes = [...new Set(listedShapes.concat((cfg.settings || []).map(product => String(product.shape || '')).filter(Boolean)))];
+    const shapeKnown = token => {
+      const key = String(token || '').trim().toLowerCase();
+      if (!key) return true;
+      return shapes.some(shape => shape.toLowerCase() === key) || shapeTokens.includes(key);
+    };
     const handlePattern = /^[a-z0-9][a-z0-9-]{0,99}$/;
     const storageKey = 'lmRingFlowV1';
     const translations = Object.fromEntries(Object.entries(cfg.copy).map(([key, value]) => [key, String(value).replace(/&(amp|lt|gt|quot|#39|#x27);/g, entity => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&#x27;': "'" }[entity]))]));
@@ -150,7 +159,8 @@
       });
       form.querySelector('.lm-dfilter__reset').dataset.action = 'reset';
       form.querySelectorAll('.lm-shape input').forEach(input => {
-        input.checked = (state.setting?.shape || state.filters.shape).split(',').includes(input.value);
+        const wanted = (state.setting?.shape || state.filters.shape).split(',').map(value => value.trim().toLowerCase());
+        input.checked = String(input.value).split(',').some(value => wanted.includes(value.trim().toLowerCase()));
         input.disabled = !!state.setting;
         input.parentElement.classList.toggle('is-active', input.checked);
       });
@@ -472,7 +482,7 @@
       const requestedShape = params.get('shape');
       const edit = params.get('edit_group') || stored.editGroup;
       if (/^lmny-[a-z0-9-]+$/i.test(edit || '')) state.editGroup = edit;
-      if (shapes.includes(requestedShape)) state.filters.shape = requestedShape;
+      if (requestedShape && shapeKnown(requestedShape)) state.filters.shape = requestedShape;
       const sameSelection = (!params.has('setting') || params.get('setting') === stored.setting) && (!params.has('diamond') || params.get('diamond') === stored.diamond);
       if (sameSelection) {
         state.size = typeof stored.size === 'string' ? stored.size : '';
@@ -481,7 +491,7 @@
         state.date = /^\d{4}-\d{2}-\d{2}$/.test(stored.date || '') ? stored.date : '';
         state.font = stored.font === 'script' ? 'script' : 'block';
         state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
-        if (stored.filters && String(stored.filters.shape).split(',').every(shape => !shape || shapes.includes(shape))) state.filters = { ...state.filters, ...stored.filters };
+        if (stored.filters && String(stored.filters.shape).split(',').every(shapeKnown)) state.filters = { ...state.filters, ...stored.filters };
       }
       if (!settingHandle && !diamondHandle) { main.dataset.initialStart = 'true'; root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || ''; return; }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';

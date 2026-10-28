@@ -113,15 +113,15 @@
     "ring-builder": {
       "type": "ring-builder-start",
       "settings": {
-        "eyebrow": "Ring Builder",
-        "title": "Build your ring",
+        "eyebrow": "Engagement rings",
+        "title": "Where would you like to begin?",
         "heading_level": "h2",
         "card_limit": 4,
         "more_url": "/pages/ring-builder",
-        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
+        "description": "Shop a certified diamond on its own, or build a ring from a setting and a stone. We only show pairs that fit.",
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
-        "show_diamond_path": false,
+        "show_diamond_path": true,
         "contact_url": "/pages/contact"
       }
     },

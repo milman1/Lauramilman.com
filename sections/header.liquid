@@ -265,6 +265,15 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 .header .nav__dropdown-link { color: var(--lmhh-ink); text-decoration: none; line-height: 1.3; }
 .header .nav__dropdown-link:hover { color: var(--lmhh-bronze); }
 .header .nav__dropdown-link--all { margin-top: 6px; color: var(--lmhh-espresso); font-weight: 600; }
+.header .nav__shape-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.header .nav__shape-grid .nav__dropdown-link { font-size: 13px; }
 
 .header .nav__intro {
   display: flex;
@@ -571,26 +580,33 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       <button type="button" aria-expanded="false" class="nav__item-link">Loose Diamonds {{ caret }}</button>
       <div class="nav__dropdown">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Lab-grown</span>
-          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/lab-grown-diamonds?shape=Cushion" class="nav__dropdown-link">Cushion</a>
-          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <span class="nav__dropdown-label">Lab-grown shapes</span>
+          <div class="nav__shape-grid">
+            {%- capture shape_entries_raw -%}{%- render 'diamond-shape-order' -%}{%- endcapture -%}
+            {%- assign shape_entries = shape_entries_raw | strip | split: ';' -%}
+            {%- for entry in shape_entries -%}
+              {%- assign shape_label = entry | split: '|' | first | strip -%}
+              <a href="/collections/lab-grown-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
+            {%- endfor -%}
+          </div>
           <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">Colored lab-grown</a>
           <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all lab-grown</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Natural</span>
-          <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <span class="nav__dropdown-label">Natural shapes</span>
+          <div class="nav__shape-grid">
+            {%- assign natural_shapes = 'Round,Oval,Emerald,Cushion,Radiant,Asscher,Pear,Marquise,Princess,Heart,Cushion Modified,Old Miner' | split: ',' -%}
+            {%- for shape_label in natural_shapes -%}
+              <a href="/collections/natural-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
+            {%- endfor -%}
+          </div>
           <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Before you choose</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <span class="nav__dropdown-label">Choose a path</span>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Shop loose diamonds</a>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
+          <a href="/collections/ring-settings" class="nav__dropdown-link">Start with a setting</a>
           <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
           <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
         </div>
@@ -622,7 +638,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Build your own</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
           <a href="/collections/ring-settings" class="nav__dropdown-link">Ring settings</a>
           <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-grown engagement rings</a>
           <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-grown rings</a>

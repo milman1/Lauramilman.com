@@ -52,7 +52,7 @@ console.log('PASS full API filters, pagination, search recovery, detailed specs/
 console.log('PASS editing an existing cart ring restores properties and replaces the old pair without duplicate lines.');
 
 {const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-setting');await click(p,'details-0');await click(p,'select');
-assert.equal(await p.locator('.lm-shape').count(),10);assert.equal(await p.locator('.lm-shape input:disabled').count(),10);assert.equal(await p.locator('.lm-shape input:checked').inputValue(),'Oval');
+const shapeCount=await p.locator('.lm-shape').count();assert.ok(shapeCount>10);assert.equal(await p.locator('.lm-shape',{hasText:'Ashoka'}).count(),1);assert.equal(await p.locator('.lm-shape input:disabled').count(),shapeCount);assert.equal(await p.locator('.lm-shape input:checked').inputValue(),'Oval');
 for(const width of [320,390,736,1024,1440]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'filter overflow '+width);}
 await p.locator('[data-origin="natural"]').click();assert.equal(await p.locator('[data-filter="max_price"]').getAttribute('max'),'250000');await p.locator('[data-origin="lab"]').click();
 await p.locator('[data-filter="min_carat"]').fill('');await p.locator('[data-filter="min_carat"]').pressSequentially('1.25');assert.equal(await p.locator('[data-filter="min_carat"]').inputValue(),'1.25');await p.locator('[data-scale="cut"] [data-grade="Excellent"]').click();await p.locator('[data-scale="cut"] [data-grade="Ideal"]').click();await p.getByRole('button',{name:'View Diamonds',exact:true}).click();await p.waitForTimeout(50);assert.equal(searches.at(-1).cuts,'Excellent,Ideal');

@@ -39,10 +39,28 @@ describe('loose diamond shape filter', () => {
       'Pear Step',
       'Horse Head',
       'Capsule',
-      'Octagonal',
+      'Octagonal|Octagonal,Octagonal Step Cut',
+      'Oldmine Moval|Oldmine Moval,Old Moval',
+      'Tycoon|Tycoon,Tycoon Cut',
+      'Round Star',
+      'Oldmine Asscher',
+      'Square Cushion Stepcut',
     ]) {
       expect(order).toContain(shape);
     }
+  });
+
+  it('uses that list on the homepage, the menu, and the ring builder', () => {
+    for (const path of ['sections/lmh-stones.liquid', 'sections/ring-builder-start.liquid', 'sections/header.liquid']) {
+      expect(themeFile(path)).toContain("render 'diamond-shape-order'");
+    }
+    const flow = themeFile('assets/ring-builder-flow.js');
+    expect(flow).toContain('.lm-shape__name');
+    expect(flow).not.toContain("const shapes = ['Round', 'Oval'");
+    const home = themeFile('templates/index.json');
+    expect(home).toContain('Where would you like to begin?');
+    expect(home).toContain('"show_diamond_path": true');
+    expect(home).not.toContain('"title": "Build your ring"');
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {
