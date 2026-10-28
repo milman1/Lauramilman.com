@@ -984,6 +984,10 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
   text-overflow: ellipsis;
 }
 
+.search-overlay__result-item--diamond .search-overlay__result-title {
+  white-space: normal;
+}
+
 .search-overlay__result-price {
   font-size: 0.85rem;
   color: var(--gold-light, #E2C27A);
@@ -1057,6 +1061,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 }
 </style>
 
+<script src="{{ 'diamond-query.js' | asset_url }}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('header');
@@ -1288,6 +1293,57 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       }
     });
 
+    function escapeSearch(value) {
+      return String(value).replace(/[&<>"']/g, function(ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
+    }
+
+    function diamondHitHtml(parsed, count) {
+      var meta = parsed.kind === 'natural' ? 'Natural diamonds' : 'Lab-grown diamonds';
+      if (count != null) {
+        meta = count.toLocaleString('en-US') + ' ' + (parsed.kind === 'natural' ? 'natural' : 'lab-grown');
+      }
+      if (parsed.detail) meta += ' · ' + parsed.detail;
+      return '<a class="search-overlay__result-item search-overlay__result-item--diamond" href="' + escapeSearch(parsed.href) + '">' +
+        '<div class="search-overlay__result-info">' +
+        '<div class="search-overlay__result-title">' + escapeSearch(parsed.title) + '</div>' +
+        '<div class="search-overlay__result-price">' + escapeSearch(meta) + '</div>' +
+        '</div></a>';
+    }
+
+    function showDiamondHit(q) {
+      if (!window.LMNYDiamondQuery) return false;
+      var parsed = window.LMNYDiamondQuery.parseDiamondQuery(q);
+      if (!parsed) return false;
+      if (searchLinks) searchLinks.style.display = 'none';
+      searchResults.innerHTML = diamondHitHtml(parsed, null);
+      var headers = { Accept: 'application/json' };
+      if (window.LMNYDiamondQuery.DIAMOND_ANON_KEY) {
+        headers.apikey = window.LMNYDiamondQuery.DIAMOND_ANON_KEY;
+        headers.Authorization = 'Bearer ' + window.LMNYDiamondQuery.DIAMOND_ANON_KEY;
+      }
+      fetch(window.LMNYDiamondQuery.DIAMOND_API + '?' + parsed.countQuery, { headers: headers })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(result) {
+          if (searchInput.value.trim() !== q || !result.ok) return;
+          searchResults.innerHTML = diamondHitHtml(parsed, Number(result.data.total) || 0);
+        })
+        .catch(function() {});
+      return true;
+    }
+
+    document.querySelectorAll('#searchOverlay form, form.lmhh__msearch').forEach(function(form) {
+      form.addEventListener('submit', function(event) {
+        if (!window.LMNYDiamondQuery) return;
+        var input = form.querySelector('input[type="search"]');
+        var parsed = input && window.LMNYDiamondQuery.parseDiamondQuery(input.value);
+        if (!parsed) return;
+        event.preventDefault();
+        window.location.assign(parsed.href);
+      });
+    });
+
     if (searchInput) {
       searchInput.addEventListener('input', function() {
         var q = searchInput.value.trim();
@@ -1297,6 +1353,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           if (searchLinks) searchLinks.style.display = '';
           return;
         }
+        if (showDiamondHit(q)) return;
+        searchResults.innerHTML = '';
         searchDebounce = setTimeout(function() {
           fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6&resources[options][fields]=title,product_type,vendor,tag,variants.title,variants.sku,body')
             .then(function(r) { return r.json(); })
