@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { isUnavailableProductHandle, UNAVAILABLE_PRODUCT_HANDLES } from '../config/unavailable.js';
 
 describe('isUnavailableProductHandle', () => {
-  it('matches the two Hermès models and their Back Vault copies', () => {
-    expect(UNAVAILABLE_PRODUCT_HANDLES).toHaveLength(2);
+  it('matches the merchant-confirmed sold pieces and their Back Vault copies', () => {
+    expect(UNAVAILABLE_PRODUCT_HANDLES).toHaveLength(3);
     for (const handle of UNAVAILABLE_PRODUCT_HANDLES) {
       expect(isUnavailableProductHandle(handle)).toBe(true);
       expect(isUnavailableProductHandle(`bv-${handle}`)).toBe(true);
