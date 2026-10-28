@@ -151,7 +151,7 @@
   }
 :is(#lmny-ring-builder,.lm-dfilter) .lm-dfilter__shapes {
     display: grid;
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 0.5rem;
   }
 :is(#lmny-ring-builder,.lm-dfilter) .lm-shape {
@@ -193,9 +193,11 @@
   }
 :is(#lmny-ring-builder,.lm-dfilter) .lm-shape__name {
     font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-size: 0.65rem;
-    letter-spacing: 0.04em;
+    font-size: 0.68rem;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
     text-align: center;
+    overflow-wrap: break-word;
   }
 :is(#lmny-ring-builder,.lm-dfilter) .lm-shape__count {
     font-family: var(--font-body, 'Montserrat', sans-serif);

@@ -1,5 +1,5 @@
 {% doc %}
-  One reading link for a collection, using a published journal article or the buying guide.
+  One or two reading links for a collection, using published journal articles or the buying guide.
   Renders nothing when this collection has no matching page.
 
   @example
@@ -9,8 +9,26 @@
 {%- liquid
   assign guide_url = ''
   assign guide_label = ''
+  assign guide2_url = ''
+  assign guide2_label = ''
   case collection.handle
-    when 'cartier' or 'van-cleef-arpels' or 'tiffany'
+    when 'cartier'
+      assign guide_url = '/blogs/journal/how-to-buy-pre-owned-cartier-van-cleef-tiffany'
+      assign guide_label = 'How to buy pre-owned Cartier, Van Cleef, and Tiffany'
+      assign guide2_url = '/blogs/journal/pre-owned-cartier-love-bracelet-size-condition'
+      assign guide2_label = 'Buying a pre-owned Cartier Love bracelet'
+    when 'david-webb'
+      assign guide_url = '/blogs/journal/how-to-authenticate-david-webb-jewelry'
+      assign guide_label = 'How to authenticate a pre-owned David Webb piece'
+    when 'estate-jewelry'
+      assign guide_url = '/blogs/journal/how-to-buy-pre-owned-cartier-van-cleef-tiffany'
+      assign guide_label = 'How to buy pre-owned signed jewelry'
+      assign guide2_url = '/blogs/journal/how-to-authenticate-david-webb-jewelry'
+      assign guide2_label = 'How to authenticate a pre-owned David Webb piece'
+    when 'gold-jewelry' or 'gold-chains' or 'gold-bracelets' or 'chains' or 'chain-necklaces' or 'chain-bracelets' or 'gold-plated-silver'
+      assign guide_url = '/blogs/journal/gold-chain-guide-styles-widths'
+      assign guide_label = 'Gold chain guide: styles and widths'
+    when 'van-cleef-arpels' or 'tiffany'
       assign guide_url = '/blogs/journal/how-to-buy-pre-owned-cartier-van-cleef-tiffany'
       assign guide_label = 'How to buy pre-owned Cartier, Van Cleef, and Tiffany'
     when 'vintage-jewelry'
@@ -31,5 +49,8 @@
   endcase
 -%}
 {%- if guide_url != blank -%}
-  <p class="lm-collection__guide"><a href="{{ guide_url }}">{{ guide_label }}</a></p>
+  <p class="lm-collection__guide">
+    <a href="{{ guide_url }}">{{ guide_label }}</a>
+    {%- if guide2_url != blank %} · <a href="{{ guide2_url }}">{{ guide2_label }}</a>{% endif -%}
+  </p>
 {%- endif -%}

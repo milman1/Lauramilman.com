@@ -10,6 +10,8 @@
   are shared.
 {%- endcomment -%}
 
+{%- capture shape_entries_raw -%}{%- render 'diamond-shape-order' -%}{%- endcapture -%}
+
 {%- liquid
   assign navy_mode = section.settings.navy_mode
   assign api_mode = false
@@ -35,7 +37,20 @@
   assign clarity_order = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ','
   assign color_order = 'M,L,K,J,I,H,G,F,E,D' | split: ','
   assign cut_order = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ','
-  assign shape_order = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ','
+  assign shape_order = shape_entries_raw | strip | split: ';'
+  assign shape_known = '|'
+  for entry in shape_order
+    assign shape_parts = entry | split: '|'
+    if shape_parts.size > 1
+      assign shape_stored = shape_parts | last
+    else
+      assign shape_stored = shape_parts | first
+    endif
+    assign shape_stored_bits = shape_stored | split: ','
+    for bit in shape_stored_bits
+      assign shape_known = shape_known | append: bit | strip | append: '|'
+    endfor
+  endfor
   assign stone_kind = section.settings.stone_kind | default: 'lab'
   if collection.handle == 'lab-grown-diamonds'
     assign stone_kind = 'lab'
@@ -225,11 +240,20 @@
               <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
             </span>
             <div class="lm-dfilter__shapes">
-              {%- comment -%} Canonical order first, then anything else the feed brought in. {%- endcomment -%}
-              {%- for name in shape_order -%}
+              {%- comment -%} Listed shapes first, then anything else the feed brought in. {%- endcomment -%}
+              {%- for entry in shape_order -%}
+                {%- assign shape_parts = entry | split: '|' -%}
+                {%- assign shape_label = shape_parts | first | strip -%}
+                {%- if shape_parts.size > 1 -%}
+                  {%- assign shape_stored = shape_parts | last -%}
+                {%- else -%}
+                  {%- assign shape_stored = shape_label -%}
+                {%- endif -%}
+                {%- assign shape_stored = shape_stored | prepend: ',' | append: ',' -%}
                 {%- for value in shape_filter.values -%}
-                  {%- if value.label == name -%}
-                    {%- assign icon_key = value.label | downcase -%}
+                  {%- assign shape_token = value.label | prepend: ',' | append: ',' -%}
+                  {%- if shape_stored contains shape_token -%}
+                    {%- assign icon_key = shape_label | downcase -%}
                     <label class="lm-shape{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
                       <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
                       {%- render 'diamond-shape-icon', shape: icon_key -%}
@@ -240,7 +264,8 @@
                 {%- endfor -%}
               {%- endfor -%}
               {%- for value in shape_filter.values -%}
-                {%- unless shape_order contains value.label -%}
+                {%- assign shape_token = value.label | prepend: '|' | append: '|' -%}
+                {%- unless shape_known contains shape_token -%}
                   {%- assign icon_key = value.label | downcase -%}
                   <label class="lm-shape{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
                     <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
