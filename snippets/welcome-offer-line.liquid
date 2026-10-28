@@ -4,9 +4,11 @@
   can see the welcome offer without signing up first. The code itself stays
   behind the signup (welcome popup / footer form).
 
-  Shown only when the product is in a collection the LMNYWELCOME discount
-  covers (Shopify Admin -> Discounts, 28 collections on 2026-10-28) and is not
-  a watch. Update ELIGIBLE below if the discount's collections change.
+  Jewelry only (merchant, 2026-10-28): shown when the product is in one of the
+  jewelry collections the LMNYWELCOME discount covers (Shopify Admin ->
+  Discounts) and is not a watch or a loose stone. Loose lab-grown and natural
+  diamond pages do not render this snippet, and the two loose-diamond
+  collections are left out of the list. Update ELIGIBLE below if the discount's collections change.
   Hidden for customers who already signed up (tag welcome10).
 
   @param {product} product - The product being shown
@@ -16,7 +18,7 @@
 {% enddoc %}
 
 {%- liquid
-  assign eligible_handles = 'earrings,rings,necklaces,bracelets,pendants-1,wedding-bands,engagement-rings,mens-wedding-bands,vintage-jewelry,estate-jewelry,cartier,chopard,hermes,tiffany,van-cleef-arpels,mens-rings,bvlgari,verdura,seaman-schepps,lab-grown-diamond-jewelry,natural-diamonds,lab-grown-diamonds,lab-grown-bracelets,lab-grown-necklaces,lab-grown-pendants,lab-grown-earrings,lab-grown-rings,lab-grown-engagement-rings' | split: ','
+  assign eligible_handles = 'earrings,rings,necklaces,bracelets,pendants-1,wedding-bands,engagement-rings,mens-wedding-bands,vintage-jewelry,estate-jewelry,cartier,chopard,hermes,tiffany,van-cleef-arpels,mens-rings,bvlgari,verdura,seaman-schepps,lab-grown-diamond-jewelry,lab-grown-bracelets,lab-grown-necklaces,lab-grown-pendants,lab-grown-earrings,lab-grown-rings,lab-grown-engagement-rings' | split: ','
   assign offer_ok = false
   for c in product.collections
     if eligible_handles contains c.handle

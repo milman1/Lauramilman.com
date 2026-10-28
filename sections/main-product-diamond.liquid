@@ -164,7 +164,6 @@
           <li>1-year warranty</li>
           {%- if m.lab == 'IGI' or m.lab == 'GIA' -%}<li>Graded by {{ m.lab }}</li>{%- endif -%}
         </ul>
-        {%- render 'welcome-offer-line', product: product -%}
 
         {%- assign g_url = section.settings.google_reviews_url -%}
         {%- if g_url != blank -%}

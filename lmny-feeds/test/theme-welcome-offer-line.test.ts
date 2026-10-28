@@ -14,17 +14,19 @@ describe('welcome offer line on product pages (2026-10-28)', () => {
   });
 
   it('shows only on products in the discount collections, never on watches or for signed-up customers', () => {
-    for (const handle of ['estate-jewelry', 'hermes', 'cartier', 'lab-grown-diamonds', 'natural-diamonds']) {
+    for (const handle of ['estate-jewelry', 'hermes', 'cartier', 'lab-grown-diamond-jewelry']) {
       expect(line).toContain(handle);
     }
+    expect(line).not.toContain(',lab-grown-diamonds,');
+    expect(line).not.toContain('natural-diamonds');
     expect(line).not.toContain('time-pieces');
     expect(line).toContain("render 'product-is-watch'");
     expect(line).toContain("customer.tags contains 'welcome10'");
   });
 
-  it('is rendered on jewelry and loose-diamond product pages', () => {
+  it('is rendered on jewelry product pages only, not loose-stone pages', () => {
     expect(read('sections/main-product.liquid')).toContain("render 'welcome-offer-line', product: product");
-    expect(read('sections/main-product-diamond.liquid')).toContain("render 'welcome-offer-line', product: product");
+    expect(read('sections/main-product-diamond.liquid')).not.toContain('welcome-offer-line');
   });
 
   it('opens the signup popup from the link', () => {
