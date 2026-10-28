@@ -150,6 +150,16 @@
     root.querySelectorAll('[data-welcome-close]').forEach(function (el) {
       el.addEventListener('click', close);
     });
+    // A "sign up for 10% off" link on a product page opens the same popup,
+    // even after the visitor dismissed the automatic one.
+    document.addEventListener('click', function (event) {
+      var trigger = event.target.closest('[data-welcome-open]');
+      if (!trigger) return;
+      event.preventDefault();
+      open();
+      var email = document.getElementById('LmWelcomeEmail');
+      if (email) email.focus();
+    });
     if (success) {
       open();
       return;

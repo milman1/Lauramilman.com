@@ -344,6 +344,8 @@
           </div>
         {%- endif -%}
 
+        {%- render 'welcome-offer-line', product: product -%}
+
         <!-- 6. Badge pills from tags -->
         {%- if status_pill != '' or metal_pill != '' or signed_pill != '' -%}
           <div class="pdp-badges">
