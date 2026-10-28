@@ -51,7 +51,7 @@ describe('loose diamond shape filter', () => {
   });
 
   it('uses that list on the homepage, the menu, and the ring builder', () => {
-    for (const path of ['sections/lmh-stones.liquid', 'sections/ring-builder-start.liquid', 'sections/header.liquid']) {
+    for (const path of ['sections/lmh-stones.liquid', 'sections/header.liquid']) {
       expect(themeFile(path)).toContain("render 'diamond-shape-order'");
     }
     const flow = themeFile('assets/ring-builder-flow.js');
@@ -61,6 +61,19 @@ describe('loose diamond shape filter', () => {
     expect(home).toContain('Where would you like to begin?');
     expect(home).toContain('"show_diamond_path": true');
     expect(home).not.toContain('"title": "Build your ring"');
+  });
+
+  it('keeps the homepage short: ten shapes, the rest folded, one shape picker', () => {
+    const stones = themeFile('sections/lmh-stones.liquid');
+    expect(stones).toContain('for entry in shape_list limit: 10');
+    expect(stones).toContain('for entry in shape_list offset: 10');
+    expect(stones).toContain('More shapes (');
+    const start = themeFile('sections/ring-builder-start.liquid');
+    expect(start).not.toContain('data-rbs-shape');
+    expect(start).not.toContain('Which shape?');
+    // One setting per shape, and a link into the builder's own setting list.
+    expect(start).toContain('seen contains seen_key');
+    expect(themeFile('templates/index.json')).toContain('"more_url": "/pages/ring-builder?start=setting"');
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {

@@ -28,13 +28,26 @@
     {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
   </div>
 
+  {%- comment -%} The classic ten show; every other stocked shape sits under "More shapes". {%- endcomment -%}
   <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
-    {%- for entry in shape_list -%}
+    {%- for entry in shape_list limit: 10 -%}
       {%- assign name = entry | split: '|' | first | strip -%}
       {%- assign icon_key = name | downcase -%}
       <li><a class="lmh-shape" href="{{ base }}?shape={{ name | url_encode }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
     {%- endfor -%}
   </ul>
+  {%- if shape_list.size > 10 -%}
+    <details class="lmh-stones__more-shapes">
+      <summary>More shapes ({{ shape_list.size | minus: 10 }})</summary>
+      <ul class="lmh-stones__shapes" role="list" aria-label="More shapes">
+        {%- for entry in shape_list offset: 10 -%}
+          {%- assign name = entry | split: '|' | first | strip -%}
+          {%- assign icon_key = name | downcase -%}
+          <li><a class="lmh-shape" href="{{ base }}?shape={{ name | url_encode }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
+        {%- endfor -%}
+      </ul>
+    </details>
+  {%- endif -%}
 
   <div class="lmh-stones__sizes" aria-label="Shop by size or budget">
     {%- for block in section.blocks -%}
