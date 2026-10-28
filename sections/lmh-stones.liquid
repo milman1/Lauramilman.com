@@ -20,7 +20,7 @@
   endif
 -%}
 
-<section class="lmh lmh-stones" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
+<section class="lmh lmh-stones" id="start-with-the-stone" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
   data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}">
   <div class="lmh-stones__head">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
