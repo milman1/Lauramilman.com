@@ -432,3 +432,7 @@ Notes for next time:
 ## 2026-10-15: "Ask about this stone" replaces "Reserve this diamond" on search tiles
 
 - Merchant request: most recent inquiries came from ChatGPT and Claude visitors. Lab, natural and colored search tiles now say "Ask about this stone", matching the stone page. The dialog asks for name, email, optional phone and an optional question, and reaches the inbox as "Diamond question" with the stone, link, stock number and listed price. It makes no promise to hold the stone.
+
+## 2026-10-28: welcome offer stated on product pages
+
+- Merchant approved saying "sign up for 10% off" publicly (the code stays behind the signup). New `snippets/welcome-offer-line.liquid` renders "New clients: sign up for 10% off your first jewelry purchase." under the trust strip on jewelry product pages and under the trust list on loose-diamond pages. It shows only when the product is in one of the 28 collections the LMNYWELCOME discount covers, never on watches, and not for customers tagged `welcome10`. The link opens the existing welcome popup (falls back to the footer form). The discounted price is not put into product structured data (Google requires the listed price without a code).
