@@ -71,3 +71,31 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     expect(start).toContain('shape={{ ring_shape | url_encode }}');
   });
 });
+
+describe('ring builder page chrome', () => {
+  it('keeps the welcome offer off ring-builder templates', () => {
+    expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
+  });
+
+  it('shows only the steps the builder owns and a mobile dock', () => {
+    const flow = themeFile('sections/ring-builder-flow.liquid');
+    expect(flow).not.toContain("ring_flow.checkout' | t }}</span>");
+    expect(flow).toContain('data-flow-dock');
+  });
+});
+
+describe('one ring builder', () => {
+  it('sends setting entry points to /pages/ring-builder', () => {
+    const header = themeFile('sections/header.liquid');
+    expect(header).toContain('href="/pages/ring-builder?start=setting"');
+    expect(header).toContain('href="/pages/ring-builder?start=diamond"');
+    expect(themeFile('snippets/diamond-setting-picker.liquid')).toContain('{% if is_setting %}/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');
+    expect(themeFile('snippets/ring-diamond-pairing.liquid')).toContain('href="/pages/ring-builder?setting={{ product.handle | url_encode }}"');
+  });
+
+  it('hands the older builder templates over outside the theme editor', () => {
+    const bar = themeFile('sections/ring-builder-bar.liquid');
+    expect(bar).toContain('window.Shopify.designMode');
+    expect(bar).toContain("location.replace('/pages/ring-builder?' + to.toString())");
+  });
+});
