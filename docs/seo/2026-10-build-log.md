@@ -424,3 +424,7 @@ Notes for next time:
   so they are not linked.
 - Several estate products exist twice (a `bv-` handle and a plain one) with the
   same title. Not changed.
+
+## 2026-10-28: guides and FAQs on Cartier and David Webb
+
+- Merchant approved showing the stored `custom.guide_html` and `custom.guide_faq` on Cartier and David Webb (reverses the 2026-10-05 "not now" for these two only). `sections/main-collection.liquid` renders `collection-longform` for those two handles; Rolex and every other collection stay as they were. The block shows under the product grid on page 1 only and adds FAQPage markup built from the visible FAQ. Both guides say 14-day returns (aligned 2026-10-26).
