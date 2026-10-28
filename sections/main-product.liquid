@@ -344,6 +344,8 @@
           </div>
         {%- endif -%}
 
+        {%- render 'welcome-offer-line', product: product -%}
+
         <!-- 6. Badge pills from tags -->
         {%- if status_pill != '' or metal_pill != '' or signed_pill != '' -%}
           <div class="pdp-badges">
@@ -775,6 +777,13 @@
 
     .pdp-sticky.is-visible {
       transform: translateY(0);
+    }
+
+    /* Shopify Inbox: keep its bubble and panel above the sticky bar */
+    body.has-pdp-sticky shopify-chat {
+      contain: layout !important;
+      height: calc(100% - 76px - env(safe-area-inset-bottom, 0px)) !important;
+      bottom: auto !important;
     }
 
     .pdp-sticky__info {
