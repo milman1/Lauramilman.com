@@ -240,7 +240,9 @@
       "scale_label":{{ 'ring_flow.scale_label' | t | json }},
       "scale_caption":{{ 'ring_flow.scale_caption' | t: length: '__length__', width: '__width__', size: '__size__', finger: '__finger__' | json }},
       "link_copied":{{ 'ring_flow.link_copied' | t | json }},
-      "share_failed":{{ 'ring_flow.share_failed' | t: url: '__url__' | json }}
+      "share_failed":{{ 'ring_flow.share_failed' | t: url: '__url__' | json }},
+      "mm_face":{{ 'ring_flow.mm_face' | t: length: '__length__', width: '__width__' | json }},
+      "mm_round":{{ 'ring_flow.mm_round' | t: size: '__size__' | json }}
     }}
   </script>
 </div>

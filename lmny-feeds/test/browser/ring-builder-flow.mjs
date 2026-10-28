@@ -4,12 +4,13 @@ const repo = new URL('../../../', import.meta.url).pathname.replace(/\/$/, '');
 const fixtures=JSON.parse(fs.readFileSync(new URL('./ring-flow-fixtures.json',import.meta.url),'utf8'));
 const settings=fixtures.settings,baseStones=fixtures.stones,raw=fixtures.diamonds;
 {const round=fixtures.settings.find(p=>p.shape==='Round');const white=structuredClone(round);white.handle='round-white-setting';white.title='Round setting in White Gold';white.options[1].values=['14K White Gold'];white.variants=white.variants.filter(v=>v.options[1]==='14K Yellow Gold').map(v=>({...v,id:v.id+500000,price:v.price+5000,options:[v.options[0],'14K White Gold']}));white.videos=['https://media.example/setting.mp4'];settings.push(white);}
+baseStones.forEach(s=>{s.measurements='8.25 X 5.60 X 3.54';});
 const cfg={settings,copy:JSON.parse(fs.readFileSync(repo+'/locales/en.default.json','utf8').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow,apiBase:'https://fixtures.supabase.co/functions/v1/diamonds',apiKey:'',root:'/',cartUrl:'/cart',contact:'/pages/contact',appointment:'/pages/private-clients',sizeGuide:'/pages/ring-size-guide',currency:'USD'};
 const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
 const fixtureImages={setting:[{image:pixel}],diamond:[{image:pixel},{image:pixel},{image:pixel}]};
 cfg.copy.tax_shipping = 'Tax &amp; shipping calculated at checkout.';
 const diamonds=raw.map((p,i)=>({handle:p.handle,title:p.title,type:p.type,shape:'Oval',available:true,setting:false,url:'/products/'+p.handle,image:"https://images.test/diamond-"+i+".jpg",images:["https://images.test/diamond-"+i+".jpg","https://images.test/diamond-alt.jpg"],videos:['https://media.example/video.mp4'],options:p.options,variants:p.variants.map(v=>({id:v.id,price:v.price,available:v.available,options:v.options}))}));
-const round={...structuredClone(diamonds[0]),handle:'lg-round-test',shape:'Round',title:'Round lab-grown diamond'};round.variants[0].id=100001;const stoneRound={...baseStones[0],stock_ref:'round-test',shape:'Round'};
+const round={...structuredClone(diamonds[0]),handle:'lg-round-test',shape:'Round',title:'Round lab-grown diamond'};round.variants[0].id=100001;const stoneRound={...baseStones[0],stock_ref:'round-test',shape:'Round',measurements:'6.43 X 6.48 X 3.86'};
 const band={handle:'test-wedding-band',title:'Round lab-grown diamond wedding band',type:'Rings',band:true,setting:false,available:true,image:'https://images.test/band.jpg',url:'/products/test-wedding-band',options:[{name:'Size',values:['6.25','7']},{name:'Metal',values:['14K White Gold','18K White Gold']}],variants:[{id:80001,price:90000,available:true,options:['6.25','14K White Gold']},{id:80002,price:115000,available:true,options:['6.25','18K White Gold']},{id:80003,price:90000,available:false,options:['7','14K White Gold']}]};
 cfg.bands=[{handle:band.handle,title:band.title},{handle:'white-band',title:'Round band in White Gold',price:90000,price_varies:true}];
 const products=new Map([...settings,...diamonds,round,band].map(p=>[p.handle,structuredClone(p)]));
@@ -105,7 +106,7 @@ console.log('PASS optional band size/metal, unavailable combination, subtotal, r
  assert.deepEqual(await p.locator('[data-filter="shape"] option').allInnerTexts(),['Round','Oval']);assert.equal(await p.locator('[data-count]').innerText(),'1 setting');await p.close();}
 console.log('PASS colored tab hidden, setting counts on shapes, rare shapes folded, singular counts, scroll and focus on screen change, return to opened card, mobile dock, hidden empty inscription.');
 {const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-diamond');await p.locator('[data-results] .product').first().waitFor();
- assert.equal(await p.locator('[data-more-filters]').isHidden(),true);await click(p,'more-filters');assert.equal(await p.locator('[data-more-filters]').isVisible(),true);
+ assert.ok((await p.locator('[data-results] .product').first().innerText()).includes('8.3 × 5.6 mm face-up'));assert.equal(await p.locator('[data-more-filters]').isHidden(),true);await click(p,'more-filters');assert.equal(await p.locator('[data-more-filters]').isVisible(),true);
  const n=searches.length;await p.locator('[data-scale="clarity"] [data-grade="VS2"]').click();await p.waitForTimeout(450);assert.equal(searches.length,n+1,'filters search without a submit');assert.equal(searches.at(-1).clarities,'VS2');
  assert.ok((await p.locator('[data-action="more-filters"]').innerText()).includes('(1)'));
  await click(p,'carat-1');await p.waitForTimeout(50);assert.equal(searches.at(-1).min_carat,'1.5');assert.equal(searches.at(-1).max_carat,'1.99');assert.equal(await p.locator('[data-action="carat-1"]').getAttribute('aria-pressed'),'true');
@@ -114,7 +115,7 @@ console.log('PASS colored tab hidden, setting counts on shapes, rare shapes fold
  await p.locator('[data-filter="min_carat"]').fill('3');await p.locator('[data-filter="max_carat"]').fill('2');await p.waitForTimeout(900);assert.notEqual(searches.at(-1).min_carat,'3','an inverted range never searches');
  await p.locator('[data-filter="max_carat"]').fill('');await p.locator('[data-filter="min_carat"]').fill('');await p.waitForTimeout(900);
  await p.locator('.lm-dfilter__group--wide > .lm-dfilter__shapes > .lm-shape',{hasText:'Round'}).first().click();await p.locator('.lm-dfilter__group--wide > .lm-dfilter__shapes > .lm-shape',{hasText:'Oval'}).first().click();await p.waitForTimeout(450);assert.equal(searches.at(-1).shape,'Round');
- await p.locator('[data-results] .product').first().waitFor();await click(p,'details-0');await p.locator('.detail').waitFor();
+ await p.locator('[data-results] .product').first().waitFor();assert.ok((await p.locator('[data-results] .product').first().innerText()).includes('6.5 mm across'));await click(p,'details-0');await p.locator('.detail').waitFor();
  assert.ok(await p.locator('.detail [data-action="select"]').evaluate(b=>!!(b.compareDocumentPosition(document.querySelector('.detail .facts'))&Node.DOCUMENT_POSITION_FOLLOWING)),'select sits above the facts');
  assert.equal(await p.locator('.detail-help a').count(),2);assert.equal(await p.locator('[data-action^="video-"]').count(),1);
  await click(p,'catalog');await p.locator('[data-results] .product').first().waitFor();await click(p,'quick-0');await p.locator('[data-count]').filter({hasText:'settings'}).waitFor();
@@ -131,7 +132,7 @@ console.log('PASS colored tab hidden, setting counts on shapes, rare shapes fold
  assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'6.25','band size follows the ring size');
  for(const width of [320,390,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}
  await p.close();}
-console.log('PASS live filtering, carat size chips, more filters, select above specs, quick select, setting metal filter and preset, size guide, matched bands with prices, band size preset.');
+console.log('PASS live filtering, mm sizes on cards, carat size chips, more filters, select above specs, quick select, setting metal filter and preset, size guide, matched bands with prices, band size preset.');
 {const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').waitFor();assert.equal(await p.locator('[data-count]').innerText(),'1 setting');
  await p.goto('https://lmny.test/pages/ring-builder?start=diamond&shape=Round');await p.locator('[data-results] .product').first().waitFor();assert.equal(searches.at(-1).shape,'Round');await p.close();}
 {const p=await newPage();await p.addInitScript(()=>{navigator.share=d=>{window.__shared=d;return Promise.resolve();};});
