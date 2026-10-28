@@ -102,3 +102,22 @@ describe('one ring builder', () => {
     expect(bar).toContain("location.replace('/pages/ring-builder?' + to.toString())");
   });
 });
+
+describe('theme validator and footer fixes', () => {
+  it('keeps the header search script free of the parser trap and non-blocking', () => {
+    const header = themeFile('sections/header.liquid');
+    // A regex written /</g reads as a closing tag to Shopify's Liquid parser and hides every later error.
+    expect(header).not.toContain('replace(/</g');
+    expect(header).toContain("escapeSearch(q)");
+    expect(header).toContain("<script src=\"{{ 'diamond-query.js' | asset_url }}\" defer></script>");
+  });
+
+  it('gives the product gallery image and footer logo their dimensions', () => {
+    expect(themeFile('sections/main-product.liquid')).toContain('height="{{ media.preview_image.height | times: 1200 | divided_by: media.preview_image.width }}"');
+    expect(themeFile('sections/footer.liquid')).toContain('width="200" height="{{ section.settings.logo.height | times: 200 | divided_by: section.settings.logo.width }}"');
+  });
+
+  it('lets the single footer column shrink so the signup button stays on screen', () => {
+    expect(themeFile('sections/footer.liquid')).toMatch(/@media \(max-width: 576px\)[\s\S]*?\.footer__grid \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  });
+});
