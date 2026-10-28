@@ -1,29 +1,66 @@
 {%- comment -%}
-  Ring builder — shape-first start (template page.ring-builder-start).
-  The shopper picks a center-stone shape; the settings that take it (from the
-  ring-settings collection, matched by snippets/center-stone-shape.liquid,
-  never the title) show below, each opening the ring-builder setting page.
-  The diamond path links to the stone searches for that shape.
-  ?shape=Oval preselects a shape; otherwise the shape with the most settings.
-  On the homepage: heading level h2 (the banner holds the page's h1), a
-  card limit with "See all" opening the full start page on the same shape,
-  and both paths: shop a diamond, or build a ring.
+  Ring builder — where to begin (homepage).
+  Two plain choices: shop a diamond on its own, or build a ring. The ring path
+  shows one setting per shape (from the ring-settings collection; the shape
+  comes from snippets/center-stone-shape.liquid, never the title) and "See
+  all" opens the builder's setting list, where the shopper picks a shape.
+  Shapes are picked in the loose-diamond section and in the builder, so they
+  are not repeated here.
+  Heading level h2 on the homepage (the banner holds the page's h1).
 {%- endcomment -%}
 
 {%- liquid
-  capture shape_entries_raw
-    render 'diamond-shape-order'
-  endcapture
-  assign shape_order = shape_entries_raw | strip | split: ';'
   assign setting_collection = collections[section.settings.settings_collection]
   assign heading_tag = 'h1'
+  assign path_tag = 'h2'
   if section.settings.heading_level == 'h2'
     assign heading_tag = 'h2'
+    assign path_tag = 'h3'
   endif
-  assign card_limit = section.settings.card_limit | default: 12
+  assign card_limit = section.settings.card_limit | default: 4
+  assign more_url = section.settings.more_url | default: '/pages/ring-builder?start=setting'
+  assign shown = 0
+  assign total = 0
+  assign seen = '|'
 -%}
 
-<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}" data-rbs data-limit="{{ card_limit }}">
+{%- capture setting_cards -%}
+  {%- if setting_collection != blank -%}
+    {%- for ring in setting_collection.products limit: 50 -%}
+      {%- unless ring.available and ring.tags contains 'ring-setting' -%}{%- continue -%}{%- endunless -%}
+      {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
+      {%- assign ring_shape = ring_shape | strip -%}
+      {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
+      {%- assign total = total | plus: 1 -%}
+      {%- assign seen_key = '|' | append: ring_shape | append: '|' -%}
+      {%- if shown >= card_limit or seen contains seen_key -%}{%- continue -%}{%- endif -%}
+      {%- assign shown = shown | plus: 1 -%}
+      {%- assign seen = seen | append: ring_shape | append: '|' -%}
+      <li class="rbs__card">
+        <a class="rbs__card-link" href="/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;shape={{ ring_shape | url_encode }}">
+          <span class="rbs__media">
+            {%- if ring.featured_image -%}
+              <img
+                src="{{ ring.featured_image | image_url: width: 400 }}"
+                srcset="{{ ring.featured_image | image_url: width: 240 }} 240w, {{ ring.featured_image | image_url: width: 400 }} 400w"
+                sizes="(min-width: 750px) 180px, 45vw"
+                alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
+                width="400"
+                height="400"
+                loading="lazy"
+              >
+            {%- endif -%}
+          </span>
+          <span class="rbs__shape">{{ ring_shape }}</span>
+          <span class="rbs__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' }}</span>
+          <span class="rbs__price">{% if ring.price_varies %}From {% endif %}{{ ring.price_min | money_without_trailing_zeros }} setting</span>
+        </a>
+      </li>
+    {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<section class="rbs{% if heading_tag == 'h2' %} rbs--embedded{% endif %}" id="Rbs-{{ section.id }}" aria-labelledby="RbsTitle-{{ section.id }}">
   <div class="rbs__container">
     <header class="rbs__header">
       {%- if section.settings.eyebrow != blank -%}<p class="rbs__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
@@ -35,79 +72,39 @@
       {%- if section.settings.show_diamond_path -%}
       <article class="rbs__path">
         <div class="rbs__path-head">
-          <h2 class="rbs__path-title">Shop a diamond</h2>
-          <span class="rbs__count">Lab-grown or natural</span>
+          <{{ path_tag }} class="rbs__path-title">Shop a diamond</{{ path_tag }}>
+          <span class="rbs__count">Certified, priced stone by stone</span>
         </div>
         <div class="rbs__stones">
-          <a class="rbs__stone" href="{{ routes.collections_url }}/lab-grown-diamonds" data-rbs-diamond="{{ routes.collections_url }}/lab-grown-diamonds">
-            <span class="rbs__stone-kind">Lab-grown</span>
-            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          <a class="rbs__stone" href="{{ routes.collections_url }}/lab-grown-diamonds">
+            <span class="rbs__stone-name">Lab-grown diamonds</span>
+            <span class="rbs__stone-kind">Browse stones &rarr;</span>
           </a>
-          <a class="rbs__stone" href="{{ routes.collections_url }}/natural-diamonds" data-rbs-diamond="{{ routes.collections_url }}/natural-diamonds">
-            <span class="rbs__stone-kind">Natural</span>
-            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          <a class="rbs__stone" href="{{ routes.collections_url }}/natural-diamonds">
+            <span class="rbs__stone-name">Natural diamonds</span>
+            <span class="rbs__stone-kind">Browse stones &rarr;</span>
           </a>
         </div>
-        <p class="rbs__note">Pick a stone, then choose a setting on its page. Every stone has its own certificate.</p>
+        {%- if section.settings.shapes_anchor != blank -%}
+          <a class="rbs__more" href="{{ section.settings.shapes_anchor | escape }}">Or browse by shape &darr;</a>
+        {%- endif -%}
+        <p class="rbs__note">Choose a stone, then set it in a ring from its page, or keep it loose.</p>
       </article>
       {%- endif -%}
       <article class="rbs__path">
         <div class="rbs__path-head">
-          <h2 class="rbs__path-title">Build a ring</h2>
-          <span class="rbs__count" data-rbs-count></span>
+          <{{ path_tag }} class="rbs__path-title">Build a ring</{{ path_tag }}>
+          <span class="rbs__count">{% if total > 0 %}{{ total }} ready-made setting{% if total != 1 %}s{% endif %}{% else %}Pick a setting, then a diamond{% endif %}</span>
         </div>
-        <ul class="rbs__grid" role="list">
-          {%- if setting_collection != blank -%}
-            {%- for ring in setting_collection.products limit: 50 -%}
-              {%- unless ring.available and ring.tags contains 'ring-setting' -%}{%- continue -%}{%- endunless -%}
-              {%- capture ring_shape -%}{% render 'center-stone-shape', product: ring %}{%- endcapture -%}
-              {%- assign ring_shape = ring_shape | strip -%}
-              {%- if ring_shape == blank -%}{%- continue -%}{%- endif -%}
-              <li class="rbs__card" data-rbs-card data-shape="{{ ring_shape | escape }}" hidden>
-                <a class="rbs__card-link" href="/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;shape={{ ring_shape | url_encode }}">
-                  <span class="rbs__media">
-                    {%- if ring.featured_image -%}
-                      <img
-                        src="{{ ring.featured_image | image_url: width: 400 }}"
-                        srcset="{{ ring.featured_image | image_url: width: 240 }} 240w, {{ ring.featured_image | image_url: width: 400 }} 400w"
-                        sizes="(min-width: 750px) 180px, 45vw"
-                        alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
-                        width="400"
-                        height="400"
-                        loading="lazy"
-                      >
-                    {%- endif -%}
-                  </span>
-                  <span class="rbs__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' }}</span>
-                  <span class="rbs__price">{% if ring.price_varies %}From {% endif %}{{ ring.price_min | money_without_trailing_zeros }} setting</span>
-                </a>
-              </li>
-            {%- endfor -%}
-          {%- endif -%}
-        </ul>
-        {%- if section.settings.more_url != blank -%}
-          <a class="rbs__more" href="{{ section.settings.more_url }}" data-rbs-more data-base="{{ section.settings.more_url }}" hidden></a>
+        {%- if shown > 0 -%}
+          <ul class="rbs__grid" role="list">{{ setting_cards }}</ul>
+          <a class="rbs__more" href="{{ more_url | escape }}">See all {{ total }} setting{% if total != 1 %}s{% endif %} &rarr;</a>
+        {%- else -%}
+          <p class="rbs__empty">No ready-made settings are listed right now. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
         {%- endif -%}
-        <p class="rbs__empty" data-rbs-empty hidden>No ready-made setting takes this shape yet. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
-        <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
+        <p class="rbs__note">Pick a setting, then a diamond that fits it. Settings are priced without the center stone; setting your diamond is included.</p>
       </article>
     </div>
-
-    <fieldset class="rbs__shapes">
-      <legend class="rbs__legend">Which shape?</legend>
-      <div class="rbs__shape-row">
-        {%- for entry in shape_order -%}
-          {%- assign name = entry | split: '|' | first | strip -%}
-          {%- assign key = name | downcase -%}
-          <label class="rbs__shape">
-            <input type="radio" name="rbs-shape-{{ section.id }}" value="{{ name }}" data-rbs-shape>
-            {%- render 'diamond-shape-icon', shape: key -%}
-            <span>{{ name }}</span>
-          </label>
-        {%- endfor -%}
-      </div>
-      <p class="rbs__hint" data-rbs-hint role="status"></p>
-    </fieldset>
   </div>
 </section>
 
@@ -119,21 +116,6 @@
   .rbs__eyebrow { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-dark, #A88340); }
   .rbs__title { margin: 0.4rem 0 0.8rem; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: clamp(2.2rem, 4.5vw, 3.2rem); font-weight: 400; }
   .rbs__desc { margin: 0; font-size: 0.95rem; font-weight: 300; line-height: 1.75; color: var(--text-muted-dark, #6B6152); }
-  .rbs__shapes { border: 0; margin: 0; padding: 0; text-align: center; }
-  .rbs__legend { margin: 0 auto 1rem; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.6rem; font-weight: 500; }
-  .rbs__shape-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
-  .rbs__shape {
-    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
-    min-width: 84px; max-width: 112px; min-height: 88px; padding: 0.7rem 0.5rem; border: 1px solid var(--rule-light, #DDD5C5);
-    overflow-wrap: anywhere; text-align: center;
-    border-radius: var(--radius-md, 8px); background: #fff; font-size: 0.78rem; cursor: pointer;
-  }
-  .rbs__shape:hover { border-color: var(--gold, #C9A050); }
-  .rbs__shape input { position: absolute; opacity: 0; pointer-events: none; }
-  .rbs__shape:has(input:checked) { border-color: var(--text-dark, #2C1810); box-shadow: inset 0 0 0 1px var(--text-dark, #2C1810); background: var(--cream, #FAF6F0); font-weight: 600; }
-  .rbs__shape:has(input:focus-visible) { outline: 2px solid var(--text-dark, #2C1810); outline-offset: 2px; }
-  .rbs__shape .shape-btn__icon { width: 30px; height: 30px; }
-  .rbs__hint { margin: 0.9rem 0 0; font-size: 0.82rem; color: var(--text-muted-dark, #6B6152); }
   .rbs__paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
   .rbs__path { background: var(--cream, #FAF6F0); border: 1px solid var(--rule-light, #DDD5C5); border-radius: var(--radius-lg, 12px); padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
   .rbs__path-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
@@ -145,6 +127,7 @@
   .rbs__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
   .rbs__card-link:hover .rbs__media { border-color: var(--gold, #C9A050); }
   .rbs__card-link:hover .rbs__media img { transform: scale(1.04); }
+  .rbs__shape { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dark, #A88340); }
   .rbs__name { font-size: 0.8rem; line-height: 1.4; }
   .rbs__price { font-size: 0.76rem; color: var(--text-muted-dark, #6B6152); }
   .rbs__stones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
@@ -156,59 +139,15 @@
   .rbs__more { align-self: flex-start; font-size: 0.8rem; font-weight: 600; color: var(--text-dark, #2C1810); text-underline-offset: 3px; }
   .rbs__note, .rbs__empty { margin: 0; font-size: 0.8rem; line-height: 1.7; color: var(--text-muted-dark, #6B6152); }
   .rbs__empty a { color: var(--text-dark, #2C1810); }
+  @media (max-width: 480px) { .rbs__stones { grid-template-columns: 1fr; } .rbs__path { padding: 1.25rem; } }
+  @media (min-width: 900px) {
+    .rbs__paths { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+    .rbs__path:only-child { grid-column: 1 / -1; }
+    .rbs__stones { grid-template-columns: 1fr; }
+    .rbs__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
 </style>
 
-<script>
-  (function () {
-    var root = document.getElementById('Rbs-{{ section.id }}');
-    if (!root) return;
-    var radios = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-shape]'));
-    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-rbs-card]'));
-    var counts = {};
-    cards.forEach(function (c) { var s = c.getAttribute('data-shape'); counts[s] = (counts[s] || 0) + 1; });
-
-    function pick(shape) {
-      var n = counts[shape] || 0;
-      var limit = parseInt(root.getAttribute('data-limit'), 10) || 12;
-      var shown = 0;
-      cards.forEach(function (c) {
-        var match = c.getAttribute('data-shape') === shape;
-        c.hidden = !match || shown >= limit;
-        if (match && shown < limit) shown += 1;
-      });
-      var more = root.querySelector('[data-rbs-more]');
-      if (more) {
-        more.hidden = n <= limit;
-        more.textContent = 'See all ' + n + ' ' + shape.toLowerCase() + ' settings';
-        more.href = more.getAttribute('data-base') + (more.getAttribute('data-base').indexOf('?') === -1 ? '?' : '&') + 'shape=' + encodeURIComponent(shape);
-      }
-      root.querySelector('[data-rbs-empty]').hidden = n > 0;
-      root.querySelector('[data-rbs-count]').textContent = n ? n + (n === 1 ? ' setting takes ' : ' settings take ') + shape.toLowerCase() : '';
-      root.querySelector('[data-rbs-hint]').textContent = n
-        ? 'Showing settings and diamonds for ' + shape.toLowerCase() + ' center stones.'
-        : 'No ready-made ' + shape.toLowerCase() + ' setting yet. You can still choose a ' + shape.toLowerCase() + ' diamond.';
-      root.querySelectorAll('[data-rbs-shape-name]').forEach(function (el) { el.textContent = shape; });
-      root.querySelectorAll('[data-rbs-diamond]').forEach(function (a) {
-        a.href = a.getAttribute('data-rbs-diamond') + '?shape=' + encodeURIComponent(shape);
-      });
-    }
-
-    radios.forEach(function (r) {
-      r.addEventListener('change', function () { if (r.checked) pick(r.value); });
-    });
-
-    var wanted = '';
-    try { wanted = new URLSearchParams(window.location.search).get('shape') || ''; } catch (e) {}
-    var start = radios.filter(function (r) { return r.value.toLowerCase() === wanted.toLowerCase(); })[0];
-    if (!start) {
-      start = radios.slice().sort(function (a, b) { return (counts[b.value] || 0) - (counts[a.value] || 0); })[0];
-    }
-    if (start) {
-      start.checked = true;
-      pick(start.value);
-    }
-  })();
-</script>
 
 {% schema %}
 {
@@ -229,17 +168,18 @@
     {
       "type": "range",
       "id": "card_limit",
-      "label": "Most settings shown per shape",
+      "label": "Settings shown",
+      "info": "One setting per shape, so the choices differ.",
       "min": 2,
       "max": 12,
       "step": 1,
-      "default": 12
+      "default": 4
     },
     {
       "type": "text",
       "id": "more_url",
       "label": "\"See all\" link",
-      "info": "Shown when a shape has more settings than the limit, such as /pages/ring-builder. Leave blank to hide."
+      "info": "Opens the builder's setting list. Defaults to /pages/ring-builder?start=setting."
     },
     {
       "type": "textarea",
@@ -263,10 +203,11 @@
     {
       "type": "checkbox",
       "id": "show_diamond_path",
-      "label": "Show \"Start with a diamond\"",
+      "label": "Show \"Shop a diamond\"",
       "info": "Shop a diamond sits beside Build a ring, so the first choice is explicit.",
       "default": true
     },
+    { "type": "text", "id": "shapes_anchor", "label": "Browse by shape link", "info": "Where \"Or browse by shape\" jumps to, such as #shopify-section-loose-stones. Leave blank to hide." },
     { "type": "text", "id": "contact_url", "label": "Custom setting link", "default": "/pages/contact" }
   ],
   "presets": [{ "name": "Ring builder start" }]
