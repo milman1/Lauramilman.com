@@ -10,7 +10,8 @@
     var result = stones.filter(function (s) {
       if (!eligible(s)) return false;
       var fields = { shape:s.shape, color:hue(s), intensity:intensity(s), clarity:s.clarity };
-      if (!Object.keys(fields).every(function (key) { return !filters[key]?.length || filters[key].includes(fields[key]); })) return false;
+      var allowed = Object.assign({}, filters, filters.shapeMatch ? { shape:filters.shapeMatch } : {});
+      if (!Object.keys(fields).every(function (key) { return !allowed[key]?.length || allowed[key].includes(fields[key]); })) return false;
       return ['carat','price'].every(function (key) {
         var value = Number(s[key]);
         return (filters['min_'+key] == null || value >= filters['min_'+key]) && (filters['max_'+key] == null || value <= filters['max_'+key]);
@@ -37,6 +38,10 @@
     function filters() {
       var f = {}, data = new FormData(form);
       ['shape','color','intensity','clarity'].forEach(function (name) { f[name] = data.getAll(name); });
+      // A shape button can stand for several stored spellings (e.g. Kite, Kite Step Cut).
+      var shapeMatch = [];
+      form.querySelectorAll('input[name="shape"]:checked').forEach(function (input) { shapeMatch = shapeMatch.concat((input.dataset.shapeMatch || input.value).split(',')); });
+      Object.defineProperty(f, 'shapeMatch', { value: shapeMatch, enumerable: false });
       var bounds = { carat: [0, 30], price: [0, 250000] };
       ['carat','price'].forEach(function (key) {
         var min = data.get('min_'+key), max = data.get('max_'+key);
@@ -161,6 +166,11 @@
         collected = collected.concat(next.stones);
       }
       stones = Array.from(new Map(collected.map(function (s) { return [s.id,s]; })).values());
+      var stocked = new Set(stones.filter(eligible).map(function (s) { return s.shape; }));
+      form.querySelectorAll('[data-extra-shape]').forEach(function (label) {
+        var input = label.querySelector('input');
+        label.hidden = !input.checked && !(input.dataset.shapeMatch || input.value).split(',').some(function (v) { return stocked.has(v); });
+      });
       ready = true; apply.disabled = false; render(false);
     } catch (error) { count.textContent = count.dataset.error; }
   });
