@@ -1,22 +1,24 @@
 {%- comment -%}
-  One reserve form for a loose-diamond search. Each tile's "Reserve this diamond"
-  button opens it and fills the stone. The form posts through Shopify's contact
-  form, so the request lands in the store inbox as "Diamond reserve".
+  One question form for a loose-diamond search. Each tile's "Ask about this
+  stone" button opens it and fills the stone. The form posts through Shopify's
+  contact form, so the question lands in the store inbox as "Diamond question"
+  with the stone, link, stock number and listed price attached. Like the
+  product page's "Ask about this stone", it makes no promise to hold the stone.
 {%- endcomment -%}
 <dialog class="lm-reserve__dialog" id="DiamondReserveDialog" aria-labelledby="DiamondReserveTitle">
   {%- form 'contact', id: 'DiamondReserveForm', class: 'lm-reserve__form' -%}
     <div class="lm-reserve__bar">
-      <h2 id="DiamondReserveTitle" class="lm-reserve__title">Reserve this diamond</h2>
+      <h2 id="DiamondReserveTitle" class="lm-reserve__title">Ask about this stone</h2>
       <button type="button" class="lm-reserve__close" data-reserve-close aria-label="Close">&times;</button>
     </div>
     {%- if form.posted_successfully? -%}
-      <p class="lm-reserve__status" role="status" data-reserve-result>Thank you — your request to reserve this diamond was sent. We will reply by email.</p>
+      <p class="lm-reserve__status" role="status" data-reserve-result>Thank you — your question was sent. We will reply by email.</p>
     {%- else -%}
       {%- if form.errors -%}
-        <p class="lm-reserve__status lm-reserve__status--error" role="alert" data-reserve-result>Your request did not send. Please check your email address and try again.</p>
+        <p class="lm-reserve__status lm-reserve__status--error" role="alert" data-reserve-result>Your question did not send. Please check your email address and try again.</p>
       {%- endif -%}
-      <p class="lm-reserve__intro">Reserve <strong data-reserve-label>this diamond</strong>. We reply by email to confirm it is still available.</p>
-      <input type="hidden" name="contact[request_type]" value="Diamond reserve">
+      <p class="lm-reserve__intro">Ask about <strong data-reserve-label>this stone</strong>. We will reply by email.</p>
+      <input type="hidden" name="contact[request_type]" value="Diamond question">
       <input type="hidden" name="contact[product]" value="" data-reserve-product>
       <input type="hidden" name="contact[product_url]" value="" data-reserve-url-field>
       <input type="hidden" name="contact[stock_number]" value="" data-reserve-stock-field>
@@ -35,7 +37,11 @@
         <label for="DiamondReserve-phone">Phone (optional)</label>
         <input type="tel" id="DiamondReserve-phone" name="contact[phone]" autocomplete="tel">
       </div>
-      <button type="submit" class="lm-reserve__submit">Reserve this diamond</button>
+      <div class="lm-reserve__field">
+        <label for="DiamondReserve-body">Your question (optional)</label>
+        <textarea id="DiamondReserve-body" name="contact[body]" rows="3" placeholder="For example: is it still available, can I see more photos, or will it fit a ring I like?"></textarea>
+      </div>
+      <button type="submit" class="lm-reserve__submit">Send question</button>
     {%- endif -%}
   {%- endform -%}
 </dialog>
@@ -131,7 +137,8 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
-  .lm-reserve__field input {
+  .lm-reserve__field input,
+  .lm-reserve__field textarea {
     width: 100%;
     padding: 0.6rem 0.7rem;
     font: inherit;
@@ -172,7 +179,7 @@
       return url;
     }
     function openReserve(btn) {
-      var title = btn.getAttribute('data-reserve-title') || 'this diamond';
+      var title = btn.getAttribute('data-reserve-title') || 'this stone';
       var label = dialog.querySelector('[data-reserve-label]');
       if (label) label.textContent = title;
       var product = field('product');

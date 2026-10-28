@@ -428,3 +428,7 @@ Notes for next time:
 ## 2026-10-28: guides and FAQs on Cartier and David Webb
 
 - Merchant approved showing the stored `custom.guide_html` and `custom.guide_faq` on Cartier and David Webb (reverses the 2026-10-05 "not now" for these two only). `sections/main-collection.liquid` renders `collection-longform` for those two handles; Rolex and every other collection stay as they were. The block shows under the product grid on page 1 only and adds FAQPage markup built from the visible FAQ. Both guides say 14-day returns (aligned 2026-10-26).
+
+## 2026-10-15: "Ask about this stone" replaces "Reserve this diamond" on search tiles
+
+- Merchant request: most recent inquiries came from ChatGPT and Claude visitors. Lab, natural and colored search tiles now say "Ask about this stone", matching the stone page. The dialog asks for name, email, optional phone and an optional question, and reaches the inbox as "Diamond question" with the stone, link, stock number and listed price. It makes no promise to hold the stone.
