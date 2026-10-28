@@ -10,7 +10,10 @@
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign base = section.settings.search_url | default: '/collections/lab-grown-diamonds'
-  assign shape_list = 'Round,Oval,Emerald,Cushion,Pear,Radiant,Princess,Marquise' | split: ','
+  capture shape_entries_raw
+    render 'diamond-shape-order'
+  endcapture
+  assign shape_list = shape_entries_raw | strip | split: ';'
   assign colored = section.settings.colored_products
   if colored == blank and section.settings.colored_collection != blank
     assign colored = section.settings.colored_collection.products
@@ -26,9 +29,10 @@
   </div>
 
   <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
-    {%- for name in shape_list -%}
+    {%- for entry in shape_list -%}
+      {%- assign name = entry | split: '|' | first | strip -%}
       {%- assign icon_key = name | downcase -%}
-      <li><a class="lmh-shape" href="{{ base }}?shape={{ name }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
+      <li><a class="lmh-shape" href="{{ base }}?shape={{ name | url_encode }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
     {%- endfor -%}
   </ul>
 

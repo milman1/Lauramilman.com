@@ -42,7 +42,21 @@
   var builderView = root.dataset.builderView || 'ring-builder';
   var builder = null;
   var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
-  var SHAPES = ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear'];
+
+  /* Any shape button on the filter, including Ashoka and the other stocked cuts. */
+  function acceptedShape(name) {
+    var want = String(name || '').trim().toLowerCase();
+    if (!want || !form) return '';
+    var inputs = form.querySelectorAll('.lm-shape input');
+    for (var i = 0; i < inputs.length; i++) {
+      var label = inputs[i].closest('.lm-shape');
+      var shown = label && label.querySelector('.lm-shape__name');
+      var text = shown ? shown.textContent.trim() : '';
+      var values = String(inputs[i].value).toLowerCase().split(',');
+      if (text.toLowerCase() === want || values.indexOf(want) !== -1) return text || name;
+    }
+    return '';
+  }
 
   var form = document.getElementById('DiamondFilterForm');
   var resultsEl = document.getElementById('lm-diamond-results');
@@ -282,7 +296,7 @@
     var handle = String(params.get('ring') || (storedRing && storedRing.handle) || '').toLowerCase();
     if (!HANDLE.test(handle)) return Promise.resolve(null);
     var sameRing = storedRing && storedRing.handle === handle;
-    var urlShapes = (params.get('shape') || '').split(',').filter(function (v) { return SHAPES.indexOf(v) !== -1; });
+    var urlShapes = (params.get('shape') || '').split(',').map(acceptedShape).filter(Boolean);
     var shape = sameRing && storedRing.shape ? storedRing.shape : urlShapes.length === 1 ? urlShapes[0] : '';
     if (!shape) return Promise.resolve(null);
     var wanted = String(params.get('variant') || (sameRing && storedRing.variant) || '');

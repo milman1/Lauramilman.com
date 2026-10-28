@@ -23,6 +23,9 @@
     'Trapezoid', 'Marquise', 'Radiant', 'Asscher', 'Cushion', 'Emerald',
     'Octagonal', 'Cadillac', 'Lozenge', 'Capsule', 'Ashoka', 'Shield',
     'Bullet', 'Moval', 'Round', 'Heart', 'Pear', 'Kite', 'Horse', 'Oval',
+    'Oval Polygon Step Cut', 'Square Cushion Stepcut', 'Oldmine Marquise',
+    'Round Rose Cut', 'Oldmine Cushion', 'Oldmine Asscher', 'Oldmine Moval',
+    'Round Star', 'Angel Cut', 'Tycoon', 'Trump', 'Cross', 'Duck',
   ];
   SHAPES.sort(function (a, b) { return b.length - a.length || a.localeCompare(b); });
 
@@ -33,6 +36,10 @@
     Pentagonal: ['Pentagonal', 'Pentagonal Step'],
     Kite: ['Kite', 'Kite Step Cut', 'Kite Step'],
     'European Cut': ['Europeancut', 'European Cut'],
+    Marquise: ['Marquise', 'Marquise Modified Brilli'],
+    Octagonal: ['Octagonal', 'Octagonal Step Cut'],
+    'Oldmine Moval': ['Oldmine Moval', 'Old Moval'],
+    Tycoon: ['Tycoon', 'Tycoon Cut'],
   };
 
   var PRODUCT_WORD =

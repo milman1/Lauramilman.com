@@ -7,11 +7,14 @@
   ?shape=Oval preselects a shape; otherwise the shape with the most settings.
   On the homepage: heading level h2 (the banner holds the page's h1), a
   card limit with "See all" opening the full start page on the same shape,
-  and no "Start with a diamond" panel when the loose-diamond section follows.
+  and both paths: shop a diamond, or build a ring.
 {%- endcomment -%}
 
 {%- liquid
-  assign shape_order = 'Round,Oval,Cushion,Emerald,Pear,Princess,Radiant,Asscher,Marquise,Heart' | split: ','
+  capture shape_entries_raw
+    render 'diamond-shape-order'
+  endcapture
+  assign shape_order = shape_entries_raw | strip | split: ';'
   assign setting_collection = collections[section.settings.settings_collection]
   assign heading_tag = 'h1'
   if section.settings.heading_level == 'h2'
@@ -28,25 +31,29 @@
       {%- if section.settings.description != blank -%}<p class="rbs__desc">{{ section.settings.description }}</p>{%- endif -%}
     </header>
 
-    <fieldset class="rbs__shapes">
-      <legend class="rbs__legend">Which shape?</legend>
-      <div class="rbs__shape-row">
-        {%- for name in shape_order -%}
-          {%- assign key = name | downcase -%}
-          <label class="rbs__shape">
-            <input type="radio" name="rbs-shape-{{ section.id }}" value="{{ name }}" data-rbs-shape>
-            {%- render 'diamond-shape-icon', shape: key -%}
-            <span>{{ name }}</span>
-          </label>
-        {%- endfor -%}
-      </div>
-      <p class="rbs__hint" data-rbs-hint role="status"></p>
-    </fieldset>
-
     <div class="rbs__paths">
+      {%- if section.settings.show_diamond_path -%}
       <article class="rbs__path">
         <div class="rbs__path-head">
-          <h2 class="rbs__path-title">Start with a setting</h2>
+          <h2 class="rbs__path-title">Shop a diamond</h2>
+          <span class="rbs__count">Lab-grown or natural</span>
+        </div>
+        <div class="rbs__stones">
+          <a class="rbs__stone" href="{{ routes.collections_url }}/lab-grown-diamonds" data-rbs-diamond="{{ routes.collections_url }}/lab-grown-diamonds">
+            <span class="rbs__stone-kind">Lab-grown</span>
+            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          </a>
+          <a class="rbs__stone" href="{{ routes.collections_url }}/natural-diamonds" data-rbs-diamond="{{ routes.collections_url }}/natural-diamonds">
+            <span class="rbs__stone-kind">Natural</span>
+            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
+          </a>
+        </div>
+        <p class="rbs__note">Pick a stone, then choose a setting on its page. Every stone has its own certificate.</p>
+      </article>
+      {%- endif -%}
+      <article class="rbs__path">
+        <div class="rbs__path-head">
+          <h2 class="rbs__path-title">Build a ring</h2>
           <span class="rbs__count" data-rbs-count></span>
         </div>
         <ul class="rbs__grid" role="list">
@@ -84,27 +91,23 @@
         <p class="rbs__empty" data-rbs-empty hidden>No ready-made setting takes this shape yet. Choose a diamond and <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">ask us about a custom setting</a>.</p>
         <p class="rbs__note">Settings are priced without the center stone. Setting your diamond is included.</p>
       </article>
-
-      {%- if section.settings.show_diamond_path -%}
-      <article class="rbs__path">
-        <div class="rbs__path-head">
-          <h2 class="rbs__path-title">Start with a diamond</h2>
-          <span class="rbs__count">Lab-grown or natural</span>
-        </div>
-        <div class="rbs__stones">
-          <a class="rbs__stone" href="{{ routes.collections_url }}/lab-grown-diamonds" data-rbs-diamond="{{ routes.collections_url }}/lab-grown-diamonds">
-            <span class="rbs__stone-kind">Lab-grown</span>
-            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
-          </a>
-          <a class="rbs__stone" href="{{ routes.collections_url }}/natural-diamonds" data-rbs-diamond="{{ routes.collections_url }}/natural-diamonds">
-            <span class="rbs__stone-kind">Natural</span>
-            <span class="rbs__stone-name"><span data-rbs-shape-name>All</span> diamonds</span>
-          </a>
-        </div>
-        <p class="rbs__note">Pick a stone, then choose a setting on its page. Every stone has its own certificate.</p>
-      </article>
-      {%- endif -%}
     </div>
+
+    <fieldset class="rbs__shapes">
+      <legend class="rbs__legend">Which shape?</legend>
+      <div class="rbs__shape-row">
+        {%- for entry in shape_order -%}
+          {%- assign name = entry | split: '|' | first | strip -%}
+          {%- assign key = name | downcase -%}
+          <label class="rbs__shape">
+            <input type="radio" name="rbs-shape-{{ section.id }}" value="{{ name }}" data-rbs-shape>
+            {%- render 'diamond-shape-icon', shape: key -%}
+            <span>{{ name }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+      <p class="rbs__hint" data-rbs-hint role="status"></p>
+    </fieldset>
   </div>
 </section>
 
@@ -121,7 +124,8 @@
   .rbs__shape-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
   .rbs__shape {
     position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
-    min-width: 84px; min-height: 88px; padding: 0.7rem 0.5rem; border: 1px solid var(--rule-light, #DDD5C5);
+    min-width: 84px; max-width: 112px; min-height: 88px; padding: 0.7rem 0.5rem; border: 1px solid var(--rule-light, #DDD5C5);
+    overflow-wrap: anywhere; text-align: center;
     border-radius: var(--radius-md, 8px); background: #fff; font-size: 0.78rem; cursor: pointer;
   }
   .rbs__shape:hover { border-color: var(--gold, #C9A050); }
@@ -213,7 +217,7 @@
   "class": "section-ring-builder-start",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Ring Builder" },
-    { "type": "text", "id": "title", "label": "Heading", "default": "Build your ring" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Where would you like to begin?" },
     {
       "type": "select",
       "id": "heading_level",
@@ -241,7 +245,7 @@
       "type": "textarea",
       "id": "description",
       "label": "Description",
-      "default": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made."
+      "default": "Shop a certified diamond on its own, or build a ring from a setting and a stone. We only show pairs that fit."
     },
     {
       "type": "text",
@@ -260,7 +264,7 @@
       "type": "checkbox",
       "id": "show_diamond_path",
       "label": "Show \"Start with a diamond\"",
-      "info": "Turn off where the loose-diamond section already follows, as on the homepage.",
+      "info": "Shop a diamond sits beside Build a ring, so the first choice is explicit.",
       "default": true
     },
     { "type": "text", "id": "contact_url", "label": "Custom setting link", "default": "/pages/contact" }

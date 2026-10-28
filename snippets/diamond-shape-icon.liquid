@@ -23,6 +23,22 @@
       assign key = 'european cut'
     when 'lady heart'
       assign key = 'heart'
+    when 'oldmine moval', 'old moval'
+      assign key = 'moval'
+    when 'tycoon', 'tycoon cut', 'oldmine cushion', 'square cushion stepcut'
+      assign key = 'cushion'
+    when 'round star', 'round rose cut'
+      assign key = 'round'
+    when 'oldmine asscher'
+      assign key = 'asscher'
+    when 'oldmine marquise', 'marquise modified brilli'
+      assign key = 'marquise'
+    when 'octagonal step cut'
+      assign key = 'octagonal'
+    when 'oval polygon step cut'
+      assign key = 'oval'
+    when 'kite step', 'kite step cut'
+      assign key = 'kite'
   endcase
 -%}
 {%- case key -%}

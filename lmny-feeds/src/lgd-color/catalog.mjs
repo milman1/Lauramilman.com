@@ -22,6 +22,8 @@ SHAPES.set('EUROPEANCUT', 'European Cut');
 SHAPES.set('MARQUISE MODIFIED BRILLI', 'Marquise');
 SHAPES.set('MARQUISE MODIFIED BRILLIANT', 'Marquise');
 SHAPES.set('OCTAGONAL STEP CUT', 'Octagonal');
+for (const s of ['OLDMINE MOVAL','OLD MOVAL','TYCOON','TYCOON CUT','ROUND STAR','TRUMP','CROSS','OLDMINE ASSCHER','DUCK','OLDMINE CUSHION','ANGEL CUT','ROUND ROSE CUT','OLDMINE MARQUISE','OVAL POLYGON STEP CUT','SQUARE CUSHION STEPCUT']) SHAPES.set(s, titleCase(s));
+SHAPES.set('OLD MOVAL', 'Oldmine Moval');
 function text(v) { return String(v ?? '').trim(); }
 const number = v => Number(text(v));
 export function titleCase(v) { return text(v).toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()); }
