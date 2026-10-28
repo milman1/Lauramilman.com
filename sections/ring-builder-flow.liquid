@@ -30,6 +30,30 @@
       <noscript><p>{{ 'ring_flow.no_javascript' | t }} <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">{{ 'ring_flow.help' | t }}</a></p></noscript>
     </div>
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
+    <section class="ring-email" data-ring-email aria-labelledby="RingEmailTitle" hidden>
+      {%- form 'contact', id: 'RingEmailForm' -%}
+        <h2 id="RingEmailTitle">{{ 'ring_flow.email_heading' | t }}</h2>
+        {%- if form.posted_successfully? -%}
+          <p class="quiet" role="status">{{ 'ring_flow.email_sent' | t }}</p>
+        {%- else -%}
+          {%- if form.errors -%}<p class="error" role="alert">{{ 'ring_flow.email_failed' | t }}</p>{%- endif -%}
+          <p class="quiet">{{ 'ring_flow.email_intro' | t }}</p>
+          <input type="hidden" name="contact[request_type]" value="Ring builder">
+          <input type="hidden" name="contact[ring_link]" data-ring-email-field="link">
+          <input type="hidden" name="contact[setting]" data-ring-email-field="setting">
+          <input type="hidden" name="contact[diamond]" data-ring-email-field="diamond">
+          <input type="hidden" name="contact[ring_size]" data-ring-email-field="size">
+          <input type="hidden" name="contact[options]" data-ring-email-field="options">
+          <input type="hidden" name="contact[ring_subtotal]" data-ring-email-field="subtotal">
+          <div class="fields">
+            <label>{{ 'ring_flow.email_name' | t }}<input type="text" name="contact[name]" autocomplete="name" value="{{ customer.name | escape }}"></label>
+            <label>{{ 'ring_flow.email_address' | t }}<input type="email" name="contact[email]" autocomplete="email" value="{{ customer.email | escape }}" required></label>
+          </div>
+          <label>{{ 'ring_flow.email_note' | t }}<textarea name="contact[body]" rows="3"></textarea></label>
+          <button type="submit" class="secondary">{{ 'ring_flow.email_send' | t }}</button>
+        {%- endif -%}
+      {%- endform -%}
+    </section>
   </div>
   <div class="dock" data-flow-dock hidden></div>
   <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>

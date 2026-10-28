@@ -434,10 +434,26 @@
       const size = Number(state.size) || 6, finger = 11.63 + 0.8128 * size, view = Math.max(26, length + 8);
       return `<figure class="scale" data-scale-view><svg viewBox="${-view / 2} ${-view / 2} ${view} ${view}" role="img" aria-label="${esc(t('scale_label'))}"><rect class="finger" x="${-finger / 2}" y="${-view / 2 - 2}" width="${finger}" height="${view + 4}"/><g class="stone">${shapeOutline(state.diamond.shape, width, length)}</g></svg><figcaption>${esc(t('scale_caption', { length: length.toFixed(2), width: width.toFixed(2), size: state.size && state.size !== 'unsure' ? state.size : 6, finger: finger.toFixed(1) }))}</figcaption></figure>`;
     }
-    async function share() {
+    function ringLink() {
       const url = new URL(location.pathname, location.origin);
       url.searchParams.set('setting', state.setting.handle);
       url.searchParams.set('diamond', state.diamond.handle);
+      return url;
+    }
+    function fillRingEmail(form) {
+      const variant = pickedVariant();
+      const values = {
+        link: ringLink().href,
+        setting: state.setting.title,
+        diamond: state.diamond.title,
+        size: state.size === 'unsure' ? t('not_sure') : state.size,
+        options: [...state.setting.options.map((o, i) => /size/i.test(o.name) || o.name === 'Title' || !variant ? '' : o.name + ': ' + variant.options[i]), state.engraving.trim() ? t('engraving') + ': ' + state.engraving.trim() : ''].filter(Boolean).join(' · '),
+        subtotal: money(subtotal())
+      };
+      form.querySelectorAll('[data-ring-email-field]').forEach(input => { input.value = values[input.dataset.ringEmailField] || ''; });
+    }
+    async function share() {
+      const url = ringLink();
       try {
         if (navigator.share) await navigator.share({ title: t('your_ring'), text: [state.setting.title, state.diamond.title].join(' · '), url: url.href });
         else { await navigator.clipboard.writeText(url.href); notice(t('link_copied')); }
@@ -454,6 +470,11 @@
       root.querySelectorAll('[data-stage]').forEach(el => { const on = +el.dataset.stage === stage; el.classList.toggle('active', on); if (on) el.setAttribute('aria-current', 'step'); else el.removeAttribute('aria-current'); });
       summary();
       persist();
+      const mail = root.querySelector('[data-ring-email]');
+      if (mail) {
+        mail.hidden = state.screen !== 'review';
+        mail.querySelectorAll('button,input').forEach(el => { el.disabled = false; });
+      }
     }
     function reveal(target) {
       if (!target) return;
@@ -618,6 +639,7 @@
       }
     });
     root.addEventListener('submit', event => {
+      if (event.target.id === 'RingEmailForm') { if (both()) fillRingEmail(event.target); else event.preventDefault(); return; }
       if (!event.target.matches('[data-search-form]')) return;
       event.preventDefault();
       if (state.busy) return;

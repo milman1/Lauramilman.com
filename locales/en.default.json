@@ -921,6 +921,14 @@
     "link_copied": "Link copied. Anyone with it sees this setting and diamond.",
     "share_failed": "Copy this link to share your ring: {{ url }}",
     "mm_face": "{{ length }} × {{ width }} mm face-up",
-    "mm_round": "{{ size }} mm across"
+    "mm_round": "{{ size }} mm across",
+    "email_heading": "Email this ring to Laura",
+    "email_intro": "Send your setting, diamond and size to Laura. She replies by email with your ring link and answers to any questions.",
+    "email_name": "Name (optional)",
+    "email_address": "Email",
+    "email_note": "Questions or notes (optional)",
+    "email_send": "Send to Laura",
+    "email_sent": "Sent. Laura will reply by email with your ring.",
+    "email_failed": "Your ring did not send. Check your email address and try again."
   }
 }
