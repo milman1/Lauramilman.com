@@ -113,6 +113,8 @@ console.log('PASS colored tab hidden, setting counts on shapes, rare shapes fold
  await click(p,'carat-1');await p.waitForTimeout(50);assert.equal(searches.at(-1).min_carat,'1.5');assert.equal(searches.at(-1).max_carat,'1.99');assert.equal(await p.locator('[data-action="carat-1"]').getAttribute('aria-pressed'),'true');
  assert.equal(await p.locator('[data-filter="min_carat"]').inputValue(),'1.5');
  await click(p,'carat-1');await p.waitForTimeout(50);assert.equal(searches.at(-1).min_carat,undefined);
+ await click(p,'pick-grades');await p.waitForTimeout(50);assert.equal(searches.at(-1).colors,'G,F,E,D');assert.equal(searches.at(-1).clarities,'VS2,VS1,VVS2,VVS1,IF,FL');assert.equal(await p.locator('[data-action="pick-grades"]').getAttribute('aria-pressed'),'true');assert.equal(await p.locator('[data-scale="color"] input:checked').count(),4);
+ await click(p,'pick-grades');await p.waitForTimeout(50);assert.equal(searches.at(-1).colors,undefined);await p.locator('[data-scale="clarity"] [data-grade="VS2"]').click();await p.waitForTimeout(450);
  await p.locator('[data-filter="min_carat"]').fill('3');await p.locator('[data-filter="max_carat"]').fill('2');await p.waitForTimeout(900);assert.notEqual(searches.at(-1).min_carat,'3','an inverted range never searches');
  await p.locator('[data-filter="max_carat"]').fill('');await p.locator('[data-filter="min_carat"]').fill('');await p.waitForTimeout(900);
  await p.locator('.lm-dfilter__group--wide > .lm-dfilter__shapes > .lm-shape',{hasText:'Round'}).first().click();await p.locator('.lm-dfilter__group--wide > .lm-dfilter__shapes > .lm-shape',{hasText:'Oval'}).first().click();await p.waitForTimeout(450);assert.equal(searches.at(-1).shape,'Round');
@@ -133,7 +135,7 @@ console.log('PASS colored tab hidden, setting counts on shapes, rare shapes fold
  assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'6.25','band size follows the ring size');
  for(const width of [320,390,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}
  await p.close();}
-console.log('PASS live filtering, mm sizes on cards, carat size chips, more filters, select above specs, quick select, setting metal filter and preset, size guide, matched bands with prices, band size preset.');
+console.log('PASS live filtering, mm sizes on cards, carat size and grade chips, more filters, select above specs, quick select, setting metal filter and preset, size guide, matched bands with prices, band size preset.');
 {const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').waitFor();assert.equal(await p.locator('[data-count]').innerText(),'1 setting');
  await p.goto('https://lmny.test/pages/ring-builder?start=diamond&shape=Round');await p.locator('[data-results] .product').first().waitFor();assert.equal(searches.at(-1).shape,'Round');await p.close();}
 {const p=await newPage();await p.addInitScript(()=>{navigator.share=d=>{window.__shared=d;return Promise.resolve();};});

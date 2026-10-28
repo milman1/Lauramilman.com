@@ -55,6 +55,7 @@
     const metalName = metal => t('metal_' + metal);
     const settingMetals = p => [...new Set(p.variants.filter(v => v.available).map(v => metalOf(v.options.join(' '))).concat(metalOf(p.title)).filter(Boolean))];
     const caratChips = [['1', '1.49'], ['1.5', '1.99'], ['2', '2.99'], ['3', '']];
+    const gradePick = { color: 'G,F,E,D', clarity: 'VS2,VS1,VVS2,VVS1,IF,FL' };
     let ready = false, searchTimer = 0;
     const bandVariant = () => state.band?.variants.find(v => v.available && v.options.every((value, i) => value === state.bandOptions[i])) || null;
     const both = () => state.setting && state.diamond;
@@ -191,10 +192,11 @@
       });
       const more = form.querySelector('.more-shapes');
       if (more && more.querySelector('input:checked')) more.open = true;
-      form.querySelectorAll('.carat-chips [data-action]').forEach((chip, i) => {
+      form.querySelectorAll('.carat-chips [data-action^="carat-"]').forEach((chip, i) => {
         const [low, high] = caratChips[i];
         chip.setAttribute('aria-pressed', String(state.filters.min_carat === low && state.filters.max_carat === high));
       });
+      form.querySelector('[data-action="pick-grades"]')?.setAttribute('aria-pressed', String(state.filters.color === gradePick.color && state.filters.clarity === gradePick.clarity));
       const toggle = form.querySelector('[data-action="more-filters"]');
       if (toggle) {
         const picked = ['color', 'clarity', 'cut'].filter(key => state.filters[key]).length;
@@ -258,7 +260,7 @@
       chips.className = 'carat-chips';
       chips.setAttribute('role', 'group');
       chips.setAttribute('aria-label', t('carat_sizes'));
-      chips.innerHTML = caratChips.map(([low, high], i) => `<button type="button" class="chip" data-action="carat-${i}" aria-pressed="false">${esc(t(high ? 'carat_value' : 'carat_plus', { carat: low }))}</button>`).join('');
+      chips.innerHTML = caratChips.map(([low, high], i) => `<button type="button" class="chip" data-action="carat-${i}" aria-pressed="false">${esc(t(high ? 'carat_value' : 'carat_plus', { carat: low }))}</button>`).join('') + `<button type="button" class="chip" data-action="pick-grades" aria-pressed="false">${esc(t('pick_grades'))}</button>`;
       carat.before(chips);
       const groups = [...form.querySelectorAll('[data-scale]')].map(scale => scale.closest('.lm-dfilter__group'));
       if (!groups.length) return;
@@ -604,6 +606,12 @@
       else if (action.startsWith('quick-')) openDetails(Number(action.slice(6)), true);
       else if (action === 'select') choose();
       else if (action === 'more-filters') { state.moreFilters = el.getAttribute('aria-expanded') !== 'true'; el.setAttribute('aria-expanded', String(state.moreFilters)); main.querySelector('[data-more-filters]').hidden = !state.moreFilters; paintDiamondFilters(); }
+      else if (action === 'pick-grades') {
+        readDiamondFilters();
+        const on = state.filters.color === gradePick.color && state.filters.clarity === gradePick.clarity;
+        state.filters.color = on ? '' : gradePick.color; state.filters.clarity = on ? '' : gradePick.clarity;
+        paintDiamondFilters(); state.page = 1; search(); persist();
+      }
       else if (action.startsWith('carat-')) {
         readDiamondFilters();
         const [low, high] = caratChips[Number(action.slice(6))];

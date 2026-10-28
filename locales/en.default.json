@@ -929,6 +929,7 @@
     "email_note": "Questions or notes (optional)",
     "email_send": "Send to Laura",
     "email_sent": "Sent. Laura will reply by email with your ring.",
-    "email_failed": "Your ring did not send. Check your email address and try again."
+    "email_failed": "Your ring did not send. Check your email address and try again.",
+    "pick_grades": "G+ colour · VS2+ clarity"
   }
 }
