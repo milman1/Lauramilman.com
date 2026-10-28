@@ -10,6 +10,18 @@ const CLARITIES = new Set(['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2
 const SHAPES = new Map(['ROUND','PRINCESS','CUSHION','EMERALD','OVAL','RADIANT','ASSCHER','MARQUISE','HEART','PEAR','BAGUETTE','TRILLION'].map(s => [s, titleCase(s)]));
 SHAPES.set('CUSHION MODIFIED', 'Cushion');
 SHAPES.set('SQUARE RADIANT', 'Radiant');
+// Shapes beyond the classic list, named as the storefront shape buttons store
+// them (snippets/diamond-shape-order.liquid), so each stone lands on a button.
+for (const s of ['ASHOKA','OLD MINER','OLDMINE OVAL','OLDMINE PEAR','PORTUGUESE','MOVAL','TRIANGLE','TRILLIANT','CUSHION BRILLIANT',
+  'DUTCH MARQUISE','DUTCH MARQUISE STEP','MARQUISE STEP','OVAL STEP','OVAL STEP CUT','PEAR STEP','HALF MOON','CRISS CUT','SHIELD',
+  'BULLET','BUTTERFLY','HEXAGONAL','HEXAGONAL STEP','LOZENGE','LOZENGE STEP','LOZENGE STEP CUT','CADILLAC','PENTAGONAL','PENTAGONAL STEP',
+  'HORSE','HORSE HEAD','KITE','KITE STEP','KITE STEP CUT','TRAPEZOID','EUROPEAN CUT','OLD EUROPEAN','LADY HEART','CAPSULE','OCTAGONAL']) SHAPES.set(s, titleCase(s));
+SHAPES.set('HALFMOON', 'Half Moon');
+SHAPES.set('EUROPEANCUT', 'European Cut');
+// Supplier abbreviations of shapes the buttons already have.
+SHAPES.set('MARQUISE MODIFIED BRILLI', 'Marquise');
+SHAPES.set('MARQUISE MODIFIED BRILLIANT', 'Marquise');
+SHAPES.set('OCTAGONAL STEP CUT', 'Octagonal');
 function text(v) { return String(v ?? '').trim(); }
 const number = v => Number(text(v));
 export function titleCase(v) { return text(v).toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()); }
