@@ -310,6 +310,15 @@
       </div>
     {%- endif -%}
 
+    {%- comment -%}
+      Guide and FAQ (custom.guide_html / custom.guide_faq) on an explicit list of
+      jewelry collections only. Merchant approved Cartier and David Webb on
+      2026-10-28; other collections with stored guides (e.g. Rolex) stay hidden.
+    {%- endcomment -%}
+    {%- if collection.handle == 'cartier' or collection.handle == 'david-webb' -%}
+      {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
+    {%- endif -%}
+
   </div>
 </section>
 
