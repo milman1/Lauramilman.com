@@ -243,6 +243,8 @@
                 <img
                   src="{{ media.preview_image | image_url: width: 1200 }}"
                   alt="{{ media_alt | escape }}"
+                  width="{{ media.preview_image.width }}"
+                  height="{{ media.preview_image.height }}"
                   loading="lazy"
                   decoding="async"
                 >
