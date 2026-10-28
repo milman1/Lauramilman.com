@@ -3,7 +3,7 @@ import fs from 'node:fs';import assert from 'node:assert/strict';
 const repo = new URL('../../../', import.meta.url).pathname.replace(/\/$/, '');
 const fixtures=JSON.parse(fs.readFileSync(new URL('./ring-flow-fixtures.json',import.meta.url),'utf8'));
 const settings=fixtures.settings,baseStones=fixtures.stones,raw=fixtures.diamonds;
-{const round=fixtures.settings.find(p=>p.shape==='Round');const white=structuredClone(round);white.handle='round-white-setting';white.title='Round setting in White Gold';white.options[1].values=['14K White Gold'];white.variants=white.variants.filter(v=>v.options[1]==='14K Yellow Gold').map(v=>({...v,id:v.id+500000,price:v.price+5000,options:[v.options[0],'14K White Gold']}));settings.push(white);}
+{const round=fixtures.settings.find(p=>p.shape==='Round');const white=structuredClone(round);white.handle='round-white-setting';white.title='Round setting in White Gold';white.options[1].values=['14K White Gold'];white.variants=white.variants.filter(v=>v.options[1]==='14K Yellow Gold').map(v=>({...v,id:v.id+500000,price:v.price+5000,options:[v.options[0],'14K White Gold']}));white.videos=['https://media.example/setting.mp4'];settings.push(white);}
 const cfg={settings,copy:JSON.parse(fs.readFileSync(repo+'/locales/en.default.json','utf8').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow,apiBase:'https://fixtures.supabase.co/functions/v1/diamonds',apiKey:'',root:'/',cartUrl:'/cart',contact:'/pages/contact',appointment:'/pages/private-clients',sizeGuide:'/pages/ring-size-guide',currency:'USD'};
 const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
 const fixtureImages={setting:[{image:pixel}],diamond:[{image:pixel},{image:pixel},{image:pixel}]};
@@ -132,4 +132,19 @@ console.log('PASS colored tab hidden, setting counts on shapes, rare shapes fold
  for(const width of [320,390,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}
  await p.close();}
 console.log('PASS live filtering, carat size chips, more filters, select above specs, quick select, setting metal filter and preset, size guide, matched bands with prices, band size preset.');
+{const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').waitFor();assert.equal(await p.locator('[data-count]').innerText(),'1 setting');
+ await p.goto('https://lmny.test/pages/ring-builder?start=diamond&shape=Round');await p.locator('[data-results] .product').first().waitFor();assert.equal(searches.at(-1).shape,'Round');await p.close();}
+{const p=await newPage();await p.addInitScript(()=>{navigator.share=d=>{window.__shared=d;return Promise.resolve();};});
+ await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').selectOption('Round');await p.locator('[data-filter="metal"]').selectOption('white');await click(p,'quick-0');await p.locator('[data-results] .product').first().waitFor();await click(p,'quick-0');await p.locator('[data-field="size"]').waitFor();
+ assert.equal(await p.locator('[data-scale-view] svg .stone *').count(),1);assert.ok((await p.locator('[data-scale-view] figcaption').innerText()).includes('8.00 × 5.00 mm face-up on a size 6 finger (16.5 mm across)'));
+ await p.locator('[data-field="size"]').selectOption('7');assert.ok((await p.locator('[data-scale-view] figcaption').innerText()).includes('size 7 finger (17.3 mm across)'));assert.equal(await p.locator('[data-scale-view]').count(),1);await shot(p,'review-scale');
+ await click(p,'review-video');assert.equal(await p.locator('[data-review-media="setting"] video').getAttribute('src'),'https://media.example/setting.mp4');
+ await click(p,'share');await p.waitForFunction(()=>window.__shared);const shared=new URL(await p.evaluate(()=>window.__shared.url));assert.equal(shared.pathname,'/pages/ring-builder');assert.equal(shared.searchParams.get('setting'),'round-white-setting');assert.equal(shared.searchParams.get('diamond'),'lg-round-test');assert.equal(shared.searchParams.has('edit_group'),false);
+ const again=p;await again.goto('https://lmny.test/pages/ring-builder');await again.locator('[data-field="size"]').waitFor();assert.equal(await again.locator('[data-field="size"]').inputValue(),'7','a later visit picks up the saved ring');
+ await again.evaluate(()=>{const v=JSON.parse(localStorage.getItem('lmRingFlowV1'));v.saved=Date.now()-31*864e5;localStorage.setItem('lmRingFlowV1',JSON.stringify(v));});await again.goto('https://lmny.test/pages/ring-builder');await again.waitForTimeout(200);assert.equal(await again.locator('[data-field="size"]').count(),0,'a ring saved over 30 days ago is not restored');
+ await p.close();}
+{const p=await newPage();await choose(p);await p.goto('https://lmny.test/pages/ring-builder?setting=round-setting');await p.locator('[data-results] .product').first().waitFor();
+ assert.equal(await p.locator('[role="alert"]').count(),0,'a link never pulls in a saved piece');assert.ok((await p.locator('[data-flow-summary]').innerText()).includes('Not yet selected'));assert.equal(searches.at(-1).shape,'Round');
+ await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').waitFor();assert.ok((await p.locator('[data-flow-summary]').innerText()).includes('Not yet selected'));await p.close();}
+console.log('PASS start links, to-scale outline that follows ring size, setting video, share link, 30-day save and expiry, links load only what they name.');
 await b.close();

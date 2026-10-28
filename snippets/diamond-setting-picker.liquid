@@ -7,8 +7,9 @@
   ring-setting) come first and show their price plus the total with this
   diamond. Finished engagement rings follow without a price: they carry
   their own center stone, so a pairing with this diamond is quoted.
-  Each card opens the ring with ?diamond=<handle>, where the pairing panel
-  takes over.
+  A setting opens the ring builder with this diamond and that setting; a
+  finished ring opens with ?diamond=<handle>, where the pairing panel takes
+  over.
 
   Accepts:
   - product: the loose diamond
@@ -39,7 +40,7 @@
             {%- assign is_setting = false -%}
             {%- if ring.tags contains 'ring-setting' -%}{%- assign is_setting = true -%}{%- endif -%}
             <li class="dsp__card">
-              <a class="dsp__link" href="{{ ring.url }}?diamond={{ product.handle | url_encode }}">
+              <a class="dsp__link" href="{% if is_setting %}/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}{% else %}{{ ring.url }}?diamond={{ product.handle | url_encode }}{% endif %}">
                 <span class="dsp__media">
                   {%- if ring.featured_image -%}
                     <img

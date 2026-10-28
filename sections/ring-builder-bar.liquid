@@ -5,7 +5,30 @@
   panel (snippets/ring-diamond-pairing.liquid) and the builder diamond search
   (assets/diamond-storefront.js) write, and repaints on lm:builder-change.
   Nothing is stored server-side; without a setting it shows where to start.
+  The builder now lives at /pages/ring-builder: outside the theme editor these
+  templates hand over to it with the same setting and diamond.
 {%- endcomment -%}
+
+<script>
+  (function () {
+    if (window.Shopify && window.Shopify.designMode) return;
+    var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
+    var params = new URLSearchParams(location.search);
+    var b = null;
+    try { b = JSON.parse(sessionStorage.getItem('lmBuilder') || 'null'); } catch (e) {}
+    var setting = {% if template.name == 'product' %}{{ product.handle | json }}{% else %}params.get('ring') || (b && b.ring && b.ring.handle){% endif %};
+    var diamond = params.get('diamond') || (b && b.diamond && b.diamond.handle);
+    var to = new URLSearchParams();
+    if (HANDLE.test(setting || '')) {
+      to.set('setting', setting);
+      if (HANDLE.test(diamond || '')) to.set('diamond', diamond);
+    } else {
+      to.set('start', 'diamond');
+      if (params.get('shape')) to.set('shape', params.get('shape'));
+    }
+    location.replace('/pages/ring-builder?' + to.toString());
+  })();
+</script>
 
 <nav class="rbb" aria-label="Your ring" data-rbb data-start-url="{{ section.settings.start_url | default: '/collections/ring-settings' | escape }}" data-currency="{{ cart.currency.iso_code | default: 'USD' }}">
   <ol class="rbb__steps" role="list">

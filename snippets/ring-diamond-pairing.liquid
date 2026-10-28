@@ -157,7 +157,10 @@
         </div>
       {%- endif -%}
       <div class="pdp-inquire__actions">
-        <a class="pdp-inquire__btn" href="/collections/lab-grown-diamonds?shape={{ shape_q }}{{ search_extra }}" data-rbc-search>{% if builder_on %}All {{ shape_l }} lab-grown diamonds{% else %}{{ ring_shape }} lab-grown diamonds{% endif %}</a>
+        {%- if is_setting and builder_on == false and product.tags contains 'ring-setting' -%}
+          <a class="pdp-inquire__btn" href="/pages/ring-builder?setting={{ product.handle | url_encode }}">Choose a {{ shape_l }} diamond in the ring builder</a>
+        {%- endif -%}
+        <a class="pdp-inquire__btn{% if is_setting and builder_on == false and product.tags contains 'ring-setting' %} pdp-inquire__btn--ghost{% endif %}" href="/collections/lab-grown-diamonds?shape={{ shape_q }}{{ search_extra }}" data-rbc-search>{% if builder_on %}All {{ shape_l }} lab-grown diamonds{% else %}{{ ring_shape }} lab-grown diamonds{% endif %}</a>
         <a class="pdp-inquire__btn pdp-inquire__btn--ghost" href="/collections/natural-diamonds?shape={{ shape_q }}{{ search_extra }}" data-rbc-search>{% if builder_on %}All {{ shape_l }} natural diamonds{% else %}{{ ring_shape }} natural diamonds{% endif %}</a>
       </div>
     </div>

@@ -233,7 +233,14 @@
       "carat_value":{{ 'ring_flow.carat_value' | t: carat: '__carat__' | json }},
       "carat_plus":{{ 'ring_flow.carat_plus' | t: carat: '__carat__' | json }},
       "cut_value":{{ 'ring_flow.cut_value' | t: cut: '__cut__' | json }},
-      "band_match":{{ 'ring_flow.band_match' | t: metal: '__metal__' | json }}
+      "band_match":{{ 'ring_flow.band_match' | t: metal: '__metal__' | json }},
+      "watch_setting":{{ 'ring_flow.watch_setting' | t | json }},
+      "share_ring":{{ 'ring_flow.share_ring' | t | json }},
+      "ask_ring":{{ 'ring_flow.ask_ring' | t | json }},
+      "scale_label":{{ 'ring_flow.scale_label' | t | json }},
+      "scale_caption":{{ 'ring_flow.scale_caption' | t: length: '__length__', width: '__width__', size: '__size__', finger: '__finger__' | json }},
+      "link_copied":{{ 'ring_flow.link_copied' | t | json }},
+      "share_failed":{{ 'ring_flow.share_failed' | t: url: '__url__' | json }}
     }}
   </script>
 </div>

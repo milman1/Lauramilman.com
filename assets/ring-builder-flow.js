@@ -20,6 +20,7 @@
     };
     const handlePattern = /^[a-z0-9][a-z0-9-]{0,99}$/;
     const storageKey = 'lmRingFlowV1';
+    const keepFor = 30 * 24 * 60 * 60 * 1000;
     const translations = Object.fromEntries(Object.entries(cfg.copy).map(([key, value]) => [key, String(value).replace(/&(amp|lt|gt|quot|#39|#x27);/g, entity => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&#x27;': "'" }[entity]))]));
     const t = (key, values = {}) => Object.entries(values).reduce((s, [k, v]) => s.replaceAll('{{ ' + k + ' }}', String(v)).replaceAll('__' + k + '__', String(v)), translations[key] || key);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -73,7 +74,7 @@
     }
     function persist() {
       const stored = { band: state.band?.handle, bandOptions: state.bandOptions, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
-      try { sessionStorage.setItem(storageKey, JSON.stringify(stored)); } catch (_) {}
+      try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: Date.now() })); } catch (_) {}
       const u = new URL(window.location.href);
       for (const k of ['setting', 'diamond', 'step', 'edit_group']) u.searchParams.delete(k);
       if (state.editGroup) u.searchParams.set('edit_group', state.editGroup);
@@ -405,7 +406,34 @@
       const p = state.setting, si = sizeIndex(p), available = p.variants.filter(v => v.available);
       const sizes = si >= 0 ? [...new Set(p.variants.map(v => String(v.options[si])))] : Array.from({ length: 10 }, (_, i) => String(4 + i * .5));
       const sizeOptions = `<option value="">${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
-      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure>${image(state[k].image, state[k].title)}<figcaption>${esc(state[k].title)}</figcaption></figure>`).join('')}</div><p class="quiet">${esc(t('fits_check'))}</p><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}<div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div>${bandPicker()}`;
+      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div>${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(cfg.appointment)}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}<div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div>${bandPicker()}`;
+    }
+    function shapeOutline(shape, w, h) {
+      const key = String(shape || '').toLowerCase(), x = w / 2, y = h / 2, cut = Math.min(w, h) * (/asscher/.test(key) ? 0.25 : 0.14);
+      if (/pear/.test(key)) return `<path d="M0 ${-y}C${x * 0.7} ${-y * 0.35} ${x} ${y * 0.1} ${x} ${y * 0.4}A${x} ${y * 0.6} 0 0 1 ${-x} ${y * 0.4}C${-x} ${y * 0.1} ${-x * 0.7} ${-y * 0.35} 0 ${-y}Z"/>`;
+      if (/marquise/.test(key)) return `<path d="M0 ${-y}Q${w} 0 0 ${y}Q${-w} 0 0 ${-y}Z"/>`;
+      if (/heart/.test(key)) return `<path d="M0 ${y}C${-x * 0.4} ${y * 0.55} ${-x} ${y * 0.1} ${-x} ${-y * 0.35}A${x / 2} ${y / 2} 0 0 1 0 ${-y * 0.45}A${x / 2} ${y / 2} 0 0 1 ${x} ${-y * 0.35}C${x} ${y * 0.1} ${x * 0.4} ${y * 0.55} 0 ${y}Z"/>`;
+      if (/emerald|asscher|radiant/.test(key)) return `<path d="M${-x + cut} ${-y}H${x - cut}L${x} ${-y + cut}V${y - cut}L${x - cut} ${y}H${-x + cut}L${-x} ${y - cut}V${-y + cut}Z"/>`;
+      if (/princess/.test(key)) return `<rect x="${-x}" y="${-y}" width="${w}" height="${h}"/>`;
+      if (/cushion/.test(key)) return `<rect x="${-x}" y="${-y}" width="${w}" height="${h}" rx="${Math.min(w, h) * 0.28}"/>`;
+      return `<ellipse rx="${x}" ry="${y}"/>`;
+    }
+    function scaleView() {
+      const found = String(state.diamond?.spec?.measurements || '').match(/(\d+(?:\.\d+)?)\s*(?:mm)?\s*[x×*-]\s*(\d+(?:\.\d+)?)/i);
+      if (!found) return '';
+      const [length, width] = [Number(found[1]), Number(found[2])].sort((a, b) => b - a);
+      if (!(length > 2 && length < 40 && width > 1)) return '';
+      const size = Number(state.size) || 6, finger = 11.63 + 0.8128 * size, view = Math.max(26, length + 8);
+      return `<figure class="scale" data-scale-view><svg viewBox="${-view / 2} ${-view / 2} ${view} ${view}" role="img" aria-label="${esc(t('scale_label'))}"><rect class="finger" x="${-finger / 2}" y="${-view / 2 - 2}" width="${finger}" height="${view + 4}"/><g class="stone">${shapeOutline(state.diamond.shape, width, length)}</g></svg><figcaption>${esc(t('scale_caption', { length: length.toFixed(2), width: width.toFixed(2), size: state.size && state.size !== 'unsure' ? state.size : 6, finger: finger.toFixed(1) }))}</figcaption></figure>`;
+    }
+    async function share() {
+      const url = new URL(location.pathname, location.origin);
+      url.searchParams.set('setting', state.setting.handle);
+      url.searchParams.set('diamond', state.diamond.handle);
+      try {
+        if (navigator.share) await navigator.share({ title: t('your_ring'), text: [state.setting.title, state.diamond.title].join(' · '), url: url.href });
+        else { await navigator.clipboard.writeText(url.href); notice(t('link_copied')); }
+      } catch (error) { if (error?.name !== 'AbortError') notice(t('share_failed', { url: url.href }), true); }
     }
     function render() {
       root.removeAttribute('aria-busy');
@@ -560,6 +588,11 @@
       else if (action === 'retry') search();
       else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); search(); persist(); }
       else if (action === 'dock-summary') reveal(aside);
+      else if (action === 'share') share();
+      else if (action === 'review-video') {
+        const src = (state.setting.videos || []).map(safeURL).find(Boolean);
+        if (src) main.querySelector('[data-review-media="setting"]').innerHTML = `<video controls playsinline autoplay muted preload="metadata" src="${esc(src)}"></video>`;
+      }
       else if (action === 'dock-add') {
         const field = main.querySelector('[data-field="size"]');
         if (!state.size && field) { notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true }); }
@@ -600,13 +633,17 @@
       if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); persist(); queueSearch(el.type === 'number' ? 700 : 250); return; }
       if (el.dataset.filter) {
         state.filters[el.dataset.filter] = el.value;
-        if (state.kind === 'setting') { state.page = 1; settingResults(); persist(); }
+        if (state.kind === 'setting') {
+          state.page = 1;
+          if (el.dataset.filter === 'shape') { state.filters.metal = ''; catalogShell(); main.querySelector('[data-filter="shape"]').focus(); }
+          settingResults(); persist();
+        }
       } else if (el.hasAttribute('data-sort')) { state.filters.sort = el.value; state.page = 1; search(); persist(); }
       else if (el.hasAttribute('data-option')) { state.options[Number(el.dataset.option)] = el.value; state.group = ''; render(); }
       else if (el.dataset.field) {
         state[el.dataset.field] = el.value;
         state.group = '';
-        if (el.dataset.field === 'size') summary();
+        if (el.dataset.field === 'size') { summary(); main.querySelector('[data-scale-view]')?.insertAdjacentHTML('afterend', scaleView()); main.querySelector('[data-scale-view]')?.remove(); }
         if (el.dataset.field === 'font') main.querySelector('[data-inscription]').classList.toggle('script', state.font === 'script');
         persist();
       }
@@ -620,14 +657,15 @@
     });
     async function restore() {
       let stored = {};
-      try { stored = JSON.parse(sessionStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
+      try { stored = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
+      if (!(Date.now() - Number(stored.saved) < keepFor)) stored = {};
       const params = new URLSearchParams(location.search);
-      const settingHandle = params.get('setting') || stored.setting;
-      const diamondHandle = params.get('diamond') || stored.diamond;
+      const linked = params.has('setting') || params.has('diamond') || params.has('start');
+      const settingHandle = linked ? params.get('setting') : stored.setting;
+      const diamondHandle = linked ? params.get('diamond') : stored.diamond;
       const requestedShape = params.get('shape');
       const edit = params.get('edit_group') || stored.editGroup;
       if (/^lmny-[a-z0-9-]+$/i.test(edit || '')) state.editGroup = edit;
-      if (requestedShape && shapeKnown(requestedShape)) state.filters.shape = requestedShape;
       const sameSelection = (!params.has('setting') || params.get('setting') === stored.setting) && (!params.has('diamond') || params.get('diamond') === stored.diamond);
       if (sameSelection) {
         state.size = typeof stored.size === 'string' ? stored.size : '';
@@ -638,7 +676,19 @@
         state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
         if (stored.filters && String(stored.filters.shape).split(',').every(shapeKnown)) state.filters = { ...state.filters, ...stored.filters };
       }
-      if (!settingHandle && !diamondHandle) { main.dataset.initialStart = 'true'; root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || ''; ready = true; return; }
+      if (requestedShape && shapeKnown(requestedShape)) state.filters.shape = requestedShape;
+      if (!settingHandle && !diamondHandle) {
+        main.dataset.initialStart = 'true';
+        root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
+        const begin = params.get('start');
+        if (begin === 'diamond' || begin === 'setting') {
+          state.kind = begin; state.page = 1;
+          if (begin === 'setting') state.filters.shape = settingShape(state.filters.shape);
+          go('catalog');
+        }
+        ready = true;
+        return;
+      }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
       notice(t('restoring'));
       state.busy = true; lockControls();

@@ -874,7 +874,7 @@
     "filters": "Refine your search",
     "range_error": "Enter a valid range, with the minimum no greater than the maximum.",
     "shape_notice": "Choose another shape after removing the selected piece.",
-    "saved": "Your selections are saved for this visit.",
+    "saved": "Your ring is saved on this device for 30 days.",
     "no_javascript": "Please enable JavaScript to build your ring, or contact Laura for assistance.",
     "added_cart": "Both pieces are added together. Continue in your bag to review shipping and checkout.",
     "edit_ring": "Edit your ring",
@@ -912,6 +912,13 @@
     "band_match": "Matches your {{ metal }} setting",
     "band_other": "Other metals",
     "size_guide": "Ring size guide",
-    "promise": "Free insured shipping · 1-year warranty"
+    "promise": "Free insured shipping · 1-year warranty",
+    "watch_setting": "Watch the setting",
+    "share_ring": "Share this ring",
+    "ask_ring": "Ask Laura about this ring",
+    "scale_label": "Diamond outline drawn to scale on a finger",
+    "scale_caption": "To scale: {{ length }} × {{ width }} mm face-up on a size {{ size }} finger ({{ finger }} mm across).",
+    "link_copied": "Link copied. Anyone with it sees this setting and diamond.",
+    "share_failed": "Copy this link to share your ring: {{ url }}"
   }
 }
