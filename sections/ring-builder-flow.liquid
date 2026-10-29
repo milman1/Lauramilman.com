@@ -86,7 +86,7 @@
       {% for band in collections['wedding-bands'].products limit: 50 %}
         {% if band.available and band.tags contains 'wedding-band' %}
           {% if band_emitted %},{% endif %}
-          {"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }}}
+          {"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"image":{% if band.featured_image %}{{ band.featured_image | image_url: width: 600 | json }}{% else %}null{% endif %}}
           {% assign band_emitted = true %}
         {% endif %}
       {% endfor %}
@@ -94,6 +94,9 @@
       "order_subtotal":{{ 'ring_flow.order_subtotal' | t | json }},
       "add_with_band":{{ 'ring_flow.add_with_band' | t | json }},
       "band":{{ 'ring_flow.band' | t | json }},
+      "band_optional":{{ 'ring_flow.band_optional' | t | json }},
+      "band_select":{{ 'ring_flow.band_select' | t | json }},
+      "band_selected":{{ 'ring_flow.band_selected' | t | json }},
       "band_heading":{{ 'ring_flow.band_heading' | t | json }},
       "band_note":{{ 'ring_flow.band_note' | t | json }},
       "no_band":{{ 'ring_flow.no_band' | t | json }},
