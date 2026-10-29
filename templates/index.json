@@ -117,32 +117,28 @@
           "type": "diamond",
           "settings": {
             "shape": "Round",
-            "image": "shopify://shop_images/lmny-home-round-diamond.jpg",
-            "artwork_x": 71
+            "image": "shopify://shop_images/lmny-gallery-round-sharp.png"
           }
         },
         "oval": {
           "type": "diamond",
           "settings": {
             "shape": "Oval",
-            "image": "shopify://shop_images/lmny-home-oval-diamond.jpg",
-            "artwork_x": 339
+            "image": "shopify://shop_images/lmny-gallery-oval-sharp.png"
           }
         },
         "emerald": {
           "type": "diamond",
           "settings": {
             "shape": "Emerald",
-            "image": "shopify://shop_images/lmny-home-emerald-diamond.jpg",
-            "artwork_x": 600
+            "image": "shopify://shop_images/lmny-gallery-emerald-sharp.png"
           }
         },
         "pear": {
           "type": "diamond",
           "settings": {
             "shape": "Pear",
-            "image": "shopify://shop_images/lmny-home-pear-diamond.jpg",
-            "artwork_x": 864
+            "image": "shopify://shop_images/lmny-gallery-pear-sharp.png"
           }
         },
         "oval_solitaire": {
@@ -197,7 +193,6 @@
           "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
           "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
         ],
-        "diamond_artwork": "shopify://shop_images/lmny-home-diamond-preview-board.png",
         "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png"
       }
     },

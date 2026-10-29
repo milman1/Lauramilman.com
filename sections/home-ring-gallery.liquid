@@ -19,7 +19,7 @@
             {%- else -%}
             <span class="hrg__image hrg__image--diamond">
               {%- if block.settings.image != blank -%}
-                {{ block.settings.image | image_url: width: 800 | image_tag: widths: '240, 400, 600, 800', sizes: '(min-width: 750px) 23vw, 43vw', loading: 'lazy', alt: block.settings.shape }}
+                {{ block.settings.image | image_url: width: 1254 | image_tag: widths: '320, 480, 640, 960, 1254', sizes: '(min-width: 1440px) 318px, (min-width: 750px) 23vw, 43vw', loading: 'lazy', alt: block.settings.shape }}
               {%- else -%}
                 {%- assign icon_shape = block.settings.shape | downcase -%}
                 {%- render 'diamond-shape-icon', shape: icon_shape -%}
@@ -104,8 +104,8 @@
   .hrg__card > a { display: block; height: 100%; text-decoration: none; }
   .hrg__image { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1.04; background: #f1eee8; overflow: hidden; }
   .hrg__image img { display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-  .hrg__image--diamond { background: #ececea; aspect-ratio: 4 / 3; }
-  .hrg__image--diamond img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+  .hrg__image--diamond { background: var(--lmh-sand); aspect-ratio: 250 / 230; }
+  .hrg__image--diamond img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: normal; }
   /* Crop the approved artwork boards without resampling or redrawing the jewelry. */
   .hrg .hrg__image--artwork { position: relative; display: block; aspect-ratio: var(--art-ratio); background: #f1eee8; }
   .hrg .hrg__image--artwork img { position: absolute; width: var(--art-width); max-width: none; height: auto; max-height: none; left: var(--art-left); top: var(--art-top); object-fit: initial; mix-blend-mode: normal; }
@@ -114,8 +114,9 @@
   .hrg__card-link { display: block; margin: 8px 0 0; font-size: 12px; }
   .hrg__card a:hover .hrg__name { text-decoration: underline; text-underline-offset: 4px; }
   .hrg__actions { display: flex; justify-content: center; gap: 16px; margin-top: 30px; }
-  .hrg__button { display: inline-flex; align-items: center; justify-content: center; gap: 20px; min-height: 50px; min-width: 250px; padding: 14px 24px; border: 1px solid #191919; text-decoration: none; font-size: 13px; line-height: 1.4; }
-  .hrg .hrg__button--primary { background: #191919; color: #fff; }
+  .hrg__button { display: inline-flex; align-items: center; justify-content: center; gap: 20px; min-height: 50px; min-width: 250px; padding: 14px 24px; border: 1px solid var(--lmh-bronze); color: var(--lmh-espresso); background: var(--lmh-cream); text-decoration: none; font-size: 13px; line-height: 1.4; }
+  .hrg .hrg__button--primary { background: var(--lmh-gold); border-color: var(--lmh-gold); color: var(--lmh-espresso); }
+  .hrg .hrg__button--primary:hover { background: var(--lmh-gold-light); border-color: var(--lmh-gold-light); }
   .hrg__button:hover { box-shadow: inset 0 0 0 1px currentColor; }
   .hrg__note { text-align: center; margin: 28px 0 -12px; font-size: 11px; line-height: 1.5; }
   .hrg__scroll { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px; }
@@ -131,7 +132,7 @@
     .hrg__tab { padding: 14px 6px; font-size: 12px; }
     .hrg__track { grid-auto-columns: 44%; gap: 12px; }
     .hrg__image { aspect-ratio: 3 / 4; }
-    .hrg__image--diamond { aspect-ratio: 4 / 3; }
+    .hrg__image--diamond { aspect-ratio: 250 / 230; }
     .hrg__name { margin: 14px 0 0; font-size: 20px; }
     .hrg__card-link { font-size: 11px; }
     .hrg__actions { flex-direction: column; gap: 10px; margin-top: 22px; }
