@@ -50,7 +50,7 @@ describe('loose diamond shape filter', () => {
     }
   });
 
-  it('uses that list on the homepage, the menu, and the ring builder', () => {
+  it('uses the shared shapes in the menu and builder alongside the curated homepage gallery', () => {
     for (const path of ['sections/lmh-stones.liquid', 'sections/header.liquid']) {
       expect(themeFile(path)).toContain("render 'diamond-shape-order'");
     }
@@ -58,12 +58,12 @@ describe('loose diamond shape filter', () => {
     expect(flow).toContain('.lm-shape__name');
     expect(flow).not.toContain("const shapes = ['Round', 'Oval'");
     const home = themeFile('templates/index.json');
-    expect(home).toContain('Where would you like to begin?');
-    expect(home).toContain('"show_diamond_path": true');
+    expect(home).toContain('"type": "home-ring-gallery"');
+    expect(themeFile('sections/home-ring-gallery.liquid')).toContain('pages/ring-builder?start=setting');
     expect(home).not.toContain('"title": "Build your ring"');
   });
 
-  it('keeps the homepage short: ten shapes, the rest folded, one shape picker', () => {
+  it('keeps legacy shape sections folded and avoids duplicating them on the homepage', () => {
     const stones = themeFile('sections/lmh-stones.liquid');
     expect(stones).toContain('for entry in shape_list limit: 10');
     expect(stones).toContain('for entry in shape_list offset: 10');
@@ -74,10 +74,10 @@ describe('loose diamond shape filter', () => {
     // One setting photo, and a link into the builder's own setting list.
     expect(start).toContain('ring_shape_key == photo_shape');
     expect(themeFile('templates/index.json')).not.toContain('"card_limit"');
-    expect(themeFile('templates/index.json')).toContain('"more_url": "/pages/ring-builder?start=setting"');
+    expect(themeFile('templates/index.json')).not.toContain('"type": "ring-builder-start"');
     // The jump target is an id the section sets itself; Shopify's wrapper id carries the template id.
     expect(stones).toContain('id="start-with-the-stone"');
-    expect(themeFile('templates/index.json')).toContain('"shapes_anchor": "#start-with-the-stone"');
+    expect(themeFile('templates/index.json')).not.toContain('"type": "lmh-stones"');
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {

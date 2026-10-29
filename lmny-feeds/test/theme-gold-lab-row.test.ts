@@ -13,13 +13,6 @@ function themeJson(path: string): {
   return JSON.parse(text);
 }
 
-const FEATURED = [
-  'copy-of-band-gold-ring-sizable',
-  'lmny-paperclip-2-5-mm-pclip060-bracelet',
-  'lmny-herringbone-2-8-mm-sf030',
-  'yellow-gold-bowtie-huggie-earrings-1',
-];
-
 const LAB = [
   'lab-grown-round-solitaire-pendant-prong-not-applicable',
   'lab-grown-oval-studs-earring-prong-north-south',
@@ -42,12 +35,9 @@ describe('homepage gold row and lab-grown carousel', () => {
       .map((block) => block?.settings?.product);
 
     expect(gold.type).toBe('lmh-product-row');
-    expect(gold.settings?.title).toBe('The gold you reach for,');
-    expect(gold.settings?.title_emphasis).toBe('rings, chains, and bands.');
     expect(gold.settings?.more_row).toBe(true);
-    expect(gold.settings?.all_url).toBe('/collections/gold-jewelry');
-    expect(products.slice(0, 4)).toEqual(FEATURED);
-    expect(products).toHaveLength(8);
+    expect(gold.settings?.all_url).toBe('/collections/everyday-jewelry');
+    expect(products).toHaveLength(16);
     expect(new Set(products).size).toBe(products.length);
 
     expect(liquid).toContain('assign feature_cap = 4');

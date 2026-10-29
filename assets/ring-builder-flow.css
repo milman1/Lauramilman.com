@@ -25,3 +25,5 @@
 
 #lmny-ring-builder .ring-email{grid-column:1;border-top:1px solid var(--line);padding-top:18px}#lmny-ring-builder .ring-email h2{font-size:24px}#lmny-ring-builder .ring-email textarea{display:block;width:100%;background:var(--paper);border:1px solid var(--line);padding:10px;font:inherit;font-size:16px;margin:6px 0 12px}
 @media(max-width:768px){body.has-pdp-sticky shopify-chat{contain:layout!important;height:calc(100% - 72px - env(safe-area-inset-bottom,0px))!important;bottom:auto!important}}
+
+@media(max-width:768px){#lmny-ring-builder .dock-selection{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.4;color:var(--quiet)}#lmny-ring-builder .dock>div{flex:1;overflow:hidden}#lmny-ring-builder:has(.dock:not([hidden])){padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}#lmny-ring-builder:has(.dock:not([hidden])) footer{padding-bottom:0}}
