@@ -951,6 +951,8 @@
     "color_title": "Colored lab-grown diamonds"
   },
   "everyday_filters": {
+    "shop_by_type": "Shop by jewelry type",
+    "all": "All jewelry",
     "type": "Jewelry type",
     "rings": "Rings",
     "necklaces": "Necklaces",
