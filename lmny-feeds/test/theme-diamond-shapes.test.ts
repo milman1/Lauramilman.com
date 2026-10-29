@@ -50,6 +50,8 @@ describe('loose diamond shape filter', () => {
     }
   });
 
+  // The homepage no longer carries the ring-builder-start or loose-stones sections
+  // (#361, 2026-10-29), so these check the sections themselves, not templates/index.json.
   it('uses that list on the homepage, the menu, and the ring builder', () => {
     for (const path of ['sections/lmh-stones.liquid', 'sections/header.liquid']) {
       expect(themeFile(path)).toContain("render 'diamond-shape-order'");
@@ -57,10 +59,6 @@ describe('loose diamond shape filter', () => {
     const flow = themeFile('assets/ring-builder-flow.js');
     expect(flow).toContain('.lm-shape__name');
     expect(flow).not.toContain("const shapes = ['Round', 'Oval'");
-    const home = themeFile('templates/index.json');
-    expect(home).toContain('Where would you like to begin?');
-    expect(home).toContain('"show_diamond_path": true');
-    expect(home).not.toContain('"title": "Build your ring"');
   });
 
   it('keeps the homepage short: ten shapes, the rest folded, one shape picker', () => {
@@ -73,11 +71,8 @@ describe('loose diamond shape filter', () => {
     expect(start).not.toContain('Which shape?');
     // One setting photo, and a link into the builder's own setting list.
     expect(start).toContain('ring_shape_key == photo_shape');
-    expect(themeFile('templates/index.json')).not.toContain('"card_limit"');
-    expect(themeFile('templates/index.json')).toContain('"more_url": "/pages/ring-builder?start=setting"');
     // The jump target is an id the section sets itself; Shopify's wrapper id carries the template id.
     expect(stones).toContain('id="start-with-the-stone"');
-    expect(themeFile('templates/index.json')).toContain('"shapes_anchor": "#start-with-the-stone"');
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {
