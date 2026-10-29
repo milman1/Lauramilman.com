@@ -833,6 +833,63 @@
         "button_url": "/pages/private-clients",
         "note": "Complimentary · No obligation"
       }
+    },
+    "estate-edit": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "estate-1": {
+          "type": "product",
+          "settings": {
+            "product": "bv-cartier-love-18k-rose-gold-size-18-bracelet-j10230",
+            "title": "Cartier LOVE Bracelet",
+            "subtitle": "Pre-owned · 18K rose gold"
+          }
+        },
+        "estate-2": {
+          "type": "product",
+          "settings": {
+            "product": "bv-hermes-18k-yellow-gold-chaine-dancre-dome-cocktail-ring-rr9027",
+            "title": "Hermès Chaîne d’ancre Ring",
+            "subtitle": "Pre-owned · 18K yellow gold"
+          }
+        },
+        "estate-3": {
+          "type": "product",
+          "settings": {
+            "product": "bv-van-cleef-arpels-alhambra-18k-rose-gold-five-motif-obsidian-bracelet-j10462",
+            "title": "Van Cleef & Arpels Alhambra Bracelet",
+            "subtitle": "Pre-owned · Obsidian & 18K rose gold"
+          }
+        },
+        "estate-4": {
+          "type": "product",
+          "settings": {
+            "product": "bv-tiffany-co-18k-white-gold-t-collection-bangle-bracelet-j10468",
+            "title": "Tiffany & Co. T Bangle",
+            "subtitle": "Pre-owned · 18K white gold"
+          }
+        }
+      },
+      "block_order": [
+        "estate-1",
+        "estate-2",
+        "estate-3",
+        "estate-4"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "4",
+        "more_row": false,
+        "scroll_row": false,
+        "ratio": "1",
+        "eyebrow": "PRE-OWNED & ESTATE",
+        "title": "A past.",
+        "title_emphasis": "A new chapter.",
+        "text": "Discover Cartier, Hermès, Van Cleef & Arpels, and Tiffany & Co.",
+        "button_1_text": "Explore vintage & estate",
+        "button_1_url": "/collections/estate-jewelry",
+        "collection_limit": 4
+      }
     }
   },
   "order": [
@@ -846,6 +903,7 @@
     "chains-carousel",
     "lab-grown",
     "pre-owned",
+    "estate-edit",
     "private-clients"
   ]
 }
