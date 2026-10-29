@@ -71,8 +71,9 @@ describe('loose diamond shape filter', () => {
     const start = themeFile('sections/ring-builder-start.liquid');
     expect(start).not.toContain('data-rbs-shape');
     expect(start).not.toContain('Which shape?');
-    // One setting per shape, and a link into the builder's own setting list.
-    expect(start).toContain('seen contains seen_key');
+    // One setting photo, and a link into the builder's own setting list.
+    expect(start).toContain('ring_shape_key == photo_shape');
+    expect(themeFile('templates/index.json')).not.toContain('"card_limit"');
     expect(themeFile('templates/index.json')).toContain('"more_url": "/pages/ring-builder?start=setting"');
     // The jump target is an id the section sets itself; Shopify's wrapper id carries the template id.
     expect(stones).toContain('id="start-with-the-stone"');

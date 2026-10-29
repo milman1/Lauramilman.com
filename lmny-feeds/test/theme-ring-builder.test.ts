@@ -67,8 +67,8 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     const start = themeFile('sections/ring-builder-start.liquid');
     expect(start).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(start).toContain("ring.tags contains 'ring-setting'");
-    expect(start).toContain('/pages/ring-builder?setting={{ ring.handle | url_encode }}');
-    expect(start).toContain('shape={{ ring_shape | url_encode }}');
+    expect(start).toContain('/pages/ring-builder?setting={{ photo_ring.handle | url_encode }}');
+    expect(start).toContain('shape={{ photo_ring_shape | url_encode }}');
   });
 });
 
