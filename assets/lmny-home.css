@@ -343,11 +343,14 @@
 /* =============================================================
    REVIEWS
    ============================================================= */
-.lmh-reviews { background: var(--lmh-ivory); padding: 64px var(--lmh-gutter); display: flex; flex-direction: column; gap: 28px; }
+.lmh-reviews { background: var(--lmh-espresso); color: var(--lmh-cream); padding: 40px var(--lmh-gutter); display: flex; flex-direction: column; gap: 20px; }
+.lmh-reviews__head, .lmh-reviews__widget { width: 100%; max-width: 900px; margin-inline: auto; min-width: 0; }
+.lmh-reviews .lmh-eyebrow, .lmh-reviews .lmh-arrow { color: var(--lmh-gold-light) !important; }
+.lmh-reviews .lmh-h2 { color: var(--lmh-cream); }
 .lmh-reviews__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
 .lmh-reviews__head > div { display: flex; flex-direction: column; gap: 12px; }
 .lmh-reviews .lmh-h2 { font-size: clamp(30px, 2.64vw, 38px); line-height: 1.05; }
-.lmh-reviews__widget { min-height: 128px; }
+.lmh-reviews__widget { min-height: 0; overflow: hidden; }
 
 /* =============================================================
    TABLET
@@ -523,7 +526,8 @@
   .lmh-stats dt { font-size: 10.5px; letter-spacing: 0.04em; }
 
   /* reviews */
-  .lmh-reviews { padding: 48px 20px; gap: 20px; }
+  .lmh-reviews { padding: 32px 20px; gap: 18px; }
+  .lmh-reviews__head { flex-wrap: wrap; gap: 16px; }
   .lmh-reviews .lmh-h2 { font-size: 30px; }
 }
 
