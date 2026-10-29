@@ -36,18 +36,21 @@
                   {%- assign group_total = 0 -%}
                   {%- assign group_count = 0 -%}
                   {%- assign group_quantities_valid = true -%}
-                  {%- assign group_setting = false -%}
-                  {%- assign group_diamond = false -%}
+                  {%- assign group_setting = 0 -%}
+                  {%- assign group_bands = 0 -%}
+                  {%- assign group_diamond = 0 -%}
                   {%- for part in cart.items -%}
                     {%- if part.properties._lm_ring_id == ring_group -%}
                       {%- assign group_total = group_total | plus: part.final_line_price -%}
                       {%- assign group_count = group_count | plus: 1 -%}
                       {%- if part.quantity != 1 -%}{%- assign group_quantities_valid = false -%}{%- endif -%}
-                      {%- if part.product.tags contains 'ring-setting' -%}{%- assign group_setting = true -%}{%- endif -%}
-                      {%- if part.product.type == 'Lab-Grown Diamond' or part.product.type == 'Natural Diamond' -%}{%- assign group_diamond = true -%}{%- endif -%}
+                      {%- if part.product.tags contains 'ring-setting' -%}{%- assign group_setting = group_setting | plus: 1 -%}{%- endif -%}
+                      {%- if part.product.type == 'Lab-Grown Diamond' or part.product.type == 'Natural Diamond' -%}{%- assign group_diamond = group_diamond | plus: 1 -%}{%- endif -%}
+                      {%- if part.properties._lm_band_handle == part.product.handle -%}{%- assign group_bands = group_bands | plus: 1 -%}{%- endif -%}
                     {%- endif -%}
                   {%- endfor -%}
-                  {%- unless group_count == 2 and group_quantities_valid and group_setting and group_diamond -%}{%- assign incomplete_ring = true -%}{%- endunless -%}
+                  {%- assign expected_count = group_bands | plus: 2 -%}
+                  {%- unless group_count == expected_count and group_bands <= 2 and group_quantities_valid and group_setting == 1 and group_diamond == 1 -%}{%- assign incomplete_ring = true -%}{%- endunless -%}
                   <div class="cart-ring-group" style="padding:18px 0;border-top:1px solid #ddd5c5;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
                     <div><strong>{{ 'ring_flow.ring_group' | t }}</strong><br><a href="{{ routes.root_url }}pages/ring-builder?setting={{ item.properties._lm_setting_handle | url_encode }}&amp;diamond={{ item.properties._lm_diamond_handle | url_encode }}&amp;edit_group={{ ring_group | url_encode }}">{{ 'ring_flow.edit_ring' | t }}</a></div>
                     <span>{{ group_total | money }}</span>
