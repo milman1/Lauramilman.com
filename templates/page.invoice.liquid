@@ -1,0 +1,461 @@
+{% comment %}
+  House invoice. Blank sheet for private sales and any sale that needs a
+  printed bill. Staff type into the page and print or save a PDF. The store
+  does not keep what they type. Assign this template to the page handle
+  `invoice`. See SHOPIFY_SETUP.md.
+{% endcomment %}
+{% layout none %}
+{%- liquid
+  assign street = shop.address.address1 | default: '1185 6th Avenue'
+  assign street2 = shop.address.address2 | default: 'Floor 3' | replace: 'Fl ', 'Floor '
+  assign city = shop.address.city | default: 'New York'
+  assign province = shop.address.province_code | default: 'NY'
+  assign zip = shop.address.zip | default: '10036'
+  assign email = shop.email | default: 'hello@lauramilman.com'
+  assign digits = shop.phone | default: '7326421700' | replace: '+', '' | replace: '-', '' | replace: ' ', '' | replace: '(', '' | replace: ')', '' | replace: '.', ''
+  if digits.size == 11
+    assign digits = digits | slice: 1, 10
+  endif
+  if digits.size == 10
+    assign area = digits | slice: 0, 3
+    assign prefix = digits | slice: 3, 3
+    assign line = digits | slice: 6, 4
+    assign phone_display = '(' | append: area | append: ') ' | append: prefix | append: '-' | append: line
+  else
+    assign phone_display = shop.phone | default: '(732) 642-1700'
+  endif
+  assign lockup = images['LMNY-header-lockup.png']
+-%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Invoice · {{ shop.name | escape }}</title>
+  {%- if settings.favicon != blank -%}
+    <link rel="icon" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+  {%- endif -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  {{ content_for_header }}
+  <style>
+    @page { size: letter; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #e7e0d4;
+      color: #2C1810;
+      font-family: Montserrat, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 24px auto 120px;
+      background: #FDFAF6;
+      display: flex;
+      flex-direction: column;
+    }
+    header.mast {
+      background: #1E1109;
+      padding: 28px 56px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header.mast img { height: 64px; width: auto; display: block; }
+    .paid-mark {
+      border: 1.5px solid #C9A050;
+      color: #C9A050;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      padding: 8px 14px 7px;
+    }
+    .paid-mark.is-due { border-color: #E2C27A; }
+    .gold-rule { height: 3px; background: #C9A050; }
+    main { padding: 32px 56px 24px; flex: 1 1 auto; }
+    .kicker {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #8A8070;
+      margin: 0 0 8px;
+    }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 500;
+      font-size: 46px;
+      line-height: 0.9;
+      color: #1E1109;
+      margin: 0;
+    }
+    .meta {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #DDD5C5;
+    }
+    .meta dt, .parties h2, th, .totals .label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #8A8070;
+    }
+    .meta dt { margin: 0 0 6px; }
+    .meta dd { margin: 0; font-size: 14px; font-weight: 500; color: #1E1109; }
+    .parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      padding: 22px 0 4px;
+    }
+    .parties h2 { margin: 0 0 10px; }
+    .parties p { margin: 0; font-size: 14px; line-height: 1.55; }
+    .name {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 26px;
+      font-weight: 500;
+      color: #1E1109;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+    th { text-align: left; padding: 0 0 10px; border-bottom: 1px solid #1E1109; }
+    th.num, td.num { text-align: right; }
+    td { padding: 18px 0; vertical-align: top; border-bottom: 1px solid #DDD5C5; font-size: 14px; }
+    .item {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: #1E1109;
+      line-height: 1.2;
+    }
+    .detail { margin-top: 6px; font-size: 12px; line-height: 1.5; color: #8A8070; }
+    .detail:empty { margin: 0; }
+    .totals { width: 280px; margin-left: auto; margin-top: 8px; }
+    .totals div { display: flex; justify-content: space-between; gap: 24px; padding: 8px 0; font-size: 13px; }
+    .totals .label { padding-top: 3px; }
+    .totals .grand { border-top: 1px solid #1E1109; margin-top: 4px; padding-top: 12px; }
+    .totals .grand span:last-child {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1;
+      color: #1E1109;
+    }
+    .note {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid #DDD5C5;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #8A8070;
+      max-width: 460px;
+    }
+    footer.colophon {
+      margin: auto 56px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-top: 1px solid #DDD5C5;
+      padding-top: 14px;
+    }
+    footer.colophon .thanks {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 20px;
+      color: #1E1109;
+      margin: 0 0 4px;
+    }
+    footer.colophon p { margin: 0; font-size: 11px; color: #8A8070; }
+    [contenteditable="plaintext-only"] { cursor: text; }
+    [data-placeholder]:empty:before {
+      content: attr(data-placeholder);
+      color: #c4b8a8;
+    }
+    [contenteditable]:focus { outline: 1px dashed #C9A050; outline-offset: 4px; }
+    .remove-line {
+      display: inline-block;
+      margin: 0 0 8px;
+      padding: 0;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8A8070;
+      cursor: pointer;
+    }
+    .tools {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px 18px;
+      width: min(8.5in, calc(100% - 32px));
+      padding: 12px 16px;
+      background: #1E1109;
+      color: #FDFAF6;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    .tools label { display: flex; align-items: center; gap: 8px; }
+    .tools input[type="text"] {
+      width: 88px;
+      border: 0;
+      border-bottom: 1px solid #C9A050;
+      background: transparent;
+      color: #FDFAF6;
+      font: inherit;
+      padding: 2px 0;
+    }
+    .tools button {
+      border: 1px solid #C9A050;
+      background: transparent;
+      color: #C9A050;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .tools button.primary { background: #C9A050; color: #1E1109; }
+    .hint {
+      width: 8.5in;
+      margin: -104px auto 28px;
+      font-size: 12px;
+      color: #8A8070;
+    }
+    [hidden] { display: none !important; }
+    @media print {
+      html, body { background: #FDFAF6; }
+      .sheet { margin: 0; }
+      .tools, .hint, .remove-line { display: none !important; }
+      [contenteditable] { outline: none !important; }
+      [data-placeholder]:empty:before { content: none; }
+      .detail:empty { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <article class="sheet">
+    <header class="mast">
+      {% if lockup != blank %}
+        <img src="{{ lockup | image_url: width: 800 }}" alt="{{ shop.name | escape }}" width="800" height="320">
+      {% else %}
+        <img src="https://cdn.shopify.com/s/files/1/1727/2565/files/LMNY-header-lockup.png?width=800" alt="{{ shop.name | escape }}" width="800" height="320">
+      {% endif %}
+      <div class="paid-mark is-due" id="status-mark">Due</div>
+    </header>
+    <div class="gold-rule"></div>
+    <main>
+      <p class="kicker">{{ shop.name | escape }}</p>
+      <h1>Invoice</h1>
+      <dl class="meta">
+        <div>
+          <dt>Invoice number</dt>
+          <dd id="invoice-number" contenteditable="plaintext-only" data-placeholder="LMNY-YYYYMMDD"></dd>
+        </div>
+        <div>
+          <dt>Invoice date</dt>
+          <dd id="invoice-date" contenteditable="plaintext-only" data-placeholder="Date"></dd>
+        </div>
+        <div>
+          <dt>Balance due</dt>
+          <dd class="js-balance">$0.00</dd>
+        </div>
+      </dl>
+      <section class="parties">
+        <div>
+          <h2>Billed to</h2>
+          <p class="name" id="bill-name" contenteditable="plaintext-only" data-placeholder="Customer name"></p>
+          <p id="bill-address" contenteditable="plaintext-only" data-placeholder="Address, optional"></p>
+        </div>
+        <div>
+          <h2>From</h2>
+          <p class="name" contenteditable="plaintext-only">{{ shop.name | escape }}</p>
+          <p contenteditable="plaintext-only">{{ street | escape }}{% if street2 != blank %}, {{ street2 | escape }}{% endif %}<br>{{ city | escape }}, {{ province | escape }} {{ zip | escape }}<br>{{ email | escape }}<br>{{ phone_display | escape }}</p>
+        </div>
+      </section>
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="num">Qty</th>
+            <th class="num">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="lines">
+          <tr>
+            <td>
+              <button type="button" class="remove-line">Remove line</button>
+              <div class="item" contenteditable="plaintext-only" data-placeholder="Description of the piece"></div>
+              <div class="detail" contenteditable="plaintext-only" data-placeholder="Metal, length, and other facts"></div>
+            </td>
+            <td class="num"><div contenteditable="plaintext-only" data-qty>1</div></td>
+            <td class="num"><div contenteditable="plaintext-only" data-amount data-placeholder="0.00"></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="totals">
+        <div><span class="label">Amount</span><span class="js-subtotal">$0.00</span></div>
+        <div><span class="label">Tax</span><span class="js-tax">Included</span></div>
+        <div class="grand"><span class="label" id="grand-label">Total</span><span class="js-grand">$0.00</span></div>
+        <div><span class="label">Balance due</span><span class="js-balance">$0.00</span></div>
+      </div>
+      <p class="note" id="note" contenteditable="plaintext-only">Payment is due on receipt. The amount includes tax.</p>
+    </main>
+    <footer class="colophon">
+      <div>
+        <p class="thanks">Thank you.</p>
+        <p>{{ shop.url | remove: 'https://' | remove: 'http://' }}</p>
+      </div>
+      <p id="invoice-number-foot">Invoice</p>
+    </footer>
+  </article>
+  <p class="hint">Type into the invoice, then print or save as PDF. Amount is the line total. Nothing you type is saved on the store.</p>
+  <div class="tools">
+    <label><input type="checkbox" id="tax-included" checked> Tax included</label>
+    <label id="tax-editor" hidden>Tax <input id="tax-amount" type="text" inputmode="decimal" value="0.00" autocomplete="off"></label>
+    <label><input type="checkbox" id="paid"> Paid</label>
+    <button type="button" id="add-line">Add line</button>
+    <button type="button" class="primary" id="print">Print / Save PDF</button>
+  </div>
+  <template id="line-template">
+    <tr>
+      <td>
+        <button type="button" class="remove-line">Remove line</button>
+        <div class="item" contenteditable="plaintext-only" data-placeholder="Description of the piece"></div>
+        <div class="detail" contenteditable="plaintext-only" data-placeholder="Metal, length, and other facts"></div>
+      </td>
+      <td class="num"><div contenteditable="plaintext-only" data-qty>1</div></td>
+      <td class="num"><div contenteditable="plaintext-only" data-amount data-placeholder="0.00"></div></td>
+    </tr>
+  </template>
+  <script>
+    (function () {
+      var lines = document.getElementById('lines');
+      var taxIncluded = document.getElementById('tax-included');
+      var taxEditor = document.getElementById('tax-editor');
+      var taxAmount = document.getElementById('tax-amount');
+      var paid = document.getElementById('paid');
+      var note = document.getElementById('note');
+      var noteTouched = false;
+      var dateEl = document.getElementById('invoice-date');
+
+      if (!dateEl.textContent.trim()) {
+        dateEl.textContent = new Date().toLocaleDateString('en-US', {
+          month: 'long', day: 'numeric', year: 'numeric'
+        });
+      }
+
+      function parseMoney(text) {
+        var n = parseFloat(String(text || '').replace(/[^0-9.-]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+
+      function money(n) {
+        return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      }
+
+      function writeAll(selector, value) {
+        document.querySelectorAll(selector).forEach(function (el) { el.textContent = value; });
+      }
+
+      function refresh() {
+        var subtotal = 0;
+        lines.querySelectorAll('[data-amount]').forEach(function (el) {
+          subtotal += parseMoney(el.textContent);
+        });
+        var included = taxIncluded.checked;
+        var tax = included ? 0 : parseMoney(taxAmount.value);
+        var total = subtotal + tax;
+        var isPaid = paid.checked;
+        taxEditor.hidden = included;
+        writeAll('.js-subtotal', money(subtotal));
+        writeAll('.js-tax', included ? 'Included' : money(tax));
+        writeAll('.js-grand', money(total));
+        writeAll('.js-balance', isPaid ? money(0) : money(total));
+        document.getElementById('grand-label').textContent = isPaid ? 'Total paid' : 'Total';
+        var mark = document.getElementById('status-mark');
+        mark.textContent = isPaid ? 'Paid' : 'Due';
+        mark.classList.toggle('is-due', !isPaid);
+        var number = document.getElementById('invoice-number').textContent.trim();
+        document.getElementById('invoice-number-foot').textContent = number ? 'Invoice ' + number : 'Invoice';
+        var rows = lines.querySelectorAll('tr');
+        rows.forEach(function (row) {
+          var button = row.querySelector('.remove-line');
+          if (button) button.hidden = rows.length < 2;
+        });
+        if (!noteTouched) {
+          if (isPaid && included) {
+            note.textContent = 'Paid in full. The amount includes tax. Tax is not itemized on this invoice.';
+          } else if (isPaid) {
+            note.textContent = 'Paid in full.';
+          } else if (included) {
+            note.textContent = 'Payment is due on receipt. The amount includes tax.';
+          } else {
+            note.textContent = 'Payment is due on receipt.';
+          }
+        }
+      }
+
+      function formatAmounts() {
+        lines.querySelectorAll('[data-amount]').forEach(function (el) {
+          if (!el.textContent.trim()) return;
+          el.textContent = money(parseMoney(el.textContent));
+        });
+        if (!taxIncluded.checked && taxAmount.value.trim()) {
+          taxAmount.value = parseMoney(taxAmount.value).toFixed(2);
+        }
+      }
+
+      lines.addEventListener('input', refresh);
+      lines.addEventListener('click', function (event) {
+        var button = event.target.closest('.remove-line');
+        if (!button || lines.querySelectorAll('tr').length < 2) return;
+        button.closest('tr').remove();
+        refresh();
+      });
+      document.getElementById('add-line').addEventListener('click', function () {
+        lines.appendChild(document.getElementById('line-template').content.cloneNode(true));
+        refresh();
+      });
+      taxIncluded.addEventListener('change', refresh);
+      paid.addEventListener('change', refresh);
+      taxAmount.addEventListener('input', refresh);
+      note.addEventListener('input', function () { noteTouched = true; });
+      document.getElementById('invoice-number').addEventListener('input', refresh);
+      document.getElementById('print').addEventListener('click', function () {
+        formatAmounts();
+        refresh();
+        window.print();
+      });
+      window.addEventListener('beforeprint', function () {
+        formatAmounts();
+        refresh();
+      });
+      refresh();
+    })();
+  </script>
+</body>
+</html>
