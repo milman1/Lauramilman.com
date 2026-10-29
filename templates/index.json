@@ -119,7 +119,7 @@
         "card_limit": 4,
         "more_url": "/pages/ring-builder?start=setting",
         "shapes_anchor": "#start-with-the-stone",
-        "description": "Shop a certified diamond on its own, or build a ring from a setting and a stone. We only show pairs that fit.",
+        "description": "",
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
         "show_diamond_path": true,

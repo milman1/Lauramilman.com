@@ -155,7 +155,8 @@
       collections that already store a guide stay hidden until approved.
     {%- endcomment -%}
     {%- if collection.handle == 'lab-grown-diamonds' or is_landing -%}
-      {%- render 'collection-longform', collection: collection -%}
+      {%- render 'diamond-visual-guide' -%}
+      {%- render 'collection-longform', collection: collection, accordion: true -%}
     {%- endif -%}
   {%- endunless -%}
   </div>
