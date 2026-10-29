@@ -449,3 +449,12 @@ Notes for next time:
 - Store content: each article's visible FAQ was copied word for word into `custom.guide_faq` (JSON, 113 questions). No article text changed.
 - Theme: `sections/main-article.liquid` emits FAQPage JSON-LD from that field, and marks up a question only while its text still appears in the article body, so editing or removing a visible FAQ drops it from the markup. New articles need the field set to get the markup.
 - Not done: a named person as author (the store has not named one; articles stay under the Organization), the hollow-chain sentence in the gold chain guide (needs a jeweler's check), and box chain in that guide.
+
+## 2026-10-29: Royal Chain gold line: channels, collection images, 14K vs 18K article
+
+- Merchant approved. Before: 0 gold sales in 90 days, under 50 visits in 30 days, and none of the 42 Gold Jewelry products on Google & YouTube, Microsoft, Facebook & Instagram or Pinterest (11 not on Shop). Product titles, descriptions, prices and SEO fields were not changed.
+- Channels: all 42 products in `gold-jewelry` published to Google & YouTube, Microsoft Channel, Facebook & Instagram, Pinterest and Shop (Online Store unchanged); read back on all six. The only sync that unpublishes (`src/googleLoose.ts`) is scoped to loose lab-grown handles, so it does not touch these.
+- Collection images (from each line's own on-body product photos): Gold Jewelry, Gold Chain Necklaces, Gold Chain Bracelets, Gold Bracelets & Bangles, Gold Rings, Gold Chains, Your First Gold Piece. Chains already had one.
+- Accuracy fix: Royal Chain sells NHMC120, NHMC150 and HMC150 Cubans as semi-solid and HSR018 rope and LCRB100 curb as "Lite", so "Solid 14K" was removed from the descriptions and meta descriptions of nine gold collections (titles unchanged), and the first gold FAQ question now says the jewelry is 14K gold, not plated, with construction varying by chain. The chain guide no longer says every listing states solid or hollow.
+- Journal: new article `14k-vs-18k-gold-everyday-jewelry` (published, FAQ in `custom.guide_faq`, links to gold collections and six products). The chain guide gains a Box Chain section and a by-style list linking 12 products and the new article; its four FAQ questions are unchanged.
+- Open for the merchant: Mini Initial Necklace and Rectangular Signet Ring are out of stock; gold rings are size 7 only; product listings for the semi-solid Cuban necklaces and Lite chains do not state construction.
