@@ -80,8 +80,22 @@ describe('loose diamond shape filter', () => {
   });
 
   it('sends every stored spelling for a shape that has more than one', () => {
-    expect(form).toContain("split: '|'");
-    expect(form).toContain('shape_value');
+    const shape = themeFile('snippets/diamond-api-shape.liquid');
+    expect(form).toContain("render 'diamond-api-shape', entry: entry");
+    expect(shape).toContain("split: '|'");
+    expect(shape).toContain('value="{{ shape_value | escape }}"');
+  });
+
+  it('folds the diamond search to the ten classic shapes, the rest under More shapes', () => {
+    expect(form).toContain('if fold_shapes and shape_order.size > 10');
+    expect(form).toContain('for entry in shape_order limit: shown_shapes');
+    expect(form).toContain('for entry in shape_order offset: shown_shapes');
+    expect(form).toContain('<details class="lm-dfilter__more-shapes">');
+    // Only the diamond search folds; the ring builder folds its own list by setting count.
+    expect(filter).toContain('fold_shapes: true');
+    expect(builder).not.toContain('fold_shapes');
+    // A shape in the link that is folded away opens the list so the choice is visible.
+    expect(themeFile('assets/diamond-storefront.js')).toContain("moreShapes.querySelector('.lm-shape input:checked')) moreShapes.open = true");
   });
 
   it('uses the same list on the collection filter and the ring builder', () => {

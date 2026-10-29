@@ -595,6 +595,9 @@
     if (!matchedShape && shapes.length && window.LMNYDiamondQuery) {
       pinnedShapes = window.LMNYDiamondQuery.queryShapes(shapes);
     }
+    // A shape from the link that sits under "More shapes" opens that list.
+    var moreShapes = form.querySelector('.lm-dfilter__more-shapes');
+    if (moreShapes && moreShapes.querySelector('.lm-shape input:checked')) moreShapes.open = true;
     ['color', 'clarity', 'cut'].forEach(function (name) {
       var plural = { color: 'colors', clarity: 'clarities', cut: 'cuts' }[name];
       var wanted = list(name).concat(list(plural));
