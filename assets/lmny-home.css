@@ -344,7 +344,7 @@
    REVIEWS
    ============================================================= */
 .lmh-reviews { background: var(--lmh-espresso); color: var(--lmh-cream); padding: 40px var(--lmh-gutter); display: flex; flex-direction: column; gap: 20px; }
-.lmh-reviews__head, .lmh-reviews__widget { width: 100%; max-width: 900px; margin-inline: auto; min-width: 0; }
+.lmh-reviews__head, .lmh-reviews__widget { width: 100%; max-width: 780px; margin-inline: auto; min-width: 0; }
 .lmh-reviews .lmh-eyebrow, .lmh-reviews .lmh-arrow { color: var(--lmh-gold-light) !important; }
 .lmh-reviews .lmh-h2 { color: var(--lmh-cream); }
 .lmh-reviews__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
