@@ -124,7 +124,7 @@
       {%- render 'diamond-origin-tabs', current: origin_tab -%}
     </header>
 
-    {% render 'diamond-api-filter-form', form_url: form_url, carat_floor: carat_floor, carat_ceil: carat_ceil, price_floor: price_floor, price_ceil: price_ceil, shape_order: shape_order, clarity_order: clarity_order, color_order: color_order, cut_order: cut_order %}
+    {% render 'diamond-api-filter-form', form_url: form_url, carat_floor: carat_floor, carat_ceil: carat_ceil, price_floor: price_floor, price_ceil: price_ceil, shape_order: shape_order, clarity_order: clarity_order, color_order: color_order, cut_order: cut_order, fold_shapes: true %}
 
   {%- unless search_only -%}
     <div class="lm-dfilter__toolbar">

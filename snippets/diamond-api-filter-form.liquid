@@ -9,6 +9,7 @@ Renders the existing API diamond filter controls shared by search and the ring b
 @param {string[]} clarity_order - Clarity grades
 @param {string[]} color_order - Colour grades
 @param {string[]} cut_order - Cut grades
+@param {boolean} [fold_shapes] - Show the first ten shapes and put the rest under "More shapes"
 {% enddoc %}
     <form class="lm-dfilter__form" id="DiamondFilterForm" action="{{ form_url }}" method="get">
       <div class="lm-dfilter__grid">
@@ -17,23 +18,27 @@ Renders the existing API diamond filter controls shared by search and the ring b
             Shape
             <button type="button" class="lm-dfilter__info" aria-label="About shape" data-tip="A diamond's shape sets its facet pattern and how it carries light. Round is the most brilliant; step cuts like emerald and asscher read clearer and more architectural.">i</button>
           </span>
+          {%- liquid
+            assign shown_shapes = shape_order.size
+            if fold_shapes and shape_order.size > 10
+              assign shown_shapes = 10
+            endif
+          -%}
           <div class="lm-dfilter__shapes">
-            {%- for entry in shape_order -%}
-              {%- assign shape_parts = entry | split: '|' -%}
-              {%- assign shape_label = shape_parts | first | strip -%}
-              {%- if shape_parts.size > 1 -%}
-                {%- assign shape_value = shape_parts | last | strip -%}
-              {%- else -%}
-                {%- assign shape_value = shape_label -%}
-              {%- endif -%}
-              {%- assign icon_key = shape_label | downcase -%}
-              <label class="lm-shape">
-                <input type="checkbox" name="shape" value="{{ shape_value | escape }}">
-                {%- render 'diamond-shape-icon', shape: icon_key -%}
-                <span class="lm-shape__name">{{ shape_label }}</span>
-              </label>
+            {%- for entry in shape_order limit: shown_shapes -%}
+              {%- render 'diamond-api-shape', entry: entry -%}
             {%- endfor -%}
           </div>
+          {%- if shown_shapes < shape_order.size -%}
+            <details class="lm-dfilter__more-shapes">
+              <summary>More shapes ({{ shape_order.size | minus: shown_shapes }})</summary>
+              <div class="lm-dfilter__shapes">
+                {%- for entry in shape_order offset: shown_shapes -%}
+                  {%- render 'diamond-api-shape', entry: entry -%}
+                {%- endfor -%}
+              </div>
+            </details>
+          {%- endif -%}
         </div>
 
         <div class="lm-dfilter__group">
