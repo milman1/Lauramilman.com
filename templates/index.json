@@ -63,7 +63,7 @@
         "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in the Diamond District.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
-        "secondary_text": "Shop Rings",
+        "secondary_text": "Shop complete rings",
         "secondary_url": "/collections/rings",
         "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
@@ -203,7 +203,7 @@
         "image_asset": "",
         "image_alt": "Laura Milman",
         "title": "Meet Laura Milman",
-        "text": "Discover the story behind the jewelry.",
+        "text": "More than 30 years in New York’s Diamond District. Discover Laura’s journey from a kitchen-table sketchbook to her own jewelry house.",
         "link_text": "Read Laura's Story",
         "link_url": "/pages/about"
       }
@@ -236,7 +236,7 @@
           "type": "tile",
           "settings": {
             "title": "For work",
-            "link_text": "Shop rings",
+            "link_text": "Shop complete rings",
             "url": "/collections/rings",
             "image_asset": "home-rings-work.webp",
             "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
@@ -261,10 +261,10 @@
         "tile-3"
       ],
       "settings": {
-        "title": "Rings, your way.",
+        "title": "Jewelry, your way.",
         "style": "warm",
-        "footer_text": "Shop all fine jewelry",
-        "footer_url": "/collections/all"
+        "footer_text": "Shop everyday jewelry",
+        "footer_url": "/collections/everyday-jewelry"
       }
     },
     "gold": {
@@ -280,8 +280,8 @@
         "gold-2": {
           "type": "chip",
           "settings": {
-            "text": "Chain Bracelets",
-            "url": "/collections/chain-bracelets"
+            "text": "Bracelets",
+            "url": "/collections/all-bracelets"
           }
         },
         "gold-3": {
@@ -305,204 +305,132 @@
             "url": "/collections/bangles"
           }
         },
-        "gold-6": {
+        "edit-1": {
           "type": "product",
           "settings": {
-            "product": "copy-of-band-gold-ring-sizable",
-            "title": "Nut Style Ring, Sizeable",
-            "subtitle": "14K Yellow Gold · Stackable"
+            "product": "mini-puffy-teardrop-bracelet-in-14k-yellow-gold",
+            "title": "Mini Puffy Teardrop Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-7": {
+        "edit-2": {
           "type": "product",
           "settings": {
-            "product": "lmny-paperclip-2-5-mm-pclip060-bracelet",
-            "title": "2.5mm Paperclip Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
+            "product": "sapphire-half-paper-clip-and-half-tennis-bracelet-in-14k-yellow-gold",
+            "title": "Sapphire Half Paper Clip and Half Tennis Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-8": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-herringbone-2-8-mm-sf030",
-            "title": "2.8mm Herringbone Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-9": {
-          "type": "product",
-          "settings": {
-            "product": "yellow-gold-bowtie-huggie-earrings-1",
-            "title": "Yellow Gold Bowtie Huggie Earrings",
-            "subtitle": "Yellow Gold"
-          }
-        },
-        "gold-10": {
+        "edit-3": {
           "type": "product",
           "settings": {
             "product": "mini-signet-ring-14k-yellow-gold",
             "title": "Mini Signet Ring",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
-        "gold-11": {
+        "edit-4": {
           "type": "product",
           "settings": {
-            "product": "mini-curb-stackable-ring-14k-yellow-gold",
-            "title": "Mini Curb Stackable Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "lmny-paperclip-2-5-mm-pclip060",
+            "title": "2.5mm Paperclip Chain Necklace",
+            "subtitle": ""
           }
         },
-        "gold-12": {
+        "edit-5": {
           "type": "product",
           "settings": {
-            "product": "polished-band-ring-14k-yellow-gold",
-            "title": "Polished Band Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "emerald-cut-london-blue-topaz-curb-bracelet-in-yellow-gold",
+            "title": "London Blue Topaz Curb Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-13": {
+        "edit-6": {
           "type": "product",
           "settings": {
-            "product": "rectangular-signet-ring-in-14k-yellow-gold",
-            "title": "Rectangular Signet Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "pear-pink-morganite-station-bracelet-in-yellow-gold",
+            "title": "Pear Pink Morganite Station Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-14": {
+        "edit-7": {
           "type": "product",
           "settings": {
-            "product": "copy-of-circle-shape-diamond-rose-gold-ring-sizable",
-            "title": "Round Diamond Stackable Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "pear-mixed-gemstone-station-bracelet-in-yellow-gold",
+            "title": "Pear Mixed Gemstone Station Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-15": {
+        "edit-8": {
           "type": "product",
           "settings": {
-            "product": "bar-set-diamond-stackable-band",
-            "title": "Bar Set Diamond Band",
-            "subtitle": "Stackable"
+            "product": "red-garnet-and-diamond-pendant-necklace-in-yellow-gold",
+            "title": "Red Garnet and Diamond Pendant Necklace",
+            "subtitle": ""
           }
         },
-        "gold-16": {
+        "edit-9": {
           "type": "product",
           "settings": {
-            "product": "channel-set-diamond-stackable-eternity-band",
-            "title": "Channel Set Diamond Band",
-            "subtitle": "Stackable"
+            "product": "emerald-cut-london-blue-topaz-curb-necklace-in-yellow-gold",
+            "title": "London Blue Topaz Curb Necklace",
+            "subtitle": ""
           }
         },
-        "gold-17": {
-          "type": "product",
-          "settings": {
-            "product": "graduated-tubogas-ring-14k-yellow-gold",
-            "title": "Graduated Tubogas Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-18": {
-          "type": "product",
-          "settings": {
-            "product": "thick-tubogas-ring-14k-yellow-gold",
-            "title": "Thick Tubogas Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-19": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-raindrop-ring-14k-yellow-gold",
-            "title": "Diamond Raindrop Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-20": {
-          "type": "product",
-          "settings": {
-            "product": "polished-5mm-bangle-14k-yellow-gold",
-            "title": "Polished 5mm Bangle",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-21": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-snake-2-6-mm-ovsn260-bracelet",
-            "title": "2.6mm Snake Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-22": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-cuban-5-mm-nhmc150-bracelet",
-            "title": "5mm Cuban Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-23": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-rope-2-5-mm-hsr018",
-            "title": "2.7mm Rope Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-24": {
-          "type": "product",
-          "settings": {
-            "product": "mini-initial-necklace-in-14k-yellow-gold",
-            "title": "Mini Initial Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-25": {
-          "type": "product",
-          "settings": {
-            "product": "polished-chevron-band",
-            "title": "Polished Chevron Band",
-            "subtitle": "14K Yellow Gold · Stackable"
-          }
-        },
-        "gold-26": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-chevron-band",
-            "title": "Diamond Chevron Band",
-            "subtitle": "Stackable"
-          }
-        },
-        "gold-27": {
+        "edit-10": {
           "type": "product",
           "settings": {
             "product": "diamond-chevron-polished-band-in-14k-yellow-gold",
             "title": "Diamond Chevron Polished Band",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
-        "gold-28": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-chevron-ring-in-14k-yellow-gold",
-            "title": "Diamond Chevron Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-29": {
-          "type": "product",
-          "settings": {
-            "product": "chevron-wire-ring",
-            "title": "Chevron Wire Ring",
-            "subtitle": "Stackable"
-          }
-        },
-        "gold-30": {
+        "edit-11": {
           "type": "product",
           "settings": {
             "product": "double-chevron-wire-ring-in-14k-yellow-gold",
             "title": "Double Chevron Wire Ring",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
+          }
+        },
+        "edit-12": {
+          "type": "product",
+          "settings": {
+            "product": "graduated-tubogas-ring-14k-yellow-gold",
+            "title": "Graduated Tubogas Ring",
+            "subtitle": ""
+          }
+        },
+        "edit-13": {
+          "type": "product",
+          "settings": {
+            "product": "mini-curb-stackable-ring-14k-yellow-gold",
+            "title": "Mini Curb Stackable Ring",
+            "subtitle": ""
+          }
+        },
+        "edit-14": {
+          "type": "product",
+          "settings": {
+            "product": "bar-cuff-bangle-14k-yellow-gold",
+            "title": "Bar Cuff Bangle",
+            "subtitle": ""
+          }
+        },
+        "edit-15": {
+          "type": "product",
+          "settings": {
+            "product": "mini-initial-necklace-in-14k-yellow-gold",
+            "title": "Mini Initial Necklace",
+            "subtitle": ""
+          }
+        },
+        "edit-16": {
+          "type": "product",
+          "settings": {
+            "product": "polished-band-ring-14k-yellow-gold",
+            "title": "Polished Band Ring",
+            "subtitle": ""
           }
         }
       },
@@ -512,42 +440,33 @@
         "gold-3",
         "gold-4",
         "gold-5",
-        "gold-6",
-        "gold-7",
-        "gold-8",
-        "gold-9",
-        "gold-10",
-        "gold-11",
-        "gold-12",
-        "gold-13",
-        "gold-14",
-        "gold-15",
-        "gold-16",
-        "gold-17",
-        "gold-18",
-        "gold-19",
-        "gold-20",
-        "gold-21",
-        "gold-22",
-        "gold-23",
-        "gold-24",
-        "gold-25",
-        "gold-26",
-        "gold-27",
-        "gold-28",
-        "gold-29",
-        "gold-30"
+        "edit-1",
+        "edit-2",
+        "edit-3",
+        "edit-4",
+        "edit-5",
+        "edit-6",
+        "edit-7",
+        "edit-8",
+        "edit-9",
+        "edit-10",
+        "edit-11",
+        "edit-12",
+        "edit-13",
+        "edit-14",
+        "edit-15",
+        "edit-16"
       ],
       "settings": {
         "style": "cream",
         "columns": "5",
         "ratio": "0.84",
-        "eyebrow": "Gold Jewelry",
-        "title": "The gold you reach for,",
-        "title_emphasis": "rings, chains, and bands.",
-        "text": "Stacking rings, 14K chain necklaces and bracelets, and bands. The same gold from a desk to dinner.",
-        "all_text": "Shop all",
-        "all_url": "/collections/gold-jewelry",
+        "eyebrow": "Everyday Jewelry",
+        "title": "From your desk,",
+        "title_emphasis": "to your dinner plans.",
+        "text": "Gold chains, sculptural rings, and gemstone bracelets and necklaces. Find your everyday favorites.",
+        "all_text": "Shop the full edit",
+        "all_url": "/collections/everyday-jewelry",
         "more_row": true,
         "button_1_text": "",
         "button_1_url": "",
@@ -557,8 +476,8 @@
         "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets",
         "collection": "",
         "collection_limit": 5,
-        "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/gold-jewelry"
+        "mobile_button_text": "Shop Everyday Jewelry",
+        "mobile_button_url": "/collections/everyday-jewelry"
       }
     },
     "chains-carousel": {
@@ -630,7 +549,8 @@
         "collection_2": "",
         "link_text": "Shop all chains",
         "link_url": "/collections/chains"
-      }
+      },
+      "disabled": true
     },
     "lab-grown": {
       "type": "lmh-product-row",

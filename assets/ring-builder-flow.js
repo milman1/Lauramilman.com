@@ -8,6 +8,7 @@
     const main = root.querySelector('[data-flow-main]');
     const aside = root.querySelector('[data-flow-summary]');
     const status = root.querySelector('[data-flow-status]');
+    const sentBox = root.querySelector('[data-ring-sent]');
     const shapeSource = root.querySelector('[data-diamond-filter-template]');
     const shapeDoc = new DOMParser().parseFromString(shapeSource ? shapeSource.innerHTML : '', 'text/html');
     const listedShapes = [...shapeDoc.querySelectorAll('.lm-shape__name')].map(el => el.textContent.trim()).filter(Boolean);
@@ -140,10 +141,11 @@
         const p = state[k];
         const price = k === 'setting' ? variantPrice(p) : k === 'band' ? bandVariant()?.price : p?.price;
         return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button(k === 'band' ? 'remove' : 'change', k === 'band' ? 'remove-band' : 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}<br>${price != null ? money(price) : esc(t('size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
-      }).join('')}</div><div class="row"><span>${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : 'missing_setting'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${state.screen === 'review' ? button(state.busy ? 'adding' : state.band ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || (state.band && !bandVariant()) ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a>`;
+      }).join('')}</div><div class="row"><span>${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : state.diamond ? 'missing_setting' : 'intro'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${state.screen === 'review' ? button(state.busy ? 'adding' : state.band ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || (state.band && !bandVariant()) ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a>`;
       const dock = root.querySelector('[data-flow-dock]');
       const next = state.screen === 'review' ? button('add_short', 'dock-add', 'primary', state.busy || !both() ? 'disabled' : '') : both() ? button('review_ring', 'review') : button('view_summary', 'dock-summary', 'secondary');
-      dock.innerHTML = `<div><span class="eyebrow">${esc(t('your_ring'))}</span><span class="total">${money(subtotal())}</span></div>${next}`;
+      const selections = ['setting', 'diamond'].map(k => `<span class="dock-selection" title="${esc(state[k]?.title || t('empty_selection'))}">${esc(t(k))}: ${esc(state[k]?.title || t('empty_selection'))}</span>`).join('');
+      dock.innerHTML = `<div><span class="eyebrow">${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span>${selections}<span class="total">${money(subtotal())}</span></div>${next}`;
       if (state.busy) lockControls();
     }
     function lockControls() {
@@ -461,6 +463,31 @@
         else { await navigator.clipboard.writeText(url.href); notice(t('link_copied')); }
       } catch (error) { if (error?.name !== 'AbortError') notice(t('share_failed', { url: url.href }), true); }
     }
+    // After the ring email posts, Shopify reloads this page with contact_posted=true.
+    // The builder draws the review after load, so the #RingEmailForm jump lands at
+    // the top; confirm at the top instead, then drop the flag so a refresh or a
+    // shared link does not say "Sent" again. A failed send goes back to the form.
+    function afterRingEmail() {
+      const mail = root.querySelector('[data-ring-email]');
+      const sent = mail && !mail.hidden && mail.querySelector('[data-ring-email-sent]');
+      const failed = mail && !mail.hidden && mail.querySelector('[data-ring-email-error]');
+      const u = new URL(window.location.href);
+      if (sent && sentBox) {
+        const items = ['setting', 'diamond'].filter(k => state[k]).map(k => `<li><span class="eyebrow">${esc(t(k))}</span>${esc(state[k].title)}</li>`).join('');
+        sentBox.innerHTML = `<h2>${esc(t('email_sent_title'))}</h2><p>${esc(t('email_sent'))}</p>${items ? `<ul>${items}</ul>` : ''}<p class="detail-help"><a class="link" href="${esc(cfg.appointment)}">${esc(t('book_viewing'))} →</a>${button('keep_personalizing', 'keep-personalizing', 'link')}</p>`;
+        sentBox.hidden = false;
+        reveal(sentBox);
+        sentBox.focus({ preventScroll: true });
+      } else if (failed) {
+        reveal(mail);
+        mail.querySelector('input[type="email"]')?.focus({ preventScroll: true });
+      }
+      if (u.searchParams.has('contact_posted') || u.hash === '#RingEmailForm') {
+        u.searchParams.delete('contact_posted');
+        if (u.hash === '#RingEmailForm') u.hash = '';
+        history.replaceState(null, '', u.pathname + u.search + u.hash);
+      }
+    }
     function render() {
       root.removeAttribute('aria-busy');
       root.querySelector('footer button').disabled = false;
@@ -477,6 +504,7 @@
         mail.hidden = state.screen !== 'review';
         mail.querySelectorAll('button,input').forEach(el => { el.disabled = false; });
       }
+      if (sentBox && state.screen !== 'review') sentBox.hidden = true;
     }
     function reveal(target) {
       if (!target) return;
@@ -620,6 +648,7 @@
         paintDiamondFilters(); state.page = 1; search(); persist();
       } else if (action.startsWith('clear-')) { state[action.slice(6)] = null; state.group = ''; go('catalog'); }
       else if (action === 'review') go('review');
+      else if (action === 'keep-personalizing') { const size = main.querySelector('[data-field="size"]'); reveal(size?.closest('label')); size?.focus({ preventScroll: true }); }
       else if (action === 'catalog' || action === 'start') { state.returnIndex = action === 'catalog' && state.screen === 'detail' ? state.detailIndex : null; go(action); }
       else if (action === 'reset') resetSearch();
       else if (action === 'retry') search();
@@ -762,6 +791,7 @@
       go(both() ? 'review' : 'catalog');
       notice(failed ? t('restore_failed') : '', failed);
       ready = true;
+      afterRingEmail();
     }
     restore();
   }

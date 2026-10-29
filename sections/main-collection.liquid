@@ -13,7 +13,7 @@
   assign jewelry_only = false
   assign schema_include_products = true
   assign collection_page_size = section.settings.products_per_page
-  if collection.handle == 'diamond-rings'
+  if collection.handle == 'diamond-rings' or collection.handle == 'everyday-jewelry'
     assign collection_page_size = 250
   endif
   if collection.handle == 'all' or collection.handle == 'all-jewelry'
@@ -173,6 +173,19 @@
         {%- for hj in hj_links -%}
           {%- assign hj_parts = hj | split: '::' -%}
           <a href="/collections/{{ hj_parts[0] }}" class="lm-collection__chip"{% if collection.handle == hj_parts[0] %} aria-current="page"{% endif %}>{{ hj_parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- if collection.handle == 'everyday-jewelry' -%}
+      <nav class="lm-collection__chips" aria-label="{{ 'everyday_filters.shop_by_type' | t }}">
+        <span class="lm-collection__chips-label">{{ 'everyday_filters.shop_by_type' | t }}</span>
+        <a class="lm-collection__chip" href="{{ collection.url }}" data-everyday-type="" aria-current="page">{{ 'everyday_filters.all' | t }}</a>
+        {%- assign everyday_types = 'Rings::rings|Necklaces::necklaces|Bracelets::bracelets' | split: '|' -%}
+        {%- for item in everyday_types -%}
+          {%- assign parts = item | split: '::' -%}
+          {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+          <a class="lm-collection__chip" href="{{ collection.url }}?jewelry_type={{ parts[0] | url_encode }}" data-everyday-type="{{ parts[0] }}">{{ label_key | t }}</a>
         {%- endfor -%}
       </nav>
     {%- endif -%}
@@ -754,6 +767,8 @@
     var allCards = productsGrid ? Array.from(productsGrid.querySelectorAll('.product-card')) : [];
     var totalOnPage = allCards.length;
     var hasJewelryFilters = !!document.querySelector('[data-jewelry-filters]');
+    var everydayInputs = Array.from(document.querySelectorAll('[data-everyday-filter]'));
+    var everydayDimensions = ['type', 'style', 'metal', 'purity', 'gemstone'];
     var drawerCloseTimer;
 
     function openDrawer() {
@@ -839,6 +854,59 @@
       return normalize(haystack).indexOf(normalize(needle)) !== -1;
     }
 
+    function everydayMatches(data, dimension, value) {
+      var title = normalize(data.titleLower || data.title).replace(/paper clip/g, 'paperclip');
+      var metal = normalize((data.metalOptions || '') + ' ' + (data.metal || '') + ' ' + title);
+      var wanted = normalize(value);
+      if (dimension === 'type') return normalize(data.type) === wanted;
+      if (dimension === 'metal') {
+        if (wanted === 'silver') return /\bsilver\b/.test(metal);
+        var color = wanted.split(' ')[0];
+        return metal.indexOf(wanted) !== -1 || new RegExp('\\b(?:10|14|18|22|24)k\\s+' + color + '\\b').test(metal);
+      }
+      if (dimension === 'purity') return new RegExp('\\b' + wanted + '\\b').test(metal);
+      if (dimension === 'style' && wanted === 'stackable') return /\bstackable\b|\bchevron\b/.test(title);
+      return title.indexOf(wanted) !== -1;
+    }
+
+    function everydaySelections() {
+      var selection = {};
+      everydayDimensions.forEach(function (dimension) {
+        selection[dimension] = everydayInputs.filter(function (input) {
+          return input.dataset.everydayFilter === dimension && input.checked;
+        }).map(function (input) { return input.value; });
+      });
+      return selection;
+    }
+
+    function everydayCardMatches(card, selection, exceptDimension) {
+      return everydayDimensions.every(function (dimension) {
+        return dimension === exceptDimension || !selection[dimension].length || selection[dimension].some(function (value) {
+          return everydayMatches(card.dataset, dimension, value);
+        });
+      });
+    }
+
+    function updateEverydayOptions(selection) {
+      document.querySelectorAll('[data-everyday-type]').forEach(function (link) {
+        var value = link.dataset.everydayType;
+        var active = value ? selection.type.length === 1 && selection.type[0] === value : selection.type.length === 0;
+        if (active) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+      everydayInputs.forEach(function (input) {
+        var dimension = input.dataset.everydayFilter;
+        var total = allCards.filter(function (card) { return everydayMatches(card.dataset, dimension, input.value); }).length;
+        var count = allCards.filter(function (card) {
+          return everydayMatches(card.dataset, dimension, input.value) && everydayCardMatches(card, selection, dimension);
+        }).length;
+        input.closest('li').hidden = total === 0 && !input.checked;
+        input.disabled = count === 0 && !input.checked;
+        input.closest('label').classList.toggle('is-disabled', input.disabled);
+        input.closest('label').querySelector('[data-everyday-count]').textContent = '(' + count + ')';
+      });
+    }
+
     function extractCarat(card) {
       var raw = card.dataset.carat || '';
       var fromMeta = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
@@ -902,6 +970,14 @@
         if (selectedTypes.length) params.set('type', selectedTypes.join(','));
         if (selectedMetals.length) params.set('metal', selectedMetals.join(','));
         if (caratRange) params.set('carat', caratRange);
+        if (everydayInputs.length) {
+          var selection = everydaySelections();
+          everydayDimensions.forEach(function (dimension) {
+            params.delete('jewelry_' + dimension);
+            selection[dimension].forEach(function (value) { params.append('jewelry_' + dimension, value); });
+          });
+          params.delete('page');
+        }
         var qs = params.toString();
         var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
         window.history.replaceState({}, '', next);
@@ -926,8 +1002,10 @@
       var caratBtn = document.querySelector('.js-jf-carat-btn.is-active');
       var caratRange = caratBtn ? caratBtn.getAttribute('data-carat') : null;
 
+      var everyday = everydaySelections();
+      var everydayCount = everydayInputs.filter(function (input) { return input.checked; }).length;
       var visibleCount = 0;
-      var hasActive = selectedTypes.length > 0 || selectedMetals.length > 0 || !!caratRange;
+      var hasActive = selectedTypes.length > 0 || selectedMetals.length > 0 || !!caratRange || everydayCount > 0;
 
       allCards.forEach(function (card) {
         var tags = card.dataset.tags || '';
@@ -954,6 +1032,8 @@
           if (!caratInRange(extractCarat(card), caratRange)) show = false;
         }
 
+        if (show && everydayCount) show = everydayCardMatches(card, everyday);
+
         card.style.display = show ? '' : 'none';
         if (show) visibleCount++;
       });
@@ -969,13 +1049,14 @@
         if (productsGrid) productsGrid.style.display = (visibleCount === 0 && hasActive) ? 'none' : '';
       }
 
+      if (everydayInputs.length) updateEverydayOptions(everyday);
       syncStyleBar(selectedTypes);
       syncURL(selectedTypes, selectedMetals, caratRange);
-      updateFilterBadge(selectedTypes.length + selectedMetals.length + (caratRange ? 1 : 0));
+      updateFilterBadge(selectedTypes.length + selectedMetals.length + (caratRange ? 1 : 0) + everydayCount);
     }
 
     function clearJewelryFilters() {
-      document.querySelectorAll('.js-jf-style, .js-jf-metal').forEach(function (input) {
+      document.querySelectorAll('.js-jf-style, .js-jf-metal, [data-everyday-filter]').forEach(function (input) {
         input.checked = false;
       });
       document.querySelectorAll('.js-jf-carat-btn').forEach(function (btn) {
@@ -1003,6 +1084,12 @@
 
       checkList('type', '.js-jf-style');
       checkList('metal', '.js-jf-metal');
+      everydayInputs.forEach(function (input) {
+        if (params.getAll('jewelry_' + input.dataset.everydayFilter).indexOf(input.value) !== -1) {
+          input.checked = true;
+          applied = true;
+        }
+      });
 
       var caratParam = params.get('carat');
       if (caratParam) {
@@ -1016,13 +1103,23 @@
         });
       }
 
-      if (applied) applyJewelryFilters();
+      if (applied || everydayInputs.length) applyJewelryFilters();
       else syncStyleBar([]);
     }
 
     if (countEl) countEl.dataset.defaultCount = countEl.textContent.trim();
 
     if (hasJewelryFilters) {
+      document.querySelectorAll('[data-everyday-type]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          event.preventDefault();
+          everydayInputs.filter(function (input) { return input.dataset.everydayFilter === 'type'; }).forEach(function (input) {
+            input.checked = input.value === link.dataset.everydayType;
+          });
+          applyJewelryFilters();
+        });
+      });
       if (form) {
         form.addEventListener('change', function (e) {
           if (e.target && e.target.matches('[data-client-filter]')) {
@@ -1033,7 +1130,7 @@
 
         // Prevent jewelry filter fields from being submitted as Shopify params
         form.addEventListener('submit', function () {
-          form.querySelectorAll('[data-client-filter]').forEach(function (input) {
+          form.querySelectorAll('[data-client-filter]:not([data-everyday-filter])').forEach(function (input) {
             input.disabled = true;
           });
           form.querySelectorAll('input[type="number"]').forEach(function (input) {

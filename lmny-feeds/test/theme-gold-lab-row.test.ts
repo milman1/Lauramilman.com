@@ -13,32 +13,6 @@ function themeJson(path: string): {
   return JSON.parse(text);
 }
 
-const FEATURED = [
-  'copy-of-band-gold-ring-sizable',
-  'lmny-paperclip-2-5-mm-pclip060-bracelet',
-  'lmny-herringbone-2-8-mm-sf030',
-  'yellow-gold-bowtie-huggie-earrings-1',
-];
-
-const EXTRA_RINGS = [
-  'mini-signet-ring-14k-yellow-gold',
-  'mini-curb-stackable-ring-14k-yellow-gold',
-  'polished-band-ring-14k-yellow-gold',
-  'rectangular-signet-ring-in-14k-yellow-gold',
-  'graduated-tubogas-ring-14k-yellow-gold',
-  'thick-tubogas-ring-14k-yellow-gold',
-  'diamond-raindrop-ring-14k-yellow-gold',
-];
-
-const BANDS = [
-  'polished-chevron-band',
-  'diamond-chevron-band',
-  'diamond-chevron-polished-band-in-14k-yellow-gold',
-  'diamond-chevron-ring-in-14k-yellow-gold',
-  'chevron-wire-ring',
-  'double-chevron-wire-ring-in-14k-yellow-gold',
-];
-
 const LAB = [
   'lab-grown-round-solitaire-pendant-prong-not-applicable',
   'lab-grown-oval-studs-earring-prong-north-south',
@@ -61,15 +35,10 @@ describe('homepage gold row and lab-grown carousel', () => {
       .map((block) => block?.settings?.product);
 
     expect(gold.type).toBe('lmh-product-row');
-    expect(gold.settings?.title).toBe('The gold you reach for,');
-    expect(gold.settings?.title_emphasis).toBe('rings, chains, and bands.');
     expect(gold.settings?.more_row).toBe(true);
-    expect(gold.settings?.all_url).toBe('/collections/gold-jewelry');
-    expect(products.slice(0, 4)).toEqual(FEATURED);
-    for (const handle of [...EXTRA_RINGS, ...BANDS, 'lmny-snake-2-6-mm-ovsn260-bracelet', 'polished-5mm-bangle-14k-yellow-gold']) {
-      expect(products).toContain(handle);
-    }
-    expect(products.length).toBeGreaterThan(FEATURED.length + EXTRA_RINGS.length);
+    expect(gold.settings?.all_url).toBe('/collections/everyday-jewelry');
+    expect(products).toHaveLength(16);
+    expect(new Set(products).size).toBe(products.length);
 
     expect(liquid).toContain('assign feature_cap = 4');
     expect(liquid).toContain('data-lmh-row-scroll');
