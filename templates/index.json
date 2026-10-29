@@ -63,8 +63,8 @@
         "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in the Diamond District.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
-        "secondary_text": "Shop complete rings",
-        "secondary_url": "/collections/rings",
+        "secondary_text": "Shop complete engagement rings",
+        "secondary_url": "/collections/engagement-rings",
         "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
         "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
@@ -556,14 +556,6 @@
     "lab-grown": {
       "type": "lmh-product-row",
       "blocks": {
-        "lab-1": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
-            "title": "Lab-Grown Round Diamond Solitaire Pendant",
-            "subtitle": "Prong · Made to order"
-          }
-        },
         "lab-2": {
           "type": "product",
           "settings": {
@@ -572,35 +564,19 @@
             "subtitle": "Prong · Made to order"
           }
         },
+        "lab-1": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Solitaire Pendant",
+            "subtitle": "Prong · Made to order"
+          }
+        },
         "lab-3": {
           "type": "product",
           "settings": {
             "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
             "title": "Lab-Grown Round Diamond Tennis Bracelet",
-            "subtitle": "14K White Gold"
-          }
-        },
-        "lab-4": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
-            "title": "Lab-Grown Emerald Huggie Earrings",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "lab-5": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-pear-diamond-drop-earrings-056-ct-14k-two-tone-er10454",
-            "title": "Lab-Grown Pear Drop Earrings",
-            "subtitle": "14K Two-Tone Gold"
-          }
-        },
-        "lab-6": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-marquise-diamond-stud-earrings-067-ct-14k-white-gold-er18519",
-            "title": "Lab-Grown Marquise Stud Earrings",
             "subtitle": "14K White Gold"
           }
         },
@@ -614,29 +590,26 @@
         }
       },
       "block_order": [
-        "lab-1",
         "lab-2",
-        "lab-4",
-        "lab-5",
-        "lab-6",
+        "lab-1",
         "lab-3",
         "lab-8"
       ],
       "settings": {
         "style": "navy",
         "columns": "4",
-        "scroll_row": true,
+        "scroll_row": false,
         "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
-        "title": "For the push present,",
-        "title_emphasis": "or the promotion you bought yourself.",
-        "text": "Pendants, studs, huggies, eternity bands, and a tennis bracelet set with lab-grown diamonds, each under $1,000.",
+        "eyebrow": "LAB-GROWN JEWELRY",
+        "title": "Your everyday",
+        "title_emphasis": "diamonds.",
+        "text": "Lab-grown diamond jewelry. Styles starting under $1,000.",
         "all_text": "",
         "all_url": "",
-        "button_1_text": "Shop Under $1,000",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
-        "button_2_text": "All Lab-Grown Jewelry",
-        "button_2_url": "/collections/lab-grown-diamond-jewelry",
+        "button_1_text": "Shop lab-grown jewelry",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry",
+        "button_2_text": "",
+        "button_2_url": "",
         "feature_image_asset": "",
         "feature_image_alt": "",
         "collection": "",
