@@ -326,6 +326,43 @@
   }
 </script>
 
+{%- comment -%}
+  FAQPage markup from custom.guide_faq (JSON: [{"question","answer"}]), a copy of
+  the FAQ section already shown in the article body. A question is marked up only
+  while its text still appears in the body, so an edited or removed FAQ drops out
+  of the markup instead of claiming an answer the page no longer shows.
+{%- endcomment -%}
+{%- liquid
+  assign article_faq = article.metafields.custom.guide_faq.value
+  assign article_faq_count = 0
+  for faq in article_faq
+    if faq.question != blank and faq.answer != blank and article.content contains faq.question
+      assign article_faq_count = article_faq_count | plus: 1
+    endif
+  endfor
+-%}
+{%- if article_faq_count > 0 -%}
+  {%- assign article_faq_i = 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for faq in article_faq -%}
+          {%- if faq.question != blank and faq.answer != blank and article.content contains faq.question -%}
+            {%- assign article_faq_i = article_faq_i | plus: 1 -%}
+            {
+              "@type": "Question",
+              "name": {{ faq.question | strip_html | json }},
+              "acceptedAnswer": { "@type": "Answer", "text": {{ faq.answer | strip_html | json }} }
+            }{%- unless article_faq_i == article_faq_count -%},{%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
 {% schema %}
 {
   "name": "t:sections.main-article.name",

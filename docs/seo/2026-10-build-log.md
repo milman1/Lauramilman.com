@@ -442,3 +442,10 @@ Notes for next time:
 ## 2026-10-28: welcome offer stated on product pages
 
 - Merchant approved saying "sign up for 10% off" publicly (the code stays behind the signup). New `snippets/welcome-offer-line.liquid` renders "New clients: sign up for 10% off your first jewelry purchase." under the trust strip on jewelry product pages only (merchant: loose lab-grown and natural stone pages untouched). It shows only when the product is in one of the jewelry collections the LMNYWELCOME discount covers, never on watches, and not for customers tagged `welcome10`. The link opens the existing welcome popup (falls back to the footer form). The discounted price is not put into product structured data (Google requires the listed price without a code).
+
+## 2026-10-29: FAQPage markup on Journal articles
+
+- Merchant approved (item 1 of the 2026-10-29 SEO next steps). 31 of 32 Journal articles already show an FAQ section; the markup now matches it. `what-jewelry-to-wear-on-a-first-date` has no FAQ section and gets none.
+- Store content: each article's visible FAQ was copied word for word into `custom.guide_faq` (JSON, 113 questions). No article text changed.
+- Theme: `sections/main-article.liquid` emits FAQPage JSON-LD from that field, and marks up a question only while its text still appears in the article body, so editing or removing a visible FAQ drops it from the markup. New articles need the field set to get the markup.
+- Not done: a named person as author (the store has not named one; articles stay under the Organization), the hollow-chain sentence in the gold chain guide (needs a jeweler's check), and box chain in that guide.
