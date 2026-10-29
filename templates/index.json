@@ -117,28 +117,64 @@
           "type": "diamond",
           "settings": {
             "shape": "Round",
-            "image": "shopify://shop_images/lmny-home-round-diamond.jpg"
+            "image": "shopify://shop_images/lmny-home-round-diamond.jpg",
+            "artwork_x": 71
           }
         },
         "oval": {
           "type": "diamond",
           "settings": {
             "shape": "Oval",
-            "image": "shopify://shop_images/lmny-home-oval-diamond.jpg"
+            "image": "shopify://shop_images/lmny-home-oval-diamond.jpg",
+            "artwork_x": 339
           }
         },
         "emerald": {
           "type": "diamond",
           "settings": {
             "shape": "Emerald",
-            "image": "shopify://shop_images/lmny-home-emerald-diamond.jpg"
+            "image": "shopify://shop_images/lmny-home-emerald-diamond.jpg",
+            "artwork_x": 600
           }
         },
         "pear": {
           "type": "diamond",
           "settings": {
             "shape": "Pear",
-            "image": "shopify://shop_images/lmny-home-pear-diamond.jpg"
+            "image": "shopify://shop_images/lmny-home-pear-diamond.jpg",
+            "artwork_x": 864
+          }
+        },
+        "oval_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Oval solitaire",
+            "shape": "Oval",
+            "artwork_x": 71
+          }
+        },
+        "emerald_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Emerald solitaire",
+            "shape": "Emerald",
+            "artwork_x": 339
+          }
+        },
+        "round_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Round solitaire",
+            "shape": "Round",
+            "artwork_x": 600
+          }
+        },
+        "three_stone": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Three stone",
+            "shape": "Oval",
+            "artwork_x": 864
           }
         }
       },
@@ -146,7 +182,11 @@
         "round",
         "oval",
         "emerald",
-        "pear"
+        "pear",
+        "oval_solitaire",
+        "emerald_solitaire",
+        "round_solitaire",
+        "three_stone"
       ],
       "settings": {
         "title": "Make it yours.",
@@ -156,7 +196,9 @@
           "emerald-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
           "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
           "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
-        ]
+        ],
+        "diamond_artwork": "shopify://shop_images/lmny-home-diamond-preview-board.png",
+        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png"
       }
     },
     "meet-laura": {

@@ -1,0 +1,12 @@
+{%- comment -%}
+  Display an exact image region from the approved 1536 × 1024 preview board.
+  Both boards are shared, cached images; labels and links remain real HTML.
+{%- endcomment -%}
+{%- liquid
+  assign image_width = 153600.0 | divided_by: crop_width
+  assign image_left = x | times: -100.0 | divided_by: crop_width
+  assign image_top = y | times: -100.0 | divided_by: crop_height
+-%}
+<span class="hrg__image hrg__image--artwork" style="--art-ratio: {{ crop_width }} / {{ crop_height }}; --art-width: {{ image_width }}%; --art-left: {{ image_left }}%; --art-top: {{ image_top }}%;">
+  {{ artwork | image_url: width: 1536 | image_tag: widths: '1536', loading: 'lazy', alt: label }}
+</span>
