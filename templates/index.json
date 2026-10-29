@@ -224,20 +224,21 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "For your forever",
-            "link_text": "Build your ring",
-            "url": "/pages/ring-builder",
-            "image_asset": "home-rings-forever.webp",
-            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal",
-            "position": "92% 50%"
+            "title": "Rings",
+            "link_text": "Shop complete rings",
+            "url": "/collections/rings",
+            "image_asset": "home-rings-model.webp",
+            "image_alt": "Woman in an ivory blazer wearing a yellow gold diamond ring",
+            "position": "50% 50%",
+            "image": "shopify://shop_images/home-rings-model.webp"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "For work",
-            "link_text": "Shop complete rings",
-            "url": "/collections/rings",
+            "title": "Necklaces",
+            "link_text": "Shop necklaces",
+            "url": "/collections/necklaces",
             "image_asset": "home-rings-work.webp",
             "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
             "position": "60% 30%"
@@ -246,7 +247,7 @@
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "For play",
+            "title": "Bracelets",
             "link_text": "Shop bracelets",
             "url": "/collections/all-bracelets",
             "image_asset": "home-bracelets.webp",
@@ -261,10 +262,10 @@
         "tile-3"
       ],
       "settings": {
-        "title": "Jewelry, your way.",
+        "title": "Find your next favorite",
         "style": "warm",
-        "footer_text": "Shop everyday jewelry",
-        "footer_url": "/collections/everyday-jewelry"
+        "footer_text": "",
+        "footer_url": ""
       }
     },
     "gold": {
