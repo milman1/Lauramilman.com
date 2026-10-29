@@ -73,6 +73,24 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
 });
 
 describe('ring builder page chrome', () => {
+  it('confirms a sent ring email at the top and clears the posted flag', () => {
+    const flow = themeFile('sections/ring-builder-flow.liquid');
+    const js = themeFile('assets/ring-builder-flow.js');
+    const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
+    expect(flow).toContain('<div class="ring-sent" data-ring-sent tabindex="-1" role="status" hidden></div>');
+    expect(flow).toContain('data-ring-email-sent>{{ \'ring_flow.email_sent_heading\' | t }}</h2>');
+    expect(flow).toContain('data-ring-email-error');
+    for (const key of ['email_sent_title', 'email_sent', 'keep_personalizing']) {
+      expect(flow).toContain(`"${key}":{{ 'ring_flow.${key}' | t | json }}`);
+      expect(en[key]).toBeTruthy();
+    }
+    expect(en.email_sent_heading).toBe('Sent to Laura');
+    // Runs once the review is drawn, so the confirmation is where the shopper lands.
+    expect(js).toMatch(/ready = true;\s*afterRingEmail\(\);/);
+    expect(js).toContain("u.searchParams.delete('contact_posted')");
+    expect(js).toContain("action === 'keep-personalizing'");
+  });
+
   it('keeps the welcome offer off ring-builder templates', () => {
     expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
   });

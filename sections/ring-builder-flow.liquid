@@ -14,6 +14,7 @@
     </nav>
   </div>
   <div class="status" data-flow-status role="status"></div>
+  <div class="ring-sent" data-ring-sent tabindex="-1" role="status" hidden></div>
   <div class="layout solo">
     <div class="flow-body" data-flow-main>
       <h2>{{ 'ring_flow.where' | t }}</h2>
@@ -32,11 +33,12 @@
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
     <section class="ring-email" data-ring-email aria-labelledby="RingEmailTitle" hidden>
       {%- form 'contact', id: 'RingEmailForm' -%}
-        <h2 id="RingEmailTitle">{{ 'ring_flow.email_heading' | t }}</h2>
         {%- if form.posted_successfully? -%}
-          <p class="quiet" role="status">{{ 'ring_flow.email_sent' | t }}</p>
+          <h2 id="RingEmailTitle" data-ring-email-sent>{{ 'ring_flow.email_sent_heading' | t }}</h2>
+          <p class="quiet">{{ 'ring_flow.email_sent' | t }}</p>
         {%- else -%}
-          {%- if form.errors -%}<p class="error" role="alert">{{ 'ring_flow.email_failed' | t }}</p>{%- endif -%}
+          <h2 id="RingEmailTitle">{{ 'ring_flow.email_heading' | t }}</h2>
+          {%- if form.errors -%}<p class="error" role="alert" data-ring-email-error>{{ 'ring_flow.email_failed' | t }}</p>{%- endif -%}
           <p class="quiet">{{ 'ring_flow.email_intro' | t }}</p>
           <input type="hidden" name="contact[request_type]" value="Ring builder">
           <input type="hidden" name="contact[ring_link]" data-ring-email-field="link">
@@ -251,6 +253,9 @@
       "ask_stone":{{ 'ring_flow.ask_stone' | t | json }},
       "ask_setting":{{ 'ring_flow.ask_setting' | t | json }},
       "book_viewing":{{ 'ring_flow.book_viewing' | t | json }},
+      "email_sent_title":{{ 'ring_flow.email_sent_title' | t | json }},
+      "email_sent":{{ 'ring_flow.email_sent' | t | json }},
+      "keep_personalizing":{{ 'ring_flow.keep_personalizing' | t | json }},
       "band_other":{{ 'ring_flow.band_other' | t | json }},
       "size_guide":{{ 'ring_flow.size_guide' | t | json }},
       "promise":{{ 'ring_flow.promise' | t | json }},
