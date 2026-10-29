@@ -227,10 +227,10 @@
             "title": "Rings",
             "link_text": "Shop complete rings",
             "url": "/collections/rings",
-            "image_asset": "home-rings-model.webp",
-            "image_alt": "Woman in an ivory blazer wearing a yellow gold diamond ring",
+            "image_asset": "",
+            "image_alt": "Model in an ivory suit wearing stacked rings and delicate bracelets",
             "position": "50% 50%",
-            "image": "shopify://shop_images/home-rings-model.webp"
+            "image": "shopify://shop_images/home-rings-supplier-model.jpg"
           }
         },
         "tile-2": {
