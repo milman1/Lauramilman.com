@@ -177,6 +177,19 @@
       </nav>
     {%- endif -%}
 
+    {%- if collection.handle == 'everyday-jewelry' -%}
+      <nav class="lm-collection__chips" aria-label="{{ 'everyday_filters.shop_by_type' | t }}">
+        <span class="lm-collection__chips-label">{{ 'everyday_filters.shop_by_type' | t }}</span>
+        <a class="lm-collection__chip" href="{{ collection.url }}" data-everyday-type="" aria-current="page">{{ 'everyday_filters.all' | t }}</a>
+        {%- assign everyday_types = 'Rings::rings|Necklaces::necklaces|Bracelets::bracelets' | split: '|' -%}
+        {%- for item in everyday_types -%}
+          {%- assign parts = item | split: '::' -%}
+          {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+          <a class="lm-collection__chip" href="{{ collection.url }}?jewelry_type={{ parts[0] | url_encode }}" data-everyday-type="{{ parts[0] }}">{{ label_key | t }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
     <!-- Shop-by chips -->
     {%- if jewelry_only == false and gold_page == false and hj_page == false and section.blocks.size > 0 -%}
       <nav class="lm-collection__chips" aria-label="Shop by">
@@ -875,6 +888,12 @@
     }
 
     function updateEverydayOptions(selection) {
+      document.querySelectorAll('[data-everyday-type]').forEach(function (link) {
+        var value = link.dataset.everydayType;
+        var active = value ? selection.type.length === 1 && selection.type[0] === value : selection.type.length === 0;
+        if (active) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
       everydayInputs.forEach(function (input) {
         var dimension = input.dataset.everydayFilter;
         var total = allCards.filter(function (card) { return everydayMatches(card.dataset, dimension, input.value); }).length;
@@ -1091,6 +1110,16 @@
     if (countEl) countEl.dataset.defaultCount = countEl.textContent.trim();
 
     if (hasJewelryFilters) {
+      document.querySelectorAll('[data-everyday-type]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          event.preventDefault();
+          everydayInputs.filter(function (input) { return input.dataset.everydayFilter === 'type'; }).forEach(function (input) {
+            input.checked = input.value === link.dataset.everydayType;
+          });
+          applyJewelryFilters();
+        });
+      });
       if (form) {
         form.addEventListener('change', function (e) {
           if (e.target && e.target.matches('[data-client-filter]')) {
