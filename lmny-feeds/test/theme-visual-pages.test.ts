@@ -8,30 +8,33 @@ function themeFile(path: string): string {
 describe('homepage: where to begin is picture-led', () => {
   const start = themeFile('sections/ring-builder-start.liquid');
 
-  it('shows real stones and real setting photos in matching grids, not paragraphs', () => {
-    expect(start).toContain('class="rbs__grid"');
-    expect(start).toContain('rbs__grid--stones');
+  it('uses the homepage tile pattern: one picture per path, serif title, gold links', () => {
+    expect(start).toContain('class="lmh lmh-split rbs"');
+    expect(start).toContain('class="lmh-split__media rbs__case"');
     expect(start).toContain('data-rbs-stones');
-    expect(start).toContain('class="rbs__shape"');
-    for (const removed of ['rbs__note', 'rbs__count', 'Certified, priced stone by stone', 'Choose a stone, then set it in a ring']) {
+    expect(start).toContain('class="lmh-split__label">Start with a diamond<');
+    expect(start).toContain('class="lmh-split__label">Start with a setting<');
+    for (const removed of ['rbs__note', 'rbs__count', 'rbs__pill', 'rbs__card', 'Certified, priced stone by stone', 'Choose a stone, then set it in a ring']) {
       expect(start).not.toContain(removed);
     }
-    // Buttons, not sentences: lab-grown, natural, by shape, and See all.
-    expect(start).toContain('>Lab-grown</a>');
-    expect(start).toContain('>Natural</a>');
-    expect(start).toContain('By shape &darr;');
-    expect(start).toContain('See all {{ total }}');
+    // Links, not sentences: lab-grown, natural, by shape, and See all.
+    expect(start).toContain('>Lab-grown {% render \'lmh-arrow\' %}</a>');
+    expect(start).toContain('>Natural {% render \'lmh-arrow\' %}</a>');
+    expect(start).toContain('>By shape {% render \'lmh-arrow\' %}</a>');
+    expect(start).toContain('See all {{ total }} setting');
   });
 
-  it('never uses a stand-in picture for the stones', () => {
+  it('shows the stones small and uncropped on navy, never a stand-in picture', () => {
     // The stone cells are live inventory photos; until they load, a shape icon.
     expect(start).not.toContain("render 'lmh-img'");
-    expect(start).not.toMatch(/\.webp|\.jpg|asset_url/);
+    expect(start).not.toMatch(/\.webp|\.jpg|'[a-z-]+\.(png|svg)' \| asset_url/);
     expect(start).toContain("render 'diamond-shape-icon'");
+    expect(start).toContain("'Round,Oval,Pear' | split: ','");
+    expect(start).toContain('background: var(--lmh-navy)');
+    expect(start).toContain('.rbs .rbs__stone { flex: 0 0 27%;');
     // One in-stock lab-grown stone per shape, linking to that stone's own page.
-    expect(start).toContain("'Round,Oval,Pear,Emerald' | split: ','");
     expect(start).toContain('kind=lab&shapes=');
-    expect(start).toContain('href="/products/\' + esc(handle)');
+    expect(start).toContain("cell.setAttribute('href', '/products/' + handle)");
     expect(start).toContain("/^https:/.test(list[i].image_urls[0]");
     const home = themeFile('templates/index.json');
     expect(home).toMatch(/"ring-builder": \{[\s\S]*?"api_base_url": "https:\/\/[^"]+\/functions\/v1\/diamonds"/);
