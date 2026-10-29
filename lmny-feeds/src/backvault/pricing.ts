@@ -1,4 +1,4 @@
-import { BACKVAULT } from '../../config/pricing.js';
+import { BACKVAULT, roundJewelryRetail } from '../../config/pricing.js';
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -28,4 +28,19 @@ export function backVaultRetail(costUsd: number, competitorPriceUsd?: number | n
   if (!Number.isFinite(competitorPriceUsd) || competitorPriceUsd <= 0) return flat;
   const midpoint = round2((costUsd + competitorPriceUsd) / 2);
   return Math.max(midpoint, flat);
+}
+
+/**
+ * Ticket written for a Back Vault piece. Jewelry rounds to the nearest $10.
+ * A Watch keeps the cent ticket from `backVaultRetail` — watches are not
+ * on the jewelry rounding rule.
+ */
+export function backVaultListedPrice(
+  costUsd: number,
+  competitorPriceUsd: number | null | undefined,
+  productType: string,
+): number {
+  const ticket = backVaultRetail(costUsd, competitorPriceUsd);
+  if (productType === 'Watch') return ticket;
+  return roundJewelryRetail(ticket);
 }

@@ -46,9 +46,10 @@ media, preview, authorization, or readback requirement.
 
 2. Finish source-specific prices, all six applicable spec fields, category,
    variant options, real availability and attached Shopify media. Lab-grown
-   finished pieces are **2× verified cost, rounded to cents**; settings remain
-   **3× cost, rounded to dollars**. Royal Chain stays **3×, rounded up to $5**.
-   House fine jewelry is merchant-priced. Missing cost blocks formula-priced
+   finished pieces are **2× verified cost, nearest $10**; settings remain
+   **2.25× cost, nearest $10**. Royal Chain stays **3×, nearest $10**.
+   House fine jewelry is merchant-priced, and that ticket is the nearest $10.
+   Loose lab-grown, natural, and colored stones are outside this rule. Missing cost blocks formula-priced
    activation. Check exact supplier-to-SKU/eBay identifier mapping in review.
    At least three accurate photos need descriptive alt text. Skylab requires
    its matching video; all video belongs first in Shopify media, never the body.

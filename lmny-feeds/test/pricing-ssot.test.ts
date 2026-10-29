@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   LAB_GROWN_JEWELRY,
   LOOSE_LAB_GROWN,
+  coloredLabRetailFromCost,
+  JEWELRY_RETAIL,
   labGrownJewelryRetailFromCost,
   labRetailMultipleFromCost,
+  roundJewelryRetail,
   STONE_TIERS,
   WATCH,
   WATCH_RETAIL_CAP_BY_STOCK,
@@ -42,8 +45,16 @@ describe('pricing SSOT — API + lab jewelry', () => {
     expect(LAB_GROWN_JEWELRY.costMultiple).toBe(2);
     expect(LAB_GROWN_JEWELRY.vendors).toContain('Peaceful Diamonds');
     expect(LAB_GROWN_JEWELRY.skuPrefixes).toEqual(['BC14', 'NK14']);
+    expect(JEWELRY_RETAIL.roundToUsd).toBe(10);
     expect(labGrownJewelryRetailFromCost(250)).toBe(500);
-    expect(labGrownJewelryRetailFromCost(333.33)).toBe(666.66);
+    expect(labGrownJewelryRetailFromCost(333.33)).toBe(670);
+    expect(roundJewelryRetail(15)).toBe(20);
+    expect(roundJewelryRetail(2025)).toBe(2030);
+  });
+
+  it('leaves loose and colored lab stones on the dollar tier, not the jewelry $10', () => {
+    expect(coloredLabRetailFromCost(250)).toBe(563);
+    expect(Math.round(250 * labRetailMultipleFromCost(250))).toBe(563);
   });
 
   it('rejects non-positive lab jewelry cost', () => {
