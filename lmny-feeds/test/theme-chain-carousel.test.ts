@@ -5,7 +5,7 @@ function themeFile(path: string): string {
   return readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
 }
 
-function themeJson(path: string): { sections: Record<string, { type?: string; settings?: Record<string, unknown>; block_order?: string[]; blocks?: Record<string, { settings?: Record<string, string> }> }>; order: string[] } {
+function themeJson(path: string): { sections: Record<string, { type?: string; disabled?: boolean; settings?: Record<string, unknown>; block_order?: string[]; blocks?: Record<string, { settings?: Record<string, string> }> }>; order: string[] } {
   const text = themeFile(path).replace(/\/\*[\s\S]*?\*\//g, '');
   return JSON.parse(text);
 }
@@ -20,13 +20,14 @@ const BANDS = [
 ];
 
 describe('homepage chain carousel', () => {
-  it('lists every house chain and the stacking bands in one carousel', () => {
+  it('preserves the optional chain carousel while hiding its duplicate homepage section', () => {
     const home = themeJson('templates/index.json');
     const section = home.sections['chains-carousel'];
     const liquid = themeFile('sections/lmh-catalog-carousel.liquid');
     const css = themeFile('assets/lmny-home.css');
 
     expect(section.type).toBe('lmh-catalog-carousel');
+    expect(section.disabled).toBe(true);
     expect(home.order.indexOf('chains-carousel')).toBeGreaterThan(home.order.indexOf('gold'));
     expect(home.order.indexOf('chains-carousel')).toBeLessThan(home.order.indexOf('lab-grown'));
     expect(section.settings?.collection).toBe('chains');
