@@ -1,7 +1,7 @@
 import { matchDesigner } from './designers.js';
 import { canonicalProductType } from './listing.js';
 import { competitorPriceFor, type CompetitorIndex } from './competitor.js';
-import { backVaultRetail } from './pricing.js';
+import { backVaultListedPrice } from './pricing.js';
 import { extractSpecs } from './specs.js';
 import { scrubText } from './scrub.js';
 import type { BackVaultItem, RawBackVaultProduct } from './types.js';
@@ -88,17 +88,18 @@ export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: Competit
     const sku = firstSku(product);
     const competitorPrice = competitor ? competitorPriceFor({ sku, sourceHandle: product.handle }, competitor) : null;
     if (competitorPrice !== null) stats.competitorMatched += 1;
+    const productType = canonicalProductType(product.product_type || 'Jewelry');
 
     items.push({
       sourceHandle: product.handle,
       title,
       vendorRaw: product.vendor,
       vendor: designer.name,
-      productType: canonicalProductType(product.product_type || 'Jewelry'),
+      productType,
       descriptionHtml,
       costUsd: cost,
       ...(competitorPrice !== null ? { competitorPriceUsd: competitorPrice } : {}),
-      priceUsd: backVaultRetail(cost, competitorPrice),
+      priceUsd: backVaultListedPrice(cost, competitorPrice, productType),
       available: true,
       sku,
       imageUrls: product.images.map((img) => img.src).filter(Boolean),

@@ -11,7 +11,7 @@ function fixture(): { snapshot: Snapshot; review: Review } {
     productType: 'Bracelets', vendor: 'Laura Milman New York', tags: ['Lab Grown Diamond'], templateSuffix: null,
     seo: { title: 'Lab-Grown Diamond Tennis Bracelet | 14K White Gold', description: `Lab-grown diamond tennis bracelet in 14K white gold. ${POLICY}` },
     category: { id: 'gid://shopify/TaxonomyCategory/aa-6-3', fullName: 'Apparel & Accessories > Jewelry > Bracelets' },
-    variants: { nodes: [{ id: 'gid://shopify/ProductVariant/1', sku: 'TEST-001', price: '246.90', inventoryQuantity: 1, inventoryPolicy: 'DENY', selectedOptions: [{ name: 'Title', value: 'Default Title' }], inventoryItem: { tracked: true, unitCost: { amount: '123.45', currencyCode: 'USD' } } }], pageInfo: { hasNextPage: false } },
+    variants: { nodes: [{ id: 'gid://shopify/ProductVariant/1', sku: 'TEST-001', price: '250.00', inventoryQuantity: 1, inventoryPolicy: 'DENY', selectedOptions: [{ name: 'Title', value: 'Default Title' }], inventoryItem: { tracked: true, unitCost: { amount: '123.45', currencyCode: 'USD' } } }], pageInfo: { hasNextPage: false } },
     media: { nodes: ['VIDEO', 'IMAGE', 'IMAGE', 'IMAGE'].map((type, i) => ({ id: `media-${i}`, alt: 'Diamond tennis bracelet detail', mediaContentType: type, status: 'READY' })), pageInfo: { hasNextPage: false } },
     metafields: { nodes: [{ namespace: 'custom', key: 'metal', value: '14K White Gold', type: 'single_line_text_field' }], pageInfo: { hasNextPage: false } },
     resourcePublicationsV2: { nodes: [], pageInfo: { hasNextPage: false } },
@@ -85,7 +85,7 @@ describe('jewelry activation gate', () => {
     snapshot.product.descriptionHtml = '<p>This elongated cushion bezel solitaire setting is made in 18K yellow gold and is sold without a center stone.</p>';
     snapshot.product.seo = { title: 'Elongated Cushion Bezel | 18K Yellow Gold', description: `Elongated cushion bezel setting in 18K yellow gold. The center stone is sold separately. ${POLICY}` };
     snapshot.product.variants.nodes[0]!.sku = `${row.sku}-6`;
-    snapshot.product.variants.nodes[0]!.price = '278';
+    snapshot.product.variants.nodes[0]!.price = '280';
     snapshot.product.metafields.nodes.push({ namespace: 'custom', key: 'diamond_shape', value: 'Cushion', type: 'single_line_text_field' });
     renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
@@ -99,7 +99,7 @@ describe('jewelry activation gate', () => {
     snapshot.product.title = 'Diamond Ring Setting in 14K White Gold'; snapshot.product.productType = 'Ring Settings';
     snapshot.product.descriptionHtml = '<p>Diamond ring setting in 14K white gold. Center diamond not included.</p>';
     snapshot.product.seo.title = 'Diamond Ring Setting | 14K White Gold';
-    snapshot.product.variants.nodes[0]!.price = '278'; renew(snapshot, review);
+    snapshot.product.variants.nodes[0]!.price = '280'; renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
     snapshot.product.variants.nodes[0]!.price = '246.90'; renew(snapshot, review); expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/source rule/);
   });
