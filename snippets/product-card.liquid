@@ -18,6 +18,17 @@
   assign display_vendor = product.vendor | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
 -%}
 
+{%- capture pc_filter_options -%}
+  {%- if collection.handle == 'everyday-jewelry' -%}
+    {%- for option in product.options_with_values -%}
+      {%- assign option_name = option.name | downcase -%}
+      {%- if option_name contains 'metal' or option_name == 'material' -%}
+        {{- option.values | join: '|||' -}}|||
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+
 <div
   class="product-card"
   data-tags="{{ pc_tags | escape }}"
@@ -27,6 +38,7 @@
   data-price-cents="{{ product.price }}"
   data-metal="{{ pc_metal | escape }}"
   data-carat="{{ pc_carat | escape }}"
+  {% if collection.handle == 'everyday-jewelry' %}data-metal-options="{{ pc_filter_options | downcase | escape }}"{% endif %}
   data-vendor="{{ product.vendor | downcase | escape }}"
 >
   <a href="{{ product.url }}" class="product-card__image-wrapper" aria-label="{{ display_title | escape }}">
