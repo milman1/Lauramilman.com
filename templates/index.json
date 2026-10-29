@@ -111,20 +111,52 @@
       "settings": {}
     },
     "ring-builder": {
-      "type": "ring-builder-start",
+      "type": "home-ring-gallery",
+      "blocks": {
+        "round": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Round",
+            "image": "shopify://shop_images/lmny-home-round-diamond.jpg"
+          }
+        },
+        "oval": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Oval",
+            "image": "shopify://shop_images/lmny-home-oval-diamond.jpg"
+          }
+        },
+        "emerald": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Emerald",
+            "image": "shopify://shop_images/lmny-home-emerald-diamond.jpg"
+          }
+        },
+        "pear": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Pear",
+            "image": "shopify://shop_images/lmny-home-pear-diamond.jpg"
+          }
+        }
+      },
+      "block_order": [
+        "round",
+        "oval",
+        "emerald",
+        "pear"
+      ],
       "settings": {
-        "eyebrow": "Engagement rings",
-        "title": "Where would you like to begin?",
-        "heading_level": "h2",
-        "more_url": "/pages/ring-builder?start=setting",
-        "shapes_anchor": "#start-with-the-stone",
-        "description": "",
-        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
-        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
-        "settings_collection": "ring-settings",
-        "builder_view": "ring-builder",
-        "show_diamond_path": true,
-        "contact_url": "/pages/contact"
+        "title": "Make it yours.",
+        "subtitle": "Start with the stone or the ring.",
+        "rings": [
+          "north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold",
+          "emerald-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
+        ]
       }
     },
     "meet-laura": {

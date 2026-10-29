@@ -36,12 +36,13 @@ describe('homepage: where to begin is picture-led', () => {
     expect(start).toContain('kind=lab&shapes=');
     expect(start).toContain("cell.setAttribute('href', '/products/' + handle)");
     expect(start).toContain("/^https:/.test(list[i].image_urls[0]");
-    const home = themeFile('templates/index.json');
-    expect(home).toMatch(/"ring-builder": \{[\s\S]*?"api_base_url": "https:\/\/[^"]+\/functions\/v1\/diamonds"/);
   });
 
-  it('has no intro paragraph on the homepage', () => {
-    expect(themeFile('templates/index.json')).toMatch(/"title": "Where would you like to begin\?",[\s\S]*?"description": "",/);
+  it('uses the approved diamonds-first gallery only on the homepage', () => {
+    const home = themeFile('templates/index.json');
+    expect(home).toContain('"type": "home-ring-gallery"');
+    expect(home).toContain('"title": "Make it yours."');
+    expect(home).toContain('"subtitle": "Start with the stone or the ring."');
   });
 });
 

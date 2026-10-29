@@ -745,7 +745,6 @@
     "no_band": "No wedding band",
     "choose_option": "Choose an option",
     "band_options_required": "Choose an available size and gold combination for your wedding band.",
-
     "title": "Your ring starts here.",
     "intro": "Choose your diamond and setting. See your complete price as you go.",
     "choose": "Choose",
@@ -931,5 +930,17 @@
     "email_sent": "Sent. Laura will reply by email with your ring.",
     "email_failed": "Your ring did not send. Check your email address and try again.",
     "pick_grades": "G+ colour · VS2+ clarity"
+  },
+  "home_ring_gallery": {
+    "starting_point": "Choose your starting point",
+    "diamond_tab": "Choose your diamond",
+    "ring_tab": "Choose your ring",
+    "previous": "Previous products",
+    "next": "Next products",
+    "lab_cta": "Explore lab-grown",
+    "natural_cta": "Explore natural",
+    "view_setting": "View setting",
+    "setting_note": "Center diamond selected separately.",
+    "settings_cta": "Explore all settings"
   }
 }
