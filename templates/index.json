@@ -120,6 +120,8 @@
         "more_url": "/pages/ring-builder?start=setting",
         "shapes_anchor": "#start-with-the-stone",
         "description": "",
+        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
+        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ",
         "settings_collection": "ring-settings",
         "builder_view": "ring-builder",
         "show_diamond_path": true,

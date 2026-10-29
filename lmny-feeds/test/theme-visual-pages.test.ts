@@ -8,9 +8,10 @@ function themeFile(path: string): string {
 describe('homepage: where to begin is picture-led', () => {
   const start = themeFile('sections/ring-builder-start.liquid');
 
-  it('shows a stone photo and a grid of real setting photos, not paragraphs', () => {
-    expect(start).toContain("render 'lmh-img'");
+  it('shows real stones and real setting photos in matching grids, not paragraphs', () => {
     expect(start).toContain('class="rbs__grid"');
+    expect(start).toContain('rbs__grid--stones');
+    expect(start).toContain('data-rbs-stones');
     expect(start).toContain('class="rbs__shape"');
     for (const removed of ['rbs__note', 'rbs__count', 'Certified, priced stone by stone', 'Choose a stone, then set it in a ring']) {
       expect(start).not.toContain(removed);
@@ -20,6 +21,20 @@ describe('homepage: where to begin is picture-led', () => {
     expect(start).toContain('>Natural</a>');
     expect(start).toContain('By shape &darr;');
     expect(start).toContain('See all {{ total }}');
+  });
+
+  it('never uses a stand-in picture for the stones', () => {
+    // The stone cells are live inventory photos; until they load, a shape icon.
+    expect(start).not.toContain("render 'lmh-img'");
+    expect(start).not.toMatch(/\.webp|\.jpg|asset_url/);
+    expect(start).toContain("render 'diamond-shape-icon'");
+    // One in-stock lab-grown stone per shape, linking to that stone's own page.
+    expect(start).toContain("'Round,Oval,Pear,Emerald' | split: ','");
+    expect(start).toContain('kind=lab&shapes=');
+    expect(start).toContain('href="/products/\' + esc(handle)');
+    expect(start).toContain("/^https:/.test(list[i].image_urls[0]");
+    const home = themeFile('templates/index.json');
+    expect(home).toMatch(/"ring-builder": \{[\s\S]*?"api_base_url": "https:\/\/[^"]+\/functions\/v1\/diamonds"/);
   });
 
   it('has no intro paragraph on the homepage', () => {

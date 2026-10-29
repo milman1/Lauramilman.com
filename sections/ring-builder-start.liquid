@@ -1,8 +1,11 @@
 {%- comment -%}
   Ring builder — where to begin (homepage).
-  Two photo tiles and almost no words: "Shop a diamond" (a stone photo with
-  Lab-grown, Natural and By shape buttons) and "Build a ring" (a 2 x 2 grid of
-  real setting photos, each labelled only with its shape, and "See all N").
+  Two photo tiles and almost no words: "Shop a diamond" (a 2 x 2 grid of real
+  stones read live from the stone search, with Lab-grown, Natural and By shape
+  buttons) and "Build a ring" (a 2 x 2 grid of real setting photos, each
+  labelled only with its shape, and "See all N"). Until the stones load, each
+  stone cell is a shape icon that links to that shape's search, so the tile is
+  never empty and never shows a stand-in picture.
   The grid shows one setting per shape from the ring-settings collection; the
   shape comes from snippets/center-stone-shape.liquid, never the title. Shapes
   are picked in the loose-diamond section and in the builder, not repeated here.
@@ -67,9 +70,18 @@
     <div class="rbs__paths">
       {%- if section.settings.show_diamond_path -%}
       <article class="rbs__path">
-        <a class="rbs__photo" href="{{ routes.collections_url }}/lab-grown-diamonds" tabindex="-1" aria-hidden="true">
-          {%- render 'lmh-img', img: section.settings.diamond_image, asset: section.settings.diamond_image_asset, alt: '', sizes: '(min-width: 900px) 540px, 100vw' -%}
-        </a>
+        <ul class="rbs__grid rbs__grid--stones" role="list" data-rbs-stones data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}">
+          {%- assign stone_shapes = 'Round,Oval,Pear,Emerald' | split: ',' -%}
+          {%- for stone_shape in stone_shapes -%}
+            {%- assign stone_icon = stone_shape | downcase -%}
+            <li class="rbs__card rbs__card--shape" data-shape="{{ stone_shape }}">
+              <a class="rbs__card-link" href="{{ routes.collections_url }}/lab-grown-diamonds?shape={{ stone_shape | url_encode }}">
+                {%- render 'diamond-shape-icon', shape: stone_icon -%}
+                <span class="rbs__shape">{{ stone_shape }}</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
         <div class="rbs__foot">
           <{{ path_tag }} class="rbs__path-title">Shop a diamond</{{ path_tag }}>
           <div class="rbs__pills">
@@ -109,13 +121,17 @@
   .rbs__desc { margin: 0.8rem 0 0; font-size: 0.95rem; font-weight: 300; line-height: 1.75; color: var(--text-muted-dark, #6B6152); }
   .rbs__paths { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
   .rbs__path { display: flex; flex-direction: column; background: var(--cream, #FAF6F0); border: 1px solid var(--rule-light, #DDD5C5); border-radius: var(--radius-lg, 12px); overflow: hidden; }
-  .rbs__photo, .rbs__grid { display: block; aspect-ratio: 1; background: #1A1410; }
-  .rbs__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .rbs__grid { display: block; aspect-ratio: 1; background: #1A1410; }
   .rbs__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px; }
   .rbs__card, .rbs__card-link { display: block; position: relative; min-width: 0; min-height: 0; height: 100%; }
   .rbs__card-link img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
   .rbs__card-link:hover img, .rbs__card-link:focus-visible img { transform: scale(1.04); }
   .rbs__card { overflow: hidden; }
+  .rbs__grid--stones { background: var(--lmh-navy, #1A1F3A); }
+  .rbs__card--shape { background: var(--lmh-navy-tile, #242A4B); }
+  .rbs__card--shape .rbs__card-link { display: flex; align-items: center; justify-content: center; color: var(--gold, #C9A050); }
+  .rbs__card--shape svg { width: 38%; height: auto; }
+  .rbs__card--shape.is-photo { background: #fff; }
   .rbs__shape { position: absolute; left: 10px; bottom: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(20, 14, 10, 0.62); color: #fff; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
   .rbs__foot { flex: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; padding: 1.1rem 1.25rem 1.25rem; }
   .rbs__path-title { margin: 0; font-family: var(--font-heading, 'Cormorant Garamond', serif); font-size: 1.7rem; font-weight: 500; line-height: 1.1; }
@@ -138,6 +154,61 @@
   @media (prefers-reduced-motion: reduce) { .rbs__card-link img { transition: none; } }
 </style>
 
+
+<script>
+  (function () {
+    var root = document.getElementById('Rbs-{{ section.id }}');
+    var grid = root && root.querySelector('[data-rbs-stones]');
+    if (!grid || !window.fetch) return;
+    var api = (grid.getAttribute('data-api') || '').replace(/\/+$/, '');
+    var key = grid.getAttribute('data-key') || '';
+    if (!api) return;
+
+    // One real stone per shape: lab-grown, 1.5 to 2.2 carats, white and clean,
+    // cheapest first, so the picture is a stone a shopper could buy today.
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function fetchShape(shape) {
+      var q = 'kind=lab&shapes=' + encodeURIComponent(shape) + '&min_carat=1.5&max_carat=2.2' +
+        '&colors=D,E,F,G&clarities=VVS1,VVS2,VS1,VS2&sort=price_asc&per_page=12';
+      return fetch(api + '?' + q, { headers: { Accept: 'application/json', apikey: key, Authorization: 'Bearer ' + key } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var list = (d && d.stones) || [];
+          for (var i = 0; i < list.length; i++) if (list[i].image_urls && /^https:/.test(list[i].image_urls[0] || '')) return list[i];
+          return null;
+        })
+        .catch(function () { return null; });
+    }
+    function paint(cell, s) {
+      if (!s) return;
+      var handle = 'lg-' + String(s.stock_ref || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      var label = s.shape + ' \u00b7 ' + Number(s.carat).toFixed(2) + ' ct';
+      cell.classList.add('is-photo');
+      cell.innerHTML = '<a class="rbs__card-link" href="/products/' + esc(handle) + '">' +
+        '<img src="' + esc(s.image_urls[0]) + '" alt="' + esc(label + ' lab-grown diamond') + '" width="600" height="600" loading="lazy">' +
+        '<span class="rbs__shape">' + esc(label) + '</span></a>';
+    }
+    function cached() {
+      try {
+        var c = JSON.parse(sessionStorage.getItem('rbs-stones') || 'null');
+        if (c && Date.now() - c.t < 10 * 60 * 1000) return Promise.resolve(c.stones);
+      } catch (e) {}
+      return null;
+    }
+
+    var cells = Array.prototype.slice.call(grid.querySelectorAll('[data-shape]'));
+    var pending = cached();
+    if (!pending) {
+      pending = Promise.all(cells.map(function (c) { return fetchShape(c.getAttribute('data-shape')); })).then(function (stones) {
+        try { sessionStorage.setItem('rbs-stones', JSON.stringify({ t: Date.now(), stones: stones })); } catch (e) {}
+        return stones;
+      });
+    }
+    pending.then(function (stones) { cells.forEach(function (c, i) { paint(c, stones[i]); }); });
+  })();
+</script>
 
 {% schema %}
 {
@@ -197,8 +268,8 @@
       "info": "Shop a diamond sits beside Build a ring, so the first choice is explicit.",
       "default": true
     },
-    { "type": "image_picker", "id": "diamond_image", "label": "Shop a diamond photo", "info": "Leave empty to use the theme photo below." },
-    { "type": "text", "id": "diamond_image_asset", "label": "Theme photo file", "default": "shop-world-loose-diamonds.webp" },
+    { "type": "text", "id": "api_base_url", "label": "Stone search address", "info": "The four stone photos are read live from here. Blank shows shape icons." },
+    { "type": "text", "id": "api_anon_key", "label": "Stone search key" },
     { "type": "text", "id": "shapes_anchor", "label": "Browse by shape link", "info": "Where \"Or browse by shape\" jumps to, such as #start-with-the-stone. Leave blank to hide." },
     { "type": "text", "id": "contact_url", "label": "Custom setting link", "default": "/pages/contact" }
   ],
