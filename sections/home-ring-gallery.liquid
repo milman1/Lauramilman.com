@@ -7,12 +7,9 @@
   <nav class="hrg__tabs" aria-label="{{ 'home_ring_gallery.starting_point' | t }}">
     <a class="hrg__tab" id="DiamondTab-{{ section.id }}" href="#DiamondGallery-{{ section.id }}" data-gallery-tab>{{ 'home_ring_gallery.diamond_tab' | t }}</a>
     <a class="hrg__tab" id="RingTab-{{ section.id }}" href="#RingGallery-{{ section.id }}" data-gallery-tab>{{ 'home_ring_gallery.ring_tab' | t }}</a>
-    {%- if section.settings.color_image != blank -%}
-      <a class="hrg__tab" id="ColorTab-{{ section.id }}" href="#ColorGallery-{{ section.id }}" data-gallery-tab>{{ 'home_ring_gallery.color_tab' | t }}</a>
-    {%- endif -%}
   </nav>
   <div class="hrg__panel" id="DiamondGallery-{{ section.id }}" data-gallery-panel>
-    <ul class="hrg__track" data-gallery-track>
+    <ul class="hrg__track{% if section.settings.color_image != blank %} hrg__track--five{% endif %}" data-gallery-track>
       {%- for block in section.blocks -%}
         {%- unless block.type == 'diamond' -%}{%- continue -%}{%- endunless -%}
         <li class="hrg__card" {{ block.shopify_attributes }}>
@@ -33,6 +30,16 @@
           </a>
         </li>
       {%- endfor -%}
+      {%- if section.settings.color_image != blank -%}
+        <li class="hrg__card">
+          <a href="{{ routes.collections_url }}/colored-lab-grown-diamonds">
+            <span class="hrg__image hrg__image--diamond">
+              {{ section.settings.color_image | image_url: width: 1254 | image_tag: widths: '320, 480, 640, 960, 1254', sizes: '(min-width: 1440px) 252px, (min-width: 750px) 19vw, 43vw', loading: 'lazy', alt: 'Pink oval lab-grown diamond illustration' }}
+            </span>
+            <span class="hrg__name">{{ 'home_ring_gallery.color_title' | t }}</span>
+          </a>
+        </li>
+      {%- endif -%}
     </ul>
     <div class="hrg__scroll" data-gallery-scroll hidden>
       <button type="button" data-gallery-prev aria-label="{{ 'home_ring_gallery.previous' | t }}">&larr;</button>
@@ -42,6 +49,9 @@
     <div class="hrg__actions">
       <a class="hrg__button hrg__button--primary" href="{{ routes.collections_url }}/lab-grown-diamonds">{{ 'home_ring_gallery.lab_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
       <a class="hrg__button" href="{{ routes.collections_url }}/natural-diamonds">{{ 'home_ring_gallery.natural_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
+      {%- if section.settings.color_image != blank -%}
+        <a class="hrg__button" href="{{ routes.collections_url }}/colored-lab-grown-diamonds">{{ 'home_ring_gallery.color_tab' | t }} <span aria-hidden="true">&rarr;</span></a>
+      {%- endif -%}
     </div>
   </div>
   <div class="hrg__panel" id="RingGallery-{{ section.id }}" data-gallery-panel>
@@ -86,23 +96,6 @@
       <a class="hrg__button hrg__button--primary" href="{{ routes.root_url }}pages/ring-builder?start=setting">{{ 'home_ring_gallery.settings_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
     </div>
   </div>
-  {%- if section.settings.color_image != blank -%}
-    <div class="hrg__panel" id="ColorGallery-{{ section.id }}" data-gallery-panel>
-      <ul class="hrg__track hrg__track--color" data-gallery-track>
-        <li class="hrg__card">
-          <a href="{{ routes.collections_url }}/colored-lab-grown-diamonds">
-            <span class="hrg__image hrg__image--diamond">
-              {{ section.settings.color_image | image_url: width: 1254 | image_tag: widths: '320, 480, 640, 960, 1254', sizes: '(min-width: 750px) 360px, 90vw', loading: 'lazy', alt: 'Pink oval lab-grown diamond illustration' }}
-            </span>
-            <span class="hrg__name">{{ 'home_ring_gallery.color_title' | t }}</span>
-          </a>
-        </li>
-      </ul>
-      <div class="hrg__actions">
-        <a class="hrg__button hrg__button--primary" href="{{ routes.collections_url }}/colored-lab-grown-diamonds">{{ 'home_ring_gallery.color_tab' | t }} <span aria-hidden="true">&rarr;</span></a>
-      </div>
-    </div>
-  {%- endif -%}
 </lmny-ring-gallery>
 
 {% stylesheet %}
@@ -118,7 +111,7 @@
   .hrg__panel[hidden], .hrg__scroll[hidden] { display: none; }
   .hrg:not([data-enhanced]) .hrg__panel + .hrg__panel { margin-top: 40px; }
   .hrg__track { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 48px) / 4); gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; margin: 0; padding: 0 0 6px; list-style: none; }
-  .hrg .hrg__track--color { grid-auto-columns: 100%; max-width: 360px; margin: 0 auto; }
+  .hrg__track--five { grid-auto-columns: calc((100% - 64px) / 5); }
   .hrg__card { min-width: 0; text-align: center; scroll-snap-align: start; }
   .hrg[data-enhanced] .hrg__track { scrollbar-width: none; }
   .hrg[data-enhanced] .hrg__track::-webkit-scrollbar { display: none; }
@@ -134,7 +127,7 @@
   .hrg__name { display: block; margin: 18px 8px 0; font-family: var(--lmh-serif); font-size: clamp(20px, 2vw, 26px); line-height: 1.15; }
   .hrg__card-link { display: block; margin: 8px 0 0; font-size: 12px; }
   .hrg__card a:hover .hrg__name { text-decoration: underline; text-underline-offset: 4px; }
-  .hrg__actions { display: flex; justify-content: center; gap: 16px; margin-top: 30px; }
+  .hrg__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 30px; }
   .hrg__button { display: inline-flex; align-items: center; justify-content: center; gap: 20px; min-height: 50px; min-width: 250px; padding: 14px 24px; border: 1px solid var(--lmh-bronze); color: var(--lmh-espresso); background: var(--lmh-cream); text-decoration: none; font-size: 13px; line-height: 1.4; }
   .hrg .hrg__button--primary { background: var(--lmh-gold); border-color: var(--lmh-gold); color: var(--lmh-espresso); }
   .hrg .hrg__button--primary:hover { background: var(--lmh-gold-light); border-color: var(--lmh-gold-light); }
