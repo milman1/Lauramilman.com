@@ -1,0 +1,125 @@
+{% doc %}
+Renders additional controls for the Everyday Jewelry collection.
+@example
+{% render 'everyday-jewelry-filters' %}
+{% enddoc %}
+
+<div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters data-everyday-group="type">
+  <button type="button" class="refine__group-head" aria-expanded="true">
+    <span class="refine__group-label">{{ 'everyday_filters.type' | t }}</span>
+    <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="refine__group-body">
+    <ul class="refine__checks">
+      {%- assign everyday_options = 'Rings::rings||Necklaces::necklaces||Bracelets::bracelets' | split: '||' -%}
+      {%- for item in everyday_options -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" name="jewelry_type" value="{{ parts[0] | escape }}" data-client-filter="type" data-everyday-filter="type">
+            <span class="refine-check__box" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="refine-check__label">{{ label_key | t }}</span>
+            <span class="refine-check__count" data-everyday-count></span>
+          </label>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters data-everyday-group="style">
+  <button type="button" class="refine__group-head" aria-expanded="true">
+    <span class="refine__group-label">{{ 'everyday_filters.style' | t }}</span>
+    <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="refine__group-body">
+    <ul class="refine__checks">
+      {%- assign everyday_options = 'Signet::signet||Chevron::chevron||Stackable::stackable||Bangle::bangle||Cuff::cuff||Paperclip::paperclip||Cuban::cuban||Rope::rope||Curb::curb||Herringbone::herringbone||Box::box||Snake::snake||Tubogas::tubogas||Station::station||Tennis::tennis||Pendant::pendant||Initial::initial' | split: '||' -%}
+      {%- for item in everyday_options -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" name="jewelry_style" value="{{ parts[0] | escape }}" data-client-filter="style" data-everyday-filter="style">
+            <span class="refine-check__box" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="refine-check__label">{{ label_key | t }}</span>
+            <span class="refine-check__count" data-everyday-count></span>
+          </label>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters data-everyday-group="metal">
+  <button type="button" class="refine__group-head" aria-expanded="true">
+    <span class="refine__group-label">{{ 'everyday_filters.metal' | t }}</span>
+    <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="refine__group-body">
+    <ul class="refine__checks">
+      {%- assign everyday_options = 'Yellow Gold::yellow_gold||White Gold::white_gold||Rose Gold::rose_gold||Silver::silver' | split: '||' -%}
+      {%- for item in everyday_options -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" name="jewelry_metal" value="{{ parts[0] | escape }}" data-client-filter="metal" data-everyday-filter="metal">
+            <span class="refine-check__box" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="refine-check__label">{{ label_key | t }}</span>
+            <span class="refine-check__count" data-everyday-count></span>
+          </label>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters data-everyday-group="purity">
+  <button type="button" class="refine__group-head" aria-expanded="true">
+    <span class="refine__group-label">{{ 'everyday_filters.purity' | t }}</span>
+    <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="refine__group-body">
+    <ul class="refine__checks">
+      {%- assign everyday_options = '10K::10k||14K::14k||18K::18k' | split: '||' -%}
+      {%- for item in everyday_options -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" name="jewelry_purity" value="{{ parts[0] | escape }}" data-client-filter="purity" data-everyday-filter="purity">
+            <span class="refine-check__box" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="refine-check__label">{{ label_key | t }}</span>
+            <span class="refine-check__count" data-everyday-count></span>
+          </label>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<div class="refine__group refine__group--jewelry" data-refine-group data-jewelry-filters data-everyday-group="gemstone">
+  <button type="button" class="refine__group-head" aria-expanded="true">
+    <span class="refine__group-label">{{ 'everyday_filters.gemstone' | t }}</span>
+    <svg class="refine__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="refine__group-body">
+    <ul class="refine__checks">
+      {%- assign everyday_options = 'Diamond::diamond||Sapphire::sapphire||Topaz::topaz||Morganite::morganite||Garnet::garnet||Mixed Gemstone::mixed_gemstone' | split: '||' -%}
+      {%- for item in everyday_options -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign label_key = 'everyday_filters.' | append: parts[1] -%}
+        <li>
+          <label class="refine-check js-client-filter">
+            <input type="checkbox" name="jewelry_gemstone" value="{{ parts[0] | escape }}" data-client-filter="gemstone" data-everyday-filter="gemstone">
+            <span class="refine-check__box" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="refine-check__label">{{ label_key | t }}</span>
+            <span class="refine-check__count" data-everyday-count></span>
+          </label>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
