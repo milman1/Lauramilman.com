@@ -90,7 +90,8 @@
           {% if band_collection == 'mens-wedding-bands' or band.tags contains 'wedding-band' %}{% assign include_band = true %}{% endif %}
           {% if band.available and band.featured_image and include_band %}
             {% if band_emitted %},{% endif %}
-            {"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"category":{% if band_collection == 'mens-wedding-bands' %}"mens"{% else %}"diamond"{% endif %},"image":{{ band.featured_image | image_url: width: 600 | json }}}
+            {% capture band_metal_text %}{{ band.title }}{% for option in band.options_with_values %}{% unless option.name contains 'size' or option.name contains 'Size' %} {{ option.values | join: ' ' }}{% endunless %}{% endfor %}{% if band.tags contains 'White Gold' %} white{% endif %}{% if band.tags contains 'Yellow Gold' %} yellow{% endif %}{% if band.tags contains 'Rose Gold' %} rose{% endif %}{% endcapture %}
+            {"metalText":{{ band_metal_text | strip | json }},"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"category":{% if band_collection == 'mens-wedding-bands' %}"mens"{% else %}"diamond"{% endif %},"image":{{ band.featured_image | image_url: width: 600 | json }}}
             {% assign band_emitted = true %}
           {% endif %}
         {% endfor %}
@@ -105,6 +106,25 @@
       "band_diamond":{{ 'ring_flow.band_diamond' | t | json }},
       "band_mens":{{ 'ring_flow.band_mens' | t | json }},
       "band_mens_note":{{ 'ring_flow.band_mens_note' | t | json }},
+      "band_number":{{ 'ring_flow.band_number' | t: number: '__number__' | json }},
+      "add_second_band":{{ 'ring_flow.add_second_band' | t | json }},
+      "choose_band":{{ 'ring_flow.choose_band' | t | json }},
+      "band_pair_note":{{ 'ring_flow.band_pair_note' | t | json }},
+      "add_with_bands":{{ 'ring_flow.add_with_bands' | t | json }},
+      "band_view_all":{{ 'ring_flow.band_view_all' | t | json }},
+      "band_show_featured":{{ 'ring_flow.band_show_featured' | t | json }},
+      "band_style":{{ 'ring_flow.band_style' | t | json }},
+      "band_all_styles":{{ 'ring_flow.band_all_styles' | t | json }},
+      "band_results":{{ 'ring_flow.band_results' | t: count: '__count__' | json }},
+      "band_style_eternity":{{ 'ring_flow.band_style_eternity' | t | json }},
+      "band_style_half":{{ 'ring_flow.band_style_half' | t | json }},
+      "band_style_three_quarter":{{ 'ring_flow.band_style_three_quarter' | t | json }},
+      "band_style_stone":{{ 'ring_flow.band_style_stone' | t | json }},
+      "band_style_satin":{{ 'ring_flow.band_style_satin' | t | json }},
+      "band_style_hammered":{{ 'ring_flow.band_style_hammered' | t | json }},
+      "band_style_milgrain":{{ 'ring_flow.band_style_milgrain' | t | json }},
+      "band_style_carved":{{ 'ring_flow.band_style_carved' | t | json }},
+      "band_style_groove":{{ 'ring_flow.band_style_groove' | t | json }},
       "band_heading":{{ 'ring_flow.band_heading' | t | json }},
       "band_note":{{ 'ring_flow.band_note' | t | json }},
       "no_band":{{ 'ring_flow.no_band' | t | json }},

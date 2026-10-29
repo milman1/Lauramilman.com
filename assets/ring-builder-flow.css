@@ -40,3 +40,10 @@
 
 #lmny-ring-builder .band-categories{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
 #lmny-ring-builder .band-categories [aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+#lmny-ring-builder .band-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+#lmny-ring-builder .band-slots button{display:flex;flex-direction:column;gap:6px;text-align:left;min-width:0;overflow-wrap:anywhere}
+#lmny-ring-builder .band-slots [aria-pressed=true]{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:var(--sand)}
+#lmny-ring-builder .band-slots span{font-size:12px}#lmny-ring-builder .sum-title>div{display:flex;gap:12px}
+#lmny-ring-builder .band-cards--all{max-height:670px;overflow-y:auto;padding:4px;align-content:start}
+@media(max-width:480px){#lmny-ring-builder .band-slots{grid-template-columns:1fr}#lmny-ring-builder .band-cards.band-cards--all{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow-x:hidden;scroll-snap-type:none;max-height:580px;gap:10px}#lmny-ring-builder .band-cards--all .band-card-title{font-size:15px}}

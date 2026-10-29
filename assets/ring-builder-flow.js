@@ -38,7 +38,12 @@
     const counted = (key, count) => t(Number(count) === 1 && translations[key + '_one'] ? key + '_one' : key, { count: Number(count).toLocaleString() });
     const button = (key, action, cls = 'primary', extra = '') => `<button type="button" class="${cls}" data-action="${esc(action)}" ${extra}>${esc(t(key))}</button>`;
     const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}">` : '';
-    const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, band: null, bandCategory: 'diamond', bandOptions: [], options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
+    const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, bandSelections: [{ product: null, options: [] }, { product: null, options: [] }], bandSlot: 0, bandCategory: 'diamond', showAllBands: false, bandMetal: '', bandStyle: '', options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
+    // The picker edits one slot; totals, persistence and cart operations use both.
+    Object.defineProperties(state, {
+      band: { get: () => state.bandSelections[state.bandSlot].product, set: p => { state.bandSelections[state.bandSlot].product = p; } },
+      bandOptions: { get: () => state.bandSelections[state.bandSlot].options, set: options => { state.bandSelections[state.bandSlot].options = options; } }
+    });
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
     const settingCount = shape => [...knownSettings.values()].filter(p => p.available && String(shape || '').split(',').some(s => s.trim().toLowerCase() === p.shape.toLowerCase())).length;
@@ -58,7 +63,12 @@
     const caratChips = [['1', '1.49'], ['1.5', '1.99'], ['2', '2.99'], ['3', '']];
     const gradePick = { color: 'G,F,E,D', clarity: 'VS2,VS1,VVS2,VVS1,IF,FL' };
     let ready = false, searchTimer = 0;
-    const bandVariant = () => state.band?.variants.find(v => v.available && v.options.every((value, i) => value === state.bandOptions[i])) || null;
+    const bandVariant = (slot = state.bandSlot) => { const b = state.bandSelections[slot]; return b.product?.variants.find(v => v.available && v.options.every((value, i) => value === b.options[i])) || null; };
+    const chosenBands = () => state.bandSelections.map((b, slot) => ({ ...b, slot, variant: bandVariant(slot) })).filter(b => b.product);
+    const bandsValid = () => chosenBands().every(b => b.variant);
+    const hasBands = () => chosenBands().length > 0;
+    const bandLabel = slot => t('band_number', { number: slot + 1 });
+    const bandOptionText = b => b.product.options.map((o, i) => o.name === 'Title' ? '' : o.name + ': ' + (b.options[i] || t('choose_option'))).filter(Boolean).join(' · ');
     const both = () => state.setting && state.diamond;
     const sizeIndex = p => p.options.findIndex(o => /size/i.test(o.name));
     const optionsOf = p => p.options.filter(o => !/size/i.test(o.name) && o.name !== 'Title');
@@ -68,14 +78,14 @@
       return p.variants.find(v => v.available && v.options.every((value, i) => i === si ? state.size === 'unsure' || !state.size || String(value) === state.size : !state.options[i] || value === state.options[i])) || null;
     }
     const variantPrice = p => p === state.setting ? pickedVariant(p)?.price : p?.variants?.find(v => v.available)?.price;
-    const subtotal = () => (variantPrice(state.setting) || 0) + (state.diamond?.price || 0) + (bandVariant()?.price || 0);
+    const subtotal = () => (variantPrice(state.setting) || 0) + (state.diamond?.price || 0) + chosenBands().reduce((total, b) => total + (b.variant?.price || 0), 0);
     function notice(message, error = false) {
       status.textContent = message;
       status.classList.toggle('error', error);
       status.setAttribute('role', error ? 'alert' : 'status');
     }
     function persist() {
-      const stored = { band: state.band?.handle, bandOptions: state.bandOptions, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
+      const stored = { bands: state.bandSelections.map(b => ({ handle: b.product?.handle, options: b.options })), bandSlot: state.bandSlot, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
       try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: Date.now() })); } catch (_) {}
       const u = new URL(window.location.href);
       for (const k of ['setting', 'diamond', 'step', 'edit_group']) u.searchParams.delete(k);
@@ -137,15 +147,15 @@
       root.querySelector('[data-flow-dock]').hidden = aside.hidden;
       document.body.classList.toggle('has-pdp-sticky', !aside.hidden);
       if (aside.hidden) return;
-      aside.innerHTML = `<h2>${esc(t('your_ring'))}</h2><div class="summary-items">${['setting', 'diamond', ...(state.band ? ['band'] : [])].map(k => {
+      aside.innerHTML = `<h2>${esc(t('your_ring'))}</h2><div class="summary-items">${['setting', 'diamond'].map(k => {
         const p = state[k];
-        const price = k === 'setting' ? variantPrice(p) : k === 'band' ? bandVariant()?.price : p?.price;
-        return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button(k === 'band' ? 'remove' : 'change', k === 'band' ? 'remove-band' : 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}<br>${price != null ? money(price) : esc(t('size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
-      }).join('')}</div><div class="row"><span>${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : state.diamond ? 'missing_setting' : 'intro'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${state.screen === 'review' ? button(state.busy ? 'adding' : state.band ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || (state.band && !bandVariant()) ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a>`;
+        const price = k === 'setting' ? variantPrice(p) : p?.price;
+        return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button('change', 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}<br>${price != null ? money(price) : esc(t('size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
+      }).join('')}${bandSummary()}</div><div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : state.diamond ? 'missing_setting' : 'intro'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${state.screen === 'review' ? button(state.busy ? 'adding' : chosenBands().length > 1 ? 'add_with_bands' : hasBands() ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || !bandsValid() ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a>`;
       const dock = root.querySelector('[data-flow-dock]');
       const next = state.screen === 'review' ? button('add_short', 'dock-add', 'primary', state.busy || !both() ? 'disabled' : '') : both() ? button('review_ring', 'review') : button('view_summary', 'dock-summary', 'secondary');
       const selections = ['setting', 'diamond'].map(k => `<span class="dock-selection" title="${esc(state[k]?.title || t('empty_selection'))}">${esc(t(k))}: ${esc(state[k]?.title || t('empty_selection'))}</span>`).join('');
-      dock.innerHTML = `<div><span class="eyebrow">${esc(t(state.band ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span>${selections}<span class="total">${money(subtotal())}</span></div>${next}`;
+      dock.innerHTML = `<div><span class="eyebrow">${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span>${selections}<span class="total">${money(subtotal())}</span></div>${next}`;
       if (state.busy) lockControls();
     }
     function lockControls() {
@@ -379,10 +389,22 @@
       main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${esc(isSetting ? fromPrice(p) : money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(cfg.appointment)}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
       state.detailVideos = videos;
     }
+    function bandSummary() {
+      return chosenBands().map(b => `<div class="sum-item" data-band-summary="${b.slot}"><div class="sum-title"><span class="eyebrow">${esc(bandLabel(b.slot))}</span><div>${button('change', 'edit-band-' + b.slot, 'link')} ${button('remove', 'remove-band-' + b.slot, 'link')}</div></div><div class="sum-product">${image(b.product.image, '', 'thumb')}<div>${esc(b.product.title)}<p class="quiet">${esc(bandOptionText(b))}</p>${b.variant ? money(b.variant.price) : esc(t('band_options_required'))}</div></div></div>`).join('');
+    }
     function bandPicker() {
       if (!(cfg.bands || []).length) return '';
       const p = state.band;
-      return `<section class="rule band-upsell" aria-label="${esc(t('band_heading'))}"><div class="heading"><div><span class="eyebrow">${esc(t('band_optional'))}</span><h2>${esc(t('band_heading'))}</h2></div>${p ? button('remove', 'remove-band', 'link') : ''}</div><p class="quiet">${esc(t(state.bandCategory === 'mens' ? 'band_mens_note' : 'band_note'))}</p>${bandCategories()}${bandCards()}<label>${esc(t('band'))}<select data-band-product><option value="">${esc(t('no_band'))}</option>${bandOptions()}</select></label>${p ? `<div class="sum-product">${image(p.image, p.title, 'thumb')}<a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div><div class="fields">${p.options.map((o,i) => `<label>${esc(o.name)}<select data-band-option="${i}"><option value="">${esc(t('choose_option'))}</option>${o.values.map(v => `<option value="${esc(v)}" ${state.bandOptions[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div><p class="${bandVariant() ? 'quiet' : 'error'}">${bandVariant() ? money(bandVariant().price) : esc(t('band_options_required'))}</p>` : ''}</section>`;
+      return `<section class="rule band-upsell" aria-label="${esc(t('band_heading'))}"><div class="heading"><div><span class="eyebrow">${esc(t('band_optional'))}</span><h2>${esc(t('band_heading'))}</h2></div></div><p class="quiet">${esc(t('band_pair_note'))}</p><div class="band-slots">${state.bandSelections.map((b, slot) => `<button type="button" class="secondary" data-action="edit-band-${slot}" aria-pressed="${state.bandSlot === slot}"><strong>${esc(bandLabel(slot))}</strong><span>${esc(b.product?.title || t(slot ? 'add_second_band' : 'choose_band'))}</span></button>`).join('')}</div><div class="heading"><h3>${esc(bandLabel(state.bandSlot))}</h3>${p ? button('remove', 'remove-band', 'link') : ''}</div>${bandCategories()}${button(state.showAllBands ? 'band_show_featured' : 'band_view_all', 'toggle-all-bands', 'link')}${state.showAllBands ? bandFilters() : ''}${bandCards()}<label>${esc(t('band'))}<select data-band-product><option value="">${esc(t('no_band'))}</option>${bandOptions()}</select></label>${p ? `<div class="sum-product">${image(p.image, p.title, 'thumb')}<a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div><div class="fields">${p.options.map((o,i) => o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-band-option="${i}"><option value="">${esc(t('choose_option'))}</option>${o.values.map(v => `<option value="${esc(v)}" ${state.bandOptions[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div><p class="${bandVariant() ? 'quiet' : 'error'}">${bandVariant() ? money(bandVariant().price) : esc(t('band_options_required'))}</p>` : ''}</section>`;
+    }
+    const bandStylePatterns = { eternity: /eternity/, half: /half.eternity/, three_quarter: /three.quarter/, stone: /(?:five|seven).stone/, satin: /satin|brushed|matte|silk/, hammered: /hammered/, milgrain: /milgrain/, carved: /carved|chevron|crosshatch|diagonal|vine|scroll/, groove: /groove|channel|stripe/ };
+    const bandMetals = b => [...new Set((String(b.metalText || b.title).toLowerCase().match(/white|yellow|rose|platinum/g) || []))];
+    const categoryBands = () => cfg.bands.filter(b => (b.category || 'diamond') === state.bandCategory);
+    function bandFilters() {
+      const rows = categoryBands();
+      const metals = [...new Set(rows.flatMap(bandMetals))];
+      const styles = Object.entries(bandStylePatterns).filter(([, pattern]) => rows.some(b => pattern.test(b.title.toLowerCase())));
+      return `<div class="fields band-filters"><label>${esc(t('metal'))}<select data-band-filter="metal"><option value="">${esc(t('all_metals'))}</option>${metals.map(m => `<option value="${esc(m)}" ${state.bandMetal === m ? 'selected' : ''}>${esc(metalName(m))}</option>`).join('')}</select></label><label>${esc(t('band_style'))}<select data-band-filter="style"><option value="">${esc(t('band_all_styles'))}</option>${styles.map(([key]) => `<option value="${key}" ${state.bandStyle === key ? 'selected' : ''}>${esc(t('band_style_' + key))}</option>`).join('')}</select></label></div>`;
     }
     function bandCategories() {
       if (!cfg.bands.some(b => b.category === 'mens')) return '';
@@ -390,13 +412,13 @@
     }
     function bandCards() {
       const ring = metalOf(pickedVariant()?.options.join(' ') || state.setting?.title);
-      const ranked = cfg.bands.filter(b => (b.category || 'diamond') === state.bandCategory).sort((a, b) => Number(metalOf(b.title) === ring && !!ring) - Number(metalOf(a.title) === ring && !!ring));
-      const featured = ranked.filter(b => b.image).slice(0, 3);
-      if (state.band && !featured.some(b => b.handle === state.band.handle)) {
+      const ranked = categoryBands().filter(b => !state.showAllBands || ((!state.bandMetal || bandMetals(b).includes(state.bandMetal)) && (!state.bandStyle || bandStylePatterns[state.bandStyle]?.test(b.title.toLowerCase())))).sort((a, b) => Number(metalOf(b.title) === ring && !!ring) - Number(metalOf(a.title) === ring && !!ring));
+      const featured = ranked.filter(b => b.image).slice(0, state.showAllBands ? ranked.length : 3);
+      if (!state.showAllBands && state.band && !featured.some(b => b.handle === state.band.handle)) {
         const selected = ranked.find(b => b.handle === state.band.handle);
         if (selected?.image) featured.splice(2, 1, selected);
       }
-      return `<div class="band-cards">${featured.map(b => {
+      return `${state.showAllBands ? `<p class="quiet" data-band-count>${esc(t('band_results', { count: featured.length }))}</p>` : ''}<div class="band-cards ${state.showAllBands ? 'band-cards--all' : ''}">${featured.map(b => {
         const selected = state.band?.handle === b.handle;
         return `<button type="button" class="band-card" data-action="choose-band" data-band-handle="${esc(b.handle)}" aria-pressed="${selected}">${image(b.image, b.title)}<span class="band-card-title">${esc(b.title)}</span><span>${esc(b.price_varies ? t('price_from', { price: money(b.price) }) : money(b.price))}</span><span class="band-card-cta">${esc(t(selected ? 'band_selected' : 'band_select'))}</span></button>`;
       }).join('')}</div>`;
@@ -430,7 +452,7 @@
       if (options.length) return;
       const ringMetal = pickedVariant()?.options.find(value => metalOf(value));
       p.options.forEach((o, i) => {
-        const wanted = /size/i.test(o.name) ? (state.bandCategory === 'mens' ? '' : state.size) : /metal/i.test(o.name) ? ringMetal : '';
+        const wanted = /size/i.test(o.name) ? (state.bandCategory === 'mens' || state.bandSlot > 0 ? '' : state.size) : /metal/i.test(o.name) ? ringMetal : '';
         if (o.values.length === 1) state.bandOptions[i] = o.values[0];
         if (wanted && o.values.includes(wanted)) state.bandOptions[i] = wanted;
       });
@@ -481,7 +503,7 @@
         setting: state.setting.title,
         diamond: state.diamond.title,
         size: state.size === 'unsure' ? t('not_sure') : state.size,
-        options: [...state.setting.options.map((o, i) => /size/i.test(o.name) || o.name === 'Title' || !variant ? '' : o.name + ': ' + variant.options[i]), state.engraving.trim() ? t('engraving') + ': ' + state.engraving.trim() : ''].filter(Boolean).join(' · '),
+        options: [...state.setting.options.map((o, i) => /size/i.test(o.name) || o.name === 'Title' || !variant ? '' : o.name + ': ' + variant.options[i]), ...chosenBands().map(b => bandLabel(b.slot) + ': ' + b.product.title + ' · ' + bandOptionText(b) + ' · ' + (b.variant ? money(b.variant.price) : t('band_options_required'))), state.engraving.trim() ? t('engraving') + ': ' + state.engraving.trim() : ''].filter(Boolean).join(' · '),
         subtotal: money(subtotal())
       };
       form.querySelectorAll('[data-ring-email-field]').forEach(input => { input.value = values[input.dataset.ringEmailField] || ''; });
@@ -562,14 +584,16 @@
     }
     async function cart() { return request(route('cart.js')); }
     function groupLines(c, group = state.group) { return (c.items || []).filter(item => item.properties?._lm_ring_id === group); }
-    function completeGroup(lines, variant, stone) { return lines.length === (state.band ? 3 : 2) && (!state.band || (bandVariant() && lines.some(i => Number(i.variant_id || i.id) === Number(bandVariant().id) && i.quantity === 1))) && lines.some(i => Number(i.variant_id || i.id) === Number(variant.id) && i.quantity === 1) && lines.some(i => Number(i.variant_id || i.id) === Number(stone.variant) && i.quantity === 1); }
+    function completeGroup(lines, variant, stone) {
+      return lines.length === 2 + chosenBands().length && chosenBands().every(b => b.variant && lines.some(i => Number(i.variant_id || i.id) === Number(b.variant.id) && i.quantity === 1 && Number(i.properties?._lm_band_slot || 0) === b.slot)) && lines.some(i => Number(i.variant_id || i.id) === Number(variant.id) && i.quantity === 1) && lines.some(i => Number(i.variant_id || i.id) === Number(stone.variant) && i.quantity === 1);
+    }
     async function removeGroup(lines) {
       if (!lines.length) return;
       const updates = Object.fromEntries(lines.map(item => [item.key, 0]));
       await request(route('cart/update.js'), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ updates }) });
     }
     async function addRing() {
-      if (state.busy || !both() || !state.size || !pickedVariant() || (state.band && !bandVariant())) return;
+      if (state.busy || !both() || !state.size || !pickedVariant() || !bandsValid()) return;
       const oldTotal = subtotal(), settingHandle = state.setting.handle, diamondHandle = state.diamond.handle;
       state.busy = true;
       notice(t('adding'));
@@ -577,12 +601,12 @@
       lockControls();
       let addAttempted = false, selectedVariant;
       try {
-        const [freshSetting, freshDiamond, freshBand] = await Promise.all([product(settingHandle), diamond(diamondHandle), state.band ? product(state.band.handle) : null]);
-        if (freshBand) {
-          if (!freshBand.band || !knownBands.has(freshBand.handle)) throw new Error(t('unavailable'));
-          state.band = freshBand;
-          if (!bandVariant()) throw new Error(t('band_options_required'));
+        const [freshSetting, freshDiamond, freshBands] = await Promise.all([product(settingHandle), diamond(diamondHandle), Promise.all(chosenBands().map(async b => ({ slot: b.slot, product: await product(b.product.handle) })))]);
+        for (const fresh of freshBands) {
+          if (!fresh.product.band || !knownBands.has(fresh.product.handle)) throw new Error(t('unavailable'));
+          state.bandSelections[fresh.slot].product = fresh.product;
         }
+        if (!bandsValid()) throw new Error(t('band_options_required'));
         setSetting(freshSetting, true);
         if (freshSetting.shape !== freshDiamond.shape) throw new Error(t('wrong_shape'));
         state.diamond = freshDiamond;
@@ -595,13 +619,13 @@
         if (completeGroup(existing, selectedVariant, state.diamond)) { if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(current, state.editGroup)); window.location.assign(cfg.cartUrl); return; }
         if (existing.length) await removeGroup(existing);
         const properties = { _lm_ring_id: state.group, _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, Ring: state.setting.title, Diamond: state.diamond.title, 'Ring size': state.size === 'unsure' ? t('not_sure') : state.size };
-        if (state.band) properties._lm_band_handle = state.band.handle;
+
         if (state.size === 'unsure') properties['Size check'] = t('not_sure');
         state.setting.options.forEach((o, i) => { if (!/size/i.test(o.name) && o.name !== 'Title') properties[o.name] = selectedVariant.options[i]; });
         if (state.engraving.trim()) { properties.Engraving = state.engraving.trim().slice(0, 20); properties['Engraving font'] = t(state.font === 'script' ? 'script' : 'block'); }
         if (state.date) properties['Requested date'] = state.date;
         const items = [{ id: selectedVariant.id, quantity: 1, properties }, { id: state.diamond.variant, quantity: 1, properties: { _lm_ring_id: state.group, _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, 'Set in': state.setting.title, 'Ring size': properties['Ring size'] } }];
-        if (state.band) items.push({ id: bandVariant().id, quantity: 1, properties: { _lm_ring_id: state.group, _lm_band_handle: state.band.handle, _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, 'Paired with': state.setting.title } });
+        chosenBands().forEach(b => items.push({ id: b.variant.id, quantity: 1, properties: { _lm_ring_id: state.group, _lm_band_handle: b.product.handle, _lm_band_slot: String(b.slot), _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, 'Paired with': state.setting.title } }));
         addAttempted = true;
         await request(route('cart/add.js'), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ items }) });
         const verified = groupLines(await cart());
@@ -654,7 +678,10 @@
       if (!el || el.disabled || state.busy) return;
       const action = el.dataset.action;
       if (!action.startsWith('photo-') && !action.startsWith('video-')) notice('');
-      if (action.startsWith('band-category-')) { state.bandCategory = action.slice(14); render(); return; }
+      if (action.startsWith('band-category-')) { state.bandCategory = action.slice(14); state.bandMetal = ''; state.bandStyle = ''; render(); return; }
+      if (action === 'toggle-all-bands') { state.showAllBands = !state.showAllBands; render(); return; }
+      if (action.startsWith('edit-band-')) { state.bandSlot = Number(action.slice(10)) === 1 ? 1 : 0; if (state.band) state.bandCategory = cfg.bands.find(b => b.handle === state.band.handle)?.category || 'diamond'; state.bandMetal = ''; state.bandStyle = ''; if (state.screen !== 'review' && both()) go('review'); else render(); reveal(main.querySelector('.band-upsell')); return; }
+      if (action.startsWith('remove-band-')) { const slot = Number(action.slice(12)) === 1 ? 1 : 0; state.bandSelections[slot] = { product: null, options: [] }; state.group = ''; render(); return; }
       if (action === 'choose-band') { await chooseBand(el.dataset.bandHandle); return; }
       if (action === 'remove-band') { state.band = null; state.bandOptions = []; state.group = ''; render(); }
       else if (action.startsWith('start-') || action.startsWith('change-')) {
@@ -695,7 +722,7 @@
         const field = main.querySelector('[data-field="size"]');
         if (!state.size && field) { notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true }); }
         else if (!pickedVariant()) notice(t('size_unavailable'), true);
-        else if (state.band && !bandVariant()) notice(t('band_options_required'), true);
+        else if (!bandsValid()) notice(t('band_options_required'), true);
         else addRing();
       }
       else if (action.startsWith('photo-')) { state.photo = Number(action.slice(6)); detail(); }
@@ -704,7 +731,7 @@
         if (src) main.querySelector('[data-media]').innerHTML = `<video controls playsinline preload="metadata" src="${esc(src)}"></video>`;
       } else if (action === 'add') addRing();
       else if (action === 'restart') {
-        state.setting = null; state.diamond = null; state.band = null; state.bandOptions = []; state.size = ''; state.options = []; state.engraving = ''; state.font = 'block'; state.date = ''; state.group = ''; state.editGroup = ''; state.page = 1; go('start');
+        state.setting = null; state.diamond = null; state.bandSelections = [{ product: null, options: [] }, { product: null, options: [] }]; state.bandSlot = 0; state.bandCategory = 'diamond'; state.showAllBands = false; state.bandMetal = ''; state.bandStyle = ''; state.size = ''; state.options = []; state.engraving = ''; state.font = 'block'; state.date = ''; state.group = ''; state.editGroup = ''; state.page = 1; go('start');
       }
     });
     root.addEventListener('submit', event => {
@@ -719,6 +746,7 @@
     root.addEventListener('change', async event => {
       if (state.busy) return;
       const el = event.target;
+      if (el.hasAttribute('data-band-filter')) { state[el.dataset.bandFilter === 'metal' ? 'bandMetal' : 'bandStyle'] = el.value; render(); main.querySelector('[data-band-filter="' + el.dataset.bandFilter + '"]')?.focus({ preventScroll: true }); return; }
       if (el.hasAttribute('data-band-product')) {
         await chooseBand(el.value);
         return;
@@ -786,11 +814,11 @@
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
       notice(t('restoring'));
       state.busy = true; lockControls();
-      let editLine = null, editBand = null;
+      let editLine = null, editBands = [];
       if (state.editGroup) {
         try {
           const lines = groupLines(await cart(), state.editGroup);
-          editBand = lines.find(line => line.properties?._lm_band_handle === line.handle);
+          editBands = lines.filter(line => line.properties?._lm_band_handle === line.handle).slice(0, 2);
           editLine = lines.find(line => line.properties?._lm_setting_handle === settingHandle && line.handle === settingHandle);
           if (editLine) {
             const props = editLine.properties || {};
@@ -805,12 +833,17 @@
       let failed = false;
       if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); } catch (_) { failed = true; state.setting = null; } }
       if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
-      if (editBand || (!state.editGroup && sameSelection && stored.band)) {
+      const savedBands = Array.isArray(stored.bands) ? stored.bands.slice(0, 2) : stored.band ? [{ handle: stored.band, options: stored.bandOptions }] : [];
+      const restoreBands = editBands.length ? editBands.map((line, index) => ({ handle: line.handle, slot: Number(line.properties?._lm_band_slot ?? index) === 1 ? 1 : 0, line })) : !state.editGroup && sameSelection ? savedBands.map((b, slot) => ({ ...b, slot })) : [];
+      for (const saved of restoreBands.filter(b => b.handle)) {
+        state.bandSlot = saved.slot;
         try {
-          await selectBand(editBand?.handle || stored.band, Array.isArray(stored.bandOptions) ? stored.bandOptions : []);
-          if (editBand) state.bandOptions = state.band.variants.find(v => Number(v.id) === Number(editBand.variant_id || editBand.id))?.options.slice() || [];
-        } catch (_) { failed = true; state.band = null; state.bandOptions = []; }
+          await selectBand(saved.handle, Array.isArray(saved.options) ? saved.options : []);
+          if (saved.line) state.bandOptions = state.band.variants.find(v => Number(v.id) === Number(saved.line.variant_id || saved.line.id))?.options.slice() || [];
+        } catch (_) { failed = true; state.band = null; state.bandOptions = []; state.group = ''; }
       }
+      state.bandSlot = stored.bandSlot === 1 ? 1 : 0;
+      state.bandCategory = cfg.bands.find(b => b.handle === state.band?.handle)?.category || 'diamond';
       state.busy = false;
       state.kind = state.setting ? 'diamond' : state.diamond ? 'setting' : 'diamond';
       if (state.setting) state.filters.shape = state.setting.shape;
