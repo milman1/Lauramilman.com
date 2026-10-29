@@ -37,3 +37,6 @@
 #lmny-ring-builder .band-card-cta{margin-top:auto;padding:10px 4px;background:var(--ink);color:var(--paper);text-align:center;width:100%}
 #lmny-ring-builder .band-upsell>.heading{align-items:center;margin-bottom:0}
 @media(max-width:480px){#lmny-ring-builder .band-cards{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 4px 12px}#lmny-ring-builder .band-card{flex:0 0 72%;scroll-snap-align:start}}
+
+#lmny-ring-builder .band-categories{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+#lmny-ring-builder .band-categories [aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}

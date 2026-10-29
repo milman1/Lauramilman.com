@@ -13,7 +13,9 @@ const diamonds=raw.map((p,i)=>({handle:p.handle,title:p.title,type:p.type,shape:
 const round={...structuredClone(diamonds[0]),handle:'lg-round-test',shape:'Round',title:'Round lab-grown diamond'};round.variants[0].id=100001;const stoneRound={...baseStones[0],stock_ref:'round-test',shape:'Round',measurements:'6.43 X 6.48 X 3.86'};
 const band={handle:'test-wedding-band',title:'Round lab-grown diamond wedding band',type:'Rings',band:true,setting:false,available:true,image:'https://images.test/band.jpg',url:'/products/test-wedding-band',options:[{name:'Size',values:['6.25','7']},{name:'Metal',values:['14K White Gold','18K White Gold']}],variants:[{id:80001,price:90000,available:true,options:['6.25','14K White Gold']},{id:80002,price:115000,available:true,options:['6.25','18K White Gold']},{id:80003,price:90000,available:false,options:['7','14K White Gold']}]};
 cfg.bands=[{handle:band.handle,title:band.title,image:band.image,price:90000,price_varies:true},{handle:'white-band',title:'Round band in White Gold',image:band.image,price:90000,price_varies:true},{handle:'rose-band',title:'Round band in Rose Gold',image:band.image,price:130000,price_varies:false}];
-const products=new Map([...settings,...diamonds,round,band].map(p=>[p.handle,structuredClone(p)]));
+const mensBand={...structuredClone(band),handle:'mens-gold-band',title:'Satin Wedding Band in 14K or 18K Gold',options:[{name:'Ring size',values:['9','10']},{name:'Jewelry material',values:['14K','18K']}],variants:[{id:81001,price:150000,available:true,options:['9','14K']},{id:81002,price:190000,available:true,options:['10','18K']}]};
+cfg.bands.push({handle:mensBand.handle,title:mensBand.title,image:mensBand.image,price:150000,price_varies:true,category:'mens'});
+const products=new Map([...settings,...diamonds,round,band,mensBand].map(p=>[p.handle,structuredClone(p)]));
 const b=await chromium.launch({executablePath:process.env.LMNY_TEST_CHROMIUM || undefined,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 let contactPosts=[];let mode='normal',cartItems=[],posts=[],searches=[],failSearch=false,priceBump=false,productUnavailable=false;
 const { Liquid } = await import(process.env.LMNY_TEST_LIQUIDJS || 'liquidjs');
@@ -159,4 +161,12 @@ console.log('PASS live filtering, mm sizes on cards, carat size and grade chips,
  await p.locator('[name="contact[email]"]').fill('shopper@example.com');await p.getByRole('button',{name:'Send to Laura'}).click();await p.waitForURL('**/contact');
  const sent=contactPosts.at(-1);assert.ok(sent.get('contact[ring_link]').includes('setting=oval-setting'));assert.ok(sent.get('contact[ring_link]').includes('diamond=lg-'));assert.equal(sent.get('contact[ring_size]'),'6.5');assert.ok(sent.get('contact[options]').includes('Engraving (optional): Yes'));assert.equal(sent.get('contact[ring_subtotal]'),'$2,300.00');assert.equal(sent.get('contact[setting]'),'Oval setting');await p.close();}
 console.log('PASS email-this-ring form, start links, to-scale outline that follows ring size, setting video, share link, 30-day save and expiry, links load only what they name.');
+{const p=await newPage();await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');
+ await click(p,'band-category-mens');assert.equal(await p.locator('.band-card').count(),1);assert.ok((await p.locator('.band-card').innerText()).includes(mensBand.title));
+ await p.locator('[data-action="choose-band"]').click();await p.locator('[data-band-option="0"]').waitFor();assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'','men’s band requires its own size');
+ await p.locator('[data-band-option="0"]').selectOption('10');await p.locator('[data-band-option="1"]').selectOption('18K');
+ await click(p,'band-category-diamond');assert.equal(await p.locator('.band-card').count(),3);assert.ok((await p.locator('[data-flow-summary]').innerText()).includes(mensBand.title),'browsing another category keeps the selection');
+ await p.reload();await p.locator('[data-band-option="0"]').waitFor();assert.equal(await p.locator('[data-action="band-category-mens"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'10');await click(p,'add');await p.waitForURL('**/cart');assert.equal(posts.at(-1).items[2].id,81002);await p.close();cartItems=[];}
+console.log('PASS men’s bands category, separate size and material, switching categories, restore and correct cart variant.');
 await b.close();

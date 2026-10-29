@@ -83,12 +83,17 @@
       {% endfor %}
     ],"bands":[
       {% assign band_emitted = false %}
-      {% for band in collections['wedding-bands'].products limit: 50 %}
-        {% if band.available and band.tags contains 'wedding-band' %}
-          {% if band_emitted %},{% endif %}
-          {"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"image":{% if band.featured_image %}{{ band.featured_image | image_url: width: 600 | json }}{% else %}null{% endif %}}
-          {% assign band_emitted = true %}
-        {% endif %}
+      {% assign band_collections = 'wedding-bands,mens-wedding-bands' | split: ',' %}
+      {% for band_collection in band_collections %}
+        {% for band in collections[band_collection].products limit: 50 %}
+          {% assign include_band = false %}
+          {% if band_collection == 'mens-wedding-bands' or band.tags contains 'wedding-band' %}{% assign include_band = true %}{% endif %}
+          {% if band.available and band.featured_image and include_band %}
+            {% if band_emitted %},{% endif %}
+            {"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"category":{% if band_collection == 'mens-wedding-bands' %}"mens"{% else %}"diamond"{% endif %},"image":{{ band.featured_image | image_url: width: 600 | json }}}
+            {% assign band_emitted = true %}
+          {% endif %}
+        {% endfor %}
       {% endfor %}
     ],"copy":{
       "order_subtotal":{{ 'ring_flow.order_subtotal' | t | json }},
@@ -97,6 +102,9 @@
       "band_optional":{{ 'ring_flow.band_optional' | t | json }},
       "band_select":{{ 'ring_flow.band_select' | t | json }},
       "band_selected":{{ 'ring_flow.band_selected' | t | json }},
+      "band_diamond":{{ 'ring_flow.band_diamond' | t | json }},
+      "band_mens":{{ 'ring_flow.band_mens' | t | json }},
+      "band_mens_note":{{ 'ring_flow.band_mens_note' | t | json }},
       "band_heading":{{ 'ring_flow.band_heading' | t | json }},
       "band_note":{{ 'ring_flow.band_note' | t | json }},
       "no_band":{{ 'ring_flow.no_band' | t | json }},
