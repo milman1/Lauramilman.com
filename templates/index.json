@@ -193,7 +193,8 @@
           "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
           "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
         ],
-        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png"
+        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png",
+        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png"
       }
     },
     "meet-laura": {
@@ -205,66 +206,6 @@
         "text": "Discover the story behind the jewelry.",
         "link_text": "Read Laura's Story",
         "link_url": "/pages/about"
-      }
-    },
-    "loose-stones": {
-      "type": "lmh-stones",
-      "blocks": {
-        "size-1": {
-          "type": "size",
-          "settings": {
-            "label": "1 to 2 ct",
-            "query": "?min_carat=1&max_carat=2"
-          }
-        },
-        "size-2": {
-          "type": "size",
-          "settings": {
-            "label": "2 to 3 ct",
-            "query": "?min_carat=2&max_carat=3"
-          }
-        },
-        "size-3": {
-          "type": "size",
-          "settings": {
-            "label": "3 ct and up",
-            "query": "?min_carat=3"
-          }
-        },
-        "size-4": {
-          "type": "size",
-          "settings": {
-            "label": "Under $1,000",
-            "query": "?max_price=1000"
-          }
-        }
-      },
-      "block_order": [
-        "size-1",
-        "size-2",
-        "size-3",
-        "size-4"
-      ],
-      "settings": {
-        "eyebrow": "Loose diamonds",
-        "title": "Start with the stone.",
-        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
-        "search_url": "/collections/lab-grown-diamonds",
-        "link_text": "See all lab-grown diamonds",
-        "natural_url": "/collections/natural-diamonds",
-        "colored_url": "/collections/colored-lab-grown-diamonds",
-        "strip_text": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA.",
-        "colored_products": [
-          "lg-color-1012090",
-          "lg-color-1020779",
-          "lg-color-77274",
-          "lg-color-1017095",
-          "lg-color-70388",
-          "lg-color-1019767"
-        ],
-        "colored_collection": "colored-lab-grown-diamonds",
-        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
-        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
       }
     },
     "reviews": {
@@ -978,7 +919,6 @@
     "trust-strip",
     "ring-builder",
     "meet-laura",
-    "loose-stones",
     "reviews",
     "rings-your-way",
     "gold",
