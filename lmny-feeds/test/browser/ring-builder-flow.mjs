@@ -12,7 +12,7 @@ cfg.copy.tax_shipping = 'Tax &amp; shipping calculated at checkout.';
 const diamonds=raw.map((p,i)=>({handle:p.handle,title:p.title,type:p.type,shape:'Oval',available:true,setting:false,url:'/products/'+p.handle,image:"https://images.test/diamond-"+i+".jpg",images:["https://images.test/diamond-"+i+".jpg","https://images.test/diamond-alt.jpg"],videos:['https://media.example/video.mp4'],options:p.options,variants:p.variants.map(v=>({id:v.id,price:v.price,available:v.available,options:v.options}))}));
 const round={...structuredClone(diamonds[0]),handle:'lg-round-test',shape:'Round',title:'Round lab-grown diamond'};round.variants[0].id=100001;const stoneRound={...baseStones[0],stock_ref:'round-test',shape:'Round',measurements:'6.43 X 6.48 X 3.86'};
 const band={handle:'test-wedding-band',title:'Round lab-grown diamond wedding band',type:'Rings',band:true,setting:false,available:true,image:'https://images.test/band.jpg',url:'/products/test-wedding-band',options:[{name:'Size',values:['6.25','7']},{name:'Metal',values:['14K White Gold','18K White Gold']}],variants:[{id:80001,price:90000,available:true,options:['6.25','14K White Gold']},{id:80002,price:115000,available:true,options:['6.25','18K White Gold']},{id:80003,price:90000,available:false,options:['7','14K White Gold']}]};
-cfg.bands=[{handle:band.handle,title:band.title},{handle:'white-band',title:'Round band in White Gold',price:90000,price_varies:true}];
+cfg.bands=[{handle:band.handle,title:band.title,image:band.image,price:90000,price_varies:true},{handle:'white-band',title:'Round band in White Gold',image:band.image,price:90000,price_varies:true},{handle:'rose-band',title:'Round band in Rose Gold',image:band.image,price:130000,price_varies:false}];
 const products=new Map([...settings,...diamonds,round,band].map(p=>[p.handle,structuredClone(p)]));
 const b=await chromium.launch({executablePath:process.env.LMNY_TEST_CHROMIUM || undefined,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 let contactPosts=[];let mode='normal',cartItems=[],posts=[],searches=[],failSearch=false,priceBump=false,productUnavailable=false;
@@ -66,14 +66,18 @@ console.log('PASS original shared filter controls, multiple grades, origin range
 for (const failure of ['normal','partial','lost_response']) {
  const p=await newPage();await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');
  const oldTotal=await p.locator('[data-flow-summary] .total').innerText();
- await p.locator('[data-band-product]').selectOption(band.handle);await p.locator('[data-band-option="0"]').waitFor();
+ assert.equal(await p.locator('.band-card').count(),3);
+ assert.equal(await p.locator('.band-card[aria-pressed="true"]').count(),0,'bands are opt-in');
+ assert.equal(await p.locator('[data-band-product]').inputValue(),'');
+ await p.locator('[data-action="choose-band"][data-band-handle="'+band.handle+'"]').click();await p.locator('[data-band-option="0"]').waitFor();
+ assert.equal(await p.locator('[data-action="choose-band"][data-band-handle="'+band.handle+'"]').getAttribute('aria-pressed'),'true');
  assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
  await p.locator('[data-band-option="0"]').selectOption('7');await p.locator('[data-band-option="1"]').selectOption('14K White Gold');
  assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
  await p.locator('[data-band-option="0"]').selectOption('6.25');await p.locator('[data-band-option="1"]').selectOption('18K White Gold');
  assert.notEqual(await p.locator('[data-flow-summary] .total').innerText(),oldTotal);
  await p.reload();await p.locator('[data-band-option="0"]').waitFor();assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'6.25');
- for(const width of [320,390,1024]) {await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
+ for(const width of [320,390,1024]) {await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);if(width===390&&failure==='normal'&&process.env.LMNY_BAND_MOBILE){await p.locator('.band-upsell').scrollIntoViewIfNeeded();await p.screenshot({path:process.env.LMNY_BAND_MOBILE});}}
  if(failure==='normal' && process.env.LMNY_BAND_PREVIEW) await p.screenshot({path:process.env.LMNY_BAND_PREVIEW,fullPage:true});
  mode=failure;cartItems=[{key:'unrelated',id:999,quantity:1,properties:{}}];await click(p,'add');
  if(failure==='partial'){await p.getByRole('alert').waitFor();assert.deepEqual(cartItems.map(i=>i.key),['unrelated']);}
