@@ -38,7 +38,7 @@
     const counted = (key, count) => t(Number(count) === 1 && translations[key + '_one'] ? key + '_one' : key, { count: Number(count).toLocaleString() });
     const button = (key, action, cls = 'primary', extra = '') => `<button type="button" class="${cls}" data-action="${esc(action)}" ${extra}>${esc(t(key))}</button>`;
     const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}">` : '';
-    const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, band: null, bandOptions: [], options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
+    const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, band: null, bandCategory: 'diamond', bandOptions: [], options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
     const settingCount = shape => [...knownSettings.values()].filter(p => p.available && String(shape || '').split(',').some(s => s.trim().toLowerCase() === p.shape.toLowerCase())).length;
@@ -382,14 +382,18 @@
     function bandPicker() {
       if (!(cfg.bands || []).length) return '';
       const p = state.band;
-      return `<section class="rule band-upsell" aria-label="${esc(t('band_heading'))}"><div class="heading"><div><span class="eyebrow">${esc(t('band_optional'))}</span><h2>${esc(t('band_heading'))}</h2></div>${p ? button('remove', 'remove-band', 'link') : ''}</div><p class="quiet">${esc(t('band_note'))}</p>${bandCards()}<label>${esc(t('band'))}<select data-band-product><option value="">${esc(t('no_band'))}</option>${bandOptions()}</select></label>${p ? `<div class="sum-product">${image(p.image, p.title, 'thumb')}<a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div><div class="fields">${p.options.map((o,i) => `<label>${esc(o.name)}<select data-band-option="${i}"><option value="">${esc(t('choose_option'))}</option>${o.values.map(v => `<option value="${esc(v)}" ${state.bandOptions[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div><p class="${bandVariant() ? 'quiet' : 'error'}">${bandVariant() ? money(bandVariant().price) : esc(t('band_options_required'))}</p>` : ''}</section>`;
+      return `<section class="rule band-upsell" aria-label="${esc(t('band_heading'))}"><div class="heading"><div><span class="eyebrow">${esc(t('band_optional'))}</span><h2>${esc(t('band_heading'))}</h2></div>${p ? button('remove', 'remove-band', 'link') : ''}</div><p class="quiet">${esc(t(state.bandCategory === 'mens' ? 'band_mens_note' : 'band_note'))}</p>${bandCategories()}${bandCards()}<label>${esc(t('band'))}<select data-band-product><option value="">${esc(t('no_band'))}</option>${bandOptions()}</select></label>${p ? `<div class="sum-product">${image(p.image, p.title, 'thumb')}<a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div><div class="fields">${p.options.map((o,i) => `<label>${esc(o.name)}<select data-band-option="${i}"><option value="">${esc(t('choose_option'))}</option>${o.values.map(v => `<option value="${esc(v)}" ${state.bandOptions[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div><p class="${bandVariant() ? 'quiet' : 'error'}">${bandVariant() ? money(bandVariant().price) : esc(t('band_options_required'))}</p>` : ''}</section>`;
+    }
+    function bandCategories() {
+      if (!cfg.bands.some(b => b.category === 'mens')) return '';
+      return `<div class="band-categories">${['diamond', 'mens'].map(category => button('band_' + category, 'band-category-' + category, 'secondary', `aria-pressed="${state.bandCategory === category}"`)).join('')}</div>`;
     }
     function bandCards() {
       const ring = metalOf(pickedVariant()?.options.join(' ') || state.setting?.title);
-      const ranked = cfg.bands.slice().sort((a, b) => Number(metalOf(b.title) === ring && !!ring) - Number(metalOf(a.title) === ring && !!ring));
+      const ranked = cfg.bands.filter(b => (b.category || 'diamond') === state.bandCategory).sort((a, b) => Number(metalOf(b.title) === ring && !!ring) - Number(metalOf(a.title) === ring && !!ring));
       const featured = ranked.filter(b => b.image).slice(0, 3);
       if (state.band && !featured.some(b => b.handle === state.band.handle)) {
-        const selected = cfg.bands.find(b => b.handle === state.band.handle);
+        const selected = ranked.find(b => b.handle === state.band.handle);
         if (selected?.image) featured.splice(2, 1, selected);
       }
       return `<div class="band-cards">${featured.map(b => {
@@ -408,21 +412,25 @@
     function bandOptions() {
       const ring = metalOf(pickedVariant()?.options.join(' ') || state.setting?.title);
       const option = b => `<option value="${esc(b.handle)}" ${state.band?.handle === b.handle ? 'selected' : ''}>${esc(b.title)}${b.price ? ' · ' + esc(b.price_varies ? t('price_from', { price: money(b.price) }) : money(b.price)) : ''}</option>`;
-      const matching = cfg.bands.filter(b => ring && metalOf(b.title) === ring);
-      if (!matching.length) return cfg.bands.map(option).join('');
-      const others = cfg.bands.filter(b => !matching.includes(b));
-      return `<optgroup label="${esc(t('band_match', { metal: metalName(ring).toLowerCase() }))}">${matching.map(option).join('')}</optgroup>${others.length ? `<optgroup label="${esc(t('band_other'))}">${others.map(option).join('')}</optgroup>` : ''}`;
+      const diamondBands = cfg.bands.filter(b => b.category !== 'mens');
+      const mensBands = cfg.bands.filter(b => b.category === 'mens');
+      const mensGroup = mensBands.length ? `<optgroup label="${esc(t('band_mens'))}">${mensBands.map(option).join('')}</optgroup>` : '';
+      const matching = diamondBands.filter(b => ring && metalOf(b.title) === ring);
+      if (!matching.length) return diamondBands.map(option).join('') + mensGroup;
+      const others = diamondBands.filter(b => !matching.includes(b));
+      return `<optgroup label="${esc(t('band_match', { metal: metalName(ring).toLowerCase() }))}">${matching.map(option).join('')}</optgroup>${others.length ? `<optgroup label="${esc(t('band_other'))}">${others.map(option).join('')}</optgroup>` : ''}${mensGroup}`;
     }
     async function selectBand(handle, options = []) {
       if (!knownBands.has(handle)) throw new Error(t('unavailable'));
       const p = await product(handle);
       if (!p.band) throw new Error(t('unavailable'));
       state.band = p;
+      state.bandCategory = cfg.bands.find(b => b.handle === handle)?.category || 'diamond';
       state.bandOptions = options;
       if (options.length) return;
       const ringMetal = pickedVariant()?.options.find(value => metalOf(value));
       p.options.forEach((o, i) => {
-        const wanted = /size/i.test(o.name) ? state.size : /metal/i.test(o.name) ? ringMetal : '';
+        const wanted = /size/i.test(o.name) ? (state.bandCategory === 'mens' ? '' : state.size) : /metal/i.test(o.name) ? ringMetal : '';
         if (o.values.length === 1) state.bandOptions[i] = o.values[0];
         if (wanted && o.values.includes(wanted)) state.bandOptions[i] = wanted;
       });
@@ -646,6 +654,7 @@
       if (!el || el.disabled || state.busy) return;
       const action = el.dataset.action;
       if (!action.startsWith('photo-') && !action.startsWith('video-')) notice('');
+      if (action.startsWith('band-category-')) { state.bandCategory = action.slice(14); render(); return; }
       if (action === 'choose-band') { await chooseBand(el.dataset.bandHandle); return; }
       if (action === 'remove-band') { state.band = null; state.bandOptions = []; state.group = ''; render(); }
       else if (action.startsWith('start-') || action.startsWith('change-')) {
