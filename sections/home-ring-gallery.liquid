@@ -11,8 +11,12 @@
   <div class="hrg__panel" id="DiamondGallery-{{ section.id }}" data-gallery-panel>
     <ul class="hrg__track" data-gallery-track>
       {%- for block in section.blocks -%}
+        {%- unless block.type == 'diamond' -%}{%- continue -%}{%- endunless -%}
         <li class="hrg__card" {{ block.shopify_attributes }}>
           <a href="{{ routes.collections_url }}/lab-grown-diamonds?shape={{ block.settings.shape | url_encode }}">
+            {%- if section.settings.diamond_artwork != blank and block.settings.artwork_x != blank -%}
+              {%- render 'home-gallery-artwork', artwork: section.settings.diamond_artwork, x: block.settings.artwork_x, y: 265, crop_width: 250, crop_height: 230, label: block.settings.shape -%}
+            {%- else -%}
             <span class="hrg__image hrg__image--diamond">
               {%- if block.settings.image != blank -%}
                 {{ block.settings.image | image_url: width: 800 | image_tag: widths: '240, 400, 600, 800', sizes: '(min-width: 750px) 23vw, 43vw', loading: 'lazy', alt: block.settings.shape }}
@@ -21,6 +25,7 @@
                 {%- render 'diamond-shape-icon', shape: icon_shape -%}
               {%- endif -%}
             </span>
+            {%- endif -%}
             <span class="hrg__name">{{ block.settings.shape | escape }}</span>
           </a>
         </li>
@@ -38,6 +43,18 @@
   </div>
   <div class="hrg__panel" id="RingGallery-{{ section.id }}" data-gallery-panel>
     <ul class="hrg__track" data-gallery-track>
+      {%- if section.settings.ring_artwork != blank -%}
+        {%- for block in section.blocks -%}
+          {%- unless block.type == 'ring_style' -%}{%- continue -%}{%- endunless -%}
+          <li class="hrg__card" {{ block.shopify_attributes }}>
+            <a href="{{ routes.root_url }}pages/ring-builder?start=setting&amp;shape={{ block.settings.shape | url_encode }}">
+              {%- render 'home-gallery-artwork', artwork: section.settings.ring_artwork, x: block.settings.artwork_x, y: 264, crop_width: 250, crop_height: 205, label: block.settings.title -%}
+              <span class="hrg__name">{{ block.settings.title | escape }}</span>
+              <span class="hrg__card-link">{{ 'home_ring_gallery.browse_settings' | t }} <span aria-hidden="true">&rarr;</span></span>
+            </a>
+          </li>
+        {%- endfor -%}
+      {%- else -%}
       {%- for ring in section.settings.rings -%}
         {%- unless ring.available and ring.featured_image and ring.tags contains 'ring-setting' -%}{%- continue -%}{%- endunless -%}
         {%- capture shape -%}{%- render 'center-stone-shape', product: ring -%}{%- endcapture -%}
@@ -54,13 +71,14 @@
           </a>
         </li>
       {%- endfor -%}
+      {%- endif -%}
     </ul>
     <div class="hrg__scroll" data-gallery-scroll hidden>
       <button type="button" data-gallery-prev aria-label="{{ 'home_ring_gallery.previous' | t }}">&larr;</button>
       <span class="hrg__progress" aria-hidden="true"><span data-gallery-progress></span></span>
       <button type="button" data-gallery-next aria-label="{{ 'home_ring_gallery.next' | t }}">&rarr;</button>
     </div>
-    <p class="hrg__note">{{ 'home_ring_gallery.setting_note' | t }}</p>
+    <p class="hrg__note">{%- if section.settings.ring_artwork != blank -%}{{ 'home_ring_gallery.inspiration_note' | t }} {% endif -%}{{ 'home_ring_gallery.setting_note' | t }}</p>
     <div class="hrg__actions">
       <a class="hrg__button hrg__button--primary" href="{{ routes.root_url }}pages/ring-builder?start=setting">{{ 'home_ring_gallery.settings_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
     </div>
@@ -88,6 +106,9 @@
   .hrg__image img { display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
   .hrg__image--diamond { background: #ececea; aspect-ratio: 4 / 3; }
   .hrg__image--diamond img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+  /* Crop the approved artwork boards without resampling or redrawing the jewelry. */
+  .hrg .hrg__image--artwork { position: relative; display: block; aspect-ratio: var(--art-ratio); background: #f1eee8; }
+  .hrg .hrg__image--artwork img { position: absolute; width: var(--art-width); max-width: none; height: auto; max-height: none; left: var(--art-left); top: var(--art-top); object-fit: initial; mix-blend-mode: normal; }
   .hrg__image svg { width: 55%; height: auto; }
   .hrg__name { display: block; margin: 18px 8px 0; font-family: var(--lmh-serif); font-size: clamp(20px, 2vw, 26px); line-height: 1.15; }
   .hrg__card-link { display: block; margin: 8px 0 0; font-size: 12px; }
@@ -200,32 +221,176 @@
   "name": "Ring and diamond gallery",
   "class": "section-home-ring-gallery",
   "settings": [
-    { "type": "text", "id": "title", "label": "Heading", "default": "Make it yours." },
-    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Start with the stone or the ring." },
-    { "type": "product_list", "id": "rings", "label": "Featured ring settings", "limit": 4, "info": "Select available ring-setting products with a confirmed center-stone shape." }
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Make it yours."
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Start with the stone or the ring."
+    },
+    {
+      "type": "product_list",
+      "id": "rings",
+      "label": "Featured ring settings",
+      "limit": 4,
+      "info": "Select available ring-setting products with a confirmed center-stone shape."
+    },
+    {
+      "type": "image_picker",
+      "id": "diamond_artwork",
+      "label": "Diamond preview artwork",
+      "info": "Approved 1536 \u00d7 1024 diamond gallery board."
+    },
+    {
+      "type": "image_picker",
+      "id": "ring_artwork",
+      "label": "Ring preview artwork",
+      "info": "Approved 1536 \u00d7 1024 ring gallery board. Rings are shown as design inspiration."
+    }
   ],
-  "max_blocks": 4,
+  "max_blocks": 8,
   "blocks": [
     {
       "type": "diamond",
       "name": "Diamond shape",
       "settings": [
-        { "type": "select", "id": "shape", "label": "Shape", "default": "Round", "options": [
-          { "value": "Round", "label": "Round" }, { "value": "Oval", "label": "Oval" },
-          { "value": "Emerald", "label": "Emerald" }, { "value": "Pear", "label": "Pear" },
-          { "value": "Cushion", "label": "Cushion" }, { "value": "Radiant", "label": "Radiant" },
-          { "value": "Princess", "label": "Princess" }, { "value": "Asscher", "label": "Asscher" },
-          { "value": "Marquise", "label": "Marquise" }, { "value": "Heart", "label": "Heart" }
-        ] },
-        { "type": "image_picker", "id": "image", "label": "Diamond photo" }
+        {
+          "type": "select",
+          "id": "shape",
+          "label": "Shape",
+          "default": "Round",
+          "options": [
+            {
+              "value": "Round",
+              "label": "Round"
+            },
+            {
+              "value": "Oval",
+              "label": "Oval"
+            },
+            {
+              "value": "Emerald",
+              "label": "Emerald"
+            },
+            {
+              "value": "Pear",
+              "label": "Pear"
+            },
+            {
+              "value": "Cushion",
+              "label": "Cushion"
+            },
+            {
+              "value": "Radiant",
+              "label": "Radiant"
+            },
+            {
+              "value": "Princess",
+              "label": "Princess"
+            },
+            {
+              "value": "Asscher",
+              "label": "Asscher"
+            },
+            {
+              "value": "Marquise",
+              "label": "Marquise"
+            },
+            {
+              "value": "Heart",
+              "label": "Heart"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Diamond photo"
+        },
+        {
+          "type": "number",
+          "id": "artwork_x",
+          "label": "Artwork crop left (pixels)",
+          "info": "Use 71, 339, 600 or 864 for the approved diamond board."
+        }
+      ],
+      "limit": 4
+    },
+    {
+      "type": "ring_style",
+      "name": "Ring inspiration",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Label",
+          "default": "Oval solitaire"
+        },
+        {
+          "type": "select",
+          "id": "shape",
+          "label": "Setting shape",
+          "default": "Oval",
+          "options": [
+            {
+              "value": "Oval",
+              "label": "Oval"
+            },
+            {
+              "value": "Emerald",
+              "label": "Emerald"
+            },
+            {
+              "value": "Round",
+              "label": "Round"
+            }
+          ]
+        },
+        {
+          "type": "number",
+          "id": "artwork_x",
+          "label": "Artwork crop left (pixels)",
+          "default": 71
+        }
       ]
     }
   ],
-  "presets": [{ "name": "Ring and diamond gallery", "blocks": [
-    { "type": "diamond", "settings": { "shape": "Round" } },
-    { "type": "diamond", "settings": { "shape": "Oval" } },
-    { "type": "diamond", "settings": { "shape": "Emerald" } },
-    { "type": "diamond", "settings": { "shape": "Pear" } }
-  ] }]
+  "presets": [
+    {
+      "name": "Ring and diamond gallery",
+      "blocks": [
+        {
+          "type": "diamond",
+          "settings": {
+            "shape": "Round"
+          }
+        },
+        {
+          "type": "diamond",
+          "settings": {
+            "shape": "Oval"
+          }
+        },
+        {
+          "type": "diamond",
+          "settings": {
+            "shape": "Emerald"
+          }
+        },
+        {
+          "type": "diamond",
+          "settings": {
+            "shape": "Pear"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}
