@@ -88,6 +88,7 @@
       const stored = { bands: state.bandSelections.map(b => ({ handle: b.product?.handle, options: b.options })), bandSlot: state.bandSlot, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
       try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: Date.now() })); } catch (_) {}
       const u = new URL(window.location.href);
+      if (u.hash.startsWith('#build=')) u.hash = '';
       for (const k of ['setting', 'diamond', 'step', 'edit_group']) u.searchParams.delete(k);
       if (state.editGroup) u.searchParams.set('edit_group', state.editGroup);
       if (stored.setting) u.searchParams.set('setting', stored.setting);
@@ -494,7 +495,26 @@
       const url = new URL(location.pathname, location.origin);
       url.searchParams.set('setting', state.setting.handle);
       url.searchParams.set('diamond', state.diamond.handle);
+      url.searchParams.set('step', 'review');
+      url.hash = 'build=' + encodeURIComponent(JSON.stringify({
+        v: 1, setting: state.setting.handle, diamond: state.diamond.handle,
+        size: state.size, options: state.options, engraving: state.engraving,
+        font: state.font, date: state.date,
+        bands: state.bandSelections.map(b => ({ handle: b.product?.handle || '', options: b.options }))
+      }));
       return url;
+    }
+    function sharedBuild(params) {
+      if (!location.hash.startsWith('#build=') || location.hash.length > 6000) return null;
+      try {
+        const value = JSON.parse(decodeURIComponent(location.hash.slice(7)));
+        const text = (v, max) => typeof v === 'string' && v.length <= max;
+        const options = v => Array.isArray(v) && v.length <= 3 && v.every(o => o == null || text(o, 100));
+        if (!value || value.v !== 1 || !handlePattern.test(value.setting || '') || !handlePattern.test(value.diamond || '') || value.setting !== params.get('setting') || value.diamond !== params.get('diamond')) return null;
+        if (!text(value.size, 20) || !options(value.options) || !text(value.engraving, 20) || !['block', 'script'].includes(value.font) || !text(value.date, 10) || (value.date && !/^\d{4}-\d{2}-\d{2}$/.test(value.date))) return null;
+        if (!Array.isArray(value.bands) || value.bands.length > 2 || !value.bands.every(b => b && text(b.handle, 100) && (!b.handle || handlePattern.test(b.handle)) && options(b.options))) return null;
+        return { setting: value.setting, diamond: value.diamond, size: value.size, options: value.options, engraving: value.engraving, font: value.font, date: value.date, bands: value.bands.map(b => ({ handle: b.handle, options: b.options })) };
+      } catch (_) { return null; }
     }
     function fillRingEmail(form) {
       const variant = pickedVariant();
@@ -782,11 +802,14 @@
       try { stored = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
       if (!(Date.now() - Number(stored.saved) < keepFor)) stored = {};
       const params = new URLSearchParams(location.search);
+      const hasSharedBuild = location.hash.startsWith('#build=');
+      const shared = hasSharedBuild ? sharedBuild(params) : null;
+      if (hasSharedBuild) stored = shared || {};
       const linked = params.has('setting') || params.has('diamond') || params.has('start');
       const settingHandle = linked ? params.get('setting') : stored.setting;
       const diamondHandle = linked ? params.get('diamond') : stored.diamond;
       const requestedShape = params.get('shape');
-      const edit = params.get('edit_group') || stored.editGroup;
+      const edit = hasSharedBuild ? '' : params.get('edit_group') || (!linked ? stored.editGroup : '');
       if (/^lmny-[a-z0-9-]+$/i.test(edit || '')) state.editGroup = edit;
       const sameSelection = (!params.has('setting') || params.get('setting') === stored.setting) && (!params.has('diamond') || params.get('diamond') === stored.diamond);
       if (sameSelection) {
@@ -830,9 +853,10 @@
           }
         } catch (_) {}
       }
-      let failed = false;
-      if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); } catch (_) { failed = true; state.setting = null; } }
+      let failed = hasSharedBuild && !shared;
+      if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
       if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
+      if (shared && both() && state.setting.shape !== state.diamond.shape) { state.diamond = null; failed = true; }
       const savedBands = Array.isArray(stored.bands) ? stored.bands.slice(0, 2) : stored.band ? [{ handle: stored.band, options: stored.bandOptions }] : [];
       const restoreBands = editBands.length ? editBands.map((line, index) => ({ handle: line.handle, slot: Number(line.properties?._lm_band_slot ?? index) === 1 ? 1 : 0, line })) : !state.editGroup && sameSelection ? savedBands.map((b, slot) => ({ ...b, slot })) : [];
       for (const saved of restoreBands.filter(b => b.handle)) {
@@ -853,6 +877,7 @@
       ready = true;
       afterRingEmail();
     }
+    window.addEventListener('hashchange', () => { if (location.hash.startsWith('#build=')) location.reload(); });
     restore();
   }
   initialize();
