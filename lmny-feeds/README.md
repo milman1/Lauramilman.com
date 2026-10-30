@@ -83,17 +83,26 @@ holds a stones table — Shopify products are the only live copy.
      `retail = cost × 2` (rounded to cents) via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
-   delete / archive / skip. Unchanged hashes are skipped entirely. Loose
-   diamonds that leave a successfully fetched feed are permanently deleted
-   from Shopify; unavailable watches are archived. A feed that fails to fetch
-   never removes its catalog segment.
+   archive / skip. Unchanged hashes are skipped entirely. Diamonds and watches
+   that leave a successfully fetched feed are archived, never deleted. A
+   returning item updates its existing ID and handle after the normal gates.
+   A feed that fails to fetch never removes its catalog segment. Retained
+   archives are excluded from the removal guard's denominator so they cannot
+   dilute the 20% protection against a truncated feed.
    Archives carry a cause: `left_feed` (the stock ref is gone — sold or
    withdrawn) or `held_in_feed` (still listed, but a gate or a pricing rule
    refused it this run). Held items archive, since an unpriceable item must not
-   stay buyable but may recover next run. A loose diamond with `left_feed` is
-   deleted and gets a permanent URL redirect; redirecting a held item would
-   strand its page when pricing lets it back. The run summary reports deletes
-   separately from archives.
+   stay buyable but may recover next run. Products with `left_feed` get a
+   collection redirect while unavailable; held items do not get new redirects.
+   After archiving, `src/archiveRedirects.ts` rechecks missing redirects for
+   retained archives, including failures from earlier runs. It preserves
+   existing redirects and creates at most 500 missing paths per run. Missing
+   navigation scope or other redirect errors appear in the report and fail
+   the run **after** inventory safety work completes; the next run retries.
+   Grant the feed app `write_online_store_navigation` (including read access):
+   release an app version with the scope in the Dev Dashboard, then approve
+   the updated access on the installed store. Confirm it appears in the next
+   sync's granted-scopes log before treating automatic redirects as enabled.
 5. **Write** (`src/shopify.ts`): `bulkOperationRunMutation(productSet)` with a
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
    Media: every feed photo attaches by URL. `files` is re-sent only when the
@@ -144,7 +153,7 @@ holds a stones table — Shopify products are the only live copy.
    flag. Every other Shopify product that still has that metafield — Vivid,
    other partner watches, fine jewelry, estate pieces, imageless watches,
    loose diamonds — has it deleted on the same run. Archive sets qty `0`
-   then `ARCHIVED`; diamonds that left the feed are still deleted. The live
+   then `ARCHIVED`; diamonds retain their product records. The live
    write needs `write_inventory` and `read_locations` on the Shopify app.
 
    **Sales channels.** Every product this step writes is published with one
@@ -662,10 +671,10 @@ Every run writes `out/report.json` (audit trail artifact) and renders
   attached as Shopify media (see above). Watch videos *are* attached.
 - The diamond PDP renders one 360° tab from `lmny_feed.video_url`; the extra
   entries in `video_urls` are written but not yet shown.
-- Archived products keep any URL redirect created for them before the
-  `held_in_feed` split existed. Reactivating one of those needs the redirect
-  deleted by hand (the app has no `write_online_store_navigation` scope, so
-  most runs never created any).
+- Existing redirects are preserved, including merchant overrides. Shopify
+  redirects apply to unavailable paths; a restored published product serves
+  its own URL again. Historical products already deleted cannot have their
+  original IDs recovered; repair their missing URLs separately.
 - App Proxy / theme filter that reads `stones` instead of `collection.filters`
   is not shipped yet — schema + dual-write land first.
 - Checkout for non-product stones (inquiry / draft order / JIT product) is an

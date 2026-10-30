@@ -7,10 +7,11 @@ import type { CatalogEntry, Decision } from './types.js';
  */
 export function assertSafeDiamondRemovals(
   decisions: Pick<Decision, 'handle' | 'action'>[],
-  catalog: Pick<CatalogEntry, 'handle'>[],
+  catalog: (Pick<CatalogEntry, 'handle'> & Partial<Pick<CatalogEntry, 'status'>>)[],
 ): void {
   for (const kind of ['natural', 'lab'] as const) {
-    const existing = new Set(catalog.filter(p => kindForHandle(p.handle) === kind).map(p => p.handle)).size;
+    // Retained archives must not dilute the guard as the historical catalog grows.
+    const existing = new Set(catalog.filter(p => kindForHandle(p.handle) === kind && p.status !== 'ARCHIVED').map(p => p.handle)).size;
     const removals = new Set(decisions.filter(d => kindForHandle(d.handle) === kind &&
       (d.action === 'delete' || d.action === 'archive')).map(d => d.handle)).size;
     if (removals >= 20 && removals / existing > 0.2) {

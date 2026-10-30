@@ -994,20 +994,30 @@ export class ShopifyClient {
     return data.productUpdate.userErrors.map((e) => e.message);
   }
 
-  /** Permanently remove an unavailable supplier product from Shopify. */
-  async deleteProduct(id: string): Promise<string[]> {
-    const data = await this.gql<{
-      productDelete: { deletedProductId: string | null; userErrors: Array<{ message: string }> };
-    }>(
-      `mutation($input: ProductDeleteInput!) {
-        productDelete(input: $input) {
-          deletedProductId
-          userErrors { message }
-        }
-      }`,
-      { input: { id } },
-    );
-    return data.productDelete.userErrors.map((e) => e.message);
+  /** Read every redirect, including later pages, to retry only missing paths. */
+  async redirectPaths(): Promise<Set<string>> {
+    const paths = new Set<string>();
+    let cursor: string | null = null;
+    do {
+      const data: { urlRedirects: {
+        nodes: Array<{ path: string }>;
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      } } = await this.gql(
+        `query($after: String) {
+          urlRedirects(first: 250, after: $after) {
+            nodes { path }
+            pageInfo { hasNextPage endCursor }
+          }
+        }`,
+        { after: cursor },
+      );
+      for (const row of data.urlRedirects.nodes) paths.add(row.path);
+      const page = data.urlRedirects.pageInfo;
+      if (!page.hasNextPage) break;
+      if (!page.endCursor || page.endCursor === cursor) throw new Error('Redirect pagination did not advance');
+      cursor = page.endCursor;
+    } while (true);
+    return paths;
   }
 
   /**
