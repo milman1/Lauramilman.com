@@ -23,7 +23,7 @@ export async function reconcileArchiveRedirects(
   fetchedKinds: Set<Kind>,
   present: Set<string>,
   merchantUnavailable: (handle: string) => boolean,
-  budget = 100,
+  budget = 500,
 ): Promise<{ ensured: number; pending: number; errors: string[] }> {
   const candidates = catalog.filter(p => {
     if (p.status !== 'ARCHIVED') return false;

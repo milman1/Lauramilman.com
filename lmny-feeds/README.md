@@ -96,10 +96,13 @@ holds a stones table — Shopify products are the only live copy.
    collection redirect while unavailable; held items do not get new redirects.
    After archiving, `src/archiveRedirects.ts` rechecks missing redirects for
    retained archives, including failures from earlier runs. It preserves
-   existing redirects and creates at most 100 missing paths per run. Missing
+   existing redirects and creates at most 500 missing paths per run. Missing
    navigation scope or other redirect errors appear in the report and fail
    the run **after** inventory safety work completes; the next run retries.
-   Grant the feed app `write_online_store_navigation` (including read access).
+   Grant the feed app `write_online_store_navigation` (including read access):
+   release an app version with the scope in the Dev Dashboard, then approve
+   the updated access on the installed store. Confirm it appears in the next
+   sync's granted-scopes log before treating automatic redirects as enabled.
 5. **Write** (`src/shopify.ts`): `bulkOperationRunMutation(productSet)` with a
    staged JSONL upload for ≥100 changes, direct `productSet` below that.
    Media: every feed photo attaches by URL. `files` is re-sent only when the
