@@ -76,7 +76,7 @@
                     {%- elsif item.product.has_only_default_variant == false -%}
                       <p class="cart-item__variant">{{ item.variant.title }}</p>
                     {%- endif -%}
-                    {%- if ring_group != blank -%}
+                    {%- if ring_group != blank or item.properties['Requested US size'] != blank -%}
                       <dl class="cart-item__properties" style="font-size:12px;margin:10px 0;overflow-wrap:anywhere">
                         {%- for property in item.properties -%}
                           {%- assign first_character = property.first | slice: 0 -%}
