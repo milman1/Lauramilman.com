@@ -16,3 +16,10 @@ it('allows ordinary stock turnover and skips unavailable feeds', () => {
   expect(() => assertSafeDiamondRemovals(catalog.map(p => ({ ...p, action: 'skip' })), catalog)).not.toThrow();
   expect(() => assertSafeDiamondRemovals(catalog.slice(0, 3).map(p => ({ ...p, action: 'delete' })), catalog)).not.toThrow();
 });
+
+it('does not let retained historical archives dilute the live-catalog safety threshold', () => {
+  const active = Array.from({ length: 100 }, (_, i) => ({ handle: `lg-${i}`, status: 'ACTIVE' as const }));
+  const archived = Array.from({ length: 10000 }, (_, i) => ({ handle: `lg-old-${i}`, status: 'ARCHIVED' as const }));
+  const decisions = active.slice(0, 21).map(p => ({ handle: p.handle, action: 'archive' as const }));
+  expect(() => assertSafeDiamondRemovals(decisions, [...active, ...archived])).toThrow('Refusing all writes');
+});

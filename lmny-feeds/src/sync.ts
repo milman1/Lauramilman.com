@@ -2,7 +2,7 @@
  * LMNY feed sync — Shopify is currently the live database.
  *
  * Full pass per run: fetch feeds → normalize → price → diff against the
- * Shopify catalog by handle + content_hash → create / update / delete / archive.
+ * Shopify catalog by handle + content_hash → create / update / archive.
  * Unchanged hashes are skipped entirely. --dry-run does everything except
  * writes and produces the full report.
  *
@@ -11,6 +11,7 @@
  */
 
 import { assertSafeDiamondRemovals } from './feedSafety.js';
+import { reconcileArchiveRedirects } from './archiveRedirects.js';
 import { reconcileGoogleLoose } from './googleLoose.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -83,13 +84,6 @@ const OUT_DIR = 'out';
 const WRITE_ERROR_FAIL_RATE = 0.01;
 /** Required Shopify scopes for a live write (write_* implies read_* of the same resource). */
 const REQUIRED_WRITE_SCOPES = ['write_products', 'write_publications', 'write_inventory', 'read_locations'];
-/** Where a sold stone's URL points once its product is archived and 404s. */
-const ARCHIVE_REDIRECT_TARGETS: Record<Kind, string> = {
-  natural: '/collections/natural-diamonds',
-  lab: '/collections/lab-grown-diamonds',
-  // The merchant's own collection, not the duplicate the sync used to create.
-  watch: '/collections/time-pieces',
-};
 /**
  * Watch videos re-hosted per run. Each is a full download plus a staged
  * upload, so an unbounded pass would blow past the hourly cadence the way 83
@@ -313,8 +307,8 @@ async function main() {
   }
 
   // 3. Read the catalog and diff. Held items are never created and existing
-  //    ones are archived so they can recover. Loose diamonds that left a
-  //    successfully fetched feed are deleted; unavailable watches archive.
+  //    ones are archived so they can recover with the same ID and handle.
+  //    Products absent from a successfully fetched feed also archive.
   const catalog: CatalogEntry[] = await shopify.fetchCatalog();
   const searchStatusByHandle = new Map(catalog.map((p) => [p.handle, p.status]));
   console.log(`Catalog: ${catalog.length} feed-managed products`);
@@ -538,7 +532,7 @@ async function main() {
   const mediaQuarantined: string[] = [];
   const mediaRehosted: string[] = [];
   let mediaVideosAttached = 0;
-  let redirectsCreated = 0;
+  const redirectErrors: string[] = [];
   let collectionsCreated: string[] = [];
   let publicationsByName = new Map<string, string>();
   let publishedToChannels = 0;
@@ -910,16 +904,11 @@ async function main() {
       }
     }
 
-    const toRemove = decisions.filter((d) => d.action === 'delete' || d.action === 'archive');
-    // urlRedirectCreate needs write_online_store_navigation, which the app
-    // doesn't currently have. Access-denied surfaces as a thrown GraphQL
-    // error, not a userError — it killed runs 20 and 21 — and a missing
-    // redirect is cosmetic next to a sold stone still listed as available,
-    // so the whole redirect step is best-effort. One note, not one per stone.
-    let redirectsDenied = false;
+    const toRemove = decisions.filter((d) => d.action === 'archive');
+    const archivedThisRun = new Set<string>();
     for (const d of toRemove) {
       if (!d.productId) continue;
-      if (d.action === 'archive' && locationId) {
+      if (locationId) {
         const existing = catalogByHandle.get(d.handle);
         if (existing?.inventoryItemId) {
           writeErrors.push(
@@ -927,35 +916,23 @@ async function main() {
           );
         }
       }
-      const errors =
-        d.action === 'delete'
-          ? await shopify.deleteProduct(d.productId)
-          : await shopify.archiveProduct(d.productId);
+      const errors = await shopify.archiveProduct(d.productId);
       writeErrors.push(...errors.map((e) => `${d.action} ${d.handle}: ${e}`));
-      if (errors.length > 0 || redirectsDenied) continue;
-      // A redirect is for a sold/withdrawn item: it permanently outlives an
-      // archived watch or deleted stone. Pointing one at an item the feed
-      // still lists would strand its page when pricing lets it back.
-      if (d.reason === 'held_in_feed') continue;
-      // A removed product URL 404s. Send it to the relevant collection so an
-      // old link lands on available inventory rather than nothing.
-      const target =
-        d.reason === 'merchant_unavailable'
-          ? ARCHIVE_REDIRECT_TARGETS.watch
-          : ARCHIVE_REDIRECT_TARGETS[kindForHandle(d.handle) ?? 'natural'];
-      try {
-        const redirectErrors = await shopify.redirectProductUrl(d.handle, target);
-        for (const e of redirectErrors) notes.push(`redirect ${d.handle}: ${e}`);
-        if (redirectErrors.length === 0) redirectsCreated += 1;
-      } catch (err) {
-        redirectsDenied = true;
-        notes.push(
-          `redirects skipped: ${err instanceof Error ? err.message : String(err)} — ` +
-            'grant the app write_online_store_navigation to enable them',
-        );
-      }
+      if (errors.length === 0) archivedThisRun.add(d.handle);
     }
-    if (redirectsCreated > 0) console.log(`Redirected ${redirectsCreated} sold stones to their collection`);
+    // A separate, bounded pass retries missing redirects for old archives too.
+    // Present/held products and failed feed segments never enter this pass.
+    const redirects = await reconcileArchiveRedirects(
+      shopify,
+      catalog.map(p => ({ handle: p.handle, status: archivedThisRun.has(p.handle) ? 'ARCHIVED' : p.status })),
+      fetchedKinds,
+      presentHandles,
+      isUnavailableProductHandle,
+    );
+    redirectErrors.push(...redirects.errors);
+    notes.push(`Archive redirects: ${redirects.ensured} ensured; ${redirects.pending} pending (retried next run).`);
+    notes.push(...redirectErrors);
+    for (const error of redirectErrors) console.error(error);
 
     // Tag watches held for pricing review; leave their existing price alone.
     let reviewTagged = 0;
@@ -1153,6 +1130,10 @@ async function main() {
   }
 
   console.log(renderMarkdown(report));
+
+  // Finish inventory safety work and publish the report before failing on
+  // navigation errors. Never silently mark a missing redirect as successful.
+  if (redirectErrors.length > 0) process.exitCode = 1;
 
   // A "successful" live run that fetched nothing looks like a deploy from the
   // Actions UI but leaves the storefront unchanged — that is exactly what
