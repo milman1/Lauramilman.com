@@ -58,7 +58,7 @@
                   {%- assign seen_ring_groups = seen_ring_groups | append: ring_group | append: ',' -%}
                 {%- endunless -%}
               {%- endif -%}
-              <div class="cart-item" data-key="{{ item.key }}"{% if ring_group != blank %} data-ring-group="{{ ring_group | escape }}"{% endif %}>
+              <div class="cart-item" data-key="{{ item.key }}"{% if ring_group != blank %} data-ring-group="{{ ring_group | escape }}"{% if item.properties._lm_band_handle == item.product.handle %} data-ring-band="true"{% endif %}{% endif %}>
 
                 <div class="cart-item__image-wrap">
                   {%- if item.image -%}
@@ -89,8 +89,8 @@
                     <button type="button"
                             class="cart-item__remove"
                             data-remove-key="{{ item.key }}"
-                            aria-label="Remove {{ item.product.title }}">
-                      {% if ring_group != blank %}{{ 'ring_flow.remove_ring' | t }}{% else %}Remove{% endif %}
+                            aria-label="{% if ring_group != blank and item.properties._lm_band_handle != item.product.handle %}{{ 'ring_flow.remove_ring' | t }}{% else %}Remove {{ item.product.title | escape }}{% endif %}">
+                      {% if ring_group != blank and item.properties._lm_band_handle == item.product.handle %}{{ 'conversion.remove_band' | t }}{% elsif ring_group != blank %}{{ 'ring_flow.remove_ring' | t }}{% else %}Remove{% endif %}
                     </button>
                   </div>
                 </div>
@@ -100,6 +100,7 @@
                     <s class="cart-item__compare-price">{{ item.original_price | money }}</s>
                   {%- endif -%}
                   <span>{{ item.final_price | money }}</span>
+                  {% for allocation in item.line_level_discount_allocations %}{% if allocation.amount > 0 %}<small style="display:block">{{ allocation.discount_application.title | escape }} (−{{ allocation.amount | money }})</small>{% endif %}{% endfor %}
                 </div>
 
                 <div class="cart-item__qty">

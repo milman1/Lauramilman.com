@@ -97,6 +97,9 @@
         {% endfor %}
       {% endfor %}
     ],"copy":{
+      "pairing_note":{{ 'ring_flow.pairing_note' | t | json }},
+      "custom_policy":{{ 'ring_flow.custom_policy' | t | json }},
+      "shipping_returns":{{ 'ring_flow.shipping_returns' | t | json }},
       "order_subtotal":{{ 'ring_flow.order_subtotal' | t | json }},
       "add_with_band":{{ 'ring_flow.add_with_band' | t | json }},
       "band":{{ 'ring_flow.band' | t | json }},

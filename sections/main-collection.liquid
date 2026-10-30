@@ -286,7 +286,7 @@
 
     <!-- Product grid -->
     {%- if collection.products.size > 0 -%}
-      <div class="products-grid lm-collection__grid" id="productsGrid">
+      <div class="products-grid lm-collection__grid" id="productsGrid" data-pages="{{ paginate.pages }}" data-page="{{ paginate.current_page }}" data-section="{{ section.id }}">
           {%- for product in collection.products -%}
             {%- render 'product-card', product: product -%}
           {%- endfor -%}
@@ -363,6 +363,7 @@
 {%- endpaginate -%}
 
 <style>
+  .lm-pagination[hidden] { display: none !important; }
   .lm-collection {
     padding: 1rem 0 4rem;
     background: var(--warm-white, #FDFAF6);
@@ -766,6 +767,45 @@
     var countEl = document.querySelector('.lm-collection__count');
     var allCards = productsGrid ? Array.from(productsGrid.querySelectorAll('.product-card')) : [];
     var totalOnPage = allCards.length;
+    var initialCards = allCards.slice();
+    var nativePagination = document.querySelector('.lm-pagination');
+    var catalogReady = !productsGrid || Number(productsGrid.dataset.pages) <= 1;
+    var catalogLoading = null;
+    var filterRevision = 0;
+    var filterStatus = document.createElement('p');
+    filterStatus.setAttribute('role', 'status');
+    filterStatus.hidden = true;
+    if (productsGrid) productsGrid.before(filterStatus);
+
+    async function loadCollection() {
+      if (catalogReady) return;
+      if (catalogLoading) return catalogLoading;
+      catalogLoading = (async function () {
+        var pages = Number(productsGrid.dataset.pages);
+        var currentPage = Number(productsGrid.dataset.page);
+        var pageCards = new Map([[currentPage, initialCards]]);
+        var pending = Array.from({ length: pages }, function (_, i) { return i + 1; }).filter(function (page) { return page !== currentPage; });
+        async function worker() {
+          while (pending.length) {
+            var page = pending.shift();
+            var url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            url.searchParams.set('section_id', productsGrid.dataset.section);
+            var response = await fetch(url.href, { headers: { Accept: 'text/html' } });
+            if (!response.ok) throw new Error('collection');
+            var doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+            var grid = doc.getElementById('productsGrid');
+            if (!grid || Number(grid.dataset.page) !== page) throw new Error('collection');
+            pageCards.set(page, Array.from(grid.querySelectorAll('.product-card')));
+          }
+        }
+        await Promise.all([worker(), worker(), worker()]);
+        allCards = Array.from({ length: pages }, function (_, i) { return pageCards.get(i + 1); }).flat();
+        totalOnPage = allCards.length;
+        catalogReady = true;
+      })();
+      try { await catalogLoading; } finally { catalogLoading = null; }
+    }
     var hasJewelryFilters = !!document.querySelector('[data-jewelry-filters]');
     var everydayInputs = Array.from(document.querySelectorAll('[data-everyday-filter]'));
     var everydayDimensions = ['type', 'style', 'metal', 'purity', 'gemstone'];
@@ -994,8 +1034,9 @@
       }
     }
 
-    function applyJewelryFilters() {
+    async function applyJewelryFilters() {
       if (!hasJewelryFilters || !allCards.length) return;
+      var revision = ++filterRevision;
 
       var selectedTypes = selectedValues('.js-jf-style');
       var selectedMetals = selectedValues('.js-jf-metal');
@@ -1007,7 +1048,28 @@
       var visibleCount = 0;
       var hasActive = selectedTypes.length > 0 || selectedMetals.length > 0 || !!caratRange || everydayCount > 0;
 
-      allCards.forEach(function (card) {
+      syncStyleBar(selectedTypes);
+      syncURL(selectedTypes, selectedMetals, caratRange);
+      if (hasActive && !catalogReady) {
+        filterStatus.hidden = false;
+        filterStatus.textContent = {{ 'conversion.filters_loading' | t | json }};
+        productsGrid.setAttribute('aria-busy', 'true');
+        if (noResultsEl) noResultsEl.hidden = true;
+        try { await loadCollection(); }
+        catch (_) {
+          if (revision !== filterRevision) return;
+          productsGrid.removeAttribute('aria-busy');
+          filterStatus.textContent = {{ 'conversion.filters_failed' | t | json }};
+          return;
+        }
+        if (revision !== filterRevision) return;
+      }
+      productsGrid.removeAttribute('aria-busy');
+      filterStatus.hidden = true;
+      productsGrid.replaceChildren.apply(productsGrid, hasActive ? allCards : initialCards);
+      if (nativePagination) nativePagination.hidden = hasActive;
+
+      (hasActive ? allCards : initialCards).forEach(function (card) {
         var tags = card.dataset.tags || '';
         var titleLower = card.dataset.titleLower || '';
         var productType = card.dataset.type || '';
