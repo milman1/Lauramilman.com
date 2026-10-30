@@ -8,6 +8,10 @@
 {%- endcomment -%}
 
 {%- liquid
+  assign made_to_order = false
+  if product.tags contains 'made-to-order' or product.tags contains 'custom-made' or product.tags contains 'ring-setting'
+    assign made_to_order = true
+  endif
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'product-form-' | append: section.id
   assign crumb_collection = collection | default: product.collections.first
@@ -335,7 +339,7 @@
                     {%- if block.settings.icon == 'returns' and is_watch == 'true' -%}
                       Exchanges Only
                     {%- elsif block.settings.icon == 'returns' -%}
-                      14-Day Returns
+                      {{ 'conversion.policy_link' | t }}
                     {%- else -%}
                       {{ block.settings.label }}
                     {%- endif -%}
@@ -401,6 +405,11 @@
           enabled: section.settings.ring_fit_enabled,
           ask_size: section.settings.ring_fit_ask_size
         %}
+
+        <div class="pdp-purchase-guidance" style="font-size:12px;line-height:1.6;margin:12px 0 18px">
+          <p>{% if made_to_order %}{{ 'conversion.delivery_custom' | t }}{% else %}{{ 'conversion.delivery_unknown' | t }}{% endif %}</p>
+          <p>{% if is_watch == 'true' %}{{ 'conversion.returns_watch' | t }}{% else %}{{ 'conversion.returns_standard' | t }}{% endif %} <a href="{{ routes.root_url }}pages/shipping-returns">{{ 'conversion.policy_link' | t }}</a></p>
+        </div>
 
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         <div class="atc-row" id="PdpAtcRow">

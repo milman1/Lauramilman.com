@@ -42,11 +42,15 @@
       assign estate = true
     endif
 
+    assign single_size_option = false
     assign has_size_option = false
     for option in product.options_with_values
       assign option_l = option.name | downcase
       if option_l contains 'size'
         assign has_size_option = true
+        if option.values.size == 1
+          assign single_size_option = true
+        endif
       endif
     endfor
 
@@ -146,6 +150,10 @@
         {%- endif -%}
       </p>
     {%- elsif has_size_option -%}
+      {% if single_size_option and no_resize == '' %}
+        <p class="pdp-fit__help">{{ 'conversion.size_request' | t }}</p>
+        <label class="pdp-fit__help" style="display:block">{{ 'conversion.size_label' | t }}<input type="number" name="properties[Requested US size]" min="3" max="13" step="0.25" style="display:block;width:100%;max-width:200px;padding:10px;font:inherit" inputmode="decimal"></label>
+      {% endif %}
       <label class="pdp-fit__check">
         <input type="checkbox" data-fit-unsure>
         <span>Not sure of the size? We’ll contact you to confirm it before your ring ships.</span>

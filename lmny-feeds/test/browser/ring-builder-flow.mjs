@@ -243,4 +243,15 @@ console.log('PASS actual Liquid cart permits ring plus zero/one/two bands and bl
 }
 console.log('PASS full build share across isolated browsers, Unicode engraving, sizes/metals/bands/date, independent edits, saved-state precedence, current prices, unpublished band rejection, malformed links and clipboard fallback.');
 
+for (const allowed of [false,true]) {
+ const p=await newPage();
+ await p.addInitScript(allowed=>{window.__events=[];window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
+ await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('PRIVATE INSCRIPTION');await click(p,'share');
+ const events=await p.evaluate(()=>window.__events);
+ if(!allowed) assert.deepEqual(events,[]);
+ else {assert.ok(events.some(e=>e.event==='lmny_build_shared'));assert.ok(events.some(e=>e.event==='lmny_setting_selected'));assert.ok(events.some(e=>e.event==='lmny_diamond_selected'));assert.equal(JSON.stringify(events).includes('PRIVATE INSCRIPTION'),false);assert.ok(events.every(e=>!('url' in e.data)&&!('engraving' in e.data)));}
+ const appointment=await p.getByRole('link',{name:'Book a viewing in New York',exact:true}).first().getAttribute('href');assert.equal(new URL(appointment).searchParams.get('interest'),'ring');assert.ok(new URL(appointment).hash.startsWith('#ring='));await p.close();
+}
+console.log('PASS consent-aware funnel events omit private personalization; consultation carries full build.');
+
 await b.close();

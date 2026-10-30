@@ -44,7 +44,7 @@ describe('lab-grown jewelry merchandising', () => {
   it('keeps the lab-grown product row in the homepage shopping sequence', () => {
     const home = themeJson('templates/index.json');
     expect(home.sections['lab-grown'].type).toBe('lmh-product-row');
-    expect(home.sections['lab-grown'].settings?.eyebrow).toBe('Lab-Grown Diamonds · Under $1,000');
+    expect(home.sections['lab-grown'].settings?.eyebrow).toBe('LAB-GROWN JEWELRY');
     expect(home.order.indexOf('lab-grown')).toBeGreaterThan(home.order.indexOf('gold'));
     expect(home.order.indexOf('lab-grown')).toBeLessThan(home.order.indexOf('pre-owned'));
   });

@@ -736,7 +736,7 @@
     "page": "Page"
   },
   "ring_flow": {
-    "order_subtotal": "Order subtotal",
+    "order_subtotal": "Subtotal before discounts",
     "add_with_band": "Add ring and band to bag",
     "band_builder": "Build your ring and add an optional wedding band",
     "band": "Wedding band",
@@ -789,7 +789,7 @@
     "setting": "Setting only",
     "change": "Change",
     "remove": "Remove",
-    "subtotal": "Ring subtotal",
+    "subtotal": "Ring subtotal before discounts",
     "selected_total": "Selected so far",
     "included": "Center diamond + setting + setting labor included. Optional wedding band priced separately.",
     "missing_diamond": "Setting price only. Choose a center diamond to see your complete ring subtotal.",
@@ -957,7 +957,10 @@
     "email_sent_title": "Sent to Laura.",
     "keep_personalizing": "Keep personalizing",
     "email_failed": "Your ring did not send. Check your email address and try again.",
-    "pick_grades": "G+ colour · VS2+ clarity"
+    "pick_grades": "G+ colour · VS2+ clarity",
+    "pairing_note": "Eligible pairing offers are calculated in your bag. Review the named discount and final subtotal there before checkout.",
+    "custom_policy": "Made to order: confirm timing with Laura before ordering. Bespoke and engraved pieces are final sale.",
+    "shipping_returns": "Shipping & returns"
   },
   "home_ring_gallery": {
     "starting_point": "Choose your starting point",
@@ -1017,5 +1020,23 @@
     "morganite": "Morganite",
     "garnet": "Garnet",
     "mixed_gemstone": "Mixed Gemstone"
+  },
+  "conversion": {
+    "filters_loading": "Finding matches across the collection…",
+    "filters_failed": "We could not check the full collection. Please try your filter again. The products below have not been filtered.",
+    "remove_band": "Remove band",
+    "size_request": "Need another size? Tell us your preferred US size. We’ll confirm whether this design can be resized and the timing before proceeding.",
+    "size_label": "Requested US size (optional)",
+    "delivery_unknown": "Need this for a particular date? Ask us to confirm availability and delivery timing before ordering.",
+    "delivery_custom": "Made to order. Please confirm production and delivery timing with Laura before ordering.",
+    "returns_standard": "Eligible jewelry may be returned within 14 days of delivery. Bespoke, engraved and specially sourced pieces are final sale.",
+    "returns_watch": "Watches are exchange-only within 7 days of delivery.",
+    "policy_link": "Shipping & returns",
+    "phone_optional": "Phone (optional)",
+    "ring_interest": "An engagement ring or wedding bands",
+    "consult_success": "Thank you — your request has been received. We’ll contact you to arrange your consultation.",
+    "build_attached": "Your ring build is attached to this request.",
+    "consult_ring_intro": "Compare natural or lab-grown diamonds, settings and wedding bands with Laura, in New York or by video. Your saved build gives us a place to start.",
+    "consult_ring_title": "Plan your ring with Laura"
   }
 }
