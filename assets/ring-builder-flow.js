@@ -79,12 +79,32 @@
     }
     const variantPrice = p => p === state.setting ? pickedVariant(p)?.price : p?.variants?.find(v => v.available)?.price;
     const subtotal = () => (variantPrice(state.setting) || 0) + (state.diamond?.price || 0) + chosenBands().reduce((total, b) => total + (b.variant?.price || 0), 0);
+    // The consent API is not automatically present on every storefront visit.
+    // Wait for its supported loader; never interpret an unavailable API as consent.
+    const privacyReady = new Promise(resolve => {
+      if (window.Shopify?.customerPrivacy) return resolve();
+      if (!window.Shopify?.loadFeatures) return resolve();
+      try { window.Shopify.loadFeatures([{ name: 'consent-tracking-api', version: '0.2' }], () => resolve()); }
+      catch (_) { resolve(); }
+    });
+    let openedTracked = false;
     function track(event, extra = {}) {
-      if (window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true) return;
       const data = { screen: state.screen, origin: state.diamond?.origin || state.filters.origin, band_count: chosenBands().length, device_type: matchMedia('(max-width: 768px)').matches ? 'mobile' : 'desktop', ...extra };
-      try { window.Shopify?.analytics?.publish?.('lmny_' + event, data); } catch (_) {}
-      try { if (typeof window.gtag === 'function') window.gtag('event', 'lmny_' + event, data); } catch (_) {}
+      privacyReady.then(() => {
+        if (!root.isConnected || window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true) return;
+        if (event === 'builder_opened' && openedTracked) return;
+        if (typeof window.Shopify?.analytics?.publish !== 'function') return;
+        if (event === 'builder_opened') openedTracked = true;
+        // A Customer events pixel forwards these to GA4. Google's app pixel runs
+        // in a sandbox, so a top-window gtag fallback cannot reliably reach it.
+        return Promise.resolve(window.Shopify.analytics.publish('lmny_' + event, data)).then(result => {
+          if (event === 'builder_opened' && result === false) openedTracked = false;
+        });
+      }).catch(() => { if (event === 'builder_opened') openedTracked = false; });
     }
+    document.addEventListener('visitorConsentCollected', () => {
+      if (ready && !openedTracked) track('builder_opened');
+    });
     function consultationLink() {
       const url = new URL(cfg.appointment, location.origin);
       url.searchParams.set('interest', 'ring');
@@ -848,7 +868,7 @@
           go('catalog');
         }
         ready = true;
-      track('builder_opened');
+        track('builder_opened');
         return;
       }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';

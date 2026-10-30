@@ -254,4 +254,38 @@ for (const allowed of [false,true]) {
 }
 console.log('PASS consent-aware funnel events omit private personalization; consultation carries full build.');
 
+for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
+ const p=await newPage();
+ await p.addInitScript(mode=>{
+   window.__events=[];window.__allowed=mode==='delayed-allow';window.__loads=0;
+   window.Shopify={analytics:{publish:(event,data)=>{window.__events.push({event,data});return Promise.resolve(true);}},loadFeatures:(features,done)=>{
+     window.__loads++;window.__features=features;
+     window.__finishPrivacy=()=>{if(mode!=='loader-error')window.Shopify.customerPrivacy={analyticsProcessingAllowed:()=>window.__allowed};done(mode==='loader-error'?new Error('failed'):null);};
+   }};
+   // Google & YouTube's gtag is sandboxed: deliberately no top-window gtag.
+ },mode);
+ await p.goto('https://lmny.test/pages/ring-builder');
+ await p.waitForFunction(()=>window.__finishPrivacy);
+ assert.deepEqual(await p.evaluate(()=>window.__events),[]);
+ await p.evaluate(()=>window.__finishPrivacy());
+ if(mode==='delayed-allow')await p.waitForFunction(()=>window.__events.length===1);
+ else assert.deepEqual(await p.evaluate(()=>window.__events),[]);
+ if(mode==='deny-then-allow') {
+   await click(p,'start-setting');await click(p,'details-0');
+   await p.locator('[data-action="select"]').first().waitFor();
+   assert.deepEqual(await p.evaluate(()=>window.__events),[]);
+   await p.evaluate(()=>{window.__allowed=true;document.dispatchEvent(new CustomEvent('visitorConsentCollected'));document.dispatchEvent(new CustomEvent('visitorConsentCollected'));});
+   await p.waitForFunction(()=>window.__events.length===1);
+   assert.equal((await p.evaluate(()=>window.__events))[0].event,'lmny_builder_opened');
+   await click(p,'select');await p.waitForFunction(()=>window.__events.some(e=>e.event==='lmny_setting_selected'));
+   await p.evaluate(()=>{window.__allowed=false;document.dispatchEvent(new CustomEvent('visitorConsentCollected'));});
+   const count=await p.evaluate(()=>window.__events.length);await click(p,'details-0');
+   assert.equal(await p.evaluate(()=>window.__events.length),count);
+ }
+ assert.equal(await p.evaluate(()=>window.__loads),1);
+ assert.deepEqual(await p.evaluate(()=>window.__features),[{name:'consent-tracking-api',version:'0.2'}]);
+ await p.close();
+}
+console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
+
 await b.close();
