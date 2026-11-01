@@ -21,7 +21,7 @@
   assign jf_drawer_handle = results.handle | downcase
   assign jf_drawer_enabled = false
   case jf_drawer_handle
-    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'diamond-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'all-bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'chains', 'chain-necklaces', 'chain-bracelets', 'gold-jewelry', 'pendants', 'pendants-1', 'all-pendants', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'lab-grown-diamond-jewelry'
+    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings', 'rings', 'lab-grown-rings', 'diamond-rings', 'engagement-rings', 'lab-grown-engagement-rings', 'bracelets', 'all-bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets', 'necklaces', 'lab-grown-necklaces', 'chokers', 'chains', 'chain-necklaces', 'chain-bracelets', 'gold-jewelry', 'everyday-jewelry', 'pendants', 'pendants-1', 'all-pendants', 'lab-grown-pendants', 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands', 'lab-grown-diamond-jewelry'
       assign jf_drawer_enabled = true
   endcase
 
@@ -85,7 +85,11 @@
     </div>
 
     {%- comment -%} PD-style Style / Metal / Carat bands for jewelry collections {%- endcomment -%}
-    {%- render 'jewelry-style-filters', collection: results -%}
+    {%- if jf_drawer_handle == 'everyday-jewelry' -%}
+      {%- render 'everyday-jewelry-filters' -%}
+    {%- else -%}
+      {%- render 'jewelry-style-filters', collection: results -%}
+    {%- endif -%}
 
     {%- comment -%}
       Signed estate and designer collections (Cartier and the other maisons)

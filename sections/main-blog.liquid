@@ -1,5 +1,3 @@
-{{ 'component-article-card.css' | asset_url | stylesheet_tag }}
-{{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'section-main-blog.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
@@ -16,37 +14,141 @@
   }
 {%- endstyle -%}
 
-{%- paginate blog.articles by 6 -%}
-  <div class="main-blog page-width section-{{ section.id }}-padding">
-    <h1 class="title--primary{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      {{ blog.title | escape }}
-    </h1>
+{%- paginate blog.articles by 7 -%}
+  <div class="journal section-{{ section.id }}-padding">
+    <div class="journal__inner">
+      <header class="journal__header">
+        <p class="eyebrow">The Journal</p>
+        <h1>{{ blog.title | escape }}</h1>
+        {%- if section.settings.intro != blank -%}
+          <p class="journal__intro">{{ section.settings.intro | escape }}</p>
+        {%- endif -%}
+        <hr class="journal__rule">
+      </header>
 
-    <div class="blog-articles {% if section.settings.layout == 'collage' %}blog-articles--collage{% endif %}">
-      {%- for article in blog.articles -%}
-        <div
-          class="blog-articles__article article{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          {% if settings.animations_reveal_on_scroll %}
-            data-cascade
-            style="--animation-order: {{ forloop.index }};"
-          {% endif %}
-        >
-          {%- render 'article-card',
-            article: article,
-            media_height: section.settings.image_height,
-            media_aspect_ratio: article.image.aspect_ratio,
-            show_image: section.settings.show_image,
-            show_date: section.settings.show_date,
-            show_author: section.settings.show_author,
-            show_excerpt: true
+      {%- if blog.articles_count == 0 -%}
+        <p class="journal__empty">The next article is being prepared.</p>
+      {%- else -%}
+        {%- assign feature = null -%}
+        {%- if paginate.current_page == 1 -%}
+          {%- assign feature = blog.articles.first -%}
+        {%- endif -%}
+
+        {%- if feature -%}
+          {%- liquid
+            assign feature_tag = ''
+            for tag in feature.tags
+              if tag != 'journal-draft'
+                assign feature_tag = tag
+                break
+              endif
+            endfor
+            if feature.excerpt.size > 0
+              assign feature_excerpt = feature.excerpt | strip_html | truncatewords: 42
+            else
+              assign feature_excerpt = feature.content | strip_html | truncatewords: 42
+            endif
           -%}
-        </div>
-      {%- endfor -%}
-    </div>
+          <article class="journal__feature">
+            <a class="journal__plate" href="{{ feature.url }}" aria-label="{{ feature.title | escape }}">
+              {%- if feature.image -%}
+                <img
+                  srcset="
+                    {%- if feature.image.width >= 480 -%}{{ feature.image | image_url: width: 480 }} 480w,{%- endif -%}
+                    {%- if feature.image.width >= 800 -%}{{ feature.image | image_url: width: 800 }} 800w,{%- endif -%}
+                    {%- if feature.image.width >= 1200 -%}{{ feature.image | image_url: width: 1200 }} 1200w,{%- endif -%}
+                    {{ feature.image | image_url: width: 1600 }} 1600w
+                  "
+                  src="{{ feature.image | image_url: width: 1200 }}"
+                  sizes="(min-width: 990px) 58vw, 100vw"
+                  alt="{{ feature.image.alt | default: feature.title | escape }}"
+                  width="{{ feature.image.width }}"
+                  height="{{ feature.image.height }}"
+                  loading="eager"
+                  fetchpriority="high"
+                >
+              {%- endif -%}
+            </a>
+            <div class="journal__feature-copy">
+              {%- if feature_tag != blank -%}
+                <p class="journal__kicker">{{ feature_tag | escape }}</p>
+              {%- endif -%}
+              <h2>
+                <a href="{{ feature.url }}">{{ feature.title | escape }}</a>
+              </h2>
+              <p class="journal__meta">
+                <time datetime="{{ feature.published_at | date: '%Y-%m-%d' }}">
+                  {{ feature.published_at | date: '%B %-d, %Y' }}
+                </time>
+              </p>
+              {%- if feature_excerpt != blank -%}
+                <p class="journal__excerpt">{{ feature_excerpt }}</p>
+              {%- endif -%}
+              <a class="journal__read" href="{{ feature.url }}">Read the article</a>
+            </div>
+          </article>
+        {%- endif -%}
 
-    {%- if paginate.pages > 1 -%}
-      {%- render 'pagination', paginate: paginate -%}
-    {%- endif -%}
+        <div class="journal__grid">
+          {%- for article in blog.articles -%}
+            {%- if feature and article.id == feature.id -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- liquid
+              assign card_tag = ''
+              for tag in article.tags
+                if tag != 'journal-draft'
+                  assign card_tag = tag
+                  break
+                endif
+              endfor
+              if article.excerpt.size > 0
+                assign card_excerpt = article.excerpt | strip_html | truncatewords: 22
+              else
+                assign card_excerpt = article.content | strip_html | truncatewords: 22
+              endif
+            -%}
+            <article class="journal-card">
+              <a class="journal__plate journal__plate--card" href="{{ article.url }}" aria-label="{{ article.title | escape }}">
+                {%- if article.image -%}
+                  <img
+                    srcset="
+                      {%- if article.image.width >= 360 -%}{{ article.image | image_url: width: 360 }} 360w,{%- endif -%}
+                      {%- if article.image.width >= 600 -%}{{ article.image | image_url: width: 600 }} 600w,{%- endif -%}
+                      {{ article.image | image_url: width: 900 }} 900w
+                    "
+                    src="{{ article.image | image_url: width: 600 }}"
+                    sizes="(min-width: 990px) 28vw, (min-width: 750px) 45vw, 100vw"
+                    alt="{{ article.image.alt | default: article.title | escape }}"
+                    width="{{ article.image.width }}"
+                    height="{{ article.image.height }}"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+              </a>
+              {%- if card_tag != blank -%}
+                <p class="journal__kicker">{{ card_tag | escape }}</p>
+              {%- endif -%}
+              <h2>
+                <a href="{{ article.url }}">{{ article.title | escape }}</a>
+              </h2>
+              <p class="journal__meta">
+                <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                  {{ article.published_at | date: '%B %-d, %Y' }}
+                </time>
+              </p>
+              {%- if card_excerpt != blank -%}
+                <p class="journal__excerpt">{{ card_excerpt }}</p>
+              {%- endif -%}
+            </article>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if paginate.pages > 1 -%}
+        {%- render 'pagination', paginate: paginate -%}
+      {%- endif -%}
+    </div>
   </div>
 {%- endpaginate -%}
 
@@ -57,72 +159,10 @@
   "class": "section",
   "settings": [
     {
-      "type": "header",
-      "content": "t:sections.main-blog.settings.header.content"
-    },
-    {
-      "type": "select",
-      "id": "layout",
-      "options": [
-        {
-          "value": "grid",
-          "label": "t:sections.main-blog.settings.layout.options__1.label"
-        },
-        {
-          "value": "collage",
-          "label": "t:sections.main-blog.settings.layout.options__2.label"
-        }
-      ],
-      "default": "collage",
-      "label": "t:sections.main-blog.settings.layout.label",
-      "info": "t:sections.main-blog.settings.layout.info"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_image",
-      "default": true,
-      "label": "t:sections.main-blog.settings.show_image.label"
-    },
-    {
-      "type": "select",
-      "id": "image_height",
-      "options": [
-        {
-          "value": "adapt",
-          "label": "t:sections.main-blog.settings.image_height.options__1.label"
-        },
-        {
-          "value": "small",
-          "label": "t:sections.main-blog.settings.image_height.options__2.label"
-        },
-        {
-          "value": "medium",
-          "label": "t:sections.main-blog.settings.image_height.options__3.label"
-        },
-        {
-          "value": "large",
-          "label": "t:sections.main-blog.settings.image_height.options__4.label"
-        }
-      ],
-      "default": "medium",
-      "label": "t:sections.main-blog.settings.image_height.label",
-      "info": "t:sections.main-blog.settings.image_height.info"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_date",
-      "default": true,
-      "label": "t:sections.main-blog.settings.show_date.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_author",
-      "default": false,
-      "label": "t:sections.main-blog.settings.show_author.label"
-    },
-    {
-      "type": "paragraph",
-      "content": "t:sections.main-blog.settings.paragraph.content"
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "Buying guides for diamonds, watches, gold chains, and estate jewelry."
     },
     {
       "type": "header",
@@ -136,7 +176,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_top",
-      "default": 36
+      "default": 48
     },
     {
       "type": "range",
@@ -146,7 +186,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "default": 72
     }
   ]
 }

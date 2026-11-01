@@ -157,8 +157,9 @@ export function shopifyFileUrl(value: string | undefined): string | undefined {
  * Belgium Dia reports shape as a trade code, and inconsistently cased
  * ("Round" and "ROUND" both appear). Left raw they can't drive a shape filter:
  * SQCU, LCU and CUSHION are one shape to a shopper, and "SQCU" means nothing
- * on a button. Map to the ten canonical shapes the filter shows; the finer
- * distinction (long vs square cushion) isn't something we merchandise on.
+ * on a button. Map trade codes onto the shape name a filter button uses. The
+ * finer distinction (long vs square cushion) isn't something we merchandise on.
+ * EUROPEANCUT and HALFMOON are the same shapes as the spaced names.
  *
  * Codes observed in the live natural feed: ROUND, MRB, RMB, PRINCESS, CUSHION,
  * LCU, SQCU, EMERALD, OVAL, OVR, RADIANT, LRAD, ASSCHER, MARQUISE, HEART,
@@ -178,9 +179,11 @@ const SHAPE_CODES: Record<string, string> = {
   PS: 'Pear', PE: 'Pear', PEAR: 'Pear',
   TR: 'Trilliant', TRI: 'Trilliant', TRIL: 'Trilliant', TRISTPR: 'Trilliant', TRILLIANT: 'Trilliant',
   BAG: 'Baguette', BGT: 'Baguette', BAGUETTE: 'Baguette',
+  HALFMOON: 'Half Moon',
+  EUROPEANCUT: 'European Cut',
 };
 
-/** The shapes the filter offers a button for, best-seller order (PD's order). */
+/** The original ten shape buttons, best-seller order. The filter also lists the other stocked shapes. */
 export const CANONICAL_SHAPES = [
   'Round', 'Princess', 'Cushion', 'Emerald', 'Oval',
   'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear',

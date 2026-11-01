@@ -8,7 +8,10 @@ Requirements: LGD certified-color endpoint; Available status; IGI report link
 with a recoverable report number; recognized loose-diamond shape, color and
 clarity; positive total cost consistent with carat × per-carat cost; both
 HTTPS photo and MP4/WebM video URLs. Every eligible stone is checked for actual media
-bytes so HTML error pages cannot pass as photographs or videos. Unrecognized
+bytes so HTML error pages cannot pass as photographs or videos. Shapes follow the storefront shape list
+(`snippets/diamond-shape-order.liquid`): the classic shapes plus Ashoka, step
+cuts, Trilliant, Kite, Hexagonal and the other stocked shapes; the colored
+filter shows an extra shape only when a colored stone carries it. Unrecognized
 or incomplete rows are excluded. Certified feed entries can include rings;
 the scope gate excludes those. Source certificate duplicates fail closed;
 certificate collisions with another catalog supplier are skipped.

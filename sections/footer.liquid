@@ -8,7 +8,7 @@
       <div class="footer__brand">
         <a href="{{ routes.root_url }}" class="footer__logo">
           {%- if section.settings.logo != blank -%}
-            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+            <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="200" height="{{ section.settings.logo.height | times: 200 | divided_by: section.settings.logo.width }}">
           {%- else -%}
             <span class="footer__logo-text">Laura <em>Milman</em></span>
           {%- endif -%}
@@ -144,7 +144,9 @@
     }
 
     .footer__grid {
-      grid-template-columns: 1fr;
+      /* minmax(0, 1fr), not 1fr: the signup field's minimum width (input plus
+         button, about 393px) would otherwise widen the column past the screen. */
+      grid-template-columns: minmax(0, 1fr);
       gap: 0;
       text-align: left;
     }

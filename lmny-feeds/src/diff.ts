@@ -29,9 +29,7 @@ export function channelsForHandle(handle: string | null | undefined): readonly s
  * - in both, hash equal, not ACTIVE    → update (reactivate), unless the
  *   product is quarantined with the media-missing tag
  * - in both, hash equal, ACTIVE        → skip (API cost control)
- * - loose diamond in catalog, not in feed → delete, because unavailable
- *   supplier products must not remain in Shopify
- * - watch in catalog, not in feed       → archive (URLs persist)
+ * - in catalog, not in feed           → archive (preserve IDs for a return)
  * - in catalog, still in feed but held → archive, so a temporary gate can
  *   reactivate it later
  * - destructive actions only apply to kinds whose feed fetch succeeded — a
@@ -41,9 +39,9 @@ export function channelsForHandle(handle: string | null | undefined): readonly s
  * A stock ref absent from this run's feed is gone — sold, most likely
  * (`left_feed`). One the feed still lists but that this run refused to price
  * is not gone at all (`held_in_feed`): it is off the storefront until the
- * numbers work, and may be back next hour. Held items archive; loose diamonds
- * that left the feed are deleted. Only `left_feed` earns the permanent URL
- * redirect that would otherwise strand the product page when it returns.
+ * numbers work, and may be back next hour. Both causes archive, so returning
+ * stock updates the same product instead of creating a replacement. Only
+ * `left_feed` earns a collection redirect while the product is unavailable.
  * Without the split, "131 watches archived" reads as sold-out inventory when
  * it can equally be a pricing rule that moved.
  */
@@ -83,15 +81,6 @@ export function diffCatalog(
       continue;
     }
     const reason = present.has(have.handle) ? 'held_in_feed' : 'left_feed';
-    if (reason === 'left_feed' && kind !== 'watch') {
-      decisions.push({
-        handle: have.handle,
-        action: 'delete',
-        reason,
-        productId: have.id,
-      });
-      continue;
-    }
     if (have.status === 'ARCHIVED') {
       decisions.push({ handle: have.handle, action: 'skip', reason: 'already_archived', productId: have.id });
     } else {

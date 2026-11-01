@@ -23,7 +23,14 @@
       <span class="lmh-card__title">{{ lmh_title | escape }}</span>
       {%- if card_sub != blank -%}<span class="lmh-card__sub">{{ card_sub | escape }}</span>{%- endif -%}
       {%- if card_product.available -%}
-        <span class="lmh-card__price">{{ card_product.price | money_without_trailing_zeros }}</span>
+        <span class="lmh-card__price">
+          {%- assign display_price = card_product.price | money_without_trailing_zeros -%}
+          {%- if card_product.price_varies -%}
+            {{- 'products.product.from_price_html' | t: price: display_price -}}
+          {%- else -%}
+            {{- display_price -}}
+          {%- endif -%}
+        </span>
       {%- else -%}
         <span class="lmh-card__sold">Sold</span>
       {%- endif -%}

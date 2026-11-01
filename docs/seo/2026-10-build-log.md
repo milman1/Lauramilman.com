@@ -467,3 +467,28 @@ featured image.
 Job change in the same pass: `insertProductPhotos` now skips the featured
 product (its photo is already the article image) and allows photos in
 consecutive blocks when a heading separates them.
+
+## 2026-10-28: guides and FAQs on Cartier and David Webb
+
+- Merchant approved showing the stored `custom.guide_html` and `custom.guide_faq` on Cartier and David Webb (reverses the 2026-10-05 "not now" for these two only). `sections/main-collection.liquid` renders `collection-longform` for those two handles; Rolex and every other collection stay as they were. The block shows under the product grid on page 1 only and adds FAQPage markup built from the visible FAQ. Both guides say 14-day returns (aligned 2026-10-26).
+
+## 2026-10-28: Pre-Owned headings, intros and FAQs on the other jewelry collections
+
+- Merchant request: do the rest of the jewelry collection pages; leave loose lab-grown and natural stones (and watches) alone. Product titles, descriptions and product SEO were not touched.
+- Store content (applied 2026-10-28, previous values backed up in the session scratchpad): new intros on Hermès, Van Cleef & Arpels, Tiffany, Bvlgari, Chopard, Graff, Buccellati, Harry Winston, Verdura, Seaman Schepps, Estate, Vintage, Gold Jewelry, Chains, Chain Necklaces, Chain Bracelets, Gold Bracelets and Gold Rings. Intros name only pieces in stock; Graff, Buccellati, Harry Winston, Verdura and Seaman Schepps stay generic because stock is thin. Meta descriptions updated on 11 of them (titles unchanged). Four-question `custom.guide_faq` on 17 (not Verdura): how to check a piece, "not an authorized dealer", 14-day returns (watches exchange only within 7 days where the collection has watches), and the new-client 10% sign-up offer on jewelry.
+- Theme: `sections/main-collection.liquid` adds "Pre-Owned … Jewelry" h1s for Hermès, Bvlgari, Chopard, Graff, Buccellati, Harry Winston and Seaman Schepps, and renders `collection-longform` from an allow-list of jewelry handles. Verdura gets neither (its only active item is a watch). Lab-grown, natural, Rolex and time-pieces collections are not on the list; the guard in `lmny-feeds/test/theme-lab-landing.test.ts` checks that.
+
+## 2026-10-15: "Ask about this stone" replaces "Reserve this diamond" on search tiles
+
+- Merchant request: most recent inquiries came from ChatGPT and Claude visitors. Lab, natural and colored search tiles now say "Ask about this stone", matching the stone page. The dialog asks for name, email, optional phone and an optional question, and reaches the inbox as "Diamond question" with the stone, link, stock number and listed price. It makes no promise to hold the stone.
+
+## 2026-10-28: welcome offer stated on product pages
+
+- Merchant approved saying "sign up for 10% off" publicly (the code stays behind the signup). New `snippets/welcome-offer-line.liquid` renders "New clients: sign up for 10% off your first jewelry purchase." under the trust strip on jewelry product pages only (merchant: loose lab-grown and natural stone pages untouched). It shows only when the product is in one of the jewelry collections the LMNYWELCOME discount covers, never on watches, and not for customers tagged `welcome10`. The link opens the existing welcome popup (falls back to the footer form). The discounted price is not put into product structured data (Google requires the listed price without a code).
+
+## 2026-10-29: FAQPage markup on Journal articles
+
+- Merchant approved (item 1 of the 2026-10-29 SEO next steps). 31 of 32 Journal articles already show an FAQ section; the markup now matches it. `what-jewelry-to-wear-on-a-first-date` has no FAQ section and gets none.
+- Store content: each article's visible FAQ was copied word for word into `custom.guide_faq` (JSON, 113 questions). No article text changed.
+- Theme: `sections/main-article.liquid` emits FAQPage JSON-LD from that field, and marks up a question only while its text still appears in the article body, so editing or removing a visible FAQ drops it from the markup. New articles need the field set to get the markup.
+- Not done: a named person as author (the store has not named one; articles stay under the Organization), the hollow-chain sentence in the gold chain guide (needs a jeweler's check), and box chain in that guide.

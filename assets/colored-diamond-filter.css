@@ -197,6 +197,10 @@
     transition: all 0.2s ease;
   }
 
+  .lm-shape[hidden] {
+    display: none;
+  }
+
   .lm-shape input {
     position: absolute;
     opacity: 0;

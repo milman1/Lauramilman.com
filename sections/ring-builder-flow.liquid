@@ -11,11 +11,10 @@
       <span data-stage="1" class="active">1 · {{ 'ring_flow.choose' | t }}</span>
       <span data-stage="2">2 · {{ 'ring_flow.pair' | t }}</span>
       <span data-stage="3">3 · {{ 'ring_flow.personalize' | t }}</span>
-      <span>4 · {{ 'ring_flow.bag' | t }}</span>
-      <span>5 · {{ 'ring_flow.checkout' | t }}</span>
     </nav>
   </div>
   <div class="status" data-flow-status role="status"></div>
+  <div class="ring-sent" data-ring-sent tabindex="-1" role="status" hidden></div>
   <div class="layout solo">
     <div class="flow-body" data-flow-main>
       <h2>{{ 'ring_flow.where' | t }}</h2>
@@ -32,12 +31,39 @@
       <noscript><p>{{ 'ring_flow.no_javascript' | t }} <a href="{{ section.settings.contact_url | default: '/pages/contact' }}">{{ 'ring_flow.help' | t }}</a></p></noscript>
     </div>
     <aside data-flow-summary aria-label="{{ 'ring_flow.your_ring' | t | escape }}" hidden></aside>
+    <section class="ring-email" data-ring-email aria-labelledby="RingEmailTitle" hidden>
+      {%- form 'contact', id: 'RingEmailForm' -%}
+        {%- if form.posted_successfully? -%}
+          <h2 id="RingEmailTitle" data-ring-email-sent>{{ 'ring_flow.email_sent_heading' | t }}</h2>
+          <p class="quiet">{{ 'ring_flow.email_sent' | t }}</p>
+        {%- else -%}
+          <h2 id="RingEmailTitle">{{ 'ring_flow.email_heading' | t }}</h2>
+          {%- if form.errors -%}<p class="error" role="alert" data-ring-email-error>{{ 'ring_flow.email_failed' | t }}</p>{%- endif -%}
+          <p class="quiet">{{ 'ring_flow.email_intro' | t }}</p>
+          <input type="hidden" name="contact[request_type]" value="Ring builder">
+          <input type="hidden" name="contact[ring_link]" data-ring-email-field="link">
+          <input type="hidden" name="contact[setting]" data-ring-email-field="setting">
+          <input type="hidden" name="contact[diamond]" data-ring-email-field="diamond">
+          <input type="hidden" name="contact[ring_size]" data-ring-email-field="size">
+          <input type="hidden" name="contact[options]" data-ring-email-field="options">
+          <input type="hidden" name="contact[ring_subtotal]" data-ring-email-field="subtotal">
+          <div class="fields">
+            <label>{{ 'ring_flow.email_name' | t }}<input type="text" name="contact[name]" autocomplete="name" value="{{ customer.name | escape }}"></label>
+            <label>{{ 'ring_flow.email_address' | t }}<input type="email" name="contact[email]" autocomplete="email" value="{{ customer.email | escape }}" required></label>
+          </div>
+          <label>{{ 'ring_flow.email_note' | t }}<textarea name="contact[body]" rows="3"></textarea></label>
+          <button type="submit" class="secondary">{{ 'ring_flow.email_send' | t }}</button>
+        {%- endif -%}
+      {%- endform -%}
+    </section>
   </div>
+  <div class="dock" data-flow-dock hidden></div>
   <footer><span>{{ 'ring_flow.saved' | t }}</span><button type="button" class="link" data-action="restart">{{ 'ring_flow.start_again' | t }}</button></footer>
   <template data-diamond-filter-template>
     <div class="diamond-search lm-dfilter lm-dfilter--navy" data-ring-builder="true">
       {% render 'diamond-origin-tabs', current: 'lab' %}
-      {% assign filter_shapes = 'Round,Princess,Cushion,Emerald,Oval,Radiant,Asscher,Marquise,Heart,Pear' | split: ',' %}
+      {% capture shape_entries_raw %}{% render 'diamond-shape-order' %}{% endcapture %}
+      {% assign filter_shapes = shape_entries_raw | strip | split: ';' %}
       {% assign filter_clarity = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
       {% assign filter_color = 'M,L,K,J,I,H,G,F,E,D' | split: ',' %}
       {% assign filter_cut = 'Poor,Fair,Good,Very Good,Excellent,Ideal' | split: ',' %}
@@ -45,7 +71,7 @@
     </div>
   </template>
   <script type="application/json" data-flow-config>
-    {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | default: '/pages/contact' | json }},"settings":[
+    {"apiBase":{{ section.settings.api_base_url | json }},"apiKey":{{ section.settings.api_anon_key | json }},"currency":{{ cart.currency.iso_code | default: shop.currency | json }},"root":{{ routes.root_url | json }},"cartUrl":{{ routes.cart_url | json }},"contact":{{ section.settings.contact_url | default: '/pages/contact' | json }},"appointment":{{ section.settings.appointment_url | default: '/pages/private-clients' | json }},"sizeGuide":{{ section.settings.size_guide_url | default: '/pages/ring-size-guide' | json }},"settings":[
       {% assign setting_emitted = false %}
       {% for ring in settings_collection.products limit: 50 %}
         {% capture ring_shape %}{% render 'center-stone-shape', product: ring %}{% endcapture %}
@@ -57,17 +83,59 @@
       {% endfor %}
     ],"bands":[
       {% assign band_emitted = false %}
-      {% for band in collections['wedding-bands'].products limit: 50 %}
-        {% if band.available and band.tags contains 'wedding-band' %}
-          {% if band_emitted %},{% endif %}
-          {"handle":{{ band.handle | json }},"title":{{ band.title | json }}}
-          {% assign band_emitted = true %}
-        {% endif %}
+      {% assign band_collections = 'wedding-bands,mens-wedding-bands' | split: ',' %}
+      {% for band_collection in band_collections %}
+        {% for band in collections[band_collection].products limit: 50 %}
+          {% assign include_band = false %}
+          {% if band_collection == 'mens-wedding-bands' or band.tags contains 'wedding-band' %}{% assign include_band = true %}{% endif %}
+          {% if band.available and band.featured_image and include_band %}
+            {% if band_emitted %},{% endif %}
+            {% capture band_metal_text %}{{ band.title }}{% for option in band.options_with_values %}{% unless option.name contains 'size' or option.name contains 'Size' %} {{ option.values | join: ' ' }}{% endunless %}{% endfor %}{% if band.tags contains 'White Gold' %} white{% endif %}{% if band.tags contains 'Yellow Gold' %} yellow{% endif %}{% if band.tags contains 'Rose Gold' %} rose{% endif %}{% endcapture %}
+            {"metalText":{{ band_metal_text | strip | json }},"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"category":{% if band_collection == 'mens-wedding-bands' %}"mens"{% else %}"diamond"{% endif %},"image":{{ band.featured_image | image_url: width: 600 | json }}}
+            {% assign band_emitted = true %}
+          {% endif %}
+        {% endfor %}
       {% endfor %}
     ],"copy":{
+      "pairing_note":{{ 'ring_flow.pairing_note' | t | json }},
+      "custom_policy":{{ 'ring_flow.custom_policy' | t | json }},
+      "shipping_returns":{{ 'ring_flow.shipping_returns' | t | json }},
       "order_subtotal":{{ 'ring_flow.order_subtotal' | t | json }},
       "add_with_band":{{ 'ring_flow.add_with_band' | t | json }},
       "band":{{ 'ring_flow.band' | t | json }},
+      "band_optional":{{ 'ring_flow.band_optional' | t | json }},
+      "band_select":{{ 'ring_flow.band_select' | t | json }},
+      "band_selected":{{ 'ring_flow.band_selected' | t | json }},
+      "band_diamond":{{ 'ring_flow.band_diamond' | t | json }},
+      "band_mens":{{ 'ring_flow.band_mens' | t | json }},
+      "band_mens_note":{{ 'ring_flow.band_mens_note' | t | json }},
+      "band_for_ring":{{ 'ring_flow.band_for_ring' | t | json }},
+      "band_for_partner":{{ 'ring_flow.band_for_partner' | t | json }},
+      "band_skip":{{ 'ring_flow.band_skip' | t | json }},
+      "band_continue":{{ 'ring_flow.band_continue' | t | json }},
+      "band_browse":{{ 'ring_flow.band_browse' | t | json }},
+      "band_edit_selection":{{ 'ring_flow.band_edit_selection' | t | json }},
+      "band_skipped":{{ 'ring_flow.band_skipped' | t | json }},
+      "band_kept":{{ 'ring_flow.band_kept' | t | json }},
+      "band_number":{{ 'ring_flow.band_number' | t: number: '__number__' | json }},
+      "add_second_band":{{ 'ring_flow.add_second_band' | t | json }},
+      "choose_band":{{ 'ring_flow.choose_band' | t | json }},
+      "band_pair_note":{{ 'ring_flow.band_pair_note' | t | json }},
+      "add_with_bands":{{ 'ring_flow.add_with_bands' | t | json }},
+      "band_view_all":{{ 'ring_flow.band_view_all' | t | json }},
+      "band_show_featured":{{ 'ring_flow.band_show_featured' | t | json }},
+      "band_style":{{ 'ring_flow.band_style' | t | json }},
+      "band_all_styles":{{ 'ring_flow.band_all_styles' | t | json }},
+      "band_results":{{ 'ring_flow.band_results' | t: count: '__count__' | json }},
+      "band_style_eternity":{{ 'ring_flow.band_style_eternity' | t | json }},
+      "band_style_half":{{ 'ring_flow.band_style_half' | t | json }},
+      "band_style_three_quarter":{{ 'ring_flow.band_style_three_quarter' | t | json }},
+      "band_style_stone":{{ 'ring_flow.band_style_stone' | t | json }},
+      "band_style_satin":{{ 'ring_flow.band_style_satin' | t | json }},
+      "band_style_hammered":{{ 'ring_flow.band_style_hammered' | t | json }},
+      "band_style_milgrain":{{ 'ring_flow.band_style_milgrain' | t | json }},
+      "band_style_carved":{{ 'ring_flow.band_style_carved' | t | json }},
+      "band_style_groove":{{ 'ring_flow.band_style_groove' | t | json }},
       "band_heading":{{ 'ring_flow.band_heading' | t | json }},
       "band_note":{{ 'ring_flow.band_note' | t | json }},
       "no_band":{{ 'ring_flow.no_band' | t | json }},
@@ -204,7 +272,49 @@
       "shape_notice":{{ 'ring_flow.shape_notice' | t | json }},
       "saved":{{ 'ring_flow.saved' | t | json }},
       "no_javascript":{{ 'ring_flow.no_javascript' | t | json }},
-      "added_cart":{{ 'ring_flow.added_cart' | t | json }}
+      "added_cart":{{ 'ring_flow.added_cart' | t | json }},
+      "results_one":{{ 'ring_flow.results_one' | t: count: '__count__' | json }},
+      "settings_results_one":{{ 'ring_flow.settings_results_one' | t: count: '__count__' | json }},
+      "price_from":{{ 'ring_flow.price_from' | t: price: '__price__' | json }},
+      "shape_settings":{{ 'ring_flow.shape_settings' | t: count: '__count__' | json }},
+      "shape_settings_one":{{ 'ring_flow.shape_settings_one' | t: count: '__count__' | json }},
+      "more_shapes":{{ 'ring_flow.more_shapes' | t: count: '__count__' | json }},
+      "no_setting_shape":{{ 'ring_flow.no_setting_shape' | t | json }},
+      "add_short":{{ 'ring_flow.add_short' | t | json }},
+      "view_summary":{{ 'ring_flow.view_summary' | t | json }},
+      "metal":{{ 'ring_flow.metal' | t | json }},
+      "all_metals":{{ 'ring_flow.all_metals' | t | json }},
+      "metal_white":{{ 'ring_flow.metal_white' | t | json }},
+      "metal_yellow":{{ 'ring_flow.metal_yellow' | t | json }},
+      "metal_rose":{{ 'ring_flow.metal_rose' | t | json }},
+      "metal_platinum":{{ 'ring_flow.metal_platinum' | t | json }},
+      "carat_sizes":{{ 'ring_flow.carat_sizes' | t | json }},
+      "more_filters":{{ 'ring_flow.more_filters' | t | json }},
+      "fewer_filters":{{ 'ring_flow.fewer_filters' | t | json }},
+      "select_short":{{ 'ring_flow.select_short' | t | json }},
+      "ask_stone":{{ 'ring_flow.ask_stone' | t | json }},
+      "ask_setting":{{ 'ring_flow.ask_setting' | t | json }},
+      "book_viewing":{{ 'ring_flow.book_viewing' | t | json }},
+      "email_sent_title":{{ 'ring_flow.email_sent_title' | t | json }},
+      "email_sent":{{ 'ring_flow.email_sent' | t | json }},
+      "keep_personalizing":{{ 'ring_flow.keep_personalizing' | t | json }},
+      "band_other":{{ 'ring_flow.band_other' | t | json }},
+      "size_guide":{{ 'ring_flow.size_guide' | t | json }},
+      "promise":{{ 'ring_flow.promise' | t | json }},
+      "carat_value":{{ 'ring_flow.carat_value' | t: carat: '__carat__' | json }},
+      "carat_plus":{{ 'ring_flow.carat_plus' | t: carat: '__carat__' | json }},
+      "cut_value":{{ 'ring_flow.cut_value' | t: cut: '__cut__' | json }},
+      "band_match":{{ 'ring_flow.band_match' | t: metal: '__metal__' | json }},
+      "watch_setting":{{ 'ring_flow.watch_setting' | t | json }},
+      "share_ring":{{ 'ring_flow.share_ring' | t | json }},
+      "ask_ring":{{ 'ring_flow.ask_ring' | t | json }},
+      "scale_label":{{ 'ring_flow.scale_label' | t | json }},
+      "scale_caption":{{ 'ring_flow.scale_caption' | t: length: '__length__', width: '__width__', size: '__size__', finger: '__finger__' | json }},
+      "link_copied":{{ 'ring_flow.link_copied' | t | json }},
+      "share_failed":{{ 'ring_flow.share_failed' | t: url: '__url__' | json }},
+      "mm_face":{{ 'ring_flow.mm_face' | t: length: '__length__', width: '__width__' | json }},
+      "mm_round":{{ 'ring_flow.mm_round' | t: size: '__size__' | json }},
+      "pick_grades":{{ 'ring_flow.pick_grades' | t | json }}
     }}
   </script>
 </div>
@@ -218,7 +328,9 @@
     {"type":"product","id":"diamond_product","label":"Diamond entry photograph"},
     {"type":"text","id":"api_base_url","label":"Diamond search URL"},
     {"type":"text","id":"api_anon_key","label":"Public diamond search key"},
-    {"type":"url","id":"contact_url","label":"Contact page"}
+    {"type":"url","id":"contact_url","label":"Contact page"},
+    {"type":"url","id":"appointment_url","label":"Book a viewing page"},
+    {"type":"url","id":"size_guide_url","label":"Ring size guide page"}
   ],
   "presets":[{"name":"Ring builder flow"}]
 }

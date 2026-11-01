@@ -265,6 +265,15 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 .header .nav__dropdown-link { color: var(--lmhh-ink); text-decoration: none; line-height: 1.3; }
 .header .nav__dropdown-link:hover { color: var(--lmhh-bronze); }
 .header .nav__dropdown-link--all { margin-top: 6px; color: var(--lmhh-espresso); font-weight: 600; }
+.header .nav__shape-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.header .nav__shape-grid .nav__dropdown-link { font-size: 13px; }
 
 .header .nav__intro {
   display: flex;
@@ -571,26 +580,33 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       <button type="button" aria-expanded="false" class="nav__item-link">Loose Diamonds {{ caret }}</button>
       <div class="nav__dropdown">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Lab-grown</span>
-          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/lab-grown-diamonds?shape=Cushion" class="nav__dropdown-link">Cushion</a>
-          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <span class="nav__dropdown-label">Lab-grown shapes</span>
+          <div class="nav__shape-grid">
+            {%- capture shape_entries_raw -%}{%- render 'diamond-shape-order' -%}{%- endcapture -%}
+            {%- assign shape_entries = shape_entries_raw | strip | split: ';' -%}
+            {%- for entry in shape_entries -%}
+              {%- assign shape_label = entry | split: '|' | first | strip -%}
+              <a href="/collections/lab-grown-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
+            {%- endfor -%}
+          </div>
           <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">Colored lab-grown</a>
           <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all lab-grown</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Natural</span>
-          <a href="/collections/natural-diamonds?shape=Round" class="nav__dropdown-link">Round</a>
-          <a href="/collections/natural-diamonds?shape=Oval" class="nav__dropdown-link">Oval</a>
-          <a href="/collections/natural-diamonds?shape=Emerald" class="nav__dropdown-link">Emerald</a>
-          <a href="/collections/natural-diamonds?shape=Pear" class="nav__dropdown-link">Pear</a>
+          <span class="nav__dropdown-label">Natural shapes</span>
+          <div class="nav__shape-grid">
+            {%- assign natural_shapes = 'Round,Oval,Emerald,Cushion,Radiant,Asscher,Pear,Marquise,Princess,Heart,Cushion Modified,Old Miner' | split: ',' -%}
+            {%- for shape_label in natural_shapes -%}
+              <a href="/collections/natural-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
+            {%- endfor -%}
+          </div>
           <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Before you choose</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <span class="nav__dropdown-label">Choose a path</span>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Shop loose diamonds</a>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
+          <a href="/pages/ring-builder?start=setting" class="nav__dropdown-link">Start with a setting</a>
           <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
           <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
         </div>
@@ -600,7 +616,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <p>Search by shape, carat, price, color and clarity, or book a viewing in Midtown to compare stones side by side.</p>
           <a class="nav__arrow" href="/pages/buying-guide">Buying guide {{ arrow }}</a>
         </div>
-        <a class="nav__card" href="/pages/ring-builder">
+        <a class="nav__card" href="/pages/ring-builder?start=diamond">
           <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
           <span class="nav__card-title">Start with the stone</span>
           <span class="nav__card-text">Choose a diamond, pick a setting, and our goldsmiths in Italy craft the ring.</span>
@@ -622,7 +638,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">Build your own</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build Your Ring</a>
+          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
           <a href="/collections/ring-settings" class="nav__dropdown-link">Ring settings</a>
           <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-grown engagement rings</a>
           <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-grown rings</a>
@@ -652,6 +668,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       <div class="nav__dropdown nav__dropdown--five">
         <div class="nav__group">
           <span class="nav__dropdown-label">Shop by occasion</span>
+          <a href="/collections/everyday-jewelry" class="nav__dropdown-link">Everyday jewelry</a>
           <a href="/collections/for-work" class="nav__dropdown-link">For work</a>
           <a href="/collections/for-a-night-out" class="nav__dropdown-link">For a night out</a>
           <a href="/collections/engagement-rings" class="nav__dropdown-link">Wedding &amp; engagement</a>
@@ -984,6 +1001,10 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
   text-overflow: ellipsis;
 }
 
+.search-overlay__result-item--diamond .search-overlay__result-title {
+  white-space: normal;
+}
+
 .search-overlay__result-price {
   font-size: 0.85rem;
   color: var(--gold-light, #E2C27A);
@@ -1057,6 +1078,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 }
 </style>
 
+<script src="{{ 'diamond-query.js' | asset_url }}" defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('header');
@@ -1288,6 +1310,57 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       }
     });
 
+    function escapeSearch(value) {
+      return String(value).replace(/[&<>"']/g, function(ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
+    }
+
+    function diamondHitHtml(parsed, count) {
+      var meta = parsed.kind === 'natural' ? 'Natural diamonds' : 'Lab-grown diamonds';
+      if (count != null) {
+        meta = count.toLocaleString('en-US') + ' ' + (parsed.kind === 'natural' ? 'natural' : 'lab-grown');
+      }
+      if (parsed.detail) meta += ' · ' + parsed.detail;
+      return '<a class="search-overlay__result-item search-overlay__result-item--diamond" href="' + escapeSearch(parsed.href) + '">' +
+        '<div class="search-overlay__result-info">' +
+        '<div class="search-overlay__result-title">' + escapeSearch(parsed.title) + '</div>' +
+        '<div class="search-overlay__result-price">' + escapeSearch(meta) + '</div>' +
+        '</div></a>';
+    }
+
+    function showDiamondHit(q) {
+      if (!window.LMNYDiamondQuery) return false;
+      var parsed = window.LMNYDiamondQuery.parseDiamondQuery(q);
+      if (!parsed) return false;
+      if (searchLinks) searchLinks.style.display = 'none';
+      searchResults.innerHTML = diamondHitHtml(parsed, null);
+      var headers = { Accept: 'application/json' };
+      if (window.LMNYDiamondQuery.DIAMOND_ANON_KEY) {
+        headers.apikey = window.LMNYDiamondQuery.DIAMOND_ANON_KEY;
+        headers.Authorization = 'Bearer ' + window.LMNYDiamondQuery.DIAMOND_ANON_KEY;
+      }
+      fetch(window.LMNYDiamondQuery.DIAMOND_API + '?' + parsed.countQuery, { headers: headers })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(result) {
+          if (searchInput.value.trim() !== q || !result.ok) return;
+          searchResults.innerHTML = diamondHitHtml(parsed, Number(result.data.total) || 0);
+        })
+        .catch(function() {});
+      return true;
+    }
+
+    document.querySelectorAll('#searchOverlay form, form.lmhh__msearch').forEach(function(form) {
+      form.addEventListener('submit', function(event) {
+        if (!window.LMNYDiamondQuery) return;
+        var input = form.querySelector('input[type="search"]');
+        var parsed = input && window.LMNYDiamondQuery.parseDiamondQuery(input.value);
+        if (!parsed) return;
+        event.preventDefault();
+        window.location.assign(parsed.href);
+      });
+    });
+
     if (searchInput) {
       searchInput.addEventListener('input', function() {
         var q = searchInput.value.trim();
@@ -1297,6 +1370,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           if (searchLinks) searchLinks.style.display = '';
           return;
         }
+        if (showDiamondHit(q)) return;
+        searchResults.innerHTML = '';
         searchDebounce = setTimeout(function() {
           fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=6&resources[options][fields]=title,product_type,vendor,tag,variants.title,variants.sku,body')
             .then(function(r) { return r.json(); })
@@ -1321,7 +1396,7 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
               });
               if (searchLinks) searchLinks.style.display = products.length > 0 || q.length >= 2 ? 'none' : '';
               if (products.length === 0) {
-                searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + q.replace(/</g, '&lt;') + '\u201d</p>';
+                searchResults.innerHTML = '<p class="search-overlay__no-results">No results for \u201c' + escapeSearch(q) + '\u201d</p>';
                 return;
               }
               var html = '';

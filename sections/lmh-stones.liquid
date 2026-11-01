@@ -10,14 +10,17 @@
 {{ 'lmny-home.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign base = section.settings.search_url | default: '/collections/lab-grown-diamonds'
-  assign shape_list = 'Round,Oval,Emerald,Cushion,Pear,Radiant,Princess,Marquise' | split: ','
+  capture shape_entries_raw
+    render 'diamond-shape-order'
+  endcapture
+  assign shape_list = shape_entries_raw | strip | split: ';'
   assign colored = section.settings.colored_products
   if colored == blank and section.settings.colored_collection != blank
     assign colored = section.settings.colored_collection.products
   endif
 -%}
 
-<section class="lmh lmh-stones" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
+<section class="lmh lmh-stones" id="start-with-the-stone" aria-labelledby="LmhStones-{{ section.id }}" data-lmh-stones
   data-api="{{ section.settings.api_base_url | escape }}" data-key="{{ section.settings.api_anon_key | escape }}">
   <div class="lmh-stones__head">
     {%- if section.settings.eyebrow != blank -%}<p class="lmh-eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
@@ -25,12 +28,26 @@
     {%- if section.settings.text != blank -%}<p class="lmh-lede">{{ section.settings.text | escape }}</p>{%- endif -%}
   </div>
 
+  {%- comment -%} The classic ten show; every other stocked shape sits under "More shapes". {%- endcomment -%}
   <ul class="lmh-stones__shapes" role="list" aria-label="Shop by shape">
-    {%- for name in shape_list -%}
+    {%- for entry in shape_list limit: 10 -%}
+      {%- assign name = entry | split: '|' | first | strip -%}
       {%- assign icon_key = name | downcase -%}
-      <li><a class="lmh-shape" href="{{ base }}?shape={{ name }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
+      <li><a class="lmh-shape" href="{{ base }}?shape={{ name | url_encode }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
     {%- endfor -%}
   </ul>
+  {%- if shape_list.size > 10 -%}
+    <details class="lmh-stones__more-shapes">
+      <summary>More shapes ({{ shape_list.size | minus: 10 }})</summary>
+      <ul class="lmh-stones__shapes" role="list" aria-label="More shapes">
+        {%- for entry in shape_list offset: 10 -%}
+          {%- assign name = entry | split: '|' | first | strip -%}
+          {%- assign icon_key = name | downcase -%}
+          <li><a class="lmh-shape" href="{{ base }}?shape={{ name | url_encode }}">{%- render 'diamond-shape-icon', shape: icon_key -%}<span>{{ name }}</span></a></li>
+        {%- endfor -%}
+      </ul>
+    </details>
+  {%- endif -%}
 
   <div class="lmh-stones__sizes" aria-label="Shop by size or budget">
     {%- for block in section.blocks -%}

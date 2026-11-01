@@ -11,6 +11,10 @@
 
   @param {collection} collection - The collection being shown
   @param {number} [page_number] - paginate.current_page; the block shows on page 1 only
+  @param {boolean} [accordion] - when true, each h2 in the guide becomes a closed
+    section the visitor opens, so the page is short and scannable. All of the text
+    stays in the page (a closed details element is still in the HTML), and the
+    FAQ starts closed too. Without it the guide renders open, as before.
 
   @example
   {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
@@ -36,12 +40,34 @@
 -%}
 
 {%- if show_longform -%}
-  <section class="lm-longform" aria-labelledby="lm-longform-{{ collection.id }}">
+  {%- assign as_accordion = false -%}
+  {%- if accordion and guide_html contains '<h2>' -%}
+    {%- assign as_accordion = true -%}
+  {%- endif -%}
+  <section class="lm-longform{% if accordion %} lm-longform--accordion{% endif %}" aria-labelledby="lm-longform-{{ collection.id }}">
     <div class="lm-longform__inner">
       <h2 class="lm-longform__title" id="lm-longform-{{ collection.id }}">About {{ collection.title | escape }}</h2>
 
       {%- if guide_html != blank -%}
-        <div class="lm-longform__body">{{ guide_html }}</div>
+        {%- if as_accordion -%}
+          {%- assign guide_parts = guide_html | split: '<h2>' -%}
+          {%- assign guide_intro = guide_parts[0] | strip -%}
+          {%- if guide_intro != blank -%}
+            <div class="lm-longform__body">{{ guide_intro }}</div>
+          {%- endif -%}
+          <div class="lm-longform__sections">
+            {%- for part in guide_parts offset: 1 -%}
+              {%- assign pair = part | split: '</h2>' -%}
+              {%- assign section_body = part | remove_first: pair[0] | remove_first: '</h2>' -%}
+              <details class="lm-longform__sec">
+                <summary><h2 class="lm-longform__sec-title">{{ pair[0] }}</h2></summary>
+                <div class="lm-longform__body">{{ section_body }}</div>
+              </details>
+            {%- endfor -%}
+          </div>
+        {%- else -%}
+          <div class="lm-longform__body">{{ guide_html }}</div>
+        {%- endif -%}
       {%- endif -%}
 
       {%- if faq_count > 0 -%}
@@ -49,7 +75,7 @@
           <h2 class="lm-longform__faq-title">Questions</h2>
           {%- for faq in guide_faq -%}
             {%- if faq.question != blank and faq.answer != blank -%}
-              <details class="lm-longform__q"{% if forloop.first %} open{% endif %}>
+              <details class="lm-longform__q"{% if forloop.first and accordion == blank %} open{% endif %}>
                 <summary>{{ faq.question | escape }}</summary>
                 <div class="lm-longform__a"><p>{{ faq.answer }}</p></div>
               </details>
@@ -121,6 +147,45 @@
       color: var(--text-dark, #2C1810);
       text-underline-offset: 0.2em;
     }
+    .lm-longform__sections { margin-top: 1.25rem; }
+    .lm-longform__sec { border-bottom: 1px solid #DDD5C5; }
+    .lm-longform__sec summary,
+    .lm-longform--accordion .lm-longform__q summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 52px;
+      padding: 0.5rem 0;
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--text-dark, #2C1810);
+    }
+    .lm-longform--accordion .lm-longform__q summary { font-family: var(--font-body, 'Montserrat', sans-serif); font-size: 0.95rem; font-weight: 500; }
+    .lm-longform__sec summary::-webkit-details-marker,
+    .lm-longform--accordion .lm-longform__q summary::-webkit-details-marker { display: none; }
+    .lm-longform__sec summary::after,
+    .lm-longform--accordion .lm-longform__q summary::after {
+      content: '+';
+      flex-shrink: 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 1.4rem;
+      font-weight: 300;
+      line-height: 1;
+      color: #A88340;
+    }
+    .lm-longform__sec[open] summary::after,
+    .lm-longform--accordion .lm-longform__q[open] summary::after { content: '\2212'; }
+    .lm-longform__sec summary:focus-visible { outline: 2px solid #C9A050; outline-offset: 3px; }
+    .lm-longform__sec-title { margin: 0; font: inherit; color: inherit; }
+    .lm-longform__sec .lm-longform__body { padding-bottom: 0.75rem; }
+    .lm-longform__sec .lm-longform__body > :first-child { margin-top: 0; }
+    .lm-longform--accordion .lm-longform__faq { margin-top: 2rem; }
+    .lm-longform--accordion .lm-longform__q { padding: 0; }
+    .lm-longform--accordion .lm-longform__q .lm-longform__a { padding-bottom: 0.75rem; }
     .lm-longform__faq { margin-top: 2.25rem; }
     .lm-longform__q {
       border-bottom: 1px solid #DDD5C5;

@@ -68,7 +68,7 @@ old CSV import are hidden and untouched.
 3. **Pricing changes are pull requests against `lmny-feeds/config/pricing.ts`.** Never a one-off number typed into Shopify admin, never a hardcoded value in a script. A bulk reprice done by hand must match the rule in that file, and the file must be merged before the next scheduled sync or the sync will revert it. **Every source has its own rule** (section 2a); there is no store-wide multiplier, and a rule from one source is never applied to another.
 4. **Dry-run before live, verify after live.** Every bulk write is preceded by a read that produces a plan file, and followed by an independent read that confirms the store matches the plan. The verification is done by a different agent or a fresh query, never by trusting the write responses alone.
 5. **Idempotent work files.** Bulk jobs run from a snapshot file (CSV or JSONL) with the final values precomputed. Re-running a line must produce the same result. Never compute a delta from live data mid-run.
-6. **No destructive operations without an explicit instruction.** No product deletes, no theme deletes, no history rewrites on shared branches, no force-push. Archive instead of delete. Loose diamonds are the one exception already coded into the Belgium sync.
+6. **No destructive operations without an explicit instruction.** No product deletes, no theme deletes, no history rewrites on shared branches, no force-push. Archive instead of delete, including loose diamonds (merchant decision 2026-10-30, #385). Preserve their IDs and handles for returning supplier stock.
 7. **Live theme is read-only from the API.** Theme edits go through git and the theme's Shopify connection. `themeFilesUpsert` to the published theme is blocked.
 8. **eBay scope.** Loose stones never go to eBay. Watches, estate designer pieces, fine jewelry, and lab-grown jewelry may. For watches, condition comes from structured source facts, never the title: `3000` for pre-owned or unknown state, `1000` only for source-confirmed Unworn with explicit box and papers, and `1500` for source-confirmed Unworn without a complete box-and-papers set.
 9. **Do not report done until verified.** If a step could not be verified, say so first.
@@ -788,11 +788,15 @@ read `docs/seo/finished-jewelry-activation-checklist.md` and
 `docs/seo/jewelry-activation-gate.md`. They supersede conflicting copy scores,
 old finished lab-grown pricing, and manual activation steps for this scope.
 Use `npm run jewelry:gate -- draft` for API creation or the default
-`validate:jewelry-csv` preflight before a draft-only CSV import. Activate only
-through `jewelry:gate plan`, documented review, `check`, and `activate`.
-Do not bypass it with a direct ACTIVE mutation, Admin click, bulk status edit,
-or an independent connector. Each product needs current evidence and the
-merchant's authorization for its exact scope; do not fabricate attestations.
+`validate:jewelry-csv` preflight before a draft-only CSV import. For activation,
+use either `jewelry:gate plan`, documented review, `check`, and `activate`, or
+the equivalent authenticated Shopify connector workflow documented in the
+gate. The connector path requires a complete paginated snapshot, the same
+product-by-product evidence review, validated GraphQL, a fresh pre-write read,
+an exact-ID status-only mutation, and an independent readback. Do not activate
+with an Admin click or bulk status edit. Each product needs current evidence
+and the merchant's authorization for its exact scope; do not fabricate
+attestations.
 Excluded categories retain their own workflows. Never activate existing
 archived products or unrelated drafts. A repo rule does not intercept external
 apps: see the enforcement limits in the workflow document.

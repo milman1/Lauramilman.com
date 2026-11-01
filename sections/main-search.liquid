@@ -1,7 +1,19 @@
 {%- comment -%}
   Laura Milman New York — Search results
   Branded results page for the Popular Searches bar and header search.
+  A size-and-shape query ("1 ct oval") belongs on the diamond filter.
 {%- endcomment -%}
+
+{%- if search.performed and search.terms != blank -%}
+  <script src="{{ 'diamond-query.js' | asset_url }}"></script>
+  <script>
+    (function () {
+      if (!window.LMNYDiamondQuery) return;
+      var parsed = window.LMNYDiamondQuery.parseDiamondQuery({{ search.terms | json }});
+      if (parsed) window.location.replace(parsed.href);
+    })();
+  </script>
+{%- endif -%}
 
 {%- paginate search.results by 24 -%}
 

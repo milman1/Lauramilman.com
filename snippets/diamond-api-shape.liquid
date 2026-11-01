@@ -1,0 +1,17 @@
+{% doc %}
+One shape checkbox for the API diamond filter (snippets/diamond-api-filter-form.liquid).
+@param {string} entry - "Label" or "Label|stored,stored" from snippets/diamond-shape-order.liquid
+{% enddoc %}
+{%- assign shape_parts = entry | split: '|' -%}
+{%- assign shape_label = shape_parts | first | strip -%}
+{%- if shape_parts.size > 1 -%}
+  {%- assign shape_value = shape_parts | last | strip -%}
+{%- else -%}
+  {%- assign shape_value = shape_label -%}
+{%- endif -%}
+{%- assign icon_key = shape_label | downcase -%}
+<label class="lm-shape">
+  <input type="checkbox" name="shape" value="{{ shape_value | escape }}">
+  {%- render 'diamond-shape-icon', shape: icon_key -%}
+  <span class="lm-shape__name">{{ shape_label }}</span>
+</label>

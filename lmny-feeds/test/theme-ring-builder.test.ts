@@ -67,7 +67,75 @@ describe('ring builder templates (opt-in, ?view=ring-builder)', () => {
     const start = themeFile('sections/ring-builder-start.liquid');
     expect(start).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(start).toContain("ring.tags contains 'ring-setting'");
-    expect(start).toContain('/pages/ring-builder?setting={{ ring.handle | url_encode }}');
-    expect(start).toContain('shape={{ ring_shape | url_encode }}');
+    expect(start).toContain('/pages/ring-builder?setting={{ photo_ring.handle | url_encode }}');
+    expect(start).toContain('shape={{ photo_ring_shape | url_encode }}');
+  });
+});
+
+describe('ring builder page chrome', () => {
+  it('confirms a sent ring email at the top and clears the posted flag', () => {
+    const flow = themeFile('sections/ring-builder-flow.liquid');
+    const js = themeFile('assets/ring-builder-flow.js');
+    const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
+    expect(flow).toContain('<div class="ring-sent" data-ring-sent tabindex="-1" role="status" hidden></div>');
+    expect(flow).toContain('data-ring-email-sent>{{ \'ring_flow.email_sent_heading\' | t }}</h2>');
+    expect(flow).toContain('data-ring-email-error');
+    for (const key of ['email_sent_title', 'email_sent', 'keep_personalizing']) {
+      expect(flow).toContain(`"${key}":{{ 'ring_flow.${key}' | t | json }}`);
+      expect(en[key]).toBeTruthy();
+    }
+    expect(en.email_sent_heading).toBe('Sent to Laura');
+    // Runs once the review is drawn, so the confirmation is where the shopper lands.
+    expect(js).toMatch(/ready = true;\s*afterRingEmail\(\);/);
+    expect(js).toContain("u.searchParams.delete('contact_posted')");
+    expect(js).toContain("action === 'keep-personalizing'");
+  });
+
+  it('keeps the welcome offer off ring-builder templates', () => {
+    expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
+  });
+
+  it('shows only the steps the builder owns and a mobile dock', () => {
+    const flow = themeFile('sections/ring-builder-flow.liquid');
+    expect(flow).not.toContain("ring_flow.checkout' | t }}</span>");
+    expect(flow).toContain('data-flow-dock');
+  });
+});
+
+describe('one ring builder', () => {
+  it('sends setting entry points to /pages/ring-builder', () => {
+    const header = themeFile('sections/header.liquid');
+    expect(header).toContain('href="/pages/ring-builder?start=setting"');
+    expect(header).toContain('href="/pages/ring-builder?start=diamond"');
+    expect(themeFile('snippets/diamond-setting-picker.liquid')).toContain('{{ routes.root_url }}pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');
+    expect(themeFile('snippets/ring-diamond-pairing.liquid')).toContain('href="/pages/ring-builder?setting={{ product.handle | url_encode }}"');
+  });
+
+  it('hands the older diamond search over, never the setting product pages', () => {
+    const bar = themeFile('sections/ring-builder-bar.liquid');
+    expect(bar).toContain('window.Shopify.designMode');
+    // Every setting product uses product.ring-builder; its page must not redirect.
+    expect(bar).toMatch(/\{%-? if template\.name == 'collection' -?%\}\s*<script>\s*\(function \(\) \{\s*if \(window\.Shopify && window\.Shopify\.designMode\) return;/);
+    expect(bar).not.toContain('product.handle | json');
+    expect(bar).toContain("location.replace('/pages/ring-builder?' + to.toString())");
+  });
+});
+
+describe('theme validator and footer fixes', () => {
+  it('keeps the header search script free of the parser trap and non-blocking', () => {
+    const header = themeFile('sections/header.liquid');
+    // A regex written /</g reads as a closing tag to Shopify's Liquid parser and hides every later error.
+    expect(header).not.toContain('replace(/</g');
+    expect(header).toContain("escapeSearch(q)");
+    expect(header).toContain("<script src=\"{{ 'diamond-query.js' | asset_url }}\" defer></script>");
+  });
+
+  it('gives the product gallery image and footer logo their dimensions', () => {
+    expect(themeFile('sections/main-product.liquid')).toContain('height="{{ media.preview_image.height | times: 1200 | divided_by: media.preview_image.width }}"');
+    expect(themeFile('sections/footer.liquid')).toContain('width="200" height="{{ section.settings.logo.height | times: 200 | divided_by: section.settings.logo.width }}"');
+  });
+
+  it('lets the single footer column shrink so the signup button stays on screen', () => {
+    expect(themeFile('sections/footer.liquid')).toMatch(/@media \(max-width: 576px\)[\s\S]*?\.footer__grid \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
   });
 });

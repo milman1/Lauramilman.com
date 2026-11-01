@@ -61,7 +61,7 @@
       {%- form 'contact', class: 'lm-consult__form', id: 'LmConsultContact' -%}
         {%- if form.posted_successfully? -%}
           <p class="lm-consult__success" role="status">
-            Thank you — your request has been received. We'll call you to set the viewing.
+            {{ 'conversion.consult_success' | t }}
           </p>
         {%- endif -%}
         {%- if form.errors -%}
@@ -71,6 +71,8 @@
         {%- endif -%}
 
         <input type="hidden" name="contact[request_type]" value="Private viewing">
+        <input type="hidden" name="contact[ring_build]" id="ConsultRingBuild" disabled>
+        <p id="ConsultBuildNotice" hidden>{{ 'conversion.build_attached' | t }}</p>
 
         <div class="lm-consult__row">
           <div class="lm-consult__field">
@@ -85,8 +87,8 @@
 
         <div class="lm-consult__row">
           <div class="lm-consult__field">
-            <label for="ConsultPhone">Phone</label>
-            <input type="tel" id="ConsultPhone" name="contact[phone]" autocomplete="tel" required>
+            <label for="ConsultPhone">{{ 'conversion.phone_optional' | t }}</label>
+            <input type="tel" id="ConsultPhone" name="contact[phone]" autocomplete="tel">
           </div>
           <div class="lm-consult__field">
             <label for="ConsultMeet">How should we meet</label>
@@ -100,6 +102,7 @@
         <div class="lm-consult__field">
           <label for="ConsultInterest">I'm interested in</label>
           <select id="ConsultInterest" name="contact[interest]">
+            <option value="An engagement ring or wedding bands">{{ 'conversion.ring_interest' | t }}</option>
             <option value="A timepiece">A timepiece</option>
             <option value="An estate / vintage piece">An estate / vintage piece</option>
             <option value="Fine jewelry">Fine jewelry</option>
@@ -382,6 +385,7 @@
     var interestSelect = document.getElementById('ConsultInterest');
     var message = document.getElementById('ConsultMessage');
     if (interestSelect) {
+      if (interest === 'ring') interestSelect.value = 'An engagement ring or wedding bands';
       if (interest === 'watch') interestSelect.value = 'A timepiece';
       if (interest === 'estate' || interest === 'vintage') interestSelect.value = 'An estate / vintage piece';
       if (interest === 'jewelry' || interest === 'fine-jewelry') interestSelect.value = 'Fine jewelry';
@@ -391,6 +395,28 @@
       message.value = 'I would like a private viewing of: ' + piece;
     }
 
+    if (interest === 'ring') {
+      document.querySelector('.lm-consult__title').textContent = {{ 'conversion.consult_ring_title' | t | json }};
+      document.querySelector('.lm-consult__intro').textContent = {{ 'conversion.consult_ring_intro' | t | json }};
+    }
+    function attachRingBuild() {
+      var attachment = document.getElementById('ConsultRingBuild');
+      attachment.disabled = true; attachment.value = '';
+      document.getElementById('ConsultBuildNotice').hidden = true;
+      try {
+      if (location.hash.startsWith('#ring=') && location.hash.length < 15000) {
+        var build = new URL(decodeURIComponent(location.hash.slice(6)));
+        if (build.origin === location.origin && /\/pages\/ring-builder$/.test(build.pathname) && build.hash.startsWith('#build=')) {
+          var field = document.getElementById('ConsultRingBuild');
+          field.value = build.href; field.disabled = false;
+          document.getElementById('ConsultBuildNotice').hidden = false;
+          if (!message.value) message.value = 'I would like to discuss my attached ring build.';
+        }
+      }
+      } catch (_) {}
+    }
+    attachRingBuild();
+    window.addEventListener('hashchange', attachRingBuild);
     var contact = document.getElementById('LmConsultContact');
     var customer = document.getElementById('LmConsultCustomer');
     if (!contact) return;
@@ -400,6 +426,7 @@
       if (value === 'A timepiece') tags.push('watch-interest');
       if (value === 'An estate / vintage piece') tags.push('vintage-interest');
       if (value === 'Fine jewelry') tags.push('jewelry-interest');
+      if (value === 'An engagement ring or wedding bands') tags.push('ring-interest');
       if (value === 'Diamond or gemstone sourcing') tags.push('diamond-interest');
       return tags.join(',');
     }

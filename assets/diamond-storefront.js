@@ -42,7 +42,21 @@
   var builderView = root.dataset.builderView || 'ring-builder';
   var builder = null;
   var HANDLE = /^[a-z0-9][a-z0-9-]{0,99}$/;
-  var SHAPES = ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Asscher', 'Marquise', 'Heart', 'Pear'];
+
+  /* Any shape button on the filter, including Ashoka and the other stocked cuts. */
+  function acceptedShape(name) {
+    var want = String(name || '').trim().toLowerCase();
+    if (!want || !form) return '';
+    var inputs = form.querySelectorAll('.lm-shape input');
+    for (var i = 0; i < inputs.length; i++) {
+      var label = inputs[i].closest('.lm-shape');
+      var shown = label && label.querySelector('.lm-shape__name');
+      var text = shown ? shown.textContent.trim() : '';
+      var values = String(inputs[i].value).toLowerCase().split(',');
+      if (text.toLowerCase() === want || values.indexOf(want) !== -1) return text || name;
+    }
+    return '';
+  }
 
   var form = document.getElementById('DiamondFilterForm');
   var resultsEl = document.getElementById('lm-diamond-results');
@@ -72,12 +86,21 @@
     return h;
   }
 
-  function selectedShapes() {
+  /* A shape from the search URL that has no button yet still filters the API. */
+  var pinnedShapes = null;
+
+  function checkedShapes() {
     return Array.prototype.map
       .call(form.querySelectorAll('.lm-shape input:checked'), function (el) {
         return el.value;
       })
       .filter(Boolean);
+  }
+
+  function selectedShapes() {
+    var checked = checkedShapes();
+    if (checked.length) return checked;
+    return pinnedShapes ? pinnedShapes.slice() : [];
   }
 
   /** Grade scale: the grades the shopper ticked, each picked on its own. */
@@ -230,7 +253,7 @@
       escapeAttr(stone.stock_ref || '') +
       '" data-reserve-price="' +
       escapeAttr(money(stone.retail_usd)) +
-      '">Reserve this diamond</button>' +
+      '">Ask about this stone</button>' +
       '</div>') +
       '</div></div>'
     );
@@ -273,7 +296,7 @@
     var handle = String(params.get('ring') || (storedRing && storedRing.handle) || '').toLowerCase();
     if (!HANDLE.test(handle)) return Promise.resolve(null);
     var sameRing = storedRing && storedRing.handle === handle;
-    var urlShapes = (params.get('shape') || '').split(',').filter(function (v) { return SHAPES.indexOf(v) !== -1; });
+    var urlShapes = (params.get('shape') || '').split(',').map(acceptedShape).filter(Boolean);
     var shape = sameRing && storedRing.shape ? storedRing.shape : urlShapes.length === 1 ? urlShapes[0] : '';
     if (!shape) return Promise.resolve(null);
     var wanted = String(params.get('variant') || (sameRing && storedRing.variant) || '');
@@ -404,6 +427,40 @@
     pagerEl.innerHTML = '<nav class="lm-pagination" aria-label="Results pages">' + html + '</nav>';
   }
 
+  function narrowedRange(key) {
+    var wrap = form.querySelector('[data-range-key="' + key + '"]');
+    if (!wrap) return null;
+    var pair = rangePair(key);
+    var floor = Number(wrap.dataset.floor);
+    var ceil = Number(wrap.dataset.ceil);
+    if (pair.min === null || pair.max === null) return null;
+    if (pair.min <= floor && pair.max >= ceil) return null;
+    return pair;
+  }
+
+  function resultSummary(total) {
+    var carat = narrowedRange('carat');
+    var labels = selectedShapes().map(function (value) {
+      return window.LMNYDiamondQuery ? window.LMNYDiamondQuery.shapeLabel(value) : value;
+    });
+    var hasGrades = selectedGrades('color').length || selectedGrades('clarity').length;
+    if (!labels.length && !carat && !hasGrades) {
+      return (total || 0).toLocaleString('en-US') + ' stone' + (total === 1 ? '' : 's');
+    }
+    if (!window.LMNYDiamondQuery) {
+      return (total || 0).toLocaleString('en-US') + ' stone' + (total === 1 ? '' : 's');
+    }
+    return window.LMNYDiamondQuery.diamondResultSummary({
+      total: total,
+      kind: cfg.kind,
+      shapes: labels,
+      minCarat: carat ? carat.min : null,
+      maxCarat: carat ? carat.max : null,
+      colors: selectedGrades('color'),
+      clarities: selectedGrades('clarity'),
+    });
+  }
+
   async function load() {
     if (searchOnly || !cfg.apiBase) return;
     var requestId = ++state.requestId;
@@ -420,12 +477,7 @@
       var data = await res.json();
       if (requestId !== state.requestId) return;
       if (!res.ok) throw new Error(data.error || 'Request failed');
-      if (countEl) {
-        countEl.textContent =
-          (data.total || 0).toLocaleString('en-US') +
-          ' stone' +
-          (data.total === 1 ? '' : 's');
-      }
+      if (countEl) countEl.textContent = resultSummary(data.total || 0);
       if (resultsEl) {
         if (!data.stones || !data.stones.length) {
           resultsEl.innerHTML =
@@ -531,9 +583,21 @@
     }
     // Older links (ring pages) use Shopify's filter.p.m.custom.diamond_shape.
     var shapes = list('shape').concat(list('shapes'), list('filter.p.m.custom.diamond_shape'));
+    var matchedShape = false;
     form.querySelectorAll('.lm-shape input').forEach(function (input) {
-      if (shapes.indexOf(String(input.value).toLowerCase()) !== -1) input.checked = true;
+      var values = String(input.value).toLowerCase().split(',');
+      var on = values.some(function (value) { return shapes.indexOf(value.trim()) !== -1; });
+      if (on) {
+        input.checked = true;
+        matchedShape = true;
+      }
     });
+    if (!matchedShape && shapes.length && window.LMNYDiamondQuery) {
+      pinnedShapes = window.LMNYDiamondQuery.queryShapes(shapes);
+    }
+    // A shape from the link that sits under "More shapes" opens that list.
+    var moreShapes = form.querySelector('.lm-dfilter__more-shapes');
+    if (moreShapes && moreShapes.querySelector('.lm-shape input:checked')) moreShapes.open = true;
     ['color', 'clarity', 'cut'].forEach(function (name) {
       var plural = { color: 'colors', clarity: 'clarities', cut: 'cuts' }[name];
       var wanted = list(name).concat(list(plural));
@@ -560,6 +624,7 @@
       if (!input) return;
       label.classList.toggle('is-active', input.checked);
       input.addEventListener('change', function () {
+        pinnedShapes = null;
         label.classList.toggle('is-active', input.checked);
       });
     });
@@ -641,6 +706,7 @@
       reset.addEventListener('click', function (e) {
         e.preventDefault();
         form.reset();
+        pinnedShapes = null;
         form.querySelectorAll('.lm-shape').forEach(function (l) {
           l.classList.remove('is-active');
         });

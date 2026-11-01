@@ -42,5 +42,11 @@
       text-decoration: none;
     }
     .lm-popular__list a:hover, .lm-popular__list a:focus-visible { border-color: var(--gold, #C9A050); }
+    @media (max-width: 749px) {
+      .lm-popular__list { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 0.4rem; scrollbar-width: none; }
+      .lm-popular__list::-webkit-scrollbar { display: none; }
+      .lm-popular__list li { flex: 0 0 auto; scroll-snap-align: start; }
+      .lm-popular__list a { white-space: nowrap; }
+    }
   </style>
 {%- endif -%}

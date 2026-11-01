@@ -39,7 +39,16 @@ describe('lab-grown landing pages', () => {
   it('renders the guide block only on the lab-grown search and landing pages', () => {
     expect(filter).toContain("collection.handle == 'lab-grown-diamonds' or is_landing");
     expect(filter.match(/render 'collection-longform'/g)).toHaveLength(1);
-    expect(repoFile('sections/main-collection.liquid')).not.toContain('collection-longform');
+    // Jewelry collections show the guide only on an explicit list (Cartier, David Webb).
+    const mainCollection = repoFile('sections/main-collection.liquid');
+    expect(mainCollection.match(/render 'collection-longform'/g)).toHaveLength(1);
+    expect(mainCollection).toContain('{%- if longform_handles contains collection.handle -%}');
+    const listed = mainCollection.match(/assign longform_handles = '([^']+)'/)?.[1].split(',') ?? [];
+    expect(listed).toContain('cartier');
+    expect(listed).toContain('hermes');
+    for (const excluded of ['lab-grown-diamonds', 'natural-diamonds', 'rolex-watches', 'time-pieces']) {
+      expect(listed).not.toContain(excluded);
+    }
   });
 
   it('links to a landing page only when its collection exists', () => {

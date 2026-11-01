@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
   let q = supabase
     .from("stones")
     .select(
-      "stock_ref,kind,shape,carat,color,clarity,cut,lab,cert_number,cert_url,retail_usd,image_urls,video_urls",
+      "stock_ref,kind,shape,carat,color,clarity,cut,lab,cert_number,cert_url,measurements,retail_usd,image_urls,video_urls",
       { count: "exact" },
     )
     .eq("kind", kind)

@@ -1,0 +1,190 @@
+{% doc %}
+  A picture-first guide for the lab-grown diamond search and its landing pages:
+  four icon tiles for what every stone includes, and four small drawings for how
+  to read a listing (cut, color, clarity, carat). It sits above the written
+  guide (snippets/collection-longform.liquid), which keeps all of its text.
+
+  Every caption restates something that guide already says, so the pictures
+  never claim more than the words do:
+  - graded by IGI or GIA, live price, photos with a video on most stones,
+    free insured shipping within the United States
+  - cut: Excellent or Ideal on rounds; color: D to F icy white, G and H white
+    once set; clarity: VS1 and VS2 usually clean to the eye in brilliant
+    shapes; carat is weight, so compare millimetres
+
+  No parameters.
+{% enddoc %}
+
+<section class="lm-vguide" aria-labelledby="LmVguideTitle">
+  <h2 class="lm-vguide__title" id="LmVguideTitle">Every stone, at a glance</h2>
+
+  <ul class="lm-vguide__facts" role="list">
+    <li class="lm-vguide__fact">
+      <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M13 6h22a2 2 0 0 1 2 2v26a2 2 0 0 1-2 2H13a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/>
+        <path d="M17 14h14M17 20h14M17 26h7"/>
+        <circle cx="31" cy="33" r="5.5" fill="var(--lm-vguide-bg, #FBF8F3)"/>
+        <path d="m28.5 37.5-1.5 6 4-2 4 2-1.5-6"/>
+      </svg>
+      <span>IGI or GIA graded</span>
+    </li>
+    <li class="lm-vguide__fact">
+      <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 24.5V9a3 3 0 0 1 3-3h15.5a3 3 0 0 1 2.1.9l16.5 16.5a3 3 0 0 1 0 4.2L28.6 43.1a3 3 0 0 1-4.2 0L6.9 26.6a3 3 0 0 1-.9-2.1Z"/>
+        <circle cx="15" cy="15" r="2.4"/>
+        <path d="M24 29.5c0 1.7 1.5 2.5 3.2 2.5 1.9 0 3.1-.9 3.1-2.3 0-3.3-6-1.8-6-5.1 0-1.4 1.2-2.3 3-2.3s3.1.8 3.1 2.2M27.1 19.6v2M27.2 32v2"/>
+      </svg>
+      <span>Live price on every stone</span>
+    </li>
+    <li class="lm-vguide__fact">
+      <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="9" width="38" height="30" rx="4"/>
+        <path d="m5 32 10-9 8 7 6-5 14 11"/>
+        <circle cx="33" cy="18" r="2.6"/>
+      </svg>
+      <span>Photos, most with video</span>
+    </li>
+    <li class="lm-vguide__fact">
+      <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M24 5 41 13v21L24 43 7 34V13L24 5Z"/>
+        <path d="m7 13 17 8 17-8M24 21v22"/>
+        <path d="m15.5 9 17 8.1"/>
+      </svg>
+      <span>Free insured US shipping</span>
+    </li>
+  </ul>
+
+  <h2 class="lm-vguide__title lm-vguide__title--sub" id="LmVguideCs">Reading a listing</h2>
+
+  <ul class="lm-vguide__cs" role="list" aria-labelledby="LmVguideCs">
+    <li class="lm-vguide__c">
+      <svg class="lm-vguide__art" viewBox="0 0 120 72" role="img" aria-label="Round brilliant seen from above, with its facets" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round">
+        <circle cx="60" cy="36" r="29"/>
+        <circle cx="60" cy="36" r="16" stroke="var(--lm-vguide-gold, #A88340)"/>
+        <path d="M60 7v14M60 51v14M31 36h14M75 36h14M39.5 15.5l10.5 10.5M70 46l10.5 10.5M80.5 15.5 70 26M50 46 39.5 56.5" stroke-width="1"/>
+      </svg>
+      <h3>Cut</h3>
+      <p>Excellent or Ideal on rounds</p>
+    </li>
+    <li class="lm-vguide__c">
+      <svg class="lm-vguide__art" viewBox="0 0 120 72" role="img" aria-label="Color scale from D, colorless, to J, with D to F and G to H marked" fill="none">
+        <defs>
+          <linearGradient id="LmVguideColor" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#FFFFFF"/>
+            <stop offset="1" stop-color="#EAD9AC"/>
+          </linearGradient>
+        </defs>
+        <rect x="6" y="16" width="108" height="20" rx="4" fill="url(#LmVguideColor)" stroke="currentColor" stroke-width="1.1"/>
+        <g font-family="inherit" font-size="8" font-weight="600" fill="currentColor" text-anchor="middle">
+          <text x="14" y="30">D</text><text x="30" y="30">E</text><text x="46" y="30">F</text><text x="62" y="30">G</text><text x="78" y="30">H</text><text x="94" y="30">I</text><text x="108" y="30">J</text>
+        </g>
+        <path d="M8 44h46" stroke="var(--lm-vguide-gold, #A88340)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M56 44h28" stroke="currentColor" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+        <g font-family="inherit" font-size="7" fill="currentColor" text-anchor="middle">
+          <text x="31" y="56">icy white</text><text x="70" y="56">white</text>
+        </g>
+      </svg>
+      <h3>Color</h3>
+      <p>D&ndash;F icy white, G&ndash;H white once set</p>
+    </li>
+    <li class="lm-vguide__c">
+      <svg class="lm-vguide__art" viewBox="0 0 120 72" role="img" aria-label="Clarity scale from flawless to slightly included, with VS1 and VS2 marked" fill="none" stroke="currentColor" stroke-width="1.1">
+        <g>
+          <rect x="6" y="22" width="20" height="16" rx="3"/>
+          <rect x="29" y="22" width="20" height="16" rx="3"/>
+          <rect x="52" y="22" width="20" height="16" rx="3" fill="var(--lm-vguide-gold, #A88340)" stroke="var(--lm-vguide-gold, #A88340)"/>
+          <rect x="75" y="22" width="20" height="16" rx="3"/>
+          <rect x="98" y="22" width="16" height="16" rx="3"/>
+        </g>
+        <g font-family="inherit" font-size="7.5" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">
+          <text x="16" y="33">FL</text><text x="39" y="33">VVS</text><text x="62" y="33" fill="#fff">VS</text><text x="85" y="33">SI</text><text x="106" y="33">I</text>
+        </g>
+        <path d="M52 46h20" stroke="var(--lm-vguide-gold, #A88340)" stroke-width="2" stroke-linecap="round"/>
+        <text x="62" y="58" font-family="inherit" font-size="7" fill="currentColor" stroke="none" text-anchor="middle">VS1&ndash;VS2</text>
+      </svg>
+      <h3>Clarity</h3>
+      <p>VS1&ndash;VS2 usually clean to the eye</p>
+    </li>
+    <li class="lm-vguide__c">
+      <svg class="lm-vguide__art" viewBox="0 0 120 72" role="img" aria-label="A round and an oval drawn to the same weight, the oval spreading longer" fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="34" cy="36" r="22"/>
+        <ellipse cx="86" cy="36" rx="16" ry="30" transform="rotate(90 86 36)" stroke="var(--lm-vguide-gold, #A88340)"/>
+        <g font-family="inherit" font-size="7" fill="currentColor" stroke="none" text-anchor="middle">
+          <text x="34" y="68">same carat</text><text x="86" y="68">looks larger</text>
+        </g>
+      </svg>
+      <h3>Carat</h3>
+      <p>Weight, not size. Compare mm</p>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .lm-vguide {
+    --lm-vguide-gold: #A88340;
+    --lm-vguide-bg: #FBF8F3;
+    margin: 2.75rem 0 0;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-vguide__title {
+    margin: 0 0 1rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+    font-weight: 400;
+    font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-vguide__title--sub { margin-top: 2rem; }
+  .lm-vguide__facts,
+  .lm-vguide__cs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lm-vguide__fact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    padding: 1.1rem 0.75rem;
+    text-align: center;
+    background: #fff;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-vguide__fact svg { color: var(--lm-vguide-gold); flex-shrink: 0; }
+  .lm-vguide__c {
+    padding: 1rem 0.75rem 1.1rem;
+    text-align: center;
+    background: #fff;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: var(--radius-md, 8px);
+  }
+  .lm-vguide__art { display: block; width: 100%; max-width: 150px; height: auto; margin: 0 auto 0.5rem; color: var(--text-dark, #2C1810); }
+  .lm-vguide__c h3 {
+    margin: 0;
+    font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+    font-weight: 500;
+    font-size: 1.25rem;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-vguide__c p {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: var(--text-muted-dark, #6B6152);
+  }
+  @media (min-width: 750px) {
+    .lm-vguide__facts,
+    .lm-vguide__cs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  }
+</style>

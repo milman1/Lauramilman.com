@@ -12,6 +12,8 @@ export const UNAVAILABLE_PRODUCT_HANDLES = [
   'hermes-stainless-steel-kelly-pm-double-tour-gold-tone-blue-watch-rr2954',
   // Hermès Mother of Pearl dial — estate + Back Vault duplicate
   'hermes-stainless-steel-mother-of-pearl-dial-watch-rr2613',
+  // Hermès Galop horse ring (RR8473) — sold offline, merchant confirmed 2026-10-28
+  'hermes-18k-white-gold-4-carat-diamond-galop-horse-ring-rr8473',
 ] as const;
 
 const UNAVAILABLE_SET = new Set<string>(UNAVAILABLE_PRODUCT_HANDLES);

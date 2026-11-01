@@ -1,0 +1,51 @@
+{% doc %}
+  One plain-text line on product pages: "New clients: sign up for 10% off your
+  first jewelry purchase." Shoppers and AI shopping assistants comparing prices
+  can see the welcome offer without signing up first. The code itself stays
+  behind the signup (welcome popup / footer form).
+
+  Jewelry only (merchant, 2026-10-28): shown when the product is in one of the
+  jewelry collections the LMNYWELCOME discount covers (Shopify Admin ->
+  Discounts) and is not a watch or a loose stone. Loose lab-grown and natural
+  diamond pages do not render this snippet, and the two loose-diamond
+  collections are left out of the list. Update ELIGIBLE below if the discount's collections change.
+  Hidden for customers who already signed up (tag welcome10).
+
+  @param {product} product - The product being shown
+
+  @example
+  {% render 'welcome-offer-line', product: product %}
+{% enddoc %}
+
+{%- liquid
+  assign eligible_handles = 'earrings,rings,necklaces,bracelets,pendants-1,wedding-bands,engagement-rings,mens-wedding-bands,vintage-jewelry,estate-jewelry,cartier,chopard,hermes,tiffany,van-cleef-arpels,mens-rings,bvlgari,verdura,seaman-schepps,lab-grown-diamond-jewelry,lab-grown-bracelets,lab-grown-necklaces,lab-grown-pendants,lab-grown-earrings,lab-grown-rings,lab-grown-engagement-rings' | split: ','
+  assign offer_ok = false
+  for c in product.collections
+    if eligible_handles contains c.handle
+      assign offer_ok = true
+      break
+    endif
+  endfor
+-%}
+{%- capture offer_is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- if offer_is_watch contains 'true' -%}{%- assign offer_ok = false -%}{%- endif -%}
+{%- if customer.tags contains 'welcome10' -%}{%- assign offer_ok = false -%}{%- endif -%}
+
+{%- if offer_ok -%}
+  <p class="lm-offer-line">
+    New clients: <a href="#FooterSignup" data-welcome-open>sign up for 10% off</a> your first jewelry purchase.
+  </p>
+  <style>
+    .lm-offer-line {
+      margin: 0.6rem 0 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.82rem;
+      color: var(--text-dark, #2C1810);
+    }
+    .lm-offer-line a {
+      color: inherit;
+      font-weight: 600;
+      text-underline-offset: 0.2em;
+    }
+  </style>
+{%- endif -%}

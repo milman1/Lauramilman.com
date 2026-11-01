@@ -63,8 +63,8 @@
         "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in the Diamond District.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
-        "secondary_text": "Shop Rings",
-        "secondary_url": "/collections/rings",
+        "secondary_text": "Shop complete engagement rings",
+        "secondary_url": "/collections/engagement-rings",
         "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
         "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
@@ -111,18 +111,90 @@
       "settings": {}
     },
     "ring-builder": {
-      "type": "ring-builder-start",
+      "type": "home-ring-gallery",
+      "blocks": {
+        "round": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Round",
+            "image": "shopify://shop_images/lmny-gallery-round-sharp.png"
+          }
+        },
+        "oval": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Oval",
+            "image": "shopify://shop_images/lmny-gallery-oval-sharp.png"
+          }
+        },
+        "emerald": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Emerald",
+            "image": "shopify://shop_images/lmny-gallery-emerald-sharp.png"
+          }
+        },
+        "pear": {
+          "type": "diamond",
+          "settings": {
+            "shape": "Pear",
+            "image": "shopify://shop_images/lmny-gallery-pear-sharp.png"
+          }
+        },
+        "oval_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Oval solitaire",
+            "shape": "Oval",
+            "artwork_x": 71
+          }
+        },
+        "emerald_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Emerald solitaire",
+            "shape": "Emerald",
+            "artwork_x": 339
+          }
+        },
+        "round_solitaire": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Round solitaire",
+            "shape": "Round",
+            "artwork_x": 600
+          }
+        },
+        "three_stone": {
+          "type": "ring_style",
+          "settings": {
+            "title": "Three stone",
+            "shape": "Oval",
+            "artwork_x": 864
+          }
+        }
+      },
+      "block_order": [
+        "round",
+        "oval",
+        "emerald",
+        "pear",
+        "oval_solitaire",
+        "emerald_solitaire",
+        "round_solitaire",
+        "three_stone"
+      ],
       "settings": {
-        "eyebrow": "Ring Builder",
-        "title": "Build your ring",
-        "heading_level": "h2",
-        "card_limit": 4,
-        "more_url": "/pages/ring-builder",
-        "description": "Start with the shape you love. We only show settings and diamonds that fit each other, so every pair you see can be made.",
-        "settings_collection": "ring-settings",
-        "builder_view": "ring-builder",
-        "show_diamond_path": false,
-        "contact_url": "/pages/contact"
+        "title": "Make it yours.",
+        "subtitle": "Start with the stone or the ring.",
+        "rings": [
+          "north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold",
+          "emerald-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
+        ],
+        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png",
+        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png"
       }
     },
     "meet-laura": {
@@ -131,69 +203,9 @@
         "image_asset": "",
         "image_alt": "Laura Milman",
         "title": "Meet Laura Milman",
-        "text": "Discover the story behind the jewelry.",
+        "text": "More than 30 years in New York’s Diamond District. Discover Laura’s journey from a kitchen-table sketchbook to her own jewelry house.",
         "link_text": "Read Laura's Story",
         "link_url": "/pages/about"
-      }
-    },
-    "loose-stones": {
-      "type": "lmh-stones",
-      "blocks": {
-        "size-1": {
-          "type": "size",
-          "settings": {
-            "label": "1 to 2 ct",
-            "query": "?min_carat=1&max_carat=2"
-          }
-        },
-        "size-2": {
-          "type": "size",
-          "settings": {
-            "label": "2 to 3 ct",
-            "query": "?min_carat=2&max_carat=3"
-          }
-        },
-        "size-3": {
-          "type": "size",
-          "settings": {
-            "label": "3 ct and up",
-            "query": "?min_carat=3"
-          }
-        },
-        "size-4": {
-          "type": "size",
-          "settings": {
-            "label": "Under $1,000",
-            "query": "?max_price=1000"
-          }
-        }
-      },
-      "block_order": [
-        "size-1",
-        "size-2",
-        "size-3",
-        "size-4"
-      ],
-      "settings": {
-        "eyebrow": "Loose diamonds",
-        "title": "Start with the stone.",
-        "text": "Choose a shape or a size and see real stones with real prices, each certified by IGI or GIA.",
-        "search_url": "/collections/lab-grown-diamonds",
-        "link_text": "See all lab-grown diamonds",
-        "natural_url": "/collections/natural-diamonds",
-        "colored_url": "/collections/colored-lab-grown-diamonds",
-        "strip_text": "Lab-grown, natural and colored, from 1.5 to 5 carats. Every stone certified by IGI or GIA.",
-        "colored_products": [
-          "lg-color-1012090",
-          "lg-color-1020779",
-          "lg-color-77274",
-          "lg-color-1017095",
-          "lg-color-70388",
-          "lg-color-1019767"
-        ],
-        "colored_collection": "colored-lab-grown-diamonds",
-        "api_base_url": "https://smwdrjpmuvwosepphufj.supabase.co/functions/v1/diamonds",
-        "api_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd2RyanBtdXZ3b3NlcHBodWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0ODYsImV4cCI6MjEwMTIyOTQ4Nn0.WDkghovX7j1rJkzM9gD-oHxSayKKiPltM1-gjld-2bQ"
       }
     },
     "reviews": {
@@ -212,20 +224,21 @@
         "tile-1": {
           "type": "tile",
           "settings": {
-            "title": "For your forever",
-            "link_text": "Build your ring",
-            "url": "/pages/ring-builder",
-            "image_asset": "home-rings-forever.webp",
-            "image_alt": "Round diamond solitaire engagement ring in yellow gold on a travertine pedestal",
-            "position": "92% 50%"
+            "title": "Rings",
+            "link_text": "Shop complete rings",
+            "url": "/collections/rings",
+            "image_asset": "",
+            "image_alt": "Model in an ivory suit wearing stacked rings and delicate bracelets",
+            "position": "50% 50%",
+            "image": "shopify://shop_images/home-rings-supplier-model.jpg"
           }
         },
         "tile-2": {
           "type": "tile",
           "settings": {
-            "title": "For work",
-            "link_text": "Shop rings",
-            "url": "/collections/rings",
+            "title": "Necklaces",
+            "link_text": "Shop necklaces",
+            "url": "/collections/necklaces",
             "image_asset": "home-rings-work.webp",
             "image_alt": "Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet",
             "position": "60% 30%"
@@ -234,7 +247,7 @@
         "tile-3": {
           "type": "tile",
           "settings": {
-            "title": "For play",
+            "title": "Bracelets",
             "link_text": "Shop bracelets",
             "url": "/collections/all-bracelets",
             "image_asset": "home-bracelets.webp",
@@ -249,10 +262,10 @@
         "tile-3"
       ],
       "settings": {
-        "title": "Rings, your way.",
+        "title": "Find your next favorite",
         "style": "warm",
-        "footer_text": "Shop all fine jewelry",
-        "footer_url": "/collections/all"
+        "footer_text": "",
+        "footer_url": ""
       }
     },
     "gold": {
@@ -268,8 +281,8 @@
         "gold-2": {
           "type": "chip",
           "settings": {
-            "text": "Chain Bracelets",
-            "url": "/collections/chain-bracelets"
+            "text": "Bracelets",
+            "url": "/collections/all-bracelets"
           }
         },
         "gold-3": {
@@ -293,204 +306,132 @@
             "url": "/collections/bangles"
           }
         },
-        "gold-6": {
+        "edit-1": {
           "type": "product",
           "settings": {
-            "product": "copy-of-band-gold-ring-sizable",
-            "title": "Nut Style Ring, Sizeable",
-            "subtitle": "14K Yellow Gold · Stackable"
+            "product": "mini-puffy-teardrop-bracelet-in-14k-yellow-gold",
+            "title": "Mini Puffy Teardrop Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-7": {
+        "edit-2": {
           "type": "product",
           "settings": {
-            "product": "lmny-paperclip-2-5-mm-pclip060-bracelet",
-            "title": "2.5mm Paperclip Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
+            "product": "sapphire-half-paper-clip-and-half-tennis-bracelet-in-14k-yellow-gold",
+            "title": "Sapphire Half Paper Clip and Half Tennis Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-8": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-herringbone-2-8-mm-sf030",
-            "title": "2.8mm Herringbone Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-9": {
-          "type": "product",
-          "settings": {
-            "product": "yellow-gold-bowtie-huggie-earrings-1",
-            "title": "Yellow Gold Bowtie Huggie Earrings",
-            "subtitle": "Yellow Gold"
-          }
-        },
-        "gold-10": {
+        "edit-3": {
           "type": "product",
           "settings": {
             "product": "mini-signet-ring-14k-yellow-gold",
             "title": "Mini Signet Ring",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
-        "gold-11": {
+        "edit-4": {
           "type": "product",
           "settings": {
-            "product": "mini-curb-stackable-ring-14k-yellow-gold",
-            "title": "Mini Curb Stackable Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "lmny-paperclip-2-5-mm-pclip060",
+            "title": "2.5mm Paperclip Chain Necklace",
+            "subtitle": ""
           }
         },
-        "gold-12": {
+        "edit-5": {
           "type": "product",
           "settings": {
-            "product": "polished-band-ring-14k-yellow-gold",
-            "title": "Polished Band Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "emerald-cut-london-blue-topaz-curb-bracelet-in-yellow-gold",
+            "title": "London Blue Topaz Curb Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-13": {
+        "edit-6": {
           "type": "product",
           "settings": {
-            "product": "rectangular-signet-ring-in-14k-yellow-gold",
-            "title": "Rectangular Signet Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "pear-pink-morganite-station-bracelet-in-yellow-gold",
+            "title": "Pear Pink Morganite Station Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-14": {
+        "edit-7": {
           "type": "product",
           "settings": {
-            "product": "copy-of-circle-shape-diamond-rose-gold-ring-sizable",
-            "title": "Round Diamond Stackable Ring",
-            "subtitle": "14K Yellow Gold"
+            "product": "pear-mixed-gemstone-station-bracelet-in-yellow-gold",
+            "title": "Pear Mixed Gemstone Station Bracelet",
+            "subtitle": ""
           }
         },
-        "gold-15": {
+        "edit-8": {
           "type": "product",
           "settings": {
-            "product": "bar-set-diamond-stackable-band",
-            "title": "Bar Set Diamond Band",
-            "subtitle": "Stackable"
+            "product": "red-garnet-and-diamond-pendant-necklace-in-yellow-gold",
+            "title": "Red Garnet and Diamond Pendant Necklace",
+            "subtitle": ""
           }
         },
-        "gold-16": {
+        "edit-9": {
           "type": "product",
           "settings": {
-            "product": "channel-set-diamond-stackable-eternity-band",
-            "title": "Channel Set Diamond Band",
-            "subtitle": "Stackable"
+            "product": "emerald-cut-london-blue-topaz-curb-necklace-in-yellow-gold",
+            "title": "London Blue Topaz Curb Necklace",
+            "subtitle": ""
           }
         },
-        "gold-17": {
-          "type": "product",
-          "settings": {
-            "product": "graduated-tubogas-ring-14k-yellow-gold",
-            "title": "Graduated Tubogas Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-18": {
-          "type": "product",
-          "settings": {
-            "product": "thick-tubogas-ring-14k-yellow-gold",
-            "title": "Thick Tubogas Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-19": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-raindrop-ring-14k-yellow-gold",
-            "title": "Diamond Raindrop Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-20": {
-          "type": "product",
-          "settings": {
-            "product": "polished-5mm-bangle-14k-yellow-gold",
-            "title": "Polished 5mm Bangle",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-21": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-snake-2-6-mm-ovsn260-bracelet",
-            "title": "2.6mm Snake Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-22": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-cuban-5-mm-nhmc150-bracelet",
-            "title": "5mm Cuban Chain Bracelet",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-23": {
-          "type": "product",
-          "settings": {
-            "product": "lmny-rope-2-5-mm-hsr018",
-            "title": "2.7mm Rope Chain Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-24": {
-          "type": "product",
-          "settings": {
-            "product": "mini-initial-necklace-in-14k-yellow-gold",
-            "title": "Mini Initial Necklace",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-25": {
-          "type": "product",
-          "settings": {
-            "product": "polished-chevron-band",
-            "title": "Polished Chevron Band",
-            "subtitle": "14K Yellow Gold · Stackable"
-          }
-        },
-        "gold-26": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-chevron-band",
-            "title": "Diamond Chevron Band",
-            "subtitle": "Stackable"
-          }
-        },
-        "gold-27": {
+        "edit-10": {
           "type": "product",
           "settings": {
             "product": "diamond-chevron-polished-band-in-14k-yellow-gold",
             "title": "Diamond Chevron Polished Band",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
           }
         },
-        "gold-28": {
-          "type": "product",
-          "settings": {
-            "product": "diamond-chevron-ring-in-14k-yellow-gold",
-            "title": "Diamond Chevron Ring",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "gold-29": {
-          "type": "product",
-          "settings": {
-            "product": "chevron-wire-ring",
-            "title": "Chevron Wire Ring",
-            "subtitle": "Stackable"
-          }
-        },
-        "gold-30": {
+        "edit-11": {
           "type": "product",
           "settings": {
             "product": "double-chevron-wire-ring-in-14k-yellow-gold",
             "title": "Double Chevron Wire Ring",
-            "subtitle": "14K Yellow Gold"
+            "subtitle": ""
+          }
+        },
+        "edit-12": {
+          "type": "product",
+          "settings": {
+            "product": "graduated-tubogas-ring-14k-yellow-gold",
+            "title": "Graduated Tubogas Ring",
+            "subtitle": ""
+          }
+        },
+        "edit-13": {
+          "type": "product",
+          "settings": {
+            "product": "mini-curb-stackable-ring-14k-yellow-gold",
+            "title": "Mini Curb Stackable Ring",
+            "subtitle": ""
+          }
+        },
+        "edit-14": {
+          "type": "product",
+          "settings": {
+            "product": "bar-cuff-bangle-14k-yellow-gold",
+            "title": "Bar Cuff Bangle",
+            "subtitle": ""
+          }
+        },
+        "edit-15": {
+          "type": "product",
+          "settings": {
+            "product": "mini-initial-necklace-in-14k-yellow-gold",
+            "title": "Mini Initial Necklace",
+            "subtitle": ""
+          }
+        },
+        "edit-16": {
+          "type": "product",
+          "settings": {
+            "product": "polished-band-ring-14k-yellow-gold",
+            "title": "Polished Band Ring",
+            "subtitle": ""
           }
         }
       },
@@ -500,42 +441,33 @@
         "gold-3",
         "gold-4",
         "gold-5",
-        "gold-6",
-        "gold-7",
-        "gold-8",
-        "gold-9",
-        "gold-10",
-        "gold-11",
-        "gold-12",
-        "gold-13",
-        "gold-14",
-        "gold-15",
-        "gold-16",
-        "gold-17",
-        "gold-18",
-        "gold-19",
-        "gold-20",
-        "gold-21",
-        "gold-22",
-        "gold-23",
-        "gold-24",
-        "gold-25",
-        "gold-26",
-        "gold-27",
-        "gold-28",
-        "gold-29",
-        "gold-30"
+        "edit-1",
+        "edit-2",
+        "edit-3",
+        "edit-4",
+        "edit-5",
+        "edit-6",
+        "edit-7",
+        "edit-8",
+        "edit-9",
+        "edit-10",
+        "edit-11",
+        "edit-12",
+        "edit-13",
+        "edit-14",
+        "edit-15",
+        "edit-16"
       ],
       "settings": {
         "style": "cream",
         "columns": "5",
         "ratio": "0.84",
-        "eyebrow": "Gold Jewelry",
-        "title": "The gold you reach for,",
-        "title_emphasis": "rings, chains, and bands.",
-        "text": "Stacking rings, 14K chain necklaces and bracelets, and bands. The same gold from a desk to dinner.",
-        "all_text": "Shop all",
-        "all_url": "/collections/gold-jewelry",
+        "eyebrow": "Everyday Jewelry",
+        "title": "From your desk,",
+        "title_emphasis": "to your dinner plans.",
+        "text": "Gold chains, sculptural rings, and gemstone bracelets and necklaces. Find your everyday favorites.",
+        "all_text": "Shop the full edit",
+        "all_url": "/collections/everyday-jewelry",
         "more_row": true,
         "button_1_text": "",
         "button_1_url": "",
@@ -545,8 +477,8 @@
         "feature_image_alt": "Woman in a black blazer wearing layered gold chain necklaces and gold bracelets",
         "collection": "",
         "collection_limit": 5,
-        "mobile_button_text": "Shop All Gold Jewelry",
-        "mobile_button_url": "/collections/gold-jewelry"
+        "mobile_button_text": "Shop Everyday Jewelry",
+        "mobile_button_url": "/collections/everyday-jewelry"
       }
     },
     "chains-carousel": {
@@ -618,19 +550,12 @@
         "collection_2": "",
         "link_text": "Shop all chains",
         "link_url": "/collections/chains"
-      }
+      },
+      "disabled": true
     },
     "lab-grown": {
       "type": "lmh-product-row",
       "blocks": {
-        "lab-1": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
-            "title": "Lab-Grown Round Diamond Solitaire Pendant",
-            "subtitle": "Prong · Made to order"
-          }
-        },
         "lab-2": {
           "type": "product",
           "settings": {
@@ -639,35 +564,19 @@
             "subtitle": "Prong · Made to order"
           }
         },
+        "lab-1": {
+          "type": "product",
+          "settings": {
+            "product": "lab-grown-round-solitaire-pendant-prong-not-applicable",
+            "title": "Lab-Grown Round Diamond Solitaire Pendant",
+            "subtitle": "Prong · Made to order"
+          }
+        },
         "lab-3": {
           "type": "product",
           "settings": {
             "product": "lab-grown-round-diamond-tennis-bracelet-054-ct-14k-white-gold-bc4494a",
             "title": "Lab-Grown Round Diamond Tennis Bracelet",
-            "subtitle": "14K White Gold"
-          }
-        },
-        "lab-4": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-emerald-diamond-huggie-earrings-041-ct-14k-yellow-gold-er17790",
-            "title": "Lab-Grown Emerald Huggie Earrings",
-            "subtitle": "14K Yellow Gold"
-          }
-        },
-        "lab-5": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-pear-diamond-drop-earrings-056-ct-14k-two-tone-er10454",
-            "title": "Lab-Grown Pear Drop Earrings",
-            "subtitle": "14K Two-Tone Gold"
-          }
-        },
-        "lab-6": {
-          "type": "product",
-          "settings": {
-            "product": "lab-grown-marquise-diamond-stud-earrings-067-ct-14k-white-gold-er18519",
-            "title": "Lab-Grown Marquise Stud Earrings",
             "subtitle": "14K White Gold"
           }
         },
@@ -681,29 +590,26 @@
         }
       },
       "block_order": [
-        "lab-1",
         "lab-2",
-        "lab-4",
-        "lab-5",
-        "lab-6",
+        "lab-1",
         "lab-3",
         "lab-8"
       ],
       "settings": {
         "style": "navy",
         "columns": "4",
-        "scroll_row": true,
+        "scroll_row": false,
         "ratio": "1.04",
-        "eyebrow": "Lab-Grown Diamonds · Under $1,000",
-        "title": "For the push present,",
-        "title_emphasis": "or the promotion you bought yourself.",
-        "text": "Pendants, studs, huggies, eternity bands, and a tennis bracelet set with lab-grown diamonds, each under $1,000.",
+        "eyebrow": "LAB-GROWN JEWELRY",
+        "title": "Your everyday",
+        "title_emphasis": "diamonds.",
+        "text": "Lab-grown diamond jewelry. Styles starting under $1,000.",
         "all_text": "",
         "all_url": "",
-        "button_1_text": "Shop Under $1,000",
-        "button_1_url": "/collections/lab-grown-diamond-jewelry?filter.v.price.lte=1000",
-        "button_2_text": "All Lab-Grown Jewelry",
-        "button_2_url": "/collections/lab-grown-diamond-jewelry",
+        "button_1_text": "Shop lab-grown jewelry",
+        "button_1_url": "/collections/lab-grown-diamond-jewelry",
+        "button_2_text": "",
+        "button_2_url": "",
         "feature_image_asset": "",
         "feature_image_alt": "",
         "collection": "",
@@ -900,6 +806,63 @@
         "button_url": "/pages/private-clients",
         "note": "Complimentary · No obligation"
       }
+    },
+    "estate-edit": {
+      "type": "lmh-product-row",
+      "blocks": {
+        "estate-1": {
+          "type": "product",
+          "settings": {
+            "product": "bv-cartier-love-18k-rose-gold-size-18-bracelet-j10230",
+            "title": "Cartier LOVE Bracelet",
+            "subtitle": "Pre-owned · 18K rose gold"
+          }
+        },
+        "estate-2": {
+          "type": "product",
+          "settings": {
+            "product": "bv-hermes-18k-yellow-gold-chaine-dancre-dome-cocktail-ring-rr9027",
+            "title": "Hermès Chaîne d’ancre Ring",
+            "subtitle": "Pre-owned · 18K yellow gold"
+          }
+        },
+        "estate-3": {
+          "type": "product",
+          "settings": {
+            "product": "bv-van-cleef-arpels-alhambra-18k-rose-gold-five-motif-obsidian-bracelet-j10462",
+            "title": "Van Cleef & Arpels Alhambra Bracelet",
+            "subtitle": "Pre-owned · Obsidian & 18K rose gold"
+          }
+        },
+        "estate-4": {
+          "type": "product",
+          "settings": {
+            "product": "bv-tiffany-co-18k-white-gold-t-collection-bangle-bracelet-j10468",
+            "title": "Tiffany & Co. T Bangle",
+            "subtitle": "Pre-owned · 18K white gold"
+          }
+        }
+      },
+      "block_order": [
+        "estate-1",
+        "estate-2",
+        "estate-3",
+        "estate-4"
+      ],
+      "settings": {
+        "style": "cream",
+        "columns": "4",
+        "more_row": false,
+        "scroll_row": false,
+        "ratio": "1",
+        "eyebrow": "PRE-OWNED & ESTATE",
+        "title": "A past.",
+        "title_emphasis": "A new chapter.",
+        "text": "Discover Cartier, Hermès, Van Cleef & Arpels, and Tiffany & Co.",
+        "button_1_text": "Explore vintage & estate",
+        "button_1_url": "/collections/estate-jewelry",
+        "collection_limit": 4
+      }
     }
   },
   "order": [
@@ -907,13 +870,13 @@
     "trust-strip",
     "ring-builder",
     "meet-laura",
-    "loose-stones",
+    "gold",
     "reviews",
     "rings-your-way",
-    "gold",
     "chains-carousel",
     "lab-grown",
     "pre-owned",
+    "estate-edit",
     "private-clients"
   ]
 }

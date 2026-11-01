@@ -386,6 +386,14 @@ describe('shape normalization', () => {
   it('passes an unknown shape through readably rather than dropping it', () => {
     expect(shapeOf('OLD MINE')).toBe('Old Mine');
   });
+
+  it('keeps one button for a concatenated feed spelling', () => {
+    expect(shapeOf('HALFMOON')).toBe('Half Moon');
+    expect(shapeOf('HALF-MOON')).toBe('Half Moon');
+    expect(shapeOf('EUROPEANCUT')).toBe('European Cut');
+    expect(shapeOf('ASHOKA')).toBe('Ashoka');
+    expect(shapeOf('OLD EUROPEAN')).toBe('Old European');
+  });
 });
 
 describe('grade normalization', () => {

@@ -8,11 +8,17 @@ their existing workflows. Never activate unrelated existing drafts or archives.
 
 ## Workflow
 
-From `lmny-feeds`, run `npm ci`. Use environment credentials:
+The local command is the default path. From `lmny-feeds`, run `npm ci`. Use
+environment credentials:
 `SHOPIFY_STORE_DOMAIN` and either `SHOPIFY_ADMIN_TOKEN` or
 `SHOPIFY_CLIENT_ID` / `SHOPIFY_CLIENT_SECRET`. Do not paste credentials into
 chat, input JSON, git, logs, or public Actions artifacts. Review snapshots
 include supplier cost: keep all inputs and outputs in restricted storage.
+
+When those environment credentials are unavailable but an authenticated
+Shopify connector is available, use the connector path in steps 3 and 4. It is
+an equivalent execution path, not a waiver of any product, evidence, pricing,
+media, preview, authorization, or readback requirement.
 
 1. Prepare the exact source facts and optimized copy under the checklist.
    Do not create unresolved Review rows. For API creation, prepare one
@@ -47,7 +53,8 @@ include supplier cost: keep all inputs and outputs in restricted storage.
    At least three accurate photos need descriptive alt text. Skylab requires
    its matching video; all video belongs first in Shopify media, never the body.
 
-3. Generate a fresh private snapshot and blank review for one exact product:
+3. Generate a fresh private snapshot and blank review for one exact product.
+   With local credentials, run:
 
    ```sh
    npm run jewelry:gate -- plan --id=gid://shopify/Product/123 --out=/private/review.json
@@ -66,7 +73,17 @@ include supplier cost: keep all inputs and outputs in restricted storage.
    selling that inventory configuration. Record the merchant's actual exact
    scope instruction in `merchantAuthorization`; a passed check is not consent.
 
-4. Check without writes, then activate only the authorized product:
+   With the authenticated Shopify connector, query the same fields for the
+   exact product and fully paginate variants, media, metafields and publication
+   records. Save or retain a private task record containing the product ID,
+   `updatedAt`, the complete structural audit, source evidence, reviewer,
+   merchant authorization and concrete evidence for every review check listed
+   by the gate. Costs and source evidence stay private. A partial connection,
+   omitted page, unresolved Review item or fabricated attestation blocks the
+   product. Re-read any field whose value changed while the review was open.
+
+4. Check without writes, then activate only the authorized product. With local
+   credentials, run:
 
    ```sh
    npm run jewelry:gate -- check --review=/private/review.json
@@ -81,6 +98,23 @@ include supplier cost: keep all inputs and outputs in restricted storage.
    A failure leaves the product unactivated unless the mutation was already
    sent; mutation/readback errors explicitly require inspecting current state
    before any retry. The only activation write is that product's status.
+
+   With the authenticated Shopify connector:
+
+   1. Validate the exact Admin GraphQL read and mutation before running them.
+   2. Freshly re-read the exact product, including every paginated collection,
+      and compare its ID, `updatedAt`, status and reviewed fields with the task
+      record. Stop on a change, partial read or failed mandatory check.
+   3. Call `productUpdate` for that exact product ID with only
+      `status: ACTIVE`. Do not combine copy, price, inventory, media, channel or
+      marketplace changes with activation.
+   4. Use a fresh query, separate from the mutation response, to confirm the
+      exact product is ACTIVE and its reviewed fields remain unchanged. Inspect
+      current state before retrying any mutation or readback error.
+
+   The connector may process an authorized batch, but every product must have
+   its own complete review and pre-write comparison. Check the first five
+   products end to end before continuing, then report after 20 verified items.
 
 5. Independently verified ACTIVE is not the same as newly published. The gate
    does not change channel assignments, marketplace flags, stock, price, or
@@ -97,13 +131,15 @@ invalid copy, missing required data/media, wrong formula prices, incomplete
 reads, absent review evidence, expired or changed snapshots, and anything
 other than DRAFT. Factual interpretation and presentation checks need actual
 review; text evidence is an attestation, not a cryptographic human signature.
+The connector path relies on the same documented checks and validated
+operations, so its task record and independent readback are mandatory.
 
-This is an executable shared workflow, **not a Shopify-wide interception
-service**. Other chat apps, direct Admin edits, CSV import without preflight,
-and apps with their own write credentials can bypass it. A model must receive
-this repository's instructions and use these commands. An independent chat
-does not automatically receive them. Never claim that installing the Shopify
-plugin makes it follow this gate.
+This is a shared workflow, **not a Shopify-wide interception service**. Direct
+Admin edits, CSV import without preflight, and apps with their own write
+credentials can bypass it. A model must receive this repository's instructions
+and use either the gate command or the documented connector path. An
+independent chat does not automatically receive them. Never claim that merely
+installing the Shopify connector makes it follow this gate.
 
 For non-bypassable cross-app enforcement, route product writes through a
 controlled service running this validator and remove direct product-write
