@@ -492,3 +492,13 @@ consecutive blocks when a heading separates them.
 - Store content: each article's visible FAQ was copied word for word into `custom.guide_faq` (JSON, 113 questions). No article text changed.
 - Theme: `sections/main-article.liquid` emits FAQPage JSON-LD from that field, and marks up a question only while its text still appears in the article body, so editing or removing a visible FAQ drops it from the markup. New articles need the field set to get the markup.
 - Not done: a named person as author (the store has not named one; articles stay under the Organization), the hollow-chain sentence in the gold chain guide (needs a jeweler's check), and box chain in that guide.
+
+## 2026-11-01 AI search: four buying guides (drafts) and tracking baseline
+
+Created four UNPUBLISHED Journal drafts aimed at questions people ask AI models about
+large lab-grown diamonds (6 and 7 carat, D color, VVS2, Ideal cut, where to save).
+Publish together; they link to each other. All four pass `checkDraft`. No prices; the
+approved "60-85% less" line only. Size figures come from our own IGI-graded round
+stones. Baseline, the question panel, the monthly routine and a technical finding
+(the large diamond collections ship no stones in the HTML) are in
+`docs/seo/ai-search-tracking.md`.
