@@ -178,6 +178,33 @@ async function choosePair(p) {
  assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'');assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
  await p.locator('[data-band-option="0"]').selectOption('10');await p.locator('[data-band-option="1"]').selectOption('18K');
 }
+// The optional upsell precedes personalization and stays reversible on both layouts.
+for (const width of [1440, 390]) {
+ const p=await newPage();await p.setViewportSize({width,height:900});await choose(p);
+ assert.equal(await p.locator('.band-slots button').first().innerText(),'For this ring\nChoose a band (optional)');
+ assert.ok(await p.evaluate(()=>document.querySelector('.band-upsell').getBoundingClientRect().top < document.querySelector('[data-field="size"]').getBoundingClientRect().top));
+ await shot(p,'wedding-bands-'+width);
+ await p.locator('[data-action="finish-bands"]').first().click();
+ assert.equal(await p.locator('[data-band-product]').count(),0);
+ assert.equal(await p.locator('[data-field="size"]').evaluate(el=>el===document.activeElement),true);
+ assert.equal(await p.locator('[data-band-summary]').count(),0);
+ await click(p,'reopen-bands');await click(p,'edit-band-1');
+ assert.equal(await p.locator('[data-action="band-category-mens"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await p.locator('.band-card').count(),1);
+ await p.locator('[data-action="choose-band"]').click();await p.locator('[data-band-option="0"]').waitFor();
+ await click(p,'finish-bands');assert.equal(await p.locator('[data-band-option="0"]').isVisible(),true);
+ assert.match(await p.getByRole('alert').innerText(),/Choose an available size/);
+ await p.locator('[data-band-option="0"]').selectOption('10');await p.locator('[data-band-option="1"]').selectOption('18K');
+ await click(p,'finish-bands');assert.equal(await p.locator('[data-band-product]').count(),0);
+ assert.equal(await p.locator('[data-band-summary="1"]').count(),1);
+ await p.locator('[data-field="size"]').selectOption('6.5');
+ await shot(p,'wedding-bands-continued-'+width);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await click(p,'edit-band-1');assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'10');
+ await click(p,'remove-band');await p.locator('[data-action="finish-bands"]').first().click();
+ assert.equal(await p.locator('[data-band-summary]').count(),0);await click(p,'restart');await click(p,'start-setting');await click(p,'details-0');await click(p,'select');await click(p,'details-0');await click(p,'select');await p.locator('[data-band-product]').waitFor();await p.close();
+}
+console.log('PASS desktop/mobile optional upsell placement, skip, partner defaults, required band options, continue, retained selection, reopen and removal.');
 for(const failure of ['normal','partial','lost_response']) {
  const p=await newPage();await choosePair(p);
  assert.equal(await p.locator('[data-band-summary]').count(),2);
