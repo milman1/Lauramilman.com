@@ -56,7 +56,7 @@
 {%- capture builder_url -%}{{ routes.root_url }}pages/ring-builder?diamond={{ product.handle | url_encode }}{%- endcapture -%}
 {{ 'diamond-purchase-choice.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'diamond-purchase-choice.js' | asset_url }}" defer></script>
-<section class="dpdp{% if is_lab %} dpdp--navy{% endif %}" data-diamond-purchase>
+<section class="dpdp{% if is_lab %} dpdp--navy{% endif %}" data-diamond-purchase data-diamond-handle="{{ product.handle | escape }}" data-diamond-origin="{% if is_lab %}lab{% else %}natural{% endif %}">
   <div class="dpdp__container">
 
     <nav class="dpdp__crumbs" aria-label="Breadcrumb">

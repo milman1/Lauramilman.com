@@ -6,7 +6,9 @@
   const eventNames = [
     'lmny_builder_opened', 'lmny_product_viewed', 'lmny_setting_selected',
     'lmny_diamond_selected', 'lmny_build_saved', 'lmny_build_shared',
-    'lmny_band_selected', 'lmny_build_added_to_cart'
+    'lmny_band_selected', 'lmny_build_added_to_cart',
+    'lmny_diamond_purchase_viewed', 'lmny_purchase_mode_selected',
+    'lmny_ring_builder_started', 'lmny_diamond_added_to_cart'
   ];
   let privacy = init.customerPrivacy;
   let started = false;
@@ -43,7 +45,9 @@
     document.head.appendChild(script);
   }
   const values = {
-    screen: ['start', 'catalog', 'detail', 'review'],
+    screen: ['start', 'catalog', 'detail', 'review', 'diamond_product'],
+    purchase_mode: ['build_ring', 'diamond_only'],
+    entry_point: ['main_cta', 'sticky_cta', 'setting_card', 'all_settings', 'add_to_cart', 'buy_now'],
     origin: ['lab', 'natural'],
     device_type: ['mobile', 'desktop'],
     product_kind: ['setting', 'diamond', 'band']
@@ -51,7 +55,14 @@
   eventNames.forEach(name => analytics.subscribe(name, event => {
     if (privacy?.analyticsProcessingAllowed !== true || (event.id && seen.has(event.id))) return;
     const data = event.customData || {};
+    const productEvent = ['lmny_diamond_purchase_viewed', 'lmny_purchase_mode_selected', 'lmny_ring_builder_started', 'lmny_diamond_added_to_cart'].includes(name);
+    if (productEvent && data.screen !== 'diamond_product') return;
     const params = { send_to: measurementId, page_location: pageLocation, page_referrer: '' };
+    if (data.screen === 'diamond_product') {
+      if (!/^(lg|nd)-[a-z0-9-]{1,96}$/.test(data.product_handle || '')) return;
+      params.page_location = 'https://www.lauramilman.com/products/' + data.product_handle;
+      params.page_title = 'Diamond details';
+    }
     // Allowlisted values only: never forward the event context, URL, customer,
     // engraving, requested date, email, or complete build payload.
     Object.entries(values).forEach(([key, allowed]) => {

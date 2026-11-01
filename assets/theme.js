@@ -130,6 +130,7 @@ function formLineProperties(form) {
 
     addVariantToCart(variantId, quantity, formLineProperties(form))
       .then(function () {
+        form.dispatchEvent(new CustomEvent('lm:product-added-to-cart', { detail: { checkout: goCheckout } }));
         if (goCheckout) {
           window.location.href = '/checkout';
           return;
