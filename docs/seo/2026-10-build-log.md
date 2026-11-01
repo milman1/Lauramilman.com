@@ -445,11 +445,11 @@ Notes for next time:
 The workflow was not run from this environment; the first live run is Monday.
 A dry run from the Actions tab (dry_run=true) shows the photos in the report.
 
-## 2026-11-01 Five vintage jewelry Journal articles (drafts, not published)
+## 2026-11-01 Five vintage jewelry Journal articles (published)
 
-Created as UNPUBLISHED articles on blog `journal` (no `journal-draft` tag, so the
-stale-draft report will not ask for them to be deleted). They link to each other,
-so publish them together; until then the cross-links return a 404.
+Created on blog `journal` without the `journal-draft` tag, then published together
+the same day at the merchant's request (they link to each other). Live pages
+checked: all five return HTTP 200 with their photos.
 
 1. vintage-antique-estate-retro-jewelry-what-the-terms-mean
 2. jewelry-eras-explained-victorian-art-deco-retro-mid-century
