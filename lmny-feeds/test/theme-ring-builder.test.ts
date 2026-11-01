@@ -107,7 +107,7 @@ describe('one ring builder', () => {
     const header = themeFile('sections/header.liquid');
     expect(header).toContain('href="/pages/ring-builder?start=setting"');
     expect(header).toContain('href="/pages/ring-builder?start=diamond"');
-    expect(themeFile('snippets/diamond-setting-picker.liquid')).toContain('{% if is_setting %}/pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');
+    expect(themeFile('snippets/diamond-setting-picker.liquid')).toContain('{{ routes.root_url }}pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');
     expect(themeFile('snippets/ring-diamond-pairing.liquid')).toContain('href="/pages/ring-builder?setting={{ product.handle | url_encode }}"');
   });
 
