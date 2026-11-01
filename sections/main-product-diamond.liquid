@@ -41,16 +41,31 @@
   endif
 -%}
 
-<section class="dpdp{% if is_lab %} dpdp--navy{% endif %}">
+{%- capture builder_shape -%}{% render 'center-stone-shape', product: product %}{%- endcapture -%}
+{%- assign builder_shape = builder_shape | strip -%}
+{%- assign can_build = false -%}
+{%- if v.available and builder_shape != blank -%}
+  {%- for setting in collections['ring-settings'].products limit: 50 -%}
+    {%- if setting.available and setting.tags contains 'ring-setting' -%}
+      {%- capture setting_shape -%}{% render 'center-stone-shape', product: setting %}{%- endcapture -%}
+      {%- assign setting_shape = setting_shape | strip -%}
+      {%- if setting_shape == builder_shape -%}{%- assign can_build = true -%}{%- break -%}{%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+{%- capture builder_url -%}{{ routes.root_url }}pages/ring-builder?diamond={{ product.handle | url_encode }}{%- endcapture -%}
+{{ 'diamond-purchase-choice.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'diamond-purchase-choice.js' | asset_url }}" defer></script>
+<section class="dpdp{% if is_lab %} dpdp--navy{% endif %}" data-diamond-purchase>
   <div class="dpdp__container">
 
     <nav class="dpdp__crumbs" aria-label="Breadcrumb">
       <a href="{{ routes.root_url }}">Home</a>
       <span aria-hidden="true">/</span>
       {%- if is_lab -%}
-        <a href="/collections/lab-grown-diamonds">Lab-Grown Diamonds</a>
+        <a href="{{ routes.collections_url }}/lab-grown-diamonds">Lab-Grown Diamonds</a>
       {%- else -%}
-        <a href="/collections/natural-diamonds">Natural Diamonds</a>
+        <a href="{{ routes.collections_url }}/natural-diamonds">Natural Diamonds</a>
       {%- endif -%}
       <span aria-hidden="true">/</span>
       <span aria-current="page">{{ product.title }}</span>
@@ -123,6 +138,8 @@
           {%- endif -%}
         </div>
 
+        <p class="dpdp__price-note">{{ 'diamond_purchase.diamond_price' | t }}</p>
+
         <!-- Headline stats -->
         <div class="dpdp__stats">
           {%- if carat -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ carat }}</span><span class="dpdp__stat-label">Carat</span></div>{%- endif -%}
@@ -131,13 +148,32 @@
           {%- if c.cut -%}<div class="dpdp__stat"><span class="dpdp__stat-value">{{ c.cut }}</span><span class="dpdp__stat-label">Cut</span></div>{%- endif -%}
         </div>
 
-        <!-- Buy -->
+        <a class="dpdp__details-link" href="#DiamondSpecs-{{ section.id }}">{{ 'diamond_purchase.view_details' | t }} →</a>
+
+        <div class="dpdp__purchase" data-diamond-actions>
+          {%- if can_build -%}
+            <fieldset class="dpdp__purchase-choice" data-diamond-choice hidden>
+              <legend>{{ 'diamond_purchase.how_to_buy' | t }}</legend>
+              <div class="dpdp__purchase-options">
+                <label><input type="radio" name="diamond-purchase-{{ section.id }}" value="ring" aria-controls="DiamondBuild-{{ section.id }}" checked><span>{{ 'diamond_purchase.build_ring' | t }}</span></label>
+                <label><input type="radio" name="diamond-purchase-{{ section.id }}" value="diamond" aria-controls="DiamondBuy-{{ section.id }}"><span>{{ 'diamond_purchase.diamond_only' | t }}</span></label>
+              </div>
+            </fieldset>
+            <div id="DiamondBuild-{{ section.id }}" data-diamond-build>
+              <h2 class="dpdp__fallback-title">{{ 'diamond_purchase.build_ring' | t }}</h2>
+              <p class="dpdp__purchase-note">{{ 'diamond_purchase.pair_note' | t }}</p>
+              <a class="dpdp__atc dpdp__build" href="{{ builder_url }}">{{ 'diamond_purchase.choose_setting' | t }} →</a>
+              <p class="dpdp__purchase-note">{{ 'diamond_purchase.carried_forward' | t }}</p>
+            </div>
+          {%- endif -%}
+          <div id="DiamondBuy-{{ section.id }}" data-diamond-buy>
+            <h2 class="dpdp__fallback-title">{{ 'diamond_purchase.diamond_only' | t }}</h2>
         {%- form 'product', product, id: form_id, data-product-form: '' -%}
           <input type="hidden" name="id" value="{{ v.id }}">
           <input type="hidden" name="quantity" value="1">
           <div class="dpdp__buy-row">
             <button type="submit" class="dpdp__atc atc-btn" {% unless v.available %}disabled{% endunless %}>
-              {%- if v.available -%}Add to Cart{%- else -%}Sold{%- endif -%}
+              {%- if v.available -%}{{ 'diamond_purchase.add_diamond' | t }}{%- else -%}Sold{%- endif -%}
             </button>
             {%- if v.available -%}
               <button type="submit" class="dpdp__atc dpdp__atc--checkout atc-btn" data-buy-now>
@@ -147,8 +183,17 @@
           </div>
         {%- endform -%}
 
-        {% render 'diamond-setting-picker', product: product %}
+          </div>
+        </div>
+      </div>
 
+      {%- if can_build -%}
+        <div class="dpdp__settings" data-diamond-settings>
+          {% render 'diamond-setting-picker', product: product %}
+        </div>
+      {%- endif -%}
+
+      <div class="dpdp__support">
         {% render 'product-inquiry', product: product %}
 
         {%- if m.cert_url -%}
@@ -182,7 +227,8 @@
           <a href="/pages/shipping-returns">Shipping, returns &amp; warranty</a>
         </p>
 
-        <!-- Full spec table -->
+      </div>
+      <div class="dpdp__specifications" id="DiamondSpecs-{{ section.id }}" tabindex="-1">
         <h2 class="dpdp__specs-title">Specification</h2>
         <dl class="dpdp__specs">
           {%- assign origin = 'Natural diamond' -%}
@@ -224,6 +270,13 @@
       </div>
     </div>
   </div>
+  {%- if v.available -%}
+    <div class="dpdp__dock" data-diamond-dock hidden>
+      <div><span>{{ 'diamond_purchase.diamond_only' | t }}</span><strong>{{ v.price | money_without_trailing_zeros }}</strong></div>
+      {%- if can_build -%}<a class="dpdp__atc dpdp__build" data-diamond-dock-build href="{{ builder_url }}">{{ 'diamond_purchase.choose_setting' | t }} →</a>{%- endif -%}
+      <button type="button" class="dpdp__atc" data-diamond-dock-buy>{{ 'diamond_purchase.add_diamond' | t }}</button>
+    </div>
+  {%- endif -%}
 </section>
 
 {% render 'structured-data-product',

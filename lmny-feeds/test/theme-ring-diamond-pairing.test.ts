@@ -23,17 +23,16 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(shape).not.toContain('product.title');
   });
 
-  it('shows matching settings in the diamond buy column, right under Add to Cart', () => {
+  it('keeps matching settings before inquiry and carries both products into the builder', () => {
     expect(diamondTemplate.order).toEqual(['main', 'recommendations']);
     const afterBuy = diamondSection.slice(diamondSection.indexOf('{%- endform -%}'));
     expect(afterBuy.indexOf("{% render 'diamond-setting-picker', product: product %}")).toBeGreaterThan(0);
     expect(afterBuy.indexOf("{% render 'diamond-setting-picker'")).toBeLessThan(afterBuy.indexOf("{% render 'product-inquiry'"));
     expect(diamondSide).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(diamondSide).toContain('{%- if ring_shape == stone_shape -%}');
-    expect(diamondSide).toContain('{{ ring.url }}?diamond={{ product.handle | url_encode }}');
-    // Settings show their price and the total with this diamond; finished rings are quoted.
-    expect(diamondSide).toContain('With this diamond {{ ring.price | plus: stone_price | money_without_trailing_zeros }}');
-    expect(diamondSide).toContain('Quoted with this diamond');
+    expect(diamondSide).toContain('pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');
+    expect(diamondSide).toContain("assign total_money = setting_price | plus: stone_price | money_without_trailing_zeros");
+    expect(diamondSide).toContain("'diamond_purchase.total_from' | t: price: total_money");
   });
 
   it('links a ring to loose diamonds of its shape through the native filter', () => {
@@ -79,10 +78,10 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(ringSide).toContain('Measurements are checked against the head before the ring is made.');
   });
 
-  it('lists settings before finished rings on diamond pages', () => {
+  it('offers available setting-only products with current prices', () => {
     expect(diamondSide).toContain("assign setting_collection = collections['ring-settings']");
-    expect(diamondSide).toContain('{%- if pass == 1 -%}{%- assign source = setting_collection -%}');
-    expect(diamondSide).toContain('We set this diamond in your setting by hand, labor included');
+    expect(diamondSide).toContain("ring.available and ring.tags contains 'ring-setting'");
+    expect(diamondSide).toContain("ring.variants | where: 'available', true | map: 'price' | uniq | sort");
   });
 
   it('names both pieces in the concierge chat', () => {

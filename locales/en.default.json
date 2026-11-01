@@ -735,6 +735,26 @@
     "next": "Next",
     "page": "Page"
   },
+  "diamond_purchase": {
+    "diamond_price": "Price for the diamond only",
+    "view_details": "View diamond details",
+    "how_to_buy": "How would you like to buy it?",
+    "build_ring": "Build a ring",
+    "diamond_only": "Diamond only",
+    "pair_note": "Pair this diamond with a setting.",
+    "choose_setting": "Choose a setting",
+    "carried_forward": "Your diamond stays selected. Add optional wedding bands after choosing your setting.",
+    "add_diamond": "Add diamond to cart",
+    "setting_from": "Setting from {{ price }}",
+    "setting_price": "Setting {{ price }}",
+    "total_from": "With this diamond from {{ price }}",
+    "total_price": "With this diamond {{ price }}",
+    "view_setting": "View setting",
+    "make_ring": "Make it a ring",
+    "find_setting": "Find its perfect setting",
+    "setting_note": "Setting labor is included. We confirm the fit before your ring is made. Subtotals are before any applicable checkout discounts.",
+    "all_settings": "Explore all matching settings"
+  },
   "ring_flow": {
     "order_subtotal": "Subtotal before discounts",
     "add_with_band": "Add ring and band to bag",
