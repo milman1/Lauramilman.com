@@ -651,6 +651,21 @@ describe('insertProductPhotos', () => {
     expect((out.match(/a\.png/g) ?? []).length).toBe(1);
   });
 
+  it('skips the featured product, whose photo is already the article image', () => {
+    const body = '<p><a href="/products/a">a</a></p><p>.</p><p><a href="/products/b">b</a></p>';
+    const out = insertProductPhotos(body, products, 3, 'A');
+    expect(out).not.toContain('a.png');
+    expect(out).toContain('b.png');
+  });
+
+  it('allows photos in consecutive blocks when a heading separates them', () => {
+    const out = insertProductPhotos(
+      '<p><a href="/products/a">a</a></p><h2>Next</h2><p><a href="/products/b">b</a></p>',
+      products,
+    );
+    expect((out.match(/<img /g) ?? []).length).toBe(2);
+  });
+
   it('never places two photos back to back', () => {
     const out = insertProductPhotos('<p><a href="/products/a">a</a></p><p><a href="/products/b">b</a></p>', products);
     expect((out.match(/<img /g) ?? []).length).toBe(1);
@@ -663,7 +678,7 @@ describe('insertProductPhotos', () => {
   });
 
   it('is wired into the article body but leaves the checked draft untouched', () => {
-    const d = draft();
+    const d = draft({ featuredProductHandle: 'lmny-emerald-ring', bodyHtml: longBody() });
     const map = new Map<string, ProductRow>([
       ['bv-cartier-tank-1962', row('bv-cartier-tank-1962', 'https://cdn.shopify.com/s/files/tank.png?v=1', 'Cartier Tank')],
     ]);

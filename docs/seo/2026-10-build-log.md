@@ -444,3 +444,26 @@ Notes for next time:
 
 The workflow was not run from this environment; the first live run is Monday.
 A dry run from the Actions tab (dry_run=true) shows the photos in the report.
+
+## 2026-11-01 Five vintage jewelry Journal articles (drafts, not published)
+
+Created as UNPUBLISHED articles on blog `journal` (no `journal-draft` tag, so the
+stale-draft report will not ask for them to be deleted). They link to each other,
+so publish them together; until then the cross-links return a 404.
+
+1. vintage-antique-estate-retro-jewelry-what-the-terms-mean
+2. jewelry-eras-explained-victorian-art-deco-retro-mid-century
+3. vintage-jewelry-hallmarks-and-makers-marks-how-to-read-them
+4. vintage-engagement-rings-old-cut-diamonds-settings-what-to-check
+5. your-first-vintage-jewelry-piece-how-to-choose-wear-and-care-for-it
+
+All five pass `checkDraft` (900-1400 words, 3 FAQs, SEO lengths, no prices, no
+supplier names, only ACTIVE published product and collection handles). Facts
+checked against GIA (old mine and old European cuts, eras), CBP/FTC guidance
+(karat marks and trademarks) and Tiffany (Schlumberger, 1956). Photos are
+catalogue photos of the pieces each article links; article 4 has only its
+featured image.
+
+Job change in the same pass: `insertProductPhotos` now skips the featured
+product (its photo is already the article image) and allows photos in
+consecutive blocks when a heading separates them.

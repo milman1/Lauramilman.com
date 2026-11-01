@@ -718,25 +718,30 @@ export function insertProductPhotos(
   bodyHtml: string,
   productsById: Map<string, ProductRow>,
   max: number = MAX_BODY_PHOTOS,
+  excludeHandle: string | null = null,
 ): string {
+  const skip = (excludeHandle ?? '').trim().toLowerCase();
   const blockRe = /<(p|ul|ol)\b[^>]*>[\s\S]*?<\/\1>/gi;
-  const blocks: Array<{ end: number; handles: string[] }> = [];
+  const blocks: Array<{ start: number; end: number; handles: string[] }> = [];
   let m: RegExpExecArray | null;
   while ((m = blockRe.exec(bodyHtml)) !== null) {
     const handles = extractStoreLinks(m[0])
       .filter((l) => l.kind === 'product')
       .map((l) => l.handle);
-    blocks.push({ end: m.index + m[0].length, handles });
+    blocks.push({ start: m.index, end: m.index + m[0].length, handles });
   }
 
   const used = new Set<string>();
   const inserts: Array<{ at: number; html: string }> = [];
   let lastIndex = -2;
+  let lastEnd = 0;
   blocks.forEach((block, index) => {
-    if (inserts.length >= max || index === lastIndex + 1) return;
+    if (inserts.length >= max) return;
+    // Two photos may not sit back to back, but a heading between them is a break.
+    if (index === lastIndex + 1 && !/<h[23]\b/i.test(bodyHtml.slice(lastEnd, block.start))) return;
     for (const handle of block.handles) {
       const product = productsById.get(handle);
-      if (used.has(handle) || !product?.imageUrl) continue;
+      if (used.has(handle) || handle === skip || !product?.imageUrl) continue;
       if (!/^https:\/\/cdn\.shopify\.com\//.test(product.imageUrl)) continue;
       const scrubbed = scrubText(product.imageAlt ?? '');
       const alt = scrubbed.length > 0 && scrubbed === (product.imageAlt ?? '').trim() ? scrubbed : scrubText(product.title);
@@ -744,6 +749,7 @@ export function insertProductPhotos(
       const src = `${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}width=900`.replace(/&/g, '&amp;');
       used.add(handle);
       lastIndex = index;
+      lastEnd = block.end;
       inserts.push({
         at: block.end,
         html: `\n<p><a href="/products/${handle}"><img src="${src}" alt="${escapeHtml(alt).replace(/"/g, '&quot;')}" width="900" loading="lazy"></a></p>`,
@@ -765,7 +771,7 @@ export function buildArticleCreateInput(
   productsById: Map<string, ProductRow> | null = null,
 ): Record<string, unknown> {
   const tags = canonicalizeTags([...draft.tags, JOURNAL_DRAFT_TAG]);
-  const withPhotos = productsById ? { ...draft, bodyHtml: insertProductPhotos(draft.bodyHtml, productsById) } : draft;
+  const withPhotos = productsById ? { ...draft, bodyHtml: insertProductPhotos(draft.bodyHtml, productsById, MAX_BODY_PHOTOS, draft.featuredProductHandle) } : draft;
   const input: Record<string, unknown> = {
     blogId,
     title: draft.title,
@@ -836,7 +842,14 @@ export function renderDraftMarkdown(
     '',
     '## Body',
     '',
-    renderBodyHtml(productsById ? { ...draft, bodyHtml: insertProductPhotos(draft.bodyHtml, productsById) } : draft),
+    renderBodyHtml(
+      productsById
+        ? {
+            ...draft,
+            bodyHtml: insertProductPhotos(draft.bodyHtml, productsById, MAX_BODY_PHOTOS, draft.featuredProductHandle),
+          }
+        : draft,
+    ),
     '',
   ];
   return lines.join('\n');
