@@ -3,13 +3,6 @@
 // This file is NOT a theme asset. Install once in the pixel sandbox.
 (() => {
   const measurementId = 'G-CTWW9B42MX'; // Verified Google app destination, 2026-10-30.
-  const eventNames = [
-    'lmny_builder_opened', 'lmny_product_viewed', 'lmny_setting_selected',
-    'lmny_diamond_selected', 'lmny_build_saved', 'lmny_build_shared',
-    'lmny_band_selected', 'lmny_build_added_to_cart',
-    'lmny_diamond_purchase_viewed', 'lmny_purchase_mode_selected',
-    'lmny_ring_builder_started', 'lmny_diamond_added_to_cart'
-  ];
   let privacy = init.customerPrivacy;
   let started = false;
   const seen = new Set();
@@ -52,7 +45,7 @@
     device_type: ['mobile', 'desktop'],
     product_kind: ['setting', 'diamond', 'band']
   };
-  eventNames.forEach(name => analytics.subscribe(name, event => {
+  function forward(name, event) {
     if (privacy?.analyticsProcessingAllowed !== true || (event.id && seen.has(event.id))) return;
     const data = event.customData || {};
     const productEvent = ['lmny_diamond_purchase_viewed', 'lmny_purchase_mode_selected', 'lmny_ring_builder_started', 'lmny_diamond_added_to_cart'].includes(name);
@@ -75,5 +68,18 @@
       seen.add(event.id);
       if (seen.size > 200) seen.delete(seen.values().next().value);
     }
-  }));
+  }
+  // Literal subscriptions let Shopify discover the events when saving the pixel.
+  analytics.subscribe('lmny_builder_opened', event => forward('lmny_builder_opened', event));
+  analytics.subscribe('lmny_product_viewed', event => forward('lmny_product_viewed', event));
+  analytics.subscribe('lmny_setting_selected', event => forward('lmny_setting_selected', event));
+  analytics.subscribe('lmny_diamond_selected', event => forward('lmny_diamond_selected', event));
+  analytics.subscribe('lmny_build_saved', event => forward('lmny_build_saved', event));
+  analytics.subscribe('lmny_build_shared', event => forward('lmny_build_shared', event));
+  analytics.subscribe('lmny_band_selected', event => forward('lmny_band_selected', event));
+  analytics.subscribe('lmny_build_added_to_cart', event => forward('lmny_build_added_to_cart', event));
+  analytics.subscribe('lmny_diamond_purchase_viewed', event => forward('lmny_diamond_purchase_viewed', event));
+  analytics.subscribe('lmny_purchase_mode_selected', event => forward('lmny_purchase_mode_selected', event));
+  analytics.subscribe('lmny_ring_builder_started', event => forward('lmny_ring_builder_started', event));
+  analytics.subscribe('lmny_diamond_added_to_cart', event => forward('lmny_diamond_added_to_cart', event));
 })();
