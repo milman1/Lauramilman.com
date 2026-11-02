@@ -793,6 +793,14 @@ export function buildArticleCreateInput(
         type: 'single_line_text_field',
         value: draft.seoDescription,
       },
+      // The theme builds FAQPage markup from this field, and only for a
+      // question whose text still appears in the body (sections/main-article.liquid).
+      {
+        namespace: 'custom',
+        key: 'guide_faq',
+        type: 'json',
+        value: JSON.stringify(draft.faq.map((f) => ({ question: f.question, answer: f.answer }))),
+      },
     ],
   };
   if (image) {

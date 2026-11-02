@@ -504,3 +504,10 @@ stones. Baseline, the question panel, the monthly routine and a technical findin
 `docs/seo/ai-search-tracking.md`.
 
 Follow-up 2026-11-02: the theme builds FAQPage markup from `custom.guide_faq`, which the nine articles written 2026-11-01/02 (five vintage, four large lab-grown guides) lacked. Set it from each article's visible FAQ (3 questions each); all nine now emit FAQPage markup. The weekly Journal job does not set this field yet, so its drafts will need it added at publish time or in the job.
+
+## 2026-11-02 Weekly Journal job sets custom.guide_faq
+
+`buildArticleCreateInput` now writes the draft's three FAQ items to `custom.guide_faq`
+(json), so a draft gets FAQPage markup from the theme as soon as it is published,
+like the other articles. The theme only marks up a question whose text appears in the
+body, which the rendered FAQ block guarantees. One new test; 961 tests pass.

@@ -488,7 +488,7 @@ describe('buildArticleCreateInput', () => {
   });
 
   it('carries the SEO fields as global.title_tag / global.description_tag', () => {
-    expect(input.metafields).toEqual([
+    expect((input.metafields as Array<{ namespace: string }>).filter((m) => m.namespace === 'global')).toEqual([
       {
         namespace: 'global',
         key: 'title_tag',
@@ -507,6 +507,16 @@ describe('buildArticleCreateInput', () => {
   it('appends the FAQ block to the body and sets the featured image', () => {
     expect(String(input.body)).toContain('Is a pre-owned tank watch a safe buy?');
     expect(input.image).toEqual({ url: 'https://cdn.shopify.com/tank.jpg', altText: 'Cartier Tank' });
+  });
+
+  it('stores the FAQ as custom.guide_faq so the theme can emit FAQPage markup', () => {
+    const faqField = (input.metafields as Array<{ namespace: string; key: string; type: string; value: string }>).find(
+      (m) => m.namespace === 'custom' && m.key === 'guide_faq',
+    );
+    expect(faqField?.type).toBe('json');
+    expect(JSON.parse(faqField?.value ?? '[]')).toEqual(draft().faq);
+    // Every stored question appears verbatim in the rendered body, which is what the theme requires.
+    for (const f of draft().faq) expect(String(input.body)).toContain(f.question);
   });
 
   it('omits the image when the featured product has none', () => {
