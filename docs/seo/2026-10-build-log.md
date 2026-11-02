@@ -493,12 +493,14 @@ consecutive blocks when a heading separates them.
 - Theme: `sections/main-article.liquid` emits FAQPage JSON-LD from that field, and marks up a question only while its text still appears in the article body, so editing or removing a visible FAQ drops it from the markup. New articles need the field set to get the markup.
 - Not done: a named person as author (the store has not named one; articles stay under the Organization), the hollow-chain sentence in the gold chain guide (needs a jeweler's check), and box chain in that guide.
 
-## 2026-11-01 AI search: four buying guides (drafts) and tracking baseline
+## 2026-11-01 AI search: four buying guides and tracking baseline
 
-Created four UNPUBLISHED Journal drafts aimed at questions people ask AI models about
+Created four Journal drafts (published 2026-11-02 at the merchant's request) aimed at questions people ask AI models about
 large lab-grown diamonds (6 and 7 carat, D color, VVS2, Ideal cut, where to save).
-Publish together; they link to each other. All four pass `checkDraft`. No prices; the
+They link to each other and were published together. All four pass `checkDraft`. No prices; the
 approved "60-85% less" line only. Size figures come from our own IGI-graded round
 stones. Baseline, the question panel, the monthly routine and a technical finding
 (the large diamond collections ship no stones in the HTML) are in
 `docs/seo/ai-search-tracking.md`.
+
+Follow-up 2026-11-02: the theme builds FAQPage markup from `custom.guide_faq`, which the nine articles written 2026-11-01/02 (five vintage, four large lab-grown guides) lacked. Set it from each article's visible FAQ (3 questions each); all nine now emit FAQPage markup. The weekly Journal job does not set this field yet, so its drafts will need it added at publish time or in the job.

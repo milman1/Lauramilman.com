@@ -65,8 +65,8 @@ color, clarity, cut, report lab, price) and emit `ItemList` JSON-LD for them.
 
 ## Content shipped for this
 
-Four buying guides, saved as unpublished Journal drafts on 2026-11-01 (publish
-together, they link to each other):
+Four buying guides, created 2026-11-01 and published 2026-11-02 (they link to
+each other; each has FAQPage markup via `custom.guide_faq`):
 
 - affordable-6-carat-lab-grown-diamond-where-to-compromise
 - 6-carat-vs-7-carat-lab-grown-diamond-size-guide
