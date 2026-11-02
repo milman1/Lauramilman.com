@@ -33,3 +33,17 @@ Owner: Codex, merchant-authorized continuation in local Chrome. PR remains draft
 Still pending: branch preview and browser regression script; setting/diamond selection and successful share receipts in this test session; four diamond-product events; consent denial/grant/revocation/no replay; per-action standard-event duplication checks; merge and live diamond-event verification. GA4 showed 3 standard add_to_cart events for the three-line builder add, but this alone is not a duplication verdict.
 
 Exact next step: restore the Shopify theme library in the same signed-in browser, connect/open diamond-choice-tracking preview, then run the remaining tests before merging. Do not reinstall the already-updated pixel or create another. Keep the existing Analytics requirement. For share testing, keep the storefront tab foreground long enough for clipboard access.
+
+## Preview import checkpoint — 2026-11-02 03:46 UTC
+
+After the merchant removed older themes, the library loaded. Connected the existing GitHub repository/diamond-choice-tracking branch as a new unpublished draft named Lauramilman.com/diamond-choice-tracking. No theme was published or deleted by the agent.
+
+Shopify integration log at 10:45:30 PM EST: 1,384 succeeded, 0 warnings, 16 failed (retry attempts); theme updated but 6 files were not saved:
+- AGENTS.md exceeds Shopify's 50 KB maximum.
+- sections/lab-grown-diamonds-feature.liquid: schema name exceeds 25 characters.
+- sections/footer-group.json: text block type not defined in schema.
+- templates/page.shop.json: lab-grown-diamonds-feature section missing due to rejected section.
+- templates/password.json: heading, paragraph, email_form block types not defined.
+- templates/product.test.json: vendor/title/subtitle/price/variant_picker/quantity_selector/buy_buttons/description/share block types not defined.
+
+The new draft's Edit/Publish controls remained disabled. After a refresh, the embedded theme library became blank again; navigating Home then Online Store did not restore it. Preview behavior therefore remains unverified. No further cart actions, pixel edits, storefront changes, or merge in this continuation. PR stays draft. Next: recover draft preview access and resolve or isolate these import failures without changing live design/prices, then finish the previously listed browser/consent/GA4 checks.
