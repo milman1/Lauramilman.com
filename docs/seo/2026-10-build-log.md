@@ -511,3 +511,14 @@ Follow-up 2026-11-02: the theme builds FAQPage markup from `custom.guide_faq`, w
 (json), so a draft gets FAQPage markup from the theme as soon as it is published,
 like the other articles. The theme only marks up a question whose text appears in the
 body, which the rendered FAQ block guarantees. One new test; 961 tests pass.
+
+## 2026-11-02 Journal clean-up: Sotheby's result, news-piece images, photos on older articles
+
+Store content only (Shopify articles); no theme or code change.
+
+- Sotheby's Milan article (1965 sapphire ribbon necklace): added a "The Result" section. The necklace sold within its estimate and was among the sale's highest results (reported by Rapaport, 2026-10-29). Stated in words, no euro figures, per the no-prices rule. Added a note that the photos are pieces from our collection, not the lot.
+- Bulgari Pink article: featured image changed from a Serpenti gold ring to our Fancy Light Pink oval diamond ring, with a note that the photos are not the Bulgari Pink. The Christie's Geneva sale (Nov 10) is still upcoming; add its result after the sale.
+- Knicks and Art Basel articles: no change needed. Knicks already carries a credited archival photo of Madison Square Garden; Art Basel's featured ring is the piece its text recommends.
+- Photos added to 12 older articles (1 to 3 each, catalogue photos linked to the product, placed after the paragraph for the matching section): lab-grown vs natural, gold chain guide, David Webb authentication, Rolex box and papers, vintage luxury watch, wearing vintage, pre-owned Cartier/Van Cleef/Tiffany, IGI vs GIA, stacking, Under $3,000, night out, are lab-grown diamonds real. Original text verified byte-for-byte unchanged after each edit. The Under $3,000 article uses only the marquise ring (from $2,400); the other lab-grown rings start higher and would contradict its headline.
+- `custom.guide_faq` set on "What jewelry to wear on a first date" (3 questions), the last published article without FAQ markup.
+- Not touched: the Under $3,000 article states prices in its title and body, which the current no-prices rule would not allow for a new article. Left as is; the merchant's call.
