@@ -306,12 +306,12 @@ export const WATCH_BRANDS: string[] = [
 /**
  * The Back Vault (estate / vintage designer jewelry, src/backvault/).
  *
- * Retail is the supplier's listed price, with no markup, and that listed
- * price is written to Shopify **Cost per item** (`inventoryItem.cost`).
- * LMNY buys at a discount to the listed price; until that discount is
- * recorded, Admin margin reads $0.
+ * Retail is the supplier's listed price, with no markup. LMNY pays the
+ * listed price divided by 1.3, and that is what is written to Shopify
+ * **Cost per item** (`inventoryItem.cost`), so Admin margin reads about 23%.
  *
  *   retail = round(listed price × 1)
+ *   cost   = round(listed price ÷ 1.3)
  *
  * Merchant decision 2026-11-02: replace the midpoint with Robinson's
  * Jewelers (floored at cost + $500) with the supplier's own listed
@@ -322,6 +322,8 @@ export const WATCH_BRANDS: string[] = [
 export const BACKVAULT = {
   /** Retail = supplier listed price × this. 1 matches their site. */
   listedPriceFactor: 1,
+  /** LMNY's cost = supplier listed price ÷ this (merchant, 2026-11-02). */
+  costDivisor: 1.3,
   competitor: {
     name: "Robinson's Jewelers",
     baseUrl: 'https://robinsonsjewelers.com',

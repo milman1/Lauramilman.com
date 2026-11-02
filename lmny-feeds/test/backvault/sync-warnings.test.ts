@@ -449,7 +449,7 @@ describe('a partial competitor index', () => {
     expect(json.warnings[0]).toContain('competitor index is PARTIAL');
     expect(json.warnings[0]).toContain('no piece matched in the rows that were read');
     expect(json.warnings[0]).toContain('no piece could be priced from a remembered comparison');
-    expect(json.warnings[0]).toContain('1 priced flat at cost + markup');
+    expect(json.warnings[0]).toContain('1 priced at the supplier listed price');
   });
 
   it('counts the matches it really used in the warning', async () => {

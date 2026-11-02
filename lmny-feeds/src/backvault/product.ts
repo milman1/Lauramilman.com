@@ -6,6 +6,7 @@ import { extractEbayWatchSpecifics } from '../ebayWatchSpecifics.js';
 import { assertScrubbed } from './scrub.js';
 import { assertHouseSettingSkuNotInFeed } from '../settingCenterShape.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
+import { backVaultCostFromListed } from './pricing.js';
 import type { BackVaultItem } from './types.js';
 
 /** Tag every synced product carries — scopes catalog reads/diff/archive to this feed only. */
@@ -141,7 +142,7 @@ export function contentHashFor(item: BackVaultItem): string {
     seoTitle: listing.seoTitle,
     seoDescription: listing.seoDescription,
     price: item.priceUsd,
-    cost: item.costUsd,
+    cost: backVaultCostFromListed(item.costUsd),
     competitorPrice: item.competitorPriceUsd ?? null,
     images: item.imageUrls,
     specs: item.specs,
@@ -213,9 +214,9 @@ export function buildProductSetInput(
         inventoryItem: {
           tracked: Boolean(locationId),
           requiresShipping: true,
-          // Admin "Cost per item", next to Price. The supplier's listed
-          // price is what LMNY pays; retail is that listed price.
-          cost: item.costUsd.toFixed(2),
+          // Admin "Cost per item", next to Price: what LMNY pays, the
+          // supplier's listed price ÷ BACKVAULT.costDivisor.
+          cost: backVaultCostFromListed(item.costUsd).toFixed(2),
         },
         ...(locationId
           ? {

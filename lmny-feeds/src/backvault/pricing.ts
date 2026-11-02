@@ -18,6 +18,17 @@ export function backVaultRetailFromCost(costUsd: number): number {
 }
 
 /**
+ * What LMNY pays for a Back Vault item: the supplier's listed price divided
+ * by BACKVAULT.costDivisor, to the cent. Written to Shopify Cost per item.
+ */
+export function backVaultCostFromListed(listedUsd: number): number {
+  if (!Number.isFinite(listedUsd) || listedUsd < 0) {
+    throw new Error(`Back Vault pricing: invalid listed price ${listedUsd}`);
+  }
+  return round2(listedUsd / BACKVAULT.costDivisor);
+}
+
+/**
  * Retail for a Back Vault item. The second argument is the competitor
  * price when one was found; it is recorded on the product and does not
  * change this number.

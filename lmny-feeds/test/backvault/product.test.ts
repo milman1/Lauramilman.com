@@ -78,10 +78,10 @@ describe('buildProductSetInput', () => {
     expect(input.id).toBeUndefined();
   });
 
-  it('writes the supplier price to Shopify Cost per item', () => {
+  it('writes the supplier listed price ÷ 1.3 to Shopify Cost per item', () => {
     const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z');
     const variant = (input.variants as Array<{ price: string; inventoryItem: { cost: string } }>)[0]!;
-    expect(variant.inventoryItem.cost).toBe('4300.00');
+    expect(variant.inventoryItem.cost).toBe('3307.69');
     expect(variant.price).toBe('4500.00');
   });
 

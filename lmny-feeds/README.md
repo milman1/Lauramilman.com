@@ -433,13 +433,13 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
-   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is
-   **the listed price itself** (`listedPriceFactor` 1; merchant decision
-   2026-11-02). Robinson's
+   `BACKVAULT`): retail is **the supplier's listed price itself**
+   (`listedPriceFactor` 1; merchant decision 2026-11-02). LMNY's cost is
+   the listed price **÷ 1.3** (`costDivisor`), about a 23% margin. Robinson's
    Jewelers is still indexed by supplier stock number
    (`src/backvault/competitor.ts`; exact match only, ambiguous numbers
    dropped) and a match is still remembered, but that price does not set
-   the ticket. The cost is written to Shopify **Cost per item**
+   the ticket. That cost (listed ÷ 1.3) is written to Shopify **Cost per item**
    (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
    the markup is a pull request against `config/pricing.ts`; the next run
    reprices every listed piece because price and cost are in the content
