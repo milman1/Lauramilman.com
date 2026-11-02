@@ -1,0 +1,42 @@
+name: Storefront browser tests
+
+on:
+  pull_request:
+    paths:
+      - 'assets/**'
+      - 'sections/**'
+      - 'snippets/**'
+      - 'locales/**'
+      - 'docs/analytics/**'
+      - 'lmny-feeds/test/**'
+      - 'lmny-feeds/package*.json'
+      - '.github/workflows/storefront-browser-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm test
+      # Both suites intercept requests and use synthetic products/cart responses.
+      # No store credentials, checkout submission, or production mutations.
+      - name: Diamond purchase choice regression
+        run: node test/browser/diamond-purchase-choice.mjs
+      - name: Ring builder regression
+        if: success() || failure()
+        run: node test/browser/ring-builder-flow.mjs

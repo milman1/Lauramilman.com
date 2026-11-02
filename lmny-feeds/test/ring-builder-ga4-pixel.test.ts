@@ -21,12 +21,12 @@ function sandbox(allowed: boolean) {
   };
 }
 describe('ring-builder GA4 custom pixel', () => {
-  it('forwards all eight custom events to the verified destination without standard events', () => {
+  it('forwards all twelve custom events to the verified destination without standard events', () => {
     const s = sandbox(true);
-    expect(s.handlers.size).toBe(8);
-    for (const [name, send] of s.handlers) send({ id: name, customData: { screen: 'review', origin: 'lab', band_count: 2, device_type: 'mobile', product_kind: 'diamond' } });
+    expect(s.handlers.size).toBe(12);
+    for (const [name, send] of s.handlers) send({ id: name, customData: { screen: 'diamond_product', product_handle: 'lg-test', origin: 'lab', band_count: 2, device_type: 'mobile', product_kind: 'diamond' } });
     const events = s.calls().filter(c => c[0] === 'event');
-    expect(events).toHaveLength(8);
+    expect(events).toHaveLength(12);
     expect(events.map(c => c[1])).toEqual([...s.handlers.keys()]);
     expect(events.every(c => c[2].send_to === 'G-CTWW9B42MX')).toBe(true);
     expect(s.scripts).toHaveLength(1);
@@ -52,4 +52,18 @@ describe('ring-builder GA4 custom pixel', () => {
     expect(JSON.stringify(s.calls())).not.toContain('PRIVATE');
     expect(s.calls().find(c => c[0] === 'event')[2]).toEqual({ send_to: 'G-CTWW9B42MX', page_location: 'https://www.lauramilman.com/pages/ring-builder', page_referrer: '' });
   });
+  it('requires a safe product handle and attributes product events without query strings', () => {
+    const s = sandbox(true), send = s.handlers.get('lmny_purchase_mode_selected')!;
+    for (const product_handle of ['https://example.com', 'lg-test?email=PRIVATE', 'lg-test#PRIVATE', '../PRIVATE', '']) {
+      send({customData: {screen: 'diamond_product', product_handle}});
+    }
+    send({customData: {screen: 'review', product_handle: 'lg-test'}});
+    expect(s.calls()).toEqual([]);
+    send({customData: {screen: 'diamond_product', product_handle: 'nd-test', purchase_mode: 'diamond_only', entry_point: 'main_cta', email: 'PRIVATE'}});
+    const params = s.calls().find(c => c[0] === 'event')[2];
+    expect(params.page_location).toBe('https://www.lauramilman.com/products/nd-test');
+    expect(params.purchase_mode).toBe('diamond_only');
+    expect(JSON.stringify(s.calls())).not.toContain('PRIVATE');
+  });
+
 });

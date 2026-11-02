@@ -1,6 +1,9 @@
 # Ring-builder GA4 repair
 
-Status: prepared; the custom pixel must be installed and live receipt verified.
+Status (2026-11-01): existing custom pixel is connected in live storefront metadata
+(ID `171900999`, name `LMNY ring-builder GA4`, Analytics permission). Its installed
+source and GA4 receipt remain unverified. Update this existing pixel; do not add another.
+Issue #391 prepares four additional diamond-product events alongside the original eight.
 Related: issue #382. Destination `G-CTWW9B42MX` was read from the live
 Google & YouTube app configuration on 2026-10-30. Reconfirm it before installation.
 
@@ -12,7 +15,7 @@ already available; they did not verify Google delivery.
 
 The repair loads the consent API before publishing, records one builder-open
 event after a later consent grant, and never replays actions performed while
-analytics consent was denied. The separate custom pixel subscribes to the eight
+analytics consent was denied. The separate custom pixel subscribes to twelve
 named events, forwards only allowlisted parameters, and suppresses its initial
 automatic page view. It does not subscribe to standard commerce/page events.
 The existing Google & YouTube app continues to own standard ecommerce tracking.
@@ -23,7 +26,7 @@ Use the merchant's connected browser and existing Shopify admin session.
 
 1. Open Settings → Customer events. Inspect current pixels first. If an LMNY
    ring-builder forwarding pixel already exists, update that one; do not duplicate it.
-2. Add a custom pixel named `LMNY ring-builder GA4` and paste the complete contents
+2. Edit the existing custom pixel named `LMNY ring-builder GA4` and replace its code with the complete contents
    of `docs/analytics/lmny-ring-builder-ga4-pixel.js` (JavaScript only, no HTML).
 3. In its Customer privacy settings require Analytics. This pixel does not use
    marketing permissions, advertising signals or data sale; select the matching
@@ -55,3 +58,20 @@ References:
 - https://help.shopify.com/en/manual/promoting-marketing/pixels/custom-pixels/code
 - https://shopify.dev/docs/api/web-pixels-api/pixel-privacy
 - https://developers.google.com/analytics/devguides/collection/ga4/views
+
+## Diamond choice events (#391)
+
+| Event | Meaning |
+|---|---|
+| `lmny_diamond_purchase_viewed` | Diamond purchase section initialized with analytics allowed; once per page initialization, including later consent grant. Not proof of viewport exposure. |
+| `lmny_purchase_mode_selected` | Shopper changed Build a ring / Diamond only; initial default is excluded. |
+| `lmny_ring_builder_started` | Click on main/sticky build CTA, setting card, or all settings link; navigation intent, not confirmed builder load. |
+| `lmny_setting_selected` with `screen=diamond_product` | Setting card clicked; distinguish from builder-screen selections. |
+| `lmny_diamond_added_to_cart` | Native diamond form AJAX add succeeded; distinguishes Add to cart / Buy now. Not an order. |
+
+Product events use a validated public product handle to construct a canonical product
+page URL. Query strings, fragments, engraving and customer data are never forwarded.
+Install the backwards-compatible pixel update first, verify preview events, then merge
+the publisher change. The pixel source is not deployed automatically by theme git sync.
+Analyze mobile versus desktop only after receipt is verified; previous missing events
+cannot establish abandonment. Existing band events remain unchanged.
