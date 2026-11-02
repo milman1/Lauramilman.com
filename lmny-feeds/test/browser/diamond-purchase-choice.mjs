@@ -39,10 +39,11 @@ const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disab
 const pixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');
 async function pageFor(options={},width=1440,javascript=true) {
  const html=await render(options);const page=await browser.newPage({viewport:{width,height:1000},javaScriptEnabled:javascript});const posts=[];page.setDefaultTimeout(10000);
+ if(options.tracking) await page.addInitScript(({allowed})=>{ window.tracked=[]; window.allowed=allowed; window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>window.allowed},analytics:{publish:(name,data)=>{window.tracked.push({name,data});return true;}}}; },{allowed:options.allowed!==false});
  page.on('pageerror',e=>{throw e;});
  await page.route('**/*',route=>{
   const req=route.request(),url=new URL(req.url());
-  if(req.method()==='POST'){posts.push({path:url.pathname,body:req.postDataJSON()});return route.fulfill({contentType:'application/json',body:'{"id":123456,"quantity":1}'});}
+  if(req.method()==='POST'){posts.push({path:url.pathname,body:req.postDataJSON()});return route.fulfill({status:options.failCart?422:200,contentType:'application/json',body:options.failCart?'{}':'{"id":123456,"quantity":1}'});}
   if(url.pathname==='/cart.js')return route.fulfill({contentType:'application/json',body:'{"items":[],"item_count":1}'});
   if(url.pathname.startsWith('/assets/'))return route.fulfill({contentType:url.pathname.endsWith('.css')?'text/css':'text/javascript',body:read(url.pathname.slice(1))});
   if(req.resourceType()==='image') {
@@ -89,4 +90,38 @@ for(const options of [{available:false},{matches:false}]) {
 {const {page:p,posts}=await pageFor();await p.locator('[data-diamond-choice] input[value="diamond"]').check();await p.locator('[data-buy-now]').click();await p.waitForURL('**/checkout');assert.equal(posts.length,1);assert.equal(posts[0].body.id,123456);await p.close();}
 {const {page:p}=await pageFor({},390,false);assert.equal(await p.locator('[data-diamond-choice]').isVisible(),false);assert.equal(await p.locator('[data-diamond-buy]').isVisible(),true);assert.equal(await p.locator('[data-diamond-build] a').isVisible(),true);await p.close();}
 console.log('PASS unavailable/no-matching-setting fallback, native Buy now checkout, no-JavaScript purchase paths.');
+for (const allowed of [true,false]) {
+ const {page:p}=await pageFor({tracking:true,allowed});
+ assert.equal(await p.evaluate(()=>tracked.length),allowed?1:0);
+ await p.locator('[data-diamond-choice] input[value="diamond"]').check();
+ await p.locator('[data-diamond-buy] .atc-btn').first().click();
+ await p.waitForFunction(()=>document.querySelector('[data-diamond-buy] .atc-btn').textContent.includes('Added'));
+ let events=await p.evaluate(()=>tracked);
+ assert.deepEqual(events.map(e=>e.name),allowed?['lmny_diamond_purchase_viewed','lmny_purchase_mode_selected','lmny_diamond_added_to_cart']:[]);
+ if(!allowed){await p.evaluate(()=>{window.allowed=true;document.dispatchEvent(new Event('visitorConsentCollected'));});assert.deepEqual(await p.evaluate(()=>tracked.map(e=>e.name)),['lmny_diamond_purchase_viewed']);}
+ await p.evaluate(()=>{window.allowed=false;document.dispatchEvent(new Event('visitorConsentCollected'));});
+ const count=await p.evaluate(()=>tracked.length);
+ await p.locator('[data-diamond-choice] input[value="ring"]').check();
+ assert.equal(await p.evaluate(()=>tracked.length),count);
+ await p.close();
+}
+{
+ const {page:p}=await pageFor({tracking:true});
+ await p.evaluate(()=>document.addEventListener('click',e=>{if(e.target.closest('a'))e.preventDefault();}));
+ for(const selector of ['[data-diamond-build] a','.dsp__all','.dsp__link']) await p.locator(selector).first().click();
+ const events=await p.evaluate(()=>tracked);
+ assert.deepEqual(events.filter(e=>e.name==='lmny_ring_builder_started').map(e=>e.data.entry_point),['main_cta','all_settings','setting_card']);
+ assert.equal(events.filter(e=>e.name==='lmny_setting_selected').length,1);
+ assert.equal(events.some(e=>e.name==='lmny_purchase_mode_selected'),false);
+ await p.close();
+}
+{
+ const {page:p}=await pageFor({tracking:true,failCart:true});
+ await p.locator('[data-diamond-choice] input[value="diamond"]').check();
+ await p.locator('[data-diamond-buy] .atc-btn').first().click();
+ await p.waitForFunction(()=>!document.querySelector('[data-diamond-buy] .atc-btn').disabled);
+ assert.equal(await p.evaluate(()=>tracked.some(e=>e.name==='lmny_diamond_added_to_cart')),false);
+ await p.close();
+}
+console.log('PASS choice tracking, successful/failed cart, builder entry points, consent grant/revocation and no action replay.');
 await browser.close();
