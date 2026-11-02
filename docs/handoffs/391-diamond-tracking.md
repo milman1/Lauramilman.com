@@ -100,3 +100,10 @@ PLAYWRIGHT_BROWSERS_PATH=/tmp/lmny-playwright node test/browser/ring-builder-flo
 ```
 
 No cart/order/inquiry changes. Original ring/no-band configuration restored. Price and layout files unchanged.
+
+
+## Approved cloud browser regression — Nov 2, 2026
+
+Merchant approved a test-only GitHub Actions workflow and use of local Chrome. Added .github/workflows/storefront-browser-tests.yml (19d8ecc), read-only contents permission, no secrets, synthetic intercepted storefront/cart requests. GitHub Actions run https://github.com/milman1/Lauramilman.com/actions/runs/41474077578 completed successfully: npm test, diamond-purchase-choice.mjs, and ring-builder-flow.mjs all passed. Independently confirmed Success in local Chrome. The macOS execution blocker no longer prevents regression validation.
+
+The previous late-grant helper session eventually showed exactly one lmny_builder_opened at 2:26:01 AM without another reload. A repeated deny/reload/grant still showed Loading/0 events during the immediate observation window; do not treat this as a consistently passing live consent case. Foreground diagnostic attempts were interrupted by concurrent Chrome focus changes. No temporary logging or permission relaxation installed. Standard-event duplication and stable real consent verification remain open; PR unmerged.
