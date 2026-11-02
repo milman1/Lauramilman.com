@@ -57,3 +57,27 @@ Controlled preview tests: product lg-924390, switch Diamond only, successful Add
 Consent blocker: Customer privacy > Cookie banner says Not visible in any region. Official Preview opens ?preview_privacy_banner=1 but renders no banner; browser console reports 'banner not rendered due to lack of saved data'. No privacy configuration was changed. Germany market preview also produced no banner; returned preview to United States. Consent denial/grant/revocation/no replay remains unverified. Need a working consent UI without overriding merchant's no-design-change constraint.
 
 GA4 Realtime showed 2 standard add_to_cart during window despite one controlled native diamond add; 3 active users means aggregate alone does not establish source or duplication. Duplication check remains open. Mobile viewport override attempt did not visibly produce mobile layout; reset override, mobile not passed. Required browser regression script still not run. PR remains draft/unmerged; live new-event verification remains pending. Screenshot /tmp/lmny-ga4-preview-events.jpg captures GA4 custom receipts.
+
+
+## Consent configuration and browser checks — Nov 2, 2026, 1:30–1:48 AM ET
+
+Merchant explicitly approved enabling the cookie banner. Saved manual visibility for Shopify's 31 recommended European regions plus United States (all 51 state entries). Existing Light appearance/position retained; checkout banner remains off. Added a Cookie preferences footer link in this branch using documented privacyBanner.showPreferences(), final implementation commit e166f4be99a47204bdb318f32346938f4f1ad058. It opens the real saved consent controls. No prices or product layouts changed.
+
+Important correction: preview_privacy_banner=1 is an appearance preview, unsuitable for persisted-consent tests. Do not treat earlier preview-button behavior as a tracking defect.
+
+Real diamond-page consent checks passed in existing pixel 171900999:
+- Revocation: Analytics unchecked and saved; next mode change emitted no new custom event. Reload showed Pixel is awaiting consent, and preferences retained Analytics unchecked.
+- Denied mode change followed by grant: exactly one lmny_diamond_purchase_viewed, no replay of denied action.
+- Subsequent allowed mode change: exactly one lmny_purchase_mode_selected (helper count 1 -> 2).
+
+Builder checks:
+- Navigating into builder with Analytics denied left pixel awaiting consent.
+- First grant had an inconclusive prolonged helper Loading state; after reload it loaded with exactly one lmny_builder_opened. Do not claim first-grant-without-reload passed.
+- Revoked Analytics in loaded builder, selected original $1,690 oval hidden-halo setting: helper count stayed 1.
+- Regranted Analytics: denied setting selection was not replayed, count stayed 1.
+- New wedding-band selection produced exactly one lmny_band_selected (count 1 -> 2).
+- Removed test band; original setting, lg-924390, ring size 4.5, no band/engraving/date restored. No cart mutation in this consent test.
+
+Mobile: 390x844 viewport override gave measured document clientWidth 375, screenshot showed mobile hamburger and single-column diamond PDP; keyboard switching to Diamond only worked. Override reset. No mobile cart submission performed.
+
+Merge remains blocked by required automated browser regression run (no repository/test runtime present in this local workspace), definitive per-action standard-event duplication verification, and resolving the builder initial late-grant loading ambiguity. GA4 user snapshot did not isolate our full test stream. Existing prior GA4 custom receipts remain valid; no live publisher merge or live new-event verification claimed. Six previously documented draft import failures remain; do not publish this draft theme.
