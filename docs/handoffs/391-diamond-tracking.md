@@ -18,3 +18,18 @@ before deployment. Local Theme Check package is also absent in this executor.
 Unit tests and syntax checks do not prove GA4 ingestion. Verify custom event receipt,
 consent denial/grant/revocation and no duplicate standard page/commerce events.
 Only after collection works can mobile drop-offs be assessed.
+
+## Local browser checkpoint — 2026-11-02 UTC (Nov 1 evening ET)
+
+Owner: Codex, merchant-authorized continuation in local Chrome. PR remains draft/unmerged.
+
+- Updated existing connected pixel 171900999 (LMNY ring-builder GA4), not a duplicate. Installed exact PR pixel blob 6a54645a1238577e4e01e23162961a8de968abd5. Shopify showed Changes saved; reload showed the new four event subscriptions. Analytics required; Marketing/Preferences off; not data sale.
+- GA4 property 413439924 / stream 6321020106 confirms G-CTWW9B42MX. Stream retains legacy Laura's Gems NY name/domain and a stale collection warning, but Realtime subsequently received controlled test events.
+- Shopify pixel helper loaded the pixel and received builder_opened, band_selected, build_saved. GA4 Realtime independently showed lmny_builder_opened, lmny_band_selected, lmny_build_saved, and lmny_build_added_to_cart (one successful builder add).
+- Added the restored oval ring plus a lab-grown wedding band to the cart; verified the three test lines, then removed their complete group. Preserved the pre-existing lg-416178 cart item, quantity 1. No checkout, order, inquiry, price or design change. Removed the test band from the saved builder afterward, restoring its original no-band selection.
+- Share clicked but reached Copy this link fallback; no successful lmny_build_shared receipt verified. Chrome focus changed during the clipboard-share test.
+- Shopify Online Store /themes panel remains blank after refresh (admin navigation works, embedded theme library does not). No verified branch preview available, so do not merge PR #392. New diamond publisher events remain undeployed.
+
+Still pending: branch preview and browser regression script; setting/diamond selection and successful share receipts in this test session; four diamond-product events; consent denial/grant/revocation/no replay; per-action standard-event duplication checks; merge and live diamond-event verification. GA4 showed 3 standard add_to_cart events for the three-line builder add, but this alone is not a duplication verdict.
+
+Exact next step: restore the Shopify theme library in the same signed-in browser, connect/open diamond-choice-tracking preview, then run the remaining tests before merging. Do not reinstall the already-updated pixel or create another. Keep the existing Analytics requirement. For share testing, keep the storefront tab foreground long enough for clipboard access.
