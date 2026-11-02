@@ -81,3 +81,22 @@ Builder checks:
 Mobile: 390x844 viewport override gave measured document clientWidth 375, screenshot showed mobile hamburger and single-column diamond PDP; keyboard switching to Diamond only worked. Override reset. No mobile cart submission performed.
 
 Merge remains blocked by required automated browser regression run (no repository/test runtime present in this local workspace), definitive per-action standard-event duplication verification, and resolving the builder initial late-grant loading ambiguity. GA4 user snapshot did not isolate our full test stream. Existing prior GA4 custom receipts remain valid; no live publisher merge or live new-event verification claimed. Six previously documented draft import failures remain; do not publish this draft theme.
+
+
+## Subscription discovery repair — Nov 2, 2026, 2:25 AM ET
+
+Cloned diamond-choice-tracking into the merchant workspace and installed locked dependencies. All 949 unit tests passed before and after the pixel change. Installed Playwright Chromium in /tmp/lmny-playwright, but both browser regression scripts abort at Chromium startup: macOS bootstrap_check_in MachPortRendezvousServer permission denied (1100), SIGTRAP. This is the execution sandbox, not a failed application assertion. No sandbox bypass attempted.
+
+Shopify pixel editor reported that the connected pixel was not subscribed to any events despite runtime loop subscriptions. Replaced the loop with twelve explicit literal analytics.subscribe calls, retaining the same forwarding/consent/deduplication function. Commit d49a307. Updated existing connected pixel 171900999, saved, reloaded; the no-subscriptions warning is now absent. Analytics permission remains required; no duplicate pixel created. Pixel unit tests pass.
+
+The literal-subscription correction does NOT yet resolve the reproduced late-consent stall: after initial denial, reload, and grant through real preferences without a reload, helper remains Loading / awaiting consent / 0 events. A regular preview without helper was also examined using DevTools: Google's standard requests updated consent from G110 to G111, but no custom-pixel collection request was established. Do not claim this browser case passes or merge yet. No speculative consent bypass or forced reload added. Standard-event duplication remains unverified.
+
+Local checkout: /Users/avimilman/Documents/Codex/2026-10-30/new-chat-2/lmny
+Browser test commands (must run in a terminal allowed to start Chromium):
+```sh
+cd /Users/avimilman/Documents/Codex/2026-10-30/new-chat-2/lmny/lmny-feeds
+PLAYWRIGHT_BROWSERS_PATH=/tmp/lmny-playwright node test/browser/diamond-purchase-choice.mjs
+PLAYWRIGHT_BROWSERS_PATH=/tmp/lmny-playwright node test/browser/ring-builder-flow.mjs
+```
+
+No cart/order/inquiry changes. Original ring/no-band configuration restored. Price and layout files unchanged.
