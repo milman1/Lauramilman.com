@@ -75,3 +75,48 @@ Install the backwards-compatible pixel update first, verify preview events, then
 the publisher change. The pixel source is not deployed automatically by theme git sync.
 Analyze mobile versus desktop only after receipt is verified; previous missing events
 cannot establish abandonment. Existing band events remain unchanged.
+
+## Diamond redirect landings (prepared; approval and live verification required)
+
+The same existing pixel observes `page_viewed` and sends only
+`lmny_diamond_redirect_landing` when a collection URL has a valid
+`lmny_redirect` diamond handle. It never emits another standard page view.
+Parameters: `original_diamond`, `redirect_collection`, `origin` (`lab`,
+`natural`, `colored_lab`). Register these as event-scoped custom dimensions
+in GA4 (reuse existing `origin` if already present). Build an Exploration
+filtered to this event; use event count, users, original diamond, destination,
+and session source/medium. Event count measures marked landings, not server
+redirect requests; copied marked URLs can produce another landing, and
+consent denial, blockers and previously cached unmarked redirects cause misses.
+No historical redirect usage can be reconstructed by this change.
+
+Installation order: update the existing pixel, test a marked collection URL
+with consent allowed/denied and verify GA4 receipt, then deploy the sync changes
+and apply the reviewed tracking migration plan. Preserve collection filters
+and all UTM parameters. Inspect existing pixel source before replacement to
+avoid overwriting a concurrent change. The pixel forwards a referrer origin
+only; it strips paths, queries and fragments from referrers and page URLs.
+Cross-pixel session attribution and purchase joins require live verification;
+do not promise attribution for every AI app or private browser.
+
+The primary sync revisits archived products each run and now independently
+reads back created redirect paths. The colored sync also revisits owned missing
+drafts/archives after a full successful feed and withdrawal verification.
+Existing overrides are preserved; active products and limited/activation runs
+are excluded. Failures leave work retryable and fail the job. Shopify retained
+products preserve handles; previously deleted URLs absent from all history
+cannot be recovered by this pass.
+
+The existing scheduled main-sync workflow performs a read-only full HTTP check
+during its 06 UTC run. GitHub schedules are best-effort; a missed/delayed run
+can delay this audit. Check Actions failures (notifications are not configured
+by this change). Reports distinguish restored product pages, valid redirects,
+404s, loops, incorrect destinations and lost filters/markers. It also generates
+`out/diamond-redirect-tracking-plan.json` containing exact before/after targets;
+the audit never applies that plan or changes products.
+
+Before applying the plan, re-read every redirect and reject stale before-values.
+Apply only exact IDs with unchanged paths/targets, then independently re-read
+and HTTP-test the changed links. Test natural, lab and colored diamonds and
+one filtered destination. Keep this work pending until the pixel, redirect
+migration, scheduled sync and GA4 event receipt are live-verified.

@@ -1,5 +1,6 @@
 import { kindForHandle } from './diff.js';
 import type { CatalogEntry, Kind } from './types.js';
+import { trackedDiamondTarget } from './diamondRedirectTracking.mjs';
 
 const TARGETS: Record<Kind, string> = {
   natural: '/collections/natural-diamonds',
@@ -46,13 +47,24 @@ export async function reconcileArchiveRedirects(
   for (const p of missing.slice(0, budget)) {
     const target = TARGETS[merchantUnavailable(p.handle) ? 'watch' : kindForHandle(p.handle)!];
     try {
-      const failures = await client.redirectProductUrl(p.handle, target);
+      const failures = await client.redirectProductUrl(p.handle, trackedDiamondTarget(p.handle, target));
       if (!failures.length) ensured++;
       errors.push(...failures.map(e => `redirect ${p.handle}: ${e}`));
     } catch (err) {
       errors.push(`redirect ${p.handle}: ${String(err)}; verify write_online_store_navigation`);
       // Auth/outage errors often affect every path. Keep the rest pending.
       break;
+    }
+  }
+  if (ensured) {
+    try {
+      const verified = await client.redirectPaths();
+      const confirmed = missing.slice(0, budget).filter(p => verified.has(`/products/${p.handle}`)).length;
+      if (confirmed < ensured) errors.push('Redirect independent readback failed; retry next run');
+      ensured = Math.min(ensured, confirmed);
+    } catch {
+      errors.push('Redirect verification lookup failed; retry next run');
+      ensured = 0;
     }
   }
   return { ensured, pending: missing.length - ensured, errors };
