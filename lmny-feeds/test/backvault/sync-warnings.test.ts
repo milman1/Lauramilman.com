@@ -167,6 +167,13 @@ vi.mock('../../src/shopify.js', async (importOriginal) => {
     async redirectProductUrl(): Promise<string[]> {
       return [];
     }
+    async draftProduct(): Promise<string[]> {
+      return [];
+    }
+    /** The only raw query the sync sends is the merchant-listings read: none here. */
+    async gql(): Promise<Record<string, unknown>> {
+      return { products: { pageInfo: { hasNextPage: false, endCursor: null }, nodes: [] } };
+    }
     async verifyAuth(): Promise<void> {}
     async grantedScopes(): Promise<string[]> {
       return ['write_products', 'write_publications', 'write_inventory', 'read_locations'];

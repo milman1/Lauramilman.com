@@ -994,6 +994,19 @@ export class ShopifyClient {
     return data.productUpdate.userErrors.map((e) => e.message);
   }
 
+  /** Status-only move to DRAFT: title, price, tags and media are untouched. */
+  async draftProduct(id: string): Promise<string[]> {
+    const data = await this.gql<{
+      productUpdate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation($product: ProductUpdateInput!) {
+        productUpdate(product: $product) { userErrors { message } }
+      }`,
+      { product: { id, status: 'DRAFT' } },
+    );
+    return data.productUpdate.userErrors.map((e) => e.message);
+  }
+
   /** Read every redirect, including later pages, to retry only missing paths. */
   async redirectPaths(): Promise<Set<string>> {
     const paths = new Set<string>();

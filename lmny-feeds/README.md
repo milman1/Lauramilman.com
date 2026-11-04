@@ -533,6 +533,21 @@ npm run sync:backvault       # live (needs Shopify env vars)
    both feeds (sold / withdrawn) or out of stock archives. If the
    full-catalog fetch fails, the run archives by new-arrivals alone and
    says so in the report.
+
+   **Merchant listings** (`src/backvault/merchantListings.ts`, merchant
+   decision 2026-11-04). Some pieces were listed by hand before this sync
+   existed: handle = the supplier's own handle (no `bv-`), tagged
+   `Pre-Owned`, merchant-written title and price. For every ACTIVE one:
+   the sync never creates or keeps a `bv-` copy (an existing copy archives
+   with reason `merchant_listing` and redirects to the merchant's listing),
+   and it never writes the listing's title, description, price or SEO.
+   When the supplier's full catalog shows the piece sold, or no longer lists
+   a handle that ends in a stock number (`-rr…`, `-j…`, `-a…`), the
+   listing moves to DRAFT, never ARCHIVED, and the report names it. No
+   draft happens when the full-catalog read failed or returned fewer than
+   500 rows, or when more than 20 listings would draft in one run (the
+   report lists them for review instead). The sync never activates a
+   merchant listing.
 8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.

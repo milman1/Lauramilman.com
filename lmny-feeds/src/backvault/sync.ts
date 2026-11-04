@@ -23,6 +23,14 @@ import {
   type Decision,
 } from './diff.js';
 import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
+import {
+  fetchMerchantListings,
+  type MerchantListing,
+  type MerchantListingPlan,
+  planMerchantListings,
+  supplierAvailability,
+  type SupplierAvailability,
+} from './merchantListings.js';
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
@@ -88,6 +96,20 @@ interface AvailabilityStats {
   error?: string;
 }
 
+/** Merchant listings of Back Vault pieces (src/backvault/merchantListings.ts). */
+interface MerchantListingStats {
+  /** ACTIVE merchant listings found (null when the read failed). */
+  active: number | null;
+  /** Of those, still in stock at the supplier. */
+  inStock: number;
+  /** `bv-` copies archived this run because the merchant lists the piece. */
+  copiesArchived: string[];
+  /** Merchant listings moved to DRAFT this run: the supplier no longer has the piece. */
+  drafted: string[];
+  /** Why drafting was held, when it was. */
+  held?: string;
+}
+
 interface RunSummary {
   startedAt: string;
   finishedAt: string;
@@ -95,6 +117,7 @@ interface RunSummary {
   feedStats: ReturnType<typeof normalizeBackVaultFeed>['stats'];
   competitor: CompetitorStats;
   availability: AvailabilityStats;
+  merchantListings: MerchantListingStats;
   decisions: Decision[];
   published: number;
   /** Sales channels that actually resolved and were published to. */
@@ -280,6 +303,18 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   const catalog = await fetchBackVaultCatalog(client, installedNames);
   const catalogByHandle = new Map(catalog.map((c) => [c.handle, c]));
 
+  // Pieces the merchant listed by hand keep their own listing; the sync must
+  // not run a `bv-` copy alongside it. A failed read only means no copy is
+  // suppressed and nothing is drafted this run.
+  let merchantListings: MerchantListing[] | null = null;
+  try {
+    merchantListings = await fetchMerchantListings(client);
+  } catch (err) {
+    // Degraded, not failed: the run then behaves as it did before this step.
+    warnings.push(`merchant listings not read: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  let supplierStock: SupplierAvailability | null = null;
+
   // Availability: a piece already on the store that rolled off new-arrivals
   // stays listed while the supplier's full catalog still has it in stock.
   // If that fetch fails, fall back to new-arrivals alone (the pre-existing
@@ -289,6 +324,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   if (!opts.limit) {
     try {
       const allRows = await fetchBackVaultAllProducts();
+      supplierStock = supplierAvailability(allRows);
       const full = normalizeBackVaultFeed(allRows, competitor);
       const merged = mergeAvailability(
         items,
@@ -309,6 +345,22 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       console.error(`Availability check failed (${availability.error}); archiving by new-arrivals only`);
     }
   }
+
+  const merchantPlan: MerchantListingPlan = planMerchantListings(
+    merchantListings ?? [],
+    supplierStock,
+    availability.fullCatalogFetched ?? 0,
+  );
+  const merchantStats: MerchantListingStats = {
+    active: merchantListings ? merchantListings.filter((l) => l.status === 'ACTIVE').length : null,
+    inStock: merchantPlan.inStock,
+    copiesArchived: [],
+    drafted: [],
+    held: merchantPlan.draftsHeld,
+  };
+  if (merchantPlan.draftsHeld) warnings.push(`merchant listings: ${merchantPlan.draftsHeld}`);
+  // Never create, reactivate or update a copy of a piece the merchant lists.
+  desiredItems = desiredItems.filter((item) => !merchantPlan.suppressed.has(handleFor(item)));
 
   // An unmatched piece on an incomplete index is priced from what the last
   // matching run remembered about it, against this run's cost. Must run BEFORE
@@ -344,6 +396,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   });
 
   const decisions = diffBackVaultCatalog(desired, catalog);
+  for (const d of decisions) {
+    if (d.action === 'archive' && merchantPlan.suppressed.has(d.handle)) d.reason = 'merchant_listing';
+  }
   // A piece that matched today but is otherwise unchanged still needs its
   // remembered comparison rewritten before it ages out.
   const memoryRefreshed = promoteBackVaultCompetitorMemory(decisions, desiredItems, catalog, {
@@ -378,9 +433,14 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
           // pattern as the Belgium Dia sync (src/shopify.ts
           // redirectProductUrl). Redirect to the all-jewelry catalog
           // (SHOPIFY_SETUP.md §5) rather than a per-designer collection —
-          // the archived product's vendor isn't available here.
-          await client.redirectProductUrl(decision.handle, '/collections/all').catch(() => {});
+          // the archived product's vendor isn't available here. A copy of a
+          // merchant listing redirects to that listing instead.
+          const merchantHandle = merchantPlan.suppressed.get(decision.handle);
+          await client
+            .redirectProductUrl(decision.handle, merchantHandle ? `/products/${merchantHandle}` : '/collections/all')
+            .catch(() => {});
         }
+        if (decision.reason === 'merchant_listing') merchantStats.copiesArchived.push(decision.handle);
         continue;
       }
       if (decision.action === 'publish') {
@@ -433,6 +493,26 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     }
   }
 
+  // The supplier no longer has these pieces: the merchant's own listing goes
+  // to DRAFT (status only), never ARCHIVED, so it can be switched back by hand.
+  for (const listing of merchantPlan.toDraft) {
+    try {
+      if (!opts.dryRun) {
+        const draftErrors = await client.draftProduct(listing.id);
+        if (draftErrors.length) {
+          errors.push(`${listing.handle}: draft ${draftErrors.join('; ')}`);
+          continue;
+        }
+      }
+      merchantStats.drafted.push(listing.handle);
+    } catch (err) {
+      errors.push(`${listing.handle}: draft ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  if (merchantStats.drafted.length > 0) {
+    console.log(`Merchant listings moved to draft (no longer in stock at the supplier): ${merchantStats.drafted.join(', ')}`);
+  }
+
   const summary: RunSummary = {
     startedAt,
     finishedAt: new Date().toISOString(),
@@ -440,6 +520,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
     feedStats: stats,
     competitor: competitorStats,
     availability,
+    merchantListings: merchantStats,
     decisions,
     published,
     channels: channelNames,
@@ -604,6 +685,20 @@ async function writeReport(summary: RunSummary): Promise<void> {
           `- Rows fetched: ${summary.availability.fullCatalogFetched ?? 'skipped'}`,
           `- Top designer, in stock: ${summary.availability.fullCatalogInStock}`,
           `- Retained after leaving new-arrivals: ${summary.availability.retained}`,
+        ]),
+    '',
+    `## Merchant listings (pieces listed by hand)`,
+    ...(summary.merchantListings.active === null
+      ? ['- Not read this run: no copy suppressed, nothing drafted']
+      : [
+          `- Active: ${summary.merchantListings.active} · still in stock at the supplier: ${summary.merchantListings.inStock}`,
+          `- Duplicate \`bv-\` copies archived: ${summary.merchantListings.copiesArchived.length}`,
+          ...(summary.merchantListings.copiesArchived.length > 0
+            ? [`  - ${summary.merchantListings.copiesArchived.join(', ')}`]
+            : []),
+          `- Moved to draft (no longer in stock at the supplier): ${summary.merchantListings.drafted.length}`,
+          ...(summary.merchantListings.drafted.length > 0 ? [`  - ${summary.merchantListings.drafted.join(', ')}`] : []),
+          ...(summary.merchantListings.held ? [`- Drafting held: ${summary.merchantListings.held}`] : []),
         ]),
     '',
     `## Catalog changes`,
