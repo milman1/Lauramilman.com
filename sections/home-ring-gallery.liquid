@@ -8,7 +8,7 @@
     <a class="hrg__tab" id="DiamondTab-{{ section.id }}" href="#DiamondGallery-{{ section.id }}" data-gallery-tab>{{ 'home_ring_gallery.diamond_tab' | t }}</a>
     <a class="hrg__tab" id="RingTab-{{ section.id }}" href="#RingGallery-{{ section.id }}" data-gallery-tab>{{ 'home_ring_gallery.ring_tab' | t }}</a>
   </nav>
-  <div class="hrg__panel" id="DiamondGallery-{{ section.id }}" data-gallery-panel>
+  <div class="hrg__panel hrg__diamonds" id="DiamondGallery-{{ section.id }}" data-gallery-panel>
     <ul class="hrg__track{% if section.settings.color_image != blank %} hrg__track--five{% endif %}" data-gallery-track>
       {%- for block in section.blocks -%}
         {%- unless block.type == 'diamond' -%}{%- continue -%}{%- endunless -%}
@@ -30,6 +30,10 @@
           </a>
         </li>
       {%- endfor -%}
+      <li class="hrg__card"><a href="{{ routes.collections_url }}/lab-grown-diamonds?shape=Ashoka">
+        <span class="hrg__image hrg__image--diamond"><img src="{{ 'gallery-ashoka.webp' | asset_url }}" alt="" width="326" height="300" loading="lazy"></span>
+        <span class="hrg__name">Ashoka</span>
+      </a></li>
       {%- if section.settings.color_image != blank -%}
         <li class="hrg__card">
           <a href="{{ routes.collections_url }}/colored-lab-grown-diamonds">
@@ -40,6 +44,9 @@
           </a>
         </li>
       {%- endif -%}
+      <li class="hrg__card"><a class="hrg__more" href="{{ routes.collections_url }}/lab-grown-diamonds">
+        <span aria-hidden="true">❯</span>{{ 'home_ring_gallery.more_diamonds' | t }}
+      </a></li>
     </ul>
     <div class="hrg__scroll" data-gallery-scroll hidden>
       <button type="button" data-gallery-prev aria-label="{{ 'home_ring_gallery.previous' | t }}">&larr;</button>
@@ -47,10 +54,10 @@
       <button type="button" data-gallery-next aria-label="{{ 'home_ring_gallery.next' | t }}">&rarr;</button>
     </div>
     <div class="hrg__actions">
-      <a class="hrg__button hrg__button--primary" href="{{ routes.collections_url }}/lab-grown-diamonds">{{ 'home_ring_gallery.lab_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
-      <a class="hrg__button" href="{{ routes.collections_url }}/natural-diamonds">{{ 'home_ring_gallery.natural_cta' | t }} <span aria-hidden="true">&rarr;</span></a>
+      <a class="hrg__button hrg__button--primary" href="{{ routes.collections_url }}/lab-grown-diamonds">{{ 'home_ring_gallery.lab_cta' | t }}</a>
+      <a class="hrg__button" href="{{ routes.collections_url }}/natural-diamonds">{{ 'home_ring_gallery.natural_cta' | t }}</a>
       {%- if section.settings.color_image != blank -%}
-        <a class="hrg__button" href="{{ routes.collections_url }}/colored-lab-grown-diamonds">{{ 'home_ring_gallery.color_tab' | t }} <span aria-hidden="true">&rarr;</span></a>
+        <a class="hrg__button" href="{{ routes.collections_url }}/colored-lab-grown-diamonds">{{ 'home_ring_gallery.color_tab' | t }}</a>
       {%- endif -%}
     </div>
   </div>
@@ -140,6 +147,16 @@
   .hrg__progress { display: block; width: 90px; height: 2px; background: #d9d4cc; }
   .hrg__progress > span { display: block; height: 100%; width: 33.333%; background: #191919; transform: translateX(var(--gallery-progress, 0%)); }
   .hrg a:focus-visible, .hrg button:focus-visible { outline: 2px solid #7a5c22; outline-offset: -2px; }
+  @container (min-width: 1000px) {
+    .hrg__diamonds .hrg__track { grid-auto-columns: minmax(0, 1fr); }
+  }
+  .hrg__diamonds .hrg__card { background: var(--lmh-sand, #f1eee8); }
+  .hrg__diamonds .hrg__name { margin: 0; padding: 9px 5px 14px; font-size: clamp(18px, 1.6vw, 24px); }
+  .hrg__diamonds .hrg__more { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: #362016; border: 2px solid #bd9955; color: #fff9ef; font: 400 clamp(20px, 1.8vw, 29px)/1.12 var(--lmh-serif); }
+  .hrg__more span { color: #d8b36f; font: 400 32px/1 sans-serif; }
+  .hrg__diamonds .hrg__button { font: 400 20px/1.25 var(--lmh-serif); border-color: #ad8949; border-radius: 4px; }
+  .hrg__diamonds .hrg__button--primary { color: #fff9ef; background: #481729; border-color: #481729; }
+  .hrg__diamonds .hrg__button--primary:hover { background: #361021; border-color: #361021; }
   @container (max-width: 749px) {
     .hrg { padding: 38px 20px; }
     .hrg__header p { font-size: 12px; }
