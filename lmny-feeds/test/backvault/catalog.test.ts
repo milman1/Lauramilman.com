@@ -38,10 +38,10 @@ describe('publishStateFor', () => {
     });
   });
 
-  it('reports the four channels an Online-Store-only estate piece is missing', () => {
+  it('reports the five channels an Online-Store-only estate piece is missing', () => {
     const state = publishStateFor(publishedRows(['Online Store']), ESTATE, INSTALLED);
     expect(state.published).toBe(false);
-    expect(state.missingChannels).toEqual(['Shop', 'Google & YouTube', 'Facebook & Instagram', 'Pinterest']);
+    expect(state.missingChannels).toEqual(['Shop', 'Google & YouTube', 'Facebook & Instagram', 'Pinterest', 'Microsoft Channel']);
   });
 
   it('treats an empty publication list as published nowhere, not published everywhere', () => {
@@ -55,7 +55,7 @@ describe('publishStateFor', () => {
 
   it('reports a single missing channel', () => {
     const state = publishStateFor(
-      publishedRows(['Online Store', 'Shop', 'Google & YouTube', 'Facebook & Instagram']),
+      publishedRows(['Online Store', 'Shop', 'Google & YouTube', 'Facebook & Instagram', 'Microsoft Channel']),
       ESTATE,
       INSTALLED,
     );

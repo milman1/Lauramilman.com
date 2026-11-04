@@ -37,6 +37,9 @@ export const SALES_CHANNELS = [
   'Google & YouTube',
   'Facebook & Instagram',
   'Pinterest',
+  // Merchant decision 2026-11-04: watches and pre-owned pieces also go to
+  // Microsoft (Bing Shopping and Copilot). Loose stones stay off it.
+  'Microsoft Channel',
 ] as const;
 
 /**
@@ -50,7 +53,7 @@ export type ChannelKind = 'diamond' | 'watch' | 'estate';
 
 /**
  * The channel list for a feed product. Diamonds get the two-channel list;
- * watches (Belgium Dia) and estate pieces (Back Vault) get all five.
+ * watches (Belgium Dia) and estate pieces (Back Vault) get the full list.
  */
 export function channelsFor(kind: ChannelKind): readonly string[] {
   return kind === 'diamond' ? LOOSE_DIAMOND_CHANNELS : SALES_CHANNELS;
