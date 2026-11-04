@@ -26,7 +26,7 @@ describe('normalizeBackVaultFeed', () => {
     const item = items[0]!;
     expect(item.vendor).toBe('Cartier');
     expect(item.costUsd).toBe(4500);
-    expect(item.priceUsd).toBe(5000);
+    expect(item.priceUsd).toBe(4050);
     expect(containsBackVaultReference(item.title)).toBe(false);
     expect(containsBackVaultReference(item.descriptionHtml)).toBe(false);
     expect(item.specs.metalType?.toLowerCase()).toContain('yellow gold');
@@ -35,14 +35,14 @@ describe('normalizeBackVaultFeed', () => {
     expect(item.specs.condition?.toLowerCase()).toContain('excellent');
   });
 
-  it('prices every item at the supplier price plus the flat $500 markup', () => {
+  it('prices every item at 10% under the supplier listed price', () => {
     const { items } = normalizeBackVaultFeed([
       product({ handle: 'a', variants: [{ id: 1, title: 'Default Title', price: '67600.00', available: true }] }),
       product({ handle: 'b', variants: [{ id: 2, title: 'Default Title', price: '950.50', available: true }] }),
     ]);
     expect(items.map((i) => [i.costUsd, i.priceUsd])).toEqual([
-      [67600, 68100],
-      [950.5, 1450.5],
+      [67600, 60840],
+      [950.5, 855.45],
     ]);
   });
 

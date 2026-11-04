@@ -214,7 +214,7 @@ export function buildProductSetInput(
           tracked: Boolean(locationId),
           requiresShipping: true,
           // Admin "Cost per item", next to Price. The supplier's listed
-          // price is what LMNY pays; retail is cost + BACKVAULT.markupUsd.
+          // price is what LMNY pays; retail is 10% under that listed price.
           cost: item.costUsd.toFixed(2),
         },
         ...(locationId

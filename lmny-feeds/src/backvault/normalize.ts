@@ -49,8 +49,8 @@ export interface NormalizeResult {
 /**
  * Filter the raw feed down to in-stock items whose vendor is one of the
  * curated top designers, then scrub and shape them for pricing/write.
- * The supplier's listed price is the cost; retail is cost plus the flat
- * markup in config/pricing.ts (BACKVAULT.markupUsd).
+ * The supplier's listed price is the cost; retail is that price times
+ * BACKVAULT.listedPriceFactor (10% less than their site).
  */
 export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: CompetitorIndex): NormalizeResult {
   const stats: NormalizeStats = { totalFetched: rawRows.length, competitorMatched: 0, malformed: 0, outOfStock: 0, notTopDesigner: 0, accepted: 0 };

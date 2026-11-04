@@ -306,20 +306,21 @@ export const WATCH_BRANDS: string[] = [
 /**
  * The Back Vault (estate / vintage designer jewelry, src/backvault/).
  *
- * The supplier's listed price is LMNY's cost. Retail is a flat markup over
- * that cost, and the cost is written to Shopify **Cost per item**
+ * The supplier's listed price is LMNY's cost. Retail is 10% under that
+ * listed price, and the cost is written to Shopify **Cost per item**
  * (`inventoryItem.cost`) so margin shows next to Price in Admin.
  *
- *   matched on a competitor:  retail = max((cost + competitor) / 2, cost + $500)
- *   no competitor match:      retail = cost + $500
+ *   retail = round(listed price × 0.9)
  *
- * The competitor is Robinson's Jewelers, which stocks the same supplier
- * pieces; the match key is the supplier stock number
+ * Merchant decision 2026-10-20: replace the midpoint with Robinson's
+ * Jewelers (floored at cost + $500) with 10% under the supplier's own
+ * listed price. Robinson's is still read and remembered; it does not
+ * set the ticket. The match key remains the supplier stock number
  * (src/backvault/competitor.ts). Never a fuzzy title match.
  */
 export const BACKVAULT = {
-  /** Flat dollar markup added to the supplier's listed (cost) price. */
-  markupUsd: 500,
+  /** Retail = supplier listed price × this. 0.9 is 10% less than their site. */
+  listedPriceFactor: 0.9,
   competitor: {
     name: "Robinson's Jewelers",
     baseUrl: 'https://robinsonsjewelers.com',

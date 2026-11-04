@@ -57,18 +57,12 @@ describe('stockRefFor / competitorPriceFor', () => {
 });
 
 describe('backVaultRetail', () => {
-  it('is the midpoint between cost and the competitor when matched', () => {
-    expect(backVaultRetail(67600, 72000)).toBe(69800);
-  });
-
-  it('never drops below cost + markup when the competitor prices low', () => {
-    expect(backVaultRetail(67600, 67700)).toBe(68100);
-    expect(backVaultRetail(67600, 0)).toBe(68100);
-  });
-
-  it('is cost + markup without a match', () => {
-    expect(backVaultRetail(67600)).toBe(68100);
-    expect(backVaultRetail(67600, null)).toBe(68100);
+  it('is 10% under the supplier price, with or without a competitor price', () => {
+    expect(backVaultRetail(67600, 72000)).toBe(60840);
+    expect(backVaultRetail(67600, 67700)).toBe(60840);
+    expect(backVaultRetail(67600, 0)).toBe(60840);
+    expect(backVaultRetail(67600)).toBe(60840);
+    expect(backVaultRetail(67600, null)).toBe(60840);
   });
 });
 
@@ -85,17 +79,17 @@ describe('normalizeBackVaultFeed with a competitor index', () => {
     images: [{ src: 'https://cdn.example.com/J10605.jpg' }],
   };
 
-  it('prices matched pieces at the midpoint and records the competitor price', () => {
+  it('prices matched pieces at 10% under the supplier price and records the competitor price', () => {
     const { items, stats } = normalizeBackVaultFeed([supplierRow], indexCompetitor([row()]));
     expect(items[0]!.costUsd).toBe(67600);
     expect(items[0]!.competitorPriceUsd).toBe(72000);
-    expect(items[0]!.priceUsd).toBe(69800);
+    expect(items[0]!.priceUsd).toBe(60840);
     expect(stats.competitorMatched).toBe(1);
   });
 
-  it('falls back to the flat markup without an index or a match', () => {
+  it('uses the same 10% under the supplier price without an index or a match', () => {
     const { items, stats } = normalizeBackVaultFeed([supplierRow]);
-    expect(items[0]!.priceUsd).toBe(68100);
+    expect(items[0]!.priceUsd).toBe(60840);
     expect(items[0]!.competitorPriceUsd).toBeUndefined();
     expect(stats.competitorMatched).toBe(0);
   });

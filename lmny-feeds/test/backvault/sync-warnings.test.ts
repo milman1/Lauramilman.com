@@ -265,7 +265,7 @@ describe('a failed competitor fetch', () => {
     await run(['--dry-run']);
     const { json } = report();
     expect(json.errors).toEqual([]);
-    expect(json.warnings).toHaveLength(2); // the fetch, plus the piece priced from memory
+    expect(json.warnings).toHaveLength(1); // the fetch; the ticket does not come from memory
     expect(json.warnings[0]).toContain('competitor fetch: Competitor feed: HTTP 429 for page 61');
     expect(process.exitCode).toBe(0);
   });
@@ -282,12 +282,12 @@ describe('a failed competitor fetch', () => {
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
     const { json, md } = report();
-    expect(json.pricedFromMemory).toBe(1);
-    expect(json.memoryHandles).toEqual([HANDLE]);
+    expect(json.pricedFromMemory).toBe(0);
+    expect(json.memoryHandles).toEqual([]);
     expect(json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
-    expect(json.warnings.some((w: string) => w.includes('1 piece priced from a remembered competitor'))).toBe(true);
-    expect(md).toContain('## Warnings (2)');
-    expect(md).toContain(`- Priced from a remembered competitor comparison: 1`);
+    expect(json.warnings.some((w: string) => w.includes('1 piece priced from a remembered competitor'))).toBe(false);
+    expect(md).toContain('## Warnings (1)');
+    expect(md).toContain('- Priced from a remembered competitor comparison: 0');
     expect(md).toContain('## Competitor prices');
     expect(md).toContain('- FAILED: Competitor feed: HTTP 429 for page 61');
   });
@@ -328,7 +328,7 @@ describe('a failed competitor fetch', () => {
     state.catalog = [catalogEntry({ rememberedCompetitorPrice: 60000 })];
     await run([]);
     const { json, md } = report();
-    expect(String(productSets[0]!.variants[0].price)).toBe('68100.00');
+    expect(String(productSets[0]!.variants[0].price)).toBe('60840.00');
     expect(json.pricedFromMemory).toBe(0);
     expect(json.memoryHandles).toEqual([]);
     expect(json.flatFallbackReasons).toMatchObject({ flooredToFlat: 1 });
@@ -351,7 +351,7 @@ describe('a failed competitor fetch', () => {
     expect(json.errors).toEqual([]);
     expect(process.exitCode).toBe(0);
     expect(md).toContain('- FAILED: Competitor feed: the 10-minute fetch deadline passed after 0');
-    expect(json.pricedFromMemory).toBe(1);
+    expect(json.pricedFromMemory).toBe(0);
   });
 });
 
@@ -390,7 +390,7 @@ describe('a partial competitor index', () => {
     // cost 67,600 + competitor 70,000 -> midpoint 68,800, STRICTLY BELOW the
     // 69,800 on the store and below what the remembered 72,000 would give.
     // This run read that price, so this run's price is what is written.
-    expect(wrotePrice(productSets[0]!)).toBe('68800.00');
+    expect(wrotePrice(productSets[0]!)).toBe('60840.00');
     expect(json.pricedFromMemory).toBe(0);
     expect(json.memoryHandles).toEqual([]);
     expect(json.errors).toEqual([]);
@@ -410,22 +410,21 @@ describe('a partial competitor index', () => {
     expect(Date.parse(at.value!)).toBeGreaterThanOrEqual(before);
   });
 
-  it('prices an unmatched piece from its remembered comparison', async () => {
+  it('leaves an unmatched piece at 10% under the supplier listed price', async () => {
     state.competitor = async () => CAPPED;
     state.catalog = [catalogEntry()];
     await run([]);
     const { json } = report();
     expect(json.competitor.error).toBeUndefined();
     expect(json.competitor.state).toBe('partial');
-    // (67,600 + the remembered 72,000) / 2 — not the flat 68,100 an index that
-    // never saw the piece's page would otherwise have written.
-    expect(wrotePrice(productSets[0]!)).toBe('69800.00');
-    expect(json.pricedFromMemory).toBe(1);
-    expect(json.memoryHandles).toEqual([HANDLE]);
-    // The memory is carried forward with the date it was READ, not today.
+    // 67,600 × 0.9. The remembered 72,000 does not change the ticket.
+    expect(wrotePrice(productSets[0]!)).toBe('60840.00');
+    expect(json.pricedFromMemory).toBe(0);
+    expect(json.memoryHandles).toEqual([]);
+    // A comparison that does not set the ticket is not copied onto this write.
     const fields = productSets[0]!.metafields as Array<Record<string, string>>;
-    expect(fields.find((f) => f.key === 'competitor_price')!.value).toBe('72000.00');
-    expect(Date.parse(fields.find((f) => f.key === 'competitor_price_at')!.value!)).toBeLessThan(Date.now() - DAY_MS);
+    expect(fields.find((f) => f.key === 'competitor_price')).toBeUndefined();
+    expect(fields.find((f) => f.key === 'competitor_price_at')).toBeUndefined();
   });
 
   it('ignores the memory when the index is complete', async () => {
@@ -449,8 +448,8 @@ describe('a partial competitor index', () => {
     // priced from memory, nothing dropped to the flat markup.
     expect(json.warnings[0]).toContain('competitor index is PARTIAL');
     expect(json.warnings[0]).toContain('no piece matched in the rows that were read');
-    expect(json.warnings[0]).toContain('1 unmatched piece priced from a remembered comparison under 90 days old');
-    expect(json.warnings[0]).toContain('nothing fell back to the flat markup');
+    expect(json.warnings[0]).toContain('no piece could be priced from a remembered comparison');
+    expect(json.warnings[0]).toContain('1 priced flat at cost + markup');
   });
 
   it('counts the matches it really used in the warning', async () => {
@@ -471,8 +470,8 @@ describe('a partial competitor index', () => {
     expect(md).toContain('- PARTIAL: 25000 rows over 100 pages');
     expect(md).toContain('caps page-based pagination at 100 pages of 250');
     expect(md).toContain("- Pieces priced from a match in this run's rows: 0");
-    expect(md).toContain(`- Priced from a remembered comparison (under 90 days old): 1 (${HANDLE})`);
-    expect(md).toContain('- Fell back to the flat markup: 0 (0 nothing remembered, 0 memory expired,');
+    expect(md).toContain('- Priced from a remembered comparison: none');
+    expect(md).toContain('- Fell back to the flat markup: 1 (0 nothing remembered, 0 memory expired,');
     expect(md).toContain('This is a warning, not an error.');
     expect(md).not.toContain('- FAILED:');
   });
@@ -481,7 +480,8 @@ describe('a partial competitor index', () => {
     state.competitor = async () => CAPPED;
     state.catalog = [catalogEntry()];
     await run(['--dry-run']);
-    expect(report().md).toContain(`  - From memory: ${HANDLE}`);
+    expect(report().md).not.toContain(`  - From memory: ${HANDLE}`);
+    expect(report().md).toContain('- Priced from a remembered competitor comparison: 0');
   });
 });
 
@@ -500,7 +500,7 @@ describe('a supplier markdown across two consecutive degraded runs', () => {
     // Run 1: cost 67,600, no comparison to work from, so the flat rule.
     state.catalog = [noMemory];
     await run([]);
-    expect(String(productSets[0]!.variants[0].price)).toBe('68100.00');
+    expect(String(productSets[0]!.variants[0].price)).toBe('60840.00');
     const firstRun = report().json;
     expect(firstRun.pricedFromMemory).toBe(0);
     expect(firstRun.flatFallback).toBe(1);
@@ -510,7 +510,7 @@ describe('a supplier markdown across two consecutive degraded runs', () => {
     state.feedRow = supplierRowAt(60000);
     state.catalog = [noMemory];
     await run([]);
-    expect(String(productSets[0]!.variants[0].price)).toBe('60500.00');
+    expect(String(productSets[0]!.variants[0].price)).toBe('54000.00');
     expect(report().json.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
     expect(process.exitCode).toBe(0);
   });
@@ -521,8 +521,8 @@ describe('a supplier markdown across two consecutive degraded runs', () => {
     await run([]);
     // (60,000 + the remembered 72,000) / 2 — the premium is kept, the markdown
     // is not swallowed.
-    expect(String(productSets[0]!.variants[0].price)).toBe('66000.00');
-    expect(report().json.pricedFromMemory).toBe(1);
+    expect(String(productSets[0]!.variants[0].price)).toBe('54000.00');
+    expect(report().json.pricedFromMemory).toBe(0);
   });
 });
 
@@ -576,8 +576,8 @@ describe('the Done line names the competitor state', () => {
     // The count, not a claim: price_pinned=0 alone cannot tell "nothing needed
     // protecting" from "nothing matched".
     expect(line).toContain('competitor_matched=0');
-    expect(line).toContain('priced_from_memory=1');
-    expect(line).toContain('flat_fallback=0');
+    expect(line).toContain('priced_from_memory=0');
+    expect(line).toContain('flat_fallback=1');
     expect(line).toContain('errors=0');
   });
 
@@ -625,12 +625,11 @@ describe('the remembered price is applied before the content hash (two degraded 
     await run([]);
     const firstRun = report().json;
     expect(firstRun.decisions[0]).toMatchObject({ action: 'update', reason: 'hash_changed' });
-    expect(firstRun.pricedFromMemory).toBe(1);
+    expect(firstRun.pricedFromMemory).toBe(0);
     expect(productSets).toHaveLength(1);
 
     const written = wrote(productSets[0]!);
-    // The midpoint against the remembered 72,000, not the flat 68100.00.
-    expect(written.price).toBe('69800.00');
+    expect(written.price).toBe('60840.00');
 
     // Run 2: same degraded conditions, the store now holding exactly what run 1
     // wrote. The hash must match, or the piece is rewritten every week forever.
@@ -650,6 +649,6 @@ describe('the remembered price is applied before the content hash (two degraded 
     expect(report().json.pricedFromMemory).toBe(0);
     // A complete index that did not match this piece is the last word on it,
     // whatever the product still remembers.
-    expect(wrote(productSets[0]!).price).toBe('68100.00');
+    expect(wrote(productSets[0]!).price).toBe('60840.00');
   });
 });
