@@ -159,9 +159,9 @@ holds a stones table — Shopify products are the only live copy.
    **Sales channels.** Every product this step writes is published with one
    `publishablePublish` call carrying the whole channel list from
    `config/channels.ts` (merchant decision 2026-09-10), not Online Store
-   alone. Watches go to all five — Online Store, Shop, Google & YouTube,
-   Facebook & Instagram, Pinterest — because they are high-ticket and
-   searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
+   alone. Watches go to all six — Online Store, Shop, Google & YouTube,
+   Facebook & Instagram, Pinterest, Microsoft Channel (added 2026-11-04) —
+   because they are high-ticket and searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
    (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
    swamp Merchant Center and Meta's catalog limits. The kind is read from
    the handle prefix (`channelsForHandle` in `src/diff.ts`), so a product

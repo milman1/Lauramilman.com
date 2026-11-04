@@ -18,6 +18,7 @@ const INSTALLED = [
   { id: 'gid://shopify/Publication/4', name: 'Facebook & Instagram' },
   { id: 'gid://shopify/Publication/5', name: 'Pinterest' },
   { id: 'gid://shopify/Publication/6', name: 'TikTok' },
+  { id: 'gid://shopify/Publication/7', name: 'Microsoft Channel' },
 ];
 
 describe('ShopifyClient.publicationIdsByName', () => {

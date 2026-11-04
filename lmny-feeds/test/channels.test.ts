@@ -8,13 +8,14 @@ import {
 import { channelsForHandle } from '../src/diff.js';
 
 describe('SALES_CHANNELS', () => {
-  it('is the five channels the merchant approved on 2026-09-10, in order', () => {
+  it('is the five channels approved on 2026-09-10 plus Microsoft (2026-11-04), in order', () => {
     expect([...SALES_CHANNELS]).toEqual([
       'Online Store',
       'Shop',
       'Google & YouTube',
       'Facebook & Instagram',
       'Pinterest',
+      'Microsoft Channel',
     ]);
   });
 
@@ -74,9 +75,9 @@ describe('publicationMatchesChannel', () => {
 });
 
 describe('channelsForHandle (Belgium Dia routing)', () => {
-  it('sends a watch to all five channels', () => {
+  it('sends a watch to every sales channel, Microsoft included', () => {
     expect([...channelsForHandle('w-3194')]).toEqual([...SALES_CHANNELS]);
-    expect(channelsForHandle('w-3194')).toHaveLength(5);
+    expect(channelsForHandle('w-3194')).toContain('Microsoft Channel');
   });
 
   it('keeps a natural stone on the two-channel list', () => {
