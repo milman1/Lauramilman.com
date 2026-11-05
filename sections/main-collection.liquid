@@ -177,6 +177,38 @@
       </nav>
     {%- endif -%}
 
+    {%- comment -%}
+      Pre-owned model pages (merchant, 2026-11-05): the designer page links down
+      to its model pages, and each model page links to its siblings.
+    {%- endcomment -%}
+    {%- liquid
+      assign model_links = ''
+      case collection.handle
+        when 'cartier', 'pre-owned-cartier-love', 'pre-owned-cartier-trinity', 'pre-owned-cartier-panthere'
+          assign model_parent = 'cartier::All Cartier'
+          assign model_links = 'pre-owned-cartier-love::Love|pre-owned-cartier-trinity::Trinity|pre-owned-cartier-panthere::Panthère'
+        when 'van-cleef-arpels', 'pre-owned-van-cleef-alhambra'
+          assign model_parent = 'van-cleef-arpels::All Van Cleef &amp; Arpels'
+          assign model_links = 'pre-owned-van-cleef-alhambra::Alhambra'
+        when 'tiffany', 'pre-owned-tiffany-schlumberger'
+          assign model_parent = 'tiffany::All Tiffany &amp; Co.'
+          assign model_links = 'pre-owned-tiffany-schlumberger::Schlumberger'
+        when 'rolex-watches', 'pre-owned-rolex-datejust', 'pre-owned-rolex-submariner'
+          assign model_parent = 'rolex-watches::All Rolex'
+          assign model_links = 'pre-owned-rolex-datejust::Datejust|pre-owned-rolex-submariner::Submariner'
+      endcase
+    -%}
+    {%- if model_links != blank -%}
+      <nav class="lm-collection__chips" aria-label="Shop by model">
+        <span class="lm-collection__chips-label">Shop by model</span>
+        {%- assign model_items = model_parent | append: '|' | append: model_links | split: '|' -%}
+        {%- for item in model_items -%}
+          {%- assign parts = item | split: '::' -%}
+          <a href="/collections/{{ parts[0] }}" class="lm-collection__chip"{% if collection.handle == parts[0] %} aria-current="page"{% endif %}>{{ parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
     {%- if collection.handle == 'everyday-jewelry' -%}
       <nav class="lm-collection__chips" aria-label="{{ 'everyday_filters.shop_by_type' | t }}">
         <span class="lm-collection__chips-label">{{ 'everyday_filters.shop_by_type' | t }}</span>
@@ -340,11 +372,12 @@
     {%- comment -%}
       Guide and FAQ (custom.guide_html / custom.guide_faq) on an explicit list of
       jewelry collections only. Merchant approved Cartier and David Webb, then
-      the other designer and gold jewelry pages, on 2026-10-28. Loose-stone and
+      the other designer and gold jewelry pages, on 2026-10-28, and the
+      pre-owned model pages on 2026-11-05. Loose-stone and
       watch collections are not on the list (Rolex's stored guide stays hidden).
     {%- endcomment -%}
     {%- liquid
-      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings' | split: ','
+      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings,pre-owned-cartier-love,pre-owned-cartier-trinity,pre-owned-cartier-panthere,pre-owned-van-cleef-alhambra,pre-owned-tiffany-schlumberger,pre-owned-rolex-datejust,pre-owned-rolex-submariner' | split: ','
     -%}
     {%- if longform_handles contains collection.handle -%}
       {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
