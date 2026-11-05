@@ -425,11 +425,14 @@ npm run sync:backvault       # live (needs Shopify env vars)
    estate-jewelry PDP reads from §1 of SHOPIFY_SETUP.md).
 5. **Rewrite listing copy** (`src/backvault/listing.ts`) to the same
    estate / watch SEO schema already used on the store:
-   - Title: `{Brand} {normalized remainder}`; watches get a `Pre-Owned` prefix
+   - Title: `Pre-Owned {Brand} {normalized remainder}` for jewelry and watches
+     (merchant decision 2026-11-05; the next run rewrites existing `bv-` titles,
+     handles stay the same)
    - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
      plus `Authenticated and hand-inspected by Laura Milman New York.`
      Specs stay in metafields, not an HTML table.
-   - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
+   - SEO title ≤ 60 chars, truncated at a word: jewelry
+     `Pre-Owned {Brand} … | Estate Jewelry`, watches `{Brand} … | Pre-Owned Watch`
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
