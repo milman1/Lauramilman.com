@@ -101,6 +101,18 @@ jobs:
             npx tsx src/sync.ts --dry-run
           fi
 
+      - name: Check diamond redirects on the daily scheduled run
+        if: always() && github.event_name == 'schedule'
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+        run: |
+          if [ "$(date -u +%H)" = "06" ]; then
+            npx tsx scripts/audit-diamond-redirects.ts
+          fi
+
       - name: Publish run summary
         if: always()
         run: cat out/report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
@@ -115,5 +127,7 @@ jobs:
             lmny-feeds/out/report.md
             lmny-feeds/out/google-loose-plan.json
             lmny-feeds/out/google-loose-verification.json
+            lmny-feeds/out/diamond-redirect-health.json
+            lmny-feeds/out/diamond-redirect-tracking-plan.json
           if-no-files-found: ignore
 

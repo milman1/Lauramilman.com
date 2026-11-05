@@ -82,4 +82,33 @@
   analytics.subscribe('lmny_purchase_mode_selected', event => forward('lmny_purchase_mode_selected', event));
   analytics.subscribe('lmny_ring_builder_started', event => forward('lmny_ring_builder_started', event));
   analytics.subscribe('lmny_diamond_added_to_cart', event => forward('lmny_diamond_added_to_cart', event));
+  // Observe Shopify's page event, but emit only the custom landing event.
+  // The Google app remains the sole owner of standard page_view events.
+  analytics.subscribe('page_viewed', event => {
+    if (privacy?.analyticsProcessingAllowed !== true || (event.id && seen.has(event.id))) return;
+    let url;
+    try { url = new URL(event.context?.document?.location?.href); } catch { return; }
+    if (!['www.lauramilman.com', 'lauramilman.com'].includes(url.hostname) || url.protocol !== 'https:') return;
+    const handle = url.searchParams.get('lmny_redirect');
+    if (!/^(lg|nd)-[a-z0-9-]{1,96}$/.test(handle || '') || !/^\/collections\/[a-z0-9-]+$/.test(url.pathname)) return;
+    let referrer = '';
+    try {
+      const ref = new URL(event.context?.document?.referrer);
+      if (['https:', 'http:'].includes(ref.protocol)) referrer = ref.origin + '/';
+    } catch { /* Direct or unavailable referral. */ }
+    start();
+    gtag('event', 'lmny_diamond_redirect_landing', {
+      send_to: measurementId,
+      page_location: 'https://www.lauramilman.com' + url.pathname,
+      page_title: 'Diamond alternatives',
+      page_referrer: referrer,
+      original_diamond: handle,
+      redirect_collection: url.pathname.slice('/collections/'.length),
+      origin: handle.startsWith('nd-') ? 'natural' : handle.startsWith('lg-color-') ? 'colored_lab' : 'lab'
+    });
+    if (event.id) {
+      seen.add(event.id);
+      if (seen.size > 200) seen.delete(seen.values().next().value);
+    }
+  });
 })();

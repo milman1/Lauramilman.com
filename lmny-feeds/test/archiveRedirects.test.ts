@@ -5,10 +5,13 @@ import type { Kind } from '../src/types.js';
 const fetched = new Set<Kind>(['natural', 'lab']);
 const archived = (handle: string) => ({ handle, status: 'ARCHIVED' as const });
 const no = () => false;
-const client = () => ({
-  redirectPaths: vi.fn(async () => new Set<string>()),
-  redirectProductUrl: vi.fn(async (_handle: string, _target: string): Promise<string[]> => []),
-});
+const client = () => {
+  const paths = new Set<string>();
+  return {
+    redirectPaths: vi.fn(async () => paths),
+    redirectProductUrl: vi.fn(async (handle: string, _target: string): Promise<string[]> => { paths.add('/products/' + handle); return []; }),
+  };
+};
 
 describe('archive redirect reconciliation', () => {
   it('repairs earlier archives, skips held, active, draft, unrelated and unavailable-feed products', async () => {
@@ -20,8 +23,8 @@ describe('archive redirect reconciliation', () => {
     ], fetched, new Set(['nd-held']), no);
     expect(result).toEqual({ ensured: 2, pending: 0, errors: [] });
     expect(c.redirectProductUrl.mock.calls).toEqual([
-      ['nd-missing', '/collections/natural-diamonds'],
-      ['lg-missing', '/collections/lab-grown-diamonds'],
+      ['nd-missing', '/collections/natural-diamonds?lmny_redirect=nd-missing'],
+      ['lg-missing', '/collections/lab-grown-diamonds?lmny_redirect=lg-missing'],
     ]);
   });
 

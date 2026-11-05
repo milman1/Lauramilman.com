@@ -9,7 +9,7 @@ function sandbox(allowed: boolean) {
   let changeConsent: (event: any) => void;
   const window: any = {};
   vm.runInNewContext(source, {
-    window, init: { customerPrivacy: { analyticsProcessingAllowed: allowed } },
+    window, URL, init: { customerPrivacy: { analyticsProcessingAllowed: allowed } },
     api: { customerPrivacy: { subscribe: (_: string, fn: any) => { changeConsent = fn; } } },
     analytics: { subscribe: (name: string, fn: any) => handlers.set(name, fn) },
     document: { createElement: () => ({}), head: { appendChild: (script: any) => scripts.push(script) } }
@@ -21,17 +21,44 @@ function sandbox(allowed: boolean) {
   };
 }
 describe('ring-builder GA4 custom pixel', () => {
+  it('counts marked landings once, excludes private URL data, and respects consent', () => {
+    const s = sandbox(false), send = s.handlers.get('page_viewed')!;
+    const event = { id: 'landing', context: { document: {
+      location: {href: 'https://www.lauramilman.com/collections/lab-grown-diamonds?lmny_redirect=lg-123&email=PRIVATE'},
+      referrer: 'https://chatgpt.com/c/PRIVATE?text=PRIVATE'
+    } } };
+    send(event); expect(s.calls()).toEqual([]);
+    s.consent(true); expect(s.calls()).toEqual([]);
+    send(event); send(event);
+    const events = s.calls().filter(c => c[0] === 'event');
+    expect(events).toHaveLength(1);
+    expect(events[0][1]).toBe('lmny_diamond_redirect_landing');
+    expect(events[0][2]).toMatchObject({original_diamond:'lg-123',redirect_collection:'lab-grown-diamonds',page_referrer:'https://chatgpt.com/'});
+    expect(JSON.stringify(s.calls())).not.toContain('PRIVATE');
+    s.consent(false); send({...event,id:'revoked'});
+    expect(s.calls().filter(c => c[0] === 'event')).toHaveLength(1);
+  });
+  it('ignores ordinary page views, off-site markers and malformed handles', () => {
+    const s = sandbox(true), send = s.handlers.get('page_viewed')!;
+    for (const href of [
+      'https://www.lauramilman.com/collections/lab-grown-diamonds',
+      'https://other.example/collections/lab-grown-diamonds?lmny_redirect=lg-123',
+      'https://www.lauramilman.com/collections/lab-grown-diamonds?lmny_redirect=bad',
+      'https://www.lauramilman.com/products/lg-123?lmny_redirect=lg-123'
+    ]) send({context:{document:{location:{href}}}});
+    expect(s.calls()).toEqual([]);
+  });
   it('forwards all twelve custom events to the verified destination without standard events', () => {
     const s = sandbox(true);
-    expect(s.handlers.size).toBe(12);
-    for (const [name, send] of s.handlers) send({ id: name, customData: { screen: 'diamond_product', product_handle: 'lg-test', origin: 'lab', band_count: 2, device_type: 'mobile', product_kind: 'diamond' } });
+    expect(s.handlers.size).toBe(13);
+    for (const [name, send] of s.handlers) if (name !== 'page_viewed') send({ id: name, customData: { screen: 'diamond_product', product_handle: 'lg-test', origin: 'lab', band_count: 2, device_type: 'mobile', product_kind: 'diamond' } });
     const events = s.calls().filter(c => c[0] === 'event');
     expect(events).toHaveLength(12);
-    expect(events.map(c => c[1])).toEqual([...s.handlers.keys()]);
+    expect(events.map(c => c[1])).toEqual([...s.handlers.keys()].filter(n => n !== 'page_viewed'));
     expect(events.every(c => c[2].send_to === 'G-CTWW9B42MX')).toBe(true);
     expect(s.scripts).toHaveLength(1);
     expect(s.calls().find(c => c[0] === 'config')[2].send_page_view).toBe(false);
-    expect(s.handlers.has('page_viewed')).toBe(false);
+    expect(s.handlers.has('page_viewed')).toBe(true);
     expect(s.handlers.has('checkout_completed')).toBe(false);
   });
   it('does not load Google or replay events while denied, and honors later revocation', () => {
