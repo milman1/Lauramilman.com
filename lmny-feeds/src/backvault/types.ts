@@ -47,7 +47,7 @@ export interface BackVaultItem {
   vendor: string;
   productType: string;
   descriptionHtml: string;
-  /** The supplier's listed price — LMNY's cost. Written to Shopify Cost per item. */
+  /** The supplier's listed price. Retail is this; LMNY's cost is this ÷ BACKVAULT.costDivisor. */
   costUsd: number;
   /**
    * Competitor's price for the same stock number: read from the competitor
@@ -64,7 +64,7 @@ export interface BackVaultItem {
    * piece every week.
    */
   competitorPriceReadAt?: string;
-  /** Retail on the store: midpoint with the competitor, else cost + BACKVAULT.markupUsd. */
+  /** Retail on the store: the supplier listed price times BACKVAULT.listedPriceFactor. */
   priceUsd: number;
   available: boolean;
   sku?: string;

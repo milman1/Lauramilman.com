@@ -585,10 +585,10 @@ function competitorWarning(stats: CompetitorStats, memory: CompetitorMemoryStats
       : 'no piece could be priced from a remembered comparison';
   const flatClause =
     flat > 0
-      ? `${flat} priced flat at cost + markup (${memory.unremembered} with nothing remembered, ` +
+      ? `${flat} priced at the supplier listed price (${memory.unremembered} with nothing remembered, ` +
         `${memory.expired} whose memory had expired, ${memory.unusable} whose memory had no readable date, ` +
         `${memory.flooredToFlat} whose remembered midpoint lost to the floor)`
-      : 'nothing fell back to the flat markup';
+      : 'nothing fell back to the listed price';
   if (stats.state === 'failed') {
     return (
       `competitor fetch: ${stats.error} — nothing could be matched this run; ${memoryClause}; ${flatClause}`
