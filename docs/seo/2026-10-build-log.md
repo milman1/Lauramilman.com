@@ -511,3 +511,10 @@ Follow-up 2026-11-02: the theme builds FAQPage markup from `custom.guide_faq`, w
 (json), so a draft gets FAQPage markup from the theme as soon as it is published,
 like the other articles. The theme only marks up a question whose text appears in the
 body, which the rendered FAQ block guarantees. One new test; 961 tests pass.
+
+## 2026-11-05: pre-owned model pages
+
+- Merchant approved, on condition that nothing affects loose-stone AI and search visibility: no loose-stone template, collection, link or sitemap entry changed.
+- Store (live): seven automatic collections by vendor and title, published to the Online Store: `pre-owned-cartier-love`, `pre-owned-cartier-trinity`, `pre-owned-cartier-panthere`, `pre-owned-van-cleef-alhambra`, `pre-owned-tiffany-schlumberger`, `pre-owned-rolex-datejust`, `pre-owned-rolex-submariner`. Each has an intro, an SEO title and description, and four FAQs in `custom.guide_faq` (two about the model, "not an authorized dealer", returns and the jewelry sign-up offer; watch pages state exchange only within 7 days). Active pieces on 2026-11-05: 29, 11, 24, 11, 17, 28 and 22.
+- Theme: `sections/main-collection.liquid` adds the seven handles to the guide/FAQ allow-list and a "Shop by model" chip row on Cartier, Van Cleef & Arpels, Tiffany and Rolex Watches and on each model page. Rolex Watches itself stays off the guide list. Guard test `lmny-feeds/test/theme-preowned-models.test.ts`.
+- Not done: Everyday Jewelry SEO fields were already set by the merchant.
