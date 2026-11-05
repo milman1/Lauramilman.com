@@ -99,12 +99,12 @@ describe('buildProductSetInput', () => {
 
   it('rewrites title, description, and SEO to the LMNY estate schema', () => {
     const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z');
-    expect(input.title).toBe('Cartier Love Bracelet');
+    expect(input.title).toBe('Pre-Owned Cartier Love Bracelet');
     expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
     expect(String(input.descriptionHtml)).toContain('Authenticated and hand-inspected by Laura Milman New York.');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
-      title: 'Cartier Love Bracelet | Estate Jewelry',
+      title: 'Pre-Owned Cartier Love Bracelet | Estate Jewelry',
       description: expect.stringContaining('Authenticated by Laura Milman New York.'),
     });
     expect((input.seo as { title: string }).title.length).toBeLessThanOrEqual(60);
