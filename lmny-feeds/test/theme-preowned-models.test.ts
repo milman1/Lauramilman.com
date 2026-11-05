@@ -13,6 +13,10 @@ const MODEL_PAGES = [
   'pre-owned-tiffany-schlumberger',
   'pre-owned-rolex-datejust',
   'pre-owned-rolex-submariner',
+  'pre-owned-cartier-juste-un-clou',
+  'pre-owned-van-cleef-perlee',
+  'pre-owned-rolex-gmt-master',
+  'pre-owned-rolex-daytona',
 ];
 
 describe('pre-owned model pages (2026-11-05)', () => {
