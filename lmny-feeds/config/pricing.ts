@@ -327,12 +327,12 @@ export const BACKVAULT = {
 } as const;
 
 /**
- * Royal Chain basic chains ONLY (AGENTS.md section 2a and recipe H).
+ * Royal Chain sourced jewelry ONLY (AGENTS.md section 2a and recipe H).
  * Retail is a straight multiple of the wholesale cost read from the
  * merchant's Royal Chain trade account. Only trending items are imported,
  * never a whole category.
  *
- *   retail = roundUpTo5(cost × 3)
+ *   retail = roundToCents(cost × 2)
  *
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
@@ -342,8 +342,7 @@ export const BACKVAULT = {
  */
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
-  costMultiple: 3,
-  roundUpToUsd: 5,
+  costMultiple: 2,
 } as const;
 
 export function supplierRetailFromCost(costUsd: number): number {
@@ -351,7 +350,7 @@ export function supplierRetailFromCost(costUsd: number): number {
     throw new Error(`Supplier pricing: invalid cost ${costUsd}`);
   }
   const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
-  return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+  return Math.round((raw + Number.EPSILON) * 100) / 100;
 }
 
 /**
