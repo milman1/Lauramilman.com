@@ -58,8 +58,9 @@ All mandatory checks below remain required. The gate command automates the
 structural checks; its documented Shopify connector path must reproduce them
 with complete reads and retain evidence for the semantic and preview checks.
 Skylab products require their matching video attached as Shopify media.
-Finished lab-grown pieces use cost × 2, rounded to cents; settings remain cost
-× 3, rounded to dollars.
+Finished lab-grown pieces use cost × 2, nearest $10; settings remain cost
+× 2.25, nearest $10. Royal Chain is cost × 3, nearest $10. Loose lab-grown,
+natural, and colored stones stay on their own stone rules.
 
 
 Create future uploads as DRAFT. Finish the applicable listing and operational

@@ -42,8 +42,16 @@ describe('normalizeBackVaultFeed', () => {
     ]);
     expect(items.map((i) => [i.costUsd, i.priceUsd])).toEqual([
       [67600, 68100],
-      [950.5, 1450.5],
+      [950.5, 1450],
     ]);
+  });
+
+  it('leaves an estate watch on the cent ticket', () => {
+    const { items } = normalizeBackVaultFeed([
+      product({ handle: 'cartier-tank', product_type: 'Watch', title: 'Cartier Tank', variants: [{ id: 3, title: 'Default Title', price: '950.50', available: true }] }),
+    ]);
+    expect(items[0]!.productType).toBe('Watch');
+    expect(items[0]!.priceUsd).toBe(1450.5);
   });
 
   it('rejects out-of-stock items', () => {

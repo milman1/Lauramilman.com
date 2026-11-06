@@ -242,26 +242,48 @@ export const WATCH = {
  * `LOOSE_LAB_GROWN`.
  * Not sourced from the Belgium Dia diamond API.
  *
- *   retail = cost × 2 (rounded to cents)
+ *   retail = nearest $10 of (cost × 2)
  *
  * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
  * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
- * Royal Chain rules to these products.
+ * Royal Chain rules to these products. Loose lab-grown, natural, and colored
+ * stones are not jewelry and do not use this rounding.
  */
 export const LAB_GROWN_JEWELRY = {
   vendors: ['Peaceful Diamonds'] as const,
   /** Common Peaceful Diamonds SKU prefixes observed on the store. */
   skuPrefixes: ['BC14', 'NK14'] as const,
-  /** retail = cost × this. */
+  /** retail = cost × this, then `roundJewelryRetail`. */
   costMultiple: 2,
 } as const;
+
+/**
+ * Jewelry tickets only. Merchant decision 2026-10-29: the published price
+ * is the nearest $10 (half up). Loose natural, loose lab-grown, colored
+ * loose lab, Belgium watches, and Jacob & Co. list prices do not use this.
+ */
+export const JEWELRY_RETAIL = {
+  roundToUsd: 10,
+} as const;
+
+/** Nearest $10. A non-positive result is refused so a tiny cost cannot publish as free. */
+export function roundJewelryRetail(usd: number): number {
+  if (!Number.isFinite(usd)) {
+    throw new Error(`Jewelry pricing: invalid amount ${usd}`);
+  }
+  const rounded = Math.round(usd / JEWELRY_RETAIL.roundToUsd) * JEWELRY_RETAIL.roundToUsd;
+  if (rounded <= 0) {
+    throw new Error(`Jewelry pricing: ${usd} rounds to a non-positive ticket`);
+  }
+  return rounded;
+}
 
 /** Retail for lab-grown jewelry from recorded wholesale cost. */
 export function labGrownJewelryRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
   }
-  return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple * 100) / 100;
+  return roundJewelryRetail(costUsd * LAB_GROWN_JEWELRY.costMultiple);
 }
 
 /** Quality gates for stones (natural and lab). Worst grade allowed through. */
@@ -313,6 +335,9 @@ export const WATCH_BRANDS: string[] = [
  *   matched on a competitor:  retail = max((cost + competitor) / 2, cost + $500)
  *   no competitor match:      retail = cost + $500
  *
+ * Jewelry (anything whose product type is not Watch) then rounds that
+ * ticket to the nearest $10. Estate watches stay on the cent ticket.
+ *
  * The competitor is Robinson's Jewelers, which stocks the same supplier
  * pieces; the match key is the supplier stock number
  * (src/backvault/competitor.ts). Never a fuzzy title match.
@@ -332,26 +357,25 @@ export const BACKVAULT = {
  * merchant's Royal Chain trade account. Only trending items are imported,
  * never a whole category.
  *
- *   retail = roundUpTo5(cost × 3)
+ *   retail = nearest $10 of (cost × 3)
  *
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
- * jewelry and hand-imported estate pieces are merchant-set and have no
- * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×2). A new
- * supplier gets its own constant here, never this one.
+ * jewelry and hand-imported estate pieces are merchant-set (no multiple)
+ * and their published ticket is still the nearest $10. Lab-grown jewelry
+ * uses `LAB_GROWN_JEWELRY` (×2). A new supplier gets its own constant
+ * here, never this one.
  */
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
   costMultiple: 3,
-  roundUpToUsd: 5,
 } as const;
 
 export function supplierRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Supplier pricing: invalid cost ${costUsd}`);
   }
-  const raw = costUsd * SUPPLIER_INTAKE.costMultiple;
-  return Math.ceil(raw / SUPPLIER_INTAKE.roundUpToUsd) * SUPPLIER_INTAKE.roundUpToUsd;
+  return roundJewelryRetail(costUsd * SUPPLIER_INTAKE.costMultiple);
 }
 
 /**
@@ -359,11 +383,11 @@ export function supplierRetailFromCost(costUsd: number): number {
  * pairs the ring with a loose diamond (theme: snippets/ring-diamond-pairing,
  * one hidden "setting-only" variant per ring, SKU SET-<ring handle>).
  * Merchant decision 2026-10-02: retail = setting cost × 3, labor to set the
- * shopper's diamond included in that price. Rounded to the nearest dollar;
- * no other rounding was specified. Merchant decision 2026-10-08: × 3 → × 2.25
- * (paired with loose lab-grown 3× → 3.5×).
+ * shopper's diamond included in that price. Merchant decision 2026-10-08:
+ * × 3 → × 2.25 (paired with loose lab-grown 3× → 3.5×). Merchant decision
+ * 2026-10-29: the ticket is the nearest $10.
  *
- *   retail = round(cost × 2.25)
+ *   retail = nearest $10 of (cost × 2.25)
  *
  * Settings only. It is not the Royal Chain rule above, and it never prices a
  * complete ring with its own center stone.
@@ -378,14 +402,14 @@ export function setting18kRetailFrom14kRetail(retail14kUsd: number): number {
   if (!Number.isFinite(retail14kUsd) || retail14kUsd <= 0) {
     throw new Error(`Setting 18K pricing: invalid 14K retail ${retail14kUsd}`);
   }
-  return retail14kUsd + SETTING_ONLY.upcharge18kUsd;
+  return roundJewelryRetail(retail14kUsd + SETTING_ONLY.upcharge18kUsd);
 }
 
 export function settingOnlyRetailFromCost(costUsd: number): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Setting-only pricing: invalid cost ${costUsd}`);
   }
-  return Math.round(costUsd * SETTING_ONLY.costMultiple);
+  return roundJewelryRetail(costUsd * SETTING_ONLY.costMultiple);
 }
 
 /**

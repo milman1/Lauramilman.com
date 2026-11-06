@@ -22,7 +22,7 @@ describe('Royal Chain listing builder', () => {
     expect(String((product.seo as { title: string }).title).length).toBeLessThanOrEqual(60);
     expect(String((product.seo as { description: string }).description).length).toBeLessThanOrEqual(160);
     expect(product.descriptionHtml).not.toMatch(/\$|price|cost/i);
-    expect(product.variants).toEqual([expect.objectContaining({ price: '305.00', sku: 'ABC1-18', inventoryItem: expect.objectContaining({ tracked: true, cost: '100.01', measurement: { weight: { value: 12.5, unit: 'GRAMS' } } }) })]);
+    expect(product.variants).toEqual([expect.objectContaining({ price: '300.00', sku: 'ABC1-18', inventoryItem: expect.objectContaining({ tracked: true, cost: '100.01', measurement: { weight: { value: 12.5, unit: 'GRAMS' } } }) })]);
   });
 
   it('escapes source text and rejects supplier names', () => {
@@ -156,7 +156,7 @@ describe('Royal Chain listing builder', () => {
     const shortlist = path.join(dir, 'shortlist.csv');
     const privateFile = path.join(dir, 'private.csv');
     await writeFile(shortlist, 'style,item_number,existing_handle,width_mm,url,image_url,image_urls,condition,condition_evidence\nCuban,A1,lmny-a1,4,https://example.test/a,https://supplier.invalid/a.jpg,https://supplier.invalid/a.jpg;https://supplier.invalid/a-detail.jpg;https://supplier.invalid/a-on-body.jpg,new,Source record states new.\nBox,B2,lmny-b2,2,https://example.test/b,https://supplier.invalid/b.jpg,,,\n');
-    await writeFile(privateFile, 'item_number,url,cost,retail,lengths_karats,error\nA1,https://example.test/a,10.00,30.00,14K Yellow:18in=$10.00|A1-18|5.1|yes;14K Yellow:20in=$11.00|A1-20|5.8|yes,\nB2,https://example.test/b,20.01,65.00,14K Rose:18in=$20.01|B2-18|4.2|yes,\n');
+    await writeFile(privateFile, 'item_number,url,cost,retail,lengths_karats,error\nA1,https://example.test/a,10.00,30.00,14K Yellow:18in=$10.00|A1-18|5.1|yes;14K Yellow:20in=$11.00|A1-20|5.8|yes,\nB2,https://example.test/b,20.01,60.00,14K Rose:18in=$20.01|B2-18|4.2|yes,\n');
     const opts = { shortlistPath: shortlist, privatePath: privateFile, outputDir: dir, expectedProducts: 2, expectedVariants: 3 };
     await expect(generateRoyalChainPlan(opts)).resolves.toEqual({ products: 2, variants: 3 });
     const first = await readFile(path.join(dir, 'royalchain-products.jsonl'), 'utf8');

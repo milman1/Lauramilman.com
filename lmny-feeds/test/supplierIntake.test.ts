@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { SUPPLIER_INTAKE, supplierRetailFromCost } from '../config/pricing.js';
 
 describe('supplierRetailFromCost', () => {
-  it('is wholesale cost times three, rounded up to the nearest $5', () => {
+  it('is wholesale cost times three, to the nearest $10', () => {
     expect(SUPPLIER_INTAKE.costMultiple).toBe(3);
     expect(supplierRetailFromCost(100)).toBe(300);
-    expect(supplierRetailFromCost(101)).toBe(305);
+    expect(supplierRetailFromCost(101)).toBe(300);
+    expect(supplierRetailFromCost(100.01)).toBe(300);
     expect(supplierRetailFromCost(412.4)).toBe(1240);
   });
 

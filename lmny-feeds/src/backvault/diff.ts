@@ -1,5 +1,5 @@
 import type { BackVaultCatalogEntry } from './catalog.js';
-import { backVaultRetail, backVaultRetailFromCost } from './pricing.js';
+import { backVaultListedPrice, backVaultRetail, backVaultRetailFromCost } from './pricing.js';
 import { handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
 
@@ -164,7 +164,7 @@ export function applyRememberedCompetitorPrices(
     }
     item.competitorPriceUsd = remembered;
     item.competitorPriceReadAt = have!.rememberedCompetitorPriceAt!;
-    item.priceUsd = backVaultRetail(item.costUsd, remembered);
+    item.priceUsd = backVaultListedPrice(item.costUsd, remembered, item.productType);
     stats.pricedFromMemory += 1;
     stats.memoryHandles.push(handleFor(item));
   }
