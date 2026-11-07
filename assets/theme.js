@@ -186,6 +186,39 @@ function formLineProperties(form) {
     });
   });
 
+  function showVariantPhoto(option) {
+    if (!option || !option.dataset.image) return;
+    var gallery = document.querySelector('.product-gallery');
+    if (!gallery) return;
+    var slides = gallery.querySelectorAll('.pdp-media');
+    var path = new URL(option.dataset.image, document.baseURI).pathname;
+    var target = Array.from(slides).find(function (slide) {
+      var img = slide.querySelector('img');
+      return img && new URL(img.src, document.baseURI).pathname === path;
+    });
+    if (target) {
+      slides.forEach(function (slide) {
+        slide.hidden = slide !== target;
+        slide.classList.toggle('is-active', slide === target);
+        var video = slide.querySelector('video');
+        if (video && slide.hidden) video.pause();
+      });
+      gallery.querySelectorAll('[data-thumb-index]').forEach(function (thumb) {
+        thumb.classList.toggle('active', thumb.dataset.thumbIndex === target.dataset.mediaIndex);
+      });
+    } else if (!slides.length) {
+      var img = gallery.querySelector('.product-gallery__main img');
+      if (img) {
+        img.removeAttribute('srcset');
+        img.src = option.dataset.image;
+      }
+    }
+  }
+
+  if (new URL(window.location.href).searchParams.has('variant')) {
+    showVariantPhoto(form.querySelector('[name="id"] option:checked'));
+  }
+
   function updateVariant(f) {
     var variantSelect = f.querySelector('[name="id"]');
     if (!variantSelect) return;
@@ -243,17 +276,7 @@ function formLineProperties(form) {
         saveEl.hidden = !onSale;
       }
 
-      var newImage = matchedVariant.dataset.image;
-      if (newImage) {
-        var mainImg = document.querySelector('.product-gallery__main img');
-        if (mainImg) {
-          mainImg.style.opacity = '0';
-          setTimeout(function () {
-            mainImg.src = newImage;
-            mainImg.style.opacity = '1';
-          }, 200);
-        }
-      }
+      showVariantPhoto(matchedVariant);
       var url = new URL(window.location.href);
       url.searchParams.set('variant', matchedVariant.value);
       window.history.replaceState(window.history.state, '', url.toString());
@@ -271,7 +294,7 @@ function formatMoney(cents) {
 /* === Product Image Gallery === */
 (function () {
   var gallery = document.querySelector('.product-gallery');
-  if (!gallery) return;
+  if (!gallery || gallery.querySelector('.pdp-media')) return;
 
   var mainImg = gallery.querySelector('.product-gallery__main img');
   var thumbs = gallery.querySelectorAll('.product-gallery__thumb');
