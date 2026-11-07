@@ -87,6 +87,10 @@
         {%- if section.settings.collection != blank -%}
           {%- assign shown = 0 -%}
           {%- for product in section.settings.collection.products -%}
+            {%- if section.settings.jewelry_only -%}
+              {%- assign product_type_lower = product.type | downcase -%}
+              {%- if product_type_lower contains 'watch' or product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+            {%- endif -%}
             {%- if shown >= section.settings.collection_limit -%}{%- break -%}{%- endif -%}
             {%- if product.available -%}
               {%- assign shown = shown | plus: 1 -%}
@@ -103,7 +107,7 @@
       {%- render 'lmh-img', img: section.settings.feature_image, asset: section.settings.feature_image_asset, alt: section.settings.feature_image_alt, sizes: '(max-width: 749px) 100vw, 50vw' -%}
     </a>
   {%- endif -%}
-  <ul class="lmh-grid lmh-grid--{{ row_cols }} lmh-scroll" role="list" style="margin: 0; padding: 0; list-style: none;">
+  <ul class="lmh-grid lmh-grid--{{ row_cols }}{% if section.settings.mobile_grid %} lmh-grid--mobile{% else %} lmh-scroll{% endif %}" role="list" style="margin: 0; padding: 0; list-style: none;">
     {%- assign feature_shown = 0 -%}
     {%- for block in section.blocks -%}
       {%- if block.type == 'product' and block.settings.product != blank -%}
@@ -118,6 +122,10 @@
     {%- if section.settings.collection != blank -%}
       {%- assign shown = 0 -%}
       {%- for product in section.settings.collection.products -%}
+            {%- if section.settings.jewelry_only -%}
+              {%- assign product_type_lower = product.type | downcase -%}
+              {%- if product_type_lower contains 'watch' or product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+            {%- endif -%}
         {%- if shown >= section.settings.collection_limit -%}{%- break -%}{%- endif -%}
         {%- if product.available -%}
           {%- assign shown = shown | plus: 1 -%}
@@ -186,6 +194,8 @@
     { "type": "select", "id": "columns", "label": "Cards per row (desktop)", "default": "5", "options": [ { "value": "4", "label": "4" }, { "value": "5", "label": "5" } ] },
     { "type": "checkbox", "id": "more_row", "label": "Extra product row", "default": false, "info": "With a feature photo, the first four products stay beside it. Further products scroll in a row underneath. Drafts stay blank until they are published." },
     { "type": "checkbox", "id": "scroll_row", "label": "Scroll the cards", "default": false, "info": "Desktop shows about four cards and scrolls for the rest. Phones already swipe." },
+    { "type": "checkbox", "id": "mobile_grid", "label": "Two-column grid on phones", "default": false },
+    { "type": "checkbox", "id": "jewelry_only", "label": "Exclude watches and missing photos from collection", "default": false },
     { "type": "text", "id": "ratio", "label": "Photo shape (width / height)", "default": "0.84" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
     { "type": "text", "id": "title", "label": "Heading" },
