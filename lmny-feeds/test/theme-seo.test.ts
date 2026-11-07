@@ -69,7 +69,8 @@ describe('theme SEO integration', () => {
     expect(diamondCollection).toContain('include_products: false');
     expect(diamondCollection).toContain("render 'product-card'");
     expect(collection).toContain("render 'collection-guide'");
-    expect(themeFile('sections/header.liquid')).toContain('>All jewelry</a>');
+    expect(themeFile('sections/header.liquid')).toContain('navigation_simple.all_jewelry');
+    expect(themeFile('sections/header.liquid')).toContain('href="/collections/all"');
     expect(themeFile('sections/header.liquid')).not.toContain('All Fine Jewelry');
     const labBlock = themeFile('sections/lab-grown-diamonds-feature.liquid');
     expect(labBlock).toContain('var(--wine, #4A1428)');
@@ -86,9 +87,11 @@ describe('theme SEO integration', () => {
     expect(header).not.toContain('nav__dropdown--fine');
     expect(header).not.toContain('All Chains');
     expect(header).toContain('href="/collections/chain-necklaces"');
-    expect(header).toContain('Chains by style');
-    expect(header).toMatch(/href="\/collections\/necklaces"[\s\S]*href="\/collections\/rings"[\s\S]*href="\/collections\/all-pendants"/);
-    expect(header).toContain('>Chains</a>');
+    expect(header).not.toContain('Chains by style');
+    for (const handle of ['necklaces', 'rings', 'all-pendants']) {
+      expect(header).toContain(`href="/collections/${handle}"`);
+    }
+    expect(header).toContain('navigation_simple.chains');
     expect(footer).toContain('href="/collections/chains"');
     expect(collection).toContain('href="/collections/chains"');
   });
