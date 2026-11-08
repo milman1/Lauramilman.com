@@ -612,35 +612,19 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.rings' | t }} {{ caret }}</button>
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.wedding' | t }} {{ caret }}</button>
       <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">{{ 'navigation_simple.shop_rings' | t }}</span>
-          <a href="/collections/rings" class="nav__dropdown-link">{{ 'navigation_simple.all_rings' | t }}</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.rings' | t }}</span>
           <a href="/collections/engagement-rings" class="nav__dropdown-link">{{ 'navigation_simple.engagement_rings' | t }}</a>
-          <a href="/collections/diamond-rings" class="nav__dropdown-link">{{ 'navigation_simple.diamond_rings' | t }}</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">{{ 'navigation_simple.everyday_rings' | t }}</span>
-          <a href="/collections/gold-rings" class="nav__dropdown-link">{{ 'navigation_simple.gold_rings' | t }}</a>
-          <a href="/collections/stackable-rings" class="nav__dropdown-link">{{ 'navigation_simple.stacking_rings' | t }}</a>
-          <a href="/collections/lab-grown-rings" class="nav__dropdown-link">{{ 'navigation_simple.lab_grown_rings' | t }}</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">{{ 'navigation_simple.make_it_yours' | t }}</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
-          <a href="/collections/ring-settings" class="nav__dropdown-link">{{ 'navigation_simple.ring_settings' | t }}</a>
-          <a href="/pages/ring-size-guide" class="nav__dropdown-link">{{ 'navigation_simple.ring_size_guide' | t }}</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.wedding_bands' | t }} {{ caret }}</button>
-      <div class="nav__dropdown nav__dropdown--simple">
-        <div class="nav__group">
+          <a href="/pages/ring-builder?start=diamond" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
           <a href="/collections/wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.womens_wedding_bands' | t }}</a>
           <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.mens_wedding_bands' | t }}</a>
+        </div>
+        <div class="nav__group">
+          <span class="nav__dropdown-label">{{ 'navigation_simple.gifts_and_celebrations' | t }}</span>
+          <a href="/collections/anniversary-gifts" class="nav__dropdown-link">{{ 'navigation_simple.anniversary_gifts' | t }}</a>
+          <a href="/collections/wedding-gifts" class="nav__dropdown-link">{{ 'navigation_simple.wedding_gifts' | t }}</a>
         </div>
       </div>
     </div>
@@ -655,10 +639,14 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/collections/necklaces" class="nav__dropdown-link">{{ 'navigation_simple.necklaces' | t }}</a>
           <a href="/collections/all-pendants" class="nav__dropdown-link">{{ 'navigation_simple.pendants' | t }}</a>
           <a href="/collections/chain-necklaces" class="nav__dropdown-link">{{ 'navigation_simple.chains' | t }}</a>
+          <a href="/collections/rings" class="nav__dropdown-link">{{ 'navigation_simple.all_rings' | t }}</a>
           <a href="/collections/all" class="nav__dropdown-link">{{ 'navigation_simple.all_jewelry' | t }}</a>
         </div>
         <div class="nav__group">
           <span class="nav__dropdown-label">{{ 'navigation_simple.explore_jewelry' | t }}</span>
+          <a href="/collections/gold-rings" class="nav__dropdown-link">{{ 'navigation_simple.gold_rings' | t }}</a>
+          <a href="/collections/stackable-rings" class="nav__dropdown-link">{{ 'navigation_simple.stacking_rings' | t }}</a>
+          <a href="/collections/diamond-rings" class="nav__dropdown-link">{{ 'navigation_simple.diamond_rings' | t }}</a>
           <a href="/collections/everyday-jewelry" class="nav__dropdown-link">{{ 'navigation_simple.everyday_jewelry' | t }}</a>
           <a href="{{ peaceful_url }}" class="nav__dropdown-link">{{ 'navigation_simple.lab_grown_diamond_jewelry' | t }}</a>
           <a href="{{ gold_all_url }}" class="nav__dropdown-link">{{ 'navigation_simple.gold_jewelry' | t }}</a>
