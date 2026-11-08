@@ -152,6 +152,24 @@
     {%- endif -%}
 
     {%- liquid
+      assign chain_style_page = false
+      case collection.handle
+        when 'chains', 'gold-chains', 'chain-bracelets', 'chain-necklaces', 'gold-bracelets', '14k-gold-herringbone-chains', '14k-gold-cuban-chains', '14k-gold-rope-chains', '14k-gold-curb-chains', '14k-gold-paperclip-chains', '14k-gold-snake-chains'
+          assign chain_style_page = true
+      endcase
+    -%}
+    {%- if chain_style_page -%}
+      {%- assign chain_styles = '14k-gold-herringbone-chains::Herringbone|14k-gold-cuban-chains::Cuban|14k-gold-rope-chains::Rope|14k-gold-curb-chains::Curb|14k-gold-paperclip-chains::Paperclip|14k-gold-snake-chains::Snake' | split: '|' -%}
+      <nav class="lm-collection__chips" aria-label="Shop by chain style">
+        <span class="lm-collection__chips-label">Shop by chain style</span>
+        {%- for item in chain_styles -%}
+          {%- assign parts = item | split: '::' -%}
+          <a href="/collections/{{ parts[0] }}" class="lm-collection__chip"{% if collection.handle == parts[0] %} aria-current="page"{% endif %}>{{ parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- liquid
       assign hj_page = false
       case collection.handle
         when 'high-jewelry', 'high-jewelry-rings', 'high-jewelry-earrings', 'high-jewelry-bracelets', 'high-jewelry-necklaces', 'fancy-yellow-diamonds', 'fancy-pink-diamonds', 'fancy-green-diamonds'
@@ -377,7 +395,7 @@
       watch collections are not on the list (Rolex's stored guide stays hidden).
     {%- endcomment -%}
     {%- liquid
-      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings,pre-owned-cartier-love,pre-owned-cartier-trinity,pre-owned-cartier-panthere,pre-owned-van-cleef-alhambra,pre-owned-tiffany-schlumberger,pre-owned-rolex-datejust,pre-owned-rolex-submariner,pre-owned-cartier-juste-un-clou,pre-owned-van-cleef-perlee,pre-owned-rolex-gmt-master,pre-owned-rolex-daytona' | split: ','
+      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings,pre-owned-cartier-love,pre-owned-cartier-trinity,pre-owned-cartier-panthere,pre-owned-van-cleef-alhambra,pre-owned-tiffany-schlumberger,pre-owned-rolex-datejust,pre-owned-rolex-submariner,pre-owned-cartier-juste-un-clou,pre-owned-van-cleef-perlee,pre-owned-rolex-gmt-master,pre-owned-rolex-daytona,14k-gold-herringbone-chains,14k-gold-cuban-chains,14k-gold-rope-chains,14k-gold-curb-chains,14k-gold-paperclip-chains,14k-gold-snake-chains' | split: ','
     -%}
     {%- if longform_handles contains collection.handle -%}
       {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}
