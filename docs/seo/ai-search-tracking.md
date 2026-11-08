@@ -31,6 +31,15 @@ whether the work is helping.
 8. How much does a 6 carat round lab-grown diamond measure in mm?
 9. Vintage Cartier or David Webb jewelry, where to buy pre-owned in New York
 10. How do I read hallmarks on vintage jewelry?
+11. Best place to buy a 14K gold herringbone bracelet online
+12. What is a good gold bracelet gift for her?
+13. 14K gold Cuban link bracelet, 5mm, where to buy
+14. Paperclip chain vs herringbone chain, which is better?
+15. Is a semi-solid gold chain worth it?
+
+Gold questions 11-15 added 2026-11-08 with the six 14K chain style pages
+(`/collections/14k-gold-*-chains`) and the gold bracelet gift guide. Watch for
+those URLs as landing pages and citations.
 
 Record per query and engine: is lauramilman.com cited or linked (yes/no), which
 URL, and which competitors appear. Keep results in `docs/seo/weekly/` or a dated
