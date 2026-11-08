@@ -618,8 +618,6 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <span class="nav__dropdown-label">{{ 'navigation_simple.shop_rings' | t }}</span>
           <a href="/collections/rings" class="nav__dropdown-link">{{ 'navigation_simple.all_rings' | t }}</a>
           <a href="/collections/engagement-rings" class="nav__dropdown-link">{{ 'navigation_simple.engagement_rings' | t }}</a>
-          <a href="/collections/wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.womens_wedding_bands' | t }}</a>
-          <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.mens_wedding_bands' | t }}</a>
           <a href="/collections/diamond-rings" class="nav__dropdown-link">{{ 'navigation_simple.diamond_rings' | t }}</a>
         </div>
         <div class="nav__group">
@@ -633,6 +631,16 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
           <a href="/pages/ring-builder" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
           <a href="/collections/ring-settings" class="nav__dropdown-link">{{ 'navigation_simple.ring_settings' | t }}</a>
           <a href="/pages/ring-size-guide" class="nav__dropdown-link">{{ 'navigation_simple.ring_size_guide' | t }}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.wedding_bands' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
+        <div class="nav__group">
+          <a href="/collections/wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.womens_wedding_bands' | t }}</a>
+          <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.mens_wedding_bands' | t }}</a>
         </div>
       </div>
     </div>
@@ -688,7 +696,29 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       </div>
     </div>
 
-    <div class="nav__item"><a href="/collections/time-pieces" class="nav__item-link">{{ 'navigation_simple.watches' | t }}</a></div>
+    <div class="nav__item">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.watches' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
+        <div class="nav__group">
+          <a href="/collections/time-pieces" class="nav__dropdown-link">{{ 'navigation_simple.all_watches' | t }}</a>
+          <a href="/collections/rolex-watches" class="nav__dropdown-link">{{ 'navigation_simple.rolex' | t }}</a>
+          <a href="/collections/cartier-watches" class="nav__dropdown-link">{{ 'navigation_simple.cartier' | t }}</a>
+          <a href="/collections/omega" class="nav__dropdown-link">{{ 'navigation_simple.omega' | t }}</a>
+        </div>
+        <div class="nav__group">
+          <a href="/collections/patek-philippe" class="nav__dropdown-link">{{ 'navigation_simple.patek_philippe' | t }}</a>
+          <a href="/collections/audemars-piguet-watches" class="nav__dropdown-link">{{ 'navigation_simple.audemars_piguet' | t }}</a>
+          <a href="/collections/jacob-co" class="nav__dropdown-link">{{ 'navigation_simple.jacob_and_co' | t }}</a>
+        </div>
+        <div class="nav__group">
+          <a href="/collections/bvlgari-watches" class="nav__dropdown-link">{{ 'navigation_simple.bvlgari' | t }}</a>
+          <a href="/collections/chopard-watches" class="nav__dropdown-link">{{ 'navigation_simple.chopard' | t }}</a>
+          <a href="/collections/hermes-watches" class="nav__dropdown-link">{{ 'navigation_simple.hermes' | t }}</a>
+          <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">{{ 'navigation_simple.van_cleef_and_arpels' | t }}</a>
+          <a href="/collections/other-watch-brands" class="nav__dropdown-link">{{ 'navigation_simple.other_watch_brands' | t }}</a>
+        </div>
+      </div>
+    </div>
 
     <div class="lmhh__mextra">
       <a href="/pages/about" class="nav__link">Our Story</a>
