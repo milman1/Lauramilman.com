@@ -95,11 +95,14 @@ describe('ring builder page chrome', () => {
     expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
   });
 
-  it('tells shoppers the bridal combo is 20% off jewelry, not the diamond', () => {
+  it('does not advertise a bridal pairing discount on the builder', () => {
     const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
-    expect(en.pairing_note).toMatch(/20%/);
-    expect(en.pairing_note).toMatch(/Diamonds stay listed/);
-    expect(en.pairing_note).toMatch(/bag/);
+    const js = themeFile('assets/ring-builder-flow.js');
+    expect(en.pairing_note).toBe('');
+    expect(js).not.toContain('pairing-note');
+    expect(js).not.toContain("t('pairing_note')");
+    expect(en.pairing_note).not.toMatch(/20%/i);
+    expect(en.pairing_note).not.toMatch(/bridal combo/i);
   });
 
   it('shows only the steps the builder owns and a mobile dock', () => {

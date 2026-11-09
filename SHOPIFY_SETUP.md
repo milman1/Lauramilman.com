@@ -264,6 +264,8 @@ Two live automatic discounts, neither a code:
 
 They do not combine with each other or with other product discounts. `LMNYWELCOME` and creator codes do not combine, so checkout keeps whichever offer is better. Watches stay at full price.
 
+Do not advertise this offer on the storefront: no ring-builder note, banner, nav, footer, or email copy. Checkout may still show the automatic discount title when it applies.
+
 Do not reactivate the expired pairing discounts `Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, or `Pairing 20% off the wedding band`. Those took 20% off the stone.
 
 ---

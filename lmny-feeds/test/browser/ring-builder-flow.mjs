@@ -315,4 +315,16 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
 }
 console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
 
+{
+ const p=await newPage();
+ await choose(p);
+ await p.locator('[data-field="size"]').selectOption('6.5');
+ const summary=await p.locator('[data-flow-summary]').innerText();
+ assert.equal(await p.locator('.pairing-note').count(),0);
+ assert.equal(/20\s*%/i.test(summary),false);
+ assert.equal(/bridal combo/i.test(summary),false);
+ await p.close();
+}
+console.log('PASS builder summary does not advertise a bridal combo discount.');
+
 await b.close();
