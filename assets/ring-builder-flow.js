@@ -594,56 +594,368 @@
       const sent = mail && !mail.hidden && mail.querySelector('[data-ring-email-sent]');
       const failed = mail && !mail.hidden && mail.querySelector('[data-ring-email-error]');
       const u = new URL(window.location.href);
-      if (sent && s…19385 tokens truncated…JSON.stringify({...payload,v:99})),encodeURIComponent(JSON.stringify({...payload,options:['x'.repeat(101)]}))]){const invalid=new URL(url);invalid.hash='build='+value;await recipient.goto(invalid.href);await recipient.waitForFunction(()=>!location.hash);await recipient.getByRole('alert').waitFor();assert.equal(await recipient.locator('[data-band-summary]').count(),0);assert.equal(await recipient.locator('[data-field="engraving"]').inputValue(),'');}
- // Copy-link fallback carries the same full snapshot.
- await sender.addInitScript(()=>{Object.defineProperty(navigator,'share',{value:undefined,configurable:true});Object.defineProperty(navigator,'clipboard',{value:{writeText:text=>{window.__copied=text;return Promise.resolve();}},configurable:true});});await sender.reload();await sender.locator('[data-band-summary="1"]').waitFor();await click(sender,'share');await sender.waitForFunction(()=>window.__copied);assert.deepEqual(JSON.parse(decodeURIComponent(new URL(await sender.evaluate(()=>window.__copied)).hash.slice(7))),payload);
- await sender.close();await recipient.close();
-}
-console.log('PASS full build share across isolated browsers, Unicode engraving, sizes/metals/bands/date, independent edits, saved-state precedence, current prices, unpublished band rejection, malformed links and clipboard fallback.');
+      if (sent && sentBox) {
+        const items = ['setting', 'diamond'].filter(k => state[k]).map(k => `<li><span class="eyebrow">${esc(t(k))}</span>${esc(state[k].title)}</li>`).join('');
+        sentBox.innerHTML = `<h2>${esc(t('email_sent_title'))}</h2><p>${esc(t('email_sent'))}</p>${items ? `<ul>${items}</ul>` : ''}<p class="detail-help"><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))} →</a>${button('keep_personalizing', 'keep-personalizing', 'link')}</p>`;
+        sentBox.hidden = false;
+        reveal(sentBox);
+        sentBox.focus({ preventScroll: true });
+      } else if (failed) {
+        reveal(mail);
+        mail.querySelector('input[type="email"]')?.focus({ preventScroll: true });
+      }
+      if (u.searchParams.has('contact_posted') || u.hash === '#RingEmailForm') {
+        u.searchParams.delete('contact_posted');
+        if (u.hash === '#RingEmailForm') u.hash = '';
+        history.replaceState(null, '', u.pathname + u.search + u.hash);
+      }
+    }
+    function render() {
+      root.classList.toggle('is-setting-studio', state.screen === 'detail' && state.kind === 'setting');
+      root.removeAttribute('aria-busy');
+      root.querySelector('footer button').disabled = false;
+      if (state.screen === 'start') start();
+      if (state.screen === 'catalog') { catalogShell(); if (state.kind === 'setting') settingResults(); else search(); }
+      if (state.screen === 'detail') detail();
+      if (state.screen === 'review') review();
+      const stage = state.screen === 'review' ? 3 : state.setting || state.diamond ? 2 : 1;
+      root.querySelectorAll('[data-stage]').forEach(el => { const on = +el.dataset.stage === stage; el.classList.toggle('active', on); if (on) el.setAttribute('aria-current', 'step'); else el.removeAttribute('aria-current'); });
+      summary();
+      persist();
+      const mail = root.querySelector('[data-ring-email]');
+      if (mail) {
+        mail.hidden = state.screen !== 'review';
+        mail.querySelectorAll('button,input').forEach(el => { el.disabled = false; });
+      }
+      if (sentBox && state.screen !== 'review') sentBox.hidden = true;
+    }
+    function reveal(target) {
+      if (!target) return;
+      const offset = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+      const top = target.getBoundingClientRect().top;
+      if (top < offset || top > window.innerHeight * 0.75) window.scrollTo({ top: Math.max(0, top + window.scrollY - offset - 16), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+    function go(screen) {
+      const moved = ready && screen !== state.screen;
+      const back = screen === 'catalog' && state.returnIndex != null;
+      state.generation++;
+      state.screen = screen;
+      render();
+      if (!moved) return;
+      if (!back) reveal(root.querySelector('.layout'));
+      const heading = main.querySelector('h2');
+      if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+    }
+    function resetSearch() {
+      if (state.kind === 'diamond') state.filters.shape = state.setting?.shape || '';
+      for (const key of ['color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price']) state.filters[key] = '';
+      state.page = 1;
+      notice('');
+      go('catalog');
+    }
+    async function cart() { return request(route('cart.js')); }
+    function groupLines(c, group = state.group) { return (c.items || []).filter(item => item.properties?._lm_ring_id === group); }
+    function completeGroup(lines, variant, stone) {
+      return lines.length === 2 + chosenBands().length && chosenBands().every(b => b.variant && lines.some(i => Number(i.variant_id || i.id) === Number(b.variant.id) && i.quantity === 1 && Number(i.properties?._lm_band_slot || 0) === b.slot)) && lines.some(i => Number(i.variant_id || i.id) === Number(variant.id) && i.quantity === 1) && lines.some(i => Number(i.variant_id || i.id) === Number(stone.variant) && i.quantity === 1);
+    }
+    async function removeGroup(lines) {
+      if (!lines.length) return;
+      const updates = Object.fromEntries(lines.map(item => [item.key, 0]));
+      await request(route('cart/update.js'), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ updates }) });
+    }
+    async function addRing() {
+      if (state.busy || !both() || !state.size || !pickedVariant() || !bandsValid()) return;
+      const oldTotal = subtotal(), settingHandle = state.setting.handle, diamondHandle = state.diamond.handle;
+      state.busy = true;
+      notice(t('adding'));
+      summary();
+      lockControls();
+      let addAttempted = false, selectedVariant;
+      try {
+        const [freshSetting, freshDiamond, freshBands] = await Promise.all([product(settingHandle), diamond(diamondHandle), Promise.all(chosenBands().map(async b => ({ slot: b.slot, product: await product(b.product.handle) })))]);
+        for (const fresh of freshBands) {
+          if (!fresh.product.band || !knownBands.has(fresh.product.handle)) throw new Error(t('unavailable'));
+          state.bandSelections[fresh.slot].product = fresh.product;
+        }
+        if (!bandsValid()) throw new Error(t('band_options_required'));
+        setSetting(freshSetting, true);
+        if (freshSetting.shape !== freshDiamond.shape) throw new Error(t('wrong_shape'));
+        state.diamond = freshDiamond;
+        selectedVariant = pickedVariant();
+        if (!state.size || !selectedVariant) throw new Error(t('size_unavailable'));
+        if (subtotal() !== oldTotal) throw new Error(t('price_changed'));
+        if (!state.group) state.group = 'lmny-' + (globalThis.crypto?.randomUUID?.() || Date.now() + '-' + Math.random().toString(36).slice(2));
+        persist();
+        const current = await cart(), existing = groupLines(current);
+        if (completeGroup(existing, selectedVariant, state.diamond)) { if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(current, state.editGroup)); window.location.assign(cfg.cartUrl); return; }
+        if (existing.length) await removeGroup(existing);
+        const properties = { _lm_ring_id: state.group, _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, Ring: state.setting.title, Diamond: state.diamond.title, 'Ring size': state.size === 'unsure' ? t('not_sure') : state.size };
 
-for (const allowed of [false,true]) {
- const p=await newPage();
- await p.addInitScript(allowed=>{window.__events=[];window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
- await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('PRIVATE INSCRIPTION');await click(p,'share');
- const events=await p.evaluate(()=>window.__events);
- if(!allowed) assert.deepEqual(events,[]);
- else {assert.ok(events.some(e=>e.event==='lmny_build_shared'));assert.ok(events.some(e=>e.event==='lmny_setting_selected'));assert.ok(events.some(e=>e.event==='lmny_diamond_selected'));assert.equal(JSON.stringify(events).includes('PRIVATE INSCRIPTION'),false);assert.ok(events.every(e=>!('url' in e.data)&&!('engraving' in e.data)));}
- const appointment=await p.getByRole('link',{name:'Book a viewing in New York',exact:true}).first().getAttribute('href');assert.equal(new URL(appointment).searchParams.get('interest'),'ring');assert.ok(new URL(appointment).hash.startsWith('#ring='));await p.close();
-}
-console.log('PASS consent-aware funnel events omit private personalization; consultation carries full build.');
-
-for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
- const p=await newPage();
- await p.addInitScript(mode=>{
-   window.__events=[];window.__allowed=mode==='delayed-allow';window.__loads=0;
-   window.Shopify={analytics:{publish:(event,data)=>{window.__events.push({event,data});return Promise.resolve(true);}},loadFeatures:(features,done)=>{
-     window.__loads++;window.__features=features;
-     window.__finishPrivacy=()=>{if(mode!=='loader-error')window.Shopify.customerPrivacy={analyticsProcessingAllowed:()=>window.__allowed};done(mode==='loader-error'?new Error('failed'):null);};
-   }};
-   // Google & YouTube's gtag is sandboxed: deliberately no top-window gtag.
- },mode);
- await p.goto('https://lmny.test/pages/ring-builder');
- await p.waitForFunction(()=>window.__finishPrivacy);
- assert.deepEqual(await p.evaluate(()=>window.__events),[]);
- await p.evaluate(()=>window.__finishPrivacy());
- if(mode==='delayed-allow')await p.waitForFunction(()=>window.__events.length===1);
- else assert.deepEqual(await p.evaluate(()=>window.__events),[]);
- if(mode==='deny-then-allow') {
-   await click(p,'start-setting');await click(p,'details-0');
-   await p.locator('[data-action="select"]').first().waitFor();
-   assert.deepEqual(await p.evaluate(()=>window.__events),[]);
-   await p.evaluate(()=>{window.__allowed=true;document.dispatchEvent(new CustomEvent('visitorConsentCollected'));document.dispatchEvent(new CustomEvent('visitorConsentCollected'));});
-   await p.waitForFunction(()=>window.__events.length===1);
-   assert.equal((await p.evaluate(()=>window.__events))[0].event,'lmny_builder_opened');
-   await click(p,'select');await p.waitForFunction(()=>window.__events.some(e=>e.event==='lmny_setting_selected'));
-   await p.evaluate(()=>{window.__allowed=false;document.dispatchEvent(new CustomEvent('visitorConsentCollected'));});
-   const count=await p.evaluate(()=>window.__events.length);await click(p,'details-0');
-   assert.equal(await p.evaluate(()=>window.__events.length),count);
- }
- assert.equal(await p.evaluate(()=>window.__loads),1);
- assert.deepEqual(await p.evaluate(()=>window.__features),[{name:'consent-tracking-api',version:'0.2'}]);
- await p.close();
-}
-console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
-
-await b.close();
+        if (state.size === 'unsure') properties['Size check'] = t('not_sure');
+        state.setting.options.forEach((o, i) => { if (!/size/i.test(o.name) && o.name !== 'Title') properties[o.name] = selectedVariant.options[i]; });
+        if (state.engraving.trim()) { properties.Engraving = state.engraving.trim().slice(0, 20); properties['Engraving font'] = t(state.font === 'script' ? 'script' : 'block'); }
+        if (state.date) properties['Requested date'] = state.date;
+        const items = [{ id: selectedVariant.id, quantity: 1, properties }, { id: state.diamond.variant, quantity: 1, properties: { _lm_ring_id: state.group, _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, 'Set in': state.setting.title, 'Ring size': properties['Ring size'] } }];
+        chosenBands().forEach(b => items.push({ id: b.variant.id, quantity: 1, properties: { _lm_ring_id: state.group, _lm_band_handle: b.product.handle, _lm_band_slot: String(b.slot), _lm_setting_handle: settingHandle, _lm_diamond_handle: diamondHandle, 'Paired with': state.setting.title } }));
+        addAttempted = true;
+        await request(route('cart/add.js'), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ items }) });
+        const verified = groupLines(await cart());
+        if (!completeGroup(verified, selectedVariant, state.diamond)) { await removeGroup(verified); throw new Error(t('cart_failed')); }
+        if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(await cart(), state.editGroup));
+        state.editGroup = ''; persist();
+        track('build_added_to_cart');
+        notice(t('added'));
+        window.location.assign(cfg.cartUrl);
+      } catch (error) {
+        if (addAttempted) {
+          try {
+            const lines = groupLines(await cart());
+            if (selectedVariant && completeGroup(lines, selectedVariant, state.diamond)) { if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(await cart(), state.editGroup)); window.location.assign(cfg.cartUrl); return; }
+            await removeGroup(lines);
+          } catch (_) { error = new Error(t('cart_uncertain')); }
+        }
+        state.busy = false;
+        go('review');
+        notice(error.message || t('cart_failed'), true);
+      }
+    }
+    function choose() {
+      try {
+        if (state.kind === 'setting') { setSetting(state.detail); if (studioVariant()) state.options = state.detailOptions.slice(); }
+        else { if (state.setting && state.detail.shape !== state.setting.shape) throw new Error(t('wrong_shape')); state.diamond = state.detail; state.filters.shape = state.diamond.shape; }
+        state.group = '';
+        track(state.kind + '_selected');
+        if (both()) go('review'); else { state.kind = state.kind === 'setting' ? 'diamond' : 'setting'; state.page = 1; state.returnIndex = null; go('catalog'); }
+      } catch (error) { notice(error.message, true); }
+    }
+    root.addEventListener('mouseover', event => {
+      const media = event.target.closest('[data-video]');
+      if (!media || media.querySelector('video') || !matchMedia('(hover: hover)').matches) return;
+      media.insertAdjacentHTML('beforeend', `<video muted loop playsinline autoplay preload="none" aria-hidden="true" src="${esc(media.dataset.video)}"></video>`);
+    });
+    root.addEventListener('mouseout', event => {
+      const media = event.target.closest('[data-video]');
+      if (media && !media.contains(event.relatedTarget)) media.querySelector('video')?.remove();
+    });
+    root.addEventListener('click', async event => {
+      const originLink = event.target.closest('[data-origin]');
+      if (originLink) {
+        event.preventDefault();
+        if (state.busy) return;
+        readDiamondFilters(); state.filters.origin = originLink.dataset.origin;
+        state.page = 1; paintDiamondFilters(); search(); persist(); return;
+      }
+      const resetLink = event.target.closest('.lm-dfilter__reset');
+      if (resetLink) event.preventDefault();
+      const el = event.target.closest('[data-action]');
+      if (!el || el.disabled || state.busy) return;
+      const action = el.dataset.action;
+      if (!action.startsWith('photo-') && !action.startsWith('video-')) notice('');
+      if (action.startsWith('band-category-')) { state.bandCategory = action.slice(14); state.bandMetal = ''; state.bandStyle = ''; render(); return; }
+      if (action === 'reopen-bands') { state.bandsCollapsed = false; render(); const target = main.querySelector('.band-slots button'); reveal(main.querySelector('.band-upsell')); target?.focus({ preventScroll: true }); return; }
+      if (action === 'finish-bands') {
+        const incomplete = chosenBands().find(b => !b.variant);
+        if (incomplete) {
+          state.bandSlot = incomplete.slot;
+          state.bandCategory = cfg.bands.find(b => b.handle === incomplete.product.handle)?.category || 'diamond';
+          state.bandMetal = ''; state.bandStyle = ''; render(); notice(t('band_options_required'), true);
+          const option = main.querySelector('[data-band-option]'); reveal(option); option?.focus({ preventScroll: true }); return;
+        }
+        state.bandsCollapsed = true; render();
+        const size = main.querySelector('[data-field="size"]'); reveal(size?.closest('label')); size?.focus({ preventScroll: true }); return;
+      }
+      if (action === 'toggle-all-bands') { state.showAllBands = !state.showAllBands; render(); return; }
+      if (action.startsWith('edit-band-')) { state.bandsCollapsed = false; state.bandSlot = Number(action.slice(10)) === 1 ? 1 : 0; state.bandCategory = state.band ? cfg.bands.find(b => b.handle === state.band.handle)?.category || 'diamond' : state.bandSlot && cfg.bands.some(b => b.category === 'mens') ? 'mens' : 'diamond'; state.bandMetal = ''; state.bandStyle = ''; if (state.screen !== 'review' && both()) go('review'); else render(); reveal(main.querySelector('.band-upsell')); return; }
+      if (action.startsWith('remove-band-')) { const slot = Number(action.slice(12)) === 1 ? 1 : 0; state.bandSelections[slot] = { product: null, options: [] }; state.group = ''; render(); return; }
+      if (action === 'choose-band') { await chooseBand(el.dataset.bandHandle); return; }
+      if (action === 'remove-band') { state.band = null; state.bandOptions = []; state.group = ''; render(); }
+      else if (action.startsWith('start-') || action.startsWith('change-')) {
+        state.kind = action.split('-')[1]; state.page = 1; state.returnIndex = null;
+        if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : settingShape(state.filters.shape);
+        if (state.kind === 'diamond' && state.setting) state.filters.shape = state.setting.shape;
+        go('catalog');
+      } else if (action.startsWith('details-')) openDetails(Number(action.slice(8)));
+      else if (action.startsWith('quick-')) openDetails(Number(action.slice(6)), true);
+      else if (action === 'select') choose();
+      else if (action === 'more-filters') { state.moreFilters = el.getAttribute('aria-expanded') !== 'true'; el.setAttribute('aria-expanded', String(state.moreFilters)); main.querySelector('[data-more-filters]').hidden = !state.moreFilters; paintDiamondFilters(); }
+      else if (action === 'pick-grades') {
+        readDiamondFilters();
+        const on = state.filters.color === gradePick.color && state.filters.clarity === gradePick.clarity;
+        state.filters.color = on ? '' : gradePick.color; state.filters.clarity = on ? '' : gradePick.clarity;
+        paintDiamondFilters(); state.page = 1; search(); persist();
+      }
+      else if (action.startsWith('carat-')) {
+        readDiamondFilters();
+        const [low, high] = caratChips[Number(action.slice(6))];
+        const on = state.filters.min_carat === low && state.filters.max_carat === high;
+        state.filters.min_carat = on ? '' : low; state.filters.max_carat = on ? '' : high;
+        paintDiamondFilters(); state.page = 1; search(); persist();
+      } else if (action.startsWith('clear-')) { state[action.slice(6)] = null; state.group = ''; go('catalog'); }
+      else if (action === 'review') go('review');
+      else if (action === 'keep-personalizing') { const size = main.querySelector('[data-field="size"]'); reveal(size?.closest('label')); size?.focus({ preventScroll: true }); }
+      else if (action === 'catalog' || action === 'start') { state.returnIndex = action === 'catalog' && state.screen === 'detail' ? state.detailIndex : null; go(action); }
+      else if (action === 'reset') resetSearch();
+      else if (action === 'retry') search();
+      else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); search(); persist(); }
+      else if (action === 'dock-summary') reveal(aside);
+      else if (action === 'share') share();
+      else if (action === 'review-video') {
+        const src = (state.setting.videos || []).map(safeURL).find(Boolean);
+        if (src) main.querySelector('[data-review-media="setting"]').innerHTML = `<video controls playsinline autoplay muted preload="metadata" src="${esc(src)}"></video>`;
+      }
+      else if (action === 'dock-add') {
+        const field = main.querySelector('[data-field="size"]');
+        if (!state.size && field) { notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true }); }
+        else if (!pickedVariant()) notice(t('size_unavailable'), true);
+        else if (!bandsValid()) notice(t('band_options_required'), true);
+        else addRing();
+      }
+      else if (action === 'studio-option') {
+        const optionIndex = Number(el.dataset.optionIndex), valueIndex = Number(el.dataset.valueIndex);
+        const value = state.detail.options[optionIndex]?.values[valueIndex];
+        const current = state.detailOptions;
+        const candidates = state.detail.variants.filter(v => v.available && v.options[optionIndex] === value);
+        const variant = candidates.find(v => v.options.every((item, i) => i === optionIndex || item === current[i])) || candidates[0];
+        if (variant) { state.detailOptions = variant.options.slice(); detail(); summary(); main.querySelector(`[data-action="studio-option"][data-option-index="${optionIndex}"][data-value-index="${valueIndex}"]`)?.focus(); }
+      }
+      else if (action.startsWith('photo-')) { state.photo = Number(action.slice(6)); detail(); }
+      else if (action.startsWith('video-')) {
+        const src = safeURL(state.detailVideos[Number(action.slice(6))]);
+        if (src) main.querySelector('[data-media]').innerHTML = `<video controls playsinline preload="metadata" src="${esc(src)}"></video>`;
+      } else if (action === 'add') addRing();
+      else if (action === 'restart') {
+        main.dataset.initialStart = 'false';
+        state.setting = null; state.diamond = null; state.bandSelections = [{ product: null, options: [] }, { product: null, options: [] }]; state.bandSlot = 0; state.bandsCollapsed = false; state.bandCategory = 'diamond'; state.showAllBands = false; state.bandMetal = ''; state.bandStyle = ''; state.size = ''; state.options = []; state.engraving = ''; state.font = 'block'; state.date = ''; state.group = ''; state.editGroup = ''; state.page = 1; go('start');
+      }
+    });
+    root.addEventListener('submit', event => {
+      if (event.target.id === 'RingEmailForm') { if (both()) fillRingEmail(event.target); else event.preventDefault(); return; }
+      if (!event.target.matches('[data-search-form]')) return;
+      event.preventDefault();
+      if (state.busy) return;
+      readDiamondFilters();
+      if (!rangesValid()) { clearTimeout(searchTimer); notice(t('range_error'), true); return; }
+      notice(''); state.page = 1; search(); persist();
+    });
+    root.addEventListener('change', async event => {
+      if (state.busy) return;
+      const el = event.target;
+      if (el.hasAttribute('data-band-filter')) { state[el.dataset.bandFilter === 'metal' ? 'bandMetal' : 'bandStyle'] = el.value; render(); main.querySelector('[data-band-filter="' + el.dataset.bandFilter + '"]')?.focus({ preventScroll: true }); return; }
+      if (el.hasAttribute('data-band-product')) {
+        await chooseBand(el.value);
+        return;
+      }
+      if (el.hasAttribute('data-band-option')) { state.bandOptions[Number(el.dataset.bandOption)] = el.value; state.group = ''; render(); return; }
+      if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); persist(); queueSearch(el.type === 'number' ? 700 : 250); return; }
+      if (el.dataset.filter) {
+        state.filters[el.dataset.filter] = el.value;
+        if (state.kind === 'setting') {
+          state.page = 1;
+          if (el.dataset.filter === 'shape') { state.filters.metal = ''; catalogShell(); main.querySelector('[data-filter="shape"]').focus(); }
+          settingResults(); persist();
+        }
+      } else if (el.hasAttribute('data-sort')) { state.filters.sort = el.value; state.page = 1; search(); persist(); }
+      else if (el.hasAttribute('data-option')) { state.options[Number(el.dataset.option)] = el.value; state.group = ''; render(); }
+      else if (el.dataset.field) {
+        state[el.dataset.field] = el.value;
+        state.group = '';
+        if (el.dataset.field === 'size') { summary(); main.querySelector('[data-scale-view]')?.insertAdjacentHTML('afterend', scaleView()); main.querySelector('[data-scale-view]')?.remove(); }
+        if (el.dataset.field === 'font') main.querySelector('[data-inscription]').classList.toggle('script', state.font === 'script');
+        persist();
+      }
+    });
+    root.addEventListener('input', event => {
+      if (state.busy) return;
+      const el = event.target;
+      if (el.closest('#DiamondFilterForm')) { readDiamondFilters(); paintDiamondFilters(); if (el.type === 'number') queueSearch(700); return; }
+      if (el.dataset.filter) state.filters[el.dataset.filter] = el.value;
+      if (el.dataset.field === 'engraving') { state.engraving = el.value.slice(0, 20); state.group = ''; const inscription = main.querySelector('[data-inscription]'); inscription.textContent = state.engraving; inscription.hidden = !state.engraving; persist(); }
+    });
+    async function restore() {
+      let stored = {};
+      try { stored = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
+      if (!(Date.now() - Number(stored.saved) < keepFor)) stored = {};
+      const params = new URLSearchParams(location.search);
+      const hasSharedBuild = location.hash.startsWith('#build=');
+      const shared = hasSharedBuild ? sharedBuild(params) : null;
+      if (hasSharedBuild) stored = shared || {};
+      const linked = params.has('setting') || params.has('diamond') || params.has('start');
+      const settingHandle = linked ? params.get('setting') : stored.setting;
+      const diamondHandle = linked ? params.get('diamond') : stored.diamond;
+      const requestedShape = params.get('shape');
+      const edit = hasSharedBuild ? '' : params.get('edit_group') || (!linked ? stored.editGroup : '');
+      if (/^lmny-[a-z0-9-]+$/i.test(edit || '')) state.editGroup = edit;
+      const sameSelection = (!params.has('setting') || params.get('setting') === stored.setting) && (!params.has('diamond') || params.get('diamond') === stored.diamond);
+      if (sameSelection) {
+        state.size = typeof stored.size === 'string' ? stored.size : '';
+        state.options = Array.isArray(stored.options) ? stored.options : [];
+        state.engraving = typeof stored.engraving === 'string' ? stored.engraving.slice(0, 20) : '';
+        state.date = /^\d{4}-\d{2}-\d{2}$/.test(stored.date || '') ? stored.date : '';
+        state.font = stored.font === 'script' ? 'script' : 'block';
+        state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
+        if (stored.filters && String(stored.filters.shape).split(',').every(shapeKnown)) state.filters = { ...state.filters, ...stored.filters };
+      }
+      if (requestedShape && shapeKnown(requestedShape)) state.filters.shape = requestedShape;
+      if (!settingHandle && !diamondHandle) {
+        main.dataset.initialStart = 'true';
+        root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
+        const begin = params.get('start');
+        if (begin === 'diamond' || begin === 'setting') {
+          state.kind = begin; state.page = 1;
+          if (begin === 'setting') state.filters.shape = settingShape(state.filters.shape);
+          go('catalog');
+        }
+        ready = true;
+        track('builder_opened');
+        return;
+      }
+      root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
+      notice(t('restoring'));
+      state.busy = true; lockControls();
+      let editLine = null, editBands = [];
+      if (state.editGroup) {
+        try {
+          const lines = groupLines(await cart(), state.editGroup);
+          editBands = lines.filter(line => line.properties?._lm_band_handle === line.handle).slice(0, 2);
+          editLine = lines.find(line => line.properties?._lm_setting_handle === settingHandle && line.handle === settingHandle);
+          if (editLine) {
+            const props = editLine.properties || {};
+            state.size = props['Size check'] ? 'unsure' : String(props['Ring size'] || '');
+            state.engraving = String(props.Engraving || '').slice(0, 20);
+            state.font = props['Engraving font'] === t('script') ? 'script' : 'block';
+            state.date = /^\d{4}-\d{2}-\d{2}$/.test(props['Requested date'] || '') ? props['Requested date'] : '';
+            state.group = state.editGroup;
+          }
+        } catch (_) {}
+      }
+      let failed = hasSharedBuild && !shared;
+      if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
+      if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
+      if (shared && both() && state.setting.shape !== state.diamond.shape) { state.diamond = null; failed = true; }
+      const savedBands = Array.isArray(stored.bands) ? stored.bands.slice(0, 2) : stored.band ? [{ handle: stored.band, options: stored.bandOptions }] : [];
+      const restoreBands = editBands.length ? editBands.map((line, index) => ({ handle: line.handle, slot: Number(line.properties?._lm_band_slot ?? index) === 1 ? 1 : 0, line })) : !state.editGroup && sameSelection ? savedBands.map((b, slot) => ({ ...b, slot })) : [];
+      for (const saved of restoreBands.filter(b => b.handle)) {
+        state.bandSlot = saved.slot;
+        try {
+          await selectBand(saved.handle, Array.isArray(saved.options) ? saved.options : []);
+          if (saved.line) state.bandOptions = state.band.variants.find(v => Number(v.id) === Number(saved.line.variant_id || saved.line.id))?.options.slice() || [];
+        } catch (_) { failed = true; state.band = null; state.bandOptions = []; state.group = ''; }
+      }
+      state.bandSlot = stored.bandSlot === 1 ? 1 : 0;
+      state.bandCategory = cfg.bands.find(b => b.handle === state.band?.handle)?.category || 'diamond';
+      state.busy = false;
+      state.kind = state.setting ? 'diamond' : state.diamond ? 'setting' : 'diamond';
+      if (state.setting) state.filters.shape = state.setting.shape;
+      if (state.diamond) state.filters.shape = state.diamond.shape;
+      go(both() ? 'review' : 'catalog');
+      notice(failed ? t('restore_failed') : '', failed);
+      ready = true;
+      afterRingEmail();
+      track('builder_opened');
+    }
+    window.addEventListener('hashchange', () => { if (location.hash.startsWith('#build=')) location.reload(); });
+    restore();
+  }
+  initialize();
+  document.addEventListener('shopify:section:load', initialize);
+})();
