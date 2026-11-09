@@ -246,6 +246,21 @@ Each accepted creator gets their own code. There is no shared program code.
 
 ---
 
+## 6b. Bridal combo automatics — expired, do not reactivate
+
+Merchant decision 2026-11-09: take the bridal combo off the website, including checkout.
+
+Deactivated (do not turn back on):
+
+1. `Bridal combo 10% off each piece` (`gid://shopify/DiscountAutomaticNode/1514083450951`) — was 10% off 6 jewelry collections, min qty 2, all buyers. Status `EXPIRED` as of 2026-11-09T23:53:06Z. Independent read: it is not in `status:active`.
+2. `Bridal combo 20% off jewelry with a diamond` (`gid://shopify/DiscountAutomaticNode/1514083811399`) — already `EXPIRED`.
+
+Do not reactivate the older stone-discounting pairing discounts `Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, or `Pairing 20% off the wedding band`. Naturals above $4,000 Amount are 1.25× (20% margin); 20% off that ticket is the invoice cost.
+
+Storefront must not advertise a bridal combo (no ring-builder note, banner, nav, footer, or email). Active codes left in place: `LMNYWELCOME` (10% jewelry) and `VIP20`.
+
+---
+
 ## 7. Branded emails
 
 HTML to paste lives in `/emails`:
