@@ -246,19 +246,25 @@ Each accepted creator gets their own code. There is no shared program code.
 
 ---
 
-## 6b. Bridal combo `Bridal combo 20% off`
+## 6b. Bridal combo — 20% off jewelry, never the loose stone
 
-Automatic amount off products. Not a code, and not Buy X Get Y.
+Loose diamonds stay at listed retail. Naturals above $4,000 Amount are 1.25× (20% margin); 20% off that ticket is the invoice cost.
 
-- Title: `Bridal combo 20% off`
-- ID: `gid://shopify/DiscountAutomaticNode/1514083450951`
-- 20% off every eligible line when the cart has at least two items from these collections: Natural Diamonds (`natural-diamonds`), Lab-Grown Diamonds (`lab-grown-diamonds`), Colored Lab-Grown Diamonds (`colored-lab-grown-diamonds`), Engagement Rings (`engagement-rings`), Engagement Ring Settings (`ring-settings`), Wedding Bands (`wedding-bands`), Men's Wedding Bands (`mens-wedding-bands`)
-- A single stone, setting, ring, or band stays at full price
-- Watches and other jewelry stay at full price
-- Combines with order and product discounts; not shipping. `LMNYWELCOME` and creator codes do not combine, so checkout keeps whichever offer is better
-- Two items from the same collection (two diamonds, two bands) also qualify. That is Shopify's minimum-quantity rule
+Two live automatic discounts, neither a code:
 
-This replaced the three pairing Buy X Get Y discounts on 2026-11-09 (`Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, `Pairing 20% off the wedding band`). Those are expired. Do not reactivate them: they only discounted one line, usually the stone.
+1. `Bridal combo 20% off jewelry` (`gid://shopify/DiscountAutomaticNode/1514083450951`)
+   - Amount off products, 20%
+   - Collections: Engagement Rings (`engagement-rings`), Engagement Ring Settings (`ring-settings`), Wedding Bands (`wedding-bands`), Men's Wedding Bands (`mens-wedding-bands`)
+   - Minimum 2 of those items
+   - A setting + band (or two bands, or a finished engagement ring + band) takes 20% off those jewelry lines
+2. `Bridal combo 20% off jewelry with a diamond` (`gid://shopify/DiscountAutomaticNode/1514083811399`)
+   - Buy 1 item from Natural Diamonds, Lab-Grown Diamonds, or Colored Lab-Grown Diamonds
+   - Get up to 2 items from the jewelry collections above at 20% off
+   - The stone is the qualifier only; it is not discounted
+
+They do not combine with each other or with other product discounts. `LMNYWELCOME` and creator codes do not combine, so checkout keeps whichever offer is better. Watches stay at full price.
+
+Do not reactivate the expired pairing discounts `Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, or `Pairing 20% off the wedding band`. Those took 20% off the stone.
 
 ---
 

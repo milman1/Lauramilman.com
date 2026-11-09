@@ -95,9 +95,10 @@ describe('ring builder page chrome', () => {
     expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
   });
 
-  it('tells shoppers the bridal combo is 20% off the set in the bag', () => {
+  it('tells shoppers the bridal combo is 20% off jewelry, not the diamond', () => {
     const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
     expect(en.pairing_note).toMatch(/20%/);
+    expect(en.pairing_note).toMatch(/Diamonds stay listed/);
     expect(en.pairing_note).toMatch(/bag/);
   });
 
