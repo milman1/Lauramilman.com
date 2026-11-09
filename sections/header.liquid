@@ -18,7 +18,7 @@
 }
 @media (max-width: 1199px) {
   :root {
-    --lmhh-announce: {% if section.settings.announce_text != blank %}36px{% else %}0px{% endif %};
+    --lmhh-announce: {% if section.settings.announce_text != blank %}48px{% else %}0px{% endif %};
     --header-height: 60px;
   }
 }
@@ -78,7 +78,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
   text-underline-offset: 3px;
 }
 .lmhh__announce-dot { width: 4px; height: 4px; background: var(--lmhh-gold); transform: rotate(45deg); flex-shrink: 0; }
-.lmhh__announce-short { display: none; }
+.lmhh__announce-short,
+.lmhh__announce-text-short { display: none; }
 
 /* ---------- bar ---------- */
 .lmhh__bar {
@@ -322,9 +323,21 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
    Below 1200px: burger / wordmark / icons, full-screen drawer
    ============================================================= */
 @media (max-width: 1199px) {
-  .lmhh__announce { gap: 10px; font-size: 9.5px; letter-spacing: 0.14em; }
+  .lmhh__announce {
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: center;
+    height: auto;
+    min-height: var(--lmhh-announce);
+    padding: 8px 14px;
+  }
   .lmhh__announce-dot, .lmhh__announce-long { display: none; }
   .lmhh__announce-short { display: inline; }
+  .lmhh__announce:has(.lmhh__announce-text-short) .lmhh__announce-text-long { display: none; }
+  .lmhh__announce-text-short { display: inline; }
 
   .lmhh__bar { height: 60px; padding: 0 8px; grid-template-columns: 88px minmax(0, 1fr) 88px; }
   .lmhh__util { display: none; }
@@ -503,7 +516,12 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 <header class="header" id="header">
   {%- if section.settings.announce_text != blank -%}
     <div class="lmhh__announce" role="region" aria-label="Announcement">
-      <span>{{ section.settings.announce_text | escape }}</span>
+      <span class="lmhh__announce-text">
+        <span class="lmhh__announce-text-long">{{ section.settings.announce_text | escape }}</span>
+        {%- if section.settings.announce_text_short != blank -%}
+          <span class="lmhh__announce-text-short">{{ section.settings.announce_text_short | escape }}</span>
+        {%- endif -%}
+      </span>
       {%- if section.settings.announce_link_text != blank -%}
         <span class="lmhh__announce-dot" aria-hidden="true"></span>
         <a href="{{ section.settings.announce_url | default: '/pages/private-clients' }}">
@@ -1329,6 +1347,12 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       "id": "announce_text",
       "label": "Announcement line",
       "default": "Private appointments in Midtown"
+    },
+    {
+      "type": "text",
+      "id": "announce_text_short",
+      "label": "Announcement line on phones",
+      "info": "Shorter line for the top of the screen. The full line is used when this is empty."
     },
     {
       "type": "text",

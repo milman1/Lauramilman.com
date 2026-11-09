@@ -83,16 +83,19 @@
       {% endfor %}
     ],"bands":[
       {% assign band_emitted = false %}
+      {% assign band_seen = '|' %}
       {% assign band_collections = 'wedding-bands,mens-wedding-bands' | split: ',' %}
       {% for band_collection in band_collections %}
         {% for band in collections[band_collection].products limit: 50 %}
-          {% assign include_band = false %}
-          {% if band_collection == 'mens-wedding-bands' or band.tags contains 'wedding-band' %}{% assign include_band = true %}{% endif %}
-          {% if band.available and band.featured_image and include_band %}
+          {% assign band_key = '|' | append: band.handle | append: '|' %}
+          {% if band.available and band.featured_image %}
+            {% unless band_seen contains band_key %}
             {% if band_emitted %},{% endif %}
             {% capture band_metal_text %}{{ band.title }}{% for option in band.options_with_values %}{% unless option.name contains 'size' or option.name contains 'Size' %} {{ option.values | join: ' ' }}{% endunless %}{% endfor %}{% if band.tags contains 'White Gold' %} white{% endif %}{% if band.tags contains 'Yellow Gold' %} yellow{% endif %}{% if band.tags contains 'Rose Gold' %} rose{% endif %}{% endcapture %}
             {"metalText":{{ band_metal_text | strip | json }},"handle":{{ band.handle | json }},"title":{{ band.title | json }},"price":{{ band.price_min | json }},"price_varies":{{ band.price_varies | json }},"category":{% if band_collection == 'mens-wedding-bands' %}"mens"{% else %}"diamond"{% endif %},"image":{{ band.featured_image | image_url: width: 600 | json }}}
             {% assign band_emitted = true %}
+            {% assign band_seen = band_seen | append: band.handle | append: '|' %}
+            {% endunless %}
           {% endif %}
         {% endfor %}
       {% endfor %}
