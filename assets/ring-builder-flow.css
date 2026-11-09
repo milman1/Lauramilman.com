@@ -56,3 +56,34 @@
 @media(max-width:768px){#lmny-ring-builder .band-upsell--collapsed{align-items:stretch;flex-direction:column}#lmny-ring-builder .band-next button{width:100%}}
 
 #lmny-ring-builder .band-upsell>.heading>.link{white-space:nowrap;flex-shrink:0}
+
+/* Setting studio reuses the existing detail/selection flow and live variants. */
+#lmny-ring-builder.is-setting-studio .layout{grid-template-columns:minmax(0,1fr)}
+#lmny-ring-builder.is-setting-studio aside{display:none}
+#lmny-ring-builder .setting-studio{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:start}
+#lmny-ring-builder .setting-studio .studio-gallery{position:sticky;top:24px;min-width:0}
+#lmny-ring-builder .setting-studio .media{background:var(--sand);aspect-ratio:1.15;overflow:hidden}
+#lmny-ring-builder .setting-studio .media img{width:100%;height:100%;object-fit:contain}
+#lmny-ring-builder .setting-studio h2{font-size:clamp(26px,3vw,40px)}
+#lmny-ring-builder .studio-controls{min-width:0}
+#lmny-ring-builder .studio-options{margin:24px 0;border:0;padding:0;min-width:0}
+#lmny-ring-builder .studio-options legend{font:20px Georgia,serif;margin-bottom:12px}
+#lmny-ring-builder .studio-options>div{display:flex;gap:9px;flex-wrap:wrap}
+#lmny-ring-builder .studio-option{border-radius:24px;padding:10px 15px;min-height:44px}
+#lmny-ring-builder .studio-option[aria-pressed=true]{border-color:#481729;background:#481729;color:#fffaf4}
+#lmny-ring-builder .studio-diamond{background:var(--sand);padding:16px;margin:24px 0;border:1px solid var(--line)}
+#lmny-ring-builder .studio-diamond .sum-product{margin-top:10px}
+#lmny-ring-builder .studio-price{font:18px/1.7 Georgia,serif;margin:20px 0}
+#lmny-ring-builder .studio-total{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+#lmny-ring-builder.is-setting-studio .primary{background:#481729;border-color:#481729;color:#fffaf4}
+#lmny-ring-builder .setting-studio .media-thumbs button{border:1px solid var(--line);min-width:44px}
+#lmny-ring-builder .setting-studio .media-thumbs [aria-pressed=true]{border:2px solid #481729}
+@media(max-width:768px){
+ #lmny-ring-builder .setting-studio{grid-template-columns:minmax(0,1fr);gap:24px}
+ #lmny-ring-builder .setting-studio .studio-gallery{position:static}
+ #lmny-ring-builder .setting-studio .media{aspect-ratio:1.2}
+ #lmny-ring-builder .setting-studio .media-thumbs{display:flex;overflow-x:auto}
+ #lmny-ring-builder .setting-studio .media-thumbs button{flex:0 0 70px}
+ #lmny-ring-builder.is-setting-studio .dock{gap:16px}
+ #lmny-ring-builder.is-setting-studio .dock .primary{max-width:62%;white-space:normal}
+}
