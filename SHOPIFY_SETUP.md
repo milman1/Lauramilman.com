@@ -246,6 +246,22 @@ Each accepted creator gets their own code. There is no shared program code.
 
 ---
 
+## 6b. Bridal combo `Bridal combo 20% off`
+
+Automatic amount off products. Not a code, and not Buy X Get Y.
+
+- Title: `Bridal combo 20% off`
+- ID: `gid://shopify/DiscountAutomaticNode/1514083450951`
+- 20% off every eligible line when the cart has at least two items from these collections: Natural Diamonds (`natural-diamonds`), Lab-Grown Diamonds (`lab-grown-diamonds`), Colored Lab-Grown Diamonds (`colored-lab-grown-diamonds`), Engagement Rings (`engagement-rings`), Engagement Ring Settings (`ring-settings`), Wedding Bands (`wedding-bands`), Men's Wedding Bands (`mens-wedding-bands`)
+- A single stone, setting, ring, or band stays at full price
+- Watches and other jewelry stay at full price
+- Combines with order and product discounts; not shipping. `LMNYWELCOME` and creator codes do not combine, so checkout keeps whichever offer is better
+- Two items from the same collection (two diamonds, two bands) also qualify. That is Shopify's minimum-quantity rule
+
+This replaced the three pairing Buy X Get Y discounts on 2026-11-09 (`Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, `Pairing 20% off the wedding band`). Those are expired. Do not reactivate them: they only discounted one line, usually the stone.
+
+---
+
 ## 7. Branded emails
 
 HTML to paste lives in `/emails`:

@@ -95,6 +95,12 @@ describe('ring builder page chrome', () => {
     expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
   });
 
+  it('tells shoppers the bridal combo is 20% off the set in the bag', () => {
+    const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
+    expect(en.pairing_note).toMatch(/20%/);
+    expect(en.pairing_note).toMatch(/bag/);
+  });
+
   it('shows only the steps the builder owns and a mobile dock', () => {
     const flow = themeFile('sections/ring-builder-flow.liquid');
     expect(flow).not.toContain("ring_flow.checkout' | t }}</span>");
