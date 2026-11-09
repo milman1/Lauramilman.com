@@ -246,27 +246,18 @@ Each accepted creator gets their own code. There is no shared program code.
 
 ---
 
-## 6b. Bridal combo — 20% off jewelry, never the loose stone
+## 6b. Bridal combo automatics — expired, do not reactivate
 
-Loose diamonds stay at listed retail. Naturals above $4,000 Amount are 1.25× (20% margin); 20% off that ticket is the invoice cost.
+Merchant decision 2026-11-09: take the bridal combo off the website, including checkout.
 
-Two live automatic discounts, neither a code:
+Deactivated (do not turn back on):
 
-1. `Bridal combo 20% off jewelry` (`gid://shopify/DiscountAutomaticNode/1514083450951`)
-   - Amount off products, 20%
-   - Collections: Engagement Rings (`engagement-rings`), Engagement Ring Settings (`ring-settings`), Wedding Bands (`wedding-bands`), Men's Wedding Bands (`mens-wedding-bands`)
-   - Minimum 2 of those items
-   - A setting + band (or two bands, or a finished engagement ring + band) takes 20% off those jewelry lines
-2. `Bridal combo 20% off jewelry with a diamond` (`gid://shopify/DiscountAutomaticNode/1514083811399`)
-   - Buy 1 item from Natural Diamonds, Lab-Grown Diamonds, or Colored Lab-Grown Diamonds
-   - Get up to 2 items from the jewelry collections above at 20% off
-   - The stone is the qualifier only; it is not discounted
+1. `Bridal combo 10% off each piece` (`gid://shopify/DiscountAutomaticNode/1514083450951`) — was 10% off 6 jewelry collections, min qty 2, all buyers. Status `EXPIRED` as of 2026-11-09T23:53:06Z. Independent read: it is not in `status:active`.
+2. `Bridal combo 20% off jewelry with a diamond` (`gid://shopify/DiscountAutomaticNode/1514083811399`) — already `EXPIRED`.
 
-They do not combine with each other or with other product discounts. `LMNYWELCOME` and creator codes do not combine, so checkout keeps whichever offer is better. Watches stay at full price.
+Do not reactivate the older stone-discounting pairing discounts `Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, or `Pairing 20% off the wedding band`. Naturals above $4,000 Amount are 1.25× (20% margin); 20% off that ticket is the invoice cost.
 
-Do not advertise this offer on the storefront: no ring-builder note, banner, nav, footer, or email copy. Checkout may still show the automatic discount title when it applies.
-
-Do not reactivate the expired pairing discounts `Pairing 20% off the loose stone`, `Pairing 20% off the setting or ring`, or `Pairing 20% off the wedding band`. Those took 20% off the stone.
+Storefront must not advertise a bridal combo (no ring-builder note, banner, nav, footer, or email). Active codes left in place: `LMNYWELCOME` (10% jewelry) and `VIP20`.
 
 ---
 
