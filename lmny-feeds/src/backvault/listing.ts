@@ -6,13 +6,14 @@
  * pieces already on the store) plus the SEO length rules from
  * docs/watch-listing-schema.md.
  *
- * Title:      {Brand} {normalized remainder}
- *             Watches: Pre-Owned {Brand} {remainder}
+ * Title:      Pre-Owned {Brand} {normalized remainder} (jewelry and watches;
+ *             merchant decision 2026-11-05, matching the hand-listed pieces)
  * Body:       "This {Brand} estate {type}… is offered by Laura Milman New York."
  *             + "Authenticated and hand-inspected by Laura Milman New York."
  *             Specs live in custom.* metafields, not in the HTML.
- * SEO title:  ≤ 60 chars, product identity + `| Estate Jewelry` or
- *             `| Pre-Owned Watch`; the theme supplies the store-name suffix.
+ * SEO title:  ≤ 60 chars. Jewelry: `Pre-Owned {Brand} … | Estate Jewelry`.
+ *             Watches: `{Brand} … | Pre-Owned Watch`. The theme supplies the
+ *             store-name suffix.
  * SEO desc:   ≤ 160 chars, ends with "Authenticated by Laura Milman New York."
  */
 
@@ -94,10 +95,10 @@ export function buildJewelryListing(item: BackVaultItem): JewelryListing {
   const brand = item.vendor.trim();
   const productType = canonicalProductType(item.productType);
   const isWatch = productType === 'Watch';
-  const remainder = titleCaseJewelry(stripLeadingBrand(stripStockSuffix(item.title), brand));
-  const title = isWatch
-    ? `Pre-Owned ${brand}${remainder ? ` ${remainder}` : ''}`.trim()
-    : `${brand}${remainder ? ` ` : ''}${remainder}`.trim();
+  const remainder = titleCaseJewelry(
+    stripLeadingBrand(stripPreOwned(stripStockSuffix(item.title)), brand),
+  );
+  const title = `Pre-Owned ${brand}${remainder ? ` ${remainder}` : ''}`.trim();
 
   const descriptionHtml = buildDescription(brand, productType, isWatch, remainder, item.specs);
   const seoTitle = buildSeoTitle(title, isWatch);
@@ -239,6 +240,11 @@ export function conditionMetafield(raw: string | undefined): string {
   const grade = conditionGrade(raw);
   if (grade) return `${grade} pre-owned condition; signed and authenticated`;
   return 'Pre-owned; authenticated by Laura Milman New York';
+}
+
+/** A supplier title that already says Pre-Owned must not end up "Pre-Owned Pre-Owned". */
+function stripPreOwned(title: string): string {
+  return title.replace(/^\s*pre[-\s]?owned\s+/i, '').trim();
 }
 
 function stripStockSuffix(title: string): string {

@@ -50,10 +50,15 @@ describe('loose diamond shape filter', () => {
     }
   });
 
-  it('uses the shared shapes in the menu and builder alongside the curated homepage gallery', () => {
-    for (const path of ['sections/lmh-stones.liquid', 'sections/header.liquid']) {
+  it('keeps full shape discovery in collections and a curated main menu', () => {
+    for (const path of ['sections/lmh-stones.liquid']) {
       expect(themeFile(path)).toContain("render 'diamond-shape-order'");
     }
+    const header = themeFile('sections/header.liquid');
+    expect(header).toContain('navigation_simple.view_all_shapes');
+    expect(header).toContain('href="/collections/lab-grown-diamonds"');
+    expect(header).toContain('href="/collections/natural-diamonds"');
+    expect(header.match(/href="\/collections\/lab-grown-diamonds\?shape=/g)).toHaveLength(6);
     const flow = themeFile('assets/ring-builder-flow.js');
     expect(flow).toContain('.lm-shape__name');
     expect(flow).not.toContain("const shapes = ['Round', 'Oval'");

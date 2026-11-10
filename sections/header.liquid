@@ -491,6 +491,13 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
   .header--nav-open .nav__icons,
   .header--nav-open .mobile-toggle { visibility: hidden; }
 }
+@media (min-width: 1200px) {
+  .header .nav__dropdown--simple {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 28px max(40px, calc((100vw - 1080px) / 2));
+    gap: 48px;
+  }
+}
 </style>
 
 <header class="header" id="header">
@@ -577,236 +584,128 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
       and gold live under Fine Jewelry.
     {%- endcomment -%}
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">Loose Diamonds {{ caret }}</button>
-      <div class="nav__dropdown">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.loose_diamonds' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Lab-grown shapes</span>
-          <div class="nav__shape-grid">
-            {%- capture shape_entries_raw -%}{%- render 'diamond-shape-order' -%}{%- endcapture -%}
-            {%- assign shape_entries = shape_entries_raw | strip | split: ';' -%}
-            {%- for entry in shape_entries -%}
-              {%- assign shape_label = entry | split: '|' | first | strip -%}
-              <a href="/collections/lab-grown-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
-            {%- endfor -%}
-          </div>
-          <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">Colored lab-grown</a>
-          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all lab-grown</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.shop_diamonds' | t }}</span>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.all_lab_grown_diamonds' | t }}</a>
+          <a href="/collections/colored-lab-grown-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.colored_lab_grown_diamonds' | t }}</a>
+          <a href="/collections/natural-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.natural_diamonds' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Natural shapes</span>
-          <div class="nav__shape-grid">
-            {%- assign natural_shapes = 'Round,Oval,Emerald,Cushion,Radiant,Asscher,Pear,Marquise,Princess,Heart,Cushion Modified,Old Miner' | split: ',' -%}
-            {%- for shape_label in natural_shapes -%}
-              <a href="/collections/natural-diamonds?shape={{ shape_label | url_encode }}" class="nav__dropdown-link">{{ shape_label }}</a>
-            {%- endfor -%}
-          </div>
-          <a href="/collections/natural-diamonds" class="nav__dropdown-link nav__dropdown-link--all">Search all natural</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.popular_lab_grown_shapes' | t }}</span>
+          <a href="/collections/lab-grown-diamonds?shape=Round" class="nav__dropdown-link">{{ 'navigation_simple.round' | t }}</a>
+          <a href="/collections/lab-grown-diamonds?shape=Oval" class="nav__dropdown-link">{{ 'navigation_simple.oval' | t }}</a>
+          <a href="/collections/lab-grown-diamonds?shape=Emerald" class="nav__dropdown-link">{{ 'navigation_simple.emerald' | t }}</a>
+          <a href="/collections/lab-grown-diamonds?shape=Cushion" class="nav__dropdown-link">{{ 'navigation_simple.cushion' | t }}</a>
+          <a href="/collections/lab-grown-diamonds?shape=Pear" class="nav__dropdown-link">{{ 'navigation_simple.pear' | t }}</a>
+          <a href="/collections/lab-grown-diamonds?shape=Ashoka" class="nav__dropdown-link">{{ 'navigation_simple.ashoka' | t }}</a>
+          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.view_all_shapes' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Choose a path</span>
-          <a href="/collections/lab-grown-diamonds" class="nav__dropdown-link">Shop loose diamonds</a>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
-          <a href="/pages/ring-builder?start=setting" class="nav__dropdown-link">Start with a setting</a>
-          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
-          <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.create_your_ring' | t }}</span>
+          <a href="/pages/ring-builder?start=diamond" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
+          <a href="/pages/ring-builder?start=setting" class="nav__dropdown-link">{{ 'navigation_simple.start_with_a_setting' | t }}</a>
+          <a href="/pages/buying-guide" class="nav__dropdown-link">{{ 'navigation_simple.diamond_buying_guide' | t }}</a>
         </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">How diamonds are listed</span>
-          <p class="nav__intro-line">Every stone is listed with its grading lab and certificate.</p>
-          <p>Search by shape, carat, price, color and clarity, or book a viewing in Midtown to compare stones side by side.</p>
-          <a class="nav__arrow" href="/pages/buying-guide">Buying guide {{ arrow }}</a>
-        </div>
-        <a class="nav__card" href="/pages/ring-builder?start=diamond">
-          <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">Start with the stone</span>
-          <span class="nav__card-text">Choose a diamond, pick a setting, and our goldsmiths in Italy craft the ring.</span>
-        </a>
       </div>
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">Rings {{ caret }}</button>
-      <div class="nav__dropdown">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.wedding' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Shop rings</span>
-          <a href="/collections/rings" class="nav__dropdown-link">All rings</a>
-          <a href="/collections/diamond-rings" class="nav__dropdown-link">Diamond rings</a>
-          <a href="/collections/engagement-rings" class="nav__dropdown-link">Engagement rings</a>
-          <a href="/collections/wedding-bands" class="nav__dropdown-link">Wedding bands</a>
-          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking rings</a>
-          <a href="/collections/gold-rings" class="nav__dropdown-link">Gold rings</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.rings' | t }}</span>
+          <a href="/collections/engagement-rings" class="nav__dropdown-link">{{ 'navigation_simple.engagement_rings' | t }}</a>
+          <a href="/pages/ring-builder?start=diamond" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
+          <a href="/collections/wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.womens_wedding_bands' | t }}</a>
+          <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.mens_wedding_bands' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Build your own</span>
-          <a href="/pages/ring-builder" class="nav__dropdown-link">Build a ring</a>
-          <a href="/collections/ring-settings" class="nav__dropdown-link">Ring settings</a>
-          <a href="/collections/lab-grown-engagement-rings" class="nav__dropdown-link">Lab-grown engagement rings</a>
-          <a href="/collections/lab-grown-rings" class="nav__dropdown-link">Lab-grown rings</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.gifts_and_celebrations' | t }}</span>
+          <a href="/collections/anniversary-gifts" class="nav__dropdown-link">{{ 'navigation_simple.anniversary_gifts' | t }}</a>
+          <a href="/collections/wedding-gifts" class="nav__dropdown-link">{{ 'navigation_simple.wedding_gifts' | t }}</a>
         </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Size &amp; care</span>
-          <a href="/pages/ring-size-guide" class="nav__dropdown-link">Ring size guide</a>
-          <a href="/pages/care-guide" class="nav__dropdown-link">Care guide</a>
-          <a href="/pages/private-clients" class="nav__dropdown-link">Book an appointment</a>
-        </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">Rings, your way</span>
-          <p class="nav__intro-line">For your forever, for work, for play.</p>
-          <p>Many engagement rings wear just as well every day. Free insured shipping and 14-day returns.</p>
-          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
-        </div>
-        <a class="nav__card" href="/collections/rings">
-          <img src="{{ 'home-rings-work.webp' | asset_url }}" alt="Woman in a white shirt wearing a diamond ring, layered gold necklaces and a tennis bracelet" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">Rings for work</span>
-          <span class="nav__card-text">Solitaires, bands and stacking rings made to wear every day.</span>
-        </a>
       </div>
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">Fine Jewelry {{ caret }}</button>
-      <div class="nav__dropdown nav__dropdown--five">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.fine_jewelry' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Shop by occasion</span>
-          <a href="/collections/everyday-jewelry" class="nav__dropdown-link">Everyday jewelry</a>
-          <a href="/collections/for-work" class="nav__dropdown-link">For work</a>
-          <a href="/collections/for-a-night-out" class="nav__dropdown-link">For a night out</a>
-          <a href="/collections/engagement-rings" class="nav__dropdown-link">Wedding &amp; engagement</a>
-          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">A push present, under $1,000</a>
-          <a href="/collections/lab-grown-earrings?type=Stud,Huggie,Hoop" class="nav__dropdown-link">Everyday basics</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.shop_by_piece' | t }}</span>
+          <a href="/collections/all-earrings" class="nav__dropdown-link">{{ 'navigation_simple.earrings' | t }}</a>
+          <a href="/collections/all-bracelets" class="nav__dropdown-link">{{ 'navigation_simple.bracelets' | t }}</a>
+          <a href="/collections/necklaces" class="nav__dropdown-link">{{ 'navigation_simple.necklaces' | t }}</a>
+          <a href="/collections/all-pendants" class="nav__dropdown-link">{{ 'navigation_simple.pendants' | t }}</a>
+          <a href="/collections/chain-necklaces" class="nav__dropdown-link">{{ 'navigation_simple.chains' | t }}</a>
+          <a href="/collections/rings" class="nav__dropdown-link">{{ 'navigation_simple.all_rings' | t }}</a>
+          <a href="/collections/all" class="nav__dropdown-link">{{ 'navigation_simple.all_jewelry' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Shop by piece</span>
-          <a href="/collections/all-earrings" class="nav__dropdown-link">Earrings</a>
-          <a href="/collections/all-bracelets" class="nav__dropdown-link">Bracelets</a>
-          <a href="/collections/necklaces" class="nav__dropdown-link">Necklaces</a>
-          <a href="/collections/rings" class="nav__dropdown-link">Rings</a>
-          <a href="/collections/all-pendants" class="nav__dropdown-link">Pendants</a>
-          <a href="/collections/all" class="nav__dropdown-link nav__dropdown-link--all">All jewelry</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.explore_jewelry' | t }}</span>
+          <a href="/collections/gold-rings" class="nav__dropdown-link">{{ 'navigation_simple.gold_rings' | t }}</a>
+          <a href="/collections/stackable-rings" class="nav__dropdown-link">{{ 'navigation_simple.stacking_rings' | t }}</a>
+          <a href="/collections/diamond-rings" class="nav__dropdown-link">{{ 'navigation_simple.diamond_rings' | t }}</a>
+          <a href="/collections/everyday-jewelry" class="nav__dropdown-link">{{ 'navigation_simple.everyday_jewelry' | t }}</a>
+          <a href="{{ peaceful_url }}" class="nav__dropdown-link">{{ 'navigation_simple.lab_grown_diamond_jewelry' | t }}</a>
+          <a href="{{ gold_all_url }}" class="nav__dropdown-link">{{ 'navigation_simple.gold_jewelry' | t }}</a>
+          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">{{ 'navigation_simple.under_1_000' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Gold</span>
-          <a href="/collections/chain-necklaces" class="nav__dropdown-link">Chains</a>
-          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Chain Bracelets</a>
-          <a href="/collections/stackable-rings" class="nav__dropdown-link">Stacking Rings</a>
-          <a href="/collections/huggie-earrings" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-          <a href="/collections/bangles" class="nav__dropdown-link">Bangles</a>
-          <a href="{{ gold_all_url }}" class="nav__dropdown-link nav__dropdown-link--all">Shop all gold</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.high_jewelry' | t }}</span>
+          <a href="/collections/high-jewelry" class="nav__dropdown-link">{{ 'navigation_simple.all_high_jewelry' | t }}</a>
+          <a href="/collections/fancy-yellow-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.fancy_yellow_diamonds' | t }}</a>
+          <a href="/collections/fancy-pink-diamonds" class="nav__dropdown-link">{{ 'navigation_simple.fancy_pink_diamonds' | t }}</a>
+          <a href="/pages/private-clients" class="nav__dropdown-link">{{ 'navigation_simple.book_a_private_viewing' | t }}</a>
         </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Lab-grown diamond jewelry</span>
-          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis Bracelets</a>
-          <a href="/collections/lab-grown-earrings?type=Huggie,Hoop" class="nav__dropdown-link">Huggies &amp; Hoops</a>
-          <a href="/collections/lab-grown-earrings?type=Stud" class="nav__dropdown-link">Stud Earrings</a>
-          <a href="/collections/lab-grown-necklaces?type=Station" class="nav__dropdown-link">Station Necklaces</a>
-          <a href="{{ peaceful_url }}?filter.v.price.lte=1000" class="nav__dropdown-link">Under $1,000</a>
-          <a href="{{ peaceful_url }}" class="nav__dropdown-link nav__dropdown-link--all">All lab-grown jewelry</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">Chains by style</span>
-          <a href="/collections/chains?type=Cuban" class="nav__dropdown-link">Cuban</a>
-          <a href="/collections/chains?type=Rope" class="nav__dropdown-link">Rope</a>
-          <a href="/collections/chains?type=Paperclip" class="nav__dropdown-link">Paperclip</a>
-          <a href="/collections/chains?type=Herringbone" class="nav__dropdown-link">Herringbone</a>
-          <a href="/collections/chains?type=Curb" class="nav__dropdown-link">Curb</a>
-        </div>
-        <a class="nav__card" href="{{ gold_all_url }}">
-          <img src="{{ 'home-gold-editorial.webp' | asset_url }}" alt="Woman in a black blazer wearing layered gold chain necklaces" loading="lazy" width="300" height="236">
-          <span class="nav__card-title">The gold you reach for</span>
-          <span class="nav__card-text">Rings, chains, and bands in 14K yellow gold.</span>
-        </a>
       </div>
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">High Jewelry {{ caret }}</button>
-      <div class="nav__dropdown">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.vintage_and_pre_owned' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">By piece</span>
-          <a href="/collections/high-jewelry-rings" class="nav__dropdown-link">Rings</a>
-          <a href="/collections/high-jewelry-earrings" class="nav__dropdown-link">Earrings</a>
-          <a href="/collections/high-jewelry-bracelets" class="nav__dropdown-link">Bracelets</a>
-          <a href="/collections/high-jewelry-necklaces" class="nav__dropdown-link">Pendants &amp; Necklaces</a>
-          <a href="/collections/high-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All high jewelry</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.explore_the_collection' | t }}</span>
+          <a href="/collections/estate-jewelry" class="nav__dropdown-link">{{ 'navigation_simple.shop_all_vintage_and_pre_owned' | t }}</a>
+          <a href="/pages/authentication" class="nav__dropdown-link">{{ 'navigation_simple.authentication' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">By color</span>
-          <a href="/collections/fancy-yellow-diamonds" class="nav__dropdown-link">Fancy yellow</a>
-          <a href="/collections/fancy-pink-diamonds" class="nav__dropdown-link">Fancy pink</a>
-          <a href="/collections/fancy-green-diamonds" class="nav__dropdown-link">Fancy green</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.shop_by_designer' | t }}</span>
+          <a href="/collections/cartier" class="nav__dropdown-link">{{ 'navigation_simple.cartier' | t }}</a>
+          <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">{{ 'navigation_simple.van_cleef_and_arpels' | t }}</a>
+          <a href="/collections/tiffany" class="nav__dropdown-link">{{ 'navigation_simple.tiffany_and_co' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">By appointment</span>
-          <a href="/pages/private-clients" class="nav__dropdown-link">Book a private viewing</a>
-          <a href="/pages/buying-guide" class="nav__dropdown-link">Buying guide</a>
+          <span class="nav__dropdown-label">{{ 'navigation_simple.more_designers' | t }}</span>
+          <a href="/collections/david-webb" class="nav__dropdown-link">{{ 'navigation_simple.david_webb' | t }}</a>
+          <a href="/collections/bvlgari" class="nav__dropdown-link">{{ 'navigation_simple.bvlgari' | t }}</a>
         </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">High jewelry</span>
-          <p class="nav__intro-line">Fancy color diamonds set in platinum and gold.</p>
-          <p>Private viewings in Midtown, in person or by video. Free insured shipping and 14-day returns.</p>
-          <a class="nav__arrow" href="/pages/private-clients">Book a viewing {{ arrow }}</a>
-        </div>
-        {%- assign hj_card = all_products['fc-j1133'] -%}
-        <a class="nav__card{% if hj_card.featured_image != blank %} nav__card--product{% endif %}" href="/collections/high-jewelry">
-          {%- if hj_card.featured_image != blank -%}
-            {{ hj_card.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: hj_card.title, widths: '300, 600', sizes: '300px' }}
-          {%- else -%}
-            <img src="{{ 'home-rings-forever.webp' | asset_url }}" alt="Round diamond solitaire ring in yellow gold on a travertine pedestal" loading="lazy" width="300" height="236">
-          {%- endif -%}
-          <span class="nav__card-title">Fancy color diamonds</span>
-          <span class="nav__card-text">Yellow, pink, green and more, set in platinum and gold.</span>
-        </a>
       </div>
     </div>
 
     <div class="nav__item">
-      <button type="button" aria-expanded="false" class="nav__item-link">{{ section.settings.estate_label | default: 'Watches &amp; Estate' }} {{ caret }}</button>
-      <div class="nav__dropdown">
+      <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.watches' | t }} {{ caret }}</button>
+      <div class="nav__dropdown nav__dropdown--simple">
         <div class="nav__group">
-          <span class="nav__dropdown-label">Watches</span>
-          <a href="/collections/rolex-watches" class="nav__dropdown-link">Rolex</a>
-          <a href="/collections/cartier-watches" class="nav__dropdown-link">Cartier</a>
-          <a href="/collections/bvlgari-watches" class="nav__dropdown-link">Bvlgari</a>
-          <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
-          <a href="/collections/chopard-watches" class="nav__dropdown-link">Chopard</a>
-          <a href="/collections/time-pieces" class="nav__dropdown-link nav__dropdown-link--all">All watches</a>
+          <a href="/collections/time-pieces" class="nav__dropdown-link">{{ 'navigation_simple.all_watches' | t }}</a>
+          <a href="/collections/rolex-watches" class="nav__dropdown-link">{{ 'navigation_simple.rolex' | t }}</a>
+          <a href="/collections/cartier-watches" class="nav__dropdown-link">{{ 'navigation_simple.cartier' | t }}</a>
+          <a href="/collections/omega" class="nav__dropdown-link">{{ 'navigation_simple.omega' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Signed jewelry</span>
-          <a href="/collections/cartier" class="nav__dropdown-link">Cartier</a>
-          <a href="/collections/van-cleef-arpels" class="nav__dropdown-link">Van Cleef &amp; Arpels</a>
-          <a href="/collections/tiffany" class="nav__dropdown-link">Tiffany &amp; Co.</a>
-          <a href="/collections/david-webb" class="nav__dropdown-link">David Webb</a>
-          <a href="/collections/bvlgari" class="nav__dropdown-link">Bvlgari</a>
-          <a href="/collections/estate-jewelry" class="nav__dropdown-link nav__dropdown-link--all">All estate jewelry</a>
+          <a href="/collections/patek-philippe" class="nav__dropdown-link">{{ 'navigation_simple.patek_philippe' | t }}</a>
+          <a href="/collections/audemars-piguet-watches" class="nav__dropdown-link">{{ 'navigation_simple.audemars_piguet' | t }}</a>
+          <a href="/collections/jacob-co" class="nav__dropdown-link">{{ 'navigation_simple.jacob_and_co' | t }}</a>
         </div>
         <div class="nav__group">
-          <span class="nav__dropdown-label">Start here</span>
-          <a href="/collections/lab-grown-bracelets?type=Tennis" class="nav__dropdown-link">Tennis bracelets to wear with a watch</a>
-          <a href="/collections/chain-bracelets" class="nav__dropdown-link">Gold chain bracelets</a>
-          <a href="/pages/authentication" class="nav__dropdown-link">Estate authentication</a>
+          <a href="/collections/bvlgari-watches" class="nav__dropdown-link">{{ 'navigation_simple.bvlgari' | t }}</a>
+          <a href="/collections/chopard-watches" class="nav__dropdown-link">{{ 'navigation_simple.chopard' | t }}</a>
+          <a href="/collections/hermes-watches" class="nav__dropdown-link">{{ 'navigation_simple.hermes' | t }}</a>
+          <a href="/collections/van-cleef-arpels-watches" class="nav__dropdown-link">{{ 'navigation_simple.van_cleef_and_arpels' | t }}</a>
+          <a href="/collections/other-watch-brands" class="nav__dropdown-link">{{ 'navigation_simple.other_watch_brands' | t }}</a>
         </div>
-        <div class="nav__intro">
-          <span class="nav__dropdown-label">How watches are listed</span>
-          <p class="nav__intro-line">Every watch listing states what its record confirms.</p>
-          <p>Condition, reference, case size, and whether the box and papers are included. Missing items are never implied. Watches are exchange-only within 7 days of delivery.</p>
-          <a class="nav__arrow" href="/pages/shipping-returns">Shipping &amp; returns {{ arrow }}</a>
-        </div>
-        {%- assign rolex_card = all_products['w-t3757'] -%}
-        <a class="nav__card{% if rolex_card.featured_image != blank %} nav__card--product{% endif %}" href="/collections/rolex-watches">
-          {%- if rolex_card.featured_image != blank -%}
-            {{ rolex_card.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: rolex_card.title, widths: '300, 600', sizes: '300px' }}
-          {%- else -%}
-            <img src="{{ 'home-gold-editorial.webp' | asset_url }}" alt="Woman wearing layered gold chain necklaces" loading="lazy" width="300" height="236">
-          {%- endif -%}
-          <span class="nav__card-title">The Rolex edit</span>
-          <span class="nav__card-text">Daytona, Submariner, GMT-Master II, Datejust and Day-Date, authenticity guaranteed.</span>
-        </a>
       </div>
-    </div>
-
-    <div class="nav__item nav__item--story">
-      <a href="/pages/about" class="nav__item-link">Our Story</a>
     </div>
 
     <div class="lmhh__mextra">

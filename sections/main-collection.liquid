@@ -152,6 +152,24 @@
     {%- endif -%}
 
     {%- liquid
+      assign chain_style_page = false
+      case collection.handle
+        when 'chains', 'gold-chains', 'chain-bracelets', 'chain-necklaces', 'gold-bracelets', '14k-gold-herringbone-chains', '14k-gold-cuban-chains', '14k-gold-rope-chains', '14k-gold-curb-chains', '14k-gold-paperclip-chains', '14k-gold-snake-chains'
+          assign chain_style_page = true
+      endcase
+    -%}
+    {%- if chain_style_page -%}
+      {%- assign chain_styles = '14k-gold-herringbone-chains::Herringbone|14k-gold-cuban-chains::Cuban|14k-gold-rope-chains::Rope|14k-gold-curb-chains::Curb|14k-gold-paperclip-chains::Paperclip|14k-gold-snake-chains::Snake' | split: '|' -%}
+      <nav class="lm-collection__chips" aria-label="Shop by chain style">
+        <span class="lm-collection__chips-label">Shop by chain style</span>
+        {%- for item in chain_styles -%}
+          {%- assign parts = item | split: '::' -%}
+          <a href="/collections/{{ parts[0] }}" class="lm-collection__chip"{% if collection.handle == parts[0] %} aria-current="page"{% endif %}>{{ parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- liquid
       assign hj_page = false
       case collection.handle
         when 'high-jewelry', 'high-jewelry-rings', 'high-jewelry-earrings', 'high-jewelry-bracelets', 'high-jewelry-necklaces', 'fancy-yellow-diamonds', 'fancy-pink-diamonds', 'fancy-green-diamonds'
@@ -173,6 +191,38 @@
         {%- for hj in hj_links -%}
           {%- assign hj_parts = hj | split: '::' -%}
           <a href="/collections/{{ hj_parts[0] }}" class="lm-collection__chip"{% if collection.handle == hj_parts[0] %} aria-current="page"{% endif %}>{{ hj_parts[1] }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- comment -%}
+      Pre-owned model pages (merchant, 2026-11-05): the designer page links down
+      to its model pages, and each model page links to its siblings.
+    {%- endcomment -%}
+    {%- liquid
+      assign model_links = ''
+      case collection.handle
+        when 'cartier', 'pre-owned-cartier-love', 'pre-owned-cartier-trinity', 'pre-owned-cartier-panthere', 'pre-owned-cartier-juste-un-clou'
+          assign model_parent = 'cartier::All Cartier'
+          assign model_links = 'pre-owned-cartier-love::Love|pre-owned-cartier-trinity::Trinity|pre-owned-cartier-panthere::Panthère|pre-owned-cartier-juste-un-clou::Juste un Clou'
+        when 'van-cleef-arpels', 'pre-owned-van-cleef-alhambra', 'pre-owned-van-cleef-perlee'
+          assign model_parent = 'van-cleef-arpels::All Van Cleef &amp; Arpels'
+          assign model_links = 'pre-owned-van-cleef-alhambra::Alhambra|pre-owned-van-cleef-perlee::Perlée'
+        when 'tiffany', 'pre-owned-tiffany-schlumberger'
+          assign model_parent = 'tiffany::All Tiffany &amp; Co.'
+          assign model_links = 'pre-owned-tiffany-schlumberger::Schlumberger'
+        when 'rolex-watches', 'pre-owned-rolex-datejust', 'pre-owned-rolex-submariner', 'pre-owned-rolex-gmt-master', 'pre-owned-rolex-daytona'
+          assign model_parent = 'rolex-watches::All Rolex'
+          assign model_links = 'pre-owned-rolex-datejust::Datejust|pre-owned-rolex-submariner::Submariner|pre-owned-rolex-gmt-master::GMT-Master II|pre-owned-rolex-daytona::Daytona'
+      endcase
+    -%}
+    {%- if model_links != blank -%}
+      <nav class="lm-collection__chips" aria-label="Shop by model">
+        <span class="lm-collection__chips-label">Shop by model</span>
+        {%- assign model_items = model_parent | append: '|' | append: model_links | split: '|' -%}
+        {%- for item in model_items -%}
+          {%- assign parts = item | split: '::' -%}
+          <a href="/collections/{{ parts[0] }}" class="lm-collection__chip"{% if collection.handle == parts[0] %} aria-current="page"{% endif %}>{{ parts[1] }}</a>
         {%- endfor -%}
       </nav>
     {%- endif -%}
@@ -340,11 +390,12 @@
     {%- comment -%}
       Guide and FAQ (custom.guide_html / custom.guide_faq) on an explicit list of
       jewelry collections only. Merchant approved Cartier and David Webb, then
-      the other designer and gold jewelry pages, on 2026-10-28. Loose-stone and
+      the other designer and gold jewelry pages, on 2026-10-28, and the
+      pre-owned model pages on 2026-11-05. Loose-stone and
       watch collections are not on the list (Rolex's stored guide stays hidden).
     {%- endcomment -%}
     {%- liquid
-      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings' | split: ','
+      assign longform_handles = 'cartier,david-webb,hermes,van-cleef-arpels,tiffany,bvlgari,chopard,graff,buccellati,harry-winston,seaman-schepps,estate-jewelry,vintage-jewelry,gold-jewelry,chains,chain-necklaces,chain-bracelets,gold-bracelets,gold-rings,pre-owned-cartier-love,pre-owned-cartier-trinity,pre-owned-cartier-panthere,pre-owned-van-cleef-alhambra,pre-owned-tiffany-schlumberger,pre-owned-rolex-datejust,pre-owned-rolex-submariner,pre-owned-cartier-juste-un-clou,pre-owned-van-cleef-perlee,pre-owned-rolex-gmt-master,pre-owned-rolex-daytona,14k-gold-herringbone-chains,14k-gold-cuban-chains,14k-gold-rope-chains,14k-gold-curb-chains,14k-gold-paperclip-chains,14k-gold-snake-chains' | split: ','
     -%}
     {%- if longform_handles contains collection.handle -%}
       {% render 'collection-longform', collection: collection, page_number: paginate.current_page %}

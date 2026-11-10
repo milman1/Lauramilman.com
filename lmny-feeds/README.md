@@ -159,9 +159,9 @@ holds a stones table — Shopify products are the only live copy.
    **Sales channels.** Every product this step writes is published with one
    `publishablePublish` call carrying the whole channel list from
    `config/channels.ts` (merchant decision 2026-09-10), not Online Store
-   alone. Watches go to all five — Online Store, Shop, Google & YouTube,
-   Facebook & Instagram, Pinterest — because they are high-ticket and
-   searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
+   alone. Watches go to all six — Online Store, Shop, Google & YouTube,
+   Facebook & Instagram, Pinterest, Microsoft Channel (added 2026-11-04) —
+   because they are high-ticket and searched by name. Loose stones stay on `LOOSE_DIAMOND_CHANNELS`
    (Online Store, Shop): about 10,000 one-of-one SKUs without GTINs would
    swamp Merchant Center and Meta's catalog limits. The kind is read from
    the handle prefix (`channelsForHandle` in `src/diff.ts`), so a product
@@ -425,11 +425,14 @@ npm run sync:backvault       # live (needs Shopify env vars)
    estate-jewelry PDP reads from §1 of SHOPIFY_SETUP.md).
 5. **Rewrite listing copy** (`src/backvault/listing.ts`) to the same
    estate / watch SEO schema already used on the store:
-   - Title: `{Brand} {normalized remainder}`; watches get a `Pre-Owned` prefix
+   - Title: `Pre-Owned {Brand} {normalized remainder}` for jewelry and watches
+     (merchant decision 2026-11-05; the next run rewrites existing `bv-` titles,
+     handles stay the same)
    - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
      plus `Authenticated and hand-inspected by Laura Milman New York.`
      Specs stay in metafields, not an HTML table.
-   - SEO title ≤ 60 chars (`{Title} | Laura Milman`, truncated at a word)
+   - SEO title ≤ 60 chars, truncated at a word: jewelry
+     `Pre-Owned {Brand} … | Estate Jewelry`, watches `{Brand} … | Pre-Owned Watch`
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
@@ -533,6 +536,21 @@ npm run sync:backvault       # live (needs Shopify env vars)
    both feeds (sold / withdrawn) or out of stock archives. If the
    full-catalog fetch fails, the run archives by new-arrivals alone and
    says so in the report.
+
+   **Merchant listings** (`src/backvault/merchantListings.ts`, merchant
+   decision 2026-11-04). Some pieces were listed by hand before this sync
+   existed: handle = the supplier's own handle (no `bv-`), tagged
+   `Pre-Owned`, merchant-written title and price. For every ACTIVE one:
+   the sync never creates or keeps a `bv-` copy (an existing copy archives
+   with reason `merchant_listing` and redirects to the merchant's listing),
+   and it never writes the listing's title, description, price or SEO.
+   When the supplier's full catalog shows the piece sold, or no longer lists
+   a handle that ends in a stock number (`-rr…`, `-j…`, `-a…`), the
+   listing moves to DRAFT, never ARCHIVED, and the report names it. No
+   draft happens when the full-catalog read failed or returned fewer than
+   500 rows, or when more than 20 listings would draft in one run (the
+   report lists them for review instead). The sync never activates a
+   merchant listing.
 8. **Diff** (`src/backvault/diff.ts`): create / update / publish / archive / skip
    against a tag-scoped catalog read (`tag:'backvault-feed'`). Handle
    prefix `bv-`. Archived products get a redirect to `/collections/all`.

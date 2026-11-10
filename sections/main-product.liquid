@@ -170,6 +170,31 @@
       endcapture
     endif
   endfor
+
+  assign jewelry_specs = product.metafields.custom.jewelry_specifications.value
+  if jewelry_specs != blank
+    if jewelry_specs.replace
+      assign spec_rows = ''
+    endif
+    for fact in jewelry_specs.rows
+      capture label_markup
+        echo 'product-spec__label">'
+        echo fact.label
+        echo '</span>'
+      endcapture
+      unless spec_rows contains label_markup
+        capture spec_rows
+          echo spec_rows
+          echo '<div class="product-spec"><span class="product-spec__label">'
+          echo fact.label | escape
+          echo '</span><span class="product-spec__value">'
+          echo fact.value | escape
+          echo '</span></div>'
+        endcapture
+      endunless
+    endfor
+  endif
+
 -%}
 
 <div class="product-page">
@@ -855,6 +880,59 @@
       height: 15px;
     }
   }
+
+  /* Keep supplier descriptions and purchase controls inside the product column. */
+  .product-info,
+  .product-info form,
+  .pdp-desc,
+  #PdpDescription {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  #PdpDescription table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  #PdpDescription th,
+  #PdpDescription td {
+    padding: 0.5rem 0.65rem;
+    text-align: left;
+    vertical-align: top;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  #PdpDescription th {
+    width: 38%;
+  }
+
+  .product-breadcrumb {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .product-gallery,
+    .product-info,
+    .product-gallery__main {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .atc-row .atc-btn {
+      flex: 1 1 100%;
+    }
+
+    .product-gallery__main:hover img {
+      transform: none;
+    }
+  }
+
 </style>
 
 <script>

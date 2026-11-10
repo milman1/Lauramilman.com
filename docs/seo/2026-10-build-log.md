@@ -522,3 +522,40 @@ Store content only (Shopify articles); no theme or code change.
 - Photos added to 12 older articles (1 to 3 each, catalogue photos linked to the product, placed after the paragraph for the matching section): lab-grown vs natural, gold chain guide, David Webb authentication, Rolex box and papers, vintage luxury watch, wearing vintage, pre-owned Cartier/Van Cleef/Tiffany, IGI vs GIA, stacking, Under $3,000, night out, are lab-grown diamonds real. Original text verified byte-for-byte unchanged after each edit. The Under $3,000 article uses only the marquise ring (from $2,400); the other lab-grown rings start higher and would contradict its headline.
 - `custom.guide_faq` set on "What jewelry to wear on a first date" (3 questions), the last published article without FAQ markup.
 - Not touched: the Under $3,000 article states prices in its title and body, which the current no-prices rule would not allow for a new article. Left as is; the merchant's call.
+
+## 2026-11-05: pre-owned model pages
+
+- Merchant approved, on condition that nothing affects loose-stone AI and search visibility: no loose-stone template, collection, link or sitemap entry changed.
+- Store (live): seven automatic collections by vendor and title, published to the Online Store: `pre-owned-cartier-love`, `pre-owned-cartier-trinity`, `pre-owned-cartier-panthere`, `pre-owned-van-cleef-alhambra`, `pre-owned-tiffany-schlumberger`, `pre-owned-rolex-datejust`, `pre-owned-rolex-submariner`. Each has an intro, an SEO title and description, and four FAQs in `custom.guide_faq` (two about the model, "not an authorized dealer", returns and the jewelry sign-up offer; watch pages state exchange only within 7 days). Active pieces on 2026-11-05: 29, 11, 24, 11, 17, 28 and 22.
+- Theme: `sections/main-collection.liquid` adds the seven handles to the guide/FAQ allow-list and a "Shop by model" chip row on Cartier, Van Cleef & Arpels, Tiffany and Rolex Watches and on each model page. Rolex Watches itself stays off the guide list. Guard test `lmny-feeds/test/theme-preowned-models.test.ts`.
+- Not done: Everyday Jewelry SEO fields were already set by the merchant.
+
+## 2026-11-05: four more model pages and Journal links
+
+- Merchant approved ("Do 1 - 4", items 1 and 2). Loose stones untouched: every new collection filters by designer vendor and model name, because a title-only "Clou" rule also matched a loose lab-grown "Cloud" diamond.
+- Store (live): `pre-owned-cartier-juste-un-clou` (vendor Cartier, title "Juste un Clou"), `pre-owned-van-cleef-perlee` (vendor Van Cleef & Arpels, "Perlee"/"Perlée"), `pre-owned-rolex-gmt-master` (vendor Rolex, "GMT-Master"/"GMT Master"; every piece is a GMT-Master II), `pre-owned-rolex-daytona` (vendor Rolex, "Daytona"). Published to the Online Store, each with an intro, SEO fields and four FAQs in `custom.guide_faq`. The dealer and returns answers are copied from the first seven pages. Watch copy says "pre-owned and unworn", because both are in stock.
+- Journal (live): links to the model pages in the shop paragraphs of `pre-owned-cartier-love-bracelet-size-condition`, `rolex-datejust-buying-guide-reference-numbers`, `rolex-box-and-papers-explained` and `how-to-buy-pre-owned-cartier-van-cleef-tiffany`. No FAQ text changed, so FAQPage markup is unaffected. A readback matched the intended bodies byte for byte. To undo, restore the bodies from the 2026-11-05 backup taken before the edit.
+- Theme: the four handles join the guide/FAQ allow-list and the "Shop by model" chips (Juste un Clou, Perlée, GMT-Master II, Daytona). The guard test lists them.
+
+## 2026-11-08: 14K gold chain style pages and a bracelet gift guide
+
+- Merchant approved ("Go" on items 1-3 of the gold visibility plan). No product title, description or SEO changed; loose stones untouched.
+- Store (live): six automatic collections by vendor Laura Milman New York and title, excluding titles with "Plated" or "Silver" (the first rule pulled in gold-plated silver curb and snake chains): `14k-gold-herringbone-chains` (6), `14k-gold-cuban-chains` (7), `14k-gold-rope-chains` (5), `14k-gold-curb-chains` (5), `14k-gold-paperclip-chains` (4), `14k-gold-snake-chains` (3). Each has an intro with the stocked widths and lengths, SEO fields and four FAQs in `custom.guide_faq`: two about the style from the gold chain guide, plus the live "solid or plated" and returns answers. The pages do not claim the chains are solid, because construction is recorded on only 7 of 33 chains.
+- `gold-bracelets` gained a fifth FAQ, "Which gold bracelet makes a good gift?".
+- Journal: `gold-bracelet-gift-guide-style-width-size` (published 2026-11-08 at the merchant's request), which links to every style page, with `custom.guide_faq` set from its visible FAQ.
+- Theme: the six handles join the guide/FAQ allow-list, and a "Shop by chain style" chip row is added to Chains, Gold Chains, Chain Bracelets, Chain Necklaces, Gold Bracelets and each style page. Guard test `lmny-feeds/test/theme-gold-style-pages.test.ts`.
+- Widths in the intros reflect stock on 2026-11-08; update them when a width is added or sells out.
+- Waiting on the merchant: gram weights and solid or semi-solid for each chain (from Midas and Royal Chain) before adding them to listings.
+
+## 2026-11-10: six how-to and lifestyle Journal articles
+
+Store content only (Shopify articles); no theme or code change. Written for Google and AI-assistant search demand, published 2026-11-10 with product photos linked to their product pages and FAQPage markup via `custom.guide_faq`:
+
+- `how-to-find-your-ring-size-at-home`
+- `how-to-tell-if-a-diamond-is-lab-grown-or-natural`
+- `how-to-clean-diamond-and-gold-jewelry-at-home`
+- `can-you-wear-jewelry-in-the-shower-pool-gym-or-to-bed`
+- `how-to-travel-with-fine-jewelry`
+- `what-jewelry-to-wear-to-a-holiday-party`
+
+None states prices. Live check after publishing: all six returned 200 with photos and FAQPage markup.

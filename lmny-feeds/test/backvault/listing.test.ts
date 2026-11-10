@@ -47,13 +47,13 @@ describe('canonicalProductType', () => {
 describe('buildJewelryListing', () => {
   it('builds the estate jewelry title, body, and SEO fields', () => {
     const listing = buildJewelryListing(item());
-    expect(listing.title).toBe('Cartier Love Bracelet');
+    expect(listing.title).toBe('Pre-Owned Cartier Love Bracelet');
     expect(listing.productType).toBe('Bracelets');
     expect(listing.descriptionHtml).toBe(
       '<p>This Cartier estate bracelet in 18K Yellow Gold is offered by Laura Milman New York. It is in excellent condition.</p>' +
         '<p>Authenticated and hand-inspected by Laura Milman New York.</p>',
     );
-    expect(listing.seoTitle).toBe('Cartier Love Bracelet | Estate Jewelry');
+    expect(listing.seoTitle).toBe('Pre-Owned Cartier Love Bracelet | Estate Jewelry');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoDescription).toContain('Shop this Cartier estate bracelet in 18K Yellow Gold, excellent condition.');
     expect(listing.seoDescription).toContain('Authenticated by Laura Milman New York.');
@@ -89,9 +89,14 @@ describe('buildJewelryListing', () => {
         specs: { metalType: '18K Yellow Gold' },
       }),
     );
-    expect(listing.title).toBe('Hermès 18K Yellow Gold Link Chain Necklace');
+    expect(listing.title).toBe('Pre-Owned Hermès 18K Yellow Gold Link Chain Necklace');
     expect(listing.productType).toBe('Necklaces');
     expect(listing.descriptionHtml).toContain('This Hermès estate necklace');
+  });
+
+  it('never doubles a Pre-Owned prefix the supplier title already has', () => {
+    const listing = buildJewelryListing(item({ title: 'Pre-Owned Cartier Love Bracelet' }));
+    expect(listing.title).toBe('Pre-Owned Cartier Love Bracelet');
   });
 
   it('uses Pre-Owned watch titles matching the watch listing schema', () => {
@@ -124,7 +129,7 @@ describe('buildJewelryListing', () => {
     );
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
     expect(listing.seoTitle).not.toMatch(/\s$/);
-    expect(listing.seoTitle).toContain('Cartier');
+    expect(listing.seoTitle).toMatch(/^Pre-Owned Cartier /);
     expect(listing.seoTitle).toMatch(/\| Estate Jewelry$/);
     expect(listing.productType).toBe('Cufflinks');
     expect(listing.descriptionHtml).toContain('pair of cufflinks');
