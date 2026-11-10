@@ -205,11 +205,11 @@ async function choosePair(p) {
  assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'');assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
  await p.locator('[data-band-option="0"]').selectOption('10');await p.locator('[data-band-option="1"]').selectOption('18K');
 }
-// The optional upsell precedes personalization and stays reversible on both layouts.
+// The optional upsell follows personalization and stays reversible on both layouts.
 for (const width of [1440, 390]) {
  const p=await newPage();await p.setViewportSize({width,height:900});await choose(p);
  assert.equal(await p.locator('.band-slots button').first().innerText(),'For this ring\nChoose a band (optional)');
- assert.ok(await p.evaluate(()=>document.querySelector('.band-upsell').getBoundingClientRect().top < document.querySelector('[data-field="size"]').getBoundingClientRect().top));
+ assert.ok(await p.evaluate(()=>document.querySelector('.band-upsell').getBoundingClientRect().top > document.querySelector('[data-review-purchase]').getBoundingClientRect().top));
  await shot(p,'wedding-bands-'+width);
  await p.locator('[data-action="finish-bands"]').first().click();
  assert.equal(await p.locator('[data-band-product]').count(),0);
