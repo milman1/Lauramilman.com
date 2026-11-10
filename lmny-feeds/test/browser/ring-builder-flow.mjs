@@ -40,6 +40,33 @@ async function newPage(){const p=await b.newPage({viewport:{width:1024,height:95
 const shot=async(p,name)=>{if(process.env.LMNY_FLOW_PREVIEW)await p.screenshot({path:process.env.LMNY_FLOW_PREVIEW+'/'+name+'.png',fullPage:true});};
 const click=(p,a)=>p.locator('[data-action="'+a+'"]').first().click();
 async function choose(p,first='setting',shape='Oval'){await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-'+first);if(shape!=='Oval'){await p.locator('[data-filter="shape"]').selectOption(shape);if(first==='diamond')await p.locator('[data-search-form]').evaluate(f=>f.requestSubmit());}await click(p,'details-0');await click(p,'select');await click(p,'details-0');await click(p,'select');await p.locator('[data-field="size"]').waitFor();}
+// Required sizing and purchase stay ahead of optional bands on both layouts.
+for (const width of [390, 1024]) {
+ const p = await newPage(); await p.setViewportSize({width, height:844});
+ await p.emulateMedia({reducedMotion:'reduce'}); await choose(p);
+ const order = await p.evaluate(() => {
+  const size = document.querySelector('[data-field="size"]');
+  const purchase = document.querySelector('[data-review-purchase]');
+  const bands = document.querySelector('.band-upsell');
+  return !!(size.compareDocumentPosition(purchase) & Node.DOCUMENT_POSITION_FOLLOWING) && !!(purchase.compareDocumentPosition(bands) & Node.DOCUMENT_POSITION_FOLLOWING);
+ });
+ assert.ok(order, 'size, purchase, then optional bands');
+ const action = width < 769 ? 'dock-add' : 'review-add';
+ assert.equal(await p.locator('[data-action="'+action+'"]').innerText(),cfg.copy.choose_size);
+ const before = posts.length; await click(p,action);
+ assert.equal(await p.locator('[data-field="size"]').evaluate(e=>e===document.activeElement),true);
+ assert.equal(posts.length,before,'size prompt must not submit a cart');
+ await p.locator('[data-field="size"]').selectOption('unsure');
+ assert.equal(await p.locator('[data-action="'+action+'"]').innerText(),cfg.copy.add);
+ assert.equal(await p.locator('[data-review-purchase] .total').innerText(),await p.locator('[data-flow-summary] .total').innerText());
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await shot(p,'guided-review-'+width);
+ await click(p,action); await p.waitForURL('**/cart');
+ assert.equal(posts.at(-1).items.length,2,'optional bands are not required');
+ assert.equal(posts.at(-1).items[0].properties['Size check'],'Not sure — confirm with Laura');
+ cartItems=[]; await p.close();
+}
+console.log('PASS sizing before bands, guided mobile/inline actions, unsure size and two-item cart.');
 for(const first of ['diamond','setting']){const p=await newPage();await choose(p,first);assert.equal((await p.locator('[data-flow-summary]').innerText()).includes('&amp;'),false);assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('<Love & us>');await p.locator('[data-field="font"]').selectOption('script');await p.locator('[data-field="date"]').fill('2027-01-01');await click(p,'change-diamond');await click(p,'details-1');await click(p,'select');assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');assert.equal(await p.locator('[data-field="engraving"]').inputValue(),'<Love & us>');await p.reload();await p.locator('[data-field="size"]').waitFor();assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');for(const width of [320,390,736,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items.length,2);assert.equal(payload.items[0].properties.Engraving,'<Love & us>');assert.equal(payload.items[0].properties['Ring size'],'6.5');assert.equal(payload.items[0].properties['Requested date'],'2027-01-01');assert.equal(payload.items[0].properties._lm_ring_id,payload.items[1].properties._lm_ring_id);await p.close();cartItems=[];}
 console.log('PASS both paths, filters, media, size, engraving, state restore, shape matching, payload, native cart redirect, responsive 320–1024.');
 {const p=await newPage();await choose(p,'setting','Round');await p.locator('[data-field="size"]').selectOption('6.5');const metal=p.locator('[data-option="1"]');const values=await metal.locator('option').evaluateAll(o=>o.map(x=>x.value));assert.equal(values.length,2);await metal.selectOption(values[1]);await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items[0].properties.Metal,values[1]);await p.close();cartItems=[];}
