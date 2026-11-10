@@ -409,7 +409,7 @@
           if (generation !== state.generation) return;
         }
         state.detail = p;
-        state.detailOptions = (p.variants.find(v => v.available && (!state.filters.metal || metalOf(v.options.join(' ')) === state.filters.metal)) || p.variants.find(v => v.available))?.options.slice() || [];
+        state.detailOptions = (state.setting?.handle === p.handle ? pickedVariant()?.options.slice() : null) || (p.variants.find(v => v.available && (!state.filters.metal || metalOf(v.options.join(' ')) === state.filters.metal)) || p.variants.find(v => v.available))?.options.slice() || [];
         state.photo = 0;
         state.detailIndex = index;
         notice('');

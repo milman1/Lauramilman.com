@@ -18,3 +18,15 @@ review actual setting media on desktop/mobile in a Shopify draft theme, then
 obtain publication approval. This branch is a first setting-detail implementation,
 not the entire concept: no style-family cross-product selector or global-header
 redesign has been added. Update live only after the working preview is reviewed.
+
+## Shared-browser retry
+
+Shared Chrome opened the actual branch JS/CSS with the repository's fixture catalog.
+Manually verified setting catalog → detail, 14K/18K price change ($2,000/$2,250),
+selected 18K carried into diamond search and review, and optional band controls.
+A 390px outer iframe had 375px content width and 375px scroll width (no overflow).
+These were controlled fixtures; images.test image URLs do not load in that harness.
+Product media and Shopify draft-theme integration remain unverified; full automated
+browser regression is still blocked. The added browser test now selects Round,
+because the Oval fixture has size options only. Preserve the selected variant when
+reopening the same setting; that follow-up fix still requires a browser recheck.
