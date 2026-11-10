@@ -56,3 +56,9 @@
 @media(max-width:768px){#lmny-ring-builder .band-upsell--collapsed{align-items:stretch;flex-direction:column}#lmny-ring-builder .band-next button{width:100%}}
 
 #lmny-ring-builder .band-upsell>.heading>.link{white-space:nowrap;flex-shrink:0}
+
+/* Keep the ring purchase before optional bands, with a guided mobile action. */
+#lmny-ring-builder .review-purchase{padding:20px;background:var(--sand);margin:24px 0}
+#lmny-ring-builder .review-purchase .row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+#lmny-ring-builder .next-step{font-size:12px;line-height:1.35;margin:8px 0 0}
+@media(max-width:768px){#lmny-ring-builder .dock .dock-action{flex:0 1 48%;overflow:visible}#lmny-ring-builder .dock-action .primary{padding:10px 8px;white-space:normal}#lmny-ring-builder .dock-action .next-step{font-size:10px;margin:5px 0 0}#lmny-ring-builder .dock{align-items:center}#lmny-ring-builder:has(.dock:not([hidden])){padding-bottom:calc(165px + env(safe-area-inset-bottom,0px))}}
