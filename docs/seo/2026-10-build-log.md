@@ -559,3 +559,17 @@ Store content only (Shopify articles); no theme or code change. Written for Goog
 - `what-jewelry-to-wear-to-a-holiday-party`
 
 None states prices. Live check after publishing: all six returned 200 with photos and FAQPage markup.
+
+## 2026-11-10: dead Journal links, redirects for drafted listings, gift collection SEO
+
+- Merchant approved items 2 and 3 of the 2026-11-09 pulse.
+- Journal (live): five links to merchant listings drafted on 2026-11-04 now point to the matching collection instead:
+  - `pre-owned-cartier-love-bracelet-size-condition`: RR9205 and RR9451 now link to `/collections/pre-owned-cartier-love`. The sentence now says the sizes in stock are on that page.
+  - `how-to-buy-a-vintage-luxury-watch`: RR5823 and RR7571 image links now go to `/collections/van-cleef-arpels-watches`.
+  - `the-bulgari-pink-and-what-makes-a-pink-diamond-rare` and `watches-worn-as-jewelry-2026`: links to J10141 now go to `/collections/bvlgari-watches`, or the anchor was removed from the text.
+  - Photos and FAQ text are unchanged. A readback matched the intended bodies byte for byte. The pre-edit bodies were backed up before the change.
+- Redirects (live): 32 URL redirects, one for each drafted merchant listing, to its model page or its designer page (watches go to the brand's watch page). A redirect only fires while the product is unavailable, so a listing switched back on serves normally. Checked live: 301 to the intended collection.
+- SEO (live):
+  - `anniversary-gifts`: "Anniversary Jewelry Gifts | Laura Milman New York".
+  - `wedding-gifts`: "Wedding Jewelry Gifts | Laura Milman New York".
+  - The descriptions name what is in each collection (mostly lab-grown diamond bands, earrings and tennis necklaces), so the proposed "gold pieces" wording was dropped.
