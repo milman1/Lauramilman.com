@@ -317,7 +317,7 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
      window.__loads++;window.__features=features;
      window.__finishPrivacy=()=>{if(mode!=='loader-error')window.Shopify.customerPrivacy={analyticsProcessingAllowed:()=>window.__allowed};done(mode==='loader-error'?new Error('failed'):null);};
    }};
-   // Google & YouTube's gtag is sandboxed: deliberately no top-window gtag.
+   // Existing storefront destination is ready; only the privacy API is delayed.
  },mode);
  await p.goto('https://lmny.test/pages/ring-builder');
  await p.waitForFunction(()=>window.__finishPrivacy);
@@ -344,3 +344,4 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
 console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
 
 await b.close();
+

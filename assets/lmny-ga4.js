@@ -62,6 +62,7 @@
     return send('lmny_' + name, params);
   }
   window.LMNYGa4 = { track };
+  if (!new URL(window.location.href).searchParams.has('lmny_redirect')) return;
   let redirectSent = false;
   function redirect() {
     if (redirectSent || !allowed()) return;
