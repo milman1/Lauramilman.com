@@ -48,6 +48,8 @@ function entry(
     missingChannels,
     rememberedCompetitorPrice: remembered.price,
     rememberedCompetitorPriceAt: remembered.at,
+    videoCount: 0,
+    video: { source: null, checkedAt: null },
   };
 }
 

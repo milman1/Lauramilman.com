@@ -7,6 +7,7 @@ import { assertScrubbed } from './scrub.js';
 import { assertHouseSettingSkuNotInFeed } from '../settingCenterShape.js';
 import { buildJewelryListing, conditionMetafield } from './listing.js';
 import type { BackVaultItem } from './types.js';
+import { videoMetafields, type VideoRecord } from './video.js';
 
 /** Tag every synced product carries — scopes catalog reads/diff/archive to this feed only. */
 export const FEED_TAG = 'backvault-feed';
@@ -151,6 +152,8 @@ export function contentHashFor(item: BackVaultItem): string {
 export interface ExistingProduct {
   id: string;
   imageCount: number;
+  /** The remembered supplier video lookup, carried through so productSet does not delete it. */
+  video?: VideoRecord;
 }
 
 /**
@@ -200,7 +203,7 @@ export function buildProductSetInput(
     category: taxonomyGidForProductType(listing.productType),
     status: hasImages ? 'ACTIVE' : 'DRAFT',
     tags: finalTags,
-    metafields: metafieldsFor(item, hash, syncedAt),
+    metafields: [...metafieldsFor(item, hash, syncedAt), ...videoMetafields(existing?.video)],
     seo: { title: listing.seoTitle, description: listing.seoDescription },
     productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
     variants: [

@@ -429,7 +429,7 @@ npm run sync:backvault       # live (needs Shopify env vars)
      (merchant decision 2026-11-05; the next run rewrites existing `bv-` titles,
      handles stay the same)
    - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
-     plus `Authenticated and hand-inspected by Laura Milman New York.`
+     plus `Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.`
      Specs stay in metafields, not an HTML table.
    - SEO title ≤ 60 chars, truncated at a word: jewelry
      `Pre-Owned {Brand} … | Estate Jewelry`, watches `{Brand} … | Pre-Owned Watch`
@@ -443,6 +443,17 @@ npm run sync:backvault       # live (needs Shopify env vars)
    Admin. Changing the rule is a pull request against `config/pricing.ts`;
    the next run reprices every listed piece because price and cost are in
    the content hash.
+
+   **Supplier videos** (`src/backvault/video.ts`, merchant decision
+   2026-11-11): after the writes, each run looks up up to 150 live pieces on
+   the supplier's `/products/<handle>.js` (products.json carries no video),
+   re-hosts up to 25 MP4s through a staged upload and attaches them as
+   product media; the theme plays video first. Each piece remembers the
+   answer in `backvault_feed.video_source` (the MP4 URL, or `none`) and
+   `video_checked_at`, carried through every productSet so a rewrite does not
+   delete it. A `none` is rechecked after 30 days; a remembered video that is
+   no longer on the product is attached again. A dry run looks up but never
+   uploads or writes.
 
    The comparison with Robinson's Jewelers described below is **switched
    off** (`BACKVAULT.competitor.enabled = false`): the sync does not read

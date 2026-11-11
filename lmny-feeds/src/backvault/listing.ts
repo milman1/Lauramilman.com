@@ -9,7 +9,7 @@
  * Title:      Pre-Owned {Brand} {normalized remainder} (jewelry and watches;
  *             merchant decision 2026-11-05, matching the hand-listed pieces)
  * Body:       "This {Brand} estate {type}… is offered by Laura Milman New York."
- *             + "Authenticated and hand-inspected by Laura Milman New York."
+ *             + "Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party."
  *             Specs live in custom.* metafields, not in the HTML.
  * SEO title:  ≤ 60 chars. Jewelry: `Pre-Owned {Brand} … | Estate Jewelry`.
  *             Watches: `{Brand} … | Pre-Owned Watch`. The theme supplies the
@@ -160,7 +160,7 @@ function buildDescription(
   if (specs.conditionNote) facts.push(`Condition note: ${specs.conditionNote.replace(/\.$/, '')}.`);
   const factsHtml = facts.length > 0 ? `<p>${escapeHtml(facts.join(' '))}</p>` : '';
 
-  return `<p>${escapeHtml(opening)}</p>${factsHtml}<p>Authenticated and hand-inspected by Laura Milman New York.</p>`;
+  return `<p>${escapeHtml(opening)}</p>${factsHtml}<p>Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.</p>`;
 }
 
 function buildSeoTitle(title: string, isWatch: boolean): string {
