@@ -39,7 +39,7 @@ const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disab
 const pixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');
 async function pageFor(options={},width=1440,javascript=true) {
  const html=await render(options);const page=await browser.newPage({viewport:{width,height:1000},javaScriptEnabled:javascript});const posts=[];page.setDefaultTimeout(10000);
- if(options.tracking) await page.addInitScript(({allowed})=>{ window.tracked=[]; window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event')window.tracked.push({name,data});}; window.allowed=allowed; window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>window.allowed},analytics:{publish:(name,data)=>{window.tracked.push({name,data});return true;}}}; },{allowed:options.allowed!==false});
+ if(options.tracking) await page.addInitScript(({allowed})=>{ window.tracked=[]; window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event'){window.tracked.push({name,data});data.event_callback?.();}}; window.allowed=allowed; window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>window.allowed},analytics:{publish:(name,data)=>{window.tracked.push({name,data});return true;}}}; },{allowed:options.allowed!==false});
  page.on('pageerror',e=>{throw e;});
  await page.route('**/*',route=>{
   const req=route.request(),url=new URL(req.url());
@@ -125,3 +125,4 @@ for (const allowed of [true,false]) {
 }
 console.log('PASS choice tracking, successful/failed cart, builder entry points, consent grant/revocation and no action replay.');
 await browser.close();
+

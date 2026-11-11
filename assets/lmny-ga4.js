@@ -37,9 +37,14 @@
             if (finished) return;
             if (!clientId || !allowed() || generation !== epoch) return finish(false);
             try {
+              const navigationEvent = ['lmny_build_added_to_cart', 'lmny_diamond_added_to_cart', 'lmny_ring_builder_started'].includes(name);
               window.gtag('event', name, { ...params, send_to: destination,
-                allow_google_signals: false, allow_ad_personalization_signals: false });
-              finish(true);
+                allow_google_signals: false, allow_ad_personalization_signals: false,
+                ...(navigationEvent ? { transport_type: 'beacon', event_timeout: 1500,
+                  event_callback: () => finish(allowed() && generation === epoch) } : {}) });
+              // Navigation callers await this Promise. Enqueuing alone can lose
+              // the custom conversion while the Google app flushes its own batch.
+              if (!navigationEvent) finish(true);
             } catch (_) { finish(false); }
           });
         } catch (_) { finish(false); }

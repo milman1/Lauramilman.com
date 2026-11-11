@@ -7,9 +7,9 @@ function setup(granted = true, href = 'https://www.lauramilman.com/pages/ring-bu
   const listeners: Record<string, Function[]> = {};
   const calls: any[][] = [];
   const pending: Function[] = [];
-  const state = { granted, ready: true };
+  const state = { granted, ready: true, complete: true };
   const win: any = { location: { href }, Shopify: { customerPrivacy: { analyticsProcessingAllowed: () => state.granted } } };
-  win.gtag = (...args: any[]) => { calls.push(args); if (args[0] === 'get') { if (state.ready) args[3]('storefront-client'); else pending.push(args[3]); } };
+  win.gtag = (...args: any[]) => { calls.push(args); if (args[0] === 'get') { if (state.ready) args[3]('storefront-client'); else pending.push(args[3]); } else if (state.complete) args[2]?.event_callback?.(); };
   const doc = { referrer: '', addEventListener: (name: string, fn: Function) => (listeners[name] ||= []).push(fn) };
   const context = vm.createContext({ window: win, document: doc, URL, setTimeout, clearTimeout });
   vm.runInContext(code, context);
@@ -17,6 +17,24 @@ function setup(granted = true, href = 'https://www.lauramilman.com/pages/ring-bu
 }
 afterEach(() => vi.useRealTimers());
 describe('existing storefront GA4 transport', () => {
+  it('waits for conversion completion before allowing navigation', async () => {
+    const s = setup(); s.state.complete = false;
+    let resolved = false;
+    const result = s.win.LMNYGa4.track('build_added_to_cart', {}).then((sent: boolean) => { resolved = true; return sent; });
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    expect(s.events()[0][2]).toMatchObject({ transport_type: 'beacon', event_timeout: 1500 });
+    s.events()[0][2].event_callback();
+    expect(await result).toBe(true);
+  });
+  it('does not block navigation forever if the completion callback is missing', async () => {
+    vi.useFakeTimers();
+    const s = setup(); s.state.complete = false;
+    const result = s.win.LMNYGa4.track('build_added_to_cart', {});
+    await vi.advanceTimersByTimeAsync(2001);
+    expect(await result).toBe(false);
+    expect(s.events()).toHaveLength(1);
+  });
   it('uses the existing destination without creating tags, identities or standard events', async () => {
     const s = setup();
     expect(await s.win.LMNYGa4.track('diamond_selected', { screen: 'catalog', origin: 'lab', band_count: 0 })).toBe(true);

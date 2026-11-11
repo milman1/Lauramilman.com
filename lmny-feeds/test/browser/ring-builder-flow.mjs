@@ -300,7 +300,7 @@ console.log('PASS full build share across isolated browsers, Unicode engraving, 
 
 for (const allowed of [false,true]) {
  const p=await newPage();
- await p.addInitScript(allowed=>{window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event')window.__events.push({event:name,data});};window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
+ await p.addInitScript(allowed=>{window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event'){window.__events.push({event:name,data});data.event_callback?.();}};window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
  await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('PRIVATE INSCRIPTION');await click(p,'share');
  const events=await p.evaluate(()=>window.__events);
  if(!allowed) assert.deepEqual(events,[]);
@@ -312,7 +312,7 @@ console.log('PASS consent-aware funnel events omit private personalization; cons
 for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
  const p=await newPage();
  await p.addInitScript(mode=>{
-   window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event')window.__events.push({event:name,data});};window.__allowed=mode==='delayed-allow';window.__loads=0;
+   window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event'){window.__events.push({event:name,data});data.event_callback?.();}};window.__allowed=mode==='delayed-allow';window.__loads=0;
    window.Shopify={analytics:{publish:(event,data)=>{window.__events.push({event,data});return Promise.resolve(true);}},loadFeatures:(features,done)=>{
      window.__loads++;window.__features=features;
      window.__finishPrivacy=()=>{if(mode!=='loader-error')window.Shopify.customerPrivacy={analyticsProcessingAllowed:()=>window.__allowed};done(mode==='loader-error'?new Error('failed'):null);};
