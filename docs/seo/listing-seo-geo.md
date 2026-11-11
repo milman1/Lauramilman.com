@@ -208,7 +208,13 @@ Rules:
 4. Poster or stills follow the video, not the other way around.
 5. Alt text describes the piece. No price, no supplier name.
 
-**Plan note:** If Shopify rejects `productCreateMedia` with a video-quota error, keep a single `<video>` in `descriptionHtml` temporarily so the theme hoist can place it first in the gallery. Prefer native media when quota allows.
+**Plan note (2026-11-11):** the store's plan caps stored videos and 3D models
+at 250, and the cap is full. Estate-feed videos are therefore played by link
+from `backvault_feed.video` (see `lmny-feeds/README.md`), not uploaded. Every
+product video, stored or by link, is described to Google as a `VideoObject`
+by `snippets/structured-data-product.liquid`.
+
+**Older plan note:** If Shopify rejects `productCreateMedia` with a video-quota error, keep a single `<video>` in `descriptionHtml` temporarily so the theme hoist can place it first in the gallery. Prefer native media when quota allows.
 
 The theme also hoists a leftover description-embedded video into the
 gallery and hides it in the accordion, so older imports do not keep the

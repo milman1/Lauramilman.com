@@ -23,7 +23,6 @@ import {
   type Decision,
 } from './diff.js';
 import { fetchBackVaultAllProducts, fetchBackVaultFeed, fetchBackVaultProductJs } from './feed.js';
-import { buildJewelryListing } from './listing.js';
 import {
   fetchMerchantListings,
   type MerchantListing,
@@ -36,10 +35,9 @@ import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
 import {
-  NO_VIDEO,
   pickSupplierVideo,
   VIDEO_LOOKUP_BUDGET,
-  VIDEO_UPLOAD_BUDGET,
+  VIDEO_LOOKUP_DELAY_MS,
   videoCandidateReason,
   videoRecordWrite,
 } from './video.js';
@@ -124,19 +122,20 @@ interface VideoStats {
   /** Pieces that needed a lookup before this run's budget was applied. */
   candidates: number;
   lookedUp: number;
-  /** Lookups that found a video. */
+  /** Lookups that found a video; its player data was saved on the piece. */
   found: number;
   /** Lookups that found none; remembered as "none". */
   none: number;
-  attached: number;
-  /** Dry run: videos that would have been attached. */
-  wouldAttach: number;
-  /** Lookups or uploads that failed; retried next run. */
+  /** Dry run: pieces that would have had a video saved. */
+  wouldAdd: number;
+  /** Lookups or writes that failed; retried next run. */
   failed: number;
-  /** Candidates left for later runs because a budget ran out. */
+  /** Candidates left for later runs (budget, or the supplier asked us to slow down). */
   deferred: number;
-  /** Handles that received a video this run. */
-  attachedHandles: string[];
+  /** True when the supplier answered HTTP 429 and lookups stopped for this run. */
+  rateLimited: boolean;
+  /** Handles that got a video this run. */
+  addedHandles: string[];
 }
 
 interface RunSummary {
@@ -788,9 +787,11 @@ if (process.argv[1] && process.argv[1].endsWith('sync.ts')) {
 }
 
 /**
- * Look up the supplier's video for pieces that need it and attach it
- * (src/backvault/video.ts). Budgeted per run; whatever is left is picked up on
- * the next run, because only a decided piece gets a record.
+ * Look up the supplier's video for pieces that need it and save its player
+ * data on the piece (src/backvault/video.ts). The file stays on the supplier's
+ * CDN, so nothing counts against the store's video cap. Budgeted and paced;
+ * whatever is left is picked up next run, because only a decided piece gets a
+ * record.
  */
 async function attachSupplierVideos(
   client: ShopifyClient,
@@ -798,21 +799,22 @@ async function attachSupplierVideos(
   itemByHandle: Map<string, BackVaultItem>,
   dryRun: boolean,
   warnings: string[],
+  sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
 ): Promise<VideoStats> {
   const stats: VideoStats = {
     candidates: 0,
     lookedUp: 0,
     found: 0,
     none: 0,
-    attached: 0,
-    wouldAttach: 0,
+    wouldAdd: 0,
     failed: 0,
     deferred: 0,
-    attachedHandles: [],
+    rateLimited: false,
+    addedHandles: [],
   };
   const now = Date.now();
-  // A piece whose video went missing goes first: it had one, and a shopper
-  // already saw it. Then never-checked, then rechecks.
+  // A piece whose video data went missing goes first, then never-checked,
+  // then rechecks of an old "none".
   const rank = { video_missing: 0, never_checked: 1, recheck: 2 } as const;
   const candidates = catalog
     .map((entry) => ({ entry, item: itemByHandle.get(entry.handle), reason: videoCandidateReason(entry, now) }))
@@ -822,64 +824,56 @@ async function attachSupplierVideos(
     .sort((a, b) => rank[a.reason] - rank[b.reason]);
   stats.candidates = candidates.length;
 
-  let uploads = VIDEO_UPLOAD_BUDGET;
   const errorNotes: string[] = [];
   for (const { entry, item } of candidates) {
-    if (stats.lookedUp >= VIDEO_LOOKUP_BUDGET || uploads <= 0) break;
+    if (stats.lookedUp >= VIDEO_LOOKUP_BUDGET) break;
+    if (stats.lookedUp > 0) await sleep(VIDEO_LOOKUP_DELAY_MS);
     stats.lookedUp += 1;
-    let source: string | null;
+    let found: ReturnType<typeof pickSupplierVideo>;
     try {
-      source = pickSupplierVideo(await fetchBackVaultProductJs(item.sourceHandle));
+      found = pickSupplierVideo(await fetchBackVaultProductJs(item.sourceHandle));
     } catch (err) {
-      stats.failed += 1;
-      errorNotes.push(`${entry.handle}: lookup ${err instanceof Error ? err.message : String(err)}`);
-      continue;
-    }
-    const checkedAt = new Date().toISOString();
-    if (!source) {
-      stats.none += 1;
-      if (!dryRun) {
-        const errs = await client.setMetafields(videoRecordWrite(entry.id, NO_VIDEO, checkedAt));
-        if (errs.length) errorNotes.push(`${entry.handle}: record ${errs.join('; ')}`);
+      const message = err instanceof Error ? err.message : String(err);
+      if (/HTTP 429/.test(message)) {
+        // The supplier asked us to slow down: stop for this run, retry next run.
+        stats.rateLimited = true;
+        stats.lookedUp -= 1;
+        break;
       }
+      stats.failed += 1;
+      errorNotes.push(`${entry.handle}: lookup ${message}`);
       continue;
     }
-    stats.found += 1;
-    uploads -= 1;
+    if (found) stats.found += 1;
+    else stats.none += 1;
     if (dryRun) {
-      stats.wouldAttach += 1;
+      if (found) stats.wouldAdd += 1;
       continue;
     }
     try {
-      const staged = await client.rehostVideo(source);
-      if (!staged) {
-        stats.failed += 1;
-        errorNotes.push(`${entry.handle}: video could not be downloaded or staged`);
-        continue;
-      }
-      const errs = await client.attachMedia(entry.id, staged, buildJewelryListing(item).title, 'VIDEO');
+      const errs = await client.setMetafields(videoRecordWrite(entry.id, found, new Date().toISOString()));
       if (errs.length) {
         stats.failed += 1;
-        errorNotes.push(`${entry.handle}: attach ${errs.join('; ')}`);
+        errorNotes.push(`${entry.handle}: record ${errs.join('; ')}`);
         continue;
       }
-      stats.attached += 1;
-      stats.attachedHandles.push(entry.handle);
-      const recErrs = await client.setMetafields(videoRecordWrite(entry.id, source, checkedAt));
-      if (recErrs.length) errorNotes.push(`${entry.handle}: record ${recErrs.join('; ')}`);
+      if (found) stats.addedHandles.push(entry.handle);
     } catch (err) {
       stats.failed += 1;
-      errorNotes.push(`${entry.handle}: video ${err instanceof Error ? err.message : String(err)}`);
+      errorNotes.push(`${entry.handle}: record ${err instanceof Error ? err.message : String(err)}`);
     }
   }
   stats.deferred = stats.candidates - stats.lookedUp;
+  if (stats.rateLimited) {
+    warnings.push(`supplier videos: the supplier answered HTTP 429 after ${stats.lookedUp} lookups; the rest wait for the next run`);
+  }
   if (errorNotes.length > 0) {
     warnings.push(`supplier videos: ${errorNotes.length} problem(s), retried next run — ${errorNotes.slice(0, 10).join(' | ')}`);
   }
   console.log(
     `Videos: ${stats.candidates} to check, ${stats.lookedUp} looked up, ${stats.found} found, ${stats.none} none, ` +
-      `${dryRun ? `${stats.wouldAttach} would attach` : `${stats.attached} attached`}, ${stats.failed} failed, ` +
-      `${stats.deferred} left for later runs`,
+      `${dryRun ? `${stats.wouldAdd} would be added` : `${stats.addedHandles.length} added`}, ${stats.failed} failed, ` +
+      `${stats.deferred} left for later runs${stats.rateLimited ? ' (supplier rate limit)' : ''}`,
   );
   return stats;
 }
@@ -889,9 +883,9 @@ function videoReportLines(summary: RunSummary): string[] {
   return [
     `- Pieces needing a lookup: ${v.candidates}`,
     `- Looked up this run: ${v.lookedUp} (found ${v.found}, none ${v.none})`,
-    summary.dryRun ? `- Would attach (dry run): ${v.wouldAttach}` : `- Attached: ${v.attached}`,
-    ...(v.attachedHandles.length > 0 ? [`  - ${v.attachedHandles.join(', ')}`] : []),
+    summary.dryRun ? `- Would be added (dry run): ${v.wouldAdd}` : `- Added: ${v.addedHandles.length}`,
+    ...(v.addedHandles.length > 0 ? [`  - ${v.addedHandles.join(', ')}`] : []),
     `- Failed (retried next run): ${v.failed}`,
-    `- Left for later runs: ${v.deferred}`,
+    `- Left for later runs: ${v.deferred}${v.rateLimited ? ' (the supplier asked us to slow down)' : ''}`,
   ];
 }

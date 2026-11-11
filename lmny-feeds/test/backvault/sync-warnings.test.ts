@@ -161,6 +161,7 @@ vi.mock('../../src/backvault/feed.js', () => ({
   fetchBackVaultAllProducts: async () => state.allRows ?? [state.feedRow],
   fetchBackVaultProductJs: async (handle: string) => {
     videoLookups.push(handle);
+    if (state.productJs instanceof Error) throw state.productJs;
     return state.productJs;
   },
 }));
@@ -711,65 +712,86 @@ describe('the remembered price is applied before the content hash (two degraded 
 });
 
 describe('supplier videos', () => {
+  const HLS = 'https://cdn.shopify.com/videos/c/vp/abc/abc.m3u8';
+  const MP4_1080 = 'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-1080p.mp4';
+  const MP4_720 = 'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-720p.mp4';
+  const POSTER = 'https://cdn.shopify.com/s/files/1/x/preview_images/abc.thumbnail.jpg';
   const VIDEO_JS = {
     media: [
       { media_type: 'image', src: 'https://cdn.example.com/J10605.jpg' },
       {
         media_type: 'video',
+        duration: 17550,
+        preview_image: { src: POSTER },
         sources: [
           { format: 'mp4', height: 480, url: 'https://cdn.shopify.com/videos/c/vp/abc/abc.SD-480p.mp4' },
-          { format: 'mp4', height: 1080, url: 'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-1080p.mp4' },
-          { format: 'm3u8', height: 1080, url: 'https://cdn.shopify.com/videos/c/vp/abc/abc.m3u8' },
+          { format: 'mp4', height: 1080, url: MP4_1080 },
+          { format: 'mp4', height: 720, url: MP4_720 },
+          { format: 'm3u8', height: 1080, url: HLS },
         ],
       },
     ],
   };
 
-  it('attaches the 1080p video to a piece never looked up, and remembers it', async () => {
+  it("saves the supplier's video addresses on a piece never looked up, and uploads nothing", async () => {
     state.catalog = [catalogEntry({ contentHash: null, video: { source: null, checkedAt: null } })];
     state.productJs = VIDEO_JS;
     await run([]);
     expect(videoLookups).toEqual(['cartier-dolphin-ring-j10605']);
-    expect(videoAttaches).toHaveLength(1);
-    expect(videoAttaches[0]![1]).toContain('abc.HD-1080p.mp4');
-    expect(videoAttaches[0]![2]).toBe('Pre-Owned Cartier Dolphin Ring');
-    expect(metafieldWrites.find((m) => m.key === 'video_source')?.value).toBe(
-      'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-1080p.mp4',
-    );
-    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.attached).toBe(1);
+    expect(videoAttaches).toHaveLength(0);
+    expect(metafieldWrites.find((m) => m.key === 'video_source')?.value).toBe(MP4_1080);
+    const saved = JSON.parse(metafieldWrites.find((m) => m.key === 'video')!.value!);
+    expect(saved.sources.map((x: { url: string }) => x.url)).toEqual([HLS, MP4_1080, MP4_720]);
+    expect(saved.poster).toBe(POSTER);
+    expect(saved.durationMs).toBe(17550);
+    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.addedHandles).toHaveLength(1);
   });
 
-  it('remembers "none" for a piece without a video and attaches nothing', async () => {
+  it('remembers "none" for a piece without a video', async () => {
     state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
     state.productJs = { media: [{ media_type: 'image' }] };
     await run([]);
-    expect(videoAttaches).toHaveLength(0);
     expect(metafieldWrites.find((m) => m.key === 'video_source')?.value).toBe('none');
+    expect(metafieldWrites.find((m) => m.key === 'video')).toBeUndefined();
   });
 
-  it('looks up but never uploads or records on a dry run', async () => {
+  it('looks up but never writes on a dry run', async () => {
     state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
     state.productJs = VIDEO_JS;
     await run(['--dry-run']);
     expect(videoLookups).toHaveLength(1);
-    expect(videoAttaches).toHaveLength(0);
     expect(metafieldWrites).toHaveLength(0);
-    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.wouldAttach).toBe(1);
+    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.wouldAdd).toBe(1);
   });
 
-  it('skips a piece that already has a video, and a recent "none"', async () => {
+  it('skips a piece with its own video, a recent "none", and one whose video is already saved', async () => {
     state.catalog = [catalogEntry({ videoCount: 1, video: { source: null, checkedAt: null } })];
     await run([]);
     state.catalog = [catalogEntry()];
     await run([]);
+    state.catalog = [catalogEntry({ video: { source: MP4_1080, checkedAt: daysAgo(1), feedVideo: '{"sources":[]}' } })];
+    await run([]);
     expect(videoLookups).toHaveLength(0);
   });
 
-  it('carries the remembered record through a product rewrite so productSet does not delete it', async () => {
-    state.catalog = [catalogEntry({ video: { source: 'none', checkedAt: '2026-11-10T00:00:00.000Z' } })];
+  it('stops looking up for the run when the supplier answers 429, without failing the run', async () => {
+    state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
+    state.productJs = new Error('HTTP 429 for x.js');
     await run([]);
-    const fields = productSets[0]!.metafields as Array<{ key: string; value: string }>;
-    expect(fields.find((f) => f.key === 'video_source')?.value).toBe('none');
+    const json = JSON.parse(writes.get('out/backvault-report.json')!);
+    expect(json.videos.rateLimited).toBe(true);
+    expect(json.videos.deferred).toBe(1);
+    expect(json.errors).toHaveLength(0);
+    expect(metafieldWrites).toHaveLength(0);
+  });
+
+  it('carries the saved video through a product rewrite so productSet does not delete it', async () => {
+    const feedVideo = JSON.stringify({ sources: [{ url: MP4_1080, type: 'video/mp4', height: 1080 }], poster: null, durationMs: null });
+    state.catalog = [catalogEntry({ video: { source: MP4_1080, checkedAt: '2026-11-10T00:00:00.000Z', feedVideo } })];
+    await run([]);
+    const fields = productSets[0]!.metafields as Array<{ key: string; type: string; value: string }>;
+    expect(fields.find((f) => f.key === 'video_source')?.value).toBe(MP4_1080);
     expect(fields.find((f) => f.key === 'video_checked_at')?.value).toBe('2026-11-10T00:00:00.000Z');
+    expect(fields.find((f) => f.key === 'video')).toMatchObject({ type: 'json', value: feedVideo });
   });
 });
