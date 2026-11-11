@@ -444,16 +444,20 @@ npm run sync:backvault       # live (needs Shopify env vars)
    the next run reprices every listed piece because price and cost are in
    the content hash.
 
-   **Supplier videos** (`src/backvault/video.ts`, merchant decision
+   **Supplier videos** (`src/backvault/video.ts`, merchant decisions
    2026-11-11): after the writes, each run looks up up to 150 live pieces on
    the supplier's `/products/<handle>.js` (products.json carries no video),
-   re-hosts up to 25 MP4s through a staged upload and attaches them as
-   product media; the theme plays video first. Each piece remembers the
-   answer in `backvault_feed.video_source` (the MP4 URL, or `none`) and
-   `video_checked_at`, carried through every productSet so a rewrite does not
-   delete it. A `none` is rechecked after 30 days; a remembered video that is
-   no longer on the product is attached again. A dry run looks up but never
-   uploads or writes.
+   1.5 s apart, stopping for the run on HTTP 429. A found video is **not
+   copied**: the plan caps stored videos and 3D models at 250, and the first
+   live run hit that cap. The piece keeps the supplier's renditions (HLS,
+   1080p and 720p MP4 on cdn.shopify.com) and poster in
+   `backvault_feed.video` (json), plus `video_source` (the MP4 URL, or
+   `none`) and `video_checked_at`, carried through every productSet. The
+   theme plays it first in the gallery when the product has no video of its
+   own, gives phones the 720p file, and hides the slide if the file is gone;
+   `snippets/structured-data-product.liquid` describes it to Google as a
+   VideoObject. A `none` is rechecked after 30 days. A dry run looks up but
+   never writes.
 
    The comparison with Robinson's Jewelers described below is **switched
    off** (`BACKVAULT.competitor.enabled = false`): the sync does not read

@@ -103,6 +103,7 @@ export async function fetchBackVaultCatalog(
           competitorPriceAt: { value: string } | null;
           videoSource: { value: string } | null;
           videoCheckedAt: { value: string } | null;
+          feedVideo: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
           variants?: {
@@ -126,6 +127,7 @@ export async function fetchBackVaultCatalog(
             competitorPriceAt: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "competitor_price_at") { value }
             videoSource: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video_source") { value }
             videoCheckedAt: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video_checked_at") { value }
+            feedVideo: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
             variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
@@ -165,7 +167,11 @@ export async function fetchBackVaultCatalog(
         rememberedCompetitorPrice: Number.isFinite(rawRemembered) && rawRemembered > 0 ? rawRemembered : null,
         rememberedCompetitorPriceAt: node.competitorPriceAt?.value ?? null,
         videoCount,
-        video: { source: node.videoSource?.value || null, checkedAt: node.videoCheckedAt?.value || null },
+        video: {
+          source: node.videoSource?.value || null,
+          checkedAt: node.videoCheckedAt?.value || null,
+          feedVideo: node.feedVideo?.value || null,
+        },
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

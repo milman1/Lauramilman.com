@@ -146,6 +146,73 @@ nothing is parsed or inferred from the title.
 }
 </script>
 
+{%- comment -%}
+  VideoObject for the product video, so Google can show a video thumbnail in
+  search. A video stored on the product wins; otherwise the supplier video an
+  estate piece plays by link (backvault_feed.video). Written only when a
+  thumbnail and a file URL are both known, which Google requires.
+{%- endcomment -%}
+{%- liquid
+  assign vo_content = ''
+  assign vo_thumb = ''
+  assign vo_ms = 0
+  assign vo_uploaded = product.published_at | default: product.created_at
+  assign vo_native = product.media | where: 'media_type', 'video' | first
+  if vo_native
+    for vo_source in vo_native.sources
+      if vo_source.format == 'mp4'
+        assign vo_content = vo_source.url
+        break
+      endif
+    endfor
+    if vo_native.preview_image
+      assign vo_thumb = vo_native.preview_image | image_url: width: 1200 | prepend: 'https:'
+    endif
+    assign vo_ms = vo_native.duration | default: 0
+  else
+    assign vo_feed = product.metafields.backvault_feed.video.value
+    if vo_feed.sources.size > 0
+      for vo_source in vo_feed.sources
+        if vo_source.type == 'video/mp4'
+          assign vo_content = vo_source.url
+          break
+        endif
+      endfor
+      if vo_feed.poster != blank
+        assign vo_thumb = vo_feed.poster
+      elsif product.featured_image
+        assign vo_thumb = product.featured_image | image_url: width: 1200 | prepend: 'https:'
+      endif
+      assign vo_ms = vo_feed.durationMs | default: 0
+      assign vo_checked = product.metafields.backvault_feed.video_checked_at.value
+      if vo_checked != blank
+        assign vo_uploaded = vo_checked
+      endif
+    endif
+  endif
+  assign vo_seconds = vo_ms | divided_by: 1000 | floor
+  assign vo_description = product.description | strip_html | replace: '&amp;', '&' | replace: '&nbsp;', ' ' | replace: '&#39;', "'" | replace: '&quot;', '"' | strip_newlines | strip | truncate: 300
+  if vo_description == blank
+    assign vo_description = schema_name | append: ' — Laura Milman New York'
+  endif
+-%}
+{%- if vo_content != blank and vo_thumb != blank -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": {{ schema_name | append: ' — video' | json }},
+  "description": {{ vo_description | json }},
+  "thumbnailUrl": [{{ vo_thumb | json }}],
+  "uploadDate": {{ vo_uploaded | date: '%Y-%m-%dT%H:%M:%S%:z' | json }},
+  "contentUrl": {{ vo_content | json }}
+  {%- if vo_seconds > 0 %},
+  "duration": {{ 'PT' | append: vo_seconds | append: 'S' | json }}
+  {%- endif %}
+}
+</script>
+{%- endif %}
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
