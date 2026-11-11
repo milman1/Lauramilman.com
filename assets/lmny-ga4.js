@@ -85,9 +85,13 @@
     send('lmny_build_added_to_cart', params);
   }
   document.addEventListener('visitorConsentCollected', flushCartHandoff);
-  if (window.Shopify?.customerPrivacy) flushCartHandoff();
-  else if (window.Shopify?.loadFeatures) {
-    try { window.Shopify.loadFeatures([{ name: 'consent-tracking-api', version: '0.2' }], flushCartHandoff); } catch (_) {}
+  let hasHandoff = false;
+  try { hasHandoff = !!sessionStorage.getItem(cartHandoffKey); } catch (_) {}
+  if (hasHandoff) {
+    if (window.Shopify?.customerPrivacy) flushCartHandoff();
+    else if (window.Shopify?.loadFeatures) {
+      try { window.Shopify.loadFeatures([{ name: 'consent-tracking-api', version: '0.2' }], flushCartHandoff); } catch (_) {}
+    }
   }
   if (!new URL(window.location.href).searchParams.has('lmny_redirect')) return;
   let redirectSent = false;
