@@ -77,7 +77,7 @@ describe('existing storefront GA4 transport', () => {
     vi.useFakeTimers();
     const s = setup(); s.state.ready = false;
     const result = s.win.LMNYGa4.track('diamond_selected', {});
-    await vi.advanceTimersByTimeAsync(2001);
+    await vi.advanceTimersByTimeAsync(10001);
     expect(await result).toBe(false);
     s.pending[0]('late');
     expect(s.events()).toHaveLength(0);

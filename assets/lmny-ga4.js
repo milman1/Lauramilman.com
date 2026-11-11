@@ -23,13 +23,13 @@
     return new Promise(resolve => {
       let attempts = 0;
       let finished = false;
-      const timeout = setTimeout(() => finish(false), 2000);
+      const timeout = setTimeout(() => finish(false), 10000);
       function finish(sent) { if (!finished) { finished = true; clearTimeout(timeout); resolve(sent); } }
       function attempt() {
         if (finished) return;
         if (!allowed() || generation !== epoch) return finish(false);
         if (typeof window.gtag !== 'function') {
-          if (++attempts >= 20) return finish(false);
+          if (++attempts >= 100) return finish(false);
           setTimeout(attempt, 100); return;
         }
         try {
