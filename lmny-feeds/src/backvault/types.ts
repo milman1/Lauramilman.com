@@ -35,6 +35,16 @@ export interface ExtractedSpecs {
   gemstones?: string;
   era?: string;
   condition?: string;
+  /** Overall length as the supplier states it in prose ("7 inches"). */
+  length?: string;
+  /** The maker's marks as the supplier reads them ("WEBB 18K David Webb"). */
+  signed?: string;
+  /**
+   * The supplier's whole condition line when it says more than a grade
+   * ("very minor enamel loss where the safety catch clips in"). Shown to the
+   * shopper as written: a flaw the source discloses is never dropped.
+   */
+  conditionNote?: string;
 }
 
 /** A Back Vault item that passed the top-designer + in-stock filter, scrubbed and ready to price. */
@@ -47,7 +57,9 @@ export interface BackVaultItem {
   vendor: string;
   productType: string;
   descriptionHtml: string;
-  /** The supplier's listed price — LMNY's cost. Written to Shopify Cost per item. */
+  /** The price the supplier shows on its own website. Retail is derived from it. */
+  listedPriceUsd: number;
+  /** What LMNY pays: the listed price less BACKVAULT.tradeDiscount. Written to Shopify Cost per item. */
   costUsd: number;
   /**
    * Competitor's price for the same stock number: read from the competitor
@@ -64,7 +76,7 @@ export interface BackVaultItem {
    * piece every week.
    */
   competitorPriceReadAt?: string;
-  /** Retail on the store: midpoint with the competitor, else cost + BACKVAULT.markupUsd. */
+  /** Retail on the store: the supplier's listed price (config/pricing.ts BACKVAULT). */
   priceUsd: number;
   available: boolean;
   sku?: string;

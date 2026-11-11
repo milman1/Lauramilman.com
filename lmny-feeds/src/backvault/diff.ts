@@ -1,5 +1,5 @@
 import type { BackVaultCatalogEntry } from './catalog.js';
-import { backVaultRetail, backVaultRetailFromCost } from './pricing.js';
+import { backVaultRetail, backVaultRetailFromListed } from './pricing.js';
 import { handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
 
@@ -158,13 +158,13 @@ export function applyRememberedCompetitorPrices(
     // A midpoint that loses to the floor leaves the piece at the flat price it
     // already had, so the memory decided nothing: say so, and leave the item
     // untouched rather than recording a comparison that set no price.
-    if (backVaultRetail(item.costUsd, remembered) <= backVaultRetailFromCost(item.costUsd)) {
+    if (backVaultRetail(item.listedPriceUsd, remembered) <= backVaultRetailFromListed(item.listedPriceUsd)) {
       stats.flooredToFlat += 1;
       continue;
     }
     item.competitorPriceUsd = remembered;
     item.competitorPriceReadAt = have!.rememberedCompetitorPriceAt!;
-    item.priceUsd = backVaultRetail(item.costUsd, remembered);
+    item.priceUsd = backVaultRetail(item.listedPriceUsd, remembered);
     stats.pricedFromMemory += 1;
     stats.memoryHandles.push(handleFor(item));
   }

@@ -213,8 +213,8 @@ export function buildProductSetInput(
         inventoryItem: {
           tracked: Boolean(locationId),
           requiresShipping: true,
-          // Admin "Cost per item", next to Price. The supplier's listed
-          // price is what LMNY pays; retail is cost + BACKVAULT.markupUsd.
+          // Admin "Cost per item", next to Price: the supplier's listed
+          // price less the trade discount (config/pricing.ts BACKVAULT).
           cost: item.costUsd.toFixed(2),
         },
         ...(locationId

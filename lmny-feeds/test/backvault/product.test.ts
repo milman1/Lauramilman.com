@@ -10,6 +10,7 @@ function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
     vendor: 'Cartier',
     productType: 'Bracelet',
     descriptionHtml: '<p>18K Yellow Gold, 32.5g.</p>',
+    listedPriceUsd: 4300,
     costUsd: 4300,
     priceUsd: 4500,
     available: true,

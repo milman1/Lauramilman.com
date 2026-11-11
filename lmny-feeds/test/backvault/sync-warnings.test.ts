@@ -9,6 +9,25 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * the Done line and in the report.
  */
 
+/**
+ * The competitor comparison is switched off in config/pricing.ts (merchant
+ * decision 2026-11-11). These tests keep the dormant mode honest by running it
+ * under the rule it was built for: comparison on, a flat $500 over the
+ * supplier's listed price, and no trade discount (cost = listed price).
+ */
+vi.mock('../../config/pricing.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config/pricing.js')>();
+  return {
+    ...actual,
+    BACKVAULT: {
+      ...actual.BACKVAULT,
+      tradeDiscount: 0,
+      markupOverListedUsd: 500,
+      competitor: { ...actual.BACKVAULT.competitor, enabled: true },
+    },
+  };
+});
+
 const SUPPLIER_ROW = {
   id: 1,
   handle: 'cartier-dolphin-ring-j10605',

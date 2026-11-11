@@ -1,7 +1,7 @@
 import { matchDesigner } from './designers.js';
 import { canonicalProductType } from './listing.js';
 import { competitorPriceFor, type CompetitorIndex } from './competitor.js';
-import { backVaultRetail } from './pricing.js';
+import { backVaultCostFromListed, backVaultRetail } from './pricing.js';
 import { extractSpecs } from './specs.js';
 import { scrubText } from './scrub.js';
 import type { BackVaultItem, RawBackVaultProduct } from './types.js';
@@ -49,8 +49,8 @@ export interface NormalizeResult {
 /**
  * Filter the raw feed down to in-stock items whose vendor is one of the
  * curated top designers, then scrub and shape them for pricing/write.
- * The supplier's listed price is the cost; retail is cost plus the flat
- * markup in config/pricing.ts (BACKVAULT.markupUsd).
+ * Retail is the supplier's listed price and the cost is that price less the
+ * trade discount (config/pricing.ts BACKVAULT).
  */
 export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: CompetitorIndex): NormalizeResult {
   const stats: NormalizeStats = { totalFetched: rawRows.length, competitorMatched: 0, malformed: 0, outOfStock: 0, notTopDesigner: 0, accepted: 0 };
@@ -71,8 +71,8 @@ export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: Competit
       stats.notTopDesigner += 1;
       continue;
     }
-    const cost = firstPrice(product);
-    if (cost === null) {
+    const listed = firstPrice(product);
+    if (listed === null || listed < 0) {
       stats.malformed += 1;
       continue;
     }
@@ -96,9 +96,10 @@ export function normalizeBackVaultFeed(rawRows: unknown[], competitor?: Competit
       vendor: designer.name,
       productType: canonicalProductType(product.product_type || 'Jewelry'),
       descriptionHtml,
-      costUsd: cost,
+      listedPriceUsd: listed,
+      costUsd: backVaultCostFromListed(listed),
       ...(competitorPrice !== null ? { competitorPriceUsd: competitorPrice } : {}),
-      priceUsd: backVaultRetail(cost, competitorPrice),
+      priceUsd: backVaultRetail(listed, competitorPrice),
       available: true,
       sku,
       imageUrls: product.images.map((img) => img.src).filter(Boolean),

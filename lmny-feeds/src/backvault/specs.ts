@@ -21,6 +21,12 @@ const MEASUREMENTS_PATTERN = /\b(\d+(?:\.\d+)?\s?(?:x|×)\s?\d+(?:\.\d+)?(?:\s?(
 // bracelet circumference is not displayed as an unlabeled dimension.
 const WRIST_SIZE_PATTERN = /\b(?:wrist|writs)\s+size\s*:?\s*(\d+(?:\.\d+)?\s*(?:inches|inch|in\.|"))/i;
 
+// "Length 7 inches", "Length: 16.5 in." in the supplier's prose paragraph.
+const LENGTH_PATTERN = /\blength\s*:?\s*(\d+(?:\.\d+)?)\s*(?:inches|inch|in\.|")/i;
+
+/** Longest supplier note printed on a product page. */
+const NOTE_MAX = 300;
+
 const ERA_PATTERN =
   /\b(art\s*deco|art\s*nouveau|victorian|edwardian|georgian|retro|mid[\s-]?century|belle\s*epoque|vintage|antique|contemporary|modern)\b|\bc(?:irca)?\.?\s*(19\d{2}|20\d{2})s?\b/i;
 
@@ -96,6 +102,11 @@ export function extractSpecs(title: string, bodyHtml: string | undefined): Extra
     }
   }
 
+  if (!specs.length) {
+    const length = toPlainText(bodyHtml ?? '').match(LENGTH_PATTERN);
+    if (length) specs.length = `${length[1]} inches`;
+  }
+
   if (!specs.era) {
     const era = text.match(ERA_PATTERN);
     if (era) specs.era = titleCaseEra(era[0].trim());
@@ -141,6 +152,13 @@ function parseLabeledSpecs(html: string): ExtractedSpecs {
       specs.measurements = value;
     } else if (label === 'condition' || label.startsWith('condition')) {
       specs.condition = value.split(/[.;]/)[0]!.trim();
+      // More than a bare grade: keep the whole line so a disclosed flaw
+      // reaches the shopper. Over-long notes are left out rather than cut
+      // mid-sentence.
+      const note = value.replace(/\s*\.$/, '').trim();
+      if (note.split(/\s+/).length > 3 && note.length <= NOTE_MAX) specs.conditionNote = note;
+    } else if (label === 'signed' || label === 'signature' || label === 'hallmarks') {
+      if (value.length <= NOTE_MAX) specs.signed = value;
     }
   }
   return specs;

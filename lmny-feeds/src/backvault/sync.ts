@@ -67,7 +67,7 @@ interface CompetitorStats {
    * The run's competitor state in one word, so a reader of the JSON report
    * never has to infer 'failed' from the presence of `error`.
    */
-  state: 'complete' | 'partial' | 'failed';
+  state: 'off' | 'complete' | 'partial' | 'failed';
   rowsFetched: number | null;
   stockRefsIndexed: number;
   /**
@@ -189,7 +189,13 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // Set by a failed fetch AND by a partial one: in both cases a piece with no
   // match may still have one we could not read, so the live price is protected.
   let competitorDegraded = false;
-  try {
+  if (!BACKVAULT.competitor.enabled) {
+    // Merchant decision 2026-11-11: retail matches the supplier's listed
+    // price, so the competitor's catalogue is not read and nothing remembered
+    // about it is used.
+    competitorStats.state = 'off';
+    console.log('Competitor comparison is off: retail is the supplier listed price');
+  } else try {
     const result = await fetchCompetitorCatalog();
     competitor = indexCompetitor(result.rows);
     competitorStats.rowsFetched = result.rows.length;
@@ -367,7 +373,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // the content hashes are computed, so the hash matches the price actually
   // written; it also stamps the read date on every piece that matched today.
   const memory = applyRememberedCompetitorPrices(desiredItems, catalog, {
-    indexComplete: competitorStats.state === 'complete',
+    indexComplete: competitorStats.state === 'complete' || competitorStats.state === 'off',
   });
   const pricedFromMemory = memory.pricedFromMemory;
   const memoryHandles = memory.memoryHandles;
@@ -621,6 +627,9 @@ function competitorReportLines(summary: RunSummary): string[] {
       `(${reasons.unremembered} nothing remembered, ${reasons.expired} memory expired, ` +
       `${reasons.unusable} memory with no readable date, ${reasons.flooredToFlat} remembered midpoint below the floor)`,
   ];
+  if (stats.state === 'off') {
+    return ["- Off: retail is the supplier's listed price, so the competitor catalogue was not read"];
+  }
   if (stats.state === 'failed') {
     return [`- FAILED: ${stats.error} — no match was possible this run`, ...aftermath];
   }
@@ -649,6 +658,7 @@ function competitorReportLines(summary: RunSummary): string[] {
  * priced_from_memory and flat_fallback, rather than asserted here.
  */
 function competitorLabel(stats: CompetitorStats): string {
+  if (stats.state === 'off') return 'off';
   if (stats.state === 'failed') return 'failed';
   if (stats.state === 'partial') return `PARTIAL(${stats.partial ?? 'stopped early'})`;
   return `complete(${stats.rowsFetched ?? 0} rows/${stats.pagesRead} pages)`;

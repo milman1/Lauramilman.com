@@ -11,6 +11,7 @@ function item(sourceHandle: string, overrides: Partial<BackVaultItem> = {}): Bac
     vendor: 'Cartier',
     productType: 'Rings',
     descriptionHtml: '<p>18K Yellow Gold.</p>',
+    listedPriceUsd: 1000,
     costUsd: 1000,
     priceUsd: 1200,
     available: true,

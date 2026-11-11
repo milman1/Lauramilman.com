@@ -436,16 +436,21 @@ npm run sync:backvault       # live (needs Shopify env vars)
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
-   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is the
-   **midpoint between cost and Robinson's Jewelers' price** when the same
-   supplier stock number is found in their public catalog
+   `BACKVAULT`): retail is **the supplier's listed price**, so the store
+   matches the supplier's own website, and the cost is that price **less one
+   third** (merchant decision 2026-11-11). The cost is written to Shopify
+   **Cost per item** (`inventoryItem.cost`) so margin shows next to Price in
+   Admin. Changing the rule is a pull request against `config/pricing.ts`;
+   the next run reprices every listed piece because price and cost are in
+   the content hash.
+
+   The comparison with Robinson's Jewelers described below is **switched
+   off** (`BACKVAULT.competitor.enabled = false`): the sync does not read
+   their catalogue and ignores anything remembered from it. With it on, a
+   piece whose supplier stock number is found in their public catalog
    (`src/backvault/competitor.ts`; exact stock-number match only, ambiguous
-   numbers dropped), floored at the flat rule; otherwise a flat
-   **cost + $500**. The cost is written to Shopify **Cost per item**
-   (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
-   the markup is a pull request against `config/pricing.ts`; the next run
-   reprices every listed piece because price and cost are in the content
-   hash.
+   numbers dropped) prices at the midpoint between the listed price and
+   theirs, floored at the flat rule.
 
    **The retailer's pagination cap.** Its public `/products.json` serves at
    most **100 pages of 250** — roughly **25,000 products**. Observed

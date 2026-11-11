@@ -152,7 +152,15 @@ function buildDescription(
       ` is offered by Laura Milman New York.${conditionClause}`;
   }
 
-  return `<p>${escapeHtml(opening)}</p><p>Authenticated and hand-inspected by Laura Milman New York.</p>`;
+  // Facts the supplier states that a buyer asks before paying: how long it
+  // is, how it is signed, and anything specific about its condition.
+  const facts: string[] = [];
+  if (specs.length && !isWatch) facts.push(`Length: ${specs.length}.`);
+  if (specs.signed) facts.push(`Signed: ${specs.signed.replace(/\.$/, '')}.`);
+  if (specs.conditionNote) facts.push(`Condition note: ${specs.conditionNote.replace(/\.$/, '')}.`);
+  const factsHtml = facts.length > 0 ? `<p>${escapeHtml(facts.join(' '))}</p>` : '';
+
+  return `<p>${escapeHtml(opening)}</p>${factsHtml}<p>Authenticated and hand-inspected by Laura Milman New York.</p>`;
 }
 
 function buildSeoTitle(title: string, isWatch: boolean): string {
