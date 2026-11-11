@@ -61,7 +61,30 @@ interface GqlError {
 interface GqlResponse<T> {
   data?: T;
   errors?: GqlError[];
-  extensions?: { cost?: { throttleStatus?: { currentlyAvailable: number; restoreRate: number } } };
+  extensions?: { cost?: GqlCost };
+}
+
+interface GqlCost {
+  requestedQueryCost?: number;
+  throttleStatus?: { maximumAvailable?: number; currentlyAvailable: number; restoreRate: number };
+}
+
+/** How long a THROTTLED request keeps retrying before the run gives up. */
+export const THROTTLE_BUDGET_MS = 10 * 60 * 1000;
+
+/**
+ * How long to wait after a THROTTLED answer: until the bucket holds this
+ * query's cost again, plus a little slack, between 1 and 30 seconds. The
+ * store's syncs share one bucket, so another sync running at the same time
+ * (2026-11-11 22:57: the hourly feed sync and the colored sync) can keep it
+ * low for minutes.
+ */
+export function throttleWaitMs(cost: GqlCost | undefined): number {
+  const status = cost?.throttleStatus;
+  if (!status || !(status.restoreRate > 0)) return 2000;
+  const needed = cost?.requestedQueryCost ?? status.maximumAvailable ?? 1000;
+  const ms = ((needed - status.currentlyAvailable) / status.restoreRate) * 1000 + 250;
+  return Math.min(30_000, Math.max(1000, Math.ceil(ms)));
 }
 
 export const PRODUCT_SET_MUTATION = `mutation call($input: ProductSetInput!) {
@@ -282,6 +305,7 @@ export class ShopifyClient {
   }
 
   async gql<T = Record<string, unknown>>(query: string, variables?: Record<string, unknown>): Promise<T> {
+    let throttledMs = 0;
     for (let attempt = 0; ; attempt++) {
       const res = await fetch(this.endpoint, {
         method: 'POST',
@@ -302,9 +326,9 @@ export class ShopifyClient {
       const body = (await res.json()) as GqlResponse<T>;
       if (body.errors?.length) {
         const throttled = body.errors.some((e) => e.extensions?.code === 'THROTTLED');
-        if (throttled && attempt < 8) {
-          const status = body.extensions?.cost?.throttleStatus;
-          const waitMs = status ? Math.max(1000, ((2000 - status.currentlyAvailable) / status.restoreRate) * 1000) : 2000;
+        if (throttled && throttledMs < THROTTLE_BUDGET_MS) {
+          const waitMs = throttleWaitMs(body.extensions?.cost);
+          throttledMs += waitMs;
           await sleep(waitMs);
           continue;
         }
