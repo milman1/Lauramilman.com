@@ -11,17 +11,18 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps Ask and Direct message on every product, and Make an offer only for watches', () => {
+  it('keeps Ask and Direct message on every product, and Make an offer for watches and pre-owned jewelry', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
     expect(inquiry).toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
     expect(inquiry).toContain('Direct message');
     expect(inquiry).toContain("render 'product-is-watch', product: product");
-    expect(inquiry).not.toContain("render 'product-is-vintage'");
-    expect(inquiry).toContain("if is_watch == 'true'");
+    // Pre-owned, estate and vintage jewelry take offers too (merchant decision 2026-11-11).
+    expect(inquiry).toContain("render 'product-is-vintage', product: product");
+    expect(inquiry).toContain("if is_watch == 'true' or is_vintage == 'true'");
     expect(inquiry).toContain("type_l == 'lab-grown diamond'");
     expect(inquiry).toContain('assign offer_ok = false');
-    // Natural stones get the ask form, never the watch-only offer.
+    // Natural stones get the ask form, never the offer.
     const offerGate = inquiry.indexOf("if is_watch == 'true'");
     expect(inquiry.slice(offerGate, offerGate + 80)).not.toContain('natural diamond');
     const offerStart = inquiry.indexOf('{%- if offer_ok -%}');

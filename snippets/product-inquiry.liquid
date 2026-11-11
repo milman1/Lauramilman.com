@@ -2,8 +2,9 @@
   Product-page concierge. Ask and Direct message open Shopify chat with
   this product pinned beside it on every product. Make an offer opens a
   short form that posts through Shopify's contact form, so the offer
-  reaches the store's email with the piece attached. That form is only
-  for watches. Lab-grown loose diamonds and other jewelry do not get it.
+  reaches the store's email with the piece attached. That form is for
+  watches and for pre-owned, estate and vintage jewelry (merchant decision
+  2026-11-11). Loose diamonds and house jewelry do not get it.
   Loose lab-grown and natural diamonds get "Ask about this stone" instead
   of the chat "Ask" pill: a short question form through the same contact
   form, so the stone and the shopper's email reach the store's inbox. It
@@ -24,10 +25,12 @@
   assign type_l = product.type | downcase | strip
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
 {%- liquid
   assign is_watch = is_watch | strip
+  assign is_vintage = is_vintage | strip
   assign offer_ok = false
-  if is_watch == 'true'
+  if is_watch == 'true' or is_vintage == 'true'
     assign offer_ok = true
   endif
   assign ask_form_ok = false

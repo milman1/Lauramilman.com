@@ -135,7 +135,8 @@ Enable in `watchListingBuilder.ts` `CONFIG.trustLine` only after confirming it a
 
 ```html
 <p>This {Pre-Owned Brand… | Brand estate {noun}…} is offered by Laura Milman New York.{ condition phrase}</p>
-<p>Authenticated and hand-inspected by Laura Milman New York.</p>
+<p>{Length: … Signed: … Condition note: … — only the facts the supplier states}</p>
+<p>Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.</p>
 ```
 
 ### Feed-watch factual sentence

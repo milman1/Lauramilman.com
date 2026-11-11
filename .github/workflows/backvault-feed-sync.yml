@@ -7,10 +7,8 @@
 # /products.json still has them in stock (availability check on each run);
 # sold / withdrawn pieces are archived.
 #
-# Price = midpoint between The Back Vault listed price (LMNY cost) and
-# Robinson's Jewelers' price for the same stock number, floored at cost + $500;
-# cost + $500 when there is no match (config/pricing.ts BACKVAULT). Cost is
-# written to Shopify "Cost per item".
+# Price = The Back Vault listed price (config/pricing.ts BACKVAULT). Cost is
+# that price less one third, written to Shopify "Cost per item".
 #
 # Runs live Sunday, Tuesday, and Thursday at 00:17 UTC, and on demand.
 # For a dry-run before going live: workflow_dispatch → leave dry_run=true.

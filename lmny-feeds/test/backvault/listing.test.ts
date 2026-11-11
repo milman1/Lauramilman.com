@@ -15,6 +15,7 @@ function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
     vendor: 'Cartier',
     productType: 'BRACL',
     descriptionHtml: '<p>supplier copy that must not ship</p>',
+    listedPriceUsd: 4300,
     costUsd: 4300,
     priceUsd: 4500,
     available: true,
@@ -51,7 +52,7 @@ describe('buildJewelryListing', () => {
     expect(listing.productType).toBe('Bracelets');
     expect(listing.descriptionHtml).toBe(
       '<p>This Cartier estate bracelet in 18K Yellow Gold is offered by Laura Milman New York. It is in excellent condition.</p>' +
-        '<p>Authenticated and hand-inspected by Laura Milman New York.</p>',
+        '<p>Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.</p>',
     );
     expect(listing.seoTitle).toBe('Pre-Owned Cartier Love Bracelet | Estate Jewelry');
     expect(listing.seoTitle.length).toBeLessThanOrEqual(60);
@@ -63,6 +64,24 @@ describe('buildJewelryListing', () => {
     expect(listing.tags).toContain('Cartier');
     expect(listing.tags).toContain('antique-estate');
     expect(listing.tags).toContain('designer-jewelry');
+  });
+
+  it('adds the length, the signature and the supplier condition note as their own facts line', () => {
+    const listing = buildJewelryListing(
+      item({
+        specs: {
+          metalType: '18K Yellow Gold',
+          condition: 'Very good',
+          length: '7 inches',
+          signed: 'Cartier 750',
+          conditionNote: 'Very good, light surface wear <on the clasp>.',
+        },
+      }),
+    );
+    expect(listing.descriptionHtml).toContain(
+      '<p>Length: 7 inches. Signed: Cartier 750. Condition note: Very good, light surface wear &lt;on the clasp&gt;.</p>' +
+        '<p>Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.</p>',
+    );
   });
 
   it('uses brooch, not a clipped plural, for brooches', () => {

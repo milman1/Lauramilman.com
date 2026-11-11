@@ -10,6 +10,7 @@ function item(overrides: Partial<BackVaultItem> = {}): BackVaultItem {
     vendor: 'Cartier',
     productType: 'Bracelet',
     descriptionHtml: '<p>18K Yellow Gold, 32.5g.</p>',
+    listedPriceUsd: 4300,
     costUsd: 4300,
     priceUsd: 4500,
     available: true,
@@ -101,7 +102,7 @@ describe('buildProductSetInput', () => {
     const input = buildProductSetInput(item(), '2026-08-17T00:00:00.000Z');
     expect(input.title).toBe('Pre-Owned Cartier Love Bracelet');
     expect(String(input.descriptionHtml)).toContain('is offered by Laura Milman New York');
-    expect(String(input.descriptionHtml)).toContain('Authenticated and hand-inspected by Laura Milman New York.');
+    expect(String(input.descriptionHtml)).toContain('Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.');
     expect(String(input.descriptionHtml)).not.toContain('<h3>Specifications</h3>');
     expect(input.seo).toEqual({
       title: 'Pre-Owned Cartier Love Bracelet | Estate Jewelry',

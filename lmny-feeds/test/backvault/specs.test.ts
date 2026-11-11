@@ -43,4 +43,24 @@ describe('extractSpecs', () => {
     expect(specs.metalWeight).toBe('146.0g');
     expect(specs.condition).toBe('Excellent');
   });
+
+  it('keeps the length, the signature and a condition line that says more than a grade', () => {
+    const html =
+      '<div>Diamond and enamel bracelet; estimated total diamond weight: 2.30 carats. Length 7 inches.</div>' +
+      '<br><strong>Signed:</strong> WEBB 18K David Webb' +
+      '<br><strong>Condition:</strong> Enamel: very good, very minor loss where safety catch clips into link.' +
+      '<br><strong>Stock:</strong> RR6485';
+    const specs = extractSpecs('David Webb Blue Enamel And Diamond Bracelet', html);
+    expect(specs.length).toBe('7 inches');
+    expect(specs.signed).toBe('WEBB 18K David Webb');
+    expect(specs.conditionNote).toBe('Enamel: very good, very minor loss where safety catch clips into link');
+  });
+
+  it('has no condition note for a bare grade, and no length when the supplier gives none', () => {
+    const specs = extractSpecs('Cartier Ring', '<strong>Condition:</strong> Excellent.');
+    expect(specs.condition).toBe('Excellent');
+    expect(specs.conditionNote).toBeUndefined();
+    expect(specs.length).toBeUndefined();
+    expect(extractSpecs('Cartier Dolphin Ring', LABELED_HTML).conditionNote).toBe('Excellent. Custom engraving on the shank');
+  });
 });

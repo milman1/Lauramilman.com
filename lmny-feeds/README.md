@@ -429,23 +429,39 @@ npm run sync:backvault       # live (needs Shopify env vars)
      (merchant decision 2026-11-05; the next run rewrites existing `bv-` titles,
      handles stay the same)
    - Body: `This {Brand} estate {type}… is offered by Laura Milman New York.`
-     plus `Authenticated and hand-inspected by Laura Milman New York.`
+     plus `Authenticated and hand-inspected by Laura Milman New York, and independently authenticated by a third party.`
      Specs stay in metafields, not an HTML table.
    - SEO title ≤ 60 chars, truncated at a word: jewelry
      `Pre-Owned {Brand} … | Estate Jewelry`, watches `{Brand} … | Pre-Owned Watch`
    - SEO description ≤ 160 chars, always ending
      `Authenticated by Laura Milman New York.`
 6. **Price** (`src/backvault/pricing.ts`, rule in `config/pricing.ts`
-   `BACKVAULT`): the supplier's listed price is LMNY's cost. Retail is the
-   **midpoint between cost and Robinson's Jewelers' price** when the same
-   supplier stock number is found in their public catalog
+   `BACKVAULT`): retail is **the supplier's listed price**, so the store
+   matches the supplier's own website, and the cost is that price **less one
+   third** (merchant decision 2026-11-11). The cost is written to Shopify
+   **Cost per item** (`inventoryItem.cost`) so margin shows next to Price in
+   Admin. Changing the rule is a pull request against `config/pricing.ts`;
+   the next run reprices every listed piece because price and cost are in
+   the content hash.
+
+   **Supplier videos** (`src/backvault/video.ts`, merchant decision
+   2026-11-11): after the writes, each run looks up up to 150 live pieces on
+   the supplier's `/products/<handle>.js` (products.json carries no video),
+   re-hosts up to 25 MP4s through a staged upload and attaches them as
+   product media; the theme plays video first. Each piece remembers the
+   answer in `backvault_feed.video_source` (the MP4 URL, or `none`) and
+   `video_checked_at`, carried through every productSet so a rewrite does not
+   delete it. A `none` is rechecked after 30 days; a remembered video that is
+   no longer on the product is attached again. A dry run looks up but never
+   uploads or writes.
+
+   The comparison with Robinson's Jewelers described below is **switched
+   off** (`BACKVAULT.competitor.enabled = false`): the sync does not read
+   their catalogue and ignores anything remembered from it. With it on, a
+   piece whose supplier stock number is found in their public catalog
    (`src/backvault/competitor.ts`; exact stock-number match only, ambiguous
-   numbers dropped), floored at the flat rule; otherwise a flat
-   **cost + $500**. The cost is written to Shopify **Cost per item**
-   (`inventoryItem.cost`) so margin shows next to Price in Admin. Changing
-   the markup is a pull request against `config/pricing.ts`; the next run
-   reprices every listed piece because price and cost are in the content
-   hash.
+   numbers dropped) prices at the midpoint between the listed price and
+   theirs, floored at the flat rule.
 
    **The retailer's pagination cap.** Its public `/products.json` serves at
    most **100 pages of 250** — roughly **25,000 products**. Observed
