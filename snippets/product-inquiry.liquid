@@ -23,7 +23,9 @@
   assign offer_id = 'PdpOffer-' | append: product.id
   assign ask_id = 'PdpAsk-' | append: product.id
   assign type_l = product.type | downcase | strip
+  assign wa_message = "Hello, I'm interested in " | append: display_title | append: ' ' | append: shop.url | append: product.url
 -%}
+{%- capture wa_url -%}{% render 'whatsapp-url', message: wa_message %}{%- endcapture -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- capture is_vintage -%}{% render 'product-is-vintage', product: product %}{%- endcapture -%}
 {%- liquid
@@ -87,6 +89,16 @@
     >
       Direct message
     </button>
+    {%- if wa_url != blank -%}
+      <a
+        class="pdp-inquire__btn pdp-inquire__btn--ghost"
+        href="{{ wa_url }}"
+        target="_blank"
+        rel="noopener"
+      >
+        WhatsApp
+      </a>
+    {%- endif -%}
   </div>
 
   {%- if offer_ok -%}

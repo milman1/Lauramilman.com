@@ -147,5 +147,20 @@
         "label": "TikTok URL"
       }
     ]
+  },
+  {
+    "name": "Contact",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "A WhatsApp number shows a WhatsApp button on every product page and on the private clients page. Leave it empty to hide the button."
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "WhatsApp number",
+        "info": "Include the country code, for example +1 212 555 0123. Spaces, dashes and brackets are fine."
+      }
+    ]
   }
 ]
