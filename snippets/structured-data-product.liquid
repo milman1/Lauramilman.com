@@ -190,6 +190,14 @@ nothing is parsed or inferred from the title.
       endif
     endif
   endif
+  # Shopify writes stored-media URLs protocol-relative ("//host/…"); Google
+  # needs absolute ones.
+  if vo_content != blank and vo_content contains '//'
+    assign vo_lead = vo_content | slice: 0, 2
+    if vo_lead == '//'
+      assign vo_content = vo_content | prepend: 'https:'
+    endif
+  endif
   assign vo_seconds = vo_ms | divided_by: 1000 | floor
   assign vo_description = product.description | strip_html | replace: '&amp;', '&' | replace: '&nbsp;', ' ' | replace: '&#39;', "'" | replace: '&quot;', '"' | strip_newlines | strip | truncate: 300
   if vo_description == blank

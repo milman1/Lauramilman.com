@@ -35,6 +35,8 @@ describe('supplier video played by link on estate pages', () => {
     expect(schema).toContain("product.media | where: 'media_type', 'video' | first");
     expect(schema).toContain('product.metafields.backvault_feed.video.value');
     expect(schema).toContain('{%- if vo_content != blank and vo_thumb != blank -%}');
+    // Stored-media URLs come protocol-relative; Google needs absolute ones.
+    expect(schema).toContain("assign vo_content = vo_content | prepend: 'https:'");
     for (const field of ['"thumbnailUrl"', '"uploadDate"', '"contentUrl"', '"duration"', '"description"', '"name"']) {
       expect(schema).toContain(field);
     }
