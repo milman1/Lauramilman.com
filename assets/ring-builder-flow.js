@@ -697,7 +697,7 @@
         state.editGroup = ''; persist();
         await track('build_added_to_cart');
         notice(t('added'));
-        window.location.assign(cfg.cartUrl);
+        console.info('LMNY preview paused after successful add');
       } catch (error) {
         console.warn('LMNY preview cart recovery', error.message);
         if (addAttempted) {
