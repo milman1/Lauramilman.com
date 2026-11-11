@@ -90,14 +90,13 @@
     let openedTracked = false;
     function track(event, extra = {}) {
       const data = { screen: state.screen, origin: state.diamond?.origin || state.filters.origin, band_count: chosenBands().length, device_type: matchMedia('(max-width: 768px)').matches ? 'mobile' : 'desktop', ...extra };
-      privacyReady.then(() => {
+      return privacyReady.then(() => {
         if (!root.isConnected || window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true) return;
         if (event === 'builder_opened' && openedTracked) return;
-        if (typeof window.Shopify?.analytics?.publish !== 'function') return;
+        if (typeof window.LMNYGa4?.track !== 'function') return;
         if (event === 'builder_opened') openedTracked = true;
-        // A Customer events pixel forwards these to GA4. Google's app pixel runs
-        // in a sandbox, so a top-window gtag fallback cannot reliably reach it.
-        return Promise.resolve(window.Shopify.analytics.publish('lmny_' + event, data)).then(result => {
+        // Share the storefront Google tag and its session identity.
+        return window.LMNYGa4.track(event, data).then(result => {
           if (event === 'builder_opened' && result === false) openedTracked = false;
         });
       }).catch(() => { if (event === 'builder_opened') openedTracked = false; });
@@ -694,7 +693,7 @@
         if (!completeGroup(verified, selectedVariant, state.diamond)) { await removeGroup(verified); throw new Error(t('cart_failed')); }
         if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(await cart(), state.editGroup));
         state.editGroup = ''; persist();
-        track('build_added_to_cart');
+        await track('build_added_to_cart');
         notice(t('added'));
         window.location.assign(cfg.cartUrl);
       } catch (error) {

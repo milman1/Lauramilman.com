@@ -124,6 +124,7 @@
     {{ 'theme.css' | asset_url | stylesheet_tag }}
 
     {{ content_for_header }}
+    {{ 'lmny-ga4.js' | asset_url | script_tag }}
     <script>
       /* Inbox "featured products" with an empty picker falls back to popular
          catalog cards (Jacob watches on a wedding-band PDP). Force it off. */
