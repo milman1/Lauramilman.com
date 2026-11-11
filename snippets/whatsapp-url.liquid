@@ -1,0 +1,18 @@
+{%- comment -%}
+  Prints a WhatsApp chat link for the number in Theme settings → Contact
+  (settings.whatsapp_number), or nothing when no number is set.
+  Optional `message` pre-fills the chat, e.g. the piece the shopper is on.
+  Usage:
+    {%- capture wa_url -%}{% render 'whatsapp-url', message: 'Hello' %}{%- endcapture -%}
+    {%- if wa_url != blank -%}<a href="{{ wa_url }}">WhatsApp</a>{%- endif -%}
+{%- endcomment -%}
+{%- liquid
+  assign wa_digits = settings.whatsapp_number | default: '' | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.' | strip
+  if wa_digits.size >= 8
+    echo 'https://wa.me/' | append: wa_digits
+    if message != blank
+      assign wa_text = message | url_encode | replace: '+', '%20'
+      echo '?text=' | append: wa_text
+    endif
+  endif
+-%}

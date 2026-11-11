@@ -142,6 +142,30 @@ describe('product-page inquiry pills', () => {
   });
 });
 
+describe('WhatsApp contact', () => {
+  const snippet = themeFile('snippets/whatsapp-url.liquid');
+  const inquiry = themeFile('snippets/product-inquiry.liquid');
+  const privateClient = themeFile('sections/private-client.liquid');
+  const schema = JSON.parse(themeFile('config/settings_schema.json')) as Array<{ name?: string; settings?: Array<{ id?: string }> }>;
+
+  it('is one theme setting, empty by default, so nothing shows until the merchant adds a number', () => {
+    const field = schema.flatMap((g) => g.settings ?? []).find((s) => s.id === 'whatsapp_number') as Record<string, unknown>;
+    expect(field).toBeDefined();
+    expect(field.default).toBeUndefined();
+    expect(snippet).toContain('settings.whatsapp_number');
+    expect(snippet).toContain("'https://wa.me/'");
+    expect(snippet).toContain('url_encode');
+  });
+
+  it('adds a WhatsApp button on product pages and a line on the private clients page, only when set', () => {
+    expect(inquiry).toContain("render 'whatsapp-url', message: wa_message");
+    expect(inquiry).toContain('{%- if wa_url != blank -%}');
+    expect(inquiry).toContain('rel="noopener"');
+    expect(privateClient).toContain("render 'whatsapp-url'");
+    expect(privateClient).toContain('{%- if wa_url != blank -%}');
+  });
+});
+
 describe('lab-grown search heading', () => {
   const filter = themeFile('sections/diamond-filter.liquid');
   const guide = themeFile('snippets/collection-guide.liquid');

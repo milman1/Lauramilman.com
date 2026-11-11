@@ -46,6 +46,13 @@
             {{ section.settings.contact_phone }}
           </a>
         {%- endif -%}
+        {%- capture wa_url -%}{% render 'whatsapp-url', message: 'Hello, I would like to arrange a private viewing.' %}{%- endcapture -%}
+        {%- if wa_url != blank -%}
+          <a href="{{ wa_url }}" class="lm-consult__contact-line" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            WhatsApp {{ settings.whatsapp_number }}
+          </a>
+        {%- endif -%}
         {%- if section.settings.contact_location != blank -%}
           <span class="lm-consult__contact-line">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.99-5.53 10.19-7.35 11.76a1 1 0 0 1-1.3 0C9.53 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
