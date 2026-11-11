@@ -11,8 +11,10 @@
     product_kind: ['setting', 'diamond', 'band']
   };
   const allowed = () => window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() === true;
+  const cartHandoffKey = 'lmny_ga4_cart_handoff_v1';
+  function clearHandoff() { try { sessionStorage.removeItem(cartHandoffKey); } catch (_) {} }
   let generation = 0;
-  document.addEventListener('visitorConsentCollected', () => { generation++; });
+  document.addEventListener('visitorConsentCollected', () => { generation++; if (!allowed()) clearHandoff(); });
   // Use the existing Google app tag. Never initialize/configure another tag,
   // generate an identity, parse GA cookies, or emit standard ecommerce events.
   function send(name, params) {
@@ -37,14 +39,9 @@
             if (finished) return;
             if (!clientId || !allowed() || generation !== epoch) return finish(false);
             try {
-              const navigationEvent = ['lmny_build_added_to_cart', 'lmny_diamond_added_to_cart', 'lmny_ring_builder_started'].includes(name);
               window.gtag('event', name, { ...params, send_to: destination,
-                allow_google_signals: false, allow_ad_personalization_signals: false,
-                ...(navigationEvent ? { transport_type: 'beacon', event_timeout: 1500,
-                  event_callback: () => finish(allowed() && generation === epoch) } : {}) });
-              // Navigation callers await this Promise. Enqueuing alone can lose
-              // the custom conversion while the Google app flushes its own batch.
-              if (!navigationEvent) finish(true);
+                allow_google_signals: false, allow_ad_personalization_signals: false });
+              finish(true);
             } catch (_) { finish(false); }
           });
         } catch (_) { finish(false); }
@@ -64,9 +61,34 @@
     }
     Object.entries(values).forEach(([key, choices]) => { if (choices.includes(data[key])) params[key] = data[key]; });
     if (Number.isInteger(data.band_count) && data.band_count >= 0 && data.band_count <= 2) params.band_count = data.band_count;
+    if (name === 'build_added_to_cart') {
+      // GA's callback can precede network batching. Carry this verified cart
+      // conversion across the imminent navigation, then send from the cart.
+      try {
+        sessionStorage.setItem(cartHandoffKey, JSON.stringify({ expires: Date.now() + 120000, params }));
+        return Promise.resolve(true);
+      } catch (_) { return Promise.resolve(false); }
+    }
     return send('lmny_' + name, params);
   }
   window.LMNYGa4 = { track };
+  function flushCartHandoff() {
+    if (!allowed()) { clearHandoff(); return; }
+    if (!/^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?cart\/?$/.test(new URL(window.location.href).pathname)) return;
+    let pending;
+    try { pending = JSON.parse(sessionStorage.getItem(cartHandoffKey) || 'null'); } catch (_) {}
+    clearHandoff(); // Claim once: reloads and duplicate consent events cannot replay it.
+    if (!pending || !Number.isFinite(pending.expires) || pending.expires < Date.now() || pending.expires > Date.now() + 120000) return;
+    const params = { page_location: 'https://www.lauramilman.com/pages/ring-builder', page_referrer: '', page_title: 'Build your ring' };
+    Object.entries(values).forEach(([key, choices]) => { if (choices.includes(pending.params?.[key])) params[key] = pending.params[key]; });
+    if (Number.isInteger(pending.params?.band_count) && pending.params.band_count >= 0 && pending.params.band_count <= 2) params.band_count = pending.params.band_count;
+    send('lmny_build_added_to_cart', params);
+  }
+  document.addEventListener('visitorConsentCollected', flushCartHandoff);
+  if (window.Shopify?.customerPrivacy) flushCartHandoff();
+  else if (window.Shopify?.loadFeatures) {
+    try { window.Shopify.loadFeatures([{ name: 'consent-tracking-api', version: '0.2' }], flushCartHandoff); } catch (_) {}
+  }
   if (!new URL(window.location.href).searchParams.has('lmny_redirect')) return;
   let redirectSent = false;
   function redirect() {

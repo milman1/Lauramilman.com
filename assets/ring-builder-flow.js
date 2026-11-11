@@ -89,7 +89,6 @@
     });
     let openedTracked = false;
     function track(event, extra = {}) {
-      console.info('LMNY preview track', event);
       const data = { screen: state.screen, origin: state.diamond?.origin || state.filters.origin, band_count: chosenBands().length, device_type: matchMedia('(max-width: 768px)').matches ? 'mobile' : 'desktop', ...extra };
       return privacyReady.then(() => {
         if (!root.isConnected || window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true) return;
@@ -98,7 +97,6 @@
         if (event === 'builder_opened') openedTracked = true;
         // Share the storefront Google tag and its session identity.
         return window.LMNYGa4.track(event, data).then(result => {
-          console.info('LMNY preview result', event, result);
           if (event === 'builder_opened' && result === false) openedTracked = false;
         });
       }).catch(() => { if (event === 'builder_opened') openedTracked = false; });
@@ -697,9 +695,8 @@
         state.editGroup = ''; persist();
         await track('build_added_to_cart');
         notice(t('added'));
-        console.info('LMNY preview paused after successful add');
+        window.location.assign(cfg.cartUrl);
       } catch (error) {
-        console.warn('LMNY preview cart recovery', error.message);
         if (addAttempted) {
           try {
             const lines = groupLines(await cart());
