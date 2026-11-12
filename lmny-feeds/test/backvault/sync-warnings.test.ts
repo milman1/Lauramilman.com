@@ -9,6 +9,25 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * the Done line and in the report.
  */
 
+/**
+ * The competitor comparison is switched off in config/pricing.ts (merchant
+ * decision 2026-11-11). These tests keep the dormant mode honest by running it
+ * under the rule it was built for: comparison on, a flat $500 over the
+ * supplier's listed price, and no trade discount (cost = listed price).
+ */
+vi.mock('../../config/pricing.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config/pricing.js')>();
+  return {
+    ...actual,
+    BACKVAULT: {
+      ...actual.BACKVAULT,
+      tradeDiscount: 0,
+      markupOverListedUsd: 500,
+      competitor: { ...actual.BACKVAULT.competitor, enabled: true },
+    },
+  };
+});
+
 const SUPPLIER_ROW = {
   id: 1,
   handle: 'cartier-dolphin-ring-j10605',
@@ -92,6 +111,8 @@ const CAPPED_MATCHING_RETAINED = await buildPaginationCapped({
 const state: {
   competitor: () => Promise<CompetitorCatalog>;
   catalog: unknown[];
+  /** What the supplier's /products/<handle>.js returns to the video pass. */
+  productJs?: unknown;
   feedRow: Record<string, unknown>;
   /** The supplier's FULL catalog, when a test needs a piece the availability check retains. */
   allRows?: Record<string, unknown>[];
@@ -128,10 +149,21 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const daysAgo = (n: number) => new Date(Date.now() - n * DAY_MS).toISOString();
 
 const writes = new Map<string, string>();
+/** Supplier handles the video pass looked up. */
+const videoLookups: string[] = [];
+/** Metafields the video pass wrote. */
+const metafieldWrites: Array<Record<string, string>> = [];
+/** Videos the video pass attached: [productId, staged url, alt]. */
+const videoAttaches: Array<[string, string, string]> = [];
 
 vi.mock('../../src/backvault/feed.js', () => ({
   fetchBackVaultFeed: async () => [state.feedRow],
   fetchBackVaultAllProducts: async () => state.allRows ?? [state.feedRow],
+  fetchBackVaultProductJs: async (handle: string) => {
+    videoLookups.push(handle);
+    if (state.productJs instanceof Error) throw state.productJs;
+    return state.productJs;
+  },
 }));
 
 vi.mock('../../src/backvault/competitor.js', async (importOriginal) => ({
@@ -168,6 +200,17 @@ vi.mock('../../src/shopify.js', async (importOriginal) => {
       return [];
     }
     async draftProduct(): Promise<string[]> {
+      return [];
+    }
+    async setMetafields(fields: Array<Record<string, string>>): Promise<string[]> {
+      metafieldWrites.push(...fields);
+      return [];
+    }
+    async rehostVideo(url: string): Promise<string | null> {
+      return `https://shopify-staged.example/${url.split('/').pop()}`;
+    }
+    async attachMedia(productId: string, url: string, alt: string): Promise<string[]> {
+      videoAttaches.push([productId, url, alt]);
       return [];
     }
     /** The only raw query the sync sends is the merchant-listings read: none here. */
@@ -220,6 +263,9 @@ function catalogEntry(overrides: Record<string, unknown> = {}) {
     // ago, which against the 67,600 cost is the 69,800 midpoint on the store.
     rememberedCompetitorPrice: 72000,
     rememberedCompetitorPriceAt: daysAgo(7),
+    // Video already decided, so these pricing tests make no supplier lookup.
+    videoCount: 0,
+    video: { source: 'none', checkedAt: daysAgo(1) },
     ...overrides,
   };
 }
@@ -229,6 +275,10 @@ let exitCodeBefore: number | string | null | undefined;
 beforeEach(() => {
   writes.clear();
   productSets.length = 0;
+  videoLookups.length = 0;
+  metafieldWrites.length = 0;
+  videoAttaches.length = 0;
+  state.productJs = null;
   state.competitor = async () => complete();
   state.catalog = [];
   state.feedRow = SUPPLIER_ROW;
@@ -658,5 +708,90 @@ describe('the remembered price is applied before the content hash (two degraded 
     // A complete index that did not match this piece is the last word on it,
     // whatever the product still remembers.
     expect(wrote(productSets[0]!).price).toBe('68100.00');
+  });
+});
+
+describe('supplier videos', () => {
+  const HLS = 'https://cdn.shopify.com/videos/c/vp/abc/abc.m3u8';
+  const MP4_1080 = 'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-1080p.mp4';
+  const MP4_720 = 'https://cdn.shopify.com/videos/c/vp/abc/abc.HD-720p.mp4';
+  const POSTER = 'https://cdn.shopify.com/s/files/1/x/preview_images/abc.thumbnail.jpg';
+  const VIDEO_JS = {
+    media: [
+      { media_type: 'image', src: 'https://cdn.example.com/J10605.jpg' },
+      {
+        media_type: 'video',
+        duration: 17550,
+        preview_image: { src: POSTER },
+        sources: [
+          { format: 'mp4', height: 480, url: 'https://cdn.shopify.com/videos/c/vp/abc/abc.SD-480p.mp4' },
+          { format: 'mp4', height: 1080, url: MP4_1080 },
+          { format: 'mp4', height: 720, url: MP4_720 },
+          { format: 'm3u8', height: 1080, url: HLS },
+        ],
+      },
+    ],
+  };
+
+  it("saves the supplier's video addresses on a piece never looked up, and uploads nothing", async () => {
+    state.catalog = [catalogEntry({ contentHash: null, video: { source: null, checkedAt: null } })];
+    state.productJs = VIDEO_JS;
+    await run([]);
+    expect(videoLookups).toEqual(['cartier-dolphin-ring-j10605']);
+    expect(videoAttaches).toHaveLength(0);
+    expect(metafieldWrites.find((m) => m.key === 'video_source')?.value).toBe(MP4_1080);
+    const saved = JSON.parse(metafieldWrites.find((m) => m.key === 'video')!.value!);
+    expect(saved.sources.map((x: { url: string }) => x.url)).toEqual([HLS, MP4_1080, MP4_720]);
+    expect(saved.poster).toBe(POSTER);
+    expect(saved.durationMs).toBe(17550);
+    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.addedHandles).toHaveLength(1);
+  });
+
+  it('remembers "none" for a piece without a video', async () => {
+    state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
+    state.productJs = { media: [{ media_type: 'image' }] };
+    await run([]);
+    expect(metafieldWrites.find((m) => m.key === 'video_source')?.value).toBe('none');
+    expect(metafieldWrites.find((m) => m.key === 'video')).toBeUndefined();
+  });
+
+  it('looks up but never writes on a dry run', async () => {
+    state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
+    state.productJs = VIDEO_JS;
+    await run(['--dry-run']);
+    expect(videoLookups).toHaveLength(1);
+    expect(metafieldWrites).toHaveLength(0);
+    expect(JSON.parse(writes.get('out/backvault-report.json')!).videos.wouldAdd).toBe(1);
+  });
+
+  it('skips a piece with its own video, a recent "none", and one whose video is already saved', async () => {
+    state.catalog = [catalogEntry({ videoCount: 1, video: { source: null, checkedAt: null } })];
+    await run([]);
+    state.catalog = [catalogEntry()];
+    await run([]);
+    state.catalog = [catalogEntry({ video: { source: MP4_1080, checkedAt: daysAgo(1), feedVideo: '{"sources":[]}' } })];
+    await run([]);
+    expect(videoLookups).toHaveLength(0);
+  });
+
+  it('stops looking up for the run when the supplier answers 429, without failing the run', async () => {
+    state.catalog = [catalogEntry({ video: { source: null, checkedAt: null } })];
+    state.productJs = new Error('HTTP 429 for x.js');
+    await run([]);
+    const json = JSON.parse(writes.get('out/backvault-report.json')!);
+    expect(json.videos.rateLimited).toBe(true);
+    expect(json.videos.deferred).toBe(1);
+    expect(json.errors).toHaveLength(0);
+    expect(metafieldWrites).toHaveLength(0);
+  });
+
+  it('carries the saved video through a product rewrite so productSet does not delete it', async () => {
+    const feedVideo = JSON.stringify({ sources: [{ url: MP4_1080, type: 'video/mp4', height: 1080 }], poster: null, durationMs: null });
+    state.catalog = [catalogEntry({ video: { source: MP4_1080, checkedAt: '2026-11-10T00:00:00.000Z', feedVideo } })];
+    await run([]);
+    const fields = productSets[0]!.metafields as Array<{ key: string; type: string; value: string }>;
+    expect(fields.find((f) => f.key === 'video_source')?.value).toBe(MP4_1080);
+    expect(fields.find((f) => f.key === 'video_checked_at')?.value).toBe('2026-11-10T00:00:00.000Z');
+    expect(fields.find((f) => f.key === 'video')).toMatchObject({ type: 'json', value: feedVideo });
   });
 });

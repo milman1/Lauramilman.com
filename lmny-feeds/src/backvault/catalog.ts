@@ -1,6 +1,7 @@
 import { channelsFor, publicationMatchesChannel } from '../../config/channels.js';
 import type { ShopifyClient } from '../shopify.js';
 import { FEED_TAG, METAFIELD_NAMESPACE } from './product.js';
+import type { VideoRecord } from './video.js';
 
 /** The five channels every estate piece belongs on (config/channels.ts). */
 const ESTATE_CHANNELS = channelsFor('estate');
@@ -71,6 +72,10 @@ export interface BackVaultCatalogEntry {
    * the competitor at all.
    */
   rememberedCompetitorPriceAt: string | null;
+  /** Videos on the product that have not failed processing. */
+  videoCount: number;
+  /** What the supplier video lookup decided (src/backvault/video.ts). */
+  video: VideoRecord;
 }
 
 /**
@@ -96,6 +101,9 @@ export async function fetchBackVaultCatalog(
           contentHash: { value: string } | null;
           competitorPrice: { value: string } | null;
           competitorPriceAt: { value: string } | null;
+          videoSource: { value: string } | null;
+          videoCheckedAt: { value: string } | null;
+          feedVideo: { value: string } | null;
           media: { edges: Array<{ node: { status: string; mediaContentType: string } }> };
           resourcePublications: { nodes: Array<{ isPublished: boolean; publication: { name: string } }> };
           variants?: {
@@ -117,6 +125,9 @@ export async function fetchBackVaultCatalog(
             contentHash: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "content_hash") { value }
             competitorPrice: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "competitor_price") { value }
             competitorPriceAt: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "competitor_price_at") { value }
+            videoSource: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video_source") { value }
+            videoCheckedAt: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video_checked_at") { value }
+            feedVideo: metafield(namespace: "${METAFIELD_NAMESPACE}", key: "video") { value }
             media(first: 50) { edges { node { status mediaContentType } } }
             resourcePublications(first: 30) { nodes { isPublished publication { name } } }
             variants(first: 1) { nodes { inventoryQuantity inventoryItem { id tracked } } }
@@ -128,6 +139,9 @@ export async function fetchBackVaultCatalog(
     for (const node of data.products.nodes) {
       const imageCount = node.media.edges.filter(
         (e) => e.node.status === 'READY' && e.node.mediaContentType === 'IMAGE',
+      ).length;
+      const videoCount = node.media.edges.filter(
+        (e) => e.node.mediaContentType === 'VIDEO' && e.node.status !== 'FAILED',
       ).length;
       const { published, missingChannels } = publishStateFor(
         node.resourcePublications.nodes,
@@ -152,6 +166,12 @@ export async function fetchBackVaultCatalog(
         inventoryQuantity: typeof variant?.inventoryQuantity === 'number' ? variant.inventoryQuantity : undefined,
         rememberedCompetitorPrice: Number.isFinite(rawRemembered) && rawRemembered > 0 ? rawRemembered : null,
         rememberedCompetitorPriceAt: node.competitorPriceAt?.value ?? null,
+        videoCount,
+        video: {
+          source: node.videoSource?.value || null,
+          checkedAt: node.videoCheckedAt?.value || null,
+          feedVideo: node.feedVideo?.value || null,
+        },
       });
     }
     if (!data.products.pageInfo.hasNextPage) break;

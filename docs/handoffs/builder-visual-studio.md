@@ -30,3 +30,12 @@ Product media and Shopify draft-theme integration remain unverified; full automa
 browser regression is still blocked. The added browser test now selects Round,
 because the Oval fixture has size options only. Preserve the selected variant when
 reopening the same setting; that follow-up fix still requires a browser recheck.
+
+## Integration with current storefront (2026-11-11)
+
+Merged main a41800e into the draft and resolved the setting-studio/mobile-dock
+conflicts, retaining PR #419's guided sizing and purchase-before-bands behavior.
+All 1,013 current unit tests pass. Added regression coverage for reopening the
+chosen metal, the diamond-inclusive mobile total, and return to guided sizing.
+Local Chromium still fails socket creation; use the existing GitHub browser
+workflow for full regression. Shopify real-catalog draft review remains pending.

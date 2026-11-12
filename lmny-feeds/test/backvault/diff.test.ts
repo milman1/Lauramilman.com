@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   applyRememberedCompetitorPrices,
   COMPETITOR_MEMORY_DAYS,
@@ -10,6 +10,25 @@ import {
 import type { BackVaultCatalogEntry } from '../../src/backvault/catalog.js';
 import { contentHashFor, handleFor } from '../../src/backvault/product.js';
 import type { BackVaultItem } from '../../src/backvault/types.js';
+
+/**
+ * The competitor comparison is switched off in config/pricing.ts (merchant
+ * decision 2026-11-11). These tests keep the dormant mode honest by running it
+ * under the rule it was built for: comparison on, a flat $500 over the
+ * supplier's listed price, and no trade discount (cost = listed price).
+ */
+vi.mock('../../config/pricing.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config/pricing.js')>();
+  return {
+    ...actual,
+    BACKVAULT: {
+      ...actual.BACKVAULT,
+      tradeDiscount: 0,
+      markupOverListedUsd: 500,
+      competitor: { ...actual.BACKVAULT.competitor, enabled: true },
+    },
+  };
+});
 
 function entry(
   handle: string,
@@ -29,6 +48,8 @@ function entry(
     missingChannels,
     rememberedCompetitorPrice: remembered.price,
     rememberedCompetitorPriceAt: remembered.at,
+    videoCount: 0,
+    video: { source: null, checkedAt: null },
   };
 }
 
@@ -141,6 +162,7 @@ describe('applyRememberedCompetitorPrices', () => {
       vendor: 'Cartier',
       productType: 'Ring',
       descriptionHtml: '<p>18K Yellow Gold.</p>',
+      listedPriceUsd: 67600,
       costUsd: 67600,
       priceUsd: 68100, // flat markup: no competitor match this run
       available: true,
@@ -176,13 +198,13 @@ describe('applyRememberedCompetitorPrices', () => {
   it('follows a supplier markdown down instead of freezing the ticket', () => {
     // The whole reason the pin was wrong: the supplier cut the cost to 60,000,
     // and the storefront must follow at the same midpoint premium.
-    const markedDown = item({ costUsd: 60000, priceUsd: 60500 });
+    const markedDown = item({ listedPriceUsd: 60000, costUsd: 60000, priceUsd: 60500 });
     applyRememberedCompetitorPrices([markedDown], [live(FRESH)], { indexComplete: false, now: NOW });
     expect(markedDown.priceUsd).toBe(66000); // (60,000 + 72,000) / 2, below the old 69,800
   });
 
   it('follows the supplier up too', () => {
-    const dearer = item({ costUsd: 70000, priceUsd: 70500 });
+    const dearer = item({ listedPriceUsd: 70000, costUsd: 70000, priceUsd: 70500 });
     applyRememberedCompetitorPrices([dearer], [live(FRESH)], { indexComplete: false, now: NOW });
     expect(dearer.priceUsd).toBe(71000);
   });
@@ -347,6 +369,7 @@ describe('promoteBackVaultCompetitorMemory', () => {
       vendor: 'Cartier',
       productType: 'Ring',
       descriptionHtml: '<p>18K Yellow Gold.</p>',
+      listedPriceUsd: 67600,
       costUsd: 67600,
       priceUsd: 69800,
       competitorPriceUsd: 72000,
@@ -462,6 +485,7 @@ describe('promoteBackVaultCompetitorMemory never rewrites a memory-priced piece'
       vendor: 'Cartier',
       productType: 'Ring',
       descriptionHtml: '<p>18K Yellow Gold.</p>',
+      listedPriceUsd: 67600,
       costUsd: 67600,
       priceUsd: 69800,
       competitorPriceUsd: 72000,

@@ -306,25 +306,39 @@ export const WATCH_BRANDS: string[] = [
 /**
  * The Back Vault (estate / vintage designer jewelry, src/backvault/).
  *
- * The supplier's listed price is LMNY's cost. Retail is a flat markup over
- * that cost, and the cost is written to Shopify **Cost per item**
- * (`inventoryItem.cost`) so margin shows next to Price in Admin.
+ * Merchant decision 2026-11-11: the store sells each piece at the price the
+ * supplier shows on its own website, and LMNY buys it at one third off that
+ * price.
  *
- *   matched on a competitor:  retail = max((cost + competitor) / 2, cost + $500)
- *   no competitor match:      retail = cost + $500
+ *   retail = supplier listed price (+ markupOverListedUsd, which is 0)
+ *   cost   = supplier listed price × (1 − tradeDiscount) = two thirds of it
  *
- * The competitor is Robinson's Jewelers, which stocks the same supplier
- * pieces; the match key is the supplier stock number
- * (src/backvault/competitor.ts). Never a fuzzy title match.
+ * The cost is written to Shopify **Cost per item** (`inventoryItem.cost`) so
+ * margin shows next to Price in Admin. It is never public.
+ *
+ * Until 2026-11-11 the listed price was recorded as the cost and retail was
+ * cost + $500, or the midpoint with Robinson's Jewelers when the same stock
+ * number was on their site. That comparison is switched off
+ * (`competitor.enabled`): the sync no longer reads their catalogue. With it
+ * on, a matched piece prices at max((listed + competitor) / 2, flat retail).
+ * The match key is the supplier stock number (src/backvault/competitor.ts),
+ * never a fuzzy title match.
  */
-export const BACKVAULT = {
-  /** Flat dollar markup added to the supplier's listed (cost) price. */
-  markupUsd: 500,
+export const BACKVAULT: {
+  readonly tradeDiscount: number;
+  readonly markupOverListedUsd: number;
+  readonly competitor: { readonly enabled: boolean; readonly name: string; readonly baseUrl: string };
+} = {
+  /** Share of the supplier's listed price LMNY does not pay: one third off. */
+  tradeDiscount: 1 / 3,
+  /** Dollars added to the supplier's listed price. 0: retail matches the supplier. */
+  markupOverListedUsd: 0,
   competitor: {
+    enabled: false,
     name: "Robinson's Jewelers",
     baseUrl: 'https://robinsonsjewelers.com',
   },
-} as const;
+};
 
 /**
  * Royal Chain basic chains ONLY (AGENTS.md section 2a and recipe H).

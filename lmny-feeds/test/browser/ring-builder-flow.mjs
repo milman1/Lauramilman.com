@@ -23,8 +23,9 @@ const liquid = new Liquid({root:repo+'/snippets',extname:'.liquid'});
 liquid.registerTag('doc',{parse(tag,remain){let token;while((token=remain.shift()))if(token.name==='enddoc')break;},render(){return '';}});
 const filterSource = fs.readFileSync(repo+'/sections/ring-builder-flow.liquid','utf8').match(/<template data-diamond-filter-template>[\s\S]*?<\/template>/)[0];
 const filterTemplate = await liquid.parseAndRender(filterSource,{request:{path:'/pages/ring-builder'},cart:{currency:{symbol:'$'}}});
-const html=`<meta charset="utf-8"><link rel="stylesheet" href="/assets/ring-builder-flow.css"><link rel="stylesheet" href="/assets/diamond-filter.css"><div id="lmny-ring-builder"><div class="intro"><h1>${cfg.copy.title}</h1><nav><span data-stage="1">1</span><span data-stage="2">2</span><span data-stage="3">3</span></nav></div><div class="status" data-flow-status role="status"></div><div class="layout solo"><div class="flow-body" data-flow-main><button data-action="start-diamond">${cfg.copy.start_diamond}</button><button data-action="start-setting">${cfg.copy.start_setting}</button></div><aside data-flow-summary hidden></aside><section class="ring-email" data-ring-email hidden><form id="RingEmailForm" method="post" action="/contact"><input type="hidden" name="contact[ring_link]" data-ring-email-field="link"><input type="hidden" name="contact[setting]" data-ring-email-field="setting"><input type="hidden" name="contact[diamond]" data-ring-email-field="diamond"><input type="hidden" name="contact[ring_size]" data-ring-email-field="size"><input type="hidden" name="contact[options]" data-ring-email-field="options"><input type="hidden" name="contact[ring_subtotal]" data-ring-email-field="subtotal"><input type="email" name="contact[email]" required><button type="submit">Send to Laura</button></form></section></div><div class="dock" data-flow-dock hidden></div><footer><button data-action="restart">${cfg.copy.start_again}</button></footer>${filterTemplate}<script type="application/json" data-flow-config>${JSON.stringify(cfg)}</script></div><script src="/assets/ring-builder-flow.js" defer></script>`;
+const html=`<meta charset="utf-8"><link rel="stylesheet" href="/assets/ring-builder-flow.css"><link rel="stylesheet" href="/assets/diamond-filter.css"><div id="lmny-ring-builder"><div class="intro"><h1>${cfg.copy.title}</h1><nav><span data-stage="1">1</span><span data-stage="2">2</span><span data-stage="3">3</span></nav></div><div class="status" data-flow-status role="status"></div><div class="layout solo"><div class="flow-body" data-flow-main><button data-action="start-diamond">${cfg.copy.start_diamond}</button><button data-action="start-setting">${cfg.copy.start_setting}</button></div><aside data-flow-summary hidden></aside><section class="ring-email" data-ring-email hidden><form id="RingEmailForm" method="post" action="/contact"><input type="hidden" name="contact[ring_link]" data-ring-email-field="link"><input type="hidden" name="contact[setting]" data-ring-email-field="setting"><input type="hidden" name="contact[diamond]" data-ring-email-field="diamond"><input type="hidden" name="contact[ring_size]" data-ring-email-field="size"><input type="hidden" name="contact[options]" data-ring-email-field="options"><input type="hidden" name="contact[ring_subtotal]" data-ring-email-field="subtotal"><input type="email" name="contact[email]" required><button type="submit">Send to Laura</button></form></section></div><div class="dock" data-flow-dock hidden></div><footer><button data-action="restart">${cfg.copy.start_again}</button></footer>${filterTemplate}<script type="application/json" data-flow-config>${JSON.stringify(cfg)}</script></div><script src="/assets/lmny-ga4.js"></script><script src="/assets/ring-builder-flow.js" defer></script>`;
 async function newPage(){const p=await b.newPage({viewport:{width:1024,height:950}});p.on('pageerror',e=>{throw e;});await p.route('**/*',async r=>{const u=new URL(r.request().url()),method=r.request().method();const json=o=>r.fulfill({contentType:'application/json',body:JSON.stringify(o)});
+ if(u.hostname==='lmny.test'&&u.pathname==='/assets/lmny-ga4.js')return r.fulfill({contentType:'text/javascript',body:fs.readFileSync(repo+'/assets/lmny-ga4.js','utf8')});
  if(u.hostname==='lmny.test'&&u.pathname==='/assets/ring-builder-flow.js')return r.fulfill({contentType:'text/javascript',body:fs.readFileSync(repo+'/assets/ring-builder-flow.js','utf8')});
  if(u.hostname==='lmny.test'&&u.pathname==='/assets/diamond-filter.css')return r.fulfill({contentType:'text/css',body:fs.readFileSync(repo+'/assets/diamond-filter.css','utf8')});
  if(u.hostname==='lmny.test'&&u.pathname==='/assets/ring-builder-flow.css')return r.fulfill({contentType:'text/css',body:fs.readFileSync(repo+'/assets/ring-builder-flow.css','utf8')});
@@ -40,6 +41,33 @@ async function newPage(){const p=await b.newPage({viewport:{width:1024,height:95
 const shot=async(p,name)=>{if(process.env.LMNY_FLOW_PREVIEW)await p.screenshot({path:process.env.LMNY_FLOW_PREVIEW+'/'+name+'.png',fullPage:true});};
 const click=(p,a)=>p.locator('[data-action="'+a+'"]').first().click();
 async function choose(p,first='setting',shape='Oval'){await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-'+first);if(shape!=='Oval'){await p.locator('[data-filter="shape"]').selectOption(shape);if(first==='diamond')await p.locator('[data-search-form]').evaluate(f=>f.requestSubmit());}await click(p,'details-0');await click(p,'select');await click(p,'details-0');await click(p,'select');await p.locator('[data-field="size"]').waitFor();}
+// Required sizing and purchase stay ahead of optional bands on both layouts.
+for (const width of [390, 1024]) {
+ const p = await newPage(); await p.setViewportSize({width, height:844});
+ await p.emulateMedia({reducedMotion:'reduce'}); await choose(p);
+ const order = await p.evaluate(() => {
+  const size = document.querySelector('[data-field="size"]');
+  const purchase = document.querySelector('[data-review-purchase]');
+  const bands = document.querySelector('.band-upsell');
+  return !!(size.compareDocumentPosition(purchase) & Node.DOCUMENT_POSITION_FOLLOWING) && !!(purchase.compareDocumentPosition(bands) & Node.DOCUMENT_POSITION_FOLLOWING);
+ });
+ assert.ok(order, 'size, purchase, then optional bands');
+ const action = width < 769 ? 'dock-add' : 'review-add';
+ assert.equal(await p.locator('[data-action="'+action+'"]').innerText(),cfg.copy.choose_size);
+ const before = posts.length; await click(p,action);
+ assert.equal(await p.locator('[data-field="size"]').evaluate(e=>e===document.activeElement),true);
+ assert.equal(posts.length,before,'size prompt must not submit a cart');
+ await p.locator('[data-field="size"]').selectOption('unsure');
+ assert.equal(await p.locator('[data-action="'+action+'"]').innerText(),cfg.copy.add);
+ assert.equal(await p.locator('[data-review-purchase] .total').innerText(),await p.locator('[data-flow-summary] .total').innerText());
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await shot(p,'guided-review-'+width);
+ await click(p,action); await p.waitForURL('**/cart');
+ assert.equal(posts.at(-1).items.length,2,'optional bands are not required');
+ assert.equal(posts.at(-1).items[0].properties['Size check'],'Not sure — confirm with Laura');
+ cartItems=[]; await p.close();
+}
+console.log('PASS sizing before bands, guided mobile/inline actions, unsure size and two-item cart.');
 for(const first of ['diamond','setting']){const p=await newPage();await choose(p,first);assert.equal((await p.locator('[data-flow-summary]').innerText()).includes('&amp;'),false);assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('<Love & us>');await p.locator('[data-field="font"]').selectOption('script');await p.locator('[data-field="date"]').fill('2027-01-01');await click(p,'change-diamond');await click(p,'details-1');await click(p,'select');assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');assert.equal(await p.locator('[data-field="engraving"]').inputValue(),'<Love & us>');await p.reload();await p.locator('[data-field="size"]').waitFor();assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');for(const width of [320,390,736,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items.length,2);assert.equal(payload.items[0].properties.Engraving,'<Love & us>');assert.equal(payload.items[0].properties['Ring size'],'6.5');assert.equal(payload.items[0].properties['Requested date'],'2027-01-01');assert.equal(payload.items[0].properties._lm_ring_id,payload.items[1].properties._lm_ring_id);await p.close();cartItems=[];}
 {
  const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-setting');await p.locator('[data-filter="shape"]').selectOption('Round');await click(p,'details-0');
@@ -52,6 +80,12 @@ for(const first of ['diamond','setting']){const p=await newPage();await choose(p
  const optionValues=await p.locator('[data-option]').evaluateAll(els=>els.map(el=>el.value));
  for(const value of selected) assert.ok(optionValues.includes(value));
  assert.equal(await p.locator('#lmny-ring-builder').evaluate(el=>el.classList.contains('is-setting-studio')),false);
+ await click(p,'change-setting');await click(p,'details-0');
+ assert.deepEqual(await p.locator('[data-action="studio-option"][aria-pressed="true"]').allTextContents(),selected,'reopening the selected setting retains metal');
+ await p.setViewportSize({width:390,height:844});
+ assert.equal(await p.locator('[data-flow-dock] .total').innerText(),await p.locator('.studio-total strong').innerText(),'mobile setting total includes selected diamond');
+ await p.locator('[data-flow-dock] [data-action="select"]').click();
+ assert.equal(await p.locator('[data-action="dock-add"]').innerText(),cfg.copy.choose_size,'studio selection returns to guided sizing');
  await p.close();
 }
 console.log('PASS both paths, filters, media, size, engraving, state restore, shape matching, payload, native cart redirect, responsive 320–1024.');
@@ -191,11 +225,11 @@ async function choosePair(p) {
  assert.equal(await p.locator('[data-band-option="0"]').inputValue(),'');assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
  await p.locator('[data-band-option="0"]').selectOption('10');await p.locator('[data-band-option="1"]').selectOption('18K');
 }
-// The optional upsell precedes personalization and stays reversible on both layouts.
+// The optional upsell follows personalization and stays reversible on both layouts.
 for (const width of [1440, 390]) {
  const p=await newPage();await p.setViewportSize({width,height:900});await choose(p);
  assert.equal(await p.locator('.band-slots button').first().innerText(),'For this ring\nChoose a band (optional)');
- assert.ok(await p.evaluate(()=>document.querySelector('.band-upsell').getBoundingClientRect().top < document.querySelector('[data-field="size"]').getBoundingClientRect().top));
+ assert.ok(await p.evaluate(()=>document.querySelector('.band-upsell').getBoundingClientRect().top > document.querySelector('[data-review-purchase]').getBoundingClientRect().top));
  await shot(p,'wedding-bands-'+width);
  await p.locator('[data-action="finish-bands"]').first().click();
  assert.equal(await p.locator('[data-band-product]').count(),0);
@@ -285,7 +319,7 @@ console.log('PASS full build share across isolated browsers, Unicode engraving, 
 
 for (const allowed of [false,true]) {
  const p=await newPage();
- await p.addInitScript(allowed=>{window.__events=[];window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
+ await p.addInitScript(allowed=>{window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event'){window.__events.push({event:name,data});data.event_callback?.();}};window.Shopify={customerPrivacy:{analyticsProcessingAllowed:()=>allowed},analytics:{publish:(event,data)=>window.__events.push({event,data})}};navigator.share=()=>Promise.resolve();},allowed);
  await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('PRIVATE INSCRIPTION');await click(p,'share');
  const events=await p.evaluate(()=>window.__events);
  if(!allowed) assert.deepEqual(events,[]);
@@ -297,12 +331,12 @@ console.log('PASS consent-aware funnel events omit private personalization; cons
 for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
  const p=await newPage();
  await p.addInitScript(mode=>{
-   window.__events=[];window.__allowed=mode==='delayed-allow';window.__loads=0;
+   window.__events=[];window.gtag=(command,name,data,callback)=>{if(command==='get')callback('fixture-client');else if(command==='event'){window.__events.push({event:name,data});data.event_callback?.();}};window.__allowed=mode==='delayed-allow';window.__loads=0;
    window.Shopify={analytics:{publish:(event,data)=>{window.__events.push({event,data});return Promise.resolve(true);}},loadFeatures:(features,done)=>{
      window.__loads++;window.__features=features;
      window.__finishPrivacy=()=>{if(mode!=='loader-error')window.Shopify.customerPrivacy={analyticsProcessingAllowed:()=>window.__allowed};done(mode==='loader-error'?new Error('failed'):null);};
    }};
-   // Google & YouTube's gtag is sandboxed: deliberately no top-window gtag.
+   // Existing storefront destination is ready; only the privacy API is delayed.
  },mode);
  await p.goto('https://lmny.test/pages/ring-builder');
  await p.waitForFunction(()=>window.__finishPrivacy);
@@ -329,3 +363,4 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
 console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
 
 await b.close();
+

@@ -512,6 +512,17 @@ Follow-up 2026-11-02: the theme builds FAQPage markup from `custom.guide_faq`, w
 like the other articles. The theme only marks up a question whose text appears in the
 body, which the rendered FAQ block guarantees. One new test; 961 tests pass.
 
+## 2026-11-02 Journal clean-up: Sotheby's result, news-piece images, photos on older articles
+
+Store content only (Shopify articles); no theme or code change.
+
+- Sotheby's Milan article (1965 sapphire ribbon necklace): added a "The Result" section. The necklace sold within its estimate and was among the sale's highest results (reported by Rapaport, 2026-10-29). Stated in words, no euro figures, per the no-prices rule. Added a note that the photos are pieces from our collection, not the lot.
+- Bulgari Pink article: featured image changed from a Serpenti gold ring to our Fancy Light Pink oval diamond ring, with a note that the photos are not the Bulgari Pink. The Christie's Geneva sale (Nov 10) is still upcoming; add its result after the sale.
+- Knicks and Art Basel articles: no change needed. Knicks already carries a credited archival photo of Madison Square Garden; Art Basel's featured ring is the piece its text recommends.
+- Photos added to 12 older articles (1 to 3 each, catalogue photos linked to the product, placed after the paragraph for the matching section): lab-grown vs natural, gold chain guide, David Webb authentication, Rolex box and papers, vintage luxury watch, wearing vintage, pre-owned Cartier/Van Cleef/Tiffany, IGI vs GIA, stacking, Under $3,000, night out, are lab-grown diamonds real. Original text verified byte-for-byte unchanged after each edit. The Under $3,000 article uses only the marquise ring (from $2,400); the other lab-grown rings start higher and would contradict its headline.
+- `custom.guide_faq` set on "What jewelry to wear on a first date" (3 questions), the last published article without FAQ markup.
+- Not touched: the Under $3,000 article states prices in its title and body, which the current no-prices rule would not allow for a new article. Left as is; the merchant's call.
+
 ## 2026-11-05: pre-owned model pages
 
 - Merchant approved, on condition that nothing affects loose-stone AI and search visibility: no loose-stone template, collection, link or sitemap entry changed.
@@ -535,3 +546,30 @@ body, which the rendered FAQ block guarantees. One new test; 961 tests pass.
 - Theme: the six handles join the guide/FAQ allow-list, and a "Shop by chain style" chip row is added to Chains, Gold Chains, Chain Bracelets, Chain Necklaces, Gold Bracelets and each style page. Guard test `lmny-feeds/test/theme-gold-style-pages.test.ts`.
 - Widths in the intros reflect stock on 2026-11-08; update them when a width is added or sells out.
 - Waiting on the merchant: gram weights and solid or semi-solid for each chain (from Midas and Royal Chain) before adding them to listings.
+
+## 2026-11-10: six how-to and lifestyle Journal articles
+
+Store content only (Shopify articles); no theme or code change. Written for Google and AI-assistant search demand, published 2026-11-10 with product photos linked to their product pages and FAQPage markup via `custom.guide_faq`:
+
+- `how-to-find-your-ring-size-at-home`
+- `how-to-tell-if-a-diamond-is-lab-grown-or-natural`
+- `how-to-clean-diamond-and-gold-jewelry-at-home`
+- `can-you-wear-jewelry-in-the-shower-pool-gym-or-to-bed`
+- `how-to-travel-with-fine-jewelry`
+- `what-jewelry-to-wear-to-a-holiday-party`
+
+None states prices. Live check after publishing: all six returned 200 with photos and FAQPage markup.
+
+## 2026-11-10: dead Journal links, redirects for drafted listings, gift collection SEO
+
+- Merchant approved items 2 and 3 of the 2026-11-09 pulse.
+- Journal (live): five links to merchant listings drafted on 2026-11-04 now point to the matching collection instead:
+  - `pre-owned-cartier-love-bracelet-size-condition`: RR9205 and RR9451 now link to `/collections/pre-owned-cartier-love`. The sentence now says the sizes in stock are on that page.
+  - `how-to-buy-a-vintage-luxury-watch`: RR5823 and RR7571 image links now go to `/collections/van-cleef-arpels-watches`.
+  - `the-bulgari-pink-and-what-makes-a-pink-diamond-rare` and `watches-worn-as-jewelry-2026`: links to J10141 now go to `/collections/bvlgari-watches`, or the anchor was removed from the text.
+  - Photos and FAQ text are unchanged. A readback matched the intended bodies byte for byte. The pre-edit bodies were backed up before the change.
+- Redirects (live): 32 URL redirects, one for each drafted merchant listing, to its model page or its designer page (watches go to the brand's watch page). A redirect only fires while the product is unavailable, so a listing switched back on serves normally. Checked live: 301 to the intended collection.
+- SEO (live):
+  - `anniversary-gifts`: "Anniversary Jewelry Gifts | Laura Milman New York".
+  - `wedding-gifts`: "Wedding Jewelry Gifts | Laura Milman New York".
+  - The descriptions name what is in each collection (mostly lab-grown diamond bands, earrings and tennis necklaces), so the proposed "gold pieces" wording was dropped.

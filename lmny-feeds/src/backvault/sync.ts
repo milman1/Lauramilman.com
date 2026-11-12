@@ -22,7 +22,7 @@ import {
   promoteBackVaultInventoryUpdates,
   type Decision,
 } from './diff.js';
-import { fetchBackVaultAllProducts, fetchBackVaultFeed } from './feed.js';
+import { fetchBackVaultAllProducts, fetchBackVaultFeed, fetchBackVaultProductJs } from './feed.js';
 import {
   fetchMerchantListings,
   type MerchantListing,
@@ -34,6 +34,13 @@ import {
 import { normalizeBackVaultFeed } from './normalize.js';
 import { buildProductSetInput, contentHashFor, handleFor } from './product.js';
 import type { BackVaultItem } from './types.js';
+import {
+  pickSupplierVideo,
+  VIDEO_LOOKUP_BUDGET,
+  VIDEO_LOOKUP_DELAY_MS,
+  videoCandidateReason,
+  videoRecordWrite,
+} from './video.js';
 
 interface RunOptions {
   dryRun: boolean;
@@ -67,7 +74,7 @@ interface CompetitorStats {
    * The run's competitor state in one word, so a reader of the JSON report
    * never has to infer 'failed' from the presence of `error`.
    */
-  state: 'complete' | 'partial' | 'failed';
+  state: 'off' | 'complete' | 'partial' | 'failed';
   rowsFetched: number | null;
   stockRefsIndexed: number;
   /**
@@ -110,6 +117,27 @@ interface MerchantListingStats {
   held?: string;
 }
 
+/** Supplier video pass (src/backvault/video.ts). */
+interface VideoStats {
+  /** Pieces that needed a lookup before this run's budget was applied. */
+  candidates: number;
+  lookedUp: number;
+  /** Lookups that found a video; its player data was saved on the piece. */
+  found: number;
+  /** Lookups that found none; remembered as "none". */
+  none: number;
+  /** Dry run: pieces that would have had a video saved. */
+  wouldAdd: number;
+  /** Lookups or writes that failed; retried next run. */
+  failed: number;
+  /** Candidates left for later runs (budget, or the supplier asked us to slow down). */
+  deferred: number;
+  /** True when the supplier answered HTTP 429 and lookups stopped for this run. */
+  rateLimited: boolean;
+  /** Handles that got a video this run. */
+  addedHandles: string[];
+}
+
 interface RunSummary {
   startedAt: string;
   finishedAt: string;
@@ -147,6 +175,7 @@ interface RunSummary {
   flatFallbackReasons: { unremembered: number; expired: number; unusable: number; flooredToFlat: number };
   /** Pieces rewritten only to refresh a remembered comparison that was going stale. */
   memoryRefreshed: number;
+  videos: VideoStats;
   /**
    * Something degraded this run without invalidating it — a failed or partial
    * competitor fetch, pieces priced from a remembered comparison. Reported, but
@@ -189,7 +218,13 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // Set by a failed fetch AND by a partial one: in both cases a piece with no
   // match may still have one we could not read, so the live price is protected.
   let competitorDegraded = false;
-  try {
+  if (!BACKVAULT.competitor.enabled) {
+    // Merchant decision 2026-11-11: retail matches the supplier's listed
+    // price, so the competitor's catalogue is not read and nothing remembered
+    // about it is used.
+    competitorStats.state = 'off';
+    console.log('Competitor comparison is off: retail is the supplier listed price');
+  } else try {
     const result = await fetchCompetitorCatalog();
     competitor = indexCompetitor(result.rows);
     competitorStats.rowsFetched = result.rows.length;
@@ -367,7 +402,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // the content hashes are computed, so the hash matches the price actually
   // written; it also stamps the read date on every piece that matched today.
   const memory = applyRememberedCompetitorPrices(desiredItems, catalog, {
-    indexComplete: competitorStats.state === 'complete',
+    indexComplete: competitorStats.state === 'complete' || competitorStats.state === 'off',
   });
   const pricedFromMemory = memory.pricedFromMemory;
   const memoryHandles = memory.memoryHandles;
@@ -466,7 +501,9 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       const input = buildProductSetInput(
         item,
         syncedAt,
-        existingEntry ? { id: existingEntry.id, imageCount: existingEntry.imageCount } : undefined,
+        existingEntry
+          ? { id: existingEntry.id, imageCount: existingEntry.imageCount, video: existingEntry.video }
+          : undefined,
         locationId ?? undefined,
       );
       if (!opts.dryRun) {
@@ -492,6 +529,11 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       errors.push(`${decision.handle}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
+
+  // Supplier videos (merchant decision 2026-11-11). Works off the catalog read
+  // taken before this run's writes, like the watch sync: a piece created this
+  // run gets its video next run. Never fails the run over media.
+  const videos = await attachSupplierVideos(client, catalog, itemByHandle, opts.dryRun, warnings);
 
   // The supplier no longer has these pieces: the merchant's own listing goes
   // to DRAFT (status only), never ARCHIVED, so it can be switched back by hand.
@@ -537,6 +579,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
       flooredToFlat: memory.flooredToFlat,
     },
     memoryRefreshed,
+    videos,
     warnings,
     errors,
   };
@@ -621,6 +664,9 @@ function competitorReportLines(summary: RunSummary): string[] {
       `(${reasons.unremembered} nothing remembered, ${reasons.expired} memory expired, ` +
       `${reasons.unusable} memory with no readable date, ${reasons.flooredToFlat} remembered midpoint below the floor)`,
   ];
+  if (stats.state === 'off') {
+    return ["- Off: retail is the supplier's listed price, so the competitor catalogue was not read"];
+  }
   if (stats.state === 'failed') {
     return [`- FAILED: ${stats.error} — no match was possible this run`, ...aftermath];
   }
@@ -649,6 +695,7 @@ function competitorReportLines(summary: RunSummary): string[] {
  * priced_from_memory and flat_fallback, rather than asserted here.
  */
 function competitorLabel(stats: CompetitorStats): string {
+  if (stats.state === 'off') return 'off';
   if (stats.state === 'failed') return 'failed';
   if (stats.state === 'partial') return `PARTIAL(${stats.partial ?? 'stopped early'})`;
   return `complete(${stats.rowsFetched ?? 0} rows/${stats.pagesRead} pages)`;
@@ -713,6 +760,9 @@ async function writeReport(summary: RunSummary): Promise<void> {
     `- Rewritten only to refresh a remembered comparison: ${summary.memoryRefreshed}`,
     `- Published this run: ${summary.published}`,
     '',
+    `## Supplier videos`,
+    ...videoReportLines(summary),
+    '',
   ];
   if (summary.warnings.length > 0) {
     lines.push(
@@ -734,4 +784,108 @@ if (process.argv[1] && process.argv[1].endsWith('sync.ts')) {
     console.error(err instanceof Error ? err.stack ?? err.message : String(err));
     process.exitCode = 1;
   });
+}
+
+/**
+ * Look up the supplier's video for pieces that need it and save its player
+ * data on the piece (src/backvault/video.ts). The file stays on the supplier's
+ * CDN, so nothing counts against the store's video cap. Budgeted and paced;
+ * whatever is left is picked up next run, because only a decided piece gets a
+ * record.
+ */
+async function attachSupplierVideos(
+  client: ShopifyClient,
+  catalog: Awaited<ReturnType<typeof fetchBackVaultCatalog>>,
+  itemByHandle: Map<string, BackVaultItem>,
+  dryRun: boolean,
+  warnings: string[],
+  sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
+): Promise<VideoStats> {
+  const stats: VideoStats = {
+    candidates: 0,
+    lookedUp: 0,
+    found: 0,
+    none: 0,
+    wouldAdd: 0,
+    failed: 0,
+    deferred: 0,
+    rateLimited: false,
+    addedHandles: [],
+  };
+  const now = Date.now();
+  // A piece whose video data went missing goes first, then never-checked,
+  // then rechecks of an old "none".
+  const rank = { video_missing: 0, never_checked: 1, recheck: 2 } as const;
+  const candidates = catalog
+    .map((entry) => ({ entry, item: itemByHandle.get(entry.handle), reason: videoCandidateReason(entry, now) }))
+    .filter((c): c is { entry: typeof c.entry; item: BackVaultItem; reason: NonNullable<typeof c.reason> } =>
+      c.item !== undefined && c.reason !== null,
+    )
+    .sort((a, b) => rank[a.reason] - rank[b.reason]);
+  stats.candidates = candidates.length;
+
+  const errorNotes: string[] = [];
+  for (const { entry, item } of candidates) {
+    if (stats.lookedUp >= VIDEO_LOOKUP_BUDGET) break;
+    if (stats.lookedUp > 0) await sleep(VIDEO_LOOKUP_DELAY_MS);
+    stats.lookedUp += 1;
+    let found: ReturnType<typeof pickSupplierVideo>;
+    try {
+      found = pickSupplierVideo(await fetchBackVaultProductJs(item.sourceHandle));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (/HTTP 429/.test(message)) {
+        // The supplier asked us to slow down: stop for this run, retry next run.
+        stats.rateLimited = true;
+        stats.lookedUp -= 1;
+        break;
+      }
+      stats.failed += 1;
+      errorNotes.push(`${entry.handle}: lookup ${message}`);
+      continue;
+    }
+    if (found) stats.found += 1;
+    else stats.none += 1;
+    if (dryRun) {
+      if (found) stats.wouldAdd += 1;
+      continue;
+    }
+    try {
+      const errs = await client.setMetafields(videoRecordWrite(entry.id, found, new Date().toISOString()));
+      if (errs.length) {
+        stats.failed += 1;
+        errorNotes.push(`${entry.handle}: record ${errs.join('; ')}`);
+        continue;
+      }
+      if (found) stats.addedHandles.push(entry.handle);
+    } catch (err) {
+      stats.failed += 1;
+      errorNotes.push(`${entry.handle}: record ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  stats.deferred = stats.candidates - stats.lookedUp;
+  if (stats.rateLimited) {
+    warnings.push(`supplier videos: the supplier answered HTTP 429 after ${stats.lookedUp} lookups; the rest wait for the next run`);
+  }
+  if (errorNotes.length > 0) {
+    warnings.push(`supplier videos: ${errorNotes.length} problem(s), retried next run — ${errorNotes.slice(0, 10).join(' | ')}`);
+  }
+  console.log(
+    `Videos: ${stats.candidates} to check, ${stats.lookedUp} looked up, ${stats.found} found, ${stats.none} none, ` +
+      `${dryRun ? `${stats.wouldAdd} would be added` : `${stats.addedHandles.length} added`}, ${stats.failed} failed, ` +
+      `${stats.deferred} left for later runs${stats.rateLimited ? ' (supplier rate limit)' : ''}`,
+  );
+  return stats;
+}
+
+function videoReportLines(summary: RunSummary): string[] {
+  const v = summary.videos;
+  return [
+    `- Pieces needing a lookup: ${v.candidates}`,
+    `- Looked up this run: ${v.lookedUp} (found ${v.found}, none ${v.none})`,
+    summary.dryRun ? `- Would be added (dry run): ${v.wouldAdd}` : `- Added: ${v.addedHandles.length}`,
+    ...(v.addedHandles.length > 0 ? [`  - ${v.addedHandles.join(', ')}`] : []),
+    `- Failed (retried next run): ${v.failed}`,
+    `- Left for later runs: ${v.deferred}${v.rateLimited ? ' (the supplier asked us to slow down)' : ''}`,
+  ];
 }

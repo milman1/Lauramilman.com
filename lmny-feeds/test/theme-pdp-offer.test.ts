@@ -11,17 +11,18 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps Ask and Direct message on every product, and Make an offer only for watches', () => {
+  it('keeps Ask and Direct message on every product, and Make an offer for watches and pre-owned jewelry', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
     expect(inquiry).toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
     expect(inquiry).toContain('Direct message');
     expect(inquiry).toContain("render 'product-is-watch', product: product");
-    expect(inquiry).not.toContain("render 'product-is-vintage'");
-    expect(inquiry).toContain("if is_watch == 'true'");
+    // Pre-owned, estate and vintage jewelry take offers too (merchant decision 2026-11-11).
+    expect(inquiry).toContain("render 'product-is-vintage', product: product");
+    expect(inquiry).toContain("if is_watch == 'true' or is_vintage == 'true'");
     expect(inquiry).toContain("type_l == 'lab-grown diamond'");
     expect(inquiry).toContain('assign offer_ok = false');
-    // Natural stones get the ask form, never the watch-only offer.
+    // Natural stones get the ask form, never the offer.
     const offerGate = inquiry.indexOf("if is_watch == 'true'");
     expect(inquiry.slice(offerGate, offerGate + 80)).not.toContain('natural diamond');
     const offerStart = inquiry.indexOf('{%- if offer_ok -%}');
@@ -138,6 +139,30 @@ describe('product-page inquiry pills', () => {
     const askGuard = inquiry.lastIndexOf('{%- if ask_form_ok -%}', askFormStart);
     expect(askGuard).toBeGreaterThan(offerFormStart);
     expect(inquiry.slice(offerFormStart, askGuard)).toContain('{%- endif -%}');
+  });
+});
+
+describe('WhatsApp contact', () => {
+  const snippet = themeFile('snippets/whatsapp-url.liquid');
+  const inquiry = themeFile('snippets/product-inquiry.liquid');
+  const privateClient = themeFile('sections/private-client.liquid');
+  const schema = JSON.parse(themeFile('config/settings_schema.json')) as Array<{ name?: string; settings?: Array<{ id?: string }> }>;
+
+  it('is one theme setting, empty by default, so nothing shows until the merchant adds a number', () => {
+    const field = schema.flatMap((g) => g.settings ?? []).find((s) => s.id === 'whatsapp_number') as Record<string, unknown>;
+    expect(field).toBeDefined();
+    expect(field.default).toBeUndefined();
+    expect(snippet).toContain('settings.whatsapp_number');
+    expect(snippet).toContain("'https://wa.me/'");
+    expect(snippet).toContain('url_encode');
+  });
+
+  it('adds a WhatsApp button on product pages and a line on the private clients page, only when set', () => {
+    expect(inquiry).toContain("render 'whatsapp-url', message: wa_message");
+    expect(inquiry).toContain('{%- if wa_url != blank -%}');
+    expect(inquiry).toContain('rel="noopener"');
+    expect(privateClient).toContain("render 'whatsapp-url'");
+    expect(privateClient).toContain('{%- if wa_url != blank -%}');
   });
 });
 

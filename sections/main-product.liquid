@@ -75,6 +75,19 @@
   assign pdp_images = product.media | where: 'media_type', 'image'
   assign pdp_models = product.media | where: 'media_type', 'model'
   assign gallery_media = pdp_videos | concat: pdp_ext_videos | concat: pdp_images | concat: pdp_models
+  # A supplier video saved by the estate sync as links (backvault_feed.video)
+  # plays from the supplier's CDN: the plan caps stored videos at 250. It only
+  # shows when the product has no video of its own, and is always first.
+  assign feed_video = product.metafields.backvault_feed.video.value
+  assign feed_video_ok = false
+  if pdp_videos.size == 0 and pdp_ext_videos.size == 0 and feed_video.sources.size > 0
+    assign feed_video_ok = true
+  endif
+  assign media_offset = 0
+  if feed_video_ok
+    assign media_offset = 1
+  endif
+  assign gallery_count = gallery_media.size | plus: media_offset
   assign description_has_video = false
   if product.description contains '<video' or product.description contains '<VIDEO' or product.description contains 'product-video' or product.description contains 'youtube.com' or product.description contains 'youtu.be' or product.description contains 'vimeo.com'
     assign description_has_video = true
@@ -219,6 +232,24 @@
           <div class="product-gallery__badge">New Arrival</div>
         {%- endif -%}
 
+        {%- if feed_video_ok -%}
+          <div class="pdp-media is-active" data-media-index="0" data-media-type="video" data-feed-video>
+            <video
+              class="pdp-media__video"
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              {% if feed_video.poster != blank %}poster="{{ feed_video.poster }}"{% endif %}
+              aria-label="{{ display_title | escape }} — video, Laura Milman New York"
+            >
+              {%- for source in feed_video.sources -%}
+                <source src="{{ source.url }}" type="{{ source.type }}"{% if source.type == 'video/mp4' and source.height > 720 and forloop.last == false %} media="(min-width: 990px)"{% endif %}>
+              {%- endfor -%}
+            </video>
+          </div>
+        {%- endif -%}
+
         {%- for media in gallery_media -%}
           {%- liquid
             capture media_alt
@@ -235,10 +266,10 @@
             assign media_alt = media_alt | strip
           -%}
           <div
-            class="pdp-media{% if forloop.first %} is-active{% endif %}"
-            data-media-index="{{ forloop.index0 }}"
+            class="pdp-media{% if forloop.first and media_offset == 0 %} is-active{% endif %}"
+            data-media-index="{{ forloop.index0 | plus: media_offset }}"
             data-media-type="{{ media.media_type }}"
-            {% unless forloop.first %}hidden{% endunless %}
+            {% unless forloop.first and media_offset == 0 %}hidden{% endunless %}
           >
             {%- case media.media_type -%}
               {%- when 'image' -%}
@@ -281,20 +312,46 @@
           </div>
         {%- endfor -%}
 
-        {%- if gallery_media.size == 0 -%}
+        {%- if gallery_count == 0 -%}
           <div class="pdp-media is-active">
             {{ 'product-1' | placeholder_svg_tag: 'pdp-media__placeholder' }}
           </div>
         {%- endif -%}
       </div>
 
-      {%- if gallery_media.size > 1 -%}
+      {%- if gallery_count > 1 -%}
         <div class="product-gallery__thumbs" role="list">
+          {%- if feed_video_ok -%}
+            {%- liquid
+              if feed_video.poster != blank
+                assign fv_thumb = feed_video.poster
+                if fv_thumb contains '?'
+                  assign fv_thumb = fv_thumb | append: '&width=240'
+                else
+                  assign fv_thumb = fv_thumb | append: '?width=240'
+                endif
+              else
+                assign fv_thumb = gallery_media.first.preview_image | image_url: width: 240
+              endif
+            -%}
+            <button
+              type="button"
+              class="product-gallery__thumb active"
+              data-thumb-index="0"
+              aria-label="View product video"
+              role="listitem"
+            >
+              <img src="{{ fv_thumb }}" alt="{{ display_title | escape }} video" width="120" height="120" loading="lazy">
+              <span class="product-gallery__thumb-play" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </button>
+          {%- endif -%}
           {%- for media in gallery_media limit: 8 -%}
             <button
               type="button"
-              class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
-              data-thumb-index="{{ forloop.index0 }}"
+              class="product-gallery__thumb{% if forloop.first and media_offset == 0 %} active{% endif %}"
+              data-thumb-index="{{ forloop.index0 | plus: media_offset }}"
               aria-label="View {% if media.media_type == 'video' or media.media_type == 'external_video' %}product video{% else %}image {{ forloop.index }}{% endif %}"
               role="listitem"
             >
@@ -1068,6 +1125,44 @@
     // Gallery: thumb switching + video autoplay management
     var gallery = document.getElementById('PdpGallery');
     hoistDescriptionVideo(gallery);
+
+    // A supplier video played by link (backvault_feed.video) can disappear if
+    // the supplier removes the file. Then drop its slide and thumbnail and show
+    // the first photo, so the shopper never sees a broken player.
+    (function guardFeedVideo() {
+      var slide = gallery && gallery.querySelector('[data-feed-video]');
+      if (!slide) return;
+      var video = slide.querySelector('video');
+      var sources = video ? video.querySelectorAll('source') : [];
+      var dropped = false;
+      function drop() {
+        if (dropped) return;
+        dropped = true;
+        var thumb = gallery.querySelector('[data-thumb-index="0"]');
+        if (thumb && thumb.parentNode) thumb.parentNode.removeChild(thumb);
+        if (slide.parentNode) slide.parentNode.removeChild(slide);
+        var next = gallery.querySelector('.pdp-media[data-media-index="1"]');
+        if (next) {
+          next.hidden = false;
+          next.classList.add('is-active');
+        }
+        var nextThumb = gallery.querySelector('[data-thumb-index="1"]');
+        if (nextThumb) nextThumb.classList.add('active');
+        var strip = gallery.querySelector('.product-gallery__thumbs');
+        if (strip && strip.querySelectorAll('[data-thumb-index]').length < 2) strip.parentNode.removeChild(strip);
+      }
+      if (!video || sources.length === 0) return drop();
+      sources[sources.length - 1].addEventListener('error', drop);
+      video.addEventListener('error', drop);
+      // Every <source> already failed before the listeners above existed. Read
+      // only after load: while a browser is still choosing a source it reports
+      // NETWORK_NO_SOURCE too, with no currentSrc yet.
+      function checkSettled() {
+        if (video.networkState === 3 && !video.currentSrc) drop();
+      }
+      if (document.readyState === 'complete') setTimeout(checkSettled, 0);
+      else window.addEventListener('load', function () { setTimeout(checkSettled, 0); });
+    })();
     if (gallery) {
       var slides = gallery.querySelectorAll('.pdp-media');
       var thumbs = gallery.querySelectorAll('[data-thumb-index]');

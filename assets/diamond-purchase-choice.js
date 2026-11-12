@@ -17,11 +17,11 @@
       }
       function track(name, extra) {
         var shopify = window.Shopify;
-        if (!root.isConnected || shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true || typeof shopify?.analytics?.publish !== 'function') return Promise.resolve(false);
+        if (!root.isConnected || shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true || typeof window.LMNYGa4?.track !== 'function') return Promise.resolve(false);
         var handle = root.dataset.diamondHandle;
         if (!/^(lg|nd)-[a-z0-9-]{1,96}$/.test(handle || '')) return Promise.resolve(false);
         var data = Object.assign({ screen: 'diamond_product', product_kind: 'diamond', product_handle: handle, origin: root.dataset.diamondOrigin, purchase_mode: mode(), device_type: window.matchMedia('(max-width: 768px)').matches ? 'mobile' : 'desktop' }, extra);
-        try { return Promise.resolve(shopify.analytics.publish('lmny_' + name, data)).then(function (result) { return result !== false; }, function () { return false; }); }
+        try { return window.LMNYGa4.track(name, data).then(function (result) { return result !== false; }, function () { return false; }); }
         catch (_) { return Promise.resolve(false); }
       }
       function trackView() {

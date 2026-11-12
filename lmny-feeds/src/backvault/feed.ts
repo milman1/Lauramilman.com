@@ -104,3 +104,22 @@ export async function fetchBackVaultFeed(): Promise<unknown[]> {
 export async function fetchBackVaultAllProducts(): Promise<unknown[]> {
   return fetchAllPages(allProductsPageUrl);
 }
+
+/**
+ * One product's storefront JSON (`/products/<handle>.js`). Unlike
+ * products.json it lists every media item, video sources included
+ * (src/backvault/video.ts). Null when the piece is gone (404) or the body is
+ * not JSON; throws on a network failure or a server error so the caller can
+ * count it and try again next run.
+ */
+export async function fetchBackVaultProductJs(handle: string): Promise<unknown | null> {
+  const url = `${baseUrl()}/products/${encodeURIComponent(handle)}.js`;
+  const res = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(30_000) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${handle}.js`);
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
