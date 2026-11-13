@@ -886,6 +886,10 @@
       if (!settingHandle && !diamondHandle) {
         main.dataset.initialStart = 'true';
         root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
+        if (params.get('band')) {
+          state.bandSlot = 0;
+          try { await selectBand(params.get('band')); } catch (_) { state.band = null; state.bandOptions = []; }
+        }
         const begin = params.get('start');
         if (begin === 'diamond' || begin === 'setting') {
           state.kind = begin; state.page = 1;
@@ -928,7 +932,15 @@
           if (saved.line) state.bandOptions = state.band.variants.find(v => Number(v.id) === Number(saved.line.variant_id || saved.line.id))?.options.slice() || [];
         } catch (_) { failed = true; state.band = null; state.bandOptions = []; state.group = ''; }
       }
-      state.bandSlot = stored.bandSlot === 1 ? 1 : 0;
+      const requestedBand = params.get('band');
+      if (requestedBand && !state.bandSelections.some(b => b.product?.handle === requestedBand)) {
+        const openSlot = state.bandSelections.findIndex(b => !b.product);
+        if (openSlot >= 0) {
+          state.bandSlot = openSlot;
+          try { await selectBand(requestedBand); } catch (_) { state.band = null; state.bandOptions = []; }
+        }
+      }
+      state.bandSlot = stored.bandSlot === 1 && state.bandSelections[1].product ? 1 : 0;
       state.bandCategory = cfg.bands.find(b => b.handle === state.band?.handle)?.category || 'diamond';
       state.busy = false;
       state.kind = state.setting ? 'diamond' : state.diamond ? 'setting' : 'diamond';

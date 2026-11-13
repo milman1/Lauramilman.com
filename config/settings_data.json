@@ -34,10 +34,11 @@
       "header": {
         "type": "header",
         "settings": {
-          "announce_text": "Private appointments in NYC",
-          "announce_link_text": "Book a viewing",
-          "announce_link_short": "Book",
-          "announce_url": "/pages/private-clients",
+          "announce_text": "Build your bridal set: 20% off a setting or loose diamond when you pair them",
+          "announce_text_short": "20% off a paired setting or diamond",
+          "announce_link_text": "Build your set",
+          "announce_link_short": "Build",
+          "announce_url": "/pages/ring-builder",
           "logo": "shopify://shop_images/LMNY-header-lockup.png",
           "estate_label": "Watches & Estate",
           "peaceful_label": "Lab-Grown Diamonds",

@@ -103,6 +103,22 @@ describe('ring builder page chrome', () => {
 });
 
 describe('one ring builder', () => {
+  it('offers catalog wedding bands on the diamond search and diamond page', () => {
+    const offer = themeFile('snippets/bridal-band-offer.liquid');
+    expect(offer).toContain("collections['wedding-bands']");
+    expect(offer).toContain('Complete the set');
+    expect(offer).toContain('pages/ring-builder?band=');
+    expect(offer).toContain('20% off');
+    expect(offer).toContain('does not combine');
+    expect(themeFile('sections/diamond-filter.liquid')).toContain("render 'bridal-band-offer'");
+    expect(themeFile('sections/main-product-diamond.liquid')).toContain("render 'bridal-band-offer', diamond: product");
+    expect(themeFile('assets/ring-builder-flow.js')).toContain("params.get('band')");
+    expect(themeFile('sections/ring-builder-flow.liquid')).toContain("collections[band_collection].products");
+    const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
+    expect(en.band_heading).toBe('Add a matching wedding band');
+    expect(en.band_optional).toBe('Complete the set');
+  });
+
   it('sends setting entry points to /pages/ring-builder', () => {
     const header = themeFile('sections/header.liquid');
     expect(header).toContain('href="/pages/ring-builder?start=setting"');

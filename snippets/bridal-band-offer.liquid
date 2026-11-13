@@ -1,0 +1,161 @@
+{% doc %}
+  Wedding bands from the Wedding Bands and Men's Wedding Bands collections.
+  Shown under the diamond search and on a diamond page. Each band opens the
+  ring builder with that band selected, and with the diamond when one is open.
+  @param {product} [diamond] - Loose diamond to carry into the ring builder.
+{% enddoc %}
+{%- liquid
+  assign band_limit = 4
+  assign band_shown = 0
+  assign mens_count = collections['mens-wedding-bands'].products_count | default: 0
+-%}
+{%- capture band_cards -%}
+  {%- for band in collections['wedding-bands'].products limit: 24 -%}
+    {%- if band_shown < band_limit and band.available and band.featured_image -%}
+      {%- assign band_shown = band_shown | plus: 1 -%}
+      {%- capture band_href -%}{{ routes.root_url }}pages/ring-builder?band={{ band.handle | url_encode }}{%- if diamond.handle != blank -%}&diamond={{ diamond.handle | url_encode }}{%- endif -%}{%- endcapture -%}
+      <li class="bridal-bands__card">
+        <a class="bridal-bands__link" href="{{ band_href }}">
+          <span class="bridal-bands__media">
+            <img
+              src="{{ band.featured_image | image_url: width: 640 }}"
+              srcset="{{ band.featured_image | image_url: width: 320 }} 320w, {{ band.featured_image | image_url: width: 640 }} 640w"
+              sizes="(max-width: 700px) 68vw, 240px"
+              alt="{{ band.featured_image.alt | default: band.title | escape }}"
+              width="640"
+              height="640"
+              loading="lazy">
+          </span>
+          <span class="bridal-bands__name">{{ band.title | escape }}</span>
+          <span class="bridal-bands__price">{% if band.price_varies %}From {% endif %}{{ band.price_min | money_without_trailing_zeros }}</span>
+          <span class="bridal-bands__cta">Add to your set</span>
+        </a>
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- if band_shown > 0 -%}
+  <section class="bridal-bands" aria-labelledby="BridalBandsHeading" data-bridal-bands>
+    <div class="bridal-bands__head">
+      <p class="bridal-bands__eyebrow">Complete the set</p>
+      <h2 class="bridal-bands__heading" id="BridalBandsHeading">Add a matching wedding band</h2>
+      <p class="bridal-bands__note">Paired with a setting or a loose diamond, the band is 20% off. A setting and a loose diamond paired together take 20% off one of those two pieces. Checkout applies one offer, whichever saves more, and a code does not combine with it.</p>
+    </div>
+    <ul class="bridal-bands__row" role="list">{{ band_cards }}</ul>
+    <p class="bridal-bands__more">
+      <a href="{{ routes.root_url }}collections/wedding-bands">View all wedding bands</a>
+      {%- if mens_count > 0 -%}
+        <a href="{{ routes.root_url }}collections/mens-wedding-bands">Men’s gold bands</a>
+      {%- endif -%}
+    </p>
+  </section>
+  <style>
+    .bridal-bands {
+      margin: 2.5rem 0 1rem;
+      padding: 1.35rem 1.15rem 1.2rem;
+      border: 1px solid var(--rule, #DDD5C5);
+      border-radius: 8px;
+      background: var(--cream, #FAF6F0);
+      color: var(--text-dark, #2C1810);
+    }
+    .bridal-bands__eyebrow {
+      margin: 0;
+      font-family: var(--font-body, Montserrat, 'Helvetica Neue', sans-serif);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-dark, #7A5C22);
+    }
+    .bridal-bands__heading {
+      margin: 0.25rem 0 0.45rem;
+      font-family: var(--font-heading, 'Cormorant Garamond', Garamond, serif);
+      font-size: clamp(1.55rem, 2.4vw, 2rem);
+      font-weight: 500;
+      line-height: 1.15;
+      color: var(--espresso, #1E1109);
+    }
+    .bridal-bands__note {
+      max-width: 68ch;
+      margin: 0 0 1rem;
+      font-family: var(--font-body, Montserrat, 'Helvetica Neue', sans-serif);
+      font-size: 0.82rem;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--text-muted, #6B6152);
+    }
+    .bridal-bands__row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .bridal-bands__link {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      height: 100%;
+      color: inherit;
+      text-decoration: none;
+    }
+    .bridal-bands__media {
+      display: block;
+      aspect-ratio: 1;
+      background: var(--warm-white, #FDFAF6);
+      border: 1px solid var(--rule, #DDD5C5);
+      overflow: hidden;
+    }
+    .bridal-bands__media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+    }
+    .bridal-bands__name {
+      font-family: var(--font-heading, 'Cormorant Garamond', Garamond, serif);
+      font-size: 1.12rem;
+      line-height: 1.25;
+      color: var(--espresso, #1E1109);
+    }
+    .bridal-bands__price {
+      font-family: var(--font-body, Montserrat, 'Helvetica Neue', sans-serif);
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      color: var(--text-dark, #2C1810);
+    }
+    .bridal-bands__cta {
+      margin-top: auto;
+      font-family: var(--font-body, Montserrat, 'Helvetica Neue', sans-serif);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-dark, #7A5C22);
+    }
+    .bridal-bands__link:hover .bridal-bands__cta { color: var(--espresso, #1E1109); }
+    .bridal-bands__more {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin: 0.95rem 0 0;
+      font-family: var(--font-body, Montserrat, 'Helvetica Neue', sans-serif);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .bridal-bands__more a { color: var(--espresso, #1E1109); }
+    @media (max-width: 900px) {
+      .bridal-bands__row {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        padding-bottom: 6px;
+      }
+      .bridal-bands__card { flex: 0 0 68%; scroll-snap-align: start; max-width: 260px; }
+    }
+  </style>
+{%- endif -%}
