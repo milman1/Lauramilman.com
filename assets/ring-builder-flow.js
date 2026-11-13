@@ -195,6 +195,10 @@
       dock.innerHTML = `<div><span class="eyebrow">${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span>${selections}<span class="total">${money(subtotal())}</span></div><div class="dock-action">${next}</div>`;
       const purchase = main.querySelector('[data-review-purchase]');
       if (purchase) purchase.innerHTML = `<div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : 'subtotal'))}</span><strong class="total">${money(subtotal())}</strong></div>${reviewAction('review-add')}`;
+      if (state.screen === 'detail' && state.kind === 'setting') {
+        const v = studioVariant();
+        dock.innerHTML = `<div><span class="eyebrow">${esc(t(state.diamond ? 'subtotal' : 'setting'))}</span><span class="total">${v ? money(v.price + (state.diamond?.price || 0)) : esc(t('size_unavailable'))}</span></div>${button('select_setting', 'select', 'primary', v ? '' : 'disabled')}`;
+      }
       if (state.busy) lockControls();
     }
     function lockControls() {
@@ -411,6 +415,7 @@
           if (generation !== state.generation) return;
         }
         state.detail = p;
+        state.detailOptions = (state.setting?.handle === p.handle ? pickedVariant()?.options.slice() : null) || (p.variants.find(v => v.available && (!state.filters.metal || metalOf(v.options.join(' ')) === state.filters.metal)) || p.variants.find(v => v.available))?.options.slice() || [];
         state.photo = 0;
         state.detailIndex = index;
         notice('');
@@ -418,15 +423,25 @@
         if (quick) choose(); else go('detail');
       } catch (error) { if (generation === state.generation) notice(error.message || t('load_failed'), true); }
     }
+    function studioVariant() {
+      return state.detail?.variants.find(v => v.available && v.options.every((value, i) => value === state.detailOptions?.[i]));
+    }
+    function studioOptions(p) {
+      return p.options.map((option, i) => i === sizeIndex(p) || option.name === 'Title' ? '' : `<fieldset class="studio-options"><legend>${esc(option.name)}</legend><div>${option.values.map((value, n) => {
+        const available = p.variants.some(v => v.available && v.options[i] === value);
+        return `<button type="button" class="secondary studio-option" data-action="studio-option" data-option-index="${i}" data-value-index="${n}" aria-pressed="${state.detailOptions?.[i] === value}" ${available ? '' : 'disabled'}>${esc(value)}</button>`;
+      }).join('')}</div></fieldset>`).join('');
+    }
     function detail() {
       const p = state.detail;
       if (!p) return go('catalog');
       const isSetting = state.kind === 'setting';
       const photos = p.images?.length ? p.images : [p.image];
       const s = p.spec || {};
+      const previewVariant = isSetting ? studioVariant() : null;
       const facts = [['shape', p.shape], ...(!isSetting ? [['origin', t(p.origin === 'natural' ? 'natural' : 'lab')], ['color', s.color], ['clarity', s.clarity], ['cut', s.cut], ['polish', s.polish], ['symmetry', s.symmetry], ['fluorescence', s.fluorescence], ['measurements', s.measurements], ['table', s.table_pct != null ? s.table_pct + '%' : null], ['depth', s.depth_pct != null ? s.depth_pct + '%' : null], ['certificate', [s.lab, s.cert_number].filter(Boolean).join(' ')]] : [])].filter(([, value]) => value != null && value !== '');
       const videos = [...new Set([...(p.videos || []), ...(s.video_urls || [])].filter(safeURL))];
-      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${esc(isSetting ? fromPrice(p) : money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
+      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail${isSetting ? ' setting-studio' : ''}"><div class="studio-gallery"><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div class="studio-controls"><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${esc(isSetting && previewVariant ? money(previewVariant.price) : isSetting ? fromPrice(p) : money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${isSetting ? `<p class="quiet">${esc(t('studio_reference'))}</p>` + studioOptions(p) + (state.diamond ? `<div class="studio-diamond"><span class="eyebrow">${esc(t('diamond'))}</span><div class="sum-product">${image(state.diamond.image, '', 'thumb')}<div>${esc(state.diamond.title)}<br>${money(state.diamond.price)}</div></div>${button('change', 'change-diamond', 'link')}</div>` : '') + `<div class="studio-price"><div class="row"><span>${esc(t('setting'))}</span><strong>${previewVariant ? money(previewVariant.price) : esc(t('size_unavailable'))}</strong></div>${state.diamond && previewVariant ? `<div class="row"><span>${esc(t('diamond'))}</span><strong>${money(state.diamond.price)}</strong></div><div class="row studio-total"><span>${esc(t('subtotal'))}</span><strong>${money(previewVariant.price + state.diamond.price)}</strong></div>` : ''}</div>` : ''}${button(isSetting ? 'select_setting' : 'select_diamond', 'select', 'primary', isSetting && !previewVariant ? 'disabled' : '')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
       state.detailVideos = videos;
     }
     function bandSummary() {
@@ -602,6 +617,7 @@
       }
     }
     function render() {
+      root.classList.toggle('is-setting-studio', state.screen === 'detail' && state.kind === 'setting');
       root.removeAttribute('aria-busy');
       root.querySelector('footer button').disabled = false;
       if (state.screen === 'start') start();
@@ -711,7 +727,7 @@
     }
     function choose() {
       try {
-        if (state.kind === 'setting') setSetting(state.detail);
+        if (state.kind === 'setting') { setSetting(state.detail); if (studioVariant()) state.options = state.detailOptions.slice(); }
         else { if (state.setting && state.detail.shape !== state.setting.shape) throw new Error(t('wrong_shape')); state.diamond = state.detail; state.filters.shape = state.diamond.shape; }
         state.group = '';
         track(state.kind + '_selected');
@@ -804,6 +820,14 @@
           const option = main.querySelector('[data-band-option]'); reveal(option); option?.focus({ preventScroll: true });
         }
         else addRing();
+      }
+      else if (action === 'studio-option') {
+        const optionIndex = Number(el.dataset.optionIndex), valueIndex = Number(el.dataset.valueIndex);
+        const value = state.detail.options[optionIndex]?.values[valueIndex];
+        const current = state.detailOptions;
+        const candidates = state.detail.variants.filter(v => v.available && v.options[optionIndex] === value);
+        const variant = candidates.find(v => v.options.every((item, i) => i === optionIndex || item === current[i])) || candidates[0];
+        if (variant) { state.detailOptions = variant.options.slice(); detail(); summary(); main.querySelector(`[data-action="studio-option"][data-option-index="${optionIndex}"][data-value-index="${valueIndex}"]`)?.focus(); }
       }
       else if (action.startsWith('photo-')) { state.photo = Number(action.slice(6)); detail(); }
       else if (action.startsWith('video-')) {
@@ -946,4 +970,3 @@
   initialize();
   document.addEventListener('shopify:section:load', initialize);
 })();
-

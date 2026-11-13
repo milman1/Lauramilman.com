@@ -69,6 +69,26 @@ for (const width of [390, 1024]) {
 }
 console.log('PASS sizing before bands, guided mobile/inline actions, unsure size and two-item cart.');
 for(const first of ['diamond','setting']){const p=await newPage();await choose(p,first);assert.equal((await p.locator('[data-flow-summary]').innerText()).includes('&amp;'),false);assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('<Love & us>');await p.locator('[data-field="font"]').selectOption('script');await p.locator('[data-field="date"]').fill('2027-01-01');await click(p,'change-diamond');await click(p,'details-1');await click(p,'select');assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');assert.equal(await p.locator('[data-field="engraving"]').inputValue(),'<Love & us>');await p.reload();await p.locator('[data-field="size"]').waitFor();assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');for(const width of [320,390,736,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items.length,2);assert.equal(payload.items[0].properties.Engraving,'<Love & us>');assert.equal(payload.items[0].properties['Ring size'],'6.5');assert.equal(payload.items[0].properties['Requested date'],'2027-01-01');assert.equal(payload.items[0].properties._lm_ring_id,payload.items[1].properties._lm_ring_id);await p.close();cartItems=[];}
+{
+ const p=await newPage();await p.goto('https://lmny.test/pages/ring-builder');await click(p,'start-setting');await p.locator('[data-filter="shape"]').selectOption('Round');await click(p,'details-0');
+ await p.locator('.setting-studio').waitFor();
+ assert.equal(await p.locator('#lmny-ring-builder').evaluate(el=>el.classList.contains('is-setting-studio')),true);
+ const choices=p.locator('[data-action="studio-option"]:not([disabled])');assert.ok(await choices.count()>0);
+ await choices.last().click();
+ const selected=await p.locator('[data-action="studio-option"][aria-pressed="true"]').allTextContents();
+ for(const width of [320,390,1024,1440]) {await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'studio overflow '+width);}
+ await click(p,'select');await click(p,'details-0');await click(p,'select');
+ const optionValues=await p.locator('[data-option]').evaluateAll(els=>els.map(el=>el.value));
+ for(const value of selected) assert.ok(optionValues.includes(value));
+ assert.equal(await p.locator('#lmny-ring-builder').evaluate(el=>el.classList.contains('is-setting-studio')),false);
+ await click(p,'change-setting');await click(p,'details-0');await p.locator('.setting-studio').waitFor();
+ assert.deepEqual(await p.locator('[data-action="studio-option"][aria-pressed="true"]').allTextContents(),selected,'reopening the selected setting retains metal');
+ await p.setViewportSize({width:390,height:844});
+ assert.equal(await p.locator('[data-flow-dock] .total').innerText(),await p.locator('.studio-total strong').innerText(),'mobile setting total includes selected diamond');
+ await p.locator('[data-flow-dock] [data-action="select"]').click();
+ assert.equal(await p.locator('[data-action="dock-add"]').innerText(),cfg.copy.choose_size,'studio selection returns to guided sizing');
+ await p.close();
+}
 console.log('PASS both paths, filters, media, size, engraving, state restore, shape matching, payload, native cart redirect, responsive 320–1024.');
 {const p=await newPage();await choose(p,'setting','Round');await p.locator('[data-field="size"]').selectOption('6.5');const metal=p.locator('[data-option="1"]');const values=await metal.locator('option').evaluateAll(o=>o.map(x=>x.value));assert.equal(values.length,2);await metal.selectOption(values[1]);await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items[0].properties.Metal,values[1]);await p.close();cartItems=[];}
 console.log('PASS live Metal and Size variant combination.');

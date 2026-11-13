@@ -747,6 +747,7 @@
     "all_settings": "Explore all matching settings"
   },
   "ring_flow": {
+    "studio_reference": "Setting reference photo; not a rendering of your chosen diamond or metal.",
     "order_subtotal": "Subtotal before discounts",
     "add_with_band": "Add ring and band to bag",
     "band_builder": "Build your ring and add an optional wedding band",
