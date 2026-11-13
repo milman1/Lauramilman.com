@@ -8,15 +8,16 @@
         "p-hallmarks": { "type": "point", "settings": { "title": "Hallmarks & Serial Numbers", "text": "<p>Maker's marks, metal hallmarks and serial numbers are verified against each maison's known conventions for the period.</p>" } },
         "p-construction": { "type": "point", "settings": { "title": "Construction & Materials", "text": "<p>Our specialists examine clasps, hinges, settings and stone quality — the details houses never compromise on and imitations always do.</p>" } },
         "p-provenance": { "type": "point", "settings": { "title": "Provenance & Papers", "text": "<p>Where original boxes, certificates or service records exist, they're documented and included. Where they don't, our own authentication documentation ships with the piece.</p>" } },
+        "p-independent": { "type": "point", "settings": { "title": "An Independent Second Check", "text": "<p>After our own inspection, every piece is also authenticated by an independent third party with no stake in the sale. Two separate checks, not one.</p>" } },
         "h-why": { "type": "heading", "settings": { "text": "Why Buy Pre-Owned & Estate" } },
         "t-why": { "type": "text", "settings": { "text": "<p>Signed estate pieces hold their value, carry designs the houses no longer make, and arrive with a patina no new piece can imitate. Bought well — and authenticated properly — they are among the smartest purchases in fine jewelry.</p>" } },
         "cta-vault": { "type": "cta", "settings": { "label": "Shop Pre-Owned & Estate", "link": "/collections/estate-jewelry" } }
       },
-      "block_order": ["t-open", "h-process", "p-hallmarks", "p-construction", "p-provenance", "h-why", "t-why", "cta-vault"],
+      "block_order": ["t-open", "h-process", "p-hallmarks", "p-construction", "p-provenance", "p-independent", "h-why", "t-why", "cta-vault"],
       "settings": {
         "eyebrow": "Pre-Owned & Estate",
         "title": "Estate Authentication",
-        "intro": "Every estate piece we offer is examined, verified and documented before it's listed. Here's what that actually means."
+        "intro": "Every estate piece we offer is examined by our specialists and by an independent third-party authenticator before it's listed. Here's what that actually means."
       }
     }
   },
