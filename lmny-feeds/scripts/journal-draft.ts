@@ -920,7 +920,10 @@ const PRODUCTS_QUERY = `query JournalProducts($cursor: String, $q: String!) {
       productType
       vendor
       tags
-      featuredMedia { preview { image { url altText } } }
+      featuredMedia { mediaContentType preview { image { url altText } } }
+      stillImages: media(first: 1, query: "media_type:IMAGE") {
+        nodes { ... on MediaImage { image { url altText } } }
+      }
     }
   }
 }`;
@@ -1061,6 +1064,40 @@ async function fetchVoiceSamples(
   }));
 }
 
+interface MediaImageRef {
+  url: string;
+  altText: string | null;
+}
+
+/** The media fields `PRODUCTS_QUERY` asks for on each product. */
+export interface ProductMediaNode {
+  featuredMedia: {
+    mediaContentType?: string | null;
+    preview: { image: MediaImageRef | null } | null;
+  } | null;
+  stillImages?: { nodes: Array<{ image?: MediaImageRef | null }> } | null;
+}
+
+/**
+ * The product photo a Journal article may use. A product whose first media is a
+ * video has a `featuredMedia.preview` that is the video's first frame — often
+ * solid black (seen 2026-11-15 on the lab-grown tennis necklaces). So: the
+ * featured media only when it is an IMAGE, else the first image in the gallery,
+ * and never a video preview frame (Shopify serves those from `/preview_images/`).
+ */
+export function pickStillImage(node: ProductMediaNode): MediaImageRef | null {
+  const isFrame = (url: string) => /\/preview_images\//.test(url);
+  const featured = node.featuredMedia;
+  const candidates: Array<MediaImageRef | null | undefined> = [
+    featured?.mediaContentType === 'IMAGE' ? featured.preview?.image : null,
+    ...(node.stillImages?.nodes ?? []).map((m) => m.image),
+  ];
+  for (const c of candidates) {
+    if (c?.url && !isFrame(c.url)) return { url: c.url, altText: c.altText ?? null };
+  }
+  return null;
+}
+
 async function fetchProducts(client: ShopifyClient): Promise<ProductRow[]> {
   const bySegment: ProductRow[] = [];
   const seen = new Set<string>();
@@ -1077,8 +1114,7 @@ async function fetchProducts(client: ShopifyClient): Promise<ProductRow[]> {
             productType: string | null;
             vendor: string | null;
             tags: string[];
-            featuredMedia: { preview: { image: { url: string; altText: string | null } | null } | null } | null;
-          }>;
+          } & ProductMediaNode>;
         };
       } = await client.gql(PRODUCTS_QUERY, { cursor, q: query });
       for (const n of data.products.nodes) {
@@ -1086,7 +1122,7 @@ async function fetchProducts(client: ShopifyClient): Promise<ProductRow[]> {
         if (LOOSE_STONE_TYPES.has((n.productType ?? '').toLowerCase())) continue;
         if (seen.has(n.handle)) continue;
         seen.add(n.handle);
-        const image = n.featuredMedia?.preview?.image ?? null;
+        const image = pickStillImage(n);
         bySegment.push({
           handle: n.handle,
           title: n.title,
