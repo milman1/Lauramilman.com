@@ -1,27 +1,142 @@
 {%- comment -%}
-  US ring sizes with inside diameter and circumference. One table for the
-  Ring Size Guide page and the product-page size dialog.
+  Ring sizes for the product-page dialog and the Ring Size Chart page.
+
+  One measurement table. Columns, in order:
+  US | diameter mm | circumference mm | circumference in |
+  UK (also Australia, Ireland, New Zealand, South Africa) |
+  France (inside circumference in mm, rounded) |
+  Germany (also Russia and Ukraine) |
+  Japan (also China and India) |
+  Italy (also Spain, the Netherlands, and Switzerland)
+
+  Half sizes 3–13 are the chart on the product page. Do not recompute
+  those diameters. Quarter sizes are for the conversion chart only.
+  An em dash is a real gap in that country's scale, not a missing value.
+  Inches are circumference ÷ 25.4, rounded to two decimals.
 
   Accepts:
-  - class: CSS class for the <table>
+  - class: CSS class for a table view
+  - view: "us" (default), "convert", or "sizer"
 {%- endcomment -%}
-<table class="{{ class }}">
-  <thead>
-    <tr>
-      <th scope="col">US Size</th>
-      <th scope="col">Diameter (mm)</th>
-      <th scope="col">Circumference (mm)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {%- assign size_rows = '4|14.9|46.8,4.5|15.3|48.0,5|15.7|49.3,5.5|16.1|50.6,6|16.5|51.9,6.5|16.9|53.1,7|17.3|54.4,7.5|17.7|55.7,8|18.1|57.0,8.5|18.5|58.3,9|19.0|59.5,9.5|19.4|60.8,10|19.8|62.1,10.5|20.2|63.4,11|20.6|64.6,11.5|21.0|65.9,12|21.4|67.2,12.5|21.8|68.5,13|22.2|69.7' | split: ',' -%}
-    {%- for row in size_rows -%}
-      {%- assign cells = row | split: '|' -%}
+
+{%- liquid
+  assign chart_view = view | default: 'us'
+-%}
+{%- capture size_data -%}
+3|14.1|44.2|1.74|F|44|14|4|4||
+3.25|14.3|44.8|1.76|F ½|45|14 ¼|—|4 ⅝||
+3.5|14.5|45.5|1.79|G|45.5|14 ½|5|5 ¼||
+3.75|14.7|46.1|1.81|G ½|46|14 ¾|6|5 ⅞||
+4|14.9|46.8|1.84|H|47|15|7|6 ½||
+4.25|15.1|47.4|1.87|H ½|47.5|—|—|7 ⅛||
+4.5|15.3|48.0|1.89|I|48|15 ¼|8|7 ¾||
+4.75|15.5|48.7|1.92|J|48.5|15 ½|—|8 ⅜||
+5|15.7|49.3|1.94|J ½|49|15 ¾|9|9||
+5.25|15.9|50.0|1.97|K|50|16|—|9 ⅝||
+5.5|16.1|50.6|1.99|K ½|50.5|16 ¼|10|10 ¼||
+5.75|16.3|51.2|2.02|L|51|—|11|10 ⅞||
+6|16.5|51.9|2.04|L ½|52|16 ½|12|11 ½||
+6.25|16.7|52.5|2.07|M|52.5|16 ¾|—|12 ⅛||
+6.5|16.9|53.1|2.09|M ½|53|17|13|12 ¾||
+6.75|17.1|53.8|2.12|N|54|—|—|13 ⅜||
+7|17.3|54.4|2.14|N ½|54.5|17 ¼|14|14||
+7.25|17.5|55.1|2.17|O|55|17 ½|—|14 ⅝||
+7.5|17.7|55.7|2.19|O ½|56|17 ¾|15|15 ¼||
+7.75|17.9|56.3|2.22|P|56.5|18|—|15 ⅞||
+8|18.1|57.0|2.24|P ½|57|—|16|16 ½||
+8.25|18.3|57.6|2.27|Q|58|18 ¼|—|17 ⅛||
+8.5|18.5|58.3|2.30|Q ½|58.5|18 ½|17|17 ¾||
+8.75|18.7|58.9|2.32|R|59|18 ¾|—|18 ⅜||
+9|19.0|59.5|2.34|R ½|60|19|18|19||
+9.25|19.2|60.2|2.37|S|60.5|19 ¼|—|19 ⅝||
+9.5|19.4|60.8|2.39|S ½|61|19 ½|19|20 ¼||
+9.75|19.5|61.4|2.42|T|61.5|—|—|20 ⅞||
+10|19.8|62.1|2.44|T ½|62|19 ¾|20|21 ½||
+10.25|20.0|62.7|2.47|U|63|20|21|22 ⅛||
+10.5|20.2|63.4|2.50|U ½|63.5|—|22|22 ¾||
+10.75|20.4|64.0|2.52|V|64|20 ½|—|23 ⅜||
+11|20.6|64.6|2.54|V ½|65|20 ¾|23|24||
+11.25|20.8|65.3|2.57|W|65.5|—|—|24 ⅝||
+11.5|21.0|65.9|2.59|W ½|66|21|24|25 ¼||
+11.75|21.2|66.6|2.62|X|67|21 ¼|—|25 ⅞||
+12|21.4|67.2|2.65|X ½|67.5|21 ½|25|26 ½||
+12.25|21.7|68.1|2.68|Y|68|—|—|27 ⅛||
+12.5|21.8|68.5|2.70|Z|69|21 ¾|26|27 ¾||
+12.75|22.0|69.1|2.72|Z ½|69.5|—|—|28 ⅜||
+13|22.2|69.7|2.74|—|70|22|27|29
+{%- endcapture -%}
+{%- assign size_rows = size_data | split: '||' -%}
+
+{%- if chart_view == 'sizer' -%}
+  <figure class="lm-sizer">
+    <div class="lm-sizer__rule" aria-hidden="true"><span class="lm-sizer__rule-bar"></span></div>
+    <figcaption class="lm-sizer__caption">50 mm. After printing, this bar must measure 50 millimeters on a ruler.</figcaption>
+    <ul class="lm-sizer__grid">
+      {%- for row in size_rows -%}
+        {%- assign cells = row | strip | split: '|' -%}
+        {%- if cells.size == 9 -%}
+          {%- unless cells[0] contains '.25' or cells[0] contains '.75' -%}
+            <li class="lm-sizer__item">
+              <span class="lm-sizer__disk" style="width: {{ cells[1] }}mm; height: {{ cells[1] }}mm" aria-hidden="true"></span>
+              <span class="lm-sizer__label">{{ cells[0] }}</span>
+            </li>
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </figure>
+{%- elsif chart_view == 'convert' -%}
+  <table class="{{ class }}">
+    <caption class="sr-only">US ring sizes converted to UK, French, German, Japanese, and Italian sizes</caption>
+    <thead>
       <tr>
-        <td>{{ cells[0] }}</td>
-        <td>{{ cells[1] }}</td>
-        <td>{{ cells[2] }}</td>
+        <th scope="col">US</th>
+        <th scope="col">Diameter (mm)</th>
+        <th scope="col">Circumference (mm)</th>
+        <th scope="col">Circumference (in)</th>
+        <th scope="col" title="United Kingdom, Australia, Ireland, New Zealand, and South Africa">UK</th>
+        <th scope="col" title="France. This column is the inside circumference in millimeters, rounded.">France</th>
+        <th scope="col" title="Germany, Russia, and Ukraine">Germany</th>
+        <th scope="col" title="Japan, China, and India">Japan</th>
+        <th scope="col" title="Italy, Spain, the Netherlands, and Switzerland">Italy</th>
       </tr>
-    {%- endfor -%}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {%- for row in size_rows -%}
+        {%- assign cells = row | strip | split: '|' -%}
+        {%- if cells.size == 9 -%}
+          <tr>
+            {%- for cell in cells -%}
+              <td>{{ cell }}</td>
+            {%- endfor -%}
+          </tr>
+        {%- endif -%}
+      {%- endfor -%}
+    </tbody>
+  </table>
+{%- else -%}
+  <table class="{{ class }}">
+    <caption class="sr-only">US ring sizes with inside diameter and circumference</caption>
+    <thead>
+      <tr>
+        <th scope="col">US Size</th>
+        <th scope="col">Diameter (mm)</th>
+        <th scope="col">Circumference (mm)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for row in size_rows -%}
+        {%- assign cells = row | strip | split: '|' -%}
+        {%- if cells.size == 9 -%}
+          {%- unless cells[0] contains '.25' or cells[0] contains '.75' -%}
+            <tr>
+              <td>{{ cells[0] }}</td>
+              <td>{{ cells[1] }}</td>
+              <td>{{ cells[2] }}</td>
+            </tr>
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </tbody>
+  </table>
+{%- endif -%}
