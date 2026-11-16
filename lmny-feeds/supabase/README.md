@@ -10,7 +10,7 @@
 |---|---|
 | `public.stones` | Seeded from Shopify Ajax (~17.9k rows: ~15.4k lab, ~2.5k natural) |
 | `public.reservations` | Ready for inquiry/reserve |
-| Edge Function `diamonds` | Search + single-stone lookup (JWT verify off; RLS on read) |
+| Edge Function `diamonds` | Search + single-stone lookup (JWT verify off; RLS on read). Lab rows on the public filter are 1ct+, color G or better, clarity VS2 or better (VS1 included), with a photo. |
 | Edge Function `reserve-diamond` | Inquiry/reserve (service role insert) |
 
 ## GitHub Actions secrets to add

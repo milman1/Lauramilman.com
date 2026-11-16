@@ -48,13 +48,37 @@ create index if not exists stones_filter_idx
 comment on table public.stones is
   'Belgium Dia stones dual-written by lmny-feeds sync. Source of truth for the App Proxy diamond filter once Shopify products are retired.';
 
--- Storefront reads via the anon key + RLS: only available rows, no cost.
+-- Storefront reads via the anon key. Cost is not in the public select list.
+-- Lab stones shown on the filter: available, a photo, 1 carat or larger,
+-- color G or better, clarity VS2 or better (VS1 included), cut Very Good or
+-- better when a cut is present, lab IGI / GIA / GCAL / HRD / AGS, and not a
+-- novelty shape. Natural stones: available, with a photo.
 alter table public.stones enable row level security;
 
 drop policy if exists stones_public_read on public.stones;
 create policy stones_public_read on public.stones
   for select
   to anon, authenticated
-  using (available = true);
+  using (
+    available = true
+    and cardinality(image_urls) > 0
+    and (
+      kind <> 'lab'
+      or (
+        color <= 'G'
+        and clarity = any (array['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2'])
+        and (cut is null or cut = any (array['Ideal', 'Excellent', 'Very Good']))
+        and upper(lab) = any (array['IGI', 'GIA', 'GCAL', 'HRD', 'AGS'])
+        and lower(shape) <> all (array[
+          'baguette', 'trapezoid', 'bullet', 'halfmoon', 'shield', 'kite', 'kite step cut',
+          'triangle', 'trilliant', 'hexagonal', 'hexagon step', 'hexagonal modified brill',
+          'lozenge', 'lozenge step cut', 'capsule', 'pentagonal', 'pentagonal step',
+          'pentagonal modified bril', 'octagonal', 'octagonal step cut', 'cadillac',
+          'star', 'round star', 'horse head', 'lily', 'butterfly', 'briolette', 'lady heart'
+        ])
+        and carat >= 1
+      )
+    )
+  );
 
 -- Service role (sync) bypasses RLS; no insert/update policy for anon.
