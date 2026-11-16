@@ -5,7 +5,7 @@
   }
 
   async function json(url, headers = { Accept: 'application/json' }) {
-    const response = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
+    const response = await fetch(url, { headers, signal: AbortSignal.timeout?.(8000) });
     if (!response.ok) throw new Error('Could not load diamond');
     return response.json();
   }

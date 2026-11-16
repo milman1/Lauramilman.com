@@ -570,7 +570,7 @@
       .some(function (key) { return params.has(key); });
     if (!urlHasFilters) {
       // Preserve the sold 1.01 ct oval's tracked redirect and prefill its nearest size range.
-      if (cfg.kind === 'lab' && params.get('lmny_redirect') === 'lg-924390') {
+      if (window.location.pathname.endsWith('/collections/lab-grown-diamonds') && params.get('lmny_redirect') === 'lg-924390') {
         params.set('shape', 'Oval');
         params.set('min_carat', '0.90');
         params.set('max_carat', '1.10');
