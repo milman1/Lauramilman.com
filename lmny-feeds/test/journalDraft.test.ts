@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  pickStillImage,
   adminArticleUrl,
   continuationMessages,
   buildArticleCreateInput,
@@ -712,5 +713,38 @@ describe('insertProductPhotos', () => {
 describe('tags', () => {
   it('allows the Rolex tag the live Journal already uses', () => {
     expect(findUnknownTags(['Rolex'])).toEqual([]);
+  });
+});
+
+describe('pickStillImage', () => {
+  const frame = 'https://cdn.shopify.com/s/files/1/1/files/preview_images/abc.thumbnail.0000000000.jpg';
+  const still = 'https://cdn.shopify.com/s/files/1/1/files/NK1104_20_284_29.png';
+
+  it('uses the featured media when it is an image', () => {
+    expect(
+      pickStillImage({ featuredMedia: { mediaContentType: 'IMAGE', preview: { image: { url: still, altText: 'a' } } } }),
+    ).toEqual({ url: still, altText: 'a' });
+  });
+
+  it('skips a video first frame and falls back to the first gallery image', () => {
+    expect(
+      pickStillImage({
+        featuredMedia: { mediaContentType: 'VIDEO', preview: { image: { url: frame, altText: 'video' } } },
+        stillImages: { nodes: [{ image: { url: still, altText: 'still' } }] },
+      }),
+    ).toEqual({ url: still, altText: 'still' });
+  });
+
+  it('never returns a video preview frame, even mislabelled', () => {
+    expect(
+      pickStillImage({
+        featuredMedia: { mediaContentType: 'IMAGE', preview: { image: { url: frame, altText: null } } },
+        stillImages: { nodes: [] },
+      }),
+    ).toBeNull();
+  });
+
+  it('returns null when the product has no image', () => {
+    expect(pickStillImage({ featuredMedia: null })).toBeNull();
   });
 });

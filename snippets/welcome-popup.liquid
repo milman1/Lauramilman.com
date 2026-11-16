@@ -41,6 +41,18 @@
   </div>
 </div>
 
+{%- comment -%}
+  Reopen tab: after a visitor closes the popup, a slim tab on the left edge
+  brings the offer back, so closing it does not lose the 10%. Left edge, mid
+  screen, to stay clear of the chat button (bottom right) and the full-width
+  add-to-cart and diamond bars on mobile product pages. Its own × hides it for
+  the rest of the visit (sessionStorage); it returns on the next visit.
+{%- endcomment -%}
+<div class="lm-welcome-tab" id="LmWelcomeTab" hidden>
+  <button type="button" class="lm-welcome-tab__open" data-welcome-open aria-haspopup="dialog">10% off</button>
+  <button type="button" class="lm-welcome-tab__hide" data-welcome-tab-hide aria-label="Hide the 10% off offer">&times;</button>
+</div>
+
 <style>
   .lm-welcome[hidden] { display: none !important; }
   .lm-welcome {
@@ -124,6 +136,47 @@
     font-size: 0.88rem;
   }
   .lm-welcome__fine { margin: 0.9rem 0 0; font-size: 0.72rem; }
+  .lm-welcome-tab[hidden] { display: none !important; }
+  .lm-welcome-tab {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    z-index: 950;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(-50%);
+    background: var(--espresso, #1E1109);
+    border: 1px solid var(--gold, #C9A050);
+    border-left: 0;
+    box-shadow: 0 4px 14px rgba(30, 17, 9, 0.18);
+  }
+  .lm-welcome-tab__open {
+    padding: 0.9rem 0.5rem;
+    border: 0;
+    background: none;
+    color: var(--cream, #FAF6F0);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    cursor: pointer;
+  }
+  .lm-welcome-tab__hide {
+    width: 100%;
+    padding: 0.25rem 0 0.4rem;
+    border: 0;
+    border-top: 1px solid rgba(201, 160, 80, 0.4);
+    background: none;
+    color: var(--gold, #C9A050);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .lm-welcome-tab button:focus-visible { outline: 2px solid var(--gold, #C9A050); outline-offset: -3px; }
   .lm-welcome .visually-hidden {
     position: absolute !important;
     width: 1px;
@@ -141,14 +194,35 @@
     var root = document.getElementById('LmWelcome');
     if (!root) return;
     var key = 'lmny-welcome-dismissed';
+    var joinedKey = 'lmny-welcome-joined';
+    var tabKey = 'lmny-welcome-tab-hidden';
+    var tab = document.getElementById('LmWelcomeTab');
     var success = !!root.querySelector('.lm-welcome__success');
-    function open() { root.hidden = false; }
+    function get(store, k) { try { return store.getItem(k); } catch (e) { return null; } }
+    function set(store, k) { try { store.setItem(k, '1'); } catch (e) {} }
+    // The tab shows only after the popup was closed, never next to it, and
+    // never once this browser has signed up or hidden it for this visit.
+    function showTab(show) {
+      if (!tab) return;
+      tab.hidden = !(show && !get(localStorage, joinedKey) && !get(sessionStorage, tabKey));
+    }
+    function open() { root.hidden = false; showTab(false); }
     function close() {
       root.hidden = true;
-      try { localStorage.setItem(key, '1'); } catch (e) {}
+      set(localStorage, key);
+      showTab(true);
     }
     root.querySelectorAll('[data-welcome-close]').forEach(function (el) {
       el.addEventListener('click', close);
+    });
+    if (tab) {
+      tab.querySelector('[data-welcome-tab-hide]').addEventListener('click', function () {
+        set(sessionStorage, tabKey);
+        showTab(false);
+      });
+    }
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !root.hidden) close();
     });
     // A "sign up for 10% off" link on a product page opens the same popup,
     // even after the visitor dismissed the automatic one.
@@ -161,12 +235,14 @@
       if (email) email.focus();
     });
     if (success) {
+      set(localStorage, joinedKey);
       open();
       return;
     }
-    try {
-      if (localStorage.getItem(key)) return;
-    } catch (e) {}
+    if (get(localStorage, key)) {
+      showTab(true);
+      return;
+    }
     setTimeout(open, 8000);
   })();
 </script>
