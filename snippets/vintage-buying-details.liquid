@@ -1,0 +1,39 @@
+{%- doc -%}
+  Displays product-specific condition and inclusions beside the purchase action.
+  @param {product} product - The vintage jewelry listing
+  @param {string} section_id - Unique identifier for the product section
+{%- enddoc -%}
+{%- liquid
+  assign facts = product.metafields.custom
+  assign condition = facts.condition_grade.value | default: facts.condition.value | strip
+  assign wear = facts.condition_note.value | strip
+  if wear == blank and product.metafields.backvault_feed.source_handle.value != blank
+    assign condition_parts = product.description | split: 'Condition note: '
+    if condition_parts.size > 1
+      assign wear = condition_parts.last | split: '</p>' | first | strip_html | strip
+    endif
+  endif
+  assign box = facts.box.value | append: '' | strip
+  assign papers = facts.papers.value | append: '' | strip
+  assign report = facts.grading_report.value | append: '' | strip
+  assign placeholders = '|—|-|n/a|unknown|'
+  assign condition_key = condition | downcase | prepend: '|' | append: '|'
+  if placeholders contains condition_key
+    assign condition = ''
+  endif
+-%}
+<section class="pdp-vintage-details" aria-labelledby="VintageBuyingDetails-{{ section_id }}">
+  <h2 id="VintageBuyingDetails-{{ section_id }}">Condition &amp; What’s Included</h2>
+  <dl>
+    <dt>Condition</dt><dd>{{ condition | default: 'Details available on request' | escape_once }}</dd>
+    {%- if wear != blank -%}
+      <dt>Condition notes</dt><dd>{{ wear | escape_once }}</dd>
+    {%- endif -%}
+    <dt>Box</dt><dd>{{ box | default: 'To be confirmed' | escape }}</dd>
+    <dt>Papers</dt><dd>{{ papers | default: 'To be confirmed' | escape }}</dd>
+    {%- if report != blank -%}
+      <dt>Grading report</dt><dd>{{ report | escape }}</dd>
+    {%- endif -%}
+  </dl>
+  <a href="#PdpInquire">Ask about condition or documentation</a>
+</section>
