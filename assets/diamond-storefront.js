@@ -569,6 +569,12 @@
     var urlHasFilters = ['shape', 'shapes', 'filter.p.m.custom.diamond_shape', 'color', 'colors', 'clarity', 'clarities', 'cut', 'cuts', 'min_carat', 'max_carat', 'min_price', 'max_price']
       .some(function (key) { return params.has(key); });
     if (!urlHasFilters) {
+      // Preserve the sold 1.01 ct oval's tracked redirect and prefill its nearest size range.
+      if (window.location.pathname.endsWith('/collections/lab-grown-diamonds') && params.get('lmny_redirect') === 'lg-924390') {
+        params.set('shape', 'Oval');
+        params.set('min_carat', '0.90');
+        params.set('max_carat', '1.10');
+      }
       var presetShape = root.dataset.presetShape || '';
       if (presetShape) params.set('shape', presetShape);
       if (root.dataset.presetMinCarat) params.set('min_carat', root.dataset.presetMinCarat);

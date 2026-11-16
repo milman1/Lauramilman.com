@@ -2,7 +2,7 @@
   'use strict';
   if (window.LMNYGa4) return;
   const destination = 'G-CTWW9B42MX';
-  const events = new Set(['builder_opened', 'product_viewed', 'setting_selected', 'diamond_selected', 'build_saved', 'build_shared', 'band_selected', 'build_added_to_cart', 'diamond_purchase_viewed', 'purchase_mode_selected', 'ring_builder_started', 'diamond_added_to_cart']);
+  const events = new Set(['builder_opened', 'builder_path_selected', 'build_review_reached', 'product_viewed', 'setting_selected', 'diamond_selected', 'build_saved', 'build_shared', 'band_selected', 'build_added_to_cart', 'diamond_purchase_viewed', 'purchase_mode_selected', 'ring_builder_started', 'diamond_added_to_cart']);
   const values = {
     screen: ['start', 'catalog', 'detail', 'review', 'diamond_product'],
     purchase_mode: ['build_ring', 'diamond_only'],
@@ -78,6 +78,26 @@
     return send('lmny_' + name, params);
   }
   window.LMNYGa4 = { track };
+  if (/^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?cart\/?$/.test(new URL(window.location.href).pathname)) {
+    let viewed = false;
+    function cartViewed() {
+      const form = document.querySelector?.('[data-lmny-cart]');
+      const kind = form?.dataset.lmnyCart;
+      if (viewed || !allowed() || !['ring_build', 'loose_diamond', 'other'].includes(kind)) return;
+      viewed = true;
+      send('lmny_cart_with_items_viewed', {
+        page_location: 'https://www.lauramilman.com/cart', page_title: 'Cart', page_referrer: '',
+        cart_kind: kind, cart_blocked: form.querySelector('[data-incomplete-ring]') ? 'yes' : 'no'
+      }).then(sent => { if (!sent) viewed = false; });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.Shopify?.customerPrivacy) cartViewed();
+      else if (window.Shopify?.loadFeatures) {
+        try { window.Shopify.loadFeatures([{ name: 'consent-tracking-api', version: '0.2' }], cartViewed); } catch (_) {}
+      }
+    });
+    document.addEventListener('visitorConsentCollected', cartViewed);
+  }
   function flushCartHandoff() {
     if (!allowed()) { clearHandoff(); return; }
     if (!/^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?cart\/?$/.test(new URL(window.location.href).pathname)) return;

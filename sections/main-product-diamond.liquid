@@ -39,6 +39,12 @@
   if carat > 0
     assign per_carat = v.price | divided_by: carat
   endif
+  assign can_compare = false
+  if shape != blank and carat > 0 and v.price > 0
+    unless product.handle contains 'lg-color-'
+      assign can_compare = true
+    endunless
+  endif
 -%}
 
 {%- capture builder_shape -%}{% render 'center-stone-shape', product: product %}{%- endcapture -%}
@@ -56,6 +62,9 @@
 {%- capture builder_url -%}{{ routes.root_url }}pages/ring-builder?diamond={{ product.handle | url_encode }}{%- endcapture -%}
 {{ 'diamond-purchase-choice.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'diamond-purchase-choice.js' | asset_url }}" defer></script>
+{%- if can_compare -%}
+  <script src="{{ 'diamond-comparison.js' | asset_url }}" defer></script>
+{%- endif -%}
 <section class="dpdp{% if is_lab %} dpdp--navy{% endif %}" data-diamond-purchase data-diamond-handle="{{ product.handle | escape }}" data-diamond-origin="{% if is_lab %}lab{% else %}natural{% endif %}">
   <div class="dpdp__container">
 
@@ -185,6 +194,20 @@
 
           </div>
         </div>
+        <a class="dpdp__view-cart" data-diamond-view-cart href="{{ routes.cart_url }}" hidden>View cart →</a>
+        {%- if can_compare -%}
+          <details class="dpdp__comparison" data-diamond-comparison data-root="{{ routes.root_url }}"
+            data-handle="{{ product.handle | escape }}" data-title="{{ product.title | escape }}"
+            data-kind="{% if is_lab %}lab{% else %}natural{% endif %}" data-shape="{{ shape | escape }}"
+            data-carat="{{ carat | escape }}" data-price="{{ v.price }}" data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
+            data-color="{{ c.color.value | escape }}" data-clarity="{{ c.clarity.value | escape }}"
+            data-measurements="{{ m.measurements.value | escape }}" data-report="{{ m.cert_url.value | escape }}" data-lab="{{ m.lab.value | escape }}">
+            <summary>Compare This Diamond</summary>
+            <p role="status" data-comparison-status></p>
+            <div class="dpdp__comparison-scroll" role="region" aria-label="Diamond comparison results" tabindex="0" data-comparison-results hidden></div>
+            <p><a href="{{ routes.collections_url }}{% if is_lab %}/lab-grown-diamonds{% else %}/natural-diamonds{% endif %}?shape={{ shape | url_encode }}">Browse more {{ shape | downcase | escape }} diamonds</a></p>
+          </details>
+        {%- endif -%}
       </div>
 
       {%- if can_build -%}
