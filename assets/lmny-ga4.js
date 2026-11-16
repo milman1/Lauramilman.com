@@ -50,6 +50,12 @@
     });
   }
   function track(name, data = {}) {
+    if (name === 'private_viewing_submitted') {
+      return send('lmny_private_viewing_submitted', {
+        page_location: 'https://www.lauramilman.com/pages/private-clients',
+        page_title: 'Private Clients', page_referrer: ''
+      });
+    }
     if (!events.has(name) || !allowed()) return Promise.resolve(false);
     const productEvent = ['diamond_purchase_viewed', 'purchase_mode_selected', 'ring_builder_started', 'diamond_added_to_cart'].includes(name);
     if (productEvent && data.screen !== 'diamond_product') return Promise.resolve(false);
