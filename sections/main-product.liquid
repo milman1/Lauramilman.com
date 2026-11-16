@@ -20,6 +20,16 @@
   if display_vendor == 'Peaceful Diamonds' or display_vendor == "Laura's Gems" or display_vendor == 'Milman New York'
     assign display_vendor = 'Laura Milman New York'
   endif
+  assign show_private_viewing = false
+  if product.available
+    for product_collection in product.collections
+      assign collection_prefix = product_collection.handle | slice: 0, 13
+      if product_collection.handle == 'high-jewelry' or collection_prefix == 'high-jewelry-'
+        assign show_private_viewing = true
+        break
+      endif
+    endfor
+  endif
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid
@@ -393,6 +403,13 @@
           </span>
         </div>
 
+        {%- if show_private_viewing -%}
+          {%- assign viewing_page = routes.root_url | append: '/pages/private-clients' | replace: '//', '/' -%}
+          <div class="pdp-private-viewing">
+            <a class="btn btn--wine" href="{{ viewing_page }}?interest={% if is_vintage == 'true' %}estate{% else %}jewelry{% endif %}&amp;piece={{ display_title | url_encode | escape }}#LmConsultContact">Request a Private Viewing</a>
+          </div>
+        {%- endif -%}
+
         <div class="pdp-installments">
           {{ form | payment_terms }}
         </div>
@@ -685,6 +702,15 @@
   }
 
   /* Shop Pay installments */
+  .pdp-private-viewing {
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  .pdp-private-viewing .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
   .pdp-installments {
     margin: -0.5rem 0 1.25rem;
     font-family: var(--font-body, 'Montserrat', sans-serif);
