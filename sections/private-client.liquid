@@ -67,7 +67,7 @@
 
       {%- form 'contact', class: 'lm-consult__form', id: 'LmConsultContact' -%}
         {%- if form.posted_successfully? -%}
-          <p class="lm-consult__success" role="status">
+          <p class="lm-consult__success" role="status" data-private-viewing-success>
             {{ 'conversion.consult_success' | t }}
           </p>
         {%- endif -%}
@@ -427,6 +427,16 @@
     var contact = document.getElementById('LmConsultContact');
     var customer = document.getElementById('LmConsultCustomer');
     if (!contact) return;
+    var pendingViewingKey = 'lmny_private_viewing_pending';
+    if (contact.querySelector('[data-private-viewing-success]')) {
+      try {
+        var sentAt = Number(sessionStorage.getItem(pendingViewingKey));
+        sessionStorage.removeItem(pendingViewingKey);
+        if (sentAt > Date.now() - 30 * 60 * 1000 && sentAt <= Date.now()) {
+          window.LMNYGa4?.track('private_viewing_submitted');
+        }
+      } catch (_) {}
+    }
 
     function tagsForInterest(value) {
       var tags = ['private-viewing'];
@@ -439,6 +449,9 @@
     }
 
     contact.addEventListener('submit', function () {
+      if (window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() === true) {
+        try { sessionStorage.setItem(pendingViewingKey, String(Date.now())); } catch (_) {}
+      }
       var email = (document.getElementById('ConsultEmail') || {}).value || '';
       var phone = (document.getElementById('ConsultPhone') || {}).value || '';
       var tagField = document.getElementById('LmConsultTags');

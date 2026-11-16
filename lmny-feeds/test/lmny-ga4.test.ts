@@ -97,6 +97,16 @@ describe('existing storefront GA4 transport', () => {
     expect(await s.win.LMNYGa4.track('diamond_purchase_viewed', { screen: 'diamond_product', product_handle: 'lg-917959' })).toBe(true);
     expect(s.events()[0][2].page_location).toBe('https://www.lauramilman.com/products/lg-917959');
   });
+  it('tracks private-viewing confirmations only with analytics consent and excludes form data', async () => {
+    const s = setup(false, 'https://www.lauramilman.com/pages/private-clients?piece=private');
+    expect(await s.win.LMNYGa4.track('private_viewing_submitted')).toBe(false);
+    s.consent(true);
+    expect(s.events()).toHaveLength(0);
+    expect(await s.win.LMNYGa4.track('private_viewing_submitted', { email: 'private@example.test' })).toBe(true);
+    expect(s.events()[0][1]).toBe('lmny_private_viewing_submitted');
+    expect(s.events()[0][2].page_location).toBe('https://www.lauramilman.com/pages/private-clients');
+    expect(s.events()[0][2]).not.toHaveProperty('email');
+  });
   it('preserves redirect tracking once per page after consent', async () => {
     const s = setup(false, 'https://www.lauramilman.com/collections/natural-diamonds?lmny_redirect=nd-352312&email=private');
     s.consent(true); await Promise.resolve();
