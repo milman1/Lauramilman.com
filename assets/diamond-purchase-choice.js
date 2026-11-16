@@ -11,6 +11,7 @@
       var dockBuild = root.querySelector('[data-diamond-dock-build]');
       var dockBuy = root.querySelector('[data-diamond-dock-buy]');
       var add = buy.querySelector('.atc-btn');
+      var viewCart = root.querySelector('[data-diamond-view-cart]');
       var viewSent = false;
       function mode() {
         return choice && choice.querySelector('input:checked')?.value === 'ring' ? 'build_ring' : 'diamond_only';
@@ -43,6 +44,7 @@
         if (entry === 'setting_card') track('setting_selected', { purchase_mode: 'build_ring', entry_point: entry, product_kind: 'setting' });
       });
       add?.form?.addEventListener('lm:product-added-to-cart', function (event) {
+        if (viewCart && event.detail?.checkout !== true) viewCart.hidden = false;
         track('diamond_added_to_cart', { purchase_mode: 'diamond_only', entry_point: event.detail?.checkout === true ? 'buy_now' : 'add_to_cart' });
       });
       function selectMode() {

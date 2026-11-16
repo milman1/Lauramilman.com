@@ -14,7 +14,18 @@
 
     {%- else -%}
 
-      <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-form">
+      {%- liquid
+        assign cart_kind = 'other'
+        for item in cart.items
+          if item.properties._lm_ring_id != blank
+            assign cart_kind = 'ring_build'
+            break
+          elsif item.product.type == 'Lab-Grown Diamond' or item.product.type == 'Natural Diamond'
+            assign cart_kind = 'loose_diamond'
+          endif
+        endfor
+      -%}
+      <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-form" data-lmny-cart="{{ cart_kind }}">
 
         <div class="cart-layout">
 

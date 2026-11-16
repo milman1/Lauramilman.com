@@ -31,3 +31,14 @@
   body.has-diamond-dock shopify-chat { bottom: calc(94px + env(safe-area-inset-bottom)) !important; }
 }
 @media (prefers-reduced-motion: reduce) { .dpdp__purchase-options label, .dpdp__build { transition: none; } }
+.dpdp__comparison { margin-top: 1rem; border-block: 1px solid currentColor; }
+.dpdp__comparison summary { padding: .8rem 0; cursor: pointer; font-weight: 600; }
+.dpdp__comparison summary:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.dpdp__comparison p { margin: .65rem 0; font-size: .85rem; }
+.dpdp__comparison-scroll { overflow-x: auto; }
+.dpdp__comparison table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.dpdp__comparison th, .dpdp__comparison td { text-align: left; vertical-align: top; padding: .55rem .65rem; border-bottom: 1px solid #9a8c7855; }
+.dpdp__comparison td { min-width: 7rem; }
+.dpdp__comparison th[scope="row"] { min-width: 9rem; }
+.dpdp__comparison a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.dpdp__view-cart { display: inline-flex; align-items: center; min-height: 44px; margin-top: .5rem; color: inherit; text-underline-offset: 3px; }

@@ -632,6 +632,7 @@
       state.screen = screen;
       render();
       if (!moved) return;
+      if (screen === 'review' && both()) track('build_review_reached');
       if (!back) reveal(root.querySelector('.layout'));
       const heading = main.querySelector('h2');
       if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
@@ -700,7 +701,12 @@
         if (addAttempted) {
           try {
             const lines = groupLines(await cart());
-            if (selectedVariant && completeGroup(lines, selectedVariant, state.diamond)) { if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(await cart(), state.editGroup)); window.location.assign(cfg.cartUrl); return; }
+            if (selectedVariant && completeGroup(lines, selectedVariant, state.diamond)) {
+              if (state.editGroup && state.editGroup !== state.group) await removeGroup(groupLines(await cart(), state.editGroup));
+              await track('build_added_to_cart');
+              window.location.assign(cfg.cartUrl);
+              return;
+            }
             await removeGroup(lines);
           } catch (_) { error = new Error(t('cart_uncertain')); }
         }
@@ -760,10 +766,12 @@
       if (action === 'choose-band') { await chooseBand(el.dataset.bandHandle); return; }
       if (action === 'remove-band') { state.band = null; state.bandOptions = []; state.group = ''; render(); }
       else if (action.startsWith('start-') || action.startsWith('change-')) {
+        const starting = state.screen === 'start' && action.startsWith('start-');
         state.kind = action.split('-')[1]; state.page = 1; state.returnIndex = null;
         if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : settingShape(state.filters.shape);
         if (state.kind === 'diamond' && state.setting) state.filters.shape = state.setting.shape;
         go('catalog');
+        if (starting) track('builder_path_selected', { product_kind: state.kind });
       } else if (action.startsWith('details-')) openDetails(Number(action.slice(8)));
       else if (action.startsWith('quick-')) openDetails(Number(action.slice(6)), true);
       else if (action === 'select') choose();
@@ -894,6 +902,7 @@
         }
         ready = true;
         track('builder_opened');
+        if (begin === 'diamond' || begin === 'setting') track('builder_path_selected', { product_kind: begin });
         return;
       }
       root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
@@ -939,6 +948,7 @@
       ready = true;
       afterRingEmail();
       track('builder_opened');
+      if (both()) track('build_review_reached');
     }
     window.addEventListener('hashchange', () => { if (location.hash.startsWith('#build=')) location.reload(); });
     restore();
