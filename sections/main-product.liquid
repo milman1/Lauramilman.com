@@ -21,7 +21,9 @@
     assign display_vendor = 'Laura Milman New York'
   endif
   assign show_private_viewing = false
-  if product.available
+  if product.tags contains 'private-viewing'
+    assign show_private_viewing = true
+  elsif product.available
     for product_collection in product.collections
       assign collection_prefix = product_collection.handle | slice: 0, 13
       if product_collection.handle == 'high-jewelry' or collection_prefix == 'high-jewelry-'
