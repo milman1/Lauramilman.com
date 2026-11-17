@@ -1,0 +1,37 @@
+{% comment %}
+  Theme-rendered cart photo. Ring settings lead with a video, and Shopify
+  uses that video's preview frame when the variant has no image of its own.
+  Those frames are black. Prefer the first still. Checkout ignores this
+  snippet and keeps using the featured media until that still is first.
+{% endcomment %}
+{%- liquid
+  assign photo = item.image
+  assign photo_src = photo.src | default: '' | append: ''
+  assign featured_kind = item.product.featured_media.media_type
+  if photo == blank or photo_src contains 'preview_images' or featured_kind == 'video' or featured_kind == 'external_video'
+    if item.variant.image == blank or photo_src contains 'preview_images'
+      for media in item.product.media
+        if media.media_type == 'image'
+          assign photo = media.preview_image
+          break
+        endif
+      endfor
+    endif
+  endif
+  assign photo_width = width | default: 200
+  assign photo_height = photo_width
+  if photo.aspect_ratio and photo.aspect_ratio > 0
+    assign photo_height = photo_width | divided_by: photo.aspect_ratio | ceil
+  endif
+-%}
+{%- if photo -%}
+  <img
+    {% if class != blank %}class="{{ class }}"{% endif %}
+    src="{{ photo | image_url: width: photo_width }}"
+    alt="{{ photo.alt | default: item.product.title | escape }}"
+    width="{{ photo_width }}"
+    height="{{ photo_height }}"
+    loading="{{ loading | default: 'lazy' }}"
+    decoding="async"
+  >
+{%- endif -%}

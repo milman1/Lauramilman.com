@@ -37,7 +37,7 @@
     };
     const counted = (key, count) => t(Number(count) === 1 && translations[key + '_one'] ? key + '_one' : key, { count: Number(count).toLocaleString() });
     const button = (key, action, cls = 'primary', extra = '') => `<button type="button" class="${cls}" data-action="${esc(action)}" ${extra}>${esc(t(key))}</button>`;
-    const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}">` : '';
+    const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}" decoding="async">` : '';
     const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, bandSelections: [{ product: null, options: [] }, { product: null, options: [] }], bandSlot: 0, bandsCollapsed: false, bandCategory: 'diamond', showAllBands: false, bandMetal: '', bandStyle: '', options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
     // The picker edits one slot; totals, persistence and cart operations use both.
     Object.defineProperties(state, {
@@ -57,6 +57,35 @@
       const low = Math.min(...prices);
       return prices.some(price => price !== low) ? t('price_from', { price: money(low) }) : money(low);
     };
+    function accentText(p) {
+      const n = Number(p.accent);
+      if (p.accent != null && p.accent !== '' && Number.isFinite(n)) return t('accent_carat', { carat: n.toFixed(2) });
+      const match = String(p.handle || '').match(/-(\d+)-(\d+)-ct$/);
+      return match ? t('accent_carat', { carat: Number(match[1] + '.' + match[2]).toFixed(2) }) : '';
+    }
+    function settingHeading(p) {
+      const accent = accentText(p);
+      const duplicated = [...knownSettings.values()].filter(s => s.title === p.title).length > 1;
+      return duplicated && accent ? p.title + ' — ' + accent : p.title;
+    }
+    function settingSubtitle(p) {
+      return [p.shape, t('setting_only'), p.metalLabel, accentText(p)].filter(Boolean).join(' · ');
+    }
+    function metalPriceLines(p) {
+      const lines = new Map();
+      for (const v of (p.variants || []).filter(v => v.available)) {
+        const label = (p.options || []).map((o, i) => /size/i.test(o.name) || o.name === 'Title' ? '' : v.options[i]).filter(Boolean).join(' · ');
+        if (!label) continue;
+        const price = Number(v.price);
+        if (!lines.has(label) || price < lines.get(label)) lines.set(label, price);
+      }
+      return [...lines.entries()];
+    }
+    function settingPriceHtml(p) {
+      const lines = metalPriceLines(p);
+      if (lines.length <= 1) return esc(lines.length ? money(lines[0][1]) : fromPrice(p));
+      return lines.map(([label, price]) => `<span class="metal-price">${esc(label)} ${esc(money(price))}</span>`).join('');
+    }
     const metalOf = text => (String(text || '').match(/platinum|white|yellow|rose/i) || [''])[0].toLowerCase();
     const metalName = metal => t('metal_' + metal);
     const settingMetals = p => [...new Set(p.variants.filter(v => v.available).map(v => metalOf(v.options.join(' '))).concat(metalOf(p.title)).filter(Boolean))];
@@ -128,14 +157,35 @@
       if (u.href !== window.location.href) history.replaceState(null, '', u.pathname + u.search + u.hash);
     }
     async function request(url, options = {}) {
+      const timeout = options.timeout || 20000;
+      const parent = options.signal;
+      const rest = { ...options };
+      delete rest.timeout;
+      delete rest.signal;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 20000);
+      const stopParent = () => controller.abort();
+      if (parent) {
+        if (parent.aborted) controller.abort();
+        else parent.addEventListener('abort', stopParent, { once: true });
+      }
+      let timer;
+      const timed = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          const error = new Error(t('load_timeout'));
+          error.name = 'TimeoutError';
+          reject(error);
+        }, timeout);
+      });
       try {
-        const res = await fetch(url, { ...options, signal: controller.signal });
+        const res = await Promise.race([fetch(url, { ...rest, signal: controller.signal }), timed]);
         const data = await res.json();
         if (!res.ok || data.status >= 400) throw new Error(data.description || data.error || t('request_failed'));
         return data;
-      } finally { clearTimeout(timer); }
+      } finally {
+        clearTimeout(timer);
+        if (parent) parent.removeEventListener('abort', stopParent);
+      }
     }
     function apiHeaders() {
       return cfg.apiKey ? { Accept: 'application/json', apikey: cfg.apiKey, Authorization: 'Bearer ' + cfg.apiKey } : { Accept: 'application/json' };
@@ -202,12 +252,13 @@
       root.setAttribute('aria-busy', 'true');
     }
     function start() {
-      if (main.dataset.initialStart !== 'true') main.innerHTML = `<h2>${esc(t('where'))}</h2><div class="paths">${['diamond', 'setting'].map(k => {
+      const serverStart = main.dataset.initialStart === 'true' && main.querySelector('[data-action="start-diamond"]');
+      main.dataset.initialStart = 'false';
+      if (!serverStart) main.innerHTML = `<h2>${esc(t('where'))}</h2><div class="paths">${['diamond', 'setting'].map(k => {
         const p = k === 'setting' ? cfg.settings[0] : null;
         const src = p?.image || root.dataset.diamondImage || '';
         return `<button type="button" class="path" data-action="start-${k}">${image(src, t(k), '', true)}<div><h2>${esc(t('start_' + k))}</h2><p class="quiet">${esc(t(k + '_intro'))}</p><span class="eyebrow">${esc(t('choose_' + k))} →</span></div></button>`;
       }).join('')}</div>`;
-      main.dataset.initialStart = 'false';
     }
     function selectField(label, key, values, current, disabled = false) {
       return `<label>${esc(t(label))}<select data-filter="${key}" ${disabled ? 'disabled' : ''}>${values.map(([v, text]) => `<option value="${esc(v)}" ${v === current ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select></label>`;
@@ -350,7 +401,7 @@
       const shape = state.diamond?.shape || state.filters.shape;
       state.rows = [...knownSettings.values()].filter(p => p.shape === shape && p.available && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
       main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
-      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, p.title)}<h3>${esc(p.title)}</h3><div class="quiet">${esc(p.shape)} · ${esc(t('setting_only'))}</div><div class="price">${esc(fromPrice(p))}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
+      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
       returnToCard();
     }
     function returnToCard() {
@@ -369,28 +420,79 @@
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => { if (!rangesValid() || state.busy) return; notice(''); state.page = 1; search(); persist(); }, delay);
     }
+    const searchCache = new Map();
+    let searchController = null;
+    const searchMemoryKey = 'lmDiamondSearchV1';
+    function recallSearch(key) {
+      if (searchCache.has(key)) return searchCache.get(key);
+      try {
+        const bag = JSON.parse(sessionStorage.getItem(searchMemoryKey) || '{}');
+        const hit = bag[key];
+        if (hit && Date.now() - Number(hit.at) < 10 * 60 * 1000 && hit.data) {
+          searchCache.set(key, hit.data);
+          return hit.data;
+        }
+      } catch (_) {}
+      return null;
+    }
+    function rememberSearch(key, data) {
+      searchCache.set(key, data);
+      try {
+        const bag = JSON.parse(sessionStorage.getItem(searchMemoryKey) || '{}');
+        bag[key] = { at: Date.now(), data };
+        const fresh = Object.entries(bag).filter(([, value]) => Date.now() - Number(value.at) < 10 * 60 * 1000).slice(-8);
+        sessionStorage.setItem(searchMemoryKey, JSON.stringify(Object.fromEntries(fresh)));
+      } catch (_) {}
+    }
+    function diamondQuery() {
+      const params = new URLSearchParams({ kind: state.filters.origin, page: String(state.page), per_page: '12', sort: state.filters.sort, shape: state.setting?.shape || state.filters.shape });
+      for (const [key, value] of Object.entries(state.filters)) if (value !== '' && !['origin', 'shape', 'sort', 'metal'].includes(key)) params.set(key === 'color' ? 'colors' : key === 'clarity' ? 'clarities' : key === 'cut' ? 'cuts' : key, value);
+      return params;
+    }
+    function paintDiamonds(response, result) {
+      if (!result?.isConnected) return;
+      state.rows = response.stones || [];
+      state.totalPages = Math.max(1, response.total_pages || 1);
+      const count = main.querySelector('[data-count]');
+      const pager = main.querySelector('[data-pager]');
+      if (count) count.textContent = counted('results', response.total || 0);
+      result.innerHTML = state.rows.length ? `<div class="products">${state.rows.map((s, i) => `<article class="product"><div class="card-media" ${safeURL(s.video_urls?.[0]) ? `data-video="${esc(safeURL(s.video_urls[0]))}"` : ''}>${image(s.image_urls?.[0], stoneTitle(s))}</div><h3>${esc(stoneTitle(s))}</h3><div class="quiet">${esc([t(s.kind === 'natural' ? 'natural' : 'lab'), s.color, s.clarity, s.cut ? t('cut_value', { cut: s.cut }) : '', s.lab].filter(Boolean).join(' · '))}</div>${faceUpText(s.measurements) ? `<div class="quiet">${esc(faceUpText(s.measurements))}</div>` : ''}<div class="price">${money(Math.round(s.retail_usd * 100), 'USD')}</div>${cardActions(i)}</article>`).join('')}</div>` : empty();
+      returnToCard();
+      if (pager) pager.innerHTML = state.totalPages > 1 ? `${button('previous', 'previous', 'secondary', state.page <= 1 ? 'disabled' : '')}<span class="quiet">${esc(t('page', { page: state.page, pages: state.totalPages }))}</span>${button('next', 'next', 'secondary', state.page >= state.totalPages ? 'disabled' : '')}` : '';
+    }
+    function searchFailed(result, timedOut) {
+      const count = main.querySelector('[data-count]');
+      if (count) count.textContent = '';
+      if (result?.isConnected) result.innerHTML = `<p>${esc(t(timedOut ? 'load_timeout' : 'load_failed'))}</p>${button('retry', 'retry', 'secondary')} <a class="link" href="${esc(cfg.contact)}">${esc(t('help'))}</a>`;
+    }
     async function search() {
       clearTimeout(searchTimer);
       const generation = ++state.generation;
+      if (searchController) searchController.abort();
+      const controller = new AbortController();
+      searchController = controller;
       const result = main.querySelector('[data-results]');
       if (!result) return;
-      result.innerHTML = `<p>${esc(t('searching'))}</p>`;
       if (!cfg.apiBase) { result.innerHTML = `<p>${esc(t('search_unavailable'))}</p>`; return; }
-      const params = new URLSearchParams({ kind: state.filters.origin, page: String(state.page), per_page: '12', sort: state.filters.sort, shape: state.setting?.shape || state.filters.shape });
-      for (const [key, value] of Object.entries(state.filters)) if (value !== '' && !['origin', 'shape', 'sort', 'metal'].includes(key)) params.set(key === 'color' ? 'colors' : key === 'clarity' ? 'clarities' : key === 'cut' ? 'cuts' : key, value);
+      const key = diamondQuery().toString();
+      const cached = recallSearch(key);
+      if (cached) paintDiamonds(cached, result);
+      else {
+        result.innerHTML = `<p>${esc(t('searching'))}</p>`;
+        const count = main.querySelector('[data-count]');
+        if (count) count.textContent = t('loading');
+        const pager = main.querySelector('[data-pager]');
+        if (pager) pager.innerHTML = '';
+      }
       try {
-        const response = await request(cfg.apiBase + '?' + params, { headers: apiHeaders() });
+        const response = await request(cfg.apiBase + '?' + key, { headers: apiHeaders(), signal: controller.signal, timeout: 12000 });
         if (generation !== state.generation || state.screen !== 'catalog' || state.kind !== 'diamond') return;
-        state.rows = response.stones || [];
-        state.totalPages = Math.max(1, response.total_pages || 1);
-        main.querySelector('[data-count]').textContent = counted('results', response.total || 0);
-        result.innerHTML = state.rows.length ? `<div class="products">${state.rows.map((s, i) => `<article class="product"><div class="card-media" ${safeURL(s.video_urls?.[0]) ? `data-video="${esc(safeURL(s.video_urls[0]))}"` : ''}>${image(s.image_urls?.[0], stoneTitle(s))}</div><h3>${esc(stoneTitle(s))}</h3><div class="quiet">${esc([t(s.kind === 'natural' ? 'natural' : 'lab'), s.color, s.clarity, s.cut ? t('cut_value', { cut: s.cut }) : '', s.lab].filter(Boolean).join(' · '))}</div>${faceUpText(s.measurements) ? `<div class="quiet">${esc(faceUpText(s.measurements))}</div>` : ''}<div class="price">${money(Math.round(s.retail_usd * 100), 'USD')}</div>${cardActions(i)}</article>`).join('')}</div>` : empty();
-        returnToCard();
-        main.querySelector('[data-pager]').innerHTML = state.totalPages > 1 ? `${button('previous', 'previous', 'secondary', state.page <= 1 ? 'disabled' : '')}<span class="quiet">${esc(t('page', { page: state.page, pages: state.totalPages }))}</span>${button('next', 'next', 'secondary', state.page >= state.totalPages ? 'disabled' : '')}` : '';
-      } catch (_) {
-        if (generation !== state.generation || state.screen !== 'catalog') return;
-        main.querySelector('[data-count]').textContent = '';
-        result.innerHTML = `<p>${esc(t('load_failed'))}</p>${button('retry', 'retry', 'secondary')} <a class="link" href="${esc(cfg.contact)}">${esc(t('help'))}</a>`;
+        rememberSearch(key, response);
+        paintDiamonds(response, result);
+      } catch (error) {
+        if (generation !== state.generation || state.screen !== 'catalog' || state.kind !== 'diamond') return;
+        if (error?.name === 'AbortError') return;
+        searchFailed(result, error?.name === 'TimeoutError');
       }
     }
     function cardActions(i) { return `<div class="card-actions">${button('view_details', 'details-' + i, 'secondary')}${button('select_short', 'quick-' + i)}</div>`; }
@@ -426,7 +528,7 @@
       const s = p.spec || {};
       const facts = [['shape', p.shape], ...(!isSetting ? [['origin', t(p.origin === 'natural' ? 'natural' : 'lab')], ['color', s.color], ['clarity', s.clarity], ['cut', s.cut], ['polish', s.polish], ['symmetry', s.symmetry], ['fluorescence', s.fluorescence], ['measurements', s.measurements], ['table', s.table_pct != null ? s.table_pct + '%' : null], ['depth', s.depth_pct != null ? s.depth_pct + '%' : null], ['certificate', [s.lab, s.cert_number].filter(Boolean).join(' ')]] : [])].filter(([, value]) => value != null && value !== '');
       const videos = [...new Set([...(p.videos || []), ...(s.video_urls || [])].filter(safeURL))];
-      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${esc(isSetting ? fromPrice(p) : money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
+      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${isSetting ? settingPriceHtml(p) : esc(money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
       state.detailVideos = videos;
     }
     function bandSummary() {
@@ -503,7 +605,7 @@
       const p = state.setting, si = sizeIndex(p), available = p.variants.filter(v => v.available);
       const sizes = si >= 0 ? [...new Set(p.variants.map(v => String(v.options[si])))] : Array.from({ length: 10 }, (_, i) => String(4 + i * .5));
       const sizeOptions = `<option value="">${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
-      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><p class="quiet">${esc(t('custom_policy'))} <a class="link" href="${esc(route('pages/shipping-returns'))}">${esc(t('shipping_returns'))}</a></p><div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div><div class="review-purchase" data-review-purchase></div>${bandPicker()}`;
+      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div><p class="quiet fulfillment">${esc(t('fulfillment'))} <a class="link" href="${esc(route('pages/shipping-returns'))}">${esc(t('shipping_returns'))}</a></p><div class="review-purchase" data-review-purchase></div>${bandPicker()}`;
     }
     function faceUp(measurements) {
       const found = String(measurements || '').match(/(\d+(?:\.\d+)?)\s*(?:mm)?\s*[x×*-]\s*(\d+(?:\.\d+)?)/i);
@@ -791,7 +893,18 @@
       } else if (action.startsWith('clear-')) { state[action.slice(6)] = null; state.group = ''; go('catalog'); }
       else if (action === 'review') go('review');
       else if (action === 'keep-personalizing') { const size = main.querySelector('[data-field="size"]'); reveal(size?.closest('label')); size?.focus({ preventScroll: true }); }
-      else if (action === 'catalog' || action === 'start') { state.returnIndex = action === 'catalog' && state.screen === 'detail' ? state.detailIndex : null; go(action); }
+      else if (action === 'catalog' || action === 'start') {
+        if (action === 'start' && state.screen === 'catalog' && !state.setting && !state.diamond) {
+          let outside = false;
+          try {
+            const ref = new URL(document.referrer);
+            outside = ref.origin === location.origin && !ref.pathname.includes('/pages/ring-builder');
+          } catch (_) {}
+          if (outside && history.length > 1) { history.back(); return; }
+        }
+        state.returnIndex = action === 'catalog' && state.screen === 'detail' ? state.detailIndex : null;
+        go(action);
+      }
       else if (action === 'reset') resetSearch();
       else if (action === 'retry') search();
       else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); search(); persist(); }

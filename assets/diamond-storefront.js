@@ -29,6 +29,8 @@
     sort: 'price_asc',
     requestId: 0,
   };
+  var searchCache = new Map();
+  var searchAbort = null;
 
   /**
    * Ring builder mode (collection template ring-builder, section setting
@@ -461,48 +463,79 @@
     });
   }
 
+  function paintStones(data) {
+    if (countEl) countEl.textContent = resultSummary(data.total || 0);
+    if (resultsEl) {
+      if (!data.stones || !data.stones.length) {
+        resultsEl.innerHTML =
+          '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">No stones match</p>' +
+          '<p class="lm-dfilter__empty-copy">Widen a grade or carat range and try again.</p></div>';
+      } else {
+        resultsEl.innerHTML =
+          '<div class="products-grid lm-dfilter__results">' +
+          data.stones.map(cardHtml).join('') +
+          '</div>';
+      }
+    }
+    renderPager(data.total_pages || 1);
+  }
+
+  function searchFailed(timedOut) {
+    if (countEl) countEl.textContent = 'Diamonds unavailable';
+    if (pagerEl) pagerEl.innerHTML = '';
+    if (resultsEl) {
+      resultsEl.innerHTML =
+        '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">' +
+        (timedOut ? 'This is taking too long' : 'Unable to load stones') +
+        '</p><p class="lm-dfilter__empty-copy">' +
+        (timedOut
+          ? 'The list did not come back in time. Try again, or reset the filters.'
+          : 'Please try again or browse the diamond collections below.') +
+        '</p><button type="button" data-diamond-retry>Try again</button></div>';
+    }
+  }
+
   async function load() {
     if (searchOnly || !cfg.apiBase) return;
     var requestId = ++state.requestId;
+    if (searchAbort) searchAbort.abort();
+    var controller = new AbortController();
+    searchAbort = controller;
     syncURL();
-    if (resultsEl) {
-      resultsEl.classList.add('is-loading');
-      resultsEl.innerHTML = '<p>Loading diamonds matching your selection…</p>';
+    var url = cfg.apiBase + '?' + buildQuery().toString();
+    var cached = searchCache.get(url);
+    if (cached) {
+      paintStones(cached);
+      if (resultsEl) resultsEl.classList.remove('is-loading');
+    } else {
+      if (resultsEl) {
+        resultsEl.classList.add('is-loading');
+        resultsEl.innerHTML = '<p>Loading diamonds matching your selection…</p>';
+      }
+      if (countEl) countEl.textContent = 'Loading diamonds…';
+      if (pagerEl) pagerEl.innerHTML = '';
     }
-    if (countEl) countEl.textContent = 'Loading diamonds…';
-    if (pagerEl) pagerEl.innerHTML = '';
+    var timer;
+    var timed = new Promise(function (_, reject) {
+      timer = setTimeout(function () {
+        controller.abort();
+        var error = new Error('timeout');
+        error.name = 'TimeoutError';
+        reject(error);
+      }, 12000);
+    });
     try {
-      var url = cfg.apiBase + '?' + buildQuery().toString();
-      var res = await fetch(url, { headers: headers() });
+      var res = await Promise.race([fetch(url, { headers: headers(), signal: controller.signal }), timed]);
       var data = await res.json();
       if (requestId !== state.requestId) return;
       if (!res.ok) throw new Error(data.error || 'Request failed');
-      if (countEl) countEl.textContent = resultSummary(data.total || 0);
-      if (resultsEl) {
-        if (!data.stones || !data.stones.length) {
-          resultsEl.innerHTML =
-            '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">No stones match</p>' +
-            '<p class="lm-dfilter__empty-copy">Widen a grade or carat range and try again.</p></div>';
-        } else {
-          resultsEl.innerHTML =
-            '<div class="products-grid lm-dfilter__results">' +
-            data.stones.map(cardHtml).join('') +
-            '</div>';
-        }
-      }
-      renderPager(data.total_pages || 1);
+      searchCache.set(url, data);
+      paintStones(data);
     } catch (err) {
-      if (requestId !== state.requestId) return;
-      if (countEl) countEl.textContent = 'Diamonds unavailable';
-      if (pagerEl) pagerEl.innerHTML = '';
-      if (resultsEl) {
-        resultsEl.innerHTML =
-          '<div class="lm-dfilter__empty"><p class="lm-dfilter__empty-title">Unable to load stones</p>' +
-          '<p class="lm-dfilter__empty-copy">' +
-          'Please try again or browse the diamond collections below.' +
-          '</p></div>';
-      }
+      if (requestId !== state.requestId || (err && err.name === 'AbortError')) return;
+      searchFailed(err && err.name === 'TimeoutError');
     } finally {
+      clearTimeout(timer);
       if (requestId === state.requestId && resultsEl) resultsEl.classList.remove('is-loading');
     }
   }
@@ -749,6 +782,10 @@
 
   if (resultsEl) {
     resultsEl.addEventListener('click', function (e) {
+      if (e.target.closest('[data-diamond-retry]')) {
+        load();
+        return;
+      }
       var buyBtn = e.target.closest('[data-buy-handle], [data-add-handle]');
       if (!buyBtn) return;
       e.preventDefault();

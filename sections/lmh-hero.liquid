@@ -28,6 +28,9 @@
       {%- if section.settings.secondary_text != blank -%}
         <a class="lmh-btn lmh-btn--outline" href="{{ section.settings.secondary_url | default: '/collections/lab-grown-diamonds' }}">{{ section.settings.secondary_text | escape }}</a>
       {%- endif -%}
+      {%- if section.settings.tertiary_text != blank -%}
+        <a class="lmh-btn lmh-btn--outline" href="{{ section.settings.tertiary_url | default: '/pages/ring-builder' }}">{{ section.settings.tertiary_text | escape }}</a>
+      {%- endif -%}
     </div>
     {%- if section.settings.note != blank -%}<span class="lmh-hero__note">{{ section.settings.note | escape }}</span>{%- endif -%}
   </div>
@@ -50,6 +53,8 @@
     { "type": "url", "id": "primary_url", "label": "Primary link" },
     { "type": "text", "id": "secondary_text", "label": "Secondary button", "default": "Search Loose Diamonds" },
     { "type": "url", "id": "secondary_url", "label": "Secondary link" },
+    { "type": "text", "id": "tertiary_text", "label": "Third button" },
+    { "type": "url", "id": "tertiary_url", "label": "Third link" },
     { "type": "text", "id": "note", "label": "Note under buttons" },
     { "type": "image_picker", "id": "image", "label": "Image" },
     { "type": "text", "id": "image_asset", "label": "Theme asset image (used when no image is picked)" },
