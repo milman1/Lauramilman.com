@@ -85,7 +85,7 @@ describe('jewelry activation gate', () => {
     snapshot.product.descriptionHtml = '<p>This elongated cushion bezel solitaire setting is made in 18K yellow gold and is sold without a center stone.</p>';
     snapshot.product.seo = { title: 'Elongated Cushion Bezel | 18K Yellow Gold', description: `Elongated cushion bezel setting in 18K yellow gold. The center stone is sold separately. ${POLICY}` };
     snapshot.product.variants.nodes[0]!.sku = `${row.sku}-6`;
-    snapshot.product.variants.nodes[0]!.price = '278';
+    snapshot.product.variants.nodes[0]!.price = '309';
     snapshot.product.metafields.nodes.push({ namespace: 'custom', key: 'diamond_shape', value: 'Cushion', type: 'single_line_text_field' });
     renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
@@ -94,14 +94,24 @@ describe('jewelry activation gate', () => {
     renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/must be Cushion/);
   });
-  it('retains settings at 2.25× instead of the finished lab-grown 2×', () => {
+  it('retains settings at 2.5× instead of the finished lab-grown 2×', () => {
     const { snapshot, review } = fixture(); review.kind = 'setting'; snapshot.product.tags = ['ring-setting'];
     snapshot.product.title = 'Diamond Ring Setting in 14K White Gold'; snapshot.product.productType = 'Ring Settings';
     snapshot.product.descriptionHtml = '<p>Diamond ring setting in 14K white gold. Center diamond not included.</p>';
     snapshot.product.seo.title = 'Diamond Ring Setting | 14K White Gold';
-    snapshot.product.variants.nodes[0]!.price = '278'; renew(snapshot, review);
+    snapshot.product.variants.nodes[0]!.price = '309'; renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
     snapshot.product.variants.nodes[0]!.price = '246.90'; renew(snapshot, review); expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/source rule/);
+  });
+  it('prices lab-grown engagement rings at 2.5× and their 18K option at the 14K price + $250', () => {
+    const { snapshot, review } = fixture(); review.kind = 'lab-grown'; snapshot.product.tags = [...snapshot.product.tags, 'Engagement Rings'];
+    const base = snapshot.product.variants.nodes[0]!;
+    base.selectedOptions = [{ name: 'Metal', value: '14K White Gold' }]; base.price = '309';
+    snapshot.product.variants.nodes.push({ ...base, id: 'gid://shopify/ProductVariant/2', sku: 'TEST-002', price: '559', selectedOptions: [{ name: 'Metal', value: '18K White Gold' }], inventoryItem: { ...base.inventoryItem, unitCost: { amount: '150.00', currencyCode: 'USD' } } });
+    renew(snapshot, review);
+    expect(validateActivation(snapshot, review, NOW).filter(i => /source rule/.test(i))).toEqual([]);
+    snapshot.product.variants.nodes[1]!.price = '375'; renew(snapshot, review);
+    expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/source rule: gid:\/\/shopify\/ProductVariant\/2/);
   });
   it.each(['Watches', 'Vintage Rings', 'Loose Diamonds', 'Lab-Grown Diamond', 'Pre-Owned Bracelets'])('rejects excluded %s', type => {
     const { snapshot, review } = fixture(); snapshot.product.productType = type; renew(snapshot, review); expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/Excluded category/);

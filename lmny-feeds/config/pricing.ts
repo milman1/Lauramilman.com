@@ -372,18 +372,19 @@ export function supplierRetailFromCost(costUsd: number): number {
  * Engagement-ring settings sold without a center stone, for a shopper who
  * pairs the ring with a loose diamond (theme: snippets/ring-diamond-pairing,
  * one hidden "setting-only" variant per ring, SKU SET-<ring handle>).
- * Merchant decision 2026-10-02: retail = setting cost × 3, labor to set the
- * shopper's diamond included in that price. Rounded to the nearest dollar;
- * no other rounding was specified. Merchant decision 2026-10-08: × 3 → × 2.25
- * (paired with loose lab-grown 3× → 3.5×).
+ * Merchant decision 2026-11-17: retail = setting cost × 2.5, labor to set the
+ * shopper's diamond included, rounded to the nearest dollar (was × 2.25 from
+ * 2026-10-08, × 3 from 2026-10-02). On a setting offered in 14K and 18K, the
+ * 18K variant is the 14K price + $250, whatever its own cost. A setting sold
+ * only in 18K is priced from its own cost.
  *
- *   retail = round(cost × 2.25)
+ *   retail = round(cost × 2.5);  18K = 14K retail + 250
  *
- * Settings only. It is not the Royal Chain rule above, and it never prices a
- * complete ring with its own center stone.
+ * Settings only. It is not the Royal Chain rule above. Complete rings with
+ * their own center stone use `ENGAGEMENT_RING` (also × 2.5).
  */
 export const SETTING_ONLY = {
-  costMultiple: 2.25,
+  costMultiple: 2.5,
   /** Flat add-on in USD for the 18K option on a setting listed in 14K. */
   upcharge18kUsd: 250,
 } as const;
@@ -400,6 +401,34 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
     throw new Error(`Setting-only pricing: invalid cost ${costUsd}`);
   }
   return Math.round(costUsd * SETTING_ONLY.costMultiple);
+}
+
+/**
+ * Lab-grown engagement rings sold with their own center stone (house rings in
+ * the engagement-rings collection, product type or tag "Engagement Ring").
+ * Merchant decision 2026-11-17: retail = cost × 2.5, rounded to the nearest
+ * dollar; the 18K option of a ring listed in 14K is the 14K price + $250.
+ * Other lab-grown jewelry stays on `LAB_GROWN_JEWELRY` (× 2). Fancy-color
+ * natural rings (handle `fc-`) and rings with no cost recorded are not
+ * covered and stay merchant-set.
+ */
+export const ENGAGEMENT_RING = {
+  costMultiple: 2.5,
+  upcharge18kUsd: 250,
+} as const;
+
+export function engagementRingRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Engagement-ring pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * ENGAGEMENT_RING.costMultiple);
+}
+
+export function engagementRing18kRetailFrom14kRetail(retail14kUsd: number): number {
+  if (!Number.isFinite(retail14kUsd) || retail14kUsd <= 0) {
+    throw new Error(`Engagement-ring 18K pricing: invalid 14K retail ${retail14kUsd}`);
+  }
+  return retail14kUsd + ENGAGEMENT_RING.upcharge18kUsd;
 }
 
 /**

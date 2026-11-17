@@ -81,6 +81,8 @@ holds a stones table — Shopify products are the only live copy.
      money is ignored. 114200 (RW3087) and 126234 (T3691) stay on the rule.
    - lab-grown jewelry (Peaceful Diamonds / finished pieces):
      `retail = cost × 2` (rounded to cents) via `config/pricing.ts` `LAB_GROWN_JEWELRY`.
+     Settings (`SETTING_ONLY`) and lab-grown engagement rings (`ENGAGEMENT_RING`) are
+     `cost × 2.5` to the dollar, 18K = 14K + $250.
      Not Belgium Dia API inventory; never use `STONE_TIERS` or watch tiers.
 4. **Diff** by handle + `content_hash` (`src/diff.ts`): create / update /
    archive / skip. Unchanged hashes are skipped entirely. Diamonds and watches

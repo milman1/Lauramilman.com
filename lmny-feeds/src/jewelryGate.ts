@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { labGrownJewelryRetailFromCost, settingOnlyRetailFromCost, supplierRetailFromCost } from '../config/pricing.js';
+import { engagementRing18kRetailFrom14kRetail, engagementRingRetailFromCost, labGrownJewelryRetailFromCost, setting18kRetailFrom14kRetail, settingOnlyRetailFromCost, supplierRetailFromCost } from '../config/pricing.js';
 import { settingShapeIssues } from './settingCenterShape.js';
 
 export const POLICY = 'Free insured shipping and 14-day returns.';
@@ -156,6 +156,22 @@ export function validateActivation(snapshot: Snapshot, review: Review, now = Dat
   if (videos.length && !['VIDEO', 'EXTERNAL_VIDEO'].includes(p.media.nodes[0]?.mediaContentType ?? '')) issues.push('Video must be first in gallery');
   if (!p.variants.nodes.length) issues.push('At least one variant required');
   const skus = new Set<string>();
+  const engagementRing = review.kind === 'lab-grown' && /\bengagement[ -]?rings?\b/i.test([p.productType, ...p.tags].join(' '));
+  const metalOf = (v: GateVariant) => v.selectedOptions.find(o => /\b(14|18)K\b/i.test(o.value));
+  const siblingKey = (v: GateVariant, metalName: string) => v.selectedOptions.filter(o => o.name !== metalName).map(o => `${o.name}=${o.value}`).join('|');
+  const ruleFromCost = (cost: number) => review.kind === 'setting' ? settingOnlyRetailFromCost(cost) : review.kind === 'royal-chain' ? supplierRetailFromCost(cost) : engagementRing ? engagementRingRetailFromCost(cost) : labGrownJewelryRetailFromCost(cost);
+  /** 18K variant of a setting or engagement ring also offered in 14K: the 14K price + $250. */
+  const expected18kFrom14k = (v: GateVariant): number | null => {
+    if (review.kind !== 'setting' && !engagementRing) return null;
+    const metal = metalOf(v);
+    if (!metal || !/\b18K\b/i.test(metal.value)) return null;
+    const key = siblingKey(v, metal.name);
+    const sibling = p.variants.nodes.find(o => { const m = metalOf(o); return m && /\b14K\b/i.test(m.value) && siblingKey(o, m.name) === key; });
+    const siblingCost = Number(sibling?.inventoryItem.unitCost?.amount);
+    if (!sibling || !(siblingCost > 0)) return null;
+    const base = ruleFromCost(siblingCost);
+    return review.kind === 'setting' ? setting18kRetailFrom14kRetail(base) : engagementRing18kRetailFrom14kRetail(base);
+  };
   for (const v of p.variants.nodes) {
     if (!v.sku?.trim() || skus.has(v.sku.trim())) issues.push(`Missing or duplicate SKU: ${v.id}`);
     if (v.sku) skus.add(v.sku.trim());
@@ -168,7 +184,7 @@ export function validateActivation(snapshot: Snapshot, review: Review, now = Dat
       const cost = Number(v.inventoryItem.unitCost?.amount);
       if (!(cost > 0 && Number.isFinite(cost)) || v.inventoryItem.unitCost?.currencyCode !== 'USD') issues.push(`Verified USD cost required: ${v.id}`);
       else {
-        const expected = review.kind === 'setting' ? settingOnlyRetailFromCost(cost) : review.kind === 'royal-chain' ? supplierRetailFromCost(cost) : labGrownJewelryRetailFromCost(cost);
+        const expected = expected18kFrom14k(v) ?? ruleFromCost(cost);
         if (Math.round(retail * 100) !== Math.round(expected * 100)) issues.push(`Price does not match source rule: ${v.id}`);
       }
     }
