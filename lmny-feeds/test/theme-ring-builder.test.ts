@@ -92,7 +92,60 @@ describe('ring builder page chrome', () => {
   });
 
   it('keeps the welcome offer off ring-builder templates', () => {
-    expect(themeFile('snippets/welcome-popup.liquid')).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
+    const popup = themeFile('snippets/welcome-popup.liquid');
+    expect(popup).toContain("unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder'");
+    expect(popup).toContain('lmny-welcome-seen');
+    expect(popup).toContain('if (!seen) return');
+    expect(popup).toContain('.header--nav-open');
+    expect(popup).toContain('20000');
+  });
+
+  it('aborts a superseded diamond search and offers a retry', () => {
+    const js = themeFile('assets/ring-builder-flow.js');
+    expect(js).toContain('searchController.abort()');
+    expect(js).toContain('TimeoutError');
+    expect(js).toContain('lmDiamondSearchV1');
+    expect(js).toContain("error?.name === 'AbortError'");
+    expect(themeFile('assets/diamond-storefront.js')).toContain('searchAbort.abort()');
+  });
+
+  it('names duplicate settings by accent weight and lists each metal price', () => {
+    const js = themeFile('assets/ring-builder-flow.js');
+    const data = themeFile('snippets/ring-flow-product-data.liquid');
+    expect(js).toContain('settingHeading');
+    expect(js).toContain('settingPriceHtml');
+    expect(js).toContain('metal-price');
+    expect(data).toContain('carat_weight');
+    expect(data).toContain('product.images.first');
+  });
+
+  it('sends Back on the opening diamond step to the previous page or the start choice', () => {
+    const js = themeFile('assets/ring-builder-flow.js');
+    expect(js).toContain('history.back()');
+    expect(js).toContain("main.querySelector('[data-action=\"start-diamond\"]')");
+  });
+
+  it('stacks the builder below tablet width and keeps popular searches scrollable', () => {
+    expect(themeFile('assets/ring-builder-flow.css')).toContain('@media(max-width:1099px)');
+    expect(themeFile('sections/popular-searches.liquid')).toContain('overflow-x: auto');
+    expect(themeFile('sections/popular-searches.liquid')).toContain('max-width: 100%');
+  });
+
+  it('uses a still photograph for a setting whose featured media is a video', () => {
+    const photo = themeFile('snippets/line-item-photo.liquid');
+    expect(photo).toContain("preview_images");
+    expect(photo).toContain("media.media_type == 'image'");
+    expect(themeFile('templates/cart.liquid')).toContain("render 'line-item-photo'");
+  });
+
+  it('puts Build a Ring on the homepage hero', () => {
+    const home = template('templates/index.json');
+    expect(home.sections.hero.settings).toMatchObject({
+      tertiary_text: 'Build a Ring',
+      tertiary_url: '/pages/ring-builder',
+    });
+    expect(String(home.sections.hero.settings?.text)).not.toContain('Diamond District');
+    expect(themeFile('sections/lmh-hero.liquid')).toContain('section.settings.tertiary_text');
   });
 
   it('shows only the steps the builder owns and a mobile dock', () => {

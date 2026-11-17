@@ -1,5 +1,9 @@
 {{ 'ring-builder-flow.css' | asset_url | stylesheet_tag }}
 {{ 'diamond-filter.css' | asset_url | stylesheet_tag }}
+{%- assign diamond_api_origin = section.settings.api_base_url | split: '/functions/' | first -%}
+{%- if diamond_api_origin contains '://' -%}
+  <link rel="preconnect" href="{{ diamond_api_origin }}" crossorigin>
+{%- endif -%}
 {%- assign settings_collection = section.settings.settings_collection -%}
 {%- assign first_setting = settings_collection.products.first -%}
 {%- assign first_diamond = section.settings.diamond_product -%}
@@ -203,6 +207,9 @@
       "carat_desc":{{ 'ring_flow.carat_desc' | t | json }},
       "searching":{{ 'ring_flow.searching' | t | json }},
       "loading":{{ 'ring_flow.loading' | t | json }},
+      "load_timeout":{{ 'ring_flow.load_timeout' | t | json }},
+      "accent_carat":{{ 'ring_flow.accent_carat' | t | json }},
+      "fulfillment":{{ 'ring_flow.fulfillment' | t | json }},
       "loading_piece":{{ 'ring_flow.loading_piece' | t | json }},
       "results":{{ 'ring_flow.results' | t: count: '__count__' | json }},
       "settings_results":{{ 'ring_flow.settings_results' | t: count: '__count__' | json }},

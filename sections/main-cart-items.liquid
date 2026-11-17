@@ -79,18 +79,11 @@
               {%- for item in cart.items -%}
                 <tr class="cart-item" id="CartItem-{{ item.index | plus: 1 }}">
                   <td class="cart-item__media">
-                    {% if item.image %}
+                    {% if item.image or item.product.images.size > 0 %}
                       {% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
                       <a href="{{ item.url }}" class="cart-item__link" aria-hidden="true" tabindex="-1"> </a>
                       <div class="cart-item__image-container gradient global-media-settings">
-                        <img
-                          src="{{ item.image | image_url: width: 300 }}"
-                          class="cart-item__image"
-                          alt="{{ item.image.alt | escape }}"
-                          loading="lazy"
-                          width="150"
-                          height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
-                        >
+                        {%- render 'line-item-photo', item: item, width: 300, class: 'cart-item__image' -%}
                       </div>
                     {% endif %}
                   </td>

@@ -164,10 +164,27 @@
       open();
       return;
     }
+    var seenKey = 'lmny-welcome-seen';
     try {
       if (localStorage.getItem(key)) return;
+      var seen = sessionStorage.getItem(seenKey);
+      sessionStorage.setItem(seenKey, '1');
+      if (!seen) return;
     } catch (e) {}
-    setTimeout(open, 8000);
+    function navOpen() {
+      return !!document.querySelector('.header--nav-open, .section-header.menu-open, #header .nav__item.open, #nav [aria-expanded="true"], details.menu-opening');
+    }
+    function whenNavClosed(done) {
+      if (!navOpen()) { done(); return; }
+      var watch = document.getElementById('header') || document.body;
+      var observer = new MutationObserver(function () {
+        if (navOpen()) return;
+        observer.disconnect();
+        setTimeout(done, 800);
+      });
+      observer.observe(watch, { attributes: true, subtree: true, attributeFilter: ['class', 'aria-expanded'] });
+    }
+    setTimeout(function () { whenNavClosed(open); }, 20000);
   })();
 </script>
 {%- endunless -%}

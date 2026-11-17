@@ -23,7 +23,13 @@ const CORS = {
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS, "Content-Type": "application/json" },
+    headers: {
+      ...CORS,
+      "Content-Type": "application/json",
+      "Cache-Control": status === 200
+        ? "public, max-age=60, stale-while-revalidate=300"
+        : "no-store",
+    },
   });
 }
 

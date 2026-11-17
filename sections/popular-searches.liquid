@@ -22,10 +22,14 @@
   .popular-searches {
     background: var(--espresso, #1E1109);
     border-bottom: 1px solid rgba(201, 160, 80, 0.18);
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .popular-searches__inner {
-    max-width: var(--container-max, 1400px);
+    width: 100%;
+    max-width: min(100%, var(--container-max, 1400px));
+    min-width: 0;
     margin: 0 auto;
     padding: 0.55rem 2rem;
     display: flex;
@@ -55,6 +59,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    min-width: max-content;
   }
 
   .popular-searches__link {
