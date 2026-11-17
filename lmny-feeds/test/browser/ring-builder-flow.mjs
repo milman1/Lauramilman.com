@@ -343,5 +343,15 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
 }
 console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
 
+{
+ const p = await newPage();
+ await p.goto('https://lmny.test/pages/ring-builder?setting=oval-setting&diamond=lg-100&band=test-wedding-band');
+ await p.locator('[data-field="size"]').waitFor();
+ assert.equal(await p.locator('[data-action="choose-band"][data-band-handle="test-wedding-band"]').getAttribute('aria-pressed'), 'true');
+ assert.match(await p.locator('.band-upsell h2').innerText(), /Add a matching wedding band/);
+ await p.close();
+}
+console.log('PASS a band linked from the diamond search is selected on review.');
+
 await b.close();
 

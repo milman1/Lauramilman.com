@@ -246,6 +246,33 @@ Each accepted creator gets their own code. There is no shared program code.
 
 ---
 
+## 6b. Bridal pairing discounts
+
+These are automatic Buy X Get Y discounts. No code. Shopify applies one of
+them per order: the one that saves more. They do not stack with each other.
+
+`LMNYWELCOME` and creator codes have combinations turned off, so a code and
+one of these offers never both apply. Checkout keeps whichever saves more.
+
+| Discount | Customer buys | Customer gets |
+|---|---|---|
+| Pairing 20% off the setting or ring | 1 loose diamond (Natural Diamonds, Lab-Grown Diamonds, or Colored Lab-Grown Diamonds) | 1 engagement ring or setting at 20% off |
+| Pairing 20% off the loose stone | 1 engagement ring or setting | 1 loose diamond at 20% off |
+| Pairing 20% off the wedding band | 1 engagement ring, setting, or loose diamond | 1 product from Wedding Bands or Men's Wedding Bands at 20% off, once per order |
+
+A setting plus a loose diamond takes 20% off whichever of those two saves
+more. A wedding band plus a setting, or a wedding band plus a loose diamond,
+takes 20% off the band. A setting, a loose diamond, and a band together still
+receive only one of the three discounts.
+
+The announcement line states that pairing rule and links to `/pages/ring-builder`.
+It does not say every piece in a three-piece set is 20% off, because checkout
+does not do that. A discount that takes 20% off every bridal piece once the
+cart holds two or more of these categories needs a Shopify Function in an
+installed app. This theme cannot run that function.
+
+---
+
 ## 7. Branded emails
 
 HTML to paste lives in `/emails`:
