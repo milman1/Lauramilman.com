@@ -103,7 +103,7 @@
           </a>
         </li>
       {%- endfor -%}
-      <li class="hrg__card"><a class="hrg__more" href="{{ routes.collections_url }}/ring-settings">
+      <li class="hrg__card"><a class="hrg__more hrg__more--settings" href="{{ routes.collections_url }}/ring-settings">
         <span aria-hidden="true">&#10095;</span>{{ 'home_ring_gallery.more_settings' | t }}
       </a></li>
     </ul>
@@ -167,6 +167,8 @@
   .hrg__diamonds .hrg__card { background: var(--lmh-sand, #f1eee8); }
   .hrg__diamonds .hrg__name { margin: 0; padding: 9px 5px 14px; font-size: clamp(18px, 1.6vw, 24px); }
   .hrg__card .hrg__more { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: var(--lmh-sand, #f5f0e8); border: 2px solid #bd9955; color: #362016; font: 400 clamp(20px, 1.8vw, 29px)/1.12 var(--lmh-serif); }
+  .hrg__card .hrg__more--settings { background: #362016; color: #fff9ef; }
+  .hrg__more--settings span[aria-hidden] { color: #d8b36f; }
   .hrg__more span { color: inherit; font: 400 32px/1 sans-serif; }
   .hrg__diamonds .hrg__button { font: 400 20px/1.25 var(--lmh-serif); border-color: #ad8949; border-radius: 4px; }
   .hrg__diamonds .hrg__button--primary { color: #fff9ef; background: #481729; border-color: #481729; }
