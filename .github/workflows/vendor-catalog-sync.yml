@@ -1,0 +1,82 @@
+# Weekly vendor catalog sync: Alyce Jewels, Eric Originals, Namdar Diamonds.
+#
+# Reads each vendor's public Shopify /products.json and updates the products
+# we imported from it (src/vendors/, rules in config/pricing.ts
+# VENDOR_CATALOG_SYNC): our variant prices follow the vendor's, and a piece
+# the vendor no longer has moves to DRAFT. Nothing is created, reactivated,
+# or deleted. A vendor whose catalog cannot be read is skipped with no writes.
+#
+# Runs live every Monday at 13:41 UTC (8:41 New York), and on demand.
+# For a dry run: workflow_dispatch → leave dry_run=true.
+#
+# Secrets: SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN, or the
+# SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET pair (same as the other syncs).
+name: Vendor catalog sync (weekly)
+
+on:
+  schedule:
+    - cron: '41 13 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no writes to Shopify)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: vendor-catalog-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+
+      - run: npm ci
+
+      - run: npx vitest run test/vendors
+
+      - name: Run sync
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          EVENT: ${{ github.event_name }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          if [ "$EVENT" = "schedule" ] || { [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; }; then
+            echo "Mode: LIVE"
+            npx tsx src/vendors/sync.ts
+          else
+            echo "Mode: dry run"
+            npx tsx src/vendors/sync.ts --dry-run
+          fi
+
+      - name: Publish run summary
+        if: always()
+        run: cat out/vendor-sync-report.md >> "$GITHUB_STEP_SUMMARY" || echo "No report generated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendor-sync-report-${{ github.run_id }}
+          path: |
+            lmny-feeds/out/vendor-sync-report.json
+            lmny-feeds/out/vendor-sync-report.md
+          if-no-files-found: ignore
