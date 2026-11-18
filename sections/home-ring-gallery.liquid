@@ -44,6 +44,12 @@
           </a>
         </li>
       {%- endif -%}
+      <li class="hrg__card">
+        <a href="{{ routes.root_url | append: '/pages/private-clients' | replace: '//', '/' }}#LmConsultContact">
+          <span class="hrg__image hrg__image--diamond"><img src="{{ 'gallery-fancy-yellow.webp' | asset_url }}" alt="" width="438" height="403" loading="lazy"></span>
+          <span class="hrg__name">{{ 'home_ring_gallery.fancy_yellow_title' | t }}</span>
+        </a>
+      </li>
       <li class="hrg__card"><a class="hrg__more" href="{{ routes.collections_url }}/lab-grown-diamonds">
         <span aria-hidden="true">❯</span>{{ 'home_ring_gallery.more_diamonds' | t }}
       </a></li>
