@@ -28,7 +28,7 @@
   <img
     {% if class != blank %}class="{{ class }}"{% endif %}
     src="{{ photo | image_url: width: photo_width }}"
-    alt="{{ photo.alt | default: item.product.title | escape }}"
+    alt="{{ alt | default: photo.alt | default: item.product.title | escape }}"
     width="{{ photo_width }}"
     height="{{ photo_height }}"
     loading="{{ loading | default: 'lazy' }}"

@@ -70,7 +70,7 @@ for (const width of [390, 1024]) {
 console.log('PASS sizing before bands, guided mobile/inline actions, unsure size and two-item cart.');
 for(const first of ['diamond','setting']){const p=await newPage();await choose(p,first);assert.equal((await p.locator('[data-flow-summary]').innerText()).includes('&amp;'),false);assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);await p.locator('[data-field="size"]').selectOption('6.5');await p.locator('[data-field="engraving"]').fill('<Love & us>');await p.locator('[data-field="font"]').selectOption('script');await p.locator('[data-field="date"]').fill('2027-01-01');await click(p,'change-diamond');await click(p,'details-1');await click(p,'select');assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');assert.equal(await p.locator('[data-field="engraving"]').inputValue(),'<Love & us>');await p.reload();await p.locator('[data-field="size"]').waitFor();assert.equal(await p.locator('[data-field="size"]').inputValue(),'6.5');for(const width of [320,390,736,1024]){await p.setViewportSize({width,height:950});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);}await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items.length,2);assert.equal(payload.items[0].properties.Engraving,'<Love & us>');assert.equal(payload.items[0].properties['Ring size'],'6.5');assert.equal(payload.items[0].properties['Requested date'],'2027-01-01');assert.equal(payload.items[0].properties._lm_ring_id,payload.items[1].properties._lm_ring_id);await p.close();cartItems=[];}
 console.log('PASS both paths, filters, media, size, engraving, state restore, shape matching, payload, native cart redirect, responsive 320–1024.');
-{const p=await newPage();await choose(p,'setting','Round');await p.locator('[data-field="size"]').selectOption('6.5');const metal=p.locator('[data-option="1"]');const values=await metal.locator('option').evaluateAll(o=>o.map(x=>x.value));assert.equal(values.length,2);await metal.selectOption(values[1]);await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items[0].properties.Metal,values[1]);await p.close();cartItems=[];}
+{const p=await newPage();await choose(p,'setting','Round');await p.locator('[data-field="size"]').selectOption('6.5');const metal=p.locator('[data-option="1"]');const values=await metal.locator('option').evaluateAll(o=>o.map(x=>x.value).filter(Boolean));assert.equal(values.length,2);assert.equal(await metal.inputValue(),'','a metal with more than one choice is not preselected');await metal.selectOption(values[1]);assert.equal(await metal.evaluate(el=>el.classList.contains('is-set')),true);await click(p,'add');await p.waitForURL('**/cart');const payload=posts.at(-1);assert.equal(payload.items[0].properties.Metal,values[1]);await p.close();cartItems=[];}
 console.log('PASS live Metal and Size variant combination.');
 {const p=await newPage();await choose(p);await p.locator('[data-field="size"]').selectOption('6.5');priceBump=true;const before=posts.length;await click(p,'add');await p.getByRole('alert').filter({hasText:'price has changed'}).waitFor();assert.equal(posts.length,before);await click(p,'add');await p.waitForURL('**/cart');priceBump=false;cartItems=[];await p.close();}
 console.log('PASS changed price requires explicit confirmation before cart mutation.');
@@ -174,7 +174,7 @@ console.log('PASS live filtering, mm sizes on cards, carat size and grade chips,
  await p.goto('https://lmny.test/pages/ring-builder?start=diamond&shape=Round');await p.locator('[data-results] .product').first().waitFor();assert.equal(searches.at(-1).shape,'Round');await p.close();}
 {const p=await newPage();await p.addInitScript(()=>{navigator.share=d=>{window.__shared=d;return Promise.resolve();};});
  await p.goto('https://lmny.test/pages/ring-builder?start=setting');await p.locator('[data-filter="shape"]').selectOption('Round');await p.locator('[data-filter="metal"]').selectOption('white');await click(p,'quick-0');await p.locator('[data-results] .product').first().waitFor();await click(p,'quick-0');await p.locator('[data-field="size"]').waitFor();
- assert.equal(await p.locator('[data-scale-view] svg .stone *').count(),1);assert.ok((await p.locator('[data-scale-view] figcaption').innerText()).includes('8.00 × 5.00 mm face-up on a size 6 finger (16.5 mm across)'));
+ assert.equal(await p.locator('[data-scale-view] svg .stone *').count(),1);assert.ok((await p.locator('[data-scale-view] figcaption').innerText()).includes('Example on a size 6 finger (16.5 mm across) until you choose a size'));
  await p.locator('[data-field="size"]').selectOption('7');assert.ok((await p.locator('[data-scale-view] figcaption').innerText()).includes('size 7 finger (17.3 mm across)'));assert.equal(await p.locator('[data-scale-view]').count(),1);await shot(p,'review-scale');
  await click(p,'review-video');assert.equal(await p.locator('[data-review-media="setting"] video').getAttribute('src'),'https://media.example/setting.mp4');
  await click(p,'share');await p.waitForFunction(()=>window.__shared);const shared=new URL(await p.evaluate(()=>window.__shared.url));assert.equal(shared.pathname,'/pages/ring-builder');assert.equal(shared.searchParams.get('setting'),'round-white-setting');assert.equal(shared.searchParams.get('diamond'),'lg-round-test');assert.equal(shared.searchParams.has('edit_group'),false);
@@ -342,6 +342,33 @@ for (const mode of ['delayed-allow', 'deny-then-allow', 'loader-error']) {
  await p.close();
 }
 console.log('PASS delayed privacy API, later consent without replay, duplicate consent, revocation and loader failure.');
+
+{
+ const p=await newPage();
+ await p.goto('https://lmny.test/pages/ring-builder?start=diamond');
+ await p.locator('[data-filter="max_price"]').waitFor();
+ assert.equal(await p.evaluate(()=>window.scrollY<40),true,'diamond step opens at the top');
+ await p.locator('[data-filter="max_price"]').fill('15000');
+ await p.locator('[data-search-form]').evaluate(f=>f.requestSubmit());
+ await p.waitForTimeout(50);
+ assert.equal(searches.at(-1).max_price,'15000');
+ assert.equal(await p.locator('[data-filter="max_price"]').inputValue(),'15000');
+ assert.ok(new URL(p.url()).searchParams.get('max_price')==='15000','applied price filter is in the URL');
+ await p.evaluate(()=>localStorage.setItem('lmRingFlowV1',JSON.stringify({saved:Date.now(),size:'6',setting:'oval-setting',diamond:'lg-1',filters:{origin:'natural',shape:'Oval',max_price:'999',style:'',metal:'',color:'',clarity:'',cut:'',min_carat:'',max_carat:'',min_price:'',sort:'price_asc'}})));
+ await p.goto('https://lmny.test/pages/ring-builder?start=setting');
+ await p.locator('[data-filter="shape"]').waitFor();
+ await click(p,'quick-0');
+ await p.locator('[data-results] .product').first().waitFor();
+ await click(p,'quick-0');
+ await p.locator('[data-field="size"]').waitFor();
+ assert.equal(await p.locator('[data-field="size"]').inputValue(),'','a fresh start does not keep a saved size');
+ assert.equal(await p.locator('[data-action="add"]').isDisabled(),true);
+ await click(p,'back-step');
+ await p.locator('[data-filter="shape"]').waitFor();
+ assert.equal(await p.locator('h2').first().innerText(),cfg.copy.choose_setting+'.');
+ await p.close();
+}
+console.log('PASS explicit size, price filter display and URL, setting-first back.');
 
 await b.close();
 
