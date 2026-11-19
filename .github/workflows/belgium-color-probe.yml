@@ -1,0 +1,27 @@
+# Temporary, read-only: counts fancy-color stones in the Belgium Dia feed.
+# No Shopify credentials; prints counts only. Delete with its branch.
+name: Belgium Dia colored-stone probe
+on:
+  push:
+    branches: [claude/belgium-color-probe]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci
+      - run: npx tsx scripts/belgium-color-probe.ts
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
