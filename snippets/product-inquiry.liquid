@@ -1,8 +1,9 @@
 {%- comment -%}
   Product-page concierge. Ask about this piece opens a short inquiry.
   The piece is filled in from the page, and the submission becomes a
-  Shopify customer. Direct message still opens Shopify chat with this
-  product pinned. Make an offer posts through Shopify's contact form for
+  Shopify customer. "Or chat with us" opens Shopify Inbox with this
+  product pinned, and is the only chat control on the page. Make an offer
+  posts through Shopify's contact form for
   watches and for pre-owned, estate and vintage jewelry (merchant decision
   2026-11-11). Loose diamonds and house jewelry do not get an offer.
   Shopify chat is an AI agent in a cross-origin iframe the theme cannot
@@ -33,15 +34,32 @@
 <div class="pdp-inquire" id="PdpInquire">
   <p class="pdp-inquire__label">Questions about this piece?</p>
   <div class="pdp-inquire__actions">
-    <button
-      type="button"
-      class="pdp-inquire__btn"
-      data-inquiry-open
-      aria-haspopup="dialog"
-      aria-controls="{{ inquiry_id }}"
-    >
-      Ask about this piece
-    </button>
+    <div class="pdp-inquire__ask">
+      <button
+        type="button"
+        class="pdp-inquire__btn"
+        data-inquiry-open
+        aria-haspopup="dialog"
+        aria-controls="{{ inquiry_id }}"
+      >
+        Ask about this piece
+      </button>
+      <p class="pdp-inquire__chat">
+        <button
+          type="button"
+          class="pdp-inquire__chat-link js-open-product-chat"
+          data-inquiry-chat
+          data-chat-intent="message"
+          data-product-id="{{ product.id }}"
+          data-product-handle="{{ product.handle }}"
+          data-product-title="{{ display_title | escape }}"
+          data-product-url="{{ shop.url }}{{ product.url }}"
+          data-product-image="{{ product_image | escape }}"
+        >
+          Or chat with us
+        </button>
+      </p>
+    </div>
     {%- if offer_ok -%}
       <button
         type="button"
@@ -52,18 +70,6 @@
         Make an offer
       </button>
     {%- endif -%}
-    <button
-      type="button"
-      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-      data-chat-intent="message"
-      data-product-id="{{ product.id }}"
-      data-product-handle="{{ product.handle }}"
-      data-product-title="{{ display_title | escape }}"
-      data-product-url="{{ shop.url }}{{ product.url }}"
-      data-product-image="{{ product_image | escape }}"
-    >
-      Direct message
-    </button>
     {%- if wa_url != blank -%}
       <a
         class="pdp-inquire__btn pdp-inquire__btn--ghost"
@@ -152,7 +158,34 @@
   .pdp-inquire__actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     gap: 0.55rem;
+  }
+  .pdp-inquire__ask {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  .pdp-inquire__chat {
+    margin: 0;
+  }
+  .pdp-inquire__chat-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--text-muted, #8A8070);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+  .pdp-inquire__chat-link:hover {
+    color: var(--text-dark, #2C1810);
   }
   .pdp-inquire__btn {
     display: inline-flex;
@@ -321,7 +354,11 @@
       btn.addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        openChat(btn);
+        var dialog = document.querySelector('dialog.lm-inquiry__dialog[open]');
+        if (dialog && typeof dialog.close === 'function') {
+          try { dialog.close(); } catch (err) {}
+        }
+        try { openChat(btn); } catch (err2) {}
       });
     });
   })();

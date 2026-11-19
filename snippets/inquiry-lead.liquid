@@ -106,6 +106,23 @@
         <p class="lm-inquiry__error" data-inquiry-error hidden role="alert"></p>
         <button type="submit" class="lm-inquiry__submit" data-inquiry-submit>Send</button>
       </form>
+      {%- if inquiry_presentation == 'dialog' and product -%}
+        <p class="lm-inquiry__chat">
+          <button
+            type="button"
+            class="lm-inquiry__chat-link js-open-product-chat"
+            data-inquiry-chat
+            data-chat-intent="message"
+            data-product-id="{{ product.id }}"
+            data-product-handle="{{ product.handle }}"
+            data-product-title="{{ inquiry_title | escape }}"
+            data-product-url="{{ inquiry_url | escape }}"
+            {% if product.featured_image %}data-product-image="{{ product.featured_image | image_url: width: 240 | escape }}"{% endif %}
+          >
+            Or chat with us
+          </button>
+        </p>
+      {%- endif -%}
     </div>
   {%- if inquiry_presentation == 'dialog' -%}
   </dialog>
@@ -463,6 +480,27 @@
   .lm-inquiry--page {
     position: relative;
     max-width: 34rem;
+  }
+  .lm-inquiry__chat {
+    margin: 0.85rem 0 0;
+    text-align: center;
+  }
+  .lm-inquiry__chat-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--text-muted, #8A8070);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+  .lm-inquiry__chat-link:hover {
+    color: var(--text-dark, #2C1810);
   }
   @media (max-width: 749px) {
     .lm-inquiry__dialog {

@@ -11,12 +11,13 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps Ask and Direct message on every product, and Make an offer for watches and pre-owned jewelry', () => {
+  it('keeps one Ask button on every product, and Make an offer for watches and pre-owned jewelry', () => {
     expect(inquiry).toContain('data-inquiry-open');
     expect(inquiry).not.toContain('data-chat-intent="ask"');
     expect(inquiry).toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
-    expect(inquiry).toContain('Direct message');
+    expect(inquiry).toContain('Or chat with us');
+    expect(inquiry).not.toContain('Direct message');
     expect(inquiry).toContain("render 'product-is-watch', product: product");
     // Pre-owned, estate and vintage jewelry take offers too (merchant decision 2026-11-11).
     expect(inquiry).toContain("render 'product-is-vintage', product: product");
@@ -137,6 +138,8 @@ describe('product-page inquiry pills', () => {
     expect(lead).toContain('Thank you. A member of our team will reply shortly.');
     expect(lead).toContain('data-inquiry-about');
     expect(lead).toContain('company_website');
+    expect(lead).toContain('Or chat with us');
+    expect(lead).toContain('js-open-product-chat');
     const offerGate = inquiry.indexOf("if is_watch == 'true'");
     expect(inquiry.slice(offerGate, offerGate + 80)).not.toContain('natural diamond');
   });
