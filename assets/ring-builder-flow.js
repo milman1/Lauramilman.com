@@ -38,7 +38,8 @@
     const counted = (key, count) => t(Number(count) === 1 && translations[key + '_one'] ? key + '_one' : key, { count: Number(count).toLocaleString() });
     const button = (key, action, cls = 'primary', extra = '') => `<button type="button" class="${cls}" data-action="${esc(action)}" ${extra}>${esc(t(key))}</button>`;
     const image = (src, alt = '', cls = '', eager = false) => safeURL(src) ? `<img class="${cls}" src="${esc(safeURL(src))}" alt="${esc(alt)}" width="800" height="800" loading="${eager ? 'eager' : 'lazy'}" decoding="async">` : '';
-    const state = { screen: 'start', kind: 'diamond', setting: null, diamond: null, bandSelections: [{ product: null, options: [] }, { product: null, options: [] }], bandSlot: 0, bandsCollapsed: false, bandCategory: 'diamond', showAllBands: false, bandMetal: '', bandStyle: '', options: [], size: '', engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
+    const state = { screen: 'start', kind: 'diamond', entry: '', setting: null, diamond: null, bandSelections: [{ product: null, options: [] }, { product: null, options: [] }], bandSlot: 0, bandsCollapsed: false, bandCategory: 'diamond', showAllBands: false, bandMetal: '', bandStyle: '', options: [], size: '', choicePrompt: false, engraving: '', font: 'block', date: '', detail: null, photo: 0, page: 1, totalPages: 1, rows: [], busy: false, generation: 0, group: '', editGroup: '', filters: { origin: 'lab', shape: 'Oval', style: '', metal: '', color: '', clarity: '', cut: '', min_carat: '', max_carat: '', min_price: '', max_price: '', sort: 'price_asc' } };
+    let historyMode = 'replace', navPush = false;
     // The picker edits one slot; totals, persistence and cart operations use both.
     Object.defineProperties(state, {
       band: { get: () => state.bandSelections[state.bandSlot].product, set: p => { state.bandSelections[state.bandSlot].product = p; } },
@@ -101,11 +102,32 @@
     const both = () => state.setting && state.diamond;
     const sizeIndex = p => p.options.findIndex(o => /size/i.test(o.name));
     const optionsOf = p => p.options.filter(o => !/size/i.test(o.name) && o.name !== 'Title');
-    function pickedVariant(p = state.setting) {
-      if (!p) return null;
+    function optionsReady(p = state.setting) {
+      if (!p) return false;
       const si = sizeIndex(p);
-      return p.variants.find(v => v.available && v.options.every((value, i) => i === si ? state.size === 'unsure' || !state.size || String(value) === state.size : !state.options[i] || value === state.options[i])) || null;
+      return p.options.every((o, i) => i === si || o.name === 'Title' || o.values.length < 2 || state.options[i]);
     }
+    function chosenDetails(p) {
+      if (!p) return '';
+      const si = sizeIndex(p);
+      return p.options.map((o, i) => i === si || o.name === 'Title' || !state.options[i] ? '' : state.options[i]).filter(Boolean).join(' · ');
+    }
+    // An empty size must not match a variant. The first available variant is
+    // often size 6, and treating "no choice" as that variant put size 6 in the bag.
+    function pickedVariant(p = state.setting) {
+      if (!p || !state.size || !optionsReady(p)) return null;
+      const si = sizeIndex(p);
+      return p.variants.find(v => v.available && v.options.every((value, i) => i === si ? state.size === 'unsure' || String(value) === String(state.size) : value === state.options[i])) || null;
+    }
+    function explicitOptions(p, seed) {
+      const si = sizeIndex(p);
+      return p.options.map((o, i) => {
+        if (o.name === 'Title') return seed?.[i] || o.values[0] || '';
+        if (i === si || o.values.length > 1) return '';
+        return o.values[0] || seed?.[i] || '';
+      });
+    }
+    const styleOf = p => /three[- ]stone/i.test(p.title + ' ' + p.handle) ? 'three-stone' : /hidden[- ]halo/i.test(p.title + ' ' + p.handle) ? 'hidden-halo' : /solitaire/i.test(p.title + ' ' + p.handle) ? 'solitaire' : '';
     const variantPrice = p => p === state.setting ? pickedVariant(p)?.price : p?.variants?.find(v => v.available)?.price;
     const subtotal = () => (variantPrice(state.setting) || 0) + (state.diamond?.price || 0) + chosenBands().reduce((total, b) => total + (b.variant?.price || 0), 0);
     // The consent API is not automatically present on every storefront visit.
@@ -144,17 +166,30 @@
       status.classList.toggle('error', error);
       status.setAttribute('role', error ? 'alert' : 'status');
     }
+    const urlFilters = ['origin', 'shape', 'style', 'metal', 'color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price', 'sort'];
     function persist() {
-      const stored = { bands: state.bandSelections.map(b => ({ handle: b.product?.handle, options: b.options })), bandSlot: state.bandSlot, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
+      const stored = { bands: state.bandSelections.map(b => ({ handle: b.product?.handle, options: b.options })), bandSlot: state.bandSlot, entry: state.entry, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
       try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: Date.now() })); if (ready && both() && !state.savedEvent) { state.savedEvent = true; track('build_saved'); } } catch (_) {}
       const u = new URL(window.location.href);
       if (u.hash.startsWith('#build=')) u.hash = '';
-      for (const k of ['setting', 'diamond', 'step', 'edit_group']) u.searchParams.delete(k);
+      for (const k of ['setting', 'diamond', 'step', 'edit_group', ...urlFilters]) u.searchParams.delete(k);
+      if (state.entry === 'setting' || state.entry === 'diamond') u.searchParams.set('start', state.entry);
       if (state.editGroup) u.searchParams.set('edit_group', state.editGroup);
       if (stored.setting) u.searchParams.set('setting', stored.setting);
       if (stored.diamond) u.searchParams.set('diamond', stored.diamond);
-      if (state.screen === 'review') u.searchParams.set('step', 'review');
-      if (u.href !== window.location.href) history.replaceState(null, '', u.pathname + u.search + u.hash);
+      const step = state.screen === 'review' ? 'review' : state.screen === 'catalog' || state.screen === 'detail' ? state.kind : '';
+      if (step) u.searchParams.set('step', step);
+      for (const key of urlFilters) {
+        const value = state.filters[key];
+        const skip = !value || (key === 'origin' && value === 'lab') || (key === 'sort' && value === 'price_asc') || (key === 'shape' && value === 'Oval' && !state.filters.style);
+        if (!skip) u.searchParams.set(key, value);
+      }
+      const next = u.pathname + u.search + u.hash;
+      const current = window.location.pathname + window.location.search + window.location.hash;
+      if (next !== current) {
+        if (historyMode === 'push') history.pushState({ lmRing: 1 }, '', next);
+        else history.replaceState({ lmRing: 1 }, '', next);
+      }
     }
     async function request(url, options = {}) {
       const timeout = options.timeout || 20000;
@@ -199,16 +234,18 @@
     function setSetting(p, restore = false) {
       if (!p.setting || !knownSettings.has(p.handle) || !shapes.includes(p.shape)) throw new Error(t('bad_selection'));
       if (state.diamond && p.shape !== state.diamond.shape) throw new Error(t('wrong_shape'));
+      const previous = state.options.slice();
       state.setting = p;
       if (!restore) {
         const first = p.variants.find(v => v.available && state.filters.metal && metalOf(v.options.join(' ')) === state.filters.metal) || p.variants.find(v => v.available);
-        state.options = first.options.slice();
+        // Multi-value metals stay blank until the shopper picks one. A single
+        // metal is the only choice, so it can be selected and highlighted.
+        state.options = explicitOptions(p, first?.options);
+        p.options.forEach((o, i) => {
+          if (sizeIndex(p) !== i && o.name !== 'Title' && o.values.length > 1 && previous[i] && o.values.includes(previous[i])) state.options[i] = previous[i];
+        });
         const si = sizeIndex(p);
-        if (si >= 0 && state.size && state.size !== 'unsure' && !p.variants.some(v => v.available && String(v.options[si]) === state.size)) state.size = '';
-      }
-      if (!pickedVariant()) {
-        state.options = p.variants.find(v => v.available).options.slice();
-        state.size = '';
+        if (si >= 0 && state.size && state.size !== 'unsure' && !p.variants.some(v => v.available && String(v.options[si]) === String(state.size))) state.size = '';
       }
       state.filters.shape = p.shape;
     }
@@ -224,9 +261,9 @@
       return { ...p, price: p.variants.find(v => v.available).price, variant: p.variants.find(v => v.available).id, spec: spec || {}, origin: p.type === 'Natural Diamond' ? 'natural' : 'lab' };
     }
     function reviewAction(action) {
-      const label = state.busy ? 'adding' : !state.size ? 'choose_size' : !pickedVariant() || !bandsValid() ? 'choose_option' : chosenBands().length > 1 ? 'add_with_bands' : hasBands() ? 'add_with_band' : 'add';
-      const hint = !state.size ? 'size_required' : !pickedVariant() ? 'size_unavailable' : !bandsValid() ? 'band_options_required' : '';
-      return button(label, action, 'primary', state.busy || !both() ? 'disabled' : '') + (hint ? `<p class="quiet next-step">${esc(t(hint))}</p>` : '');
+      const label = state.busy ? 'adding' : !state.size ? 'choose_size' : !optionsReady() || !pickedVariant() || !bandsValid() ? 'choose_option' : chosenBands().length > 1 ? 'add_with_bands' : hasBands() ? 'add_with_band' : 'add';
+      const hint = !state.size ? 'size_required' : !optionsReady() ? 'metal_required' : !pickedVariant() ? 'size_unavailable' : !bandsValid() ? 'band_options_required' : '';
+      return button(label, action, 'primary', state.busy || !both() ? 'disabled' : '') + (hint ? `<p class="${state.choicePrompt ? 'error' : 'quiet'} next-step">${esc(t(hint))}</p>` : '');
     }
     function summary() {
       aside.hidden = state.screen === 'start';
@@ -237,8 +274,9 @@
       aside.innerHTML = `<h2>${esc(t('your_ring'))}</h2><div class="summary-items">${['setting', 'diamond'].map(k => {
         const p = state[k];
         const price = k === 'setting' ? variantPrice(p) : p?.price;
-        return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button('change', 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}<br>${price != null ? money(price) : esc(t('size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
-      }).join('')}${bandSummary()}</div><div class="summary-checkout"><div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : state.diamond ? 'missing_setting' : 'intro'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${both() ? `<p class="quiet pairing-note">${esc(t('pairing_note'))}</p>` : ''}${state.screen === 'review' ? button(state.busy ? 'adding' : chosenBands().length > 1 ? 'add_with_bands' : hasBands() ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !pickedVariant() || state.busy || !both() || !bandsValid() ? 'disabled' : '') + (!state.size ? `<p class="quiet">${esc(t('size_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : !bandsValid() ? `<p class="quiet">${esc(t('band_options_required'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a></div>`;
+        const detail = k === 'setting' ? chosenDetails(p) : '';
+        return `<div class="sum-item"><div class="sum-title"><span class="eyebrow">${esc(t(k))}</span>${p ? button('change', 'change-' + k, 'link') : ''}</div>${p ? `<div class="sum-product">${image(p.image, '', 'thumb')}<div>${esc(p.title)}${detail ? ' · ' + esc(detail) : ''}<br>${price != null ? money(price) : esc(t(k === 'setting' && state.size && !optionsReady() ? 'metal_required' : 'size_unavailable'))}</div></div>` : `<p class="quiet">${esc(t('empty_selection'))}</p>`}</div>`;
+      }).join('')}${bandSummary()}</div><div class="summary-checkout"><div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span><span class="total">${money(subtotal())}</span></div><p class="quiet">${esc(t(both() ? 'included' : state.setting ? 'missing_diamond' : state.diamond ? 'missing_setting' : 'intro'))}</p><p class="quiet">${esc(t('tax_shipping'))}</p>${both() ? `<p class="quiet pairing-note">${esc(t('pairing_note'))}</p>` : ''}${state.screen === 'review' ? button(state.busy ? 'adding' : chosenBands().length > 1 ? 'add_with_bands' : hasBands() ? 'add_with_band' : 'add', 'add', 'primary', !state.size || !optionsReady() || !pickedVariant() || state.busy || !both() || !bandsValid() ? 'disabled' : '') + (!state.size ? `<p class="${state.choicePrompt ? 'error' : 'quiet'}">${esc(t('size_required'))}</p>` : !optionsReady() ? `<p class="${state.choicePrompt ? 'error' : 'quiet'}">${esc(t('metal_required'))}</p>` : !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : !bandsValid() ? `<p class="quiet">${esc(t('band_options_required'))}</p>` : '') : both() ? button('review_ring', 'review') : ''}<p class="quiet promise">${esc(t('promise'))}</p><a class="link" href="${esc(cfg.cartUrl)}">${esc(t('view_bag'))}</a></div>`;
       const dock = root.querySelector('[data-flow-dock]');
       const next = state.screen === 'review' ? reviewAction('dock-add') : both() ? button('review_ring', 'review') : button('choose_' + (state.setting ? 'diamond' : state.diamond ? 'setting' : state.kind), 'catalog', 'primary');
       const selections = ['setting', 'diamond'].map(k => `<span class="dock-selection" title="${esc(state[k]?.title || t('empty_selection'))}">${esc(t(k))}: ${esc(state[k]?.title || t('empty_selection'))}</span>`).join('');
@@ -267,9 +305,10 @@
       const lock = state.kind === 'diamond' ? state.setting : state.diamond;
       const shape = lock?.shape || state.filters.shape;
       const shapeOptions = shapes.filter(s => settingCount(s) || s === shape).map(s => [s, s]);
-      const metals = [...new Set([...knownSettings.values()].filter(p => p.available && p.shape === shape).flatMap(settingMetals))];
+      if (state.filters.style && !lock) shapeOptions.unshift(['', t('all_shapes')]);
+      const metals = [...new Set([...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style)).flatMap(settingMetals))];
       const metalField = metals.length > 1 ? selectField('metal', 'metal', [['', t('all_metals')], ...metals.map(m => [m, metalName(m)])], state.filters.metal) : '';
-      if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${metalField}</div>${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
+      if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${metalField}</div>${state.filters.style ? `<p class="quiet">${esc(t('style_filter', { style: state.filters.style }))}</p>` : ''}${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
       return root.querySelector('[data-diamond-filter-template]').innerHTML + (lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : '');
     }
     function paintDiamondFilters() {
@@ -325,10 +364,15 @@
           const input = range.querySelector('[data-range-' + side + ']');
           input.dataset.filter = side + '_' + key;
           input.max = ceil;
-          if (document.activeElement !== input) input.value = state.filters[side + '_' + key] || (side === 'min' ? floor : ceil);
+          input.placeholder = String(side === 'min' ? floor : ceil);
+          // The ceiling is a placeholder, not the value. Writing 250000 back into
+          // the field after the shopper applied 15000 made the box disagree with the results.
+          if (document.activeElement !== input) input.value = state.filters[side + '_' + key] || '';
         });
-        const low = Number(range.querySelector('[data-range-min]').value);
-        const high = Number(range.querySelector('[data-range-max]').value);
+        const rawLow = range.querySelector('[data-range-min]').value;
+        const rawHigh = range.querySelector('[data-range-max]').value;
+        const low = rawLow === '' ? floor : Number(rawLow);
+        const high = rawHigh === '' ? ceil : Number(rawHigh);
         const pct = n => Math.max(0, Math.min(100, (n - floor) / (ceil - floor) * 100));
         const fill = range.querySelector('[data-range-fill]');
         fill.style.left = Math.min(pct(low), pct(high)) + '%';
@@ -382,16 +426,16 @@
       form.querySelectorAll('[data-range]').forEach(range => {
         const key = range.dataset.rangeKey;
         for (const side of ['min', 'max']) {
-          const value = range.querySelector('[data-range-' + side + ']').value;
+          const value = range.querySelector('[data-range-' + side + ']').value.trim();
           const bound = side === 'min' ? range.dataset.floor : range.dataset.ceil;
-          state.filters[side + '_' + key] = Number(value) === Number(bound) ? '' : value;
+          state.filters[side + '_' + key] = value === '' || Number(value) === Number(bound) ? '' : value;
         }
       });
     }
 
     function catalogShell() {
       const k = state.kind;
-      main.innerHTML = `<div class="heading"><h2>${esc(t('choose_' + k))}.</h2>${button('back', 'start', 'link')}</div>${filters()}<div class="toolbar"><span class="quiet" data-count>${esc(t('loading'))}</span>${k === 'diamond' ? `<label>${esc(t('sort'))}<select data-sort>${['price_asc', 'price_desc', 'carat_asc', 'carat_desc'].map(s => `<option value="${s}" ${state.filters.sort === s ? 'selected' : ''}>${esc(t(s))}</option>`).join('')}</select></label>` : ''}</div><div data-results></div><div class="pager" data-pager></div><p class="quiet rule">${esc(t(k === 'diamond' ? 'unit_usd' : 'setting_only'))}</p>`;
+      main.innerHTML = `<div class="heading"><h2>${esc(t('choose_' + k))}.</h2>${button('back', 'back-step', 'link')}</div>${filters()}<div class="toolbar"><span class="quiet" data-count>${esc(t('loading'))}</span>${k === 'diamond' ? `<label>${esc(t('sort'))}<select data-sort>${['price_asc', 'price_desc', 'carat_asc', 'carat_desc'].map(s => `<option value="${s}" ${state.filters.sort === s ? 'selected' : ''}>${esc(t(s))}</option>`).join('')}</select></label>` : ''}</div><div data-results></div><div class="pager" data-pager></div><p class="quiet rule">${esc(t(k === 'diamond' ? 'unit_usd' : 'setting_only'))}</p>`;
       if (k === 'diamond') { decorateShapes(); decorateFilters(); paintDiamondFilters(); }
     }
     function empty(settings = false) {
@@ -399,7 +443,7 @@
     }
     function settingResults() {
       const shape = state.diamond?.shape || state.filters.shape;
-      state.rows = [...knownSettings.values()].filter(p => p.shape === shape && p.available && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
+      state.rows = [...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style) && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
       main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
       main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
       returnToCard();
@@ -446,7 +490,7 @@
     }
     function diamondQuery() {
       const params = new URLSearchParams({ kind: state.filters.origin, page: String(state.page), per_page: '12', sort: state.filters.sort, shape: state.setting?.shape || state.filters.shape });
-      for (const [key, value] of Object.entries(state.filters)) if (value !== '' && !['origin', 'shape', 'sort', 'metal'].includes(key)) params.set(key === 'color' ? 'colors' : key === 'clarity' ? 'clarities' : key === 'cut' ? 'cuts' : key, value);
+      for (const [key, value] of Object.entries(state.filters)) if (value !== '' && !['origin', 'shape', 'sort', 'metal', 'style'].includes(key)) params.set(key === 'color' ? 'colors' : key === 'clarity' ? 'clarities' : key === 'cut' ? 'cuts' : key, value);
       return params;
     }
     function paintDiamonds(response, result) {
@@ -604,8 +648,15 @@
       if (!both()) return go('catalog');
       const p = state.setting, si = sizeIndex(p), available = p.variants.filter(v => v.available);
       const sizes = si >= 0 ? [...new Set(p.variants.map(v => String(v.options[si])))] : Array.from({ length: 10 }, (_, i) => String(4 + i * .5));
-      const sizeOptions = `<option value="">${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
-      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('continue_browsing', 'catalog', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div><div class="fields"><div><label>${esc(t('size'))}<select data-field="size">${sizeOptions}</select></label><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${p.options.map((o, i) => i === si || o.name === 'Title' ? '' : `<label>${esc(o.name)}<select data-option="${i}">${o.values.map(v => `<option value="${esc(v)}" ${state.options[i] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div>${!pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div><p class="quiet fulfillment">${esc(t('fulfillment'))} <a class="link" href="${esc(route('pages/shipping-returns'))}">${esc(t('shipping_returns'))}</a></p><div class="review-purchase" data-review-purchase></div>${bandPicker()}`;
+      const sizeOptions = `<option value="" ${state.size ? '' : 'selected'}>${esc(t('choose_size'))}</option>${sizes.map(s => `<option value="${esc(s)}" ${state.size === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}<option value="unsure" ${state.size === 'unsure' ? 'selected' : ''}>${esc(t('not_sure'))}</option>`;
+      const optionFields = p.options.map((o, i) => {
+        if (i === si || o.name === 'Title') return '';
+        const multi = o.values.length > 1;
+        const current = state.options[i] || '';
+        const placeholder = multi ? `<option value="" ${current ? '' : 'selected'}>${esc(t('choose_metal'))}</option>` : '';
+        return `<label>${esc(o.name)}<select data-option="${i}" class="${multi ? (current ? 'is-set' : 'is-empty') : 'is-set'}">${placeholder}${o.values.map(v => `<option value="${esc(v)}" ${current === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>${multi && !current ? `<span class="${state.choicePrompt ? 'error' : 'quiet'}" data-metal-hint>${esc(t('metal_required'))}</span>` : ''}</label>`;
+      }).join('');
+      main.innerHTML = `<div class="heading"><h2>${esc(t('make_yours'))}</h2>${button('back', 'back-step', 'link')}</div><div class="review-images">${['setting', 'diamond'].map(k => `<figure><div data-review-media="${k}">${image(state[k].image, state[k].title)}</div><figcaption>${esc(k === 'setting' && chosenDetails(state.setting) ? state.setting.title.replace(/\s+in\s+.+$/i, ' in ' + chosenDetails(state.setting)) : state[k].title)}${k === 'setting' && (state.setting.videos || []).some(safeURL) ? ` ${button('watch_setting', 'review-video', 'link')}` : ''}</figcaption></figure>`).join('')}</div><div class="fields"><div><label>${esc(t('size'))}<select data-field="size" class="${state.size ? 'is-set' : 'is-empty'}">${sizeOptions}</select></label><p class="${state.choicePrompt && !state.size ? 'error' : 'quiet'}" data-size-hint role="status" ${state.size ? 'hidden' : ''}>${esc(t('size_required'))}</p><a class="link" href="${esc(cfg.sizeGuide)}" target="_blank" rel="noopener">${esc(t('size_guide'))}</a></div>${optionFields}</div>${state.size && optionsReady() && !pickedVariant() ? `<p class="error">${esc(t('size_unavailable'))}</p>` : ''}${scaleView()}<p class="detail-help">${button('share_ring', 'share', 'link')}<a class="link" href="${esc(cfg.contact)}">${esc(t('ask_ring'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><p class="quiet">${esc(t('fits_check'))}</p><div class="fields rule"><label>${esc(t('engraving'))}<input data-field="engraving" maxlength="20" value="${esc(state.engraving)}"><span class="quiet">${esc(t('engraving_hint'))}</span></label><label>${esc(t('engraving_font'))}<select data-field="font"><option value="block" ${state.font === 'block' ? 'selected' : ''}>${esc(t('block'))}</option><option value="script" ${state.font === 'script' ? 'selected' : ''}>${esc(t('script'))}</option></select></label></div><div class="inscription ${state.font === 'script' ? 'script' : ''}" data-inscription aria-label="${esc(t('engraving_preview'))}" ${state.engraving ? '' : 'hidden'}>${esc(state.engraving)}</div><label class="rule">${esc(t('date'))}<input data-field="date" type="date" value="${esc(state.date)}"><span class="quiet">${esc(t('date_hint'))}</span></label><div class="callout"><strong>${esc(t('made_order'))}</strong><br>${esc(t('production_note'))}</div><p class="quiet fulfillment">${esc(t('fulfillment'))} <a class="link" href="${esc(route('pages/shipping-returns'))}">${esc(t('shipping_returns'))}</a></p><div class="review-purchase" data-review-purchase></div>${bandPicker()}`;
     }
     function faceUp(measurements) {
       const found = String(measurements || '').match(/(\d+(?:\.\d+)?)\s*(?:mm)?\s*[x×*-]\s*(\d+(?:\.\d+)?)/i);
@@ -630,8 +681,9 @@
     function scaleView() {
       const [length, width] = faceUp(state.diamond?.spec?.measurements);
       if (!length) return '';
-      const size = Number(state.size) || 6, finger = 11.63 + 0.8128 * size, view = Math.max(26, length + 8);
-      return `<figure class="scale" data-scale-view><svg viewBox="${-view / 2} ${-view / 2} ${view} ${view}" role="img" aria-label="${esc(t('scale_label'))}"><rect class="finger" x="${-finger / 2}" y="${-view / 2 - 2}" width="${finger}" height="${view + 4}"/><g class="stone">${shapeOutline(state.diamond.shape, width, length)}</g></svg><figcaption>${esc(t('scale_caption', { length: length.toFixed(2), width: width.toFixed(2), size: state.size && state.size !== 'unsure' ? state.size : 6, finger: finger.toFixed(1) }))}</figcaption></figure>`;
+      const chosen = state.size && state.size !== 'unsure';
+      const size = chosen ? Number(state.size) : 6, finger = 11.63 + 0.8128 * size, view = Math.max(26, length + 8);
+      return `<figure class="scale" data-scale-view><svg viewBox="${-view / 2} ${-view / 2} ${view} ${view}" role="img" aria-label="${esc(t('scale_label'))}"><rect class="finger" x="${-finger / 2}" y="${-view / 2 - 2}" width="${finger}" height="${view + 4}"/><g class="stone">${shapeOutline(state.diamond.shape, width, length)}</g></svg><figcaption>${esc(t(chosen ? 'scale_caption' : 'scale_example', { length: length.toFixed(2), width: width.toFixed(2), size: chosen ? state.size : 6, finger: finger.toFixed(1) }))}</figcaption></figure>`;
     }
     function ringLink() {
       const url = new URL(location.pathname, location.origin);
@@ -727,15 +779,24 @@
       const top = target.getBoundingClientRect().top;
       if (top < offset || top > window.innerHeight * 0.75) window.scrollTo({ top: Math.max(0, top + window.scrollY - offset - 16), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
+    function scrollStepTop() {
+      const offset = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+      const top = root.getBoundingClientRect().top + window.scrollY - offset - 8;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+    }
     function go(screen) {
-      const moved = ready && screen !== state.screen;
+      const previous = state.screen;
+      const moved = ready && (screen !== previous || navPush);
+      navPush = false;
       const back = screen === 'catalog' && state.returnIndex != null;
       state.generation++;
       state.screen = screen;
+      historyMode = moved ? 'push' : 'replace';
       render();
+      historyMode = 'replace';
+      if (!back && (moved || !ready)) scrollStepTop();
       if (!moved) return;
       if (screen === 'review' && both()) track('build_review_reached');
-      if (!back) reveal(root.querySelector('.layout'));
       const heading = main.querySelector('h2');
       if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
     }
@@ -757,7 +818,7 @@
       await request(route('cart/update.js'), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ updates }) });
     }
     async function addRing() {
-      if (state.busy || !both() || !state.size || !pickedVariant() || !bandsValid()) return;
+      if (state.busy || !both() || !state.size || !optionsReady() || !pickedVariant() || !bandsValid()) return;
       const oldTotal = subtotal(), settingHandle = state.setting.handle, diamondHandle = state.diamond.handle;
       state.busy = true;
       notice(t('adding'));
@@ -775,7 +836,8 @@
         if (freshSetting.shape !== freshDiamond.shape) throw new Error(t('wrong_shape'));
         state.diamond = freshDiamond;
         selectedVariant = pickedVariant();
-        if (!state.size || !selectedVariant) throw new Error(t('size_unavailable'));
+        const sizeAt = sizeIndex(state.setting);
+        if (!state.size || !selectedVariant || (sizeAt >= 0 && state.size !== 'unsure' && String(selectedVariant.options[sizeAt]) !== String(state.size))) throw new Error(t('size_required'));
         if (subtotal() !== oldTotal) throw new Error(t('price_changed'));
         if (!state.group) state.group = 'lmny-' + (globalThis.crypto?.randomUUID?.() || Date.now() + '-' + Math.random().toString(36).slice(2));
         persist();
@@ -823,7 +885,7 @@
         else { if (state.setting && state.detail.shape !== state.setting.shape) throw new Error(t('wrong_shape')); state.diamond = state.detail; state.filters.shape = state.diamond.shape; }
         state.group = '';
         track(state.kind + '_selected');
-        if (both()) go('review'); else { state.kind = state.kind === 'setting' ? 'diamond' : 'setting'; state.page = 1; state.returnIndex = null; go('catalog'); }
+        if (both()) go('review'); else { state.kind = state.kind === 'setting' ? 'diamond' : 'setting'; state.page = 1; state.returnIndex = null; navPush = true; go('catalog'); }
       } catch (error) { notice(error.message, true); }
     }
     root.addEventListener('mouseover', event => {
@@ -870,6 +932,7 @@
       else if (action.startsWith('start-') || action.startsWith('change-')) {
         const starting = state.screen === 'start' && action.startsWith('start-');
         state.kind = action.split('-')[1]; state.page = 1; state.returnIndex = null;
+        if (starting) state.entry = state.kind;
         if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : settingShape(state.filters.shape);
         if (state.kind === 'diamond' && state.setting) state.filters.shape = state.setting.shape;
         go('catalog');
@@ -893,6 +956,26 @@
       } else if (action.startsWith('clear-')) { state[action.slice(6)] = null; state.group = ''; go('catalog'); }
       else if (action === 'review') go('review');
       else if (action === 'keep-personalizing') { const size = main.querySelector('[data-field="size"]'); reveal(size?.closest('label')); size?.focus({ preventScroll: true }); }
+      else if (action === 'back-step') {
+        if (state.screen === 'detail') {
+          state.returnIndex = state.detailIndex;
+          go('catalog');
+        } else if (state.screen === 'review' || (state.screen === 'catalog' && ((state.entry === 'setting' && state.kind === 'diamond' && state.setting) || (state.entry === 'diamond' && state.kind === 'setting' && state.diamond)))) {
+          state.kind = state.entry === 'setting' ? 'setting' : 'diamond';
+          state.page = 1;
+          state.returnIndex = null;
+          navPush = true;
+          go('catalog');
+        } else if (state.screen === 'catalog' && !state.setting && !state.diamond) {
+          let outside = false;
+          try {
+            const ref = new URL(document.referrer);
+            outside = ref.origin === location.origin && !ref.pathname.includes('/pages/ring-builder');
+          } catch (_) {}
+          if (outside && history.length > 1) { history.back(); return; }
+          go('start');
+        } else go('start');
+      }
       else if (action === 'catalog' || action === 'start') {
         if (action === 'start' && state.screen === 'catalog' && !state.setting && !state.diamond) {
           let outside = false;
@@ -914,9 +997,15 @@
         const src = (state.setting.videos || []).map(safeURL).find(Boolean);
         if (src) main.querySelector('[data-review-media="setting"]').innerHTML = `<video controls playsinline autoplay muted preload="metadata" src="${esc(src)}"></video>`;
       }
-      else if (action === 'dock-add' || action === 'review-add') {
+      else if (action === 'dock-add' || action === 'review-add' || action === 'add') {
         const field = main.querySelector('[data-field="size"]');
-        if (!state.size && field) { notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true }); }
+        state.choicePrompt = true;
+        if (!state.size && field) {
+          const hint = main.querySelector('[data-size-hint]');
+          if (hint) { hint.hidden = false; hint.className = 'error'; }
+          notice(t('size_required'), true); reveal(field); field.focus({ preventScroll: true });
+        }
+        else if (!optionsReady()) { notice(t('metal_required'), true); const option = main.querySelector('[data-option].is-empty, [data-option]'); reveal(option); option?.focus({ preventScroll: true }); }
         else if (!pickedVariant()) { notice(t('size_unavailable'), true); const option = main.querySelector('[data-option]') || field; reveal(option); option?.focus({ preventScroll: true }); }
         else if (!bandsValid()) {
           const incomplete = chosenBands().find(b => !b.variant);
@@ -930,10 +1019,10 @@
       else if (action.startsWith('video-')) {
         const src = safeURL(state.detailVideos[Number(action.slice(6))]);
         if (src) main.querySelector('[data-media]').innerHTML = `<video controls playsinline preload="metadata" src="${esc(src)}"></video>`;
-      } else if (action === 'add') addRing();
+      }
       else if (action === 'restart') {
         main.dataset.initialStart = 'false';
-        state.setting = null; state.diamond = null; state.bandSelections = [{ product: null, options: [] }, { product: null, options: [] }]; state.bandSlot = 0; state.bandsCollapsed = false; state.bandCategory = 'diamond'; state.showAllBands = false; state.bandMetal = ''; state.bandStyle = ''; state.size = ''; state.options = []; state.engraving = ''; state.font = 'block'; state.date = ''; state.group = ''; state.editGroup = ''; state.page = 1; go('start');
+        state.setting = null; state.diamond = null; state.bandSelections = [{ product: null, options: [] }, { product: null, options: [] }]; state.bandSlot = 0; state.bandsCollapsed = false; state.bandCategory = 'diamond'; state.showAllBands = false; state.bandMetal = ''; state.bandStyle = ''; state.entry = ''; state.size = ''; state.choicePrompt = false; state.options = []; state.engraving = ''; state.font = 'block'; state.date = ''; state.group = ''; state.editGroup = ''; state.filters.style = ''; state.page = 1; go('start');
       }
     });
     root.addEventListener('submit', event => {
@@ -994,23 +1083,27 @@
       const edit = hasSharedBuild ? '' : params.get('edit_group') || (!linked ? stored.editGroup : '');
       if (/^lmny-[a-z0-9-]+$/i.test(edit || '')) state.editGroup = edit;
       const sameSelection = (!params.has('setting') || params.get('setting') === stored.setting) && (!params.has('diamond') || params.get('diamond') === stored.diamond);
-      if (sameSelection) {
+      const freshPath = (params.get('start') === 'setting' || params.get('start') === 'diamond') && !params.get('setting') && !params.get('diamond');
+      const begin = params.get('start');
+      if (begin === 'setting' || begin === 'diamond') state.entry = begin;
+      else if (!freshPath && (stored.entry === 'setting' || stored.entry === 'diamond')) state.entry = stored.entry;
+      if (sameSelection && !freshPath) {
         state.size = typeof stored.size === 'string' ? stored.size : '';
         state.options = Array.isArray(stored.options) ? stored.options : [];
         state.engraving = typeof stored.engraving === 'string' ? stored.engraving.slice(0, 20) : '';
         state.date = /^\d{4}-\d{2}-\d{2}$/.test(stored.date || '') ? stored.date : '';
         state.font = stored.font === 'script' ? 'script' : 'block';
         state.group = /^lmny-[a-z0-9-]+$/i.test(stored.group || '') ? stored.group : '';
-        if (stored.filters && String(stored.filters.shape).split(',').every(shapeKnown)) state.filters = { ...state.filters, ...stored.filters };
+        if (stored.filters && String(stored.filters.shape || '').split(',').every(shapeKnown)) state.filters = { ...state.filters, style: '', ...stored.filters };
       }
+      for (const key of urlFilters) if (params.has(key)) state.filters[key] = params.get(key) || '';
       if (requestedShape && shapeKnown(requestedShape)) state.filters.shape = requestedShape;
       if (!settingHandle && !diamondHandle) {
         main.dataset.initialStart = 'true';
         root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
-        const begin = params.get('start');
         if (begin === 'diamond' || begin === 'setting') {
-          state.kind = begin; state.page = 1;
-          if (begin === 'setting') state.filters.shape = settingShape(state.filters.shape);
+          state.kind = begin; state.entry = begin; state.page = 1;
+          if (begin === 'setting') state.filters.shape = params.get('style') && !params.get('shape') ? '' : settingShape(state.filters.shape);
           go('catalog');
         }
         ready = true;
@@ -1053,10 +1146,13 @@
       state.bandSlot = stored.bandSlot === 1 ? 1 : 0;
       state.bandCategory = cfg.bands.find(b => b.handle === state.band?.handle)?.category || 'diamond';
       state.busy = false;
-      state.kind = state.setting ? 'diamond' : state.diamond ? 'setting' : 'diamond';
-      if (state.setting) state.filters.shape = state.setting.shape;
+      const step = params.get('step');
+      if (state.setting && step !== 'diamond') state.filters.shape = state.setting.shape;
       if (state.diamond) state.filters.shape = state.diamond.shape;
-      go(both() ? 'review' : 'catalog');
+      if (step === 'setting' && state.setting) { state.kind = 'setting'; go('catalog'); }
+      else if (step === 'diamond') { state.kind = 'diamond'; go('catalog'); }
+      else if (both()) go('review');
+      else { state.kind = state.setting ? 'diamond' : state.diamond ? 'setting' : 'diamond'; go('catalog'); }
       notice(failed ? t('restore_failed') : '', failed);
       ready = true;
       afterRingEmail();
@@ -1064,6 +1160,7 @@
       if (both()) track('build_review_reached');
     }
     window.addEventListener('hashchange', () => { if (location.hash.startsWith('#build=')) location.reload(); });
+    window.addEventListener('popstate', () => { location.reload(); });
     restore();
   }
   initialize();

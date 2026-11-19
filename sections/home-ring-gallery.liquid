@@ -73,7 +73,7 @@
         {%- for block in section.blocks -%}
           {%- unless block.type == 'ring_style' -%}{%- continue -%}{%- endunless -%}
           <li class="hrg__card" {{ block.shopify_attributes }}>
-            <a href="{{ routes.root_url }}pages/ring-builder?start=setting&amp;shape={{ block.settings.shape | url_encode }}">
+            <a href="{{ routes.root_url }}pages/ring-builder?start=setting{%- if block.settings.style != blank -%}&amp;style={{ block.settings.style | url_encode }}{%- else -%}&amp;shape={{ block.settings.shape | url_encode }}{%- endif -%}">
               {%- render 'home-gallery-artwork', artwork: section.settings.ring_artwork, x: block.settings.artwork_x, y: 264, crop_width: 250, crop_height: 205, label: block.settings.title -%}
               <span class="hrg__name">{{ block.settings.title | escape }}</span>
               <span class="hrg__card-link">{{ 'home_ring_gallery.browse_settings' | t }} <span aria-hidden="true">&rarr;</span></span>
@@ -383,6 +383,19 @@
           "id": "title",
           "label": "Label",
           "default": "Oval solitaire"
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Setting style",
+          "default": "",
+          "info": "When set, the tile opens that style instead of every setting in the shape.",
+          "options": [
+            { "value": "", "label": "Any style" },
+            { "value": "three-stone", "label": "Three stone" },
+            { "value": "solitaire", "label": "Solitaire" },
+            { "value": "hidden-halo", "label": "Hidden halo" }
+          ]
         },
         {
           "type": "select",

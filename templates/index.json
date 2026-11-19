@@ -162,6 +162,7 @@
           "type": "ring_style",
           "settings": {
             "title": "Three stone",
+            "style": "three-stone",
             "shape": "Oval",
             "artwork_x": 864
           }

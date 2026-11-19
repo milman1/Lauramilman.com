@@ -65,6 +65,8 @@ describe('loose diamond shape filter', () => {
     const home = themeFile('templates/index.json');
     expect(home).toContain('"type": "home-ring-gallery"');
     expect(themeFile('sections/home-ring-gallery.liquid')).toContain('pages/ring-builder?start=setting');
+    expect(themeFile('sections/home-ring-gallery.liquid')).toContain('block.settings.style');
+    expect(themeFile('templates/index.json')).toContain('"style": "three-stone"');
     expect(home).not.toContain('"title": "Build your ring"');
   });
 
