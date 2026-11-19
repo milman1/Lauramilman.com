@@ -45,10 +45,10 @@ function inquiryBody(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function post(body: unknown, origin = ORIGIN) {
+function post(body: unknown, origin = ORIGIN, extra: Record<string, string> = {}) {
   return new Request('https://worker.example/inquiry', {
     method: 'POST',
-    headers: { Origin: origin, 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.10' },
+    headers: { Origin: origin, 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.10', ...extra },
     body: JSON.stringify(body),
   });
 }
@@ -283,6 +283,43 @@ describe('inquiry handler', () => {
     }
     const blocked = await handleInquiry(post(inquiryBody({ question: 'Question 9' })), used, {}, fetchImpl);
     expect(blocked.status).toBe(429);
+  });
+
+  it('saves a ring request with its details and a ring subject', async () => {
+    const state = shopState();
+    const fetchImpl = fakeFetch(state);
+    const body = {
+      kind: 'ring',
+      name: 'Maya Cohen',
+      email: 'maya@example.com',
+      phone: '',
+      question: 'Can this be ready in June?',
+      ring: {
+        request_type: 'Ring builder',
+        ring_link: 'https://www.lauramilman.com/pages/ring-builder?setting=oval&diamond=lg-1#build=abc',
+        setting: 'Oval setting',
+        diamond: '1.20 ct Oval',
+        size: '6.5',
+        options: 'Metal: 18K Yellow Gold · Engraving (optional): Yes',
+        subtotal: '$2,300.00',
+      },
+    };
+    const res = await handleInquiry(post(body, ORIGIN, { 'CF-IPCountry': 'US' }), env(), {}, fetchImpl);
+    expect(res.status).toBe(200);
+    expect(state.creates[0].tags).toEqual(['Inquiry', 'Website form', 'Ring builder']);
+    expect(state.creates[0].emailMarketingConsent).toBeUndefined();
+    expect(state.creates[0].note).toContain('Request type: Ring builder');
+    expect(state.creates[0].note).toContain('Country code: US');
+    expect(state.creates[0].note).toContain('#build=abc');
+    expect(state.creates[0].note).toContain('Setting: Oval setting');
+    expect(state.creates[0].note).toContain('Diamond: 1.20 ct Oval');
+    expect(state.creates[0].note).toContain('Size: 6.5');
+    expect(state.creates[0].note).toContain('Metal: 18K Yellow Gold');
+    expect(state.creates[0].note).toContain('Price: $2,300.00');
+    expect(state.creates[0].note).toContain('Can this be ready in June?');
+    expect(state.emails[0].body.subject).toBe('Your ring request for Laura Milman New York');
+    expect(String(state.emails[0].body.text)).toContain('Ring link: https://www.lauramilman.com/pages/ring-builder?setting=oval&diamond=lg-1#build=abc');
+    expect(String(state.emails[0].body.text)).not.toContain('Diamond District');
   });
 
   it('does not save a customer when the admin token is missing', async () => {

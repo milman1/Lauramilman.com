@@ -24,6 +24,7 @@ import { allowedOrigins } from './engraving-render.js';
 
 export const INQUIRY_ROUTE = '/inquiry';
 export const INQUIRY_TAGS = ['Inquiry', 'Website form'];
+export const RING_TAGS = ['Inquiry', 'Website form', 'Ring builder'];
 export const STORE_EMAIL = 'hello@lauramilman.com';
 export const FROM_ADDRESS = `Laura Milman New York <${STORE_EMAIL}>`;
 export const NOTE_LIMIT = 5000;
@@ -107,6 +108,23 @@ function allowedPieceHosts(env) {
   return hosts;
 }
 
+function storeLink(raw, env, origin, max) {
+  if (typeof raw !== 'string' || !raw || raw.length > max) return '';
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return '';
+  }
+  if (url.protocol !== 'https:') return '';
+  const hosts = allowedPieceHosts(env);
+  if (origin) {
+    try { hosts.add(new URL(origin).host); } catch { /* ignore a bad origin */ }
+  }
+  if (!hosts.has(url.host)) return '';
+  return url.toString();
+}
+
 function pieceUrl(raw, env) {
   if (typeof raw !== 'string' || !raw || raw.length > 500) return '';
   let url;
@@ -120,8 +138,58 @@ function pieceUrl(raw, env) {
   return url.toString();
 }
 
-export function validateInquiry(body, env) {
+function splitName(raw) {
+  const name = oneLine(raw, 120);
+  const space = name.indexOf(' ');
+  if (space === -1) return { firstName: name.slice(0, 80), lastName: '' };
+  return { firstName: name.slice(0, space).slice(0, 80), lastName: name.slice(space + 1).trim().slice(0, 80) };
+}
+
+function validateRing(body, env, origin) {
+  const named = splitName(body.name || `${body.first_name || ''} ${body.last_name || ''}`);
+  const firstName = oneLine(body.first_name, 80) || named.firstName;
+  const lastName = oneLine(body.last_name, 80) || named.lastName;
+  const email = oneLine(body.email, 254).toLowerCase();
+  const phone = oneLine(body.phone, 40);
+  const question = questionText(body.question || body.note || '');
+  if (!firstName) return { ok: false, error: 'first_name_required' };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: 'email_invalid' };
+  if (phone && !/^[0-9+().\-\s]+$/.test(phone)) return { ok: false, error: 'phone_invalid' };
+  const ring = body.ring;
+  if (!ring || typeof ring !== 'object' || Array.isArray(ring)) return { ok: false, error: 'ring_required' };
+  const ringLink = storeLink(ring.ring_link, env, origin, 4000);
+  if (!ringLink) return { ok: false, error: 'ring_link_invalid' };
+  const options = oneLine(ring.options, 1500);
+  const metalMatch = options.match(/(?:^|\s|·\s*)Metal:\s*([^·]+)/);
+  return {
+    ok: true,
+    value: {
+      kind: 'ring',
+      firstName,
+      lastName,
+      email,
+      phone,
+      question,
+      marketing: false,
+      piece: null,
+      tags: RING_TAGS,
+      ring: {
+        requestType: 'Ring builder',
+        ringLink,
+        setting: oneLine(ring.setting, 200),
+        diamond: oneLine(ring.diamond, 200),
+        size: oneLine(ring.size, 40),
+        metal: metalMatch ? oneLine(metalMatch[1], 80) : '',
+        options,
+        price: oneLine(ring.subtotal || ring.price, 40),
+      },
+    },
+  };
+}
+
+export function validateInquiry(body, env, origin) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, error: 'bad_request' };
+  if (body.kind === 'ring') return validateRing(body, env, origin);
   const firstName = oneLine(body.first_name, 80);
   const lastName = oneLine(body.last_name, 80);
   const email = oneLine(body.email, 254).toLowerCase();
@@ -159,8 +227,14 @@ export function validateInquiry(body, env) {
       question,
       marketing: body.marketing === true,
       piece,
+      tags: INQUIRY_TAGS,
+      ring: null,
     },
   };
+}
+
+function customerTags(inquiry) {
+  return inquiry.tags && inquiry.tags.length ? inquiry.tags : INQUIRY_TAGS;
 }
 
 export function buildCustomerNote(inquiry, existingNote, nowIso) {
@@ -172,7 +246,18 @@ export function buildCustomerNote(inquiry, existingNote, nowIso) {
   ];
   if (inquiry.phone) lines.push(`Phone: ${inquiry.phone}`);
   lines.push(`Email marketing: ${inquiry.marketing ? 'yes' : 'no'}`);
-  if (inquiry.piece) {
+  if (inquiry.kind === 'ring' && inquiry.ring) {
+    lines[0] = 'Ring builder request';
+    lines.push('Request type: Ring builder');
+    if (inquiry.countryCode) lines.push(`Country code: ${inquiry.countryCode}`);
+    lines.push(`Ring link: ${inquiry.ring.ringLink}`);
+    if (inquiry.ring.setting) lines.push(`Setting: ${inquiry.ring.setting}`);
+    if (inquiry.ring.diamond) lines.push(`Diamond: ${inquiry.ring.diamond}`);
+    if (inquiry.ring.size) lines.push(`Size: ${inquiry.ring.size}`);
+    if (inquiry.ring.metal) lines.push(`Metal: ${inquiry.ring.metal}`);
+    if (inquiry.ring.options) lines.push(`Details: ${inquiry.ring.options}`);
+    if (inquiry.ring.price) lines.push(`Price: ${inquiry.ring.price}`);
+  } else if (inquiry.piece) {
     lines.push(`Piece: ${inquiry.piece.title}`);
     if (inquiry.piece.variant) lines.push(`Variant: ${inquiry.piece.variant}`);
     if (inquiry.piece.sku) lines.push(`SKU: ${inquiry.piece.sku}`);
@@ -181,7 +266,7 @@ export function buildCustomerNote(inquiry, existingNote, nowIso) {
   } else {
     lines.push('Piece: general inquiry');
   }
-  lines.push('Question:', inquiry.question);
+  if (inquiry.question) lines.push(inquiry.kind === 'ring' ? 'Note:' : 'Question:', inquiry.question);
   const block = lines.join('\n');
   const prior = String(existingNote || '').trim();
   if (!prior) return block.slice(0, NOTE_LIMIT);
@@ -203,7 +288,66 @@ function escapeHtml(value) {
   }[ch]));
 }
 
+function ringDetailLines(inquiry) {
+  const ring = inquiry.ring || {};
+  const lines = ['Request type: Ring builder'];
+  if (inquiry.countryCode) lines.push(`Country code: ${inquiry.countryCode}`);
+  if (ring.ringLink) lines.push(`Ring link: ${ring.ringLink}`);
+  if (ring.setting) lines.push(`Setting: ${ring.setting}`);
+  if (ring.diamond) lines.push(`Diamond: ${ring.diamond}`);
+  if (ring.size) lines.push(`Size: ${ring.size}`);
+  if (ring.metal) lines.push(`Metal: ${ring.metal}`);
+  if (ring.options) lines.push(`Details: ${ring.options}`);
+  if (ring.price) lines.push(`Price: ${ring.price}`);
+  return lines;
+}
+
+function buildRingEmail(inquiry) {
+  const lines = ringDetailLines(inquiry);
+  const text = [
+    `Hello ${inquiry.firstName},`,
+    '',
+    'Thank you for sending your ring to Laura Milman New York. A member of our team will reply shortly in this thread.',
+    '',
+    'Your ring:',
+    ...lines,
+    ...(inquiry.question ? ['', 'Your note:', inquiry.question] : []),
+    '',
+    'Laura Milman New York',
+    'Midtown, New York City',
+    STORE_EMAIL,
+  ].join('\n');
+  const rows = lines.map((line) => `<p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;">${escapeHtml(line)}</p>`).join('');
+  const note = inquiry.question
+    ? `<div style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:1px solid #DDD5C5;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#8A8070;">Your note</p><p style="margin:0;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(inquiry.question)}</p></div>`
+    : '';
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<body style="margin:0;padding:0;background:#FAF6F0;color:#2C1810;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;">
+    <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#8A8070;">Laura Milman New York</p>
+    <h1 style="margin:0 0 16px;font-weight:400;font-size:28px;line-height:1.2;">Thank you for your ring.</h1>
+    <p style="margin:0 0 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;">Hello ${escapeHtml(inquiry.firstName)}, a member of our team will reply shortly in this thread.</p>
+    <div style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:1px solid #DDD5C5;">${rows}</div>
+    ${note}
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:1.5;color:#8A8070;">Laura Milman New York<br>Midtown, New York City<br>${STORE_EMAIL}</p>
+  </div>
+</body>
+</html>`;
+  const to = inquiry.email;
+  return {
+    from: FROM_ADDRESS,
+    to: [to],
+    bcc: to === STORE_EMAIL ? [] : [STORE_EMAIL],
+    replyTo: STORE_EMAIL,
+    subject: 'Your ring request for Laura Milman New York',
+    html,
+    text,
+  };
+}
+
 export function buildInquiryEmail(inquiry) {
+  if (inquiry.kind === 'ring') return buildRingEmail(inquiry);
   const title = inquiry.piece ? inquiry.piece.title : '';
   const subject = title
     ? `Your question about the ${title}`.slice(0, 180)
@@ -353,8 +497,9 @@ export async function saveInquiryCustomer(inquiry, env, fetchImpl, nowIso) {
       firstName: inquiry.firstName,
       lastName: inquiry.lastName,
       note,
-      tags: INQUIRY_TAGS,
+      tags: customerTags(inquiry),
     };
+    if (!inquiry.lastName) delete input.lastName;
     if (phone) input.phone = phone;
     if (inquiry.marketing) input.emailMarketingConsent = consentInput(null).emailMarketingConsent;
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -388,9 +533,9 @@ async function updateExisting(existing, inquiry, env, fetchImpl, nowIso, phone) 
   const input = {
     id: existing.id,
     firstName: inquiry.firstName,
-    lastName: inquiry.lastName,
     note,
   };
+  if (inquiry.lastName) input.lastName = inquiry.lastName;
   if (phone) input.phone = phone;
   let updated = await shopify(env, UPDATE_CUSTOMER, { input }, fetchImpl);
   let errors = userErrors(updated.customerUpdate);
@@ -400,7 +545,7 @@ async function updateExisting(existing, inquiry, env, fetchImpl, nowIso, phone) 
     errors = userErrors(updated.customerUpdate);
   }
   if (errors.length) throw new Error(errors.map((error) => error.message).join('; '));
-  const tagged = await shopify(env, ADD_TAGS, { id: existing.id, tags: INQUIRY_TAGS }, fetchImpl);
+  const tagged = await shopify(env, ADD_TAGS, { id: existing.id, tags: customerTags(inquiry) }, fetchImpl);
   const tagErrors = userErrors(tagged.tagsAdd);
   if (tagErrors.length) throw new Error(tagErrors.map((error) => error.message).join('; '));
   if (inquiry.marketing) {
@@ -497,9 +642,13 @@ export async function handleInquiry(request, env, ctx, fetchImpl = fetch) {
     return json(200, { ok: true }, cors);
   }
 
-  const checked = validateInquiry(body, env);
+  const checked = validateInquiry(body, env, origin);
   if (!checked.ok) return json(400, { error: checked.error }, cors);
   const inquiry = checked.value;
+  const country = String(request.headers.get('CF-IPCountry') || '').toUpperCase();
+  if (inquiry.kind === 'ring' && /^[A-Z]{2}$/.test(country) && country !== 'XX' && country !== 'T1') {
+    inquiry.countryCode = country;
+  }
   if (kv) {
     await Promise.all([
       bump(kv, `inquiry:ip:${ip}:${hour}`, 2 * 3600),
@@ -509,7 +658,13 @@ export async function handleInquiry(request, env, ctx, fetchImpl = fetch) {
 
   if (!env.SHOPIFY_ADMIN_TOKEN || !shopDomain(env)) return json(503, { error: 'not_configured' }, cors);
 
-  const hash = await digest([inquiry.email, inquiry.question, inquiry.piece ? inquiry.piece.title : '', inquiry.piece ? inquiry.piece.variant : ''].join('\n'));
+  const hash = await digest([
+    inquiry.email,
+    inquiry.question,
+    inquiry.piece ? inquiry.piece.title : '',
+    inquiry.piece ? inquiry.piece.variant : '',
+    inquiry.ring ? inquiry.ring.ringLink : '',
+  ].join('\n'));
   if (kv) {
     const done = await kv.get(`inquiry:done:${hash}`);
     if (done) {
