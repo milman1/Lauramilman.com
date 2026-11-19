@@ -35,6 +35,7 @@
 import { collectFeed } from './complete-feed.js';
 
 import { ENGRAVING_ROUTE, handleEngraving } from './engraving-render.js';
+import { INQUIRY_ROUTE, handleInquiry } from './inquiry-lead.js';
 
 const UPSTREAM = 'https://belgiumdia.com';
 const FEEDS = ['natural', 'lab', 'watch'];
@@ -144,7 +145,9 @@ export default {
   async fetch(request, env, ctx) {
     // Storefront engraving render (POST from the product page). Separate from
     // the feed cache below, which stays GET-only and key-gated.
-    if (new URL(request.url).pathname === ENGRAVING_ROUTE) return handleEngraving(request, env, ctx);
+    const pathname = new URL(request.url).pathname;
+    if (pathname === ENGRAVING_ROUTE) return handleEngraving(request, env, ctx);
+    if (pathname === INQUIRY_ROUTE) return handleInquiry(request, env, ctx);
 
     if (request.method !== 'GET') return new Response('Method not allowed', { status: 405 });
     if (!env.FEED_CACHE) return new Response('Worker misconfigured: FEED_CACHE KV binding not set', { status: 500 });

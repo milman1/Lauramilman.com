@@ -1,0 +1,483 @@
+{%- comment -%}
+  Inquiry that becomes a Shopify customer. Product pages pass presentation
+  "dialog" and the piece; the contact page passes "page" and no piece.
+  The browser posts to the Cloudflare Worker, which writes the customer and
+  sends the confirmation. This form never submits to Shopify's contact or
+  customer forms, so an unticked marketing box stays unticked.
+{%- endcomment -%}
+{%- liquid
+  assign inquiry_presentation = presentation | default: 'page'
+  assign inquiry_title = piece_title | default: ''
+  if inquiry_title == blank and product
+    assign inquiry_title = product.title
+  endif
+  assign inquiry_endpoint = 'https://lauramilman-com.milmanavi.workers.dev/inquiry'
+  if settings.inquiry_endpoint != blank
+    assign inquiry_endpoint = settings.inquiry_endpoint
+  endif
+  assign inquiry_id = 'LmInquiry-page'
+  if product
+    assign inquiry_id = 'LmInquiry-' | append: product.id
+  endif
+  assign inquiry_url = ''
+  if product
+    assign inquiry_url = shop.url | append: product.url
+  endif
+-%}
+
+<div
+  class="lm-inquiry{% if inquiry_presentation == 'dialog' %} lm-inquiry--dialog{% else %} lm-inquiry--page{% endif %}"
+  data-inquiry
+  data-presentation="{{ inquiry_presentation }}"
+  data-endpoint="{{ inquiry_endpoint | escape }}"
+  data-product-title="{{ inquiry_title | escape }}"
+  data-product-url="{{ inquiry_url | escape }}"
+>
+  {%- if product -%}
+    <script type="application/json" data-inquiry-variants>
+      [
+        {%- for variant in product.variants -%}
+          {
+            "id": {{ variant.id | json }},
+            "title": {{ variant.title | default: '' | json }},
+            "sku": {{ variant.sku | default: '' | json }},
+            "price": {{ variant.price | money | json }},
+            "options": {% if variant.options %}{{ variant.options | json }}{% else %}[]{% endif %}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    </script>
+  {%- endif -%}
+
+  {%- if inquiry_presentation == 'dialog' -%}
+  <dialog class="lm-inquiry__dialog" id="{{ inquiry_id }}" aria-labelledby="{{ inquiry_id }}-title">
+  {%- endif -%}
+    <div class="lm-inquiry__panel">
+      <div class="lm-inquiry__head">
+        {%- if inquiry_presentation == 'dialog' -%}
+          <h2 class="lm-inquiry__title" id="{{ inquiry_id }}-title">Ask about this piece</h2>
+          <button type="button" class="lm-inquiry__close" data-inquiry-close aria-label="Close">×</button>
+        {%- endif -%}
+      </div>
+
+      <p class="lm-inquiry__status" data-inquiry-success hidden role="status">Thank you. A member of our team will reply shortly.</p>
+
+      <form class="lm-inquiry__form" data-inquiry-form novalidate>
+        {%- if product -%}
+          <p class="lm-inquiry__about" data-inquiry-about>About: {{ inquiry_title | escape }}</p>
+        {%- endif -%}
+
+        <div class="lm-inquiry__hp" aria-hidden="true">
+          <label for="{{ inquiry_id }}-company">Company website</label>
+          <input type="text" id="{{ inquiry_id }}-company" name="company_website" tabindex="-1" autocomplete="off" data-inquiry-hp>
+        </div>
+
+        <div class="lm-inquiry__row">
+          <div class="lm-inquiry__field">
+            <label for="{{ inquiry_id }}-first">First name</label>
+            <input type="text" id="{{ inquiry_id }}-first" name="first_name" autocomplete="given-name" required {% if customer %}value="{{ customer.first_name | escape }}"{% endif %} data-inquiry-first>
+          </div>
+          <div class="lm-inquiry__field">
+            <label for="{{ inquiry_id }}-last">Last name</label>
+            <input type="text" id="{{ inquiry_id }}-last" name="last_name" autocomplete="family-name" required {% if customer %}value="{{ customer.last_name | escape }}"{% endif %} data-inquiry-last>
+          </div>
+        </div>
+
+        <div class="lm-inquiry__field">
+          <label for="{{ inquiry_id }}-email">Email</label>
+          <input type="email" id="{{ inquiry_id }}-email" name="email" autocomplete="email" required {% if customer %}value="{{ customer.email | escape }}"{% endif %} data-inquiry-email>
+        </div>
+
+        <div class="lm-inquiry__field">
+          <label for="{{ inquiry_id }}-phone">Phone <span class="lm-inquiry__optional">(optional)</span></label>
+          <input type="tel" id="{{ inquiry_id }}-phone" name="phone" autocomplete="tel" data-inquiry-phone>
+        </div>
+
+        <div class="lm-inquiry__field">
+          <label for="{{ inquiry_id }}-question">Your question</label>
+          <textarea id="{{ inquiry_id }}-question" name="question" rows="4" required data-inquiry-question></textarea>
+        </div>
+
+        <label class="lm-inquiry__check" for="{{ inquiry_id }}-marketing">
+          <input type="checkbox" id="{{ inquiry_id }}-marketing" name="marketing" value="yes" data-inquiry-marketing>
+          <span>Email me occasional notes from Laura Milman New York. This is optional.</span>
+        </label>
+
+        <p class="lm-inquiry__error" data-inquiry-error hidden role="alert"></p>
+        <button type="submit" class="lm-inquiry__submit" data-inquiry-submit>Send</button>
+      </form>
+    </div>
+  {%- if inquiry_presentation == 'dialog' -%}
+  </dialog>
+  {%- endif -%}
+
+  <script>
+    (function () {
+      var root = document.currentScript && document.currentScript.closest('[data-inquiry]');
+      if (!root || root.dataset.inquiryBound === '1') return;
+      root.dataset.inquiryBound = '1';
+      var form = root.querySelector('[data-inquiry-form]');
+      var dialog = root.querySelector('dialog');
+      var success = root.querySelector('[data-inquiry-success]');
+      var error = root.querySelector('[data-inquiry-error]');
+      var about = root.querySelector('[data-inquiry-about]');
+      var opener = null;
+      var variants = [];
+      var variantJson = root.querySelector('[data-inquiry-variants]');
+      if (variantJson) {
+        try { variants = JSON.parse(variantJson.textContent); } catch (err) { variants = []; }
+      }
+
+      function selectedVariant() {
+        var productForm = document.querySelector('form[data-product-form]');
+        if (!productForm) return variants[0] || null;
+        var field = productForm.querySelector('[name="id"]');
+        var id = field ? String(field.value || '') : '';
+        if (field && field.options && field.selectedOptions && field.selectedOptions[0]) {
+          id = String(field.selectedOptions[0].value || id);
+        }
+        for (var i = 0; i < variants.length; i += 1) {
+          if (String(variants[i].id) === id) return variants[i];
+        }
+        return variants[0] || null;
+      }
+
+      function extraSize() {
+        var bits = [];
+        var ring = document.querySelector('input[name="properties[Ring size]"]');
+        var requested = document.querySelector('input[name="properties[Requested US size]"]');
+        var unsure = document.querySelector('[data-fit-unsure]');
+        if (ring && ring.value) bits.push('Ring size ' + ring.value);
+        if (requested && requested.value) bits.push('Requested US size ' + requested.value);
+        if (unsure && unsure.checked) bits.push('Not sure of the size');
+        return bits.join(', ');
+      }
+
+      function variantLabel(variant) {
+        var parts = [];
+        var options = variant && variant.options;
+        if (options && options.length && options.join(' / ') !== 'Default Title') parts.push(options.join(' / '));
+        else if (variant && variant.title && variant.title !== 'Default Title') parts.push(variant.title);
+        var size = extraSize();
+        if (size) parts.push(size);
+        return parts.join(', ');
+      }
+
+      function piecePayload() {
+        if (!root.getAttribute('data-product-title')) return null;
+        var variant = selectedVariant();
+        var title = root.getAttribute('data-product-title') || '';
+        var label = variantLabel(variant);
+        var url = root.getAttribute('data-product-url') || window.location.href;
+        try {
+          var parsed = /^https?:/i.test(url) ? new URL(url) : new URL(url, window.location.href);
+          if (variant && variant.id && variants.length > 1) parsed.searchParams.set('variant', String(variant.id));
+          url = parsed.toString();
+        } catch (err) {}
+        return {
+          title: title,
+          variant: label,
+          sku: variant && variant.sku ? variant.sku : '',
+          price: variant && variant.price ? variant.price : '',
+          url: url
+        };
+      }
+
+      function paintAbout() {
+        if (!about) return;
+        var piece = piecePayload();
+        if (!piece) return;
+        about.textContent = piece.variant ? 'About: ' + piece.title + ' — ' + piece.variant : 'About: ' + piece.title;
+      }
+
+      function showError(message) {
+        if (!error) return;
+        error.hidden = !message;
+        error.textContent = message || '';
+      }
+
+      function field(name) {
+        return form.querySelector('[data-inquiry-' + name + ']');
+      }
+
+      function validate() {
+        var first = field('first');
+        var last = field('last');
+        var email = field('email');
+        var question = field('question');
+        var missing = !first.value.trim() || !last.value.trim() || !email.value.trim() || !question.value.trim();
+        var emailOk = email.validity && email.validity.valid && email.value.indexOf('@') > 0;
+        [first, last, email, question].forEach(function (input) {
+          var bad = !input.value.trim() || (input === email && !emailOk);
+          input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+        });
+        if (missing || !emailOk) {
+          showError('Enter your first name, last name, email, and your question.');
+          var focus = !first.value.trim() ? first : !last.value.trim() ? last : !emailOk ? email : question;
+          focus.focus();
+          return false;
+        }
+        showError('');
+        return true;
+      }
+
+      function setPending(pending) {
+        var button = root.querySelector('[data-inquiry-submit]');
+        if (!button) return;
+        button.disabled = pending;
+        button.textContent = pending ? 'Sending' : 'Send';
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!validate()) return;
+        var endpoint = root.getAttribute('data-endpoint');
+        if (!endpoint) {
+          showError('This form is not available just now. Please email hello@lauramilman.com.');
+          return;
+        }
+        var payload = {
+          first_name: field('first').value.trim(),
+          last_name: field('last').value.trim(),
+          email: field('email').value.trim(),
+          phone: field('phone').value.trim(),
+          question: field('question').value.trim(),
+          marketing: Boolean(field('marketing') && field('marketing').checked),
+          company_website: (field('hp') && field('hp').value) || ''
+        };
+        var piece = piecePayload();
+        if (piece) payload.piece = piece;
+        setPending(true);
+        fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+          credentials: 'omit'
+        }).then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            if (!res.ok || !data.ok) throw new Error('save');
+            form.hidden = true;
+            if (about) about.hidden = true;
+            success.hidden = false;
+            success.focus && success.setAttribute('tabindex', '-1');
+            success.focus();
+          });
+        }).catch(function () {
+          setPending(false);
+          showError('Your question did not send. Please try again, or email hello@lauramilman.com.');
+        });
+      });
+
+      function openDialog(button) {
+        if (!dialog || !dialog.showModal) return;
+        opener = button || opener;
+        paintAbout();
+        if (!dialog.open) dialog.showModal();
+        var first = field('first');
+        if (first && !first.value) first.focus();
+      }
+
+      if (dialog) {
+        document.querySelectorAll('[data-inquiry-open][aria-controls="' + dialog.id + '"]').forEach(function (button) {
+          button.addEventListener('click', function (event) {
+            event.preventDefault();
+            openDialog(button);
+          });
+        });
+        root.querySelectorAll('[data-inquiry-close]').forEach(function (button) {
+          button.addEventListener('click', function () { dialog.close(); });
+        });
+        dialog.addEventListener('click', function (event) {
+          if (event.target === dialog) dialog.close();
+        });
+        dialog.addEventListener('close', function () {
+          if (opener && opener.focus) opener.focus();
+        });
+      } else {
+        paintAbout();
+      }
+
+      document.addEventListener('click', function (event) {
+        var option = event.target.closest && event.target.closest('.product-option-btn, [data-fit-size], [data-fit-unsure]');
+        if (option) paintAbout();
+      });
+      var productForm = document.querySelector('form[data-product-form]');
+      if (productForm) {
+        productForm.addEventListener('change', paintAbout);
+      }
+      paintAbout();
+    })();
+  </script>
+</div>
+
+<style>
+  .lm-inquiry__dialog {
+    width: min(28rem, calc(100vw - 1.5rem));
+    max-height: min(92dvh, 44rem);
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    background: var(--cream, #FAF6F0);
+    color: var(--text-dark, #2C1810);
+    border-radius: 8px;
+  }
+  .lm-inquiry__dialog::backdrop {
+    background: rgba(30, 17, 9, 0.48);
+  }
+  .lm-inquiry__panel {
+    padding: 1.25rem 1.2rem 1.35rem;
+  }
+  .lm-inquiry__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .lm-inquiry__title {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.7rem;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+  .lm-inquiry__close {
+    border: 0;
+    background: transparent;
+    color: var(--text-dark, #2C1810);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0.1rem 0.2rem;
+    cursor: pointer;
+  }
+  .lm-inquiry__about {
+    margin: 0 0 0.9rem;
+    padding: 0.7rem 0.75rem;
+    background: #fff;
+    border: 1px solid var(--rule-light, #DDD5C5);
+    border-radius: 4px;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .lm-inquiry__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .lm-inquiry__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.7rem;
+  }
+  .lm-inquiry__field label,
+  .lm-inquiry__check {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8A8070);
+  }
+  .lm-inquiry__optional {
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+  .lm-inquiry__field input,
+  .lm-inquiry__field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.7rem;
+    font: inherit;
+    font-size: 16px;
+    color: var(--text-dark, #2C1810);
+    background: #fff;
+    border: 1px solid var(--border-medium, #CFC7B8);
+    border-radius: 4px;
+  }
+  .lm-inquiry__field input:focus,
+  .lm-inquiry__field textarea:focus {
+    outline: 2px solid var(--gold, #C9A050);
+    outline-offset: 1px;
+  }
+  .lm-inquiry__field input[aria-invalid="true"],
+  .lm-inquiry__field textarea[aria-invalid="true"] {
+    border-color: #9B2C2C;
+  }
+  .lm-inquiry__check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 0.2rem 0 0.9rem;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.82rem;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-inquiry__check input {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.1rem;
+    flex: 0 0 auto;
+    accent-color: var(--espresso, #1E1109);
+  }
+  .lm-inquiry__error,
+  .lm-inquiry__status {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .lm-inquiry__error { color: #9B2C2C; }
+  .lm-inquiry__status { color: var(--text-dark, #2C1810); }
+  .lm-inquiry__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.75rem 1.1rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream, #FAF6F0);
+    background: var(--espresso, #1E1109);
+    border: 1px solid var(--espresso, #1E1109);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .lm-inquiry__submit:disabled { opacity: 0.65; cursor: progress; }
+  .lm-inquiry__hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .lm-inquiry--page {
+    position: relative;
+    max-width: 34rem;
+  }
+  @media (max-width: 749px) {
+    .lm-inquiry__dialog {
+      width: 100%;
+      max-width: 100%;
+      max-height: 92dvh;
+      margin: auto 0 0;
+      border-radius: 12px 12px 0 0;
+    }
+    .lm-inquiry__panel { padding: 1.1rem 1rem 1.25rem; }
+  }
+  @media (min-width: 750px) {
+    .lm-inquiry__row {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+  }
+</style>
