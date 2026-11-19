@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -179,22 +188,22 @@
         "three_stone"
       ],
       "settings": {
+        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png",
         "title": "Make it yours.",
         "subtitle": "Start with the stone or the ring.",
-        "additional_rings": [
-          "antique-marquise-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
-          "pear-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
-          "radiant-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
-          "elongated-cushion-prong-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold"
-        ],
         "rings": [
           "north-south-solitaire-prong-engagement-ring-setting-in-18k-yellow-gold",
           "emerald-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
           "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
           "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
         ],
-        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png",
-        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png"
+        "additional_rings": [
+          "antique-marquise-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "pear-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "radiant-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "elongated-cushion-prong-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold"
+        ],
+        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png"
       }
     },
     "meet-laura": {
@@ -227,10 +236,10 @@
             "title": "Rings",
             "link_text": "Shop complete rings",
             "url": "/collections/rings",
+            "image": "shopify://shop_images/home-rings-supplier-model.jpg",
             "image_asset": "",
             "image_alt": "Model in an ivory suit wearing stacked rings and delicate bracelets",
-            "position": "50% 50%",
-            "image": "shopify://shop_images/home-rings-supplier-model.jpg"
+            "position": "50% 50%"
           }
         },
         "tile-2": {
@@ -461,6 +470,7 @@
       "settings": {
         "style": "cream",
         "columns": "5",
+        "more_row": true,
         "ratio": "0.84",
         "eyebrow": "Everyday Jewelry",
         "title": "From your desk,",
@@ -468,7 +478,6 @@
         "text": "Gold chains, sculptural rings, and gemstone bracelets and necklaces. Find your everyday favorites.",
         "all_text": "Shop the full edit",
         "all_url": "/collections/everyday-jewelry",
-        "more_row": true,
         "button_1_text": "",
         "button_1_url": "",
         "button_2_text": "",
@@ -541,6 +550,7 @@
         "band-5",
         "band-6"
       ],
+      "disabled": true,
       "settings": {
         "eyebrow": "Gold",
         "title": "Chains and bands,",
@@ -550,8 +560,7 @@
         "collection_2": "",
         "link_text": "Shop all chains",
         "link_url": "/collections/chains"
-      },
-      "disabled": true
+      }
     },
     "lab-grown": {
       "type": "lmh-product-row",
@@ -809,13 +818,13 @@
     },
     "estate-edit": {
       "type": "lmh-product-row",
-      "blocks": {},
-      "block_order": [],
       "settings": {
         "style": "cream",
         "columns": "4",
         "more_row": false,
         "scroll_row": false,
+        "mobile_grid": true,
+        "jewelry_only": true,
         "ratio": "1",
         "eyebrow": "VINTAGE & PRE-OWNED JEWELRY",
         "title": "A past.",
@@ -823,10 +832,8 @@
         "text": "Discover pre-owned jewelry from Cartier, Van Cleef & Arpels, Tiffany & Co., David Webb and more.",
         "button_1_text": "Shop all vintage & pre-owned",
         "button_1_url": "/collections/estate-jewelry",
-        "collection_limit": 12,
         "collection": "estate-jewelry",
-        "mobile_grid": true,
-        "jewelry_only": true,
+        "collection_limit": 12,
         "mobile_button_text": "Shop all vintage & pre-owned",
         "mobile_button_url": "/collections/estate-jewelry"
       }
