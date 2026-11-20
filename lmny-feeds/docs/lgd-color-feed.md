@@ -73,3 +73,19 @@ as `color_below_floor`; `src/lgd-color/belgium.ts` picks them up instead.
   `lmny-colored-stone-sync` concurrency group with LGD. Set
   `BELGIUM_COLOR_SYNC_LIVE=false` to pause scheduled writes. Report:
   `out/belgium-color-report.json`.
+
+## Listing copy (both sources)
+
+`listingCopy` in `catalog.mjs` writes title, SEO title, SEO description and
+body from `docs/seo/listing-seo-geo.md` and the loose-diamond formula in
+`lmny-feeds/docs/seo-title-formulas.md`, the same formula as white loose stones:
+
+- Title: `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1, IGI Certified`
+- SEO title (<= 60): `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1 | IGI`;
+  a long name drops clarity, then intensity, so the hue and `| IGI` always stay.
+- SEO description (<= 160): one identity sentence with grade and IGI report.
+- Body: one answer-first `<p>` of 40-60 words, facts only; specs live in the
+  `custom.*` metafields the theme turns into the spec grid and Product JSON-LD.
+
+Changed 2026-11-20 (was `2.00ct Oval Fancy Intense Pink Lab-Grown Diamond — VS1 | IGI`).
+Existing LGD listings take the new copy the next time the sync rewrites them.

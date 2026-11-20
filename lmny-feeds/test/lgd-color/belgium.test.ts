@@ -50,8 +50,28 @@ describe('Belgium Dia colored lab stones', () => {
     const p = payloadFor(stone, undefined, 'DRAFT');
     expect(p.status).toBe('DRAFT');
     expect(p.tags).toEqual(expect.arrayContaining([FEED_TAG, BELGIUM_TAG, 'Colored Lab-Grown Diamond', 'Pink', 'Fancy Intense']));
-    expect(p.title).toBe('2.00ct Oval Fancy Intense Pink Lab-Grown Diamond — VS1 | IGI');
+    expect(p.title).toBe('2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1, IGI Certified');
     expect(p.variants[0].price).toBe('675.00');
+  });
+
+  it('listing copy meets the SEO/GEO guide for loose diamonds', () => {
+    const scrubbed = (v: string) => !/belgium|lgd|supplier|stunning|must-have|breathtaking|ethical|sustainable/i.test(v);
+    for (const over of [{}, { Shape: 'CUSHION BRILLIANT', Color: 'YELLOW', Fancy_Color_Intensity: 'Fancy Intense', Clarity: 'VVS2', Weight: '12.34', Measurements: '12.01x10.55x7.30' }]) {
+      const p = payloadFor(normalizeBelgiumRow(row(over)).stone!, undefined, 'DRAFT');
+      expect(p.title).toMatch(/^\d+\.\d\dct [A-Za-z ]+ Lab-Grown Diamond — Fancy [A-Za-z ]+ [A-Z0-9]+, IGI Certified$/);
+      expect(p.seo.title.length).toBeLessThanOrEqual(60);
+      expect(p.seo.title).toMatch(/ \| IGI$/);
+      expect(p.seo.title).toMatch(/Pink|Yellow/);
+      expect(p.seo.description.length).toBeLessThanOrEqual(160);
+      expect(p.descriptionHtml).toMatch(/^<p>[^<]+<\/p>$/);
+      const words = p.descriptionHtml.replace(/<[^>]+>/g, '').split(/\s+/).length;
+      expect(words).toBeGreaterThanOrEqual(40);
+      expect(words).toBeLessThanOrEqual(60);
+      for (const v of [p.title, p.seo.title, p.seo.description, p.descriptionHtml]) expect(scrubbed(v)).toBe(true);
+      const meta = Object.fromEntries(p.metafields.map((m: { key: string; value: string }) => [m.key, m.value]));
+      expect(p.title).toContain(meta.color);
+      expect(p.descriptionHtml).toContain(meta.clarity);
+    }
   });
 
   it('each source owns, and withdraws, only its own stones', () => {

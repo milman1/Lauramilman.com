@@ -79,12 +79,37 @@ export function normalizeFeed(rows) {
   return { stones, holds };
 }
 const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Listing copy per docs/seo/listing-seo-geo.md and the loose-diamond formula in
+// lmny-feeds/docs/seo-title-formulas.md (same as white loose stones, src/product.ts):
+//   title     {carat}ct {shape} Lab-Grown Diamond — {color} {clarity}, IGI Certified
+//   SEO title {carat}ct {shape} Lab-Grown Diamond — {color} {clarity} | IGI  (<= 60, suffix and hue kept)
+//   SEO desc  one identity sentence with verified specs (<= 160)
+//   body      one <p>, answer-first, 40-60 words, facts only, no table or media
+// where {color} is the intensity and hue ("Fancy Intense Pink").
+function truncateAtWord(v, max) { if (v.length <= max) return v; const cut = v.slice(0, max); const i = cut.lastIndexOf(' '); return (i > 0 ? cut.slice(0, i) : cut).trim(); }
+function fitWithSuffix(lead, suffix, max) { return `${truncateAtWord(lead, max - suffix.length - 1)} ${suffix}`.trim(); }
+export function listingCopy(s) {
+  const carat = Number(s.carat).toFixed(2), color = `${s.intensity} ${s.color}`, shape = s.shape.toLowerCase();
+  const measurements = text(s.measurements).replace(/\s*mm$/i, '');
+  const title = `${carat}ct ${s.shape} Lab-Grown Diamond — ${color} ${s.clarity}, IGI Certified`;
+  // Long shapes or intensities drop clarity, then intensity, before any word is
+  // cut, so the hue (the colored-stone search term) always survives.
+  const leads = [`${carat}ct ${s.shape} Lab-Grown Diamond — ${color} ${s.clarity}`, `${carat}ct ${s.shape} Lab-Grown Diamond — ${color}`,
+    `${carat}ct ${s.shape} Lab-Grown Diamond — ${s.color}`, `${carat}ct ${s.color} ${s.shape} Lab-Grown Diamond`];
+  const seoTitle = fitWithSuffix(leads.find(l => l.length + 6 <= 60) ?? leads[3], '| IGI', 60);
+  const seoDescription = truncateAtWord(`Shop this ${carat}ct ${shape} lab-grown diamond in ${color}, graded ${s.clarity} clarity and certified by IGI under report ${s.certificate}.`, 160);
+  const body = `This ${carat}ct ${shape} lab-grown diamond is graded ${color} color and ${s.clarity} clarity by IGI under report ${s.certificate}` +
+    (measurements ? `, and measures ${measurements} mm` : '') +
+    '. It is a loose stone, sold without a setting. Its own photograph, 360° video and IGI grading report are on this page.';
+  return { title, seoTitle, seoDescription, descriptionHtml: `<p>${escape(body)}</p>` };
+}
 export function payloadFor(s, existing, status = 'DRAFT', locationId) {
   if (status === 'ACTIVE' && (!existing || existing.status === 'ARCHIVED' || !existing.readyImage)) throw new Error('Activation requires an existing reviewed draft with ready image');
   const color = `${s.intensity} ${s.color}`;
-  const title = `${s.carat.toFixed(2)}ct ${s.shape} ${color} Lab-Grown Diamond — ${s.clarity} | IGI`;
-  const seoTitle = `${s.carat.toFixed(2)}ct ${s.color} ${s.shape} Lab-Grown Diamond | IGI`.slice(0,60);
-  const descriptionHtml = `<p>This ${s.carat.toFixed(2)}ct ${escape(s.shape.toLowerCase())} lab-grown diamond has ${escape(color)} color and ${escape(s.clarity)} clarity. Its IGI report is ${escape(s.certificate)}. This is a loose diamond, sold without a setting. Review its individual photograph, video, and grading report before choosing a setting.</p>`;
+  const copy = listingCopy(s);
+  const title = copy.title;
+  const seoTitle = copy.seoTitle;
+  const descriptionHtml = copy.descriptionHtml;
   const metafields = [
     ['lmny_feed','cert_number','single_line_text_field',s.certificate],['lmny_feed','cert_url','url',s.certUrl],['lmny_feed','lab','single_line_text_field','IGI'],
     ['lmny_feed','measurements','single_line_text_field',s.measurements],['custom','diamond_shape','single_line_text_field',s.shape],
@@ -94,7 +119,7 @@ export function payloadFor(s, existing, status = 'DRAFT', locationId) {
   metafields.push({namespace:'colored_feed',key:'content_hash',type:'single_line_text_field',value:snapshotHash(s)});
   const input = { handle:s.handle, title, vendor:'Laura Milman New York', productType:'Lab-Grown Diamond', category:'gid://shopify/TaxonomyCategory/aa-6', templateSuffix:'diamond', status,
     descriptionHtml, tags:[FEED_TAG,...(s.sourceTag?[s.sourceTag]:[]),'Colored Lab-Grown Diamond',s.shape,s.color,s.intensity,s.clarity,'IGI'],
-    seo:{title:seoTitle,description:`${s.carat.toFixed(2)}ct ${color} ${s.shape.toLowerCase()} lab-grown diamond. ${s.clarity} clarity, IGI certified. Sold loose by Laura Milman New York.`.slice(0,160)},
+    seo:{title:seoTitle,description:copy.seoDescription},
     metafields, productOptions:[{name:'Title',values:[{name:'Default Title'}]}],
     variants:[{...(existing?.variantId ? {id:existing.variantId}:{}),optionValues:[{optionName:'Title',name:'Default Title'}],sku:s.stock,price:s.retail.toFixed(2),taxable:true,inventoryPolicy:'CONTINUE',inventoryItem:{tracked:true,requiresShipping:true,cost:s.cost.toFixed(2)},...(locationId ? {inventoryQuantities:[{locationId,name:'available',quantity:0}]}:{})}] };
   if (!existing?.readyImage) input.files = [{originalSource:s.image,contentType:'IMAGE',alt:title}];
