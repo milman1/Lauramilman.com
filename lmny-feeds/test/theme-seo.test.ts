@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { Liquid } from 'liquidjs';
 import { describe, expect, it } from 'vitest';
 
 function themeFile(path: string): string {
@@ -6,6 +8,42 @@ function themeFile(path: string): string {
 }
 
 describe('theme SEO integration', () => {
+  it.each([
+    ['Vintage-Style Ring', undefined, [], undefined],
+    ['Vintage—Inspired Brooch', undefined, [], undefined],
+    ['Vintage-Inspired Pendant', 'New ', [], 'NewCondition'],
+    ['Vintage Style Brooch', 'Used - Excellent', [], 'UsedCondition'],
+    ['Vintage Style Brooch', 'Pre Owned', [], 'UsedCondition'],
+    ['Vintage Style Brooch', 'Unused', [], undefined],
+    ['Vintage Style Brooch', undefined, ['Pre-Owned'], 'UsedCondition'],
+    ['Pre-Owned Vintage Style Ring', undefined, [], 'UsedCondition'],
+    ['Signed Estate Brooch', 'Pre-Owned', [], 'UsedCondition'],
+    ['Gold Band', 'New', [], 'NewCondition'],
+  ])('renders condition based on the product record for %s', async (title, condition, tags, expected) => {
+    const liquid = new Liquid({
+      root: fileURLToPath(new URL('../../snippets/', import.meta.url)),
+      extname: '.liquid',
+    });
+    liquid.registerFilter('json', (value) => JSON.stringify(value ?? null));
+    const variant = { sku: 'TEST-1', url: '/products/sample?variant=1', price: 50000, available: true };
+    const template = themeFile('snippets/structured-data-product.liquid').replace(/{% doc %}[\s\S]*?{% enddoc %}/, '');
+    const html = await liquid.parseAndRender(template, {
+      canonical_url: 'https://example.com/products/sample',
+      shop: { url: 'https://example.com', name: 'LMNY', currency: 'USD' },
+      current_variant: variant,
+      product: {
+        title, description: 'Test piece', images: [], type: 'Jewelry', tags,
+        collections: [], variants: [variant], metafields: { custom: { condition: { value: condition } } },
+      },
+    });
+    const productBlock = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const product = JSON.parse(productBlock?.[1] ?? '');
+    const schemaCondition = expected && `https://schema.org/${expected}`;
+    expect(product.itemCondition).toBe(schemaCondition);
+    expect(product.offers[0].itemCondition).toBe(schemaCondition);
+    expect(product.offers[0].price).toBe(500);
+  });
+
   it('renders shared Product and BreadcrumbList schema on every PDP', () => {
     const standard = themeFile('sections/main-product.liquid');
     const diamond = themeFile('sections/main-product-diamond.liquid');

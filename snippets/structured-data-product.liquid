@@ -37,6 +37,19 @@ nothing is parsed or inferred from the title.
   if is_vintage == 'true' or schema_condition contains 'pre-owned' or schema_condition contains 'preowned' or schema_condition contains 'used'
     assign item_condition = 'https://schema.org/UsedCondition'
   endif
+  # A design qualifier cannot establish the item's condition.
+  assign condition_title = product.title | downcase | replace: '-', ' ' | replace: '–', ' ' | replace: '—', ' ' | replace: '‑', ' ' | replace: '  ', ' ' | replace: '  ', ' '
+  if condition_title contains 'vintage style' or condition_title contains 'vintage inspired'
+    assign item_condition = ''
+    assign recorded_condition = schema_condition | strip | replace: '-', ' ' | replace: '–', ' ' | replace: '—', ' ' | replace: '‑', ' ' | replace: '  ', ' ' | append: ' '
+    assign condition_word = recorded_condition | split: ' ' | first
+    assign condition_tags = product.tags | join: '|' | downcase | split: '|'
+    if condition_word == 'new' or condition_word == 'unworn' or condition_word == 'new/unworn'
+      assign item_condition = 'https://schema.org/NewCondition'
+    elsif recorded_condition contains 'pre owned ' or condition_word == 'preowned' or condition_word == 'used' or condition_title contains 'pre owned' or condition_title contains 'preowned' or condition_tags contains 'pre-owned' or condition_tags contains 'preowned' or condition_tags contains 'antique-estate'
+      assign item_condition = 'https://schema.org/UsedCondition'
+    endif
+  endif
   assign schema_material = product.metafields.custom.metal.value | default: product.metafields.custom.metal_type.value
   assign schema_currency = cart.currency.iso_code | default: shop.currency
   assign schema_mpn = product.metafields.global['MPN'].value | default: ''
@@ -93,7 +106,7 @@ nothing is parsed or inferred from the title.
   },
   "sku": {{ current_variant.sku | json }},
   "category": {{ product.type | json }},
-  "itemCondition": {{ item_condition | json }},
+  {%- if item_condition != '' %}"itemCondition": {{ item_condition | json }},{% endif %}
   "offers": [
     {%- for variant in product.variants limit: 50 -%}
       {
@@ -104,7 +117,7 @@ nothing is parsed or inferred from the title.
         "price": {{ variant.price | divided_by: 100.0 | json }},
         "priceCurrency": {{ schema_currency | json }},
         "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
-        "itemCondition": {{ item_condition | json }},
+        {%- if item_condition != '' %}"itemCondition": {{ item_condition | json }},{% endif %}
         "seller": { "@id": {{ shop.url | append: '/#organization' | json }} },
         {{ schema_shipping }}
         {%- if schema_returns != blank -%},{{ schema_returns }}{%- endif %}
