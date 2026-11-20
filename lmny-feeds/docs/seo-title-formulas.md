@@ -21,6 +21,19 @@ without repeating “Laura Milman New York.”
 
 Example: `2.01ct Round Natural Diamond — F VS1 | GIA`
 
+The same formula covers white (D-Z) and colored loose stones. For a colored
+stone, `{color}` is the intensity and hue from the grading report, and the
+lab is IGI:
+
+- Product title: `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1, IGI Certified`
+- SEO title: `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1 | IGI`
+
+When a colored SEO title runs past 60 characters, clarity is dropped first,
+then the intensity, so the hue and the `| IGI` suffix always remain
+(`12.34ct Cushion Brilliant Lab-Grown Diamond — Yellow | IGI`). White stones
+come from `src/product.ts`; colored stones from `listingCopy` in
+`src/lgd-color/catalog.mjs`.
+
 The formula front-loads the attributes shoppers use in search and explicitly
 states diamond origin and certification. Long shapes are shortened only at a
 word boundary; the grading lab suffix is always retained.
