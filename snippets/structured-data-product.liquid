@@ -38,12 +38,15 @@ nothing is parsed or inferred from the title.
     assign item_condition = 'https://schema.org/UsedCondition'
   endif
   # A design qualifier cannot establish the item's condition.
-  assign condition_title = product.title | downcase | replace: '-', ' ' | replace: '–', ' ' | replace: '‑', ' '
+  assign condition_title = product.title | downcase | replace: '-', ' ' | replace: '–', ' ' | replace: '—', ' ' | replace: '‑', ' ' | replace: '  ', ' ' | replace: '  ', ' '
   if condition_title contains 'vintage style' or condition_title contains 'vintage inspired'
     assign item_condition = ''
-    if schema_condition == 'new' or schema_condition == 'unworn' or schema_condition == 'new/unworn'
+    assign recorded_condition = schema_condition | strip | replace: '-', ' ' | replace: '–', ' ' | replace: '—', ' ' | replace: '‑', ' ' | replace: '  ', ' ' | append: ' '
+    assign condition_word = recorded_condition | split: ' ' | first
+    assign condition_tags = product.tags | join: '|' | downcase | split: '|'
+    if condition_word == 'new' or condition_word == 'unworn' or condition_word == 'new/unworn'
       assign item_condition = 'https://schema.org/NewCondition'
-    elsif schema_condition contains 'pre-owned' or schema_condition contains 'preowned' or schema_condition == 'used' or condition_title contains 'pre owned' or condition_title contains 'preowned'
+    elsif recorded_condition contains 'pre owned ' or condition_word == 'preowned' or condition_word == 'used' or condition_title contains 'pre owned' or condition_title contains 'preowned' or condition_tags contains 'pre-owned' or condition_tags contains 'preowned' or condition_tags contains 'antique-estate'
       assign item_condition = 'https://schema.org/UsedCondition'
     endif
   endif

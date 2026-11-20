@@ -9,12 +9,17 @@ function themeFile(path: string): string {
 
 describe('theme SEO integration', () => {
   it.each([
-    ['Vintage-Style Ring', undefined, undefined],
-    ['Vintage-Inspired Pendant', 'New', 'NewCondition'],
-    ['Pre-Owned Vintage Style Ring', undefined, 'UsedCondition'],
-    ['Signed Estate Brooch', 'Pre-Owned', 'UsedCondition'],
-    ['Gold Band', 'New', 'NewCondition'],
-  ])('renders condition based on the product record for %s', async (title, condition, expected) => {
+    ['Vintage-Style Ring', undefined, [], undefined],
+    ['Vintage—Inspired Brooch', undefined, [], undefined],
+    ['Vintage-Inspired Pendant', 'New ', [], 'NewCondition'],
+    ['Vintage Style Brooch', 'Used - Excellent', [], 'UsedCondition'],
+    ['Vintage Style Brooch', 'Pre Owned', [], 'UsedCondition'],
+    ['Vintage Style Brooch', 'Unused', [], undefined],
+    ['Vintage Style Brooch', undefined, ['Pre-Owned'], 'UsedCondition'],
+    ['Pre-Owned Vintage Style Ring', undefined, [], 'UsedCondition'],
+    ['Signed Estate Brooch', 'Pre-Owned', [], 'UsedCondition'],
+    ['Gold Band', 'New', [], 'NewCondition'],
+  ])('renders condition based on the product record for %s', async (title, condition, tags, expected) => {
     const liquid = new Liquid({
       root: fileURLToPath(new URL('../../snippets/', import.meta.url)),
       extname: '.liquid',
@@ -27,7 +32,7 @@ describe('theme SEO integration', () => {
       shop: { url: 'https://example.com', name: 'LMNY', currency: 'USD' },
       current_variant: variant,
       product: {
-        title, description: 'Test piece', images: [], type: 'Jewelry', tags: [],
+        title, description: 'Test piece', images: [], type: 'Jewelry', tags,
         collections: [], variants: [variant], metafields: { custom: { condition: { value: condition } } },
       },
     });
