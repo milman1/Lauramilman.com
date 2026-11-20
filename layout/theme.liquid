@@ -48,6 +48,10 @@
         assign seo_meta_description = 'Shop lab-grown jewelry for work and dinner, plus authenticated David Webb, Cartier, Van Cleef, and Tiffany.'
       elsif page.handle == 'authentication'
         assign seo_meta_description = 'Every pre-owned David Webb, Cartier, Van Cleef & Arpels, Bvlgari, and Tiffany & Co. piece is examined, verified, and documented before listing.'
+      elsif page.handle == 'ring-size-guide'
+        assign seo_page_title = 'Ring Size Chart | Laura Milman'
+        assign seo_social_title = seo_page_title
+        assign seo_meta_description = 'US ring sizes 3 to 13, with inside diameter, circumference, and UK, European, and Asian conversions. Print a sizer at home.'
       elsif request.page_type == 'page' and seo_meta_description == blank
         capture seo_meta_description
           echo 'Learn about '

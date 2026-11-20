@@ -3,17 +3,99 @@
     "main": {
       "type": "size-guide",
       "blocks": {
-        "tip-paper": { "type": "tip", "settings": { "text": "Wrap a thin strip of paper snugly around the base of your finger and mark where it overlaps. Measure the length in millimeters — that's your circumference." } },
-        "tip-evening": { "type": "tip", "settings": { "text": "Measure at the end of the day, when your fingers are at their largest. Avoid measuring when your hands are cold." } },
-        "tip-existing": { "type": "tip", "settings": { "text": "If a ring that fits is already in hand, measure its inside diameter and match it to the table above." } },
-        "tip-wide": { "type": "tip", "settings": { "text": "Wider bands wear more snugly — for bands over 6mm, consider going up half a size." } }
+        "tip-paper": {
+          "type": "tip",
+          "settings": {
+            "text": "Wrap a thin strip of paper or a flexible tape snugly around the base of the finger and mark where it overlaps. Measure that length in millimeters. That number is your circumference. Match it to the chart."
+          }
+        },
+        "tip-evening": {
+          "type": "tip",
+          "settings": {
+            "text": "Measure at the end of the day, when your fingers are largest. Cold hands, and first thing in the morning, measure small."
+          }
+        },
+        "tip-existing": {
+          "type": "tip",
+          "settings": {
+            "text": "If you already have a ring that fits, measure its inside diameter in millimeters and match that number to the diameter column. Or set the ring on the printed circles."
+          }
+        },
+        "tip-wide": {
+          "type": "tip",
+          "settings": {
+            "text": "A wider band feels tighter. For a band over 6 mm, choose a half size up. Between two sizes, choose the larger one."
+          }
+        },
+        "tip-surprise": {
+          "type": "tip",
+          "settings": {
+            "text": "Buying as a surprise? Borrow a ring they wear on that finger and measure its inside diameter. A glove size is not a ring size."
+          }
+        },
+        "qa-size": {
+          "type": "qa",
+          "settings": {
+            "question": "What size is my ring?",
+            "answer": "<p>If a ring already fits, measure its inside diameter in millimeters and find that number in the diameter column. You can also place the ring on the printed circles: the right disk sits just inside the band, edge to edge.</p>"
+          }
+        },
+        "qa-measure": {
+          "type": "qa",
+          "settings": {
+            "question": "How do I measure my finger at home?",
+            "answer": "<p>Wrap a thin strip of paper or a flexible tape around the base of the finger, mark where it overlaps, and measure that length in millimeters. That is your circumference. Measure at the end of the day, then match the number to the chart.</p>"
+          }
+        },
+        "qa-between": {
+          "type": "qa",
+          "settings": {
+            "question": "What if I am between two sizes?",
+            "answer": "<p>Choose the larger size. A band wider than 6 mm wears tighter, so go up half a size. On the ring page you can choose “Not sure,” and we will confirm the fit before the ring ships.</p>"
+          }
+        },
+        "qa-countries": {
+          "type": "qa",
+          "settings": {
+            "question": "Are ring sizes the same in every country?",
+            "answer": "<p>No. A US 6 is a UK L ½, a French 52, and a Japanese 12. Laura Milman rings are made in US sizes. Use the conversion chart, and ask us if the size you have is not listed.</p>"
+          }
+        },
+        "qa-resize": {
+          "type": "qa",
+          "settings": {
+            "question": "Can my ring be resized?",
+            "answer": "<p>Most rings include one complimentary resizing. Eternity bands, and some estate pieces, cannot be resized, and we say so before you buy. Unworn jewelry can be returned or exchanged within 14 days of delivery.</p>"
+          }
+        },
+        "qa-surprise": {
+          "type": "qa",
+          "settings": {
+            "question": "How do I find a size for someone else?",
+            "answer": "<p>Borrow a ring they already wear on that finger and measure its inside diameter, or match it to the printed circles. Do not guess from a glove. If it is a surprise, ask us and we will help you narrow it down.</p>"
+          }
+        }
       },
-      "block_order": ["tip-paper", "tip-evening", "tip-existing", "tip-wide"],
+      "block_order": [
+        "tip-paper",
+        "tip-evening",
+        "tip-existing",
+        "tip-wide",
+        "tip-surprise",
+        "qa-size",
+        "qa-measure",
+        "qa-between",
+        "qa-countries",
+        "qa-resize",
+        "qa-surprise"
+      ],
       "settings": {
         "eyebrow": "Fit & Sizing",
-        "title": "Ring Size Guide",
-        "intro": "Find your size with confidence — and if you're between sizes or buying as a surprise, we'll help you get it right.",
-        "footer_text": "Unsure between two sizes? Complimentary resizing is included on most rings.",
+        "title": "Ring Size Chart",
+        "intro": "Match a measurement to a US size, convert a size from another country, or print a sizer and check it with a ruler.",
+        "tips_title": "How to measure at home",
+        "faq_title": "Questions",
+        "footer_text": "Still between two sizes? Ask us before you order.",
         "cta_text": "Ask a Specialist",
         "cta_url": "/pages/private-clients"
       }

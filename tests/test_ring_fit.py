@@ -78,6 +78,90 @@ def test_ring_fit_buttons_never_submit_the_product_form() -> None:
         assert 'type="button"' in tag, tag
 
 
+def _chart_rows() -> list[list[str]]:
+    text = (ROOT / "snippets/ring-size-chart.liquid").read_text()
+    start = text.index("{%- capture size_data -%}")
+    end = text.index("{%- endcapture -%}", start)
+    block = text[start:end].split("size_data -%}", 1)[1]
+    rows = []
+    for part in block.split("||"):
+        line = part.strip()
+        if "|" not in line:
+            continue
+        cells = line.split("|")
+        assert len(cells) == 9, line
+        rows.append(cells)
+    return rows
+
+
+def test_size_chart_keeps_the_house_half_sizes_and_converts() -> None:
+    """Half sizes stay the numbers already on the product page. Quarter
+    sizes and country columns are the trade chart, with inches = mm / 25.4.
+    """
+    rows = _chart_rows()
+    assert len(rows) == 41
+    by_size = {cells[0]: cells for cells in rows}
+    house = {
+        "3": ("14.1", "44.2"),
+        "3.5": ("14.5", "45.5"),
+        "4": ("14.9", "46.8"),
+        "4.5": ("15.3", "48.0"),
+        "5": ("15.7", "49.3"),
+        "5.5": ("16.1", "50.6"),
+        "6": ("16.5", "51.9"),
+        "6.5": ("16.9", "53.1"),
+        "7": ("17.3", "54.4"),
+        "7.5": ("17.7", "55.7"),
+        "8": ("18.1", "57.0"),
+        "8.5": ("18.5", "58.3"),
+        "9": ("19.0", "59.5"),
+        "9.5": ("19.4", "60.8"),
+        "10": ("19.8", "62.1"),
+        "10.5": ("20.2", "63.4"),
+        "11": ("20.6", "64.6"),
+        "11.5": ("21.0", "65.9"),
+        "12": ("21.4", "67.2"),
+        "12.5": ("21.8", "68.5"),
+        "13": ("22.2", "69.7"),
+    }
+    for size, (diameter, circ) in house.items():
+        assert by_size[size][1] == diameter
+        assert by_size[size][2] == circ
+    assert by_size["6"][4:] == ["L ½", "52", "16 ½", "12", "11 ½"]
+    assert by_size["7"][4:] == ["N ½", "54.5", "17 ¼", "14", "14"]
+    assert by_size["4.25"][6:8] == ["—", "—"]
+    assert by_size["13"][4] == "—"
+    previous = -1.0
+    for cells in rows:
+        diameter = float(cells[1])
+        circ = float(cells[2])
+        assert diameter > previous
+        previous = diameter
+        assert abs(float(cells[3]) - round(circ / 25.4, 2)) < 0.001
+    # The dialog stays on the half-size US table. The guide page adds the rest.
+    assert "render 'ring-size-chart', class: 'pdp-fit-dialog__table'" in FIT.read_text()
+    guide = (ROOT / "sections/size-guide.liquid").read_text()
+    assert "view: 'us'" in guide
+    assert "view: 'convert'" in guide
+    assert "view: 'sizer'" in guide
+    assert "chart_view == 'convert'" in (ROOT / "snippets/ring-size-chart.liquid").read_text()
+
+
+def test_size_guide_states_the_published_resizing_policy() -> None:
+    guide = (ROOT / "sections/size-guide.liquid").read_text().lower()
+    page = (ROOT / "templates/page.ring-size-guide.json").read_text().lower()
+    combined = guide + "\n" + page
+    assert "one complimentary resizing" in combined
+    assert "eternity" in combined
+    assert "14 days" in combined
+    assert "30-day" not in combined
+    assert "30 days" not in combined
+    assert "free ring sizer" not in combined
+    assert "mail you" not in combined
+    assert "FAQPage" in (ROOT / "sections/size-guide.liquid").read_text()
+    assert "Ring Size Chart | Laura Milman" in (ROOT / "layout/theme.liquid").read_text()
+
+
 def test_estate_rings_never_promise_complimentary_resizing() -> None:
     fit = FIT.read_text()
     estate_branch = fit.index("{%- if estate -%}")
