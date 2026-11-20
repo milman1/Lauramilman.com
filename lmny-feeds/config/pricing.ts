@@ -381,7 +381,8 @@ export function supplierRetailFromCost(costUsd: number): number {
  *   retail = round(cost × 2.5);  18K = 14K retail + 250
  *
  * Settings only. It is not the Royal Chain rule above. Complete rings with
- * their own center stone use `ENGAGEMENT_RING` (also × 2.5).
+ * their own center stone use `ENGAGEMENT_RING` (× 2.75), so a finished ring
+ * always costs more than its setting-only version.
  */
 export const SETTING_ONLY = {
   costMultiple: 2.5,
@@ -406,14 +407,14 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
 /**
  * Lab-grown engagement rings sold with their own center stone (house rings in
  * the engagement-rings collection, product type or tag "Engagement Ring").
- * Merchant decision 2026-11-17: retail = cost × 2.5, rounded to the nearest
- * dollar; the 18K option of a ring listed in 14K is the 14K price + $250.
+ * Merchant decision 2026-11-20: retail = cost × 2.75, rounded to the nearest
+ * dollar (× 2.5 from 2026-11-17, × 2 before); the 18K option of a ring listed in 14K is the 14K price + $250.
  * Other lab-grown jewelry stays on `LAB_GROWN_JEWELRY` (× 2). Fancy-color
  * natural rings (handle `fc-`) and rings with no cost recorded are not
  * covered and stay merchant-set.
  */
 export const ENGAGEMENT_RING = {
-  costMultiple: 2.5,
+  costMultiple: 2.75,
   upcharge18kUsd: 250,
 } as const;
 

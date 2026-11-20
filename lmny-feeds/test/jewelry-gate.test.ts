@@ -103,11 +103,11 @@ describe('jewelry activation gate', () => {
     expect(validateActivation(snapshot, review, NOW)).toEqual([]);
     snapshot.product.variants.nodes[0]!.price = '246.90'; renew(snapshot, review); expect(validateActivation(snapshot, review, NOW).join(' ')).toMatch(/source rule/);
   });
-  it('prices lab-grown engagement rings at 2.5× and their 18K option at the 14K price + $250', () => {
+  it('prices lab-grown engagement rings at 2.75× and their 18K option at the 14K price + $250', () => {
     const { snapshot, review } = fixture(); review.kind = 'lab-grown'; snapshot.product.tags = [...snapshot.product.tags, 'Engagement Rings'];
     const base = snapshot.product.variants.nodes[0]!;
-    base.selectedOptions = [{ name: 'Metal', value: '14K White Gold' }]; base.price = '309';
-    snapshot.product.variants.nodes.push({ ...base, id: 'gid://shopify/ProductVariant/2', sku: 'TEST-002', price: '559', selectedOptions: [{ name: 'Metal', value: '18K White Gold' }], inventoryItem: { ...base.inventoryItem, unitCost: { amount: '150.00', currencyCode: 'USD' } } });
+    base.selectedOptions = [{ name: 'Metal', value: '14K White Gold' }]; base.price = '339';
+    snapshot.product.variants.nodes.push({ ...base, id: 'gid://shopify/ProductVariant/2', sku: 'TEST-002', price: '589', selectedOptions: [{ name: 'Metal', value: '18K White Gold' }], inventoryItem: { ...base.inventoryItem, unitCost: { amount: '150.00', currencyCode: 'USD' } } });
     renew(snapshot, review);
     expect(validateActivation(snapshot, review, NOW).filter(i => /source rule/.test(i))).toEqual([]);
     snapshot.product.variants.nodes[1]!.price = '375'; renew(snapshot, review);

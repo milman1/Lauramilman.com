@@ -33,17 +33,17 @@ describe('setting18kRetailFrom14kRetail', () => {
 });
 
 describe('engagementRingRetailFromCost', () => {
-  it('prices a lab-grown engagement ring with its own stone at 2.5× cost, to the dollar', () => {
-    expect(ENGAGEMENT_RING.costMultiple).toBe(2.5);
-    expect(engagementRingRetailFromCost(850)).toBe(2125);
-    expect(engagementRingRetailFromCost(1450)).toBe(3625);
-    expect(engagementRingRetailFromCost(333)).toBe(833);
+  it('prices a lab-grown engagement ring with its own stone at 2.75× cost, to the dollar', () => {
+    expect(ENGAGEMENT_RING.costMultiple).toBe(2.75);
+    expect(engagementRingRetailFromCost(850)).toBe(2338);
+    expect(engagementRingRetailFromCost(1450)).toBe(3988);
+    expect(engagementRingRetailFromCost(1000)).toBe(2750);
     expect(() => engagementRingRetailFromCost(0)).toThrow(/invalid cost/);
   });
 
   it('prices the 18K option at the 14K price + $250', () => {
     expect(ENGAGEMENT_RING.upcharge18kUsd).toBe(250);
-    expect(engagementRing18kRetailFrom14kRetail(engagementRingRetailFromCost(650))).toBe(1875);
+    expect(engagementRing18kRetailFrom14kRetail(engagementRingRetailFromCost(650))).toBe(2038);
     expect(() => engagementRing18kRetailFrom14kRetail(-1)).toThrow();
   });
 });

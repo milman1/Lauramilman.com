@@ -58,9 +58,9 @@ All mandatory checks below remain required. The gate command automates the
 structural checks; its documented Shopify connector path must reproduce them
 with complete reads and retain evidence for the semantic and preview checks.
 Skylab products require their matching video attached as Shopify media.
-Finished lab-grown pieces use cost × 2, rounded to cents. Settings and lab-grown
-engagement rings use cost × 2.5, rounded to dollars, with the 18K option at the
-14K price + $250 (merchant decision 2026-11-17).
+Finished lab-grown pieces use cost × 2, rounded to cents. Settings use cost × 2.5 and
+lab-grown engagement rings cost × 2.75, rounded to dollars, with the 18K option
+at the 14K price + $250 (merchant decisions 2026-11-17 and 2026-11-20).
 
 
 Create future uploads as DRAFT. Finish the applicable listing and operational
