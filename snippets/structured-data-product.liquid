@@ -37,6 +37,16 @@ nothing is parsed or inferred from the title.
   if is_vintage == 'true' or schema_condition contains 'pre-owned' or schema_condition contains 'preowned' or schema_condition contains 'used'
     assign item_condition = 'https://schema.org/UsedCondition'
   endif
+  # A design qualifier cannot establish the item's condition.
+  assign condition_title = product.title | downcase | replace: '-', ' ' | replace: '–', ' ' | replace: '‑', ' '
+  if condition_title contains 'vintage style' or condition_title contains 'vintage inspired'
+    assign item_condition = ''
+    if schema_condition == 'new' or schema_condition == 'unworn' or schema_condition == 'new/unworn'
+      assign item_condition = 'https://schema.org/NewCondition'
+    elsif schema_condition contains 'pre-owned' or schema_condition contains 'preowned' or schema_condition == 'used' or condition_title contains 'pre owned' or condition_title contains 'preowned'
+      assign item_condition = 'https://schema.org/UsedCondition'
+    endif
+  endif
   assign schema_material = product.metafields.custom.metal.value | default: product.metafields.custom.metal_type.value
   assign schema_currency = cart.currency.iso_code | default: shop.currency
   assign schema_mpn = product.metafields.global['MPN'].value | default: ''
@@ -93,7 +103,7 @@ nothing is parsed or inferred from the title.
   },
   "sku": {{ current_variant.sku | json }},
   "category": {{ product.type | json }},
-  "itemCondition": {{ item_condition | json }},
+  {%- if item_condition != '' %}"itemCondition": {{ item_condition | json }},{% endif %}
   "offers": [
     {%- for variant in product.variants limit: 50 -%}
       {
@@ -104,7 +114,7 @@ nothing is parsed or inferred from the title.
         "price": {{ variant.price | divided_by: 100.0 | json }},
         "priceCurrency": {{ schema_currency | json }},
         "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
-        "itemCondition": {{ item_condition | json }},
+        {%- if item_condition != '' %}"itemCondition": {{ item_condition | json }},{% endif %}
         "seller": { "@id": {{ shop.url | append: '/#organization' | json }} },
         {{ schema_shipping }}
         {%- if schema_returns != blank -%},{{ schema_returns }}{%- endif %}
