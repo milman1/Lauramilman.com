@@ -129,6 +129,10 @@
   {%- unless search_only -%}
     <div class="lm-dfilter__toolbar">
       <span class="lm-dfilter__count" id="lm-diamond-count" role="status">Loading diamonds…</span>
+      <div class="lm-dfilter__view" role="group" aria-label="Results layout">
+        <button type="button" class="lm-dfilter__view-btn" data-results-view="list" aria-pressed="true">List</button>
+        <button type="button" class="lm-dfilter__view-btn" data-results-view="grid" aria-pressed="false">Grid</button>
+      </div>
       <div class="lm-dfilter__sort">
         <label for="lm-diamond-sort">Sort by</label>
         <select id="lm-diamond-sort">

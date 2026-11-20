@@ -261,6 +261,172 @@
     );
   }
 
+  /* ── List view: one row per stone that opens in place (image, 360° video, specs, buy) ── */
+  var VIEW_KEY = 'lmDiamondView';
+  var view = 'list';
+  try {
+    var savedView = window.localStorage.getItem(VIEW_KEY);
+    if (savedView === 'grid' || savedView === 'list') view = savedView;
+  } catch (e) {}
+  var lastData = null;
+
+  function rowId(stone) {
+    return 'lm-srow-' + String(stone.stock_ref || '').replace(/[^A-Za-z0-9_-]+/g, '-');
+  }
+
+  function specRow(label, value) {
+    return (
+      '<div class="lm-srow__spec"><dt>' + escapeHtml(label) + '</dt>' +
+      (value ? '<dd>' + value + '</dd>' : '<dd class="is-unknown">&mdash;</dd>') +
+      '</div>'
+    );
+  }
+
+  function rowHtml(stone) {
+    var img = (stone.image_urls && stone.image_urls[0]) || '';
+    var video = (stone.video_urls && stone.video_urls[0]) || '';
+    var href = '/products/' + productHandle(stone);
+    var handle = href.replace('/products/', '');
+    var id = rowId(stone);
+    var name = stone.carat + 'ct ' + stone.shape;
+    var title = name + ', ' + stone.color + ' ' + stone.clarity + (stone.lab ? ' — ' + stone.lab : '');
+    var grades = [stone.color, stone.clarity, stone.cut].filter(Boolean).join(' · ');
+    var origin = stone.kind || cfg.kind;
+    var labTag = origin === 'lab' ? '<span class="lab-grown-tag">Lab Grown Diamond</span>' : '';
+    var cert = stone.lab ? escapeHtml(stone.lab + (stone.cert_number ? ' ' + stone.cert_number : '')) : '';
+    if (cert && stone.cert_url) {
+      cert = '<a href="' + escapeAttr(stone.cert_url) + '" target="_blank" rel="noopener">' + cert + '</a>';
+    }
+
+    var actions = builder
+      ? builderActions(stone, handle)
+      : '<div class="lm-stone-card__actions">' +
+        '<button type="button" class="lm-stone-card__atc" data-add-handle="' + escapeAttr(handle) + '">Add to cart</button>' +
+        '<button type="button" class="lm-stone-card__buy" data-buy-handle="' + escapeAttr(handle) + '">Buy now</button>' +
+        '</div>' +
+        '<button type="button" class="lm-stone-card__reserve" data-reserve-stone' +
+        ' data-reserve-title="' + escapeAttr(title) + '" data-reserve-url="' + escapeAttr(href) +
+        '" data-reserve-stock="' + escapeAttr(stone.stock_ref || '') +
+        '" data-reserve-price="' + escapeAttr(money(stone.retail_usd)) + '">Ask about this stone</button>';
+
+    return (
+      '<article class="lm-srow" role="listitem" data-stock="' + escapeAttr(stone.stock_ref) + '" data-handle="' + escapeAttr(handle) + '">' +
+      '<button type="button" class="lm-srow__head" data-srow-toggle aria-expanded="false" aria-controls="' + id + '">' +
+      '<span class="lm-srow__thumb">' +
+      (img
+        ? '<img src="' + escapeAttr(img) + '" alt="" width="160" height="160" loading="lazy">'
+        : '<span class="lm-srow__thumb-empty" aria-hidden="true"></span>') +
+      '</span>' +
+      '<span class="lm-srow__main">' +
+      '<span class="lm-srow__price">' + money(stone.retail_usd) + '</span>' +
+      '<span class="lm-srow__name">' + escapeHtml(name) + '</span>' +
+      '<span class="lm-srow__grades">' + escapeHtml(grades) + '</span>' +
+      '</span>' +
+      '<span class="lm-srow__side">' +
+      (stone.lab ? '<span class="lm-srow__lab">' + escapeHtml(stone.lab) + '</span>' : '') +
+      (video ? '<span class="lm-srow__has-video">360°</span>' : '') +
+      '<span class="lm-srow__toggle"><span data-srow-label>Details</span>' +
+      '<svg aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>' +
+      '</span>' +
+      '</span>' +
+      '</button>' +
+      '<div class="lm-srow__panel" id="' + id + '" hidden>' +
+      '<div class="lm-srow__media">' +
+      '<div class="lm-srow__tabs" role="tablist" aria-label="' + escapeAttr(name) + ' media">' +
+      '<button type="button" role="tab" class="lm-srow__tab" aria-selected="true" data-srow-tab="image">Image</button>' +
+      (video ? '<button type="button" role="tab" class="lm-srow__tab" aria-selected="false" data-srow-tab="video">360° Video</button>' : '') +
+      '</div>' +
+      '<div class="lm-srow__stage" data-srow-pane="image">' +
+      (img
+        ? '<img data-src="' + escapeAttr(img) + '" alt="' + escapeAttr(title) + '" width="800" height="800">'
+        : '<p class="lm-srow__nomedia">Photo not available for this stone.</p>') +
+      '</div>' +
+      (video
+        ? '<div class="lm-srow__stage" data-srow-pane="video" hidden>' +
+          '<video data-src="' + escapeAttr(video) + '" controls playsinline muted loop preload="none" aria-label="360° view of ' + escapeAttr(title) + '"></video>' +
+          '</div>'
+        : '<p class="lm-srow__note">No 360° video on file for this stone. Ask us for more photos.</p>') +
+      '</div>' +
+      '<div class="lm-srow__info">' +
+      labTag +
+      '<p class="lm-srow__title">' + escapeHtml(title) + '</p>' +
+      '<dl class="lm-srow__specs">' +
+      specRow('Shape', escapeHtml(stone.shape || '')) +
+      specRow('Carat', escapeHtml(stone.carat != null ? String(stone.carat) : '')) +
+      specRow('Colour', escapeHtml(stone.color || '')) +
+      specRow('Clarity', escapeHtml(stone.clarity || '')) +
+      specRow('Cut', escapeHtml(stone.cut || '')) +
+      specRow('Measurements', escapeHtml(stone.measurements || '')) +
+      specRow('Certificate', cert) +
+      '</dl>' +
+      actions +
+      '<a class="lm-srow__more" href="' + escapeAttr(href) + '">View full details</a>' +
+      '</div>' +
+      '</div>' +
+      '</article>'
+    );
+  }
+
+  function showPane(row, name) {
+    row.querySelectorAll('[data-srow-tab]').forEach(function (tab) {
+      tab.setAttribute('aria-selected', tab.getAttribute('data-srow-tab') === name ? 'true' : 'false');
+    });
+    row.querySelectorAll('[data-srow-pane]').forEach(function (pane) {
+      var on = pane.getAttribute('data-srow-pane') === name;
+      pane.hidden = !on;
+      var vid = pane.querySelector('video');
+      if (!vid) return;
+      if (!on) {
+        vid.pause();
+        return;
+      }
+      if (vid.dataset.src) {
+        vid.src = vid.dataset.src;
+        vid.removeAttribute('data-src');
+        vid.addEventListener('error', function () {
+          pane.innerHTML = '<p class="lm-srow__nomedia">The 360° video could not be loaded.</p>';
+        });
+      }
+      vid.muted = true;
+      var playing = vid.play();
+      if (playing && playing.catch) playing.catch(function () {});
+    });
+  }
+
+  function setRowOpen(row, open) {
+    var head = row.querySelector('[data-srow-toggle]');
+    var panel = row.querySelector('.lm-srow__panel');
+    if (!head || !panel) return;
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.hidden = !open;
+    row.classList.toggle('is-open', open);
+    var label = row.querySelector('[data-srow-label]');
+    if (label) label.textContent = open ? 'Hide details' : 'Details';
+    if (open) {
+      var img = panel.querySelector('img[data-src]');
+      if (img) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      }
+    } else {
+      panel.querySelectorAll('video').forEach(function (v) { v.pause(); });
+    }
+  }
+
+  function setView(next) {
+    view = next === 'grid' ? 'grid' : 'list';
+    try { window.localStorage.setItem(VIEW_KEY, view); } catch (e) {}
+    root.querySelectorAll('[data-results-view]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-results-view') === view ? 'true' : 'false');
+    });
+    if (lastData) paintStones(lastData);
+  }
+
+  root.querySelectorAll('[data-results-view]').forEach(function (btn) {
+    btn.setAttribute('aria-pressed', btn.getAttribute('data-results-view') === view ? 'true' : 'false');
+    btn.addEventListener('click', function () { setView(btn.getAttribute('data-results-view')); });
+  });
+
   function ringPath(extra) {
     var q = '?view=' + encodeURIComponent(builderView);
     if (builder.variant) q += '&variant=' + encodeURIComponent(builder.variant);
@@ -464,6 +630,7 @@
   }
 
   function paintStones(data) {
+    lastData = data;
     if (countEl) countEl.textContent = resultSummary(data.total || 0);
     if (resultsEl) {
       if (!data.stones || !data.stones.length) {
@@ -472,8 +639,8 @@
           '<p class="lm-dfilter__empty-copy">Widen a grade or carat range and try again.</p></div>';
       } else {
         resultsEl.innerHTML =
-          '<div class="products-grid lm-dfilter__results">' +
-          data.stones.map(cardHtml).join('') +
+          (view === 'list' ? '<div class="lm-srows" role="list">' : '<div class="products-grid lm-dfilter__results">') +
+          data.stones.map(view === 'list' ? rowHtml : cardHtml).join('') +
           '</div>';
       }
     }
@@ -784,6 +951,17 @@
     resultsEl.addEventListener('click', function (e) {
       if (e.target.closest('[data-diamond-retry]')) {
         load();
+        return;
+      }
+      var rowHead = e.target.closest('[data-srow-toggle]');
+      if (rowHead) {
+        var openRowEl = rowHead.closest('.lm-srow');
+        setRowOpen(openRowEl, rowHead.getAttribute('aria-expanded') !== 'true');
+        return;
+      }
+      var rowTab = e.target.closest('[data-srow-tab]');
+      if (rowTab) {
+        showPane(rowTab.closest('.lm-srow'), rowTab.getAttribute('data-srow-tab'));
         return;
       }
       var buyBtn = e.target.closest('[data-buy-handle], [data-add-handle]');
