@@ -47,3 +47,29 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 Reports contain counts, handles and retail prices; no API key or supplier costs.
 Only the sanitized report is uploaded as an Actions artifact. No raw source
 records, private plan inputs, credentials, or actual-cost fixtures are committed.
+
+## Belgium Dia colored stones (second source)
+
+Merchant decision 2026-11-20: the fancy-color rows in the Belgium Dia lab feed
+(~500 pink, yellow, blue, green and brown stones in Nov 2026) are listed
+alongside LGD's, not instead of them. The white Belgium sync still holds them
+as `color_below_floor`; `src/lgd-color/belgium.ts` picks them up instead.
+
+- Same pipeline as LGD: `normalizeBelgiumRow` builds the LGD stone shape, then
+  `payloadFor`, `planFor` and `main` in `sync.mjs` price, write, media-check,
+  verify and withdraw it. Price is `coloredLabRetailFromCost` on the cost
+  `resolveStoneCost` gives the white lab sync, with the white lab $/ct floor.
+- Ownership: tags `colored-stone-feed` and `belgium-color-feed`, handle
+  `lg-color-bd-<stock>`. `ownsLgd` and `ownsBelgium` keep each source's
+  withdrawals to its own stones. The storefront treats both the same.
+- A stone whose IGI report is already listed (by LGD or any lab-grown product)
+  is skipped as `duplicate_certificate`.
+- Held, never guessed: modifier colors ("Yellowish Green"), unknown intensity,
+  non-IGI, clarity below SI2, no IGI report number, no HTTPS photo or MP4/WebM
+  video, a non-available status, or a cost below the lab $/ct floor.
+- A lab feed under 5,000 rows is refused (the pager has no total to check).
+- Workflow: `.github/workflows/belgium-color-sync.yml`, hourly at :07, the same
+  modes as LGD (dispatch defaults to a full dry run). Shares the
+  `lmny-colored-stone-sync` concurrency group with LGD. Set
+  `BELGIUM_COLOR_SYNC_LIVE=false` to pause scheduled writes. Report:
+  `out/belgium-color-report.json`.

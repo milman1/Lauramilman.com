@@ -4,10 +4,18 @@ import { coloredLabRetailFromCost } from '../../config/pricing.ts';
 // Separate ownership from the Belgium feed; its removal pass must never own these.
 export const FEED_TAG = 'colored-stone-feed';
 export const PREFIX = 'lg-color-';
-const COLORS = new Set(['BLUE', 'BROWN', 'GREEN', 'ORANGE', 'PINK', 'YELLOW']);
-const INTENSITIES = new Set(['Fancy', 'Fancy Light', 'Fancy', 'Fancy Intense', 'Fancy Vivid', 'Fancy Deep', 'Fancy Dark', 'Light', 'Very Light', 'Faint']);
-const CLARITIES = new Set(['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2']);
-const SHAPES = new Map(['ROUND','PRINCESS','CUSHION','EMERALD','OVAL','RADIANT','ASSCHER','MARQUISE','HEART','PEAR','BAGUETTE','TRILLION'].map(s => [s, titleCase(s)]));
+// Belgium Dia colored lab stones sit alongside LGD's (merchant decision
+// 2026-11-20). They share FEED_TAG, so the storefront treats them the same,
+// but carry their own tag and handle prefix so each source withdraws only
+// its own stones (src/lgd-color/belgium.ts).
+export const BELGIUM_TAG = 'belgium-color-feed';
+export const BELGIUM_PREFIX = 'lg-color-bd-';
+export function ownsLgd(p) { return p.tags.includes(FEED_TAG) && p.handle.startsWith(PREFIX) && !p.handle.startsWith(BELGIUM_PREFIX) && !p.tags.includes(BELGIUM_TAG); }
+export function ownsBelgium(p) { return p.tags.includes(FEED_TAG) && p.tags.includes(BELGIUM_TAG) && p.handle.startsWith(BELGIUM_PREFIX); }
+export const COLORS = new Set(['BLUE', 'BROWN', 'GREEN', 'ORANGE', 'PINK', 'YELLOW']);
+export const INTENSITIES = new Set(['Fancy', 'Fancy Light', 'Fancy', 'Fancy Intense', 'Fancy Vivid', 'Fancy Deep', 'Fancy Dark', 'Light', 'Very Light', 'Faint']);
+export const CLARITIES = new Set(['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2']);
+export const SHAPES = new Map(['ROUND','PRINCESS','CUSHION','EMERALD','OVAL','RADIANT','ASSCHER','MARQUISE','HEART','PEAR','BAGUETTE','TRILLION'].map(s => [s, titleCase(s)]));
 SHAPES.set('CUSHION MODIFIED', 'Cushion');
 SHAPES.set('SQUARE RADIANT', 'Radiant');
 // Shapes beyond the classic list, named as the storefront shape buttons store
@@ -43,7 +51,8 @@ export function normalizeRow(r) {
   const clarity = text(r.Clarity).toUpperCase(), carat = number(r.Weight);
   const cost = number(r.Buy_Price_Total), perCarat = number(r.Buy_Price);
   const certificate = certificateFromUrl(r.CertificateLink);
-  if (!/^[a-z0-9_-]+$/i.test(stock)) return { reason: 'stock' };
+  // A `bd-` stock would land in the Belgium handle space (lg-color-bd-…).
+  if (!/^[a-z0-9_-]+$/i.test(stock) || /^bd-/i.test(stock)) return { reason: 'stock' };
   if (text(r.Diamond_Type) !== 'Lab Grown' || text(r.Lab) !== 'IGI' || !shape || !COLORS.has(color)) return { reason: 'scope' };
   if (text(r.Availability) !== 'Available') return { reason: 'unavailable' };
   if (!INTENSITIES.has(intensity) || !CLARITIES.has(clarity) || !certificate) return { reason: 'grading_or_certificate' };
@@ -84,7 +93,7 @@ export function payloadFor(s, existing, status = 'DRAFT', locationId) {
   ].filter(f => f[3]).map(([namespace,key,type,value]) => ({namespace,key,type,value}));
   metafields.push({namespace:'colored_feed',key:'content_hash',type:'single_line_text_field',value:snapshotHash(s)});
   const input = { handle:s.handle, title, vendor:'Laura Milman New York', productType:'Lab-Grown Diamond', category:'gid://shopify/TaxonomyCategory/aa-6', templateSuffix:'diamond', status,
-    descriptionHtml, tags:[FEED_TAG,'Colored Lab-Grown Diamond',s.shape,s.color,s.intensity,s.clarity,'IGI'],
+    descriptionHtml, tags:[FEED_TAG,...(s.sourceTag?[s.sourceTag]:[]),'Colored Lab-Grown Diamond',s.shape,s.color,s.intensity,s.clarity,'IGI'],
     seo:{title:seoTitle,description:`${s.carat.toFixed(2)}ct ${color} ${s.shape.toLowerCase()} lab-grown diamond. ${s.clarity} clarity, IGI certified. Sold loose by Laura Milman New York.`.slice(0,160)},
     metafields, productOptions:[{name:'Title',values:[{name:'Default Title'}]}],
     variants:[{...(existing?.variantId ? {id:existing.variantId}:{}),optionValues:[{optionName:'Title',name:'Default Title'}],sku:s.stock,price:s.retail.toFixed(2),taxable:true,inventoryPolicy:'CONTINUE',inventoryItem:{tracked:true,requiresShipping:true,cost:s.cost.toFixed(2)},...(locationId ? {inventoryQuantities:[{locationId,name:'available',quantity:0}]}:{})}] };
