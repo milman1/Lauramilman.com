@@ -52,6 +52,13 @@ describe('extractSpecs', () => {
     },
   );
 
+  it('does not use abbreviated labeled metal fineness as a diamond weight', () => {
+    const html = '<strong>Metal Type:</strong> 18ct';
+    const specs = extractSpecs('Estate cufflinks', html);
+    expect(specs.metalType).toBe('18ct');
+    expect(specs.diamondWeight).toBeUndefined();
+  });
+
   it('requires diamond evidence, not another gemstone weight, after explicit zero center weight', () => {
     const label = '<strong>Center Diamond Weight:</strong> 0ct';
     expect(extractSpecs('Estate 2ct sapphire ring in 18ct yellow gold', label).diamondWeight).toBeUndefined();
