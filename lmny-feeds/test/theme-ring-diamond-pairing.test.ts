@@ -27,7 +27,8 @@ describe('engagement ring ↔ loose diamond pairing', () => {
     expect(diamondTemplate.order).toEqual(['main', 'recommendations']);
     const afterBuy = diamondSection.slice(diamondSection.indexOf('{%- endform -%}'));
     expect(afterBuy.indexOf("{% render 'diamond-setting-picker', product: product %}")).toBeGreaterThan(0);
-    expect(afterBuy.indexOf("{% render 'diamond-setting-picker'")).toBeLessThan(afterBuy.indexOf("{% render 'product-inquiry'"));
+    expect(afterBuy.indexOf("{% render 'product-inquiry'")).toBeGreaterThan(0);
+    expect(afterBuy.indexOf("{% render 'product-inquiry'")).toBeLessThan(afterBuy.indexOf("{% render 'diamond-setting-picker'"));
     expect(diamondSide).toContain("{% render 'center-stone-shape', product: ring %}");
     expect(diamondSide).toContain('{%- if ring_shape == stone_shape -%}');
     expect(diamondSide).toContain('pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}');

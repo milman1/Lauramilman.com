@@ -734,18 +734,22 @@
     // The builder draws the review after load, so the #RingEmailForm jump lands at
     // the top; confirm at the top instead, then drop the flag so a refresh or a
     // shared link does not say "Sent" again. A failed send goes back to the form.
+    function showRingSent() {
+      if (!sentBox) return;
+      const items = ['setting', 'diamond'].filter(k => state[k]).map(k => `<li><span class="eyebrow">${esc(t(k))}</span>${esc(state[k].title)}</li>`).join('');
+      sentBox.innerHTML = `<h2>${esc(t('email_sent_title'))}</h2><p>${esc(t('email_sent'))}</p>${items ? `<ul>${items}</ul>` : ''}<p class="detail-help"><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))} →</a>${button('keep_personalizing', 'keep-personalizing', 'link')}</p>`;
+      sentBox.hidden = false;
+      reveal(sentBox);
+      sentBox.focus({ preventScroll: true });
+    }
     function afterRingEmail() {
       const mail = root.querySelector('[data-ring-email]');
-      const sent = mail && !mail.hidden && mail.querySelector('[data-ring-email-sent]');
-      const failed = mail && !mail.hidden && mail.querySelector('[data-ring-email-error]');
+      const marker = mail && mail.querySelector('[data-ring-email-sent]');
+      const sent = mail && !mail.hidden && marker && !marker.hidden;
+      const failed = mail && !mail.hidden && mail.querySelector('[data-ring-email-error]:not([hidden])');
       const u = new URL(window.location.href);
-      if (sent && sentBox) {
-        const items = ['setting', 'diamond'].filter(k => state[k]).map(k => `<li><span class="eyebrow">${esc(t(k))}</span>${esc(state[k].title)}</li>`).join('');
-        sentBox.innerHTML = `<h2>${esc(t('email_sent_title'))}</h2><p>${esc(t('email_sent'))}</p>${items ? `<ul>${items}</ul>` : ''}<p class="detail-help"><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))} →</a>${button('keep_personalizing', 'keep-personalizing', 'link')}</p>`;
-        sentBox.hidden = false;
-        reveal(sentBox);
-        sentBox.focus({ preventScroll: true });
-      } else if (failed) {
+      if (sent) showRingSent();
+      else if (failed) {
         reveal(mail);
         mail.querySelector('input[type="email"]')?.focus({ preventScroll: true });
       }
@@ -1026,7 +1030,60 @@
       }
     });
     root.addEventListener('submit', event => {
-      if (event.target.id === 'RingEmailForm') { if (both()) fillRingEmail(event.target); else event.preventDefault(); return; }
+      if (event.target.id === 'RingEmailForm') {
+        event.preventDefault();
+        if (!both()) return;
+        const form = event.target;
+        fillRingEmail(form);
+        const name = (form.querySelector('[name="contact[name]"]') || {}).value || '';
+        const email = (form.querySelector('[name="contact[email]"]') || {}).value || '';
+        const phone = (form.querySelector('[name="contact[phone]"]') || {}).value || '';
+        const note = (form.querySelector('[name="contact[body]"]') || {}).value || '';
+        const error = form.querySelector('[data-ring-email-error]');
+        const field = key => (form.querySelector('[data-ring-email-field="' + key + '"]') || {}).value || '';
+        if (!name.trim() || !email.trim()) {
+          if (error) error.hidden = false;
+          (name.trim() ? form.querySelector('[name="contact[email]"]') : form.querySelector('[name="contact[name]"]'))?.focus();
+          return;
+        }
+        if (error) error.hidden = true;
+        const parts = name.trim().split(/\s+/);
+        const endpoint = form.getAttribute('data-inquiry-endpoint') || 'https://lauramilman-com.milmanavi.workers.dev/inquiry';
+        const button = form.querySelector('[type="submit"]');
+        if (button) button.disabled = true;
+        fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'omit',
+          body: JSON.stringify({
+            kind: 'ring',
+            name: name.trim(),
+            first_name: parts[0],
+            last_name: parts.slice(1).join(' '),
+            email: email.trim(),
+            phone: phone.trim(),
+            question: note.trim(),
+            ring: {
+              request_type: 'Ring builder',
+              ring_link: field('link'),
+              setting: field('setting'),
+              diamond: field('diamond'),
+              size: field('size'),
+              options: field('options'),
+              subtotal: field('subtotal')
+            }
+          })
+        }).then(res => res.json().catch(() => ({})).then(data => {
+          if (!res.ok || !data.ok) throw new Error('save');
+          const marker = form.querySelector('[data-ring-email-sent]');
+          if (marker) marker.hidden = false;
+          showRingSent();
+        })).catch(() => {
+          if (button) button.disabled = false;
+          if (error) error.hidden = false;
+        });
+        return;
+      }
       if (!event.target.matches('[data-search-form]')) return;
       event.preventDefault();
       if (state.busy) return;

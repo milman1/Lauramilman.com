@@ -1,0 +1,63 @@
+{%- comment -%}
+  General inquiry for the contact page. No piece line. One form, the same
+  lead path as Ask about this piece on a product.
+{%- endcomment -%}
+
+<section class="lm-inquiry-page">
+  <div class="page-width page-width--narrow">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="lm-inquiry-page__title">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    {%- if section.settings.intro != blank -%}
+      <p class="lm-inquiry-page__intro">{{ section.settings.intro }}</p>
+    {%- endif -%}
+    {% render 'inquiry-lead', presentation: 'page' %}
+  </div>
+</section>
+
+<style>
+  .lm-inquiry-page {
+    background: var(--warm-white, #FDFAF6);
+    padding: 1rem 0 3.5rem;
+  }
+  .lm-inquiry-page__title {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+  }
+  .lm-inquiry-page__intro {
+    margin: 0 0 1.25rem;
+    max-width: 36rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted, #8A8070);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Inquiry",
+  "tag": "section",
+  "class": "section-inquiry",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Write to us"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "A question about a piece, a size, or a visit. We reply by email."
+    }
+  ],
+  "presets": [
+    { "name": "Inquiry" }
+  ]
+}
+{% endschema %}
