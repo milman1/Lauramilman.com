@@ -17,6 +17,9 @@ const METAL_WEIGHT_PATTERN = /\b(\d+(?:\.\d+)?)\s*(grams?|gr\.?|g|dwt)\b/i;
 const GOLD_FINENESS_PATTERN =
   /(?<![\w.])(?:[1-9]|1\d|2[0-4])\s*-?\s*(?:cts?|carats?)\b\.?[\s-]*(?:(?:yellow|white|rose|pink|green|solid|tri[\s-]?color|two[\s-]?tone|three[\s-]?tone)[\s,\/-]+(?:and[\s-]+)?)*gold\b/gi;
 
+// The labeled metal type identifies fineness even when the supplier omits "gold".
+const LABELED_METAL_FINENESS_PATTERN = /\bmetal\s+type\s*:\s*(?:[1-9]|1\d|2[0-4])\s*-?\s*(?:cts?|carats?)\b/gi;
+
 const DIAMOND_WEIGHT_PATTERN = /(?<![\w.+-])(\d+(?:\.\d+)?|\.\d+)\s*(?:cttw|ctw|cts|ct|carats?)\b/gi;
 const DIAMONDS_BEFORE_WEIGHT =
   /\b(?:diamonds?|(?:total\s+)?diamond\s+weight)\s*(?:weigh(?:s|ing)?|total(?:s|l?ing)?|of)?\s*[:=]?\s*(?:approx(?:imately)?\.?\s*)?$/i;
@@ -25,7 +28,8 @@ const DIAMONDS_AFTER_WEIGHT =
 
 function findDiamondWeight(text: string, requireDiamondContext: boolean): string | undefined {
   // Mask rather than delete, so two unrelated phrases cannot become adjacent.
-  const withoutFineness = text.replace(GOLD_FINENESS_PATTERN, (metal) => ' '.repeat(metal.length));
+  const mask = (metal: string) => ' '.repeat(metal.length);
+  const withoutFineness = text.replace(GOLD_FINENESS_PATTERN, mask).replace(LABELED_METAL_FINENESS_PATTERN, mask);
   for (const match of withoutFineness.matchAll(DIAMOND_WEIGHT_PATTERN)) {
     const amount = match[1]!;
     if (!(Number(amount) > 0)) continue;
