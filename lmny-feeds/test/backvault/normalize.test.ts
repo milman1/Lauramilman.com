@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeBackVaultFeed } from '../../src/backvault/normalize.js';
+import { buildProductSetInput } from '../../src/backvault/product.js';
 import { containsBackVaultReference } from '../../src/backvault/scrub.js';
 import type { RawBackVaultProduct } from '../../src/backvault/types.js';
 
@@ -34,6 +35,33 @@ describe('normalizeBackVaultFeed', () => {
     expect(item.specs.metalWeight).toBe('32.5g');
     expect(item.specs.era?.toLowerCase()).toContain('art deco');
     expect(item.specs.condition?.toLowerCase()).toContain('excellent');
+  });
+
+  it('builds the J10546 product update without a false diamond claim', () => {
+    const { items } = normalizeBackVaultFeed([product({
+      handle: 'cartier-18k-yellow-gold-octagonal-circa-2000-cuff-links-j10546',
+      title: 'Cartier 18K Yellow Gold Octagonal Circa 2000 Cuff Links',
+      product_type: 'Cuff Links',
+      body_html:
+        '<p>Double sided cufflinks in 18ct yellow gold with octagonal faces.</p>' +
+        '<strong>Center Diamond Weight:</strong> 0.00<br>' +
+        '<strong>Measurements:</strong> L 4.1cm<br>' +
+        '<strong>Metal Type:</strong> 18K Yellow Gold<br>' +
+        '<strong>Metal Weight:</strong> 19.9 gr.<br>' +
+        '<strong>Signed:</strong> Cartier',
+      variants: [{ id: 10, title: 'Default Title', price: '4200.00', available: true, sku: 'J10546' }],
+    })]);
+    expect(items).toHaveLength(1);
+    const input = buildProductSetInput(items[0]!, '2026-11-21T00:00:00.000Z', {
+      id: 'gid://shopify/Product/1',
+      imageCount: 1,
+    });
+    expect(input.id).toBe('gid://shopify/Product/1');
+    expect(input.descriptionHtml).not.toMatch(/(?:18ct|0ct) of diamonds/i);
+    expect(input.metafields).not.toContainEqual(expect.objectContaining({ namespace: 'custom', key: 'diamond_weight' }));
+    expect(input.metafields).toContainEqual(expect.objectContaining({
+      namespace: 'custom', key: 'metal_type', value: '18K Yellow Gold',
+    }));
   });
 
   it('prices every item at the supplier price, with the cost one third below it', () => {
