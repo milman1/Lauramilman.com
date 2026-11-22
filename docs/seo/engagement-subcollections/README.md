@@ -1,10 +1,29 @@
 # Engagement ring subcollections: SEO and AEO copy (2026-11-22)
 
-Twelve subcollections under Wedding → Engagement Rings, chosen from what the 71-ring `engagement-rings` collection actually holds on 2026-11-22. Copy follows `docs/seo/listing-seo-geo.md`: answer-first intro, no hype, closer matches the live 14-day policy. Not yet created in Shopify.
+Twelve subcollections under Wedding → Engagement Rings, chosen from what the 71-ring `engagement-rings` collection actually holds on 2026-11-22. Copy follows `docs/seo/listing-seo-geo.md`: answer-first intro, no hype, closer matches the live 14-day policy. **Created in Shopify 2026-11-22, unpublished (no sales channels).** Each is a smart collection: tagged `Engagement Rings` AND the style or shape tag, excluding `ring-setting` (the settings sold without a center stone carry the Engagement Rings tag too). Read back after creation:
+
+| Collection | Products | Publications |
+|---|---|---|
+| solitaire-engagement-rings | 28 | 0 |
+| hidden-halo-engagement-rings | 7 | 0 |
+| halo-engagement-rings | 4 | 0 |
+| three-stone-engagement-rings | 4 | 0 |
+| east-west-engagement-rings | 3 | 0 |
+| fancy-color-diamond-engagement-rings | 15 | 0 |
+| oval-engagement-rings | 10 | 0 |
+| round-engagement-rings | 9 | 0 |
+| emerald-cut-engagement-rings | 10 | 0 |
+| marquise-engagement-rings | 15 | 0 |
+| pear-engagement-rings | 6 | 0 |
+| radiant-cut-engagement-rings | 7 | 0 |
+
+Counts include a few draft or archived products, which the storefront hides. SEO fields, description, `custom.guide_html` and `custom.guide_faq` are set on all 12. Publishing to the Online Store is the merchant's call.
+
+Theme (`snippets/wedding-subnav.liquid`): the built-in style copy applies only to the tagged URLs; a dedicated collection shows its own fields. Once published, the menu and chips switch to these collections automatically.
 
 Fields per collection: **Description** (collection body, the answer-first intro), **SEO title** (≤ 60), **SEO description** (≤ 160), `custom.guide_html` (buying guide), `custom.guide_faq` (JSON, rendered as visible FAQ + FAQPage schema). Machine-readable copy: `copy.json`; Shopify bulk sheet: `collections.csv`.
 
-**To show the guide and FAQ**, each handle must be added to `longform_handles` in `sections/main-collection.liquid`.
+The 12 handles are on the `longform_handles` list in `sections/main-collection.liquid`, so the guide and FAQ render once a collection is published.
 
 ---
 
