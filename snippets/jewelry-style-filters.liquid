@@ -19,7 +19,7 @@
   assign jf_carats = 'Under 1 Carat::Under 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5+ Carats::5+ ct'
 
   case jf_handle
-    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings'
+    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings', 'bridal-earrings'
       assign jf_enabled = true
       assign jf_style_label = 'Earring Style'
       assign jf_styles = 'Stud::Studs||Drop::Drop||Martini::Martini||Huggie::Huggie||Hoop::Hoops||Chandelier::Chandelier||Statement::Statement||Toi et Moi::Toi et Moi'
@@ -30,11 +30,17 @@
       assign jf_style_label = 'Ring Style'
       assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Vintage::Vintage'
 
-    when 'engagement-rings', 'lab-grown-engagement-rings'
+    when 'engagement-rings', 'lab-grown-engagement-rings', 'solitaire-engagement-rings', 'halo-engagement-rings', 'hidden-halo-engagement-rings', 'three-stone-engagement-rings'
       assign jf_enabled = true
       assign jf_style_label = 'Ring Style'
-      assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Split Shank::Split Shank||Designer::Designer||Vintage::Vintage'
+      assign jf_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Vintage::Vintage'
       assign jf_carats = '1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10+ Carats::10+ ct'
+
+    when 'ring-settings', 'solitaire-ring-settings', 'hidden-halo-ring-settings'
+      assign jf_enabled = true
+      assign jf_style_label = 'Setting Style'
+      assign jf_styles = 'Solitaire::Solitaire||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Pavé::Pavé'
+      assign jf_carats = 'Under 0.5 Carats::Under 0.5 ct||0.5-1 Carats::0.5 - 1 ct||1-2 Carats::1 - 2 ct||2+ Carats::2+ ct'
 
     when 'bracelets', 'all-bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets'
       assign jf_enabled = true
@@ -42,7 +48,7 @@
       assign jf_styles = 'Tennis::Tennis||Station Line::Station Line||Riviera::Riviera||Bangle::Bangle||Statement::Statement||Cuff::Cuff'
       assign jf_carats = 'Under 3 Carats::Under 3 ct||3-5 Carats::3 - 5 ct||5-10 Carats::5 - 10 ct||10+ Carats::10+ ct'
 
-    when 'necklaces', 'lab-grown-necklaces', 'chokers'
+    when 'necklaces', 'lab-grown-necklaces', 'chokers', 'tennis-necklaces'
       assign jf_enabled = true
       assign jf_style_label = 'Necklace Style'
       assign jf_styles = 'Station::Station||Tennis::Tennis||Riviera::Riviera||Statement::Statement||Lariat::Lariat||Pendant::Pendant'
@@ -65,10 +71,10 @@
       assign jf_style_label = 'Shop by'
       assign jf_styles = 'Necklace::Necklaces||Bracelet::Bracelets||Earring::Earrings||Ring::Rings||Pendant::Pendants||Charm::Charms'
 
-    when 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands'
+    when 'wedding-bands', 'eternity-wedding-bands', 'half-eternity-wedding-bands', 'three-quarter-wedding-bands', 'lab-grown-wedding-bands', 'channel-set-wedding-bands', 'stackable-bands', 'eternity-bands'
       assign jf_enabled = true
       assign jf_style_label = 'Band Style'
-      assign jf_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Stackable::Stackable||Wedding Band::Wedding Band||Anniversary::Anniversary'
+      assign jf_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Three-Quarter::Three-Quarter||Channel::Channel||Stackable::Stackable'
       assign jf_carats = 'Under 0.5 Carats::Under 0.5 ct||0.5-1 Carats::0.5 - 1 ct||1-2 Carats::1 - 2 ct||2-3 Carats::2 - 3 ct||3+ Carats::3+ ct'
 
     when 'lab-grown-diamond-jewelry'
