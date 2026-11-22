@@ -220,5 +220,5 @@ export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
   sanitized.verified=plan.writes.length;await writeFile(source.reportPath,JSON.stringify(sanitized,null,2));
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }
-if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError?{reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError || err?.safeToLog ? {reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
 
