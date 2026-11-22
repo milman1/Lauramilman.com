@@ -3,6 +3,22 @@ import { pathToFileURL } from 'node:url';
 import { FEED_TAG, fetchInventory, normalizeFeed, ownsLgd, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
 export function currentStage() { return stage; }
+/**
+ * What to do when normalization produced no listable stones.
+ * `continue` when at least one stone is listable. `warn` is only a complete
+ * Belgium snapshot whose every colored row is a recognized unavailable
+ * status: exit without Shopify reads or writes. Anything else, including an
+ * unrecognized code or the LGD source, refuses so an empty snapshot cannot
+ * withdraw live stones.
+ */
+export function emptySnapshotAction(source, normalized) {
+  if (normalized.stones?.length) return 'continue';
+  const colored = normalized.colored ?? 0;
+  const unknown = normalized.holds?.unknown_availability ?? 0;
+  const unavailable = normalized.holds?.unavailable ?? 0;
+  if (source.emptyEligible === 'warn' && colored > 0 && unknown === 0 && unavailable === colored) return 'warn';
+  return 'refuse';
+}
 // Errors whose message carries only counts or fixed text, safe to print in CI logs.
 export class SafeError extends Error {}
 // Hourly runs may withdraw at most 150 stones, or 10% of live stones if that is
@@ -132,8 +148,16 @@ export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
   const rows=await source.fetchRows();
   stage='normalize';
   const normalized=source.normalize(rows);
-  console.log(JSON.stringify({stage,fetched:rows.length,eligible:normalized.stones.length,excluded:normalized.holds}));
-  if(!normalized.stones.length)throw new Error('No eligible stones; availability writes are unsafe');
+  console.log(JSON.stringify({stage,fetched:rows.length,...(normalized.colored==null?{}:{colored:normalized.colored}),eligible:normalized.stones.length,excluded:normalized.holds,...(normalized.availability?{availability:normalized.availability}:{})}));
+  const emptyAction=emptySnapshotAction(source,normalized);
+  if(emptyAction==='warn'){
+    const warning='No colored stones are available; availability writes skipped';
+    console.log(JSON.stringify({stage,warning,fetched:rows.length,colored:normalized.colored??0,eligible:0,excluded:normalized.holds,availability:normalized.availability??{}}));
+    await mkdir('out',{recursive:true});
+    await writeFile(source.reportPath,JSON.stringify({dryRun:dry,warning,fetched:rows.length,colored:normalized.colored??0,eligible:0,holds:normalized.holds,availability:normalized.availability??{},writes:[],withdrawals:[],skipped:[]},null,2));
+    return;
+  }
+  if(emptyAction==='refuse')throw new SafeError('No eligible stones; availability writes are unsafe');
   stage='shopify_auth';
   const gql=await client();
   stage='shopify_catalog';

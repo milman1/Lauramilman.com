@@ -22,6 +22,12 @@
  * Anything that does not fit LGD's rules (unknown intensity, modifier colors
  * such as "Yellowish Green", non-IGI, no photo or no MP4 video) is held and
  * counted, never guessed.
+ *
+ * Availability is a trade status code, not the word "available". Belgium Dia's
+ * published sample (the same Stock_No D3632 shape as the schema fixture) sends
+ * `"Availability": "G"` for guaranteed. Memo, hold, sold, and not-available
+ * stay excluded. A blank field is not treated as a refusal: the feed itself
+ * is the in-stock list, matching the white sync.
  */
 import { pathToFileURL } from 'node:url';
 import { LAB_GUARDS, coloredLabRetailFromCost } from '../../config/pricing.js';
@@ -37,6 +43,102 @@ const IMAGE_KEYS = ['imagelink', 'image', 'image_url', 'images', 'img', 'photo',
 const VIDEO_KEYS = ['videolink', 'video_html', 'video', 'video_url', 'videos', 'video_link', 'diamond_video'];
 /** Intensity words that can lead the Color value ("FANCY VIVID GREEN"), longest first. */
 const LEADING_INTENSITY = ['FANCY INTENSE', 'FANCY VIVID', 'FANCY DEEP', 'FANCY DARK', 'FANCY LIGHT', 'VERY LIGHT', 'FANCY', 'LIGHT', 'FAINT'];
+
+/**
+ * Canonical availability token: case, surrounding whitespace, and separator
+ * differences ("On_Memo", "on-hold", "G.") collapse to one token.
+ */
+export function availabilityCanon(value: unknown): string {
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return String(value ?? '')
+    .normalize('NFKC')
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_/.-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Guaranteed / in-stock synonyms, including Rapaport's G, GA, and STPS. */
+const AVAILABLE_VALUES = new Set([
+  'available',
+  'a',
+  'g',
+  'ga',
+  'guaranteed',
+  'guaranteed available',
+  'guaranteed availability',
+  'guaranteedavailable',
+  'in stock',
+  'instock',
+  'yes',
+  'y',
+  'true',
+  '1',
+  'stps',
+  'subject to prior sale',
+]);
+/** Memo, hold, sold, and explicit not-available. Checked before the available set. */
+const UNAVAILABLE_VALUES = new Set([
+  'memo',
+  'on memo',
+  'm',
+  'hold',
+  'on hold',
+  'h',
+  'sold',
+  'sold out',
+  's',
+  'na',
+  'n',
+  'n a',
+  'unavailable',
+  'not available',
+  'u',
+  'no',
+  'false',
+  '0',
+]);
+
+export type AvailabilityClass = 'blank' | 'available' | 'unavailable' | 'unknown';
+
+export function classifyAvailability(value: unknown): AvailabilityClass {
+  const canon = availabilityCanon(value);
+  if (!canon) return 'blank';
+  if (UNAVAILABLE_VALUES.has(canon)) return 'unavailable';
+  if (AVAILABLE_VALUES.has(canon)) return 'available';
+  return 'unknown';
+}
+
+/**
+ * Short display key for the availability histogram. Values that are long or
+ * not a plain status word collapse to `(other)` so a log cannot carry a URL,
+ * a secret, or a price.
+ */
+export function availabilityBucket(value: unknown): string {
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (value === null || value === undefined) return '(blank)';
+  const shown = String(value)
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/[_/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!shown) return '(blank)';
+  if (shown.length > 32 || !/^[\p{L}\p{N} .+-]+$/u.test(shown)) return '(other)';
+  return shown.toUpperCase();
+}
+
+/** Availability, Avail, or Available. A Status field counts only when it is a known code. */
+function readAvailability(raw: Raw): unknown {
+  const direct = pick(raw, ['availability', 'avail', 'available']);
+  if (direct !== undefined) return direct;
+  const status = pick(raw, ['status']);
+  if (status === undefined) return undefined;
+  const cls = classifyAvailability(status);
+  return cls === 'available' || cls === 'unavailable' ? status : undefined;
+}
 
 function text(raw: Raw, keys: string[]): string {
   const v = pick(raw, keys);
@@ -80,8 +182,9 @@ export function normalizeBelgiumRow(raw: Raw): { stone?: Record<string, unknown>
   if (!/^[a-z0-9_-]+$/i.test(stock)) return { reason: 'stock' };
   const diamondType = text(raw, ['diamond_type']);
   if (diamondType && !/lab/i.test(diamondType)) return { reason: 'scope' };
-  const availability = text(raw, ['availability']);
-  if (availability && !/^available$/i.test(availability)) return { reason: 'unavailable' };
+  const availability = classifyAvailability(readAvailability(raw));
+  if (availability === 'unavailable') return { reason: 'unavailable' };
+  if (availability === 'unknown') return { reason: 'unknown_availability' };
   const shape = (SHAPES as Map<string, string>).get(text(raw, ['shape', 'cut_shape', 'stone_shape']).toUpperCase());
   const parsed = parseColor(text(raw, ['color', 'colour', 'color_grade']), text(raw, ['fancy_color_intensity', 'fancy_intensity', 'intensity']));
   if (!shape || !parsed) return { reason: 'scope' };
@@ -135,12 +238,21 @@ export function normalizeBelgiumRow(raw: Raw): { stone?: Record<string, unknown>
 }
 
 /** Colored rows only; white rows belong to the hourly Belgium sync. */
-export function normalizeBelgiumFeed(rows: Raw[]): { stones: Record<string, unknown>[]; holds: Record<string, number> } {
+export function normalizeBelgiumFeed(rows: Raw[]): {
+  stones: Record<string, unknown>[];
+  holds: Record<string, number>;
+  colored: number;
+  availability: Record<string, number>;
+} {
   const stones: Record<string, unknown>[] = [];
   const holds: Record<string, number> = {};
+  const availability: Record<string, number> = {};
   const stocks = new Set<string>();
   const certs = new Set<string>();
-  for (const raw of rows.filter(isColoredRow)) {
+  const coloredRows = rows.filter(isColoredRow);
+  for (const raw of coloredRows) {
+    const bucket = availabilityBucket(readAvailability(raw));
+    availability[bucket] = (availability[bucket] ?? 0) + 1;
     const result = normalizeBelgiumRow(raw);
     if (!result.stone) {
       holds[result.reason!] = (holds[result.reason!] ?? 0) + 1;
@@ -153,7 +265,7 @@ export function normalizeBelgiumFeed(rows: Raw[]): { stones: Record<string, unkn
     certs.add(certificate);
     stones.push(result.stone);
   }
-  return { stones, holds };
+  return { stones, holds, colored: coloredRows.length, availability };
 }
 
 /**
@@ -174,6 +286,10 @@ export const BELGIUM_SOURCE = {
   normalize: normalizeBelgiumFeed,
   owns: ownsBelgium,
   reportPath: 'out/belgium-color-report.json',
+  // A complete feed whose colored rows are all memo, hold, sold, or not
+  // available is a real empty catalog. Warn and write nothing. An unrecognized
+  // code still fails the run so the histogram can be diagnosed.
+  emptyEligible: 'warn' as const,
 };
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
