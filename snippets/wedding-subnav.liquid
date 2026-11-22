@@ -9,6 +9,10 @@
   Empty styles are omitted. A dedicated collection the store does not have
   yet contributes no link.
 
+  The heading, title, description and intro below are written for the
+  tagged URLs only. A dedicated collection uses its own title, SEO fields,
+  description, guide and FAQ, so this snippet prints nothing for it.
+
   @param {string} part - menu, chips, heading, intro, title, or description
 {% enddoc %}
 
@@ -45,6 +49,12 @@
       assign wedding_key = 'gift-tennis'
     when 'tennis-bracelets'
       assign wedding_key = 'bracelets-tennis'
+    when 'east-west-engagement-rings'
+      assign wedding_key = 'er-east-west'
+    when 'fancy-color-diamond-engagement-rings'
+      assign wedding_key = 'er-fancy-color'
+    when 'oval-engagement-rings', 'round-engagement-rings', 'emerald-cut-engagement-rings', 'marquise-engagement-rings', 'pear-engagement-rings', 'radiant-cut-engagement-rings'
+      assign wedding_key = 'er-shape-' | append: collection.handle
     when 'solitaire-ring-settings'
       assign wedding_key = 'set-solitaire'
     when 'hidden-halo-ring-settings'
@@ -103,6 +113,11 @@
       endif
   endcase
 
+  assign wedding_copy_key = ''
+  if wedding_tag != blank
+    assign wedding_copy_key = wedding_key
+  endif
+
   assign er_all = collections['engagement-rings'].url
   assign er_lab = collections['lab-grown-engagement-rings'].url
   assign er_settings = collections['ring-settings'].url
@@ -128,6 +143,22 @@
   if collections['three-stone-engagement-rings'].products_count > 0
     assign er_three = collections['three-stone-engagement-rings'].url
   endif
+  assign er_east_west = ''
+  if collections['east-west-engagement-rings'].products_count > 0
+    assign er_east_west = collections['east-west-engagement-rings'].url
+  endif
+  assign er_fancy = ''
+  if collections['fancy-color-diamond-engagement-rings'].products_count > 0
+    assign er_fancy = collections['fancy-color-diamond-engagement-rings'].url
+  endif
+  assign er_shape_handles = 'round-engagement-rings,oval-engagement-rings,emerald-cut-engagement-rings,radiant-cut-engagement-rings,pear-engagement-rings,marquise-engagement-rings' | split: ','
+  assign er_shape_count = 0
+  for h in er_shape_handles
+    if collections[h].products_count > 0
+      assign er_shape_count = er_shape_count | plus: 1
+    endif
+  endfor
+
   assign set_solitaire = '/collections/ring-settings/solitaire'
   if collections['solitaire-ring-settings'].products_count > 0
     assign set_solitaire = collections['solitaire-ring-settings'].url
@@ -212,11 +243,28 @@
       <a href="{{ er_halo }}" class="lm-collection__chip"{% if wedding_key == 'er-halo' %} aria-current="page"{% endif %}>Halo</a>
       <a href="{{ er_hidden }}" class="lm-collection__chip"{% if wedding_key == 'er-hidden-halo' %} aria-current="page"{% endif %}>Hidden halo</a>
       <a href="{{ er_three }}" class="lm-collection__chip"{% if wedding_key == 'er-three-stone' %} aria-current="page"{% endif %}>Three-stone</a>
+      {%- if er_east_west != blank -%}
+        <a href="{{ er_east_west }}" class="lm-collection__chip"{% if wedding_key == 'er-east-west' %} aria-current="page"{% endif %}>East-west</a>
+      {%- endif -%}
+      {%- if er_fancy != blank -%}
+        <a href="{{ er_fancy }}" class="lm-collection__chip"{% if wedding_key == 'er-fancy-color' %} aria-current="page"{% endif %}>Fancy color</a>
+      {%- endif -%}
       <a href="{{ er_lab }}" class="lm-collection__chip"{% if wedding_parent == 'er-lab' %} aria-current="page"{% endif %}>Lab-grown</a>
       <a href="{{ er_settings }}" class="lm-collection__chip"{% if wedding_parent == 'set-all' %} aria-current="page"{% endif %}>Ring settings</a>
       <a href="{{ set_solitaire }}" class="lm-collection__chip"{% if wedding_key == 'set-solitaire' %} aria-current="page"{% endif %}>Solitaire settings</a>
       <a href="{{ set_hidden }}" class="lm-collection__chip"{% if wedding_key == 'set-hidden-halo' %} aria-current="page"{% endif %}>Hidden halo settings</a>
     </nav>
+    {%- if er_shape_count > 0 -%}
+      <nav class="lm-collection__chips" aria-label="Engagement ring shapes">
+        <span class="lm-collection__chips-label">Shape</span>
+        {%- for h in er_shape_handles -%}
+          {%- assign shape_collection = collections[h] -%}
+          {%- if shape_collection.products_count > 0 -%}
+            <a href="{{ shape_collection.url }}" class="lm-collection__chip"{% if collection.handle == h %} aria-current="page"{% endif %}>{{ h | remove: '-engagement-rings' | remove: '-cut' | capitalize }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
     <nav class="lm-collection__chips" aria-label="Wedding band styles">
       <span class="lm-collection__chips-label">Bands</span>
       <a href="{{ band_women }}" class="lm-collection__chip"{% if wedding_parent == 'band-women' %} aria-current="page"{% endif %}>Women's</a>
@@ -240,7 +288,7 @@
     </nav>
   {%- endif -%}
 {%- elsif part == 'heading' -%}
-  {%- case wedding_key -%}
+  {%- case wedding_copy_key -%}
     {%- when 'er-solitaire' -%}Solitaire Engagement Rings
     {%- when 'er-halo' -%}Halo Engagement Rings
     {%- when 'er-hidden-halo' -%}Hidden Halo Engagement Rings
@@ -257,7 +305,7 @@
     {%- when 'bracelets-tennis' -%}Tennis Bracelets
   {%- endcase -%}
 {%- elsif part == 'title' -%}
-  {%- case wedding_key -%}
+  {%- case wedding_copy_key -%}
     {%- when 'er-solitaire' -%}Solitaire Engagement Rings | Laura Milman
     {%- when 'er-halo' -%}Halo Engagement Rings | Laura Milman
     {%- when 'er-hidden-halo' -%}Hidden Halo Engagement Rings | Laura Milman
@@ -274,7 +322,7 @@
     {%- when 'bracelets-tennis' -%}Tennis Bracelets | Laura Milman
   {%- endcase -%}
 {%- elsif part == 'description' -%}
-  {%- case wedding_key -%}
+  {%- case wedding_copy_key -%}
     {%- when 'er-solitaire' -%}Solitaire engagement rings with one center diamond, in gold. Free insured shipping and 14-day returns.
     {%- when 'er-halo' -%}Halo engagement rings with diamonds set around the center stone. Free insured shipping and 14-day returns.
     {%- when 'er-hidden-halo' -%}Hidden halo engagement rings with diamonds set under the center stone. Free insured shipping and 14-day returns.
@@ -291,8 +339,8 @@
     {%- when 'bracelets-tennis' -%}Lab-grown diamond tennis bracelets in 14K gold. Free insured shipping and 14-day returns.
   {%- endcase -%}
 {%- elsif part == 'intro' -%}
-  {%- case wedding_key -%}
-    {%- when 'er-solitaire' -%}Solitaire engagement rings with one center diamond and no side stones. Natural and lab-grown diamonds are both in this assortment, in yellow, white, and rose gold.
+  {%- case wedding_copy_key -%}
+    {%- when 'er-solitaire' -%}Solitaire engagement rings with one center diamond and no side stones, in round, oval, emerald, marquise and radiant shapes.
     {%- when 'er-halo' -%}Halo engagement rings with a frame of diamonds around the center stone.
     {%- when 'er-hidden-halo' -%}Hidden halo engagement rings with diamonds set beneath the center stone.
     {%- when 'er-three-stone' -%}Three-stone engagement rings with a center diamond and one stone on each side.
@@ -307,6 +355,7 @@
     {%- when 'gift-tennis' -%}Lab-grown diamond tennis necklaces in 14K white gold and 14K yellow gold.
     {%- when 'bracelets-tennis' -%}Lab-grown diamond tennis bracelets in 14K gold.
   {%- else -%}
+    {%- if wedding_key == blank -%}
     {%- case wedding_parent -%}
       {%- when 'er-all' -%}Engagement rings in natural and lab-grown diamonds. Shop solitaire, halo, hidden halo, and three-stone styles, or start with a setting.
       {%- when 'er-lab' -%}Lab-grown diamond engagement rings, including solitaire, hidden halo, and three-stone styles.
@@ -317,5 +366,6 @@
       {%- when 'gift-all' -%}Wedding gifts in lab-grown diamonds: studs, hoops, drops, and tennis necklaces.
       {%- when 'gift-anniversary' -%}Anniversary gifts: diamond wedding bands and lab-grown diamond tennis necklaces.
     {%- endcase -%}
+    {%- endif -%}
   {%- endcase -%}
 {%- endif -%}
