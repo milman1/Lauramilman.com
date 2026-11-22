@@ -13,19 +13,22 @@
   assign jsb_styles = ''
 
   case jsb_handle
-    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings'
+    when 'earrings', 'all-earrings', 'lab-grown-earrings', 'chandelier-earrings', 'bridal-earrings'
       assign jsb_label = 'Earring Style'
       assign jsb_styles = 'Stud::Studs||Drop::Drop||Martini::Martini||Huggie::Huggie||Hoop::Hoops||Chandelier::Chandelier||Statement::Statement||Toi et Moi::Toi et Moi'
     when 'rings', 'lab-grown-rings', 'diamond-rings'
       assign jsb_label = 'Ring Style'
       assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Vintage::Vintage'
-    when 'engagement-rings', 'lab-grown-engagement-rings'
+    when 'engagement-rings', 'lab-grown-engagement-rings', 'solitaire-engagement-rings', 'halo-engagement-rings', 'hidden-halo-engagement-rings', 'three-stone-engagement-rings'
       assign jsb_label = 'Ring Style'
-      assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Split Shank::Split Shank||Designer::Designer||Vintage::Vintage'
+      assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Vintage::Vintage'
+    when 'ring-settings', 'solitaire-ring-settings', 'hidden-halo-ring-settings'
+      assign jsb_label = 'Setting Style'
+      assign jsb_styles = 'Solitaire::Solitaire||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Pavé::Pavé'
     when 'bracelets', 'all-bracelets', 'lab-grown-bracelets', 'bangles', 'tennis-bracelets'
       assign jsb_label = 'Bracelet Style'
       assign jsb_styles = 'Tennis::Tennis||Station Line::Station Line||Riviera::Riviera||Bangle::Bangle||Statement::Statement||Cuff::Cuff'
-    when 'necklaces', 'lab-grown-necklaces', 'chokers'
+    when 'necklaces', 'lab-grown-necklaces', 'chokers', 'tennis-necklaces'
       assign jsb_label = 'Necklace Style'
       assign jsb_styles = 'Station::Station||Tennis::Tennis||Riviera::Riviera||Statement::Statement||Lariat::Lariat||Pendant::Pendant'
     when 'chains', 'chain-necklaces', 'chain-bracelets'
@@ -34,9 +37,9 @@
     when 'pendants', 'pendants-1', 'all-pendants', 'lab-grown-pendants'
       assign jsb_label = 'Pendant Style'
       assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Double Halo::Double Halo||Cross::Cross||Heart::Heart||Toi et Moi::Toi et Moi||Pendant::Pendant'
-    when 'wedding-bands', 'mens-wedding-bands', 'stackable-bands', 'eternity-bands'
+    when 'wedding-bands', 'eternity-wedding-bands', 'half-eternity-wedding-bands', 'three-quarter-wedding-bands', 'lab-grown-wedding-bands', 'channel-set-wedding-bands', 'stackable-bands', 'eternity-bands'
       assign jsb_label = 'Band Style'
-      assign jsb_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Stackable::Stackable||Wedding Band::Wedding Band||Anniversary::Anniversary'
+      assign jsb_styles = 'Eternity::Eternity||Half Eternity::Half Eternity||Three-Quarter::Three-Quarter||Channel::Channel||Stackable::Stackable'
     when 'lab-grown-diamond-jewelry'
       assign jsb_label = 'Jewelry Style'
       assign jsb_styles = 'Stud::Studs||Drop::Drop||Huggie::Huggie||Hoop::Hoops||Tennis::Tennis||Solitaire::Solitaire||Halo::Halo||Statement::Statement'
@@ -44,6 +47,32 @@
   if jsb_handle == 'diamond-rings'
     assign jsb_styles = 'Solitaire::Solitaire||Halo::Halo||Hidden Halo::Hidden Halo||Three Stone::Three Stone||Toi et Moi::Toi et Moi||Statement::Statement||Cluster::Cluster||Pavé::Pavé||Fashion::Fashion||Cocktail::Cocktail||Stackable::Stackable||Eternity::Eternity'
   endif
+  assign wedding_style_tag = ''
+  if current_tags.size == 1
+    assign wedding_style_tag = current_tags | first | downcase | replace: ' ', '-'
+  endif
+  case jsb_handle
+    when 'engagement-rings', 'lab-grown-engagement-rings'
+      if wedding_style_tag == 'solitaire' or wedding_style_tag == 'halo' or wedding_style_tag == 'hidden-halo' or wedding_style_tag == 'three-stone'
+        assign jsb_styles = ''
+      endif
+    when 'wedding-bands'
+      if wedding_style_tag == 'eternity' or wedding_style_tag == 'half-eternity' or wedding_style_tag == 'three-quarter' or wedding_style_tag == 'lab-grown'
+        assign jsb_styles = ''
+      endif
+    when 'ring-settings'
+      if wedding_style_tag == 'solitaire' or wedding_style_tag == 'hidden-halo'
+        assign jsb_styles = ''
+      endif
+    when 'wedding-gifts'
+      if wedding_style_tag == 'earrings' or wedding_style_tag == 'tennis'
+        assign jsb_styles = ''
+      endif
+    when 'lab-grown-bracelets'
+      if wedding_style_tag == 'tennis'
+        assign jsb_styles = ''
+      endif
+  endcase
 -%}
 
 {%- if jsb_styles != blank -%}

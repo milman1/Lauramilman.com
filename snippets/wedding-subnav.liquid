@@ -1,0 +1,321 @@
+{% doc %}
+  Wedding submenu, collection chips, and the wording for wedding style pages.
+
+  Style links use a tagged collection URL, such as
+  /collections/engagement-rings/solitaire, which Shopify filters to products
+  that carry that tag. When a dedicated collection for the same style has
+  products, the link uses that collection instead.
+
+  Empty styles are omitted. A dedicated collection the store does not have
+  yet contributes no link.
+
+  @param {string} part - menu, chips, heading, intro, title, or description
+{% enddoc %}
+
+{%- liquid
+  assign wedding_tag = ''
+  if current_tags.size == 1
+    assign wedding_tag = current_tags | first | downcase | replace: ' ', '-'
+  endif
+
+  assign wedding_key = ''
+  assign wedding_parent = ''
+  case collection.handle
+    when 'solitaire-engagement-rings'
+      assign wedding_key = 'er-solitaire'
+    when 'halo-engagement-rings'
+      assign wedding_key = 'er-halo'
+    when 'hidden-halo-engagement-rings'
+      assign wedding_key = 'er-hidden-halo'
+    when 'three-stone-engagement-rings'
+      assign wedding_key = 'er-three-stone'
+    when 'eternity-wedding-bands'
+      assign wedding_key = 'band-eternity'
+    when 'half-eternity-wedding-bands'
+      assign wedding_key = 'band-half-eternity'
+    when 'three-quarter-wedding-bands'
+      assign wedding_key = 'band-three-quarter'
+    when 'lab-grown-wedding-bands'
+      assign wedding_key = 'band-lab-grown'
+    when 'channel-set-wedding-bands'
+      assign wedding_key = 'band-channel'
+    when 'bridal-earrings'
+      assign wedding_key = 'gift-earrings'
+    when 'tennis-necklaces'
+      assign wedding_key = 'gift-tennis'
+    when 'tennis-bracelets'
+      assign wedding_key = 'bracelets-tennis'
+    when 'solitaire-ring-settings'
+      assign wedding_key = 'set-solitaire'
+    when 'hidden-halo-ring-settings'
+      assign wedding_key = 'set-hidden-halo'
+    when 'engagement-rings', 'lab-grown-engagement-rings'
+      case wedding_tag
+        when 'solitaire', 'halo', 'hidden-halo', 'three-stone'
+          assign wedding_key = 'er-' | append: wedding_tag
+      endcase
+      if wedding_key == blank and wedding_tag == blank
+        if collection.handle == 'lab-grown-engagement-rings'
+          assign wedding_parent = 'er-lab'
+        else
+          assign wedding_parent = 'er-all'
+        endif
+      endif
+    when 'ring-settings'
+      case wedding_tag
+        when 'solitaire', 'hidden-halo'
+          assign wedding_key = 'set-' | append: wedding_tag
+      endcase
+      if wedding_key == blank and wedding_tag == blank
+        assign wedding_parent = 'set-all'
+      endif
+    when 'wedding-bands'
+      case wedding_tag
+        when 'eternity', 'half-eternity', 'three-quarter', 'lab-grown'
+          assign wedding_key = 'band-' | append: wedding_tag
+      endcase
+      if wedding_key == blank and wedding_tag == blank
+        assign wedding_parent = 'band-women'
+      endif
+    when 'mens-wedding-bands'
+      if wedding_tag == blank
+        assign wedding_parent = 'band-men'
+      endif
+    when 'mens-wedding-bands-white-gold'
+      if wedding_tag == blank
+        assign wedding_parent = 'band-white'
+      endif
+    when 'wedding-gifts'
+      case wedding_tag
+        when 'earrings', 'tennis'
+          assign wedding_key = 'gift-' | append: wedding_tag
+      endcase
+      if wedding_key == blank and wedding_tag == blank
+        assign wedding_parent = 'gift-all'
+      endif
+    when 'anniversary-gifts'
+      if wedding_tag == blank
+        assign wedding_parent = 'gift-anniversary'
+      endif
+    when 'lab-grown-bracelets'
+      if wedding_tag == 'tennis'
+        assign wedding_key = 'bracelets-tennis'
+      endif
+  endcase
+
+  assign er_all = collections['engagement-rings'].url
+  assign er_lab = collections['lab-grown-engagement-rings'].url
+  assign er_settings = collections['ring-settings'].url
+  assign band_women = collections['wedding-bands'].url
+  assign band_men = collections['mens-wedding-bands'].url
+  assign band_white = collections['mens-wedding-bands-white-gold'].url
+  assign gift_all = collections['wedding-gifts'].url
+  assign gift_anniversary = collections['anniversary-gifts'].url
+
+  assign er_solitaire = '/collections/engagement-rings/solitaire'
+  if collections['solitaire-engagement-rings'].products_count > 0
+    assign er_solitaire = collections['solitaire-engagement-rings'].url
+  endif
+  assign er_halo = '/collections/engagement-rings/halo'
+  if collections['halo-engagement-rings'].products_count > 0
+    assign er_halo = collections['halo-engagement-rings'].url
+  endif
+  assign er_hidden = '/collections/engagement-rings/hidden-halo'
+  if collections['hidden-halo-engagement-rings'].products_count > 0
+    assign er_hidden = collections['hidden-halo-engagement-rings'].url
+  endif
+  assign er_three = '/collections/engagement-rings/three-stone'
+  if collections['three-stone-engagement-rings'].products_count > 0
+    assign er_three = collections['three-stone-engagement-rings'].url
+  endif
+  assign set_solitaire = '/collections/ring-settings/solitaire'
+  if collections['solitaire-ring-settings'].products_count > 0
+    assign set_solitaire = collections['solitaire-ring-settings'].url
+  endif
+  assign set_hidden = '/collections/ring-settings/hidden-halo'
+  if collections['hidden-halo-ring-settings'].products_count > 0
+    assign set_hidden = collections['hidden-halo-ring-settings'].url
+  endif
+  assign band_eternity = '/collections/wedding-bands/eternity'
+  if collections['eternity-wedding-bands'].products_count > 0
+    assign band_eternity = collections['eternity-wedding-bands'].url
+  endif
+  assign band_half = '/collections/wedding-bands/half-eternity'
+  if collections['half-eternity-wedding-bands'].products_count > 0
+    assign band_half = collections['half-eternity-wedding-bands'].url
+  endif
+  assign band_three_quarter = '/collections/wedding-bands/three-quarter'
+  if collections['three-quarter-wedding-bands'].products_count > 0
+    assign band_three_quarter = collections['three-quarter-wedding-bands'].url
+  endif
+  assign band_lab = '/collections/wedding-bands/lab-grown'
+  if collections['lab-grown-wedding-bands'].products_count > 0
+    assign band_lab = collections['lab-grown-wedding-bands'].url
+  endif
+  assign band_channel = ''
+  if collections['channel-set-wedding-bands'].products_count > 0
+    assign band_channel = collections['channel-set-wedding-bands'].url
+  endif
+  assign gift_earrings = '/collections/wedding-gifts/earrings'
+  if collections['bridal-earrings'].products_count > 0
+    assign gift_earrings = collections['bridal-earrings'].url
+  endif
+  assign gift_tennis = '/collections/wedding-gifts/tennis'
+  if collections['tennis-necklaces'].products_count > 0
+    assign gift_tennis = collections['tennis-necklaces'].url
+  endif
+  assign bracelets_tennis = '/collections/lab-grown-bracelets/tennis'
+  if collections['tennis-bracelets'].products_count > 0
+    assign bracelets_tennis = collections['tennis-bracelets'].url
+  endif
+-%}
+
+{%- if part == 'menu' -%}
+  <div class="nav__group">
+    <span class="nav__dropdown-label">Engagement rings</span>
+    <a href="{{ er_all }}" class="nav__dropdown-link">All engagement rings</a>
+    <a href="{{ er_solitaire }}" class="nav__dropdown-link">Solitaire</a>
+    <a href="{{ er_halo }}" class="nav__dropdown-link">Halo</a>
+    <a href="{{ er_hidden }}" class="nav__dropdown-link">Hidden halo</a>
+    <a href="{{ er_three }}" class="nav__dropdown-link">Three-stone</a>
+    <a href="{{ er_lab }}" class="nav__dropdown-link">Lab-grown engagement rings</a>
+    <a href="{{ er_settings }}" class="nav__dropdown-link">Ring settings</a>
+    <a href="/pages/ring-builder?start=diamond" class="nav__dropdown-link">Build a ring</a>
+  </div>
+  <div class="nav__group">
+    <span class="nav__dropdown-label">Wedding bands</span>
+    <a href="{{ band_women }}" class="nav__dropdown-link">Women's wedding bands</a>
+    <a href="{{ band_men }}" class="nav__dropdown-link">Men's wedding bands</a>
+    <a href="{{ band_eternity }}" class="nav__dropdown-link">Eternity</a>
+    <a href="{{ band_half }}" class="nav__dropdown-link">Half eternity</a>
+    <a href="{{ band_three_quarter }}" class="nav__dropdown-link">Three-quarter</a>
+    <a href="{{ band_lab }}" class="nav__dropdown-link">Lab-grown bands</a>
+    <a href="{{ band_white }}" class="nav__dropdown-link">White gold, men's</a>
+    {%- if band_channel != blank -%}
+      <a href="{{ band_channel }}" class="nav__dropdown-link">Channel-set</a>
+    {%- endif -%}
+  </div>
+  <div class="nav__group">
+    <span class="nav__dropdown-label">Bridal jewelry</span>
+    <a href="{{ gift_all }}" class="nav__dropdown-link">Wedding gifts</a>
+    <a href="{{ gift_earrings }}" class="nav__dropdown-link">Bridal earrings</a>
+    <a href="{{ gift_tennis }}" class="nav__dropdown-link">Tennis necklaces</a>
+    <a href="{{ bracelets_tennis }}" class="nav__dropdown-link">Tennis bracelets</a>
+    <a href="{{ gift_anniversary }}" class="nav__dropdown-link">Anniversary gifts</a>
+  </div>
+{%- elsif part == 'chips' -%}
+  {%- if wedding_key != blank or wedding_parent != blank -%}
+    <nav class="lm-collection__chips" aria-label="Engagement ring styles">
+      <span class="lm-collection__chips-label">Engagement</span>
+      <a href="{{ er_all }}" class="lm-collection__chip"{% if wedding_parent == 'er-all' %} aria-current="page"{% endif %}>All</a>
+      <a href="{{ er_solitaire }}" class="lm-collection__chip"{% if wedding_key == 'er-solitaire' %} aria-current="page"{% endif %}>Solitaire</a>
+      <a href="{{ er_halo }}" class="lm-collection__chip"{% if wedding_key == 'er-halo' %} aria-current="page"{% endif %}>Halo</a>
+      <a href="{{ er_hidden }}" class="lm-collection__chip"{% if wedding_key == 'er-hidden-halo' %} aria-current="page"{% endif %}>Hidden halo</a>
+      <a href="{{ er_three }}" class="lm-collection__chip"{% if wedding_key == 'er-three-stone' %} aria-current="page"{% endif %}>Three-stone</a>
+      <a href="{{ er_lab }}" class="lm-collection__chip"{% if wedding_parent == 'er-lab' %} aria-current="page"{% endif %}>Lab-grown</a>
+      <a href="{{ er_settings }}" class="lm-collection__chip"{% if wedding_parent == 'set-all' %} aria-current="page"{% endif %}>Ring settings</a>
+      <a href="{{ set_solitaire }}" class="lm-collection__chip"{% if wedding_key == 'set-solitaire' %} aria-current="page"{% endif %}>Solitaire settings</a>
+      <a href="{{ set_hidden }}" class="lm-collection__chip"{% if wedding_key == 'set-hidden-halo' %} aria-current="page"{% endif %}>Hidden halo settings</a>
+    </nav>
+    <nav class="lm-collection__chips" aria-label="Wedding band styles">
+      <span class="lm-collection__chips-label">Bands</span>
+      <a href="{{ band_women }}" class="lm-collection__chip"{% if wedding_parent == 'band-women' %} aria-current="page"{% endif %}>Women's</a>
+      <a href="{{ band_men }}" class="lm-collection__chip"{% if wedding_parent == 'band-men' %} aria-current="page"{% endif %}>Men's</a>
+      <a href="{{ band_eternity }}" class="lm-collection__chip"{% if wedding_key == 'band-eternity' %} aria-current="page"{% endif %}>Eternity</a>
+      <a href="{{ band_half }}" class="lm-collection__chip"{% if wedding_key == 'band-half-eternity' %} aria-current="page"{% endif %}>Half eternity</a>
+      <a href="{{ band_three_quarter }}" class="lm-collection__chip"{% if wedding_key == 'band-three-quarter' %} aria-current="page"{% endif %}>Three-quarter</a>
+      <a href="{{ band_lab }}" class="lm-collection__chip"{% if wedding_key == 'band-lab-grown' %} aria-current="page"{% endif %}>Lab-grown</a>
+      <a href="{{ band_white }}" class="lm-collection__chip"{% if wedding_parent == 'band-white' %} aria-current="page"{% endif %}>White gold, men's</a>
+      {%- if band_channel != blank -%}
+        <a href="{{ band_channel }}" class="lm-collection__chip"{% if wedding_key == 'band-channel' %} aria-current="page"{% endif %}>Channel-set</a>
+      {%- endif -%}
+    </nav>
+    <nav class="lm-collection__chips" aria-label="Bridal jewelry">
+      <span class="lm-collection__chips-label">Bridal</span>
+      <a href="{{ gift_all }}" class="lm-collection__chip"{% if wedding_parent == 'gift-all' %} aria-current="page"{% endif %}>Wedding gifts</a>
+      <a href="{{ gift_earrings }}" class="lm-collection__chip"{% if wedding_key == 'gift-earrings' %} aria-current="page"{% endif %}>Earrings</a>
+      <a href="{{ gift_tennis }}" class="lm-collection__chip"{% if wedding_key == 'gift-tennis' %} aria-current="page"{% endif %}>Tennis necklaces</a>
+      <a href="{{ bracelets_tennis }}" class="lm-collection__chip"{% if wedding_key == 'bracelets-tennis' %} aria-current="page"{% endif %}>Tennis bracelets</a>
+      <a href="{{ gift_anniversary }}" class="lm-collection__chip"{% if wedding_parent == 'gift-anniversary' %} aria-current="page"{% endif %}>Anniversary</a>
+    </nav>
+  {%- endif -%}
+{%- elsif part == 'heading' -%}
+  {%- case wedding_key -%}
+    {%- when 'er-solitaire' -%}Solitaire Engagement Rings
+    {%- when 'er-halo' -%}Halo Engagement Rings
+    {%- when 'er-hidden-halo' -%}Hidden Halo Engagement Rings
+    {%- when 'er-three-stone' -%}Three-Stone Engagement Rings
+    {%- when 'set-solitaire' -%}Solitaire Ring Settings
+    {%- when 'set-hidden-halo' -%}Hidden Halo Ring Settings
+    {%- when 'band-eternity' -%}Eternity Wedding Bands
+    {%- when 'band-half-eternity' -%}Half-Eternity Wedding Bands
+    {%- when 'band-three-quarter' -%}Three-Quarter Wedding Bands
+    {%- when 'band-lab-grown' -%}Lab-Grown Wedding Bands
+    {%- when 'band-channel' -%}Channel-Set Wedding Bands
+    {%- when 'gift-earrings' -%}Bridal Earrings
+    {%- when 'gift-tennis' -%}Tennis Necklaces
+    {%- when 'bracelets-tennis' -%}Tennis Bracelets
+  {%- endcase -%}
+{%- elsif part == 'title' -%}
+  {%- case wedding_key -%}
+    {%- when 'er-solitaire' -%}Solitaire Engagement Rings | Laura Milman
+    {%- when 'er-halo' -%}Halo Engagement Rings | Laura Milman
+    {%- when 'er-hidden-halo' -%}Hidden Halo Engagement Rings | Laura Milman
+    {%- when 'er-three-stone' -%}Three-Stone Engagement Rings | Laura Milman
+    {%- when 'set-solitaire' -%}Solitaire Ring Settings | Laura Milman
+    {%- when 'set-hidden-halo' -%}Hidden Halo Ring Settings | Laura Milman
+    {%- when 'band-eternity' -%}Eternity Wedding Bands | Laura Milman
+    {%- when 'band-half-eternity' -%}Half-Eternity Wedding Bands | Laura Milman
+    {%- when 'band-three-quarter' -%}Three-Quarter Wedding Bands | Laura Milman
+    {%- when 'band-lab-grown' -%}Lab-Grown Wedding Bands | Laura Milman
+    {%- when 'band-channel' -%}Channel-Set Wedding Bands | Laura Milman
+    {%- when 'gift-earrings' -%}Bridal Earrings | Laura Milman
+    {%- when 'gift-tennis' -%}Tennis Necklaces | Laura Milman
+    {%- when 'bracelets-tennis' -%}Tennis Bracelets | Laura Milman
+  {%- endcase -%}
+{%- elsif part == 'description' -%}
+  {%- case wedding_key -%}
+    {%- when 'er-solitaire' -%}Solitaire engagement rings with one center diamond, in gold. Free insured shipping and 14-day returns.
+    {%- when 'er-halo' -%}Halo engagement rings with diamonds set around the center stone. Free insured shipping and 14-day returns.
+    {%- when 'er-hidden-halo' -%}Hidden halo engagement rings with diamonds set under the center stone. Free insured shipping and 14-day returns.
+    {%- when 'er-three-stone' -%}Three-stone engagement rings with a center diamond and a stone on each side. Free insured shipping and 14-day returns.
+    {%- when 'set-solitaire' -%}Solitaire engagement ring settings sold without a center stone. Free insured shipping and 14-day returns.
+    {%- when 'set-hidden-halo' -%}Hidden halo engagement ring settings sold without a center stone. Free insured shipping and 14-day returns.
+    {%- when 'band-eternity' -%}Eternity wedding bands with diamonds all the way around. These bands cannot be resized. Free insured shipping and 14-day returns.
+    {%- when 'band-half-eternity' -%}Half-eternity wedding bands with diamonds across the top of the band. Free insured shipping and 14-day returns.
+    {%- when 'band-three-quarter' -%}Three-quarter wedding bands with diamonds around most of the band. Free insured shipping and 14-day returns.
+    {%- when 'band-lab-grown' -%}Lab-grown diamond wedding bands in 14K and 18K gold. Free insured shipping and 14-day returns.
+    {%- when 'band-channel' -%}Channel-set wedding bands with stones set into a groove in the band. Free insured shipping and 14-day returns.
+    {%- when 'gift-earrings' -%}Lab-grown diamond earrings for a wedding: studs, hoops, huggies, and drops. Free insured shipping and 14-day returns.
+    {%- when 'gift-tennis' -%}Lab-grown diamond tennis necklaces in 14K gold. Free insured shipping and 14-day returns.
+    {%- when 'bracelets-tennis' -%}Lab-grown diamond tennis bracelets in 14K gold. Free insured shipping and 14-day returns.
+  {%- endcase -%}
+{%- elsif part == 'intro' -%}
+  {%- case wedding_key -%}
+    {%- when 'er-solitaire' -%}Solitaire engagement rings with one center diamond and no side stones. Natural and lab-grown diamonds are both in this assortment, in yellow, white, and rose gold.
+    {%- when 'er-halo' -%}Halo engagement rings with a frame of diamonds around the center stone.
+    {%- when 'er-hidden-halo' -%}Hidden halo engagement rings with diamonds set beneath the center stone.
+    {%- when 'er-three-stone' -%}Three-stone engagement rings with a center diamond and one stone on each side.
+    {%- when 'set-solitaire' -%}Solitaire engagement ring settings sold without a center stone. Choose a diamond and the setting labor is included.
+    {%- when 'set-hidden-halo' -%}Hidden halo engagement ring settings sold without a center stone. Choose a diamond and the setting labor is included.
+    {%- when 'band-eternity' -%}Eternity wedding bands with diamonds set all the way around the band. An eternity band cannot be resized.
+    {%- when 'band-half-eternity' -%}Half-eternity wedding bands with diamonds set across the top of the band.
+    {%- when 'band-three-quarter' -%}Three-quarter wedding bands with diamonds set around most of the band.
+    {%- when 'band-lab-grown' -%}Lab-grown diamond wedding bands in 14K and 18K gold, including eternity, half-eternity, and three-quarter styles.
+    {%- when 'band-channel' -%}Channel-set wedding bands with stones set into a groove in the band.
+    {%- when 'gift-earrings' -%}Lab-grown diamond earrings for a wedding, including studs, hoops, huggies, and drops.
+    {%- when 'gift-tennis' -%}Lab-grown diamond tennis necklaces in 14K white gold and 14K yellow gold.
+    {%- when 'bracelets-tennis' -%}Lab-grown diamond tennis bracelets in 14K gold.
+  {%- else -%}
+    {%- case wedding_parent -%}
+      {%- when 'er-all' -%}Engagement rings in natural and lab-grown diamonds. Shop solitaire, halo, hidden halo, and three-stone styles, or start with a setting.
+      {%- when 'er-lab' -%}Lab-grown diamond engagement rings, including solitaire, hidden halo, and three-stone styles.
+      {%- when 'set-all' -%}Engagement ring settings sold without a center stone. Choose a diamond and the setting labor is included.
+      {%- when 'band-women' -%}Women's diamond wedding bands, including eternity, half-eternity, three-quarter, channel-set, and stackable styles.
+      {%- when 'band-men' -%}Men's wedding bands in 14K and 18K gold, in satin, hammered, milgrain, and polished finishes.
+      {%- when 'band-white' -%}Men's white gold wedding bands in 14K and 18K.
+      {%- when 'gift-all' -%}Wedding gifts in lab-grown diamonds: studs, hoops, drops, and tennis necklaces.
+      {%- when 'gift-anniversary' -%}Anniversary gifts: diamond wedding bands and lab-grown diamond tennis necklaces.
+    {%- endcase -%}
+  {%- endcase -%}
+{%- endif -%}

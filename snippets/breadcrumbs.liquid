@@ -65,6 +65,16 @@
   endif
 -%}
 
+{%- if request.page_type == 'collection' -%}
+  {%- capture wedding_crumb -%}{%- render 'wedding-subnav', part: 'heading' -%}{%- endcapture -%}
+  {%- assign wedding_crumb = wedding_crumb | strip -%}
+  {%- if wedding_crumb != blank -%}
+    {%- assign crumb_current = wedding_crumb -%}
+    {%- assign crumb_parent_title = collection.title -%}
+    {%- assign crumb_parent_url = collection.url -%}
+  {%- endif -%}
+{%- endif -%}
+
 {%- if crumb_current != blank -%}
   <nav class="breadcrumbs" aria-label="Breadcrumb">
     <ol class="breadcrumbs__list">
