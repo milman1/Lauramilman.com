@@ -126,6 +126,18 @@ export function payloadFor(s, existing, status = 'DRAFT', locationId) {
   return input;
 }
 export function snapshotHash(value) { return createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
+/** Fixed text only. Never include the request URL: it carries the API key. */
+export function supplierFetchError(err) {
+  const code = err?.cause?.code || err?.code || '';
+  const name = err?.name || err?.cause?.name || '';
+  const kind = code === 'ENOTFOUND' || code === 'EAI_AGAIN' || code === 'ENODATA' ? 'host does not resolve'
+    : code === 'ETIMEDOUT' || code === 'UND_ERR_CONNECT_TIMEOUT' || name === 'TimeoutError' ? 'timed out'
+    : code === 'ECONNREFUSED' || code === 'ECONNRESET' ? 'connection failed'
+    : 'request failed';
+  const error = new Error(`LGD supplier ${kind}; no inventory changes are safe`);
+  error.safeToLog = true;
+  return error;
+}
 export async function fetchInventory(key, fetcher = fetch) {
   if (!key) throw new Error('LGD_API_KEY is not set');
   const rows = []; let totalPages, totalResults;
@@ -134,8 +146,8 @@ export async function fetchInventory(key, fetcher = fetch) {
     u.search = new URLSearchParams({type:'certified_color',page:String(page),key}).toString();
     let response;
     try { response = await fetcher(u, {headers:{Accept:'application/json'},signal:AbortSignal.timeout(60000),redirect:'error'}); }
-    catch { throw new Error('LGD feed request failed; no inventory changes are safe'); }
-    if (!response.ok) throw new Error(`LGD feed HTTP ${response.status}`);
+    catch (err) { throw supplierFetchError(err); }
+    if (!response.ok) { const error = new Error(`LGD feed HTTP ${response.status}; no inventory changes are safe`); error.safeToLog = true; throw error; }
     let data; try { data = await response.json(); } catch { throw new Error('LGD returned invalid JSON'); }
     if (!Array.isArray(data.data) || Number(data.page_no)!==page || !Number.isInteger(Number(data.total_page)) || Number(data.total_page)<1 || Number(data.total_page)>100 || !Number.isInteger(Number(data.total_results)) || Number(data.total_results)<=0) throw new Error('Invalid or empty feed snapshot');
     if (page===1) { totalPages=Number(data.total_page); totalResults=Number(data.total_results); }

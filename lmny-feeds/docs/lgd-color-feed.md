@@ -27,6 +27,12 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 ## Setup and operation
 
 - Store `LGD_API_KEY` as an Actions secret. Reuse existing Shopify credentials.
+  The feed host is `api.lgdusallc.com`. On 2026-11-22 that domain was on
+  registrar client hold (Porkbun, last changed 2026-11-16) and did not
+  resolve, so the hourly sync failed at supplier fetch before any Shopify
+  write. The key was present. Restoring the run needs the registrant to
+  remove that hold, or a replacement base URL from the supplier. A failed
+  fetch still writes nothing and withdraws nothing.
 - Run the workflow in dry-run mode, then sample mode to create five drafts.
 - Verify five draft pages, ready photos, playable videos, grading reports,
   price, source isolation and no certificate collisions before expansion.
