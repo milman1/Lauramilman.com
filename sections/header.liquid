@@ -613,19 +613,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 
     <div class="nav__item">
       <button type="button" aria-expanded="false" class="nav__item-link">{{ 'navigation_simple.wedding' | t }} {{ caret }}</button>
-      <div class="nav__dropdown nav__dropdown--simple">
-        <div class="nav__group">
-          <span class="nav__dropdown-label">{{ 'navigation_simple.rings' | t }}</span>
-          <a href="/collections/engagement-rings" class="nav__dropdown-link">{{ 'navigation_simple.engagement_rings' | t }}</a>
-          <a href="/pages/ring-builder?start=diamond" class="nav__dropdown-link">{{ 'navigation_simple.build_a_ring' | t }}</a>
-          <a href="/collections/wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.womens_wedding_bands' | t }}</a>
-          <a href="/collections/mens-wedding-bands" class="nav__dropdown-link">{{ 'navigation_simple.mens_wedding_bands' | t }}</a>
-        </div>
-        <div class="nav__group">
-          <span class="nav__dropdown-label">{{ 'navigation_simple.gifts_and_celebrations' | t }}</span>
-          <a href="/collections/anniversary-gifts" class="nav__dropdown-link">{{ 'navigation_simple.anniversary_gifts' | t }}</a>
-          <a href="/collections/wedding-gifts" class="nav__dropdown-link">{{ 'navigation_simple.wedding_gifts' | t }}</a>
-        </div>
+      <div class="nav__dropdown nav__dropdown--simple" data-wedding-menu>
+        {%- render 'wedding-subnav', part: 'menu' -%}
       </div>
     </div>
 

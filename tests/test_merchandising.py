@@ -530,3 +530,42 @@ def test_render_tags_never_use_filters_in_arguments():
         if bad.search(path.read_text())
     ]
     assert offenders == [], offenders
+
+
+def test_wedding_subcategories_have_pages_and_seo_limits() -> None:
+    nav = (ROOT / "snippets/wedding-subnav.liquid").read_text()
+    header = (ROOT / "sections/header.liquid").read_text()
+    assert "data-wedding-menu" in header
+    assert "render 'wedding-subnav', part: 'menu'" in header
+    assert "Diamond District" not in nav
+    for path in (
+        "/collections/engagement-rings/solitaire",
+        "/collections/engagement-rings/halo",
+        "/collections/engagement-rings/hidden-halo",
+        "/collections/engagement-rings/three-stone",
+        "/collections/ring-settings/solitaire",
+        "/collections/ring-settings/hidden-halo",
+        "/collections/wedding-bands/eternity",
+        "/collections/wedding-bands/half-eternity",
+        "/collections/wedding-bands/three-quarter",
+        "/collections/wedding-bands/lab-grown",
+        "/collections/wedding-gifts/earrings",
+        "/collections/wedding-gifts/tennis",
+        "/collections/lab-grown-bracelets/tennis",
+    ):
+        assert path in nav, path
+    assert "channel-set-wedding-bands" in nav
+    assert "/collections/wedding-bands/channel" not in nav
+    titles = [line.split("%}", 1)[1].strip() for line in nav.splitlines() if "| Laura Milman" in line and "%}" in line]
+    descriptions = [
+        line.split("%}", 1)[1].strip()
+        for line in nav.splitlines()
+        if "Free insured shipping and 14-day returns." in line and "%}" in line
+    ]
+    assert titles, "expected wedding SEO titles"
+    assert descriptions, "expected wedding SEO descriptions"
+    assert all(len(title) <= 60 for title in titles), [title for title in titles if len(title) > 60]
+    assert all(len(text) <= 160 for text in descriptions), [text for text in descriptions if len(text) > 160]
+    filters = (ROOT / "sections/main-collection.liquid").read_text()
+    assert "blob.indexOf('hidden halo') === -1" in filters
+    assert "blob.indexOf('half eternity') === -1" in filters

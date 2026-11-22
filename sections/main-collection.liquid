@@ -90,6 +90,19 @@
   endfor
 -%}
 
+{%- capture wedding_heading -%}{%- render 'wedding-subnav', part: 'heading' -%}{%- endcapture -%}
+{%- capture wedding_intro -%}{%- render 'wedding-subnav', part: 'intro' -%}{%- endcapture -%}
+{%- liquid
+  assign wedding_heading = wedding_heading | strip
+  assign wedding_intro = wedding_intro | strip
+  if wedding_heading != blank
+    assign collection_heading = wedding_heading
+  endif
+  if wedding_intro != blank
+    assign collection_intro = wedding_intro
+  endif
+-%}
+
 {%- paginate collection.products by collection_page_size -%}
 
 <section class="lm-collection{% if navy_mode %} lm-collection--navy{% endif %}" aria-label="{{ collection.title | escape }}">
@@ -113,6 +126,8 @@
       {%- endif -%}
       {%- render 'collection-guide', collection: collection -%}
     </header>
+
+    {%- render 'wedding-subnav', part: 'chips' -%}
     {%- if template.suffix == 'diamond-seo' -%}
       {%- render 'diamond-search-links' -%}
     {%- endif -%}
@@ -408,7 +423,9 @@
 
 {% render 'structured-data-collection',
   collection: collection,
-  include_products: schema_include_products
+  include_products: schema_include_products,
+  name: wedding_heading,
+  description: wedding_intro
 %}
 
 {%- endpaginate -%}
@@ -945,6 +962,22 @@
       return normalize(haystack).indexOf(normalize(needle)) !== -1;
     }
 
+    function styleMatches(tags, titleLower, productType, type) {
+      var blob = normalize([tags, titleLower, productType].join(' '));
+      var needle = normalize(type);
+      if (!needle) return false;
+      if (needle === 'halo') {
+        return /(^|[^a-z0-9])halo([^a-z0-9]|$)/.test(blob) && blob.indexOf('hidden halo') === -1;
+      }
+      if (needle === 'eternity') {
+        return /(^|[^a-z0-9])eternity([^a-z0-9]|$)/.test(blob) && blob.indexOf('half eternity') === -1;
+      }
+      if (needle === 'solitaire') {
+        return blob.indexOf('solitaire') !== -1 && blob.indexOf('hidden halo') === -1;
+      }
+      return blob.indexOf(needle) !== -1;
+    }
+
     function everydayMatches(data, dimension, value) {
       var title = normalize(data.titleLower || data.title).replace(/paper clip/g, 'paperclip');
       var metal = normalize((data.metalOptions || '') + ' ' + (data.metal || '') + ' ' + title);
@@ -1028,6 +1061,7 @@
         case '3+ Carats': return carat >= 3;
         case '7+ Carats': return carat >= 7;
         case '10+ Carats': return carat >= 10;
+        case '2+ Carats': return carat >= 2;
         case '20+ Carats': return carat >= 20;
         default: return false;
       }
@@ -1129,7 +1163,7 @@
 
         if (show && selectedTypes.length) {
           var typeMatch = selectedTypes.some(function (type) {
-            return containsValue(tags, type) || containsValue(titleLower, type) || containsValue(productType, type);
+            return styleMatches(tags, titleLower, productType, type);
           });
           if (!typeMatch) show = false;
         }
