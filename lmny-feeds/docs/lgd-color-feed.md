@@ -66,7 +66,11 @@ as `color_below_floor`; `src/lgd-color/belgium.ts` picks them up instead.
   is skipped as `duplicate_certificate`.
 - Held, never guessed: modifier colors ("Yellowish Green"), unknown intensity,
   non-IGI, clarity below SI2, no IGI report number, no HTTPS photo or MP4/WebM
-  video, a non-available status, or a cost below the lab $/ct floor.
+  video, memo / hold / sold / not-available status, or a cost below the lab $/ct floor.
+  Belgium Dia sends availability as a code (`G` guaranteed, `GA`, `Available`,
+  `STPS`); a blank field stays eligible. An unrecognized code is held and
+  fails the run. A complete feed whose colored rows are all recognized
+  unavailable logs the value counts, writes nothing, and exits 0.
 - A lab feed under 5,000 rows is refused (the pager has no total to check).
 - Workflow: `.github/workflows/belgium-color-sync.yml`, hourly at :07, the same
   modes as LGD (dispatch defaults to a full dry run). Shares the

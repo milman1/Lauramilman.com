@@ -1,7 +1,8 @@
+import { readFile, rm } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { BELGIUM_TAG, FEED_TAG, normalizeRow, ownsBelgium, ownsLgd, payloadFor } from '../../src/lgd-color/catalog.mjs';
-import { planFor } from '../../src/lgd-color/sync.mjs';
-import { fetchBelgiumLabRows, isColoredRow, normalizeBelgiumFeed, normalizeBelgiumRow, parseColor } from '../../src/lgd-color/belgium.js';
+import { emptySnapshotAction, LGD_SOURCE, main, planFor } from '../../src/lgd-color/sync.mjs';
+import { BELGIUM_SOURCE, availabilityBucket, classifyAvailability, fetchBelgiumLabRows, isColoredRow, normalizeBelgiumFeed, normalizeBelgiumRow, parseColor } from '../../src/lgd-color/belgium.js';
 
 const row = (over: Record<string, unknown> = {}) => ({
   Stock_No: 'BX100', Shape: 'OVAL', Color: 'PINK', Fancy_Color_Intensity: 'Fancy Intense', Clarity: 'VS1',
@@ -39,6 +40,80 @@ describe('Belgium Dia colored lab stones', () => {
     expect(reason({ ImageLink: 'http://cdn.example.com/stone.jpg' })).toBe('photo_or_video');
     expect(reason({ Availability: 'Memo' })).toBe('unavailable');
     expect(reason({ Buy_Price: '' })).toBe('cost_mismatch');
+  });
+
+  it('accepts Belgium Dia availability codes and documented synonyms', () => {
+    const reason = (over: Record<string, unknown>) => normalizeBelgiumRow(row(over)).reason;
+    for (const value of ['G', ' g ', 'G.', 'GA', 'Guaranteed', 'Guaranteed Available', 'Available', 'AVAILABLE', 'in stock', 'In-Stock', true, 1, 'yes', 'STPS', 'A']) {
+      expect(reason({ Availability: value }), JSON.stringify(value)).toBeUndefined();
+    }
+    for (const value of ['Memo', 'M', 'On Memo', 'ON_MEMO', 'Hold', 'On-Hold', 'H', 'Sold', 'S', 'NA', 'N/A', 'Unavailable', 'not available', false, 0]) {
+      expect(reason({ Availability: value }), JSON.stringify(value)).toBe('unavailable');
+    }
+    expect(reason({ Availability: 'CALL' })).toBe('unknown_availability');
+    expect(reason({ Avail: 'G' })).toBeUndefined();
+    expect(reason({ Status: 'M' })).toBe('unavailable');
+    // An unrelated Status is not an availability signal.
+    expect(reason({ Status: 'shipped from ny' })).toBeUndefined();
+    expect(classifyAvailability('   ')).toBe('blank');
+    expect(availabilityBucket('https://supplier.example/secret')).toBe('(other)');
+    expect(availabilityBucket('G')).toBe('G');
+  });
+
+  it('logs distinct availability values for colored rows only', () => {
+    const feed = normalizeBelgiumFeed([
+      row({ Availability: 'G' }),
+      row({ Stock_No: 'BX101', Report_No: 'LG700000001', Availability: ' G ' }),
+      row({ Stock_No: 'BX102', Report_No: 'LG700000002', Availability: 'Memo' }),
+      row({ Stock_No: 'BX103', Report_No: 'LG700000003', Availability: 'CALL' }),
+      row({ Color: 'D', Availability: 'SOLD' }),
+    ]);
+    expect(feed.colored).toBe(4);
+    expect(feed.availability).toEqual({ G: 2, MEMO: 1, CALL: 1 });
+    expect(feed.stones).toHaveLength(2);
+    expect(feed.holds).toEqual({ unavailable: 1, unknown_availability: 1 });
+  });
+
+  it('warns without writes only when every colored row is recognized unavailable', () => {
+    const memo = { stones: [], holds: { unavailable: 528 }, colored: 528 };
+    expect(emptySnapshotAction(BELGIUM_SOURCE, memo)).toBe('warn');
+    expect(emptySnapshotAction(LGD_SOURCE, memo)).toBe('refuse');
+    expect(emptySnapshotAction(BELGIUM_SOURCE, { stones: [], holds: { unknown_availability: 528 }, colored: 528 })).toBe('refuse');
+    expect(emptySnapshotAction(BELGIUM_SOURCE, { stones: [], holds: { unavailable: 20, photo_or_video: 508 }, colored: 528 })).toBe('refuse');
+    expect(emptySnapshotAction(BELGIUM_SOURCE, { stones: [], holds: {}, colored: 0 })).toBe('refuse');
+    expect(emptySnapshotAction(BELGIUM_SOURCE, { stones: [{}], holds: {}, colored: 1 })).toBe('continue');
+  });
+
+  it('exits cleanly with no Shopify access when the colored feed is all memo or sold', async () => {
+    const reportPath = 'out/belgium-color-empty-snapshot.test.json';
+    await rm(reportPath, { force: true });
+    await main(['--dry-run'], {
+      ...BELGIUM_SOURCE,
+      fetchRows: async () => [
+        row({ Availability: 'Memo' }),
+        row({ Stock_No: 'BX101', Report_No: 'LG700000001', Availability: 'Sold' }),
+      ],
+      reportPath,
+    });
+    const report = JSON.parse(await readFile(reportPath, 'utf8'));
+    expect(report).toMatchObject({
+      eligible: 0,
+      colored: 2,
+      writes: [],
+      withdrawals: [],
+      holds: { unavailable: 2 },
+      availability: { MEMO: 1, SOLD: 1 },
+    });
+    expect(report.warning).toMatch(/availability writes skipped/);
+    await rm(reportPath, { force: true });
+  });
+
+  it('still refuses availability writes when an availability code is unrecognized', async () => {
+    await expect(main(['--dry-run'], {
+      ...BELGIUM_SOURCE,
+      fetchRows: async () => [row({ Availability: 'CALL' })],
+      reportPath: 'out/belgium-color-unknown-availability.test.json',
+    })).rejects.toThrow(/availability writes are unsafe/);
   });
 
   it('refuses a per-carat price that reads as a total', () => {
