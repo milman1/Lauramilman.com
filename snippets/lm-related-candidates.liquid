@@ -1,0 +1,56 @@
+{%- comment -%}
+  Compact candidate JSON for the related rows. Prices stay in cents.
+  Unavailable pieces and pieces with no photo are left out.
+  Rendered from the collection feed and from Shopify's related intent.
+{%- endcomment -%}
+{%- liquid
+  assign cap = limit | default: 24
+  assign shown = 0
+-%}
+<script type="application/json" data-lm-pool>
+{
+  "products": [
+    {%- assign comma = false -%}
+    {%- for product in lm_products -%}
+      {%- if shown >= cap -%}{% break %}{%- endif -%}
+      {%- if product.available == false or product.featured_image == blank -%}{% continue %}{%- endif -%}
+      {%- liquid
+        assign item_high = force_high
+        if product.tags contains 'high-jewelry' or product.tags contains 'High Jewelry' or product.tags contains 'high jewelry'
+          assign item_high = true
+        endif
+        assign image_alt = product.featured_image.alt | default: product.title
+        assign image_2 = ''
+        if product.images[1] != blank
+          assign image_2 = product.images[1] | image_url: width: 600
+        endif
+        assign metal = product.metafields.custom.metal_type.value | default: product.metafields.custom.metal.value
+        assign shape = product.metafields.custom.diamond_shape.value
+        assign carat = product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value
+      -%}
+      {%- if comma -%},{%- endif -%}
+      {
+        "id": {{ product.id | json }},
+        "handle": {{ product.handle | json }},
+        "title": {{ product.title | json }},
+        "vendor": {{ product.vendor | json }},
+        "type": {{ product.type | json }},
+        "price": {{ product.price | json }},
+        "compareAt": {{ product.compare_at_price | default: 0 | json }},
+        "tags": {{ product.tags | json }},
+        "available": true,
+        "url": {{ product.url | json }},
+        "image": {{ product.featured_image | image_url: width: 600 | json }},
+        "imageAlt": {{ image_alt | json }},
+        "image2": {{ image_2 | json }},
+        "metal": {{ metal | json }},
+        "shape": {{ shape | json }},
+        "carat": {{ carat | json }},
+        "highJewelry": {% if item_high %}true{% else %}false{% endif %}
+      }
+      {%- assign comma = true -%}
+      {%- assign shown = shown | plus: 1 -%}
+    {%- endfor -%}
+  ]
+}
+</script>

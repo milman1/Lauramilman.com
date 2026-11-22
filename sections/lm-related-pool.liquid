@@ -1,0 +1,20 @@
+{%- comment -%}
+  Compact product feed for one collection. Requested as
+  /collections/{handle}?view=lm-related so the product page can score
+  candidates without downloading full descriptions.
+  Not a storefront layout. Do not assign collection.lm-related to a collection.
+{%- endcomment -%}
+{%- liquid
+  assign pool_high = false
+  if collection.handle == 'high-jewelry' or collection.handle contains 'high-jewelry'
+    assign pool_high = true
+  endif
+-%}
+{%- render 'lm-related-candidates', lm_products: collection.products, limit: 24, force_high: pool_high -%}
+
+{% schema %}
+{
+  "name": "Related candidate feed",
+  "settings": []
+}
+{% endschema %}

@@ -1,12 +1,22 @@
 {%- comment -%}
-  Laura Milman New York — "You May Also Like"
-  4-up related products, same collection first (never a junk fallback across
-  the whole catalog). Renders nothing at all when there's nothing related.
+  Laura Milman New York — related rows.
+
+  Previously this printed the first products in whichever collection the
+  shopper came from, or the product's first collection. That order is the
+  collection's own sort, so a gold bracelet could sit beside unrelated
+  pieces from All Jewelry, and sold-out items were not removed.
+
+  The page now keeps this layout and fills two rows when the section nears
+  the viewport:
+    You may also like — the same kind of piece, closest in brand, metal,
+    stone, style, and price.
+    Complete the look — a different category that pairs with it.
+  The current product, sold-out pieces, and duplicates are left out. A row
+  with no confident match stays hidden.
 {%- endcomment -%}
 
 {%- liquid
   assign limit = section.settings.product_count | default: 4
-  assign rec_collection = collection | default: product.collections.first
   assign high_jewelry = false
   for membership in product.collections
     assign prefix = membership.handle | slice: 0, 13
@@ -16,79 +26,91 @@
     endif
   endfor
   assign title = section.settings.title | default: 'You May Also Like'
+  assign complement_title = section.settings.complement_title | default: 'Complete the look'
+  assign eyebrow = section.settings.eyebrow
+  assign subtitle = section.settings.subtitle
   if high_jewelry
-    assign rec_collection = collections['high-jewelry']
-    assign title = 'More High Jewelry to View'
+    assign eyebrow = ''
+    assign subtitle = 'Choose a piece to see its details or request a private viewing.'
   endif
 
-  capture rec_grid
-    if rec_collection != blank
-      assign shown = 0
-      if high_jewelry
-        assign current_type = product.type | downcase | strip
-        for pass in (1..2)
-          for rec in rec_collection.products limit: 50
-            if rec.id == product.id or rec.available == false or rec.featured_image == blank
-              continue
-            endif
-            assign rec_type = rec.type | downcase | strip
-            if pass == 1 and rec_type != current_type
-              continue
-            elsif pass == 2 and rec_type == current_type
-              continue
-            endif
-            render 'product-card', product: rec
-            assign shown = shown | plus: 1
-            if shown >= limit
-              break
-            endif
-          endfor
-          if shown >= limit
-            break
-          endif
-        endfor
-      else
-        for rec in rec_collection.products
-          if rec.id != product.id
-            render 'product-card', product: rec
-            assign shown = shown | plus: 1
-          endif
-          if shown >= limit
-            break
-          endif
-        endfor
-      endif
-    endif
-  endcapture
+  assign collection_handles = ''
+  for membership in product.collections
+    assign collection_handles = collection_handles | append: membership.handle | append: '|||'
+  endfor
 -%}
 
-{%- if rec_grid contains 'product-card' -%}
-<section class="product-recs" aria-label="{{ title | escape }}">
+{%- if recommendations.performed -%}
+  {%- render 'lm-related-candidates', lm_products: recommendations.products, limit: 10, force_high: false -%}
+{%- else -%}
+<section
+  class="product-recs"
+  data-lm-related
+  aria-busy="true"
+  aria-label="{{ title | escape }}"
+>
+  <script type="application/json" data-lm-related-context>
+    {
+      "id": {{ product.id | json }},
+      "handle": {{ product.handle | json }},
+      "title": {{ product.title | json }},
+      "vendor": {{ product.vendor | json }},
+      "type": {{ product.type | json }},
+      "price": {{ product.price | json }},
+      "tags": {{ product.tags | json }},
+      "metal": {{ product.metafields.custom.metal_type.value | default: product.metafields.custom.metal.value | json }},
+      "shape": {{ product.metafields.custom.diamond_shape.value | json }},
+      "carat": {{ product.metafields.custom.carat_weight.value | default: product.metafields.custom.diamond_weight.value | json }},
+      "collections": {{ collection_handles | split: '|||' | json }},
+      "fromCollection": {{ collection.handle | json }},
+      "highJewelry": {% if high_jewelry %}true{% else %}false{% endif %},
+      "limit": {{ limit | json }},
+      "moneyFormat": {{ shop.money_format | json }},
+      "root": {{ routes.root_url | json }},
+      "sectionId": {{ section.id | json }},
+      "recommendationsUrl": {{ routes.product_recommendations_url | json }}
+    }
+  </script>
   <div class="product-recs__inner">
-
-    <div class="product-recs__header">
-      {%- unless high_jewelry -%}<p class="eyebrow">{{ section.settings.eyebrow }}</p>{%- endunless -%}
-      <h2 class="section-title">{{ title | escape }}</h2>
-      {%- if high_jewelry -%}
-        <p class="product-recs__subtitle">Choose a piece to see its details or request a private viewing.</p>
-      {%- elsif section.settings.subtitle != blank -%}
-        <p class="product-recs__subtitle">{{ section.settings.subtitle }}</p>
-      {%- endif -%}
+    <div class="product-recs__row" data-lm-row="similar" hidden>
+      <div class="product-recs__header">
+        {%- if eyebrow != blank -%}<p class="eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
+        <h2 class="section-title" id="LmRelatedSimilar-{{ section.id }}">{{ title | escape }}</h2>
+        {%- if subtitle != blank -%}
+          <p class="product-recs__subtitle">{{ subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+      <div class="product-recs__grid" data-lm-grid="similar" aria-labelledby="LmRelatedSimilar-{{ section.id }}"></div>
     </div>
 
-    <div class="product-recs__grid">
-      {{ rec_grid }}
+    <div class="product-recs__row" data-lm-row="complement" hidden>
+      <div class="product-recs__header">
+        <h2 class="section-title" id="LmRelatedComplement-{{ section.id }}">{{ complement_title | escape }}</h2>
+      </div>
+      <div class="product-recs__grid" data-lm-grid="complement" aria-labelledby="LmRelatedComplement-{{ section.id }}"></div>
     </div>
-
   </div>
 </section>
-{%- endif -%}
+<script type="module" src="{{ 'lm-related.js' | asset_url }}"></script>
 
 <style>
   .product-recs {
     background: var(--warm-white, #FDFAF6);
     padding: 5rem 0;
     border-top: 1px solid var(--rule-light, #DDD5C5);
+  }
+
+  /* The section sits at the bottom of the product page. Until the rows
+     are filled it must not open a gap and must not download card images. */
+  .product-recs:not(.is-ready) {
+    background: transparent;
+    padding: 0;
+    border-top: 0;
+    min-height: 1px;
+  }
+
+  .product-recs:not(.is-ready) .product-recs__inner {
+    display: none;
   }
 
   .product-recs__inner {
@@ -119,6 +141,10 @@
     margin: 0.75rem 0 0;
   }
 
+  .product-recs__row + .product-recs__row {
+    margin-top: 3.5rem;
+  }
+
   .product-recs__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -135,12 +161,22 @@
     .product-recs {
       padding: 3.5rem 0;
     }
+    .product-recs:not(.is-ready) {
+      padding: 0;
+    }
     .product-recs__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
+    .product-recs__row + .product-recs__row {
+      margin-top: 2.25rem;
+    }
+    .product-recs__header {
+      margin-bottom: 1.5rem;
+    }
   }
 </style>
+{%- endif -%}
 
 {% schema %}
 {
@@ -162,6 +198,12 @@
     },
     {
       "type": "text",
+      "id": "complement_title",
+      "label": "Second row title",
+      "default": "Complete the look"
+    },
+    {
+      "type": "text",
       "id": "subtitle",
       "label": "Subtitle",
       "default": "Explore similar pieces from our collection"
@@ -169,7 +211,7 @@
     {
       "type": "range",
       "id": "product_count",
-      "label": "Products to show",
+      "label": "Products to show in each row",
       "min": 2,
       "max": 8,
       "step": 1,
