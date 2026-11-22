@@ -456,6 +456,28 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
 }
 
 /**
+ * Midas engagement-ring mountings (trade account), sold as settings without a
+ * center stone. Merchant decision 2026-11-22: list them as settings, priced
+ * with the settings rule (`SETTING_ONLY`, cost × 2.25, labor to set the
+ * shopper's diamond included). Each metal is priced from its own trade cost;
+ * the 14K + $250 18K shortcut applies only when the supplier gives a 14K cost
+ * alone. Products are drafts, tag `ring-setting` plus `mc-import`, SKU
+ * `MC-<item number>` (sizes add `-<size>`), vendor Laura Milman New York. The
+ * supplier is never named on the store. Center shape comes from the supplier
+ * record per item and is added to `SETTING_CENTER_SHAPES`, never read from a SKU.
+ */
+export const MIDAS_SETTINGS = {
+  supplier: 'Midas',
+  tag: 'mc-import',
+  skuPrefix: 'MC-',
+  pricing: 'SETTING_ONLY',
+} as const;
+
+export function midasSettingRetailFromCost(costUsd: number): number {
+  return settingOnlyRetailFromCost(costUsd);
+}
+
+/**
  * LGD certified colored loose lab diamonds. Merchant decision 2026-10-22: the
  * same graduated tiers as white loose lab-grown (`labRetailMultipleFromCost`),
  * rounded to the dollar; was 3.5x cost from 2026-10-11.
