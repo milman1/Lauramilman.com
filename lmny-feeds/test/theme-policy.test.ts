@@ -48,7 +48,8 @@ describe('storefront warranty and return policy', () => {
     }
 
     const home = themeFile('templates/index.json');
-    expect(home, 'templates/index.json').toContain('14-Day Returns');
+    expect(home, 'templates/index.json').toContain('14-day returns on eligible jewelry');
+    expect(home, 'templates/index.json').toContain('"/pages/shipping-returns"');
     expect(home, 'templates/index.json').toContain('Inspected in New York');
     expect(home, 'templates/index.json').toContain('Hand-Inspected');
     expect(home, 'templates/index.json').not.toContain('Authenticity');
