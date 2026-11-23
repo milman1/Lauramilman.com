@@ -9,7 +9,14 @@
       },
       "block_order": ["trust-shipping", "trust-warranty", "trust-returns"],
       "settings": {
-        "show_vendor": true
+        "show_vendor": true,
+        "setting_timeline_enabled": true,
+        "setting_timeline_text": "Choose your diamond and setting, and we will set it within two business days, then ship it the next day.",
+        "setting_timeline_tags": "ring-setting, center-stone-excluded, set-stone, Engagement Rings",
+        "setting_timeline_types": "Engagement Ring, Engagement Rings, Solitaire Ring",
+        "setting_timeline_collections": "engagement-rings, lab-grown-engagement-rings, ring-settings, solitaire-ring-settings, hidden-halo-ring-settings",
+        "setting_timeline_hide_tags": "no-setting-timeline, backvault-feed, antique-estate, designer-jewelry, estate, vintage, pre-owned, preowned",
+        "setting_timeline_all_rings": false
       }
     },
     "education": {

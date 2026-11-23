@@ -1,0 +1,145 @@
+{%- comment -%}
+  Prints "true" when the product page should show the stone-setting
+  timeline: the shopper chooses a diamond and a mounting, and the house
+  sets the stone.
+
+  Shows for engagement rings, ring settings, and mountings. The reliable
+  signals in this catalog are the ring-setting and center-stone-excluded
+  tags, the Engagement Rings tag, product types Engagement Ring /
+  Engagement Rings / Solitaire Ring, the engagement-ring and ring-settings
+  collections, and a title that names an engagement ring, setting, or
+  mounting. Product type "Rings" alone is not enough: it also covers
+  finished estate rings, wedding bands, and stock fashion rings.
+
+  Stays off for watches, loose diamonds, earrings, bracelets, necklaces,
+  pendants, and other finished jewelry, and for estate / pre-owned pieces
+  and wedding or eternity bands.
+
+  Adjust it from the Product section settings, or with tags:
+  set-stone shows the line on a piece the rules would skip;
+  no-setting-timeline hides it, including on a setting.
+{%- endcomment -%}
+{%- liquid
+  assign show = false
+  if enabled
+    assign type_l = product.type | downcase | strip
+    assign title_l = product.title | downcase
+    assign tag_blob = '|'
+    for tag in product.tags
+      assign tag_down = tag | downcase | strip
+      assign tag_blob = tag_blob | append: tag_down | append: '|'
+    endfor
+
+    assign blocked = false
+    if type_l contains 'watch' or type_l contains 'timepiece' or type_l == 'natural diamond' or type_l == 'lab-grown diamond'
+      assign blocked = true
+    endif
+    if tag_blob contains '|no-setting-timeline|'
+      assign blocked = true
+    endif
+
+    unless blocked
+      if tag_blob contains '|set-stone|'
+        assign show = true
+      else
+        assign hidden = false
+        assign hide_list = hide_tags | default: '' | split: ','
+        for raw in hide_list
+          assign item = raw | downcase | strip
+          if item != blank
+            assign needle = '|' | append: item | append: '|'
+            if tag_blob contains needle
+              assign hidden = true
+            endif
+          endif
+        endfor
+        if title_l contains 'pre-owned' or title_l contains 'preowned'
+          assign hidden = true
+        endif
+
+        unless hidden
+          assign tagged = false
+          assign show_list = show_tags | default: '' | split: ','
+          for raw in show_list
+            assign item = raw | downcase | strip
+            if item != blank
+              assign needle = '|' | append: item | append: '|'
+              if tag_blob contains needle
+                assign tagged = true
+              endif
+            endif
+          endfor
+
+          assign typed = false
+          assign type_list = show_types | default: '' | split: ','
+          for raw in type_list
+            assign item = raw | downcase | strip
+            if item != blank and type_l == item
+              assign typed = true
+            endif
+          endfor
+
+          assign collected = false
+          assign col_list = show_collections | default: '' | split: ','
+          for raw in col_list
+            assign item = raw | downcase | strip
+            if item != blank
+              for c in product.collections
+                assign handle_l = c.handle | downcase
+                if handle_l == item
+                  assign collected = true
+                endif
+              endfor
+            endif
+          endfor
+
+          assign titled = false
+          if title_l contains 'engagement ring' or title_l contains 'ring setting' or title_l contains 'mounting' or title_l contains ' setting'
+            unless title_l contains 'earring'
+              if type_l contains 'ring' or type_l == 'jewelry' or type_l == blank
+                assign titled = true
+              endif
+            endunless
+          endif
+
+          assign ringish = false
+          if all_rings
+            if type_l contains 'ring'
+              unless type_l contains 'earring'
+                assign ringish = true
+              endunless
+            elsif type_l == 'jewelry' or type_l == blank
+              if title_l contains ' ring' or title_l contains ' band'
+                unless title_l contains 'earring'
+                  assign ringish = true
+                endunless
+              endif
+            endif
+          endif
+
+          assign other_jewelry = false
+          if type_l contains 'earring' or type_l contains 'bracelet' or type_l contains 'necklace' or type_l contains 'pendant' or type_l contains 'brooch' or type_l contains 'cufflink' or type_l contains 'bangle'
+            assign other_jewelry = true
+          endif
+
+          assign finished_band = false
+          if title_l contains 'wedding band' or title_l contains 'eternity band' or tag_blob contains '|wedding-band|' or tag_blob contains '|eternity band|' or tag_blob contains '|wedding bands|' or tag_blob contains '|mens wedding bands|'
+            assign finished_band = true
+          endif
+
+          if other_jewelry == false
+            if finished_band == false or tagged
+              if tagged or typed or collected or titled or ringish
+                assign show = true
+              endif
+            endif
+          endif
+        endunless
+      endif
+    endunless
+  endif
+
+  if show
+    echo 'true'
+  endif
+-%}

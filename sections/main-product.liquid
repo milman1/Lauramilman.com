@@ -405,6 +405,26 @@
           </span>
         </div>
 
+        {%- capture stone_set_timeline -%}
+          {%- render 'stone-set-timeline',
+            product: product,
+            enabled: section.settings.setting_timeline_enabled,
+            show_tags: section.settings.setting_timeline_tags,
+            show_types: section.settings.setting_timeline_types,
+            hide_tags: section.settings.setting_timeline_hide_tags,
+            show_collections: section.settings.setting_timeline_collections,
+            all_rings: section.settings.setting_timeline_all_rings
+          -%}
+        {%- endcapture -%}
+        {%- assign stone_set_timeline = stone_set_timeline | strip -%}
+        {%- if stone_set_timeline == 'true' -%}
+          {%- assign setting_timeline_text = section.settings.setting_timeline_text | strip -%}
+          {%- if setting_timeline_text == blank -%}
+            {%- assign setting_timeline_text = 'conversion.setting_timeline' | t -%}
+          {%- endif -%}
+          <p class="pdp-setting-timeline">{{ setting_timeline_text | escape }}</p>
+        {%- endif -%}
+
         {%- if show_private_viewing -%}
           {%- assign viewing_page = routes.root_url | append: '/pages/private-clients' | replace: '//', '/' -%}
           <div class="pdp-private-viewing">
@@ -714,6 +734,16 @@
   .pdp-private-viewing .btn {
     width: 100%;
     min-height: 44px;
+  }
+
+  .pdp-setting-timeline {
+    margin: -0.75rem 0 1.25rem;
+    max-width: 38rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-dark, #2C1810);
   }
 
   .pdp-vintage-details {
@@ -1275,6 +1305,58 @@
       "id": "show_vendor",
       "label": "Show vendor",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Setting timeline"
+    },
+    {
+      "type": "checkbox",
+      "id": "setting_timeline_enabled",
+      "label": "Show the setting timeline",
+      "info": "Under the price on engagement rings and ring settings: the shopper chooses a diamond and a setting, and the house sets the stone. Watches, other jewelry, estate pieces, and wedding bands stay hidden.",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "setting_timeline_text",
+      "label": "Setting timeline text",
+      "default": "Choose your diamond and setting, and we will set it within two business days, then ship it the next day."
+    },
+    {
+      "type": "text",
+      "id": "setting_timeline_tags",
+      "label": "Tags that show the line",
+      "info": "Comma-separated. Matched exactly, ignoring caps. set-stone shows the line on any piece except a watch, a loose diamond, or a piece tagged no-setting-timeline.",
+      "default": "ring-setting, center-stone-excluded, set-stone, Engagement Rings"
+    },
+    {
+      "type": "text",
+      "id": "setting_timeline_types",
+      "label": "Product types that show the line",
+      "info": "Comma-separated. Matched exactly, ignoring caps. Product type Rings is not in this list, because that type also covers finished estate rings and bands.",
+      "default": "Engagement Ring, Engagement Rings, Solitaire Ring"
+    },
+    {
+      "type": "text",
+      "id": "setting_timeline_collections",
+      "label": "Collections that show the line",
+      "info": "Comma-separated collection handles.",
+      "default": "engagement-rings, lab-grown-engagement-rings, ring-settings, solitaire-ring-settings, hidden-halo-ring-settings"
+    },
+    {
+      "type": "text",
+      "id": "setting_timeline_hide_tags",
+      "label": "Tags that hide the line",
+      "info": "Comma-separated. Matched exactly, ignoring caps. no-setting-timeline always hides the line. A title that says pre-owned hides it too.",
+      "default": "no-setting-timeline, backvault-feed, antique-estate, designer-jewelry, estate, vintage, pre-owned, preowned"
+    },
+    {
+      "type": "checkbox",
+      "id": "setting_timeline_all_rings",
+      "label": "Also show it on every other ring",
+      "info": "Includes finished fashion rings typed Ring or Rings. Estate pieces, wedding bands, and eternity bands stay hidden unless tagged set-stone.",
+      "default": false
     },
     {
       "type": "header",
