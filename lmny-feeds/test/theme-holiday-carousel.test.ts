@@ -18,11 +18,11 @@ describe('homepage holiday carousel', () => {
   const script = themeFile('assets/holiday-carousel.js');
   const home = themeJson('templates/index.json');
 
-  it('leads the homepage and leaves the year-round hero in place', () => {
+  it('leads the homepage and does not render the year-round hero under the carousel', () => {
     expect(home.order[0]).toBe('holiday');
     expect(home.sections.holiday.type).toBe('holiday-carousel');
     expect(home.sections.hero.type).toBe('lmh-hero');
-    expect(home.order.indexOf('hero')).toBe(1);
+    expect(home.sections.hero.disabled).toBe(true);
     expect(home.order.indexOf('private-clients')).toBe(home.order.length - 1);
   });
 

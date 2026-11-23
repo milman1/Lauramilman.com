@@ -86,6 +86,7 @@
     },
     "hero": {
       "type": "lmh-hero",
+      "disabled": true,
       "blocks": {
         "pill-1": {
           "type": "pill",
