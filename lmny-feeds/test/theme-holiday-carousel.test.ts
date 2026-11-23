@@ -40,6 +40,16 @@ describe('homepage holiday carousel', () => {
     expect(copy).toContain('/collections/lab-grown-diamond-jewelry');
     expect(copy).toContain('/collections/everyday-jewelry');
     expect(copy).toContain('holiday-velvet-desktop.webp');
+    const velvet = slides['slide-velvet'].settings ?? {};
+    const velvetCopy = [velvet.eyebrow, velvet.heading, velvet.subtext, velvet.image_alt, velvet.button_label].join('\n');
+    expect(velvet.heading).toBe("The season's most brilliant gift");
+    expect(velvet.subtext).toBe('Lab-grown diamond jewelry, chosen in New York City.');
+    expect(velvet.image_alt).toBe('Diamond jewelry holiday display');
+    expect(velvet.button_label).toBe('Shop diamond jewelry');
+    expect(velvet.button_link).toBe('/collections/lab-grown-diamond-jewelry');
+    expect(velvet.show_snow).toBe(true);
+    expect(velvetCopy).not.toMatch(/velvet|on red/i);
+    expect(slides['slide-jewelry'].settings?.show_snow).toBeUndefined();
     expect(copy).not.toMatch(/%|Diamond District|Midtown|private appointment|showroom/i);
     expect(copy).not.toMatch(/(?<!New )Jacob & Co/);
   });
@@ -61,6 +71,11 @@ describe('homepage holiday carousel', () => {
     expect(section).toContain('fetchpriority="high"');
     expect(css).toContain('aspect-ratio: 1440 / 640');
     expect(css).toContain('aspect-ratio: 390 / 560');
+    expect(section).toContain('lm-holiday__snow');
+    expect(section).toContain('show_snow');
+    expect(css).toContain('lm-holiday-snow');
+    expect(css).toContain('.lm-holiday__snow');
+    expect(css).toContain('pointer-events: none');
     expect(css).toContain('prefers-reduced-motion: reduce');
     expect(css).toContain('Cormorant Garamond');
     expect(script).toContain('prefers-reduced-motion');

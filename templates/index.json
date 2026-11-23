@@ -31,12 +31,13 @@
           "settings": {
             "image_asset": "holiday-velvet-desktop.webp",
             "mobile_image_asset": "holiday-velvet-mobile.webp",
-            "image_alt": "Loose diamonds arranged on dark red velvet",
+            "image_alt": "Diamond jewelry holiday display",
             "image_focus": "center",
             "copy_side": "left",
-            "eyebrow": "The season",
-            "heading": "Diamonds on dark red velvet",
-            "subtext": "Diamond jewelry for the season, from New York City.",
+            "show_snow": true,
+            "eyebrow": "The holidays",
+            "heading": "The season's most brilliant gift",
+            "subtext": "Lab-grown diamond jewelry, chosen in New York City.",
             "button_label": "Shop diamond jewelry",
             "button_link": "/collections/lab-grown-diamond-jewelry"
           }
