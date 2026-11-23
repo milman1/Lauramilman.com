@@ -9,6 +9,80 @@
  */
 {
   "sections": {
+    "holiday": {
+      "type": "holiday-carousel",
+      "blocks": {
+        "slide-jewelry": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "home-hero-ring.webp",
+            "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring",
+            "image_focus": "right",
+            "copy_side": "left",
+            "eyebrow": "Black Friday",
+            "heading": "Twenty percent off jewelry",
+            "subtext": "All jewelry, November 27 through December 1.",
+            "button_label": "Shop jewelry",
+            "button_link": "/collections/all"
+          }
+        },
+        "slide-velvet": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Loose diamonds arranged on dark red velvet",
+            "image_focus": "center",
+            "copy_side": "left",
+            "eyebrow": "The season",
+            "heading": "Diamonds on dark red velvet",
+            "subtext": "Diamond jewelry for the season, from New York City.",
+            "button_label": "Shop diamond jewelry",
+            "button_link": "/collections/lab-grown-diamond-jewelry"
+          }
+        },
+        "slide-jacob": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-jacob-co.jpg",
+            "image_alt": "New Jacob & Co Epic II chronograph on the wrist",
+            "image_focus": "center",
+            "copy_side": "right",
+            "eyebrow": "New Jacob & Co",
+            "heading": "Twenty percent off New watches",
+            "subtext": "New Jacob & Co watches, November 27 through December 1.",
+            "button_label": "Shop New Jacob & Co",
+            "button_link": "/collections/jacob-co"
+          }
+        },
+        "slide-gifts": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "home-rings-model.webp",
+            "mobile_image_asset": "home-bracelets.webp",
+            "image_alt": "Woman in an ivory blazer wearing a diamond ring, Laura Milman New York",
+            "image_focus": "center",
+            "copy_side": "left",
+            "eyebrow": "Christmas delivery",
+            "heading": "Ship by December 22",
+            "subtext": "Order in time for Christmas delivery. Gifts from New York City.",
+            "button_label": "Shop gifts",
+            "button_link": "/collections/everyday-jewelry"
+          }
+        }
+      },
+      "block_order": [
+        "slide-jewelry",
+        "slide-velvet",
+        "slide-jacob",
+        "slide-gifts"
+      ],
+      "settings": {
+        "autoplay": true,
+        "interval": 6,
+        "accessibility_label": "Holiday"
+      }
+    },
     "hero": {
       "type": "lmh-hero",
       "blocks": {
@@ -840,6 +914,7 @@
     }
   },
   "order": [
+    "holiday",
     "hero",
     "trust-strip",
     "ring-builder",
