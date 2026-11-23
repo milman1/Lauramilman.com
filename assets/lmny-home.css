@@ -231,6 +231,7 @@
   color: var(--lmh-ink);
 }
 .lmh-trust li { display: flex; align-items: center; gap: 10px; }
+.lmh-trust a { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
 .lmh-diamond { width: 5px; height: 5px; background: var(--lmh-gold); transform: rotate(45deg); flex-shrink: 0; }
 
 /* =============================================================

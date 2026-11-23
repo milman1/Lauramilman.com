@@ -24,11 +24,18 @@
             "answer": "<p>Every order ships free within the United States, fully insured and signature-required. Most in-stock pieces leave our workshop within 2–3 business days; bespoke and made-to-order pieces are quoted individually.</p>"
           }
         },
+        "qa-setting": {
+          "type": "qa",
+          "settings": {
+            "question": "How long does it take to set a diamond?",
+            "answer": "<p>Choose your diamond and setting. We set it here in New York and deliver it within three business days.</p>"
+          }
+        },
         "qa-returns": {
           "type": "qa",
           "settings": {
             "question": "What is your return policy?",
-            "answer": "<p>Unworn jewelry in original condition may be returned or exchanged within 14 days of delivery, and loose diamonds follow the same window when unset and returned with their certificate. Watches and timepieces are exchanges only — no refunds — within 7 days of delivery, with box, papers, and tags. Bespoke commissions and specially sourced stones are final sale.</p>"
+            "answer": "<p>Unworn jewelry, and unset diamonds with their certificate, may be returned or exchanged within 14 days of delivery, with a prepaid, insured label. Once your diamond is set, the ring can be exchanged but not returned. Engraved pieces, bespoke commissions, and specially sourced stones (diamonds not listed on our site) are final sale, and we are happy to offer an exchange or store credit. Watches and timepieces are exchanges only — no refunds — within 7 days of delivery, with box, papers, and tags.</p>"
           }
         },
         "qa-sizing": {
@@ -53,7 +60,7 @@
           }
         }
       },
-      "block_order": ["qa-authentic", "qa-natural-lab", "qa-shipping", "qa-returns", "qa-sizing", "qa-bespoke", "qa-warranty"],
+      "block_order": ["qa-authentic", "qa-natural-lab", "qa-shipping", "qa-setting", "qa-returns", "qa-sizing", "qa-bespoke", "qa-warranty"],
       "settings": {
         "eyebrow": "Help & Answers",
         "title": "Frequently Asked Questions",

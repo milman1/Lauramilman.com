@@ -11,7 +11,11 @@
       "settings": {
         "show_vendor": true,
         "setting_timeline_enabled": true,
-        "setting_timeline_text": "Choose your diamond and setting, and we will set it within two business days, then ship it the next day.",
+        "setting_timeline_text": "Choose your diamond and setting. We set it here in New York and deliver it within three business days.",
+        "setting_returns_text": "Unworn jewelry, and unset diamonds with their certificate, may be returned or exchanged within 14 days of delivery, with a prepaid, insured label. Once your diamond is set, the ring can be exchanged but not returned. Engraved pieces, bespoke commissions, and specially sourced stones (diamonds not listed on our site) are final sale, and we are happy to offer an exchange or store credit.",
+        "setting_holiday_enabled": true,
+        "setting_holiday_text": "Order by December 22 for delivery before Christmas.",
+        "setting_holiday_through": "2026-12-22",
         "setting_timeline_tags": "ring-setting, center-stone-excluded, set-stone, Engagement Rings",
         "setting_timeline_types": "Engagement Ring, Engagement Rings, Solitaire Ring",
         "setting_timeline_collections": "engagement-rings, lab-grown-engagement-rings, ring-settings, solitaire-ring-settings, hidden-halo-ring-settings",

@@ -422,7 +422,17 @@
           {%- if setting_timeline_text == blank -%}
             {%- assign setting_timeline_text = 'conversion.setting_timeline' | t -%}
           {%- endif -%}
-          <p class="pdp-setting-timeline">{{ setting_timeline_text | escape }}</p>
+          <div class="pdp-setting-notes">
+            <p class="pdp-setting-timeline">{{ setting_timeline_text | escape }}</p>
+            {%- if section.settings.setting_holiday_enabled -%}
+              {%- assign setting_holiday_text = section.settings.setting_holiday_text | strip -%}
+              {%- if setting_holiday_text == blank -%}
+                {%- assign setting_holiday_text = 'conversion.setting_holiday' | t -%}
+              {%- endif -%}
+              {%- assign setting_holiday_through = section.settings.setting_holiday_through | default: '2026-12-22' | strip -%}
+              <p class="pdp-setting-timeline pdp-setting-holiday" data-holiday-through="{{ setting_holiday_through | escape }}" hidden>{{ setting_holiday_text | escape }}</p>
+            {%- endif -%}
+          </div>
         {%- endif -%}
 
         {%- if show_private_viewing -%}
@@ -535,6 +545,13 @@
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
         {%- if is_vintage == 'true' and is_watch != 'true' -%}
           {%- render 'vintage-buying-details', product: product, section_id: section.id -%}
+        {%- endif -%}
+        {%- if stone_set_timeline == 'true' -%}
+          {%- assign setting_returns_text = section.settings.setting_returns_text | strip -%}
+          {%- if setting_returns_text == blank -%}
+            {%- assign setting_returns_text = 'conversion.setting_returns' | t -%}
+          {%- endif -%}
+          <p class="pdp-setting-returns">{{ setting_returns_text | escape }}</p>
         {%- endif -%}
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
@@ -736,14 +753,32 @@
     min-height: 44px;
   }
 
-  .pdp-setting-timeline {
+  .pdp-setting-notes {
     margin: -0.75rem 0 1.25rem;
+    max-width: 38rem;
+  }
+
+  .pdp-setting-timeline,
+  .pdp-setting-returns {
+    margin: 0 0 0.55rem;
     max-width: 38rem;
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 12px;
     font-weight: 400;
     line-height: 1.6;
     color: var(--text-dark, #2C1810);
+  }
+
+  .pdp-setting-notes .pdp-setting-timeline:last-child {
+    margin-bottom: 0;
+  }
+
+  .pdp-setting-holiday[hidden] {
+    display: none !important;
+  }
+
+  .pdp-setting-returns {
+    margin: 0 0 1rem;
   }
 
   .pdp-vintage-details {
@@ -1293,6 +1328,22 @@
     }
   })();
 </script>
+<script>
+  (function () {
+    var nodes = document.querySelectorAll('[data-holiday-through]');
+    if (!nodes.length || !window.Intl || !Intl.DateTimeFormat) return;
+    var today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+    nodes.forEach(function (node) {
+      var through = node.getAttribute('data-holiday-through') || '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(through) && today <= through) node.hidden = false;
+    });
+  })();
+</script>
 
 {% schema %}
 {
@@ -1321,7 +1372,34 @@
       "type": "textarea",
       "id": "setting_timeline_text",
       "label": "Setting timeline text",
-      "default": "Choose your diamond and setting, and we will set it within two business days, then ship it the next day."
+      "default": "Choose your diamond and setting. We set it here in New York and deliver it within three business days."
+    },
+    {
+      "type": "textarea",
+      "id": "setting_returns_text",
+      "label": "Returns line",
+      "info": "Shown near Add to Cart on the same engagement rings and settings.",
+      "default": "Unworn jewelry, and unset diamonds with their certificate, may be returned or exchanged within 14 days of delivery, with a prepaid, insured label. Once your diamond is set, the ring can be exchanged but not returned. Engraved pieces, bespoke commissions, and specially sourced stones (diamonds not listed on our site) are final sale, and we are happy to offer an exchange or store credit."
+    },
+    {
+      "type": "checkbox",
+      "id": "setting_holiday_enabled",
+      "label": "Show the holiday delivery line",
+      "info": "On the same engagement rings and settings. It hides on its own after the date below, using New York time.",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "setting_holiday_text",
+      "label": "Holiday delivery line",
+      "default": "Order by December 22 for delivery before Christmas."
+    },
+    {
+      "type": "text",
+      "id": "setting_holiday_through",
+      "label": "Show the holiday line through",
+      "info": "A date as YYYY-MM-DD. The line shows through this date in America/New_York and hides the next day.",
+      "default": "2026-12-22"
     },
     {
       "type": "text",
