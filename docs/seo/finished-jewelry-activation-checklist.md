@@ -249,3 +249,7 @@ Never recommend importing or applying a Review row. Preserve a restricted
 change log showing prepared, applied, verified, unchanged, Review, and Skipped
 counts separately. Report exact blockers. A plan, commit, or write response
 alone is not proof that live products have been updated.
+
+## Media completeness when scraping
+
+When the product source is a scraped supplier or trade page, pull every photo and every video the page offers, per product and per variant or metal that has its own media, at the highest resolution served, with source URLs recorded (AGENTS.md rule 15). Do not stop at three images or at the first view. If fewer than three photos exist, keep the product DRAFT and list it for the merchant.
