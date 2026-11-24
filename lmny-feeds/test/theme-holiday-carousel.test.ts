@@ -31,27 +31,25 @@ describe('homepage holiday carousel', () => {
     const copy = Object.values(slides).map((block) => JSON.stringify(block.settings)).join('\n');
     expect(copy).toContain('Twenty percent off jewelry');
     expect(copy).toContain('November 27 through December 1');
-    expect(copy).toContain('Twenty percent off New watches');
-    expect(copy).toContain('New Jacob & Co');
     expect(copy).toContain('Ship by December 22');
     expect(copy).toContain('New York City');
     expect(copy).toContain('/collections/all');
-    expect(copy).toContain('/collections/jacob-co');
     expect(copy).toContain('/collections/lab-grown-diamond-jewelry');
     expect(copy).toContain('/collections/everyday-jewelry');
-    expect(copy).toContain('holiday-velvet-desktop.webp');
+    expect(copy).not.toMatch(/watch|jacob/i);
+    expect(home.sections.holiday.block_order).toEqual(['slide-jewelry', 'slide-velvet', 'slide-gifts']);
+    for (const id of ['slide-jewelry', 'slide-velvet', 'slide-gifts']) {
+      const slide = slides[id].settings ?? {};
+      expect(slide.image_asset).toBe('holiday-velvet-desktop.webp');
+      expect(slide.mobile_image_asset).toBe('holiday-velvet-mobile.webp');
+      expect(slide.image_alt).toBe('Diamond jewelry holiday display');
+      expect(slide.show_snow).toBe(true);
+    }
     const velvet = slides['slide-velvet'].settings ?? {};
-    const velvetCopy = [velvet.eyebrow, velvet.heading, velvet.subtext, velvet.image_alt, velvet.button_label].join('\n');
     expect(velvet.heading).toBe("The season's most brilliant gift");
     expect(velvet.subtext).toBe('Lab-grown diamond jewelry, chosen in New York City.');
-    expect(velvet.image_alt).toBe('Diamond jewelry holiday display');
-    expect(velvet.button_label).toBe('Shop diamond jewelry');
-    expect(velvet.button_link).toBe('/collections/lab-grown-diamond-jewelry');
-    expect(velvet.show_snow).toBe(true);
-    expect(velvetCopy).not.toMatch(/velvet|on red/i);
-    expect(slides['slide-jewelry'].settings?.show_snow).toBeUndefined();
+    expect([velvet.eyebrow, velvet.heading, velvet.subtext, velvet.image_alt, velvet.button_label].join('\n')).not.toMatch(/velvet|on red/i);
     expect(copy).not.toMatch(/%|Diamond District|Midtown|private appointment|showroom/i);
-    expect(copy).not.toMatch(/(?<!New )Jacob & Co/);
   });
 
   it('is an editable, accessible carousel', () => {
