@@ -456,6 +456,27 @@ export function settingOnlyRetailFromCost(costUsd: number): number {
 }
 
 /**
+ * Midas Chain wedding bands (bands only, never ring settings): merchant
+ * decision 2026-11-23.
+ *
+ *   retail = round(trade cost × 2.5)
+ *
+ * Per variant, rounded to the dollar. Its own row: it is not the setting-only
+ * rule, the Royal Chain rule, or any other supplier's multiple. The supplier
+ * is never named on the store.
+ */
+export const MIDAS_BANDS = {
+  costMultiple: 2.5,
+} as const;
+
+export function midasBandRetailFromCost(costUsd: number): number {
+  if (!Number.isFinite(costUsd) || costUsd <= 0) {
+    throw new Error(`Midas band pricing: invalid cost ${costUsd}`);
+  }
+  return Math.round(costUsd * MIDAS_BANDS.costMultiple);
+}
+
+/**
  * LGD certified colored loose lab diamonds. Merchant decision 2026-10-22: the
  * same graduated tiers as white loose lab-grown (`labRetailMultipleFromCost`),
  * rounded to the dollar; was 3.5x cost from 2026-10-11.
