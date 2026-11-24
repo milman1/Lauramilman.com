@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { FEED_TAG, fetchInventory, normalizeFeed, ownsLgd, payloadFor, snapshotHash } from './catalog.mjs';
+import { FEED_TAG, fetchLgdInventory, normalizeLgdFeed, ownsLgd, ownsWhite, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
 export function currentStage() { return stage; }
 /**
@@ -114,7 +114,10 @@ async function paginate(gql,operation,key,variables={}) {
 }
 function requireNoErrors(result) {if(result.userErrors?.length) { console.error(JSON.stringify({stage, rejectedFields:result.userErrors.map(e=>e.field||['input'])})); throw new Error('Shopify rejected operation'); }}
 export async function mediaReady(stone,fetcher=fetch) {
-  for (const [url,kind] of [[stone.image,'image'],[stone.video,'video']]) {
+  const checks = [[stone.image, 'image']];
+  if (stone.video) checks.push([stone.video, 'video']);
+  else if (stone.inventory !== 'white') return false;
+  for (const [url,kind] of checks) {
     let r;try{r=await fetcher(url,{headers:{Range:'bytes=0-1023'},signal:AbortSignal.timeout(30000),redirect:'error'});}catch{return false;}
     if(!r.ok){await r.body?.cancel();return false;}
     const type=r.headers.get('content-type')||'';
@@ -130,13 +133,13 @@ export async function mediaReady(stone,fetcher=fetch) {
 // The LGD source; src/lgd-color/belgium.ts supplies the Belgium Dia one.
 export const LGD_SOURCE = {
   name: 'LGD',
-  fetchRows: () => fetchInventory(process.env.LGD_API_KEY),
-  normalize: normalizeFeed,
+  fetchRows: () => fetchLgdInventory(process.env.LGD_API_KEY),
+  normalize: normalizeLgdFeed,
   owns: ownsLgd,
   reportPath: 'out/lgd-color-report.json',
 };
 export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
-  const owns=source.owns;
+  let owns=source.owns;
   const dry=argv.includes('--dry-run'), activate=argv.includes('--activate');
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
@@ -148,7 +151,11 @@ export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
   const rows=await source.fetchRows();
   stage='normalize';
   const normalized=source.normalize(rows);
-  console.log(JSON.stringify({stage,fetched:rows.length,...(normalized.colored==null?{}:{colored:normalized.colored}),eligible:normalized.stones.length,excluded:normalized.holds,...(normalized.availability?{availability:normalized.availability}:{})}));
+  if (normalized.manageWhite) {
+    const coloredOwns = owns;
+    owns = (product) => coloredOwns(product) || ownsWhite(product);
+  }
+  console.log(JSON.stringify({stage,fetched:rows.length,...(normalized.colored==null?{}:{colored:normalized.colored}),...(normalized.counts?{counts:normalized.counts}:{}),...(normalized.manageWhite?{manageWhite:true}:{}),eligible:normalized.stones.length,excluded:normalized.holds,...(normalized.availability?{availability:normalized.availability}:{})}));
   const emptyAction=emptySnapshotAction(source,normalized);
   if(emptyAction==='warn'){
     const warning='No colored stones are available; availability writes skipped';
@@ -158,6 +165,9 @@ export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
     return;
   }
   if(emptyAction==='refuse')throw new SafeError('No eligible stones; availability writes are unsafe');
+  // White stones are not allowed to stand in for a colored snapshot. An empty
+  // colored result still refuses, so a white feed cannot withdraw colored stones.
+  if(normalized.counts && normalized.counts.color===0)throw new SafeError('No eligible colored stones; availability writes are unsafe');
   stage='shopify_auth';
   const gql=await client();
   stage='shopify_catalog';

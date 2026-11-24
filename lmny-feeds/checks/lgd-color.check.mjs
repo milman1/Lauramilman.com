@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeRow, normalizeFeed, payloadFor, fetchInventory, supplierFetchError, FEED_TAG } from '../src/lgd-color/catalog.mjs';
+import { normalizeRow, normalizeFeed, normalizeWhiteRow, normalizeLgdFeed, payloadFor, fetchInventory, fetchLgdInventory, supplierFetchError, FEED_TAG, WHITE_TAG, ownsWhite, ownsLgd } from '../src/lgd-color/catalog.mjs';
+import { inventoryEndpoint } from '../src/lgd-color/client.mjs';
 import { planFor, mediaReady, requestShopify, withdrawalLimit, SafeError } from '../src/lgd-color/sync.mjs';
 const fixture = (override={}) => ({Stock_No:'TEST1',Shape:'RADIANT',Color:'BLUE',Fancy_Color_Intensity:'Fancy Vivid',Clarity:'VS1',Weight:'2',Buy_Price:'100',Buy_Price_Total:'200',Diamond_Type:'Lab Grown',Lab:'IGI',Availability:'Available',ImageLink:'https://example.com/stone.jpg',Video_HTML:'https://example.com/stone.mp4',CertificateLink:'https://example.com/LG12345678.pdf',...override});
 test('prices from total cost, never per-carat price',()=>{const s=normalizeRow(fixture()).stone;assert.equal(s.retail,500);assert.equal(s.cost,200);assert.equal(s.certificate,'LG12345678');});
@@ -25,3 +26,107 @@ test('colored stones use the white loose lab-grown tiers, rounded to the dollar'
 test('over-limit withdrawal names the counts and a reviewed maximum allows it',()=>{const s=normalizeRow(fixture()).stone;const catalog=Array.from({length:151},(_,i)=>({id:'p'+i,handle:'lg-color-gone'+i,tags:[FEED_TAG],status:'ACTIVE'}));assert.throws(()=>planFor([s],catalog),e=>e instanceof SafeError&&/withdrawal of 151 stones exceeds the limit of 150 \(151 live\)/.test(e.message));assert.equal(planFor([s],catalog.slice(0,150)).holds.length,150);assert.equal(planFor([s],catalog,{maxWithdrawals:151}).holds.length,151);assert.throws(()=>planFor([s],catalog,{maxWithdrawals:9}),SafeError);});
 test('a preview reports withdrawals over the limit instead of stopping',()=>{const s=normalizeRow(fixture()).stone;const catalog=Array.from({length:10},(_,i)=>({id:'p'+i,handle:'lg-color-gone'+i,tags:[FEED_TAG],status:'ACTIVE'}));assert.equal(planFor([s],catalog,{checkLimit:false}).holds.length,10);});
 test('stocked shapes beyond the classic list are accepted under their storefront button names',()=>{const shape=v=>normalizeRow(fixture({Shape:v})).stone?.shape;assert.equal(shape('ASHOKA'),'Ashoka');assert.equal(shape('Hexagonal'),'Hexagonal');assert.equal(shape('EuropeanCut'),'European Cut');assert.equal(shape('KITE STEP CUT'),'Kite Step Cut');assert.equal(shape('MARQUISE MODIFIED BRILLI'),'Marquise');assert.equal(shape('OCTAGONAL STEP CUT'),'Octagonal');assert.equal(shape('RADIANT'),'Radiant');assert.equal(shape('CUSHION MODIFIED'),'Cushion');assert.equal(normalizeRow(fixture({Shape:'LILYCUT'})).reason,'scope');assert.equal(normalizeRow(fixture({Shape:'RING'})).reason,'scope');});
+
+const whiteFixture = (override={}) => ({Stock_No:'W1',Shape:'OVAL',Color:'F',Clarity:'VS1',Weight:'1',Buy_Price:'200',Buy_Price_Total:'200',Diamond_Type:'Lab Grown',Lab:'IGI',Availability:'Available',ImageLink:'https://example.com/white.jpg',CertificateLink:'https://example.com/LG22222222.pdf',...override});
+test('white stones are priced on the lab tiers and stay out of the colored feed',()=>{
+  const stone=normalizeWhiteRow(whiteFixture()).stone;
+  assert.equal(stone.handle,'lab-white-w1');
+  assert.equal(stone.retail,500);
+  assert.equal(stone.lab,'IGI');
+  assert.equal(ownsWhite({handle:stone.handle,tags:[WHITE_TAG]}),true);
+  assert.equal(ownsLgd({handle:stone.handle,tags:[WHITE_TAG]}),false);
+  const payload=payloadFor(stone,undefined,'DRAFT','gid://shopify/Location/1');
+  assert.equal(payload.status,'DRAFT');
+  assert.ok(payload.tags.includes(WHITE_TAG));
+  assert.ok(!payload.tags.includes(FEED_TAG));
+  assert.ok(!payload.tags.includes('lmny-feed'));
+  assert.ok(!payload.tags.includes('ebay'));
+  assert.equal(payload.seo.title,'1.00ct Oval Lab-Grown Diamond — F VS1 | IGI');
+  assert.ok(payload.seo.title.length<=60&&payload.seo.description.length<=160);
+  assert.equal(payload.metafields.find(m=>m.key==='video_url'),undefined);
+  assert.equal(payload.variants[0].inventoryQuantities[0].quantity,0);
+  assert.ok(!JSON.stringify(payload).toLowerCase().includes('lgd usa'));
+});
+test('white feed holds grades past L, missing photos, and a per-carat price read as a total',()=>{
+  assert.equal(normalizeWhiteRow(whiteFixture({Color:'M'})).reason,'color_below_floor');
+  assert.equal(normalizeWhiteRow(whiteFixture({Color:'PINK'})).reason,'scope');
+  assert.equal(normalizeWhiteRow(whiteFixture({ImageLink:''})).reason,'photo_or_video');
+  assert.equal(normalizeWhiteRow(whiteFixture({Lab:'HRD'})).reason,'grading_or_certificate');
+  assert.equal(normalizeWhiteRow(whiteFixture({Weight:'2',Buy_Price:'10',Buy_Price_Total:'20'})).reason,'cost_mismatch');
+  const withVideo=normalizeWhiteRow(whiteFixture({Video_HTML:'https://example.com/white.mp4'})).stone;
+  assert.equal(withVideo.video,'https://example.com/white.mp4');
+  const gia=normalizeWhiteRow(whiteFixture({Lab:'GIA',CertificateLink:'https://example.com/2141438163.pdf'})).stone;
+  assert.equal(gia.lab,'GIA');
+  assert.equal(gia.certificate,'2141438163');
+});
+test('a white stone with no video still passes the media check when the photo is real',async()=>{
+  const stone=normalizeWhiteRow(whiteFixture()).stone;
+  const jpeg=new Uint8Array([255,216,255,217]);
+  const ok=await mediaReady(stone,async()=>new Response(jpeg,{headers:{'content-type':'image/jpeg'}}));
+  assert.equal(ok,true);
+});
+test('colored and white rows normalize together and a missing white class does not own white products',()=>{
+  const color=fixture({Stock_No:'C1'});
+  const white=whiteFixture();
+  const rows=[{...color,_lgdType:'certified_color'},{...white,_lgdType:'certified'}];
+  rows.manageWhite=true;
+  const normalized=normalizeLgdFeed(rows);
+  assert.deepEqual(normalized.counts,{color:1,white:1});
+  assert.equal(normalized.manageWhite,true);
+  const owned=[
+    {id:'c',handle:'lg-color-gone',tags:[FEED_TAG],status:'ACTIVE'},
+    {id:'w',handle:'lab-white-gone',tags:[WHITE_TAG],status:'ACTIVE'},
+    {id:'b',handle:'lg-color-bd-gone',tags:[FEED_TAG,'belgium-color-feed'],status:'ACTIVE'},
+  ];
+  const plan=planFor(normalized.stones,owned,{owns:p=>ownsLgd(p)||ownsWhite(p)});
+  assert.deepEqual(plan.holds.map(h=>h.handle).sort(),['lab-white-gone','lg-color-gone']);
+  const colorOnly=[{...color,_lgdType:'certified_color'}];
+  colorOnly.manageWhite=false;
+  assert.equal(normalizeLgdFeed(colorOnly).manageWhite,false);
+  assert.equal(planFor(normalizeLgdFeed(colorOnly).stones,owned).holds.map(h=>h.handle).join(),'lg-color-gone');
+});
+test('fetches color and white, and a 404 on white leaves color usable',async()=>{
+  const seen=[];
+  const logs=[];
+  const realLog=console.log;
+  console.log=(line)=>{logs.push(String(line));};
+  const page=(stock)=>({ok:true,status:200,json:async()=>({page_no:1,total_page:1,total_results:1,data:[stock.startsWith('W')?whiteFixture({Stock_No:stock}):fixture({Stock_No:stock})]})});
+  try {
+    const rows=await fetchLgdInventory('secret-key',async(url)=>{
+      seen.push(url.searchParams.get('type'));
+      assert.equal(url.searchParams.get('key'),'secret-key');
+      if(url.searchParams.get('type')==='certified') return {ok:false,status:404,body:{cancel(){}}};
+      return page('C9');
+    });
+    assert.deepEqual(seen,['certified_color','certified']);
+    assert.equal(rows.length,1);
+    assert.equal(rows.manageWhite,false);
+    assert.equal(rows[0].Stock_No,'C9');
+    assert.ok(logs.every(line=>!line.includes('secret-key')));
+  } finally { console.log=realLog; }
+});
+test('a white-class failure leaves the colored rows and does not own white products',async()=>{
+  const rows=await fetchLgdInventory('secret-key',async(url)=>{
+    if(url.searchParams.get('type')==='certified') throw Object.assign(new TypeError('fetch failed'),{cause:{code:'ENOTFOUND',message:'https://api.example/diamond?key=secret-key'}});
+    return {ok:true,status:200,json:async()=>({page_no:1,total_page:1,total_results:1,data:[fixture({Stock_No:'C4'})]})};
+  });
+  assert.equal(rows.manageWhite,false);
+  assert.equal(rows.length,1);
+  assert.equal(rows[0]._lgdType,'certified_color');
+});
+test('retries a timed-out page and still hides the request URL',async()=>{
+  let calls=0;
+  const rows=await fetchInventory('secret-key',async()=>{
+    calls++;
+    if(calls===1) throw Object.assign(new TypeError('fetch failed'),{cause:{code:'ETIMEDOUT',message:'https://api.example/diamond?key=secret-key'}});
+    return {ok:true,status:200,json:async()=>({page_no:1,total_page:1,total_results:1,data:[fixture()]})};
+  });
+  assert.equal(rows.length,1);
+  assert.equal(calls,2);
+});
+test('LGD_API_BASE replaces the endpoint and rejects a URL that would leak the key',()=>{
+  assert.equal(inventoryEndpoint({LGD_API_BASE:'https://example.com/developer-api/diamond'}),'https://example.com/developer-api/diamond');
+  assert.equal(inventoryEndpoint({}),'https://api.lgdusallc.com/api/v1/inventory/diamond');
+  assert.throws(()=>inventoryEndpoint({LGD_API_BASE:'https://user:secret@example.com/diamond'}));
+  assert.throws(()=>inventoryEndpoint({LGD_API_BASE:'http://example.com/diamond'}));
+});
