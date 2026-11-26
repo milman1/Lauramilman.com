@@ -91,22 +91,6 @@
             "button_link": "/collections/necklaces"
           }
         },
-        "slide-vintage": {
-          "type": "slide",
-          "settings": {
-            "image_asset": "holiday-velvet-desktop.webp",
-            "mobile_image_asset": "holiday-velvet-mobile.webp",
-            "image_alt": "Vintage jewelry holiday display",
-            "image_focus": "center",
-            "copy_side": "left",
-            "show_snow": true,
-            "eyebrow": "Vintage",
-            "heading": "20% off vintage jewelry",
-            "subtext": "Cartier, Van Cleef & Arpels, Tiffany & Co., David Webb and more. Use code LMNY20.",
-            "button_label": "Shop vintage",
-            "button_link": "/collections/vintage-jewelry"
-          }
-        },
         "slide-blue": {
           "type": "slide",
           "settings": {
@@ -210,7 +194,6 @@
         "slide-earrings",
         "slide-bracelets",
         "slide-necklaces",
-        "slide-vintage",
         "slide-blue",
         "slide-red",
         "slide-green",

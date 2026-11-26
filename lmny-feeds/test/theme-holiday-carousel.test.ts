@@ -43,8 +43,6 @@ describe('homepage holiday carousel', () => {
     expect(copy).toContain('Black Friday 20% off all jewelry with code LMNY20.');
     // Merchant 2026-11-26: the discount is shown as the number "20%", not spelled out.
     expect(copy).not.toMatch(/New York City|Christmas|December 22|percent/i);
-    expect(copy).toContain('20% off vintage jewelry');
-    expect(copy).toContain('/collections/vintage-jewelry');
     expect(copy).toContain('/collections/rings');
     expect(copy).toContain('/collections/all-earrings');
     expect(copy).toContain('/collections/all-bracelets');
@@ -63,7 +61,6 @@ describe('homepage holiday carousel', () => {
       'slide-earrings',
       'slide-bracelets',
       'slide-necklaces',
-      'slide-vintage',
       'slide-blue',
       'slide-red',
       'slide-green',
@@ -74,7 +71,6 @@ describe('homepage holiday carousel', () => {
     const images: Record<string, string> = {
       'slide-jewelry': 'holiday-velvet-desktop.webp',
       'slide-velvet': 'holiday-velvet-desktop.webp',
-      'slide-vintage': 'holiday-velvet-desktop.webp',
       'slide-gifts': 'holiday-velvet-desktop.webp',
       'slide-rings': 'holiday-ring-desktop.webp',
       'slide-earrings': 'holiday-earrings-desktop.webp',
