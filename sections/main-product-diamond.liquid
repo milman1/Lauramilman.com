@@ -200,6 +200,13 @@
           filled in (sections/private-client.liquid reads interest and piece).
         {%- endcomment -%}
         {%- if v.available -%}
+          {%- comment -%}
+            Lead times from the merchant (2026-11-26): delivery takes about 1-2
+            business days, and setting a stone takes 2 business days.
+          {%- endcomment -%}
+          <p class="dpdp__delivery">
+            Free insured U.S. delivery in about 1–2 business days. Set in a ring: 2 business days more for setting.
+          </p>
           {%- assign viewing_piece = product.title | append: ' ' | append: shop.url | append: product.url -%}
           <p class="dpdp__viewing">
             Prefer to see it first?

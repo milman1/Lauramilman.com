@@ -23,9 +23,13 @@ describe('private viewing link on loose diamond pages', () => {
     expect(form).toContain("var piece = params.get('piece')");
   });
 
-  it('makes no delivery promise', () => {
-    const line = page.slice(page.indexOf('class="dpdp__viewing"'), page.indexOf('data-diamond-view-cart'));
-    expect(line).toContain('Book a private Midtown viewing');
-    expect(line).not.toMatch(/deliver|business day|ships/i);
+  it('states the merchant lead times once, above the viewing link', () => {
+    const delivery = page.indexOf('class="dpdp__delivery"');
+    expect(delivery).toBeGreaterThan(page.indexOf("{%- endform -%}"));
+    expect(delivery).toBeLessThan(page.indexOf('class="dpdp__viewing"'));
+    expect(page).toContain('Free insured U.S. delivery in about 1–2 business days. Set in a ring: 2 business days more for setting.');
+    const viewing = page.slice(page.indexOf('class="dpdp__viewing"'), page.indexOf('data-diamond-view-cart'));
+    expect(viewing).toContain('Book a private Midtown viewing');
+    expect(viewing).not.toMatch(/deliver|business day/i);
   });
 });
