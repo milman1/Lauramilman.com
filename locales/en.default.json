@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "general": {
     "password_page": {
@@ -850,6 +859,9 @@
     "carat_desc": "Carat: high to low",
     "searching": "Loading diamonds…",
     "loading": "Loading…",
+    "load_timeout": "This is taking too long. Try again, or reset the filters.",
+    "accent_carat": "{{ carat }} ct accent diamonds",
+    "fulfillment": "In-stock pieces ship in 2–3 business days. Bespoke and specially sourced pieces are confirmed with their own timeline before you commit. Unworn jewelry in its original packaging may be returned or exchanged within 14 days. Bespoke, engraved, and specially sourced pieces are final sale.",
     "loading_piece": "Checking product details…",
     "results": "{{ count }} diamonds",
     "settings_results": "{{ count }} settings",
@@ -873,6 +885,10 @@
     "choose_size": "Choose your size",
     "not_sure": "Not sure — confirm with Laura",
     "size_required": "Choose a ring size or “Not sure” to continue.",
+    "choose_metal": "Choose metal",
+    "metal_required": "Choose a metal to continue.",
+    "all_shapes": "All shapes",
+    "style_filter": "Showing {{ style }} settings.",
     "engraving": "Engraving (optional)",
     "engraving_hint": "Up to 20 characters · complimentary, subject to space. Engraved pieces are final sale.",
     "engraving_font": "Engraving font",
@@ -961,6 +977,7 @@
     "ask_ring": "Ask Laura about this ring",
     "scale_label": "Diamond outline drawn to scale on a finger",
     "scale_caption": "To scale: {{ length }} × {{ width }} mm face-up on a size {{ size }} finger ({{ finger }} mm across).",
+    "scale_example": "To scale: {{ length }} × {{ width }} mm face-up. Example on a size {{ size }} finger ({{ finger }} mm across) until you choose a size.",
     "link_copied": "Link copied. Anyone with it can open your full build, including sizes, bands and engraving.",
     "share_failed": "Copy this link to share your ring: {{ url }}",
     "mm_face": "{{ length }} × {{ width }} mm face-up",
@@ -997,6 +1014,8 @@
     "browse_settings": "Browse settings",
     "inspiration_note": "Design inspiration.",
     "color_tab": "Explore color lab-grown",
+    "more_settings": "View more settings",
+    "fancy_yellow_title": "Natural fancy color diamonds",
     "color_title": "Colored lab-grown diamonds"
   },
   "everyday_filters": {

@@ -3,6 +3,8 @@ Renders CollectionPage and optional ItemList JSON-LD.
 
 @param {collection} collection - Collection represented by the current page.
 @param {boolean} [include_products] - Whether to include visible products.
+@param {string} [name] - Visible heading when the page is a style within the collection.
+@param {string} [description] - Page description for that style.
 
 @example
 {% render 'structured-data-collection', collection: collection, include_products: true %}
@@ -13,8 +15,8 @@ Renders CollectionPage and optional ItemList JSON-LD.
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "@id": {{ canonical_url | append: '#collection' | json }},
-  "name": {{ collection.title | json }},
-  "description": {{ collection.description | strip_html | strip | truncate: 500 | json }},
+  "name": {{ name | default: collection.title | json }},
+  "description": {{ description | default: collection.description | strip_html | strip | truncate: 500 | json }},
   "url": {{ canonical_url | json }}
   {%- if collection.image -%}
     ,"image": {{ collection.image | image_url: width: 1200 | prepend: "https:" | json }}

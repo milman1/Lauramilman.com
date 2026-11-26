@@ -1,5 +1,9 @@
 {{ 'ring-builder-flow.css' | asset_url | stylesheet_tag }}
 {{ 'diamond-filter.css' | asset_url | stylesheet_tag }}
+{%- assign diamond_api_origin = section.settings.api_base_url | split: '/functions/' | first -%}
+{%- if diamond_api_origin contains '://' -%}
+  <link rel="preconnect" href="{{ diamond_api_origin }}" crossorigin>
+{%- endif -%}
 {%- assign settings_collection = section.settings.settings_collection -%}
 {%- assign first_setting = settings_collection.products.first -%}
 {%- assign first_diamond = section.settings.diamond_product -%}
@@ -203,6 +207,9 @@
       "carat_desc":{{ 'ring_flow.carat_desc' | t | json }},
       "searching":{{ 'ring_flow.searching' | t | json }},
       "loading":{{ 'ring_flow.loading' | t | json }},
+      "load_timeout":{{ 'ring_flow.load_timeout' | t | json }},
+      "accent_carat":{{ 'ring_flow.accent_carat' | t | json }},
+      "fulfillment":{{ 'ring_flow.fulfillment' | t | json }},
       "loading_piece":{{ 'ring_flow.loading_piece' | t | json }},
       "results":{{ 'ring_flow.results' | t: count: '__count__' | json }},
       "settings_results":{{ 'ring_flow.settings_results' | t: count: '__count__' | json }},
@@ -310,6 +317,11 @@
       "ask_ring":{{ 'ring_flow.ask_ring' | t | json }},
       "scale_label":{{ 'ring_flow.scale_label' | t | json }},
       "scale_caption":{{ 'ring_flow.scale_caption' | t: length: '__length__', width: '__width__', size: '__size__', finger: '__finger__' | json }},
+      "scale_example":{{ 'ring_flow.scale_example' | t: length: '__length__', width: '__width__', size: '__size__', finger: '__finger__' | json }},
+      "choose_metal":{{ 'ring_flow.choose_metal' | t | json }},
+      "metal_required":{{ 'ring_flow.metal_required' | t | json }},
+      "all_shapes":{{ 'ring_flow.all_shapes' | t | json }},
+      "style_filter":{{ 'ring_flow.style_filter' | t: style: '__style__' | json }},
       "link_copied":{{ 'ring_flow.link_copied' | t | json }},
       "share_failed":{{ 'ring_flow.share_failed' | t: url: '__url__' | json }},
       "mm_face":{{ 'ring_flow.mm_face' | t: length: '__length__', width: '__width__' | json }},

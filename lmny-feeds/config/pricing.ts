@@ -341,6 +341,59 @@ export const BACKVAULT: {
 };
 
 /**
+ * Vendor catalogs read weekly from each vendor's public Shopify products.json
+ * (src/vendors/, workflow vendor-catalog-sync.yml). Merchant decisions
+ * 2026-11-18:
+ *
+ *   retail = vendor's current price × priceFactor   (1: match the vendor)
+ *
+ * Prices follow the vendor up or down. A piece the vendor no longer lists,
+ * or lists with no available variant, moves to DRAFT; it is never
+ * reactivated automatically. Cost per item is not written: the trade cost
+ * for these vendors is not recorded yet.
+ *
+ * Guards: a vendor price of 0 ("contact for pricing") is never written; a
+ * single change larger than maxPriceChangeShare is held for review; a vendor
+ * whose drafts would exceed maxDraftShare of its active items (minimum
+ * minDraftBrake) gets no drafts that run.
+ */
+export interface VendorCatalogConfig {
+  readonly key: string;
+  readonly name: string;
+  readonly baseUrl: string;
+  /** Tag every product imported from this vendor carries. */
+  readonly importTag: string;
+  /** Our variant SKU is `${skuPrefix}${vendor variant id}` when set. */
+  readonly skuPrefix?: string;
+  /** Untagged products imported before the tag existed, matched by SKU. */
+  readonly legacySkus?: readonly string[];
+  readonly priceFactor: number;
+}
+
+export const VENDOR_CATALOG_SYNC: {
+  readonly vendors: readonly VendorCatalogConfig[];
+  readonly maxPriceChangeShare: number;
+  readonly maxDraftShare: number;
+  readonly minDraftBrake: number;
+} = {
+  vendors: [
+    { key: 'alyce', name: 'Alyce Jewels', baseUrl: 'https://alycejewels.com', importTag: 'alyce-import', skuPrefix: 'ALYCE-', priceFactor: 1 },
+    {
+      key: 'eric-originals',
+      name: 'Eric Originals',
+      baseUrl: 'https://ericoriginals.com',
+      importTag: 'eric-originals-import',
+      legacySkus: ['R8708', 'R8212', 'P3559', 'P2491', 'R8000'],
+      priceFactor: 1,
+    },
+    { key: 'namdar', name: 'Namdar Diamonds', baseUrl: 'https://www.namdardiamondsusa.com', importTag: 'namdar-import', priceFactor: 1 },
+  ],
+  maxPriceChangeShare: 0.5,
+  maxDraftShare: 0.2,
+  minDraftBrake: 3,
+};
+
+/**
  * Royal Chain basic chains ONLY (AGENTS.md section 2a and recipe H).
  * Retail is a straight multiple of the wholesale cost read from the
  * merchant's Royal Chain trade account. Only trending items are imported,

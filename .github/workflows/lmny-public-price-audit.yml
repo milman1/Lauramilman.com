@@ -13,6 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test price-audit decisions
+        run: node --test scripts/audit-diamond-prices.test.mjs
       - name: Compare Shopify and public JSON-LD prices
         env:
           SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}

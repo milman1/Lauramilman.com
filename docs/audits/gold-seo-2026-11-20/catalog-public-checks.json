@@ -1,0 +1,256 @@
+{
+  "date": "2026-11-20",
+  "products": [
+    {
+      "handle": "lmny-snake-2-6-mm-ovsn260-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-4-6-mm-sf050-bracelet",
+      "status": 200,
+      "variants": 2,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-3-8-mm-sf040-bracelet",
+      "status": 200,
+      "variants": 2,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-2-8-mm-sf030-bracelet",
+      "status": 200,
+      "variants": 3,
+      "errors": []
+    },
+    {
+      "handle": "lmny-curb-4-4-mm-lcrb100-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-curb-3-6-mm-cc100-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-rope-3-mm-slk023-bracelet",
+      "status": 200,
+      "variants": 2,
+      "errors": []
+    },
+    {
+      "handle": "lmny-paperclip-4-mm-pclip095-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-paperclip-2-5-mm-pclip060-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-5-5-mm-hmc150-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-5-mm-nhmc150-bracelet",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-snake-2-6-mm-ovsn260",
+      "status": 200,
+      "variants": 3,
+      "errors": []
+    },
+    {
+      "handle": "lmny-snake-2-mm-ovsn200",
+      "status": 200,
+      "variants": 3,
+      "errors": []
+    },
+    {
+      "handle": "lmny-box-2-5-mm-srbx130",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-box-1-4-mm-box073",
+      "status": 200,
+      "variants": 5,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-4-6-mm-sf050",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-3-8-mm-sf040",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-herringbone-2-8-mm-sf030",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-curb-4-4-mm-lcrb100",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-curb-3-6-mm-cc100",
+      "status": 200,
+      "variants": 5,
+      "errors": []
+    },
+    {
+      "handle": "lmny-curb-3-2-mm-cc080",
+      "status": 200,
+      "variants": 5,
+      "errors": []
+    },
+    {
+      "handle": "lmny-rope-3-mm-slk023",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-rope-2-5-mm-hsr018",
+      "status": 200,
+      "variants": 5,
+      "errors": []
+    },
+    {
+      "handle": "lmny-rope-2-3-mm-proy018",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-rope-1-8-mm-ch014",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-paperclip-4-mm-pclip095",
+      "status": 200,
+      "variants": 3,
+      "errors": []
+    },
+    {
+      "handle": "lmny-paperclip-2-5-mm-pclip060",
+      "status": 200,
+      "variants": 3,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-6-mm-mc180",
+      "status": 200,
+      "variants": 1,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-5-5-mm-hmc150",
+      "status": 200,
+      "variants": 2,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-5-mm-nhmc150",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-4-5-mm-nhmc120",
+      "status": 200,
+      "variants": 4,
+      "errors": []
+    },
+    {
+      "handle": "lmny-cuban-3-9-mm-nmc120",
+      "status": 200,
+      "variants": 5,
+      "errors": []
+    }
+  ],
+  "public_checks": [
+    {
+      "path": "/collections/chains",
+      "status": 200,
+      "final_url": "https://www.lauramilman.com/collections/chains",
+      "canonical": [
+        "https://www.lauramilman.com/collections/chains"
+      ],
+      "noindex": false
+    },
+    {
+      "path": "/collections/gold-chains",
+      "status": 200,
+      "final_url": "https://www.lauramilman.com/collections/gold-chains",
+      "canonical": [
+        "https://www.lauramilman.com/collections/gold-chains"
+      ],
+      "noindex": false
+    },
+    {
+      "path": "/collections/chain-necklaces",
+      "status": 200,
+      "final_url": "https://www.lauramilman.com/collections/chain-necklaces",
+      "canonical": [
+        "https://www.lauramilman.com/collections/chain-necklaces"
+      ],
+      "noindex": false
+    },
+    {
+      "path": "/collections/chain-bracelets",
+      "status": 200,
+      "final_url": "https://www.lauramilman.com/collections/chain-bracelets",
+      "canonical": [
+        "https://www.lauramilman.com/collections/chain-bracelets"
+      ],
+      "noindex": false
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "final_url": "https://www.lauramilman.com/sitemap.xml",
+      "canonical": [],
+      "noindex": false
+    },
+    {
+      "user_agent": "Googlebot",
+      "status": 200,
+      "contains_products": true
+    },
+    {
+      "user_agent": "OAI-SearchBot",
+      "status": 200,
+      "contains_products": true
+    }
+  ],
+  "limitations": [
+    "HTTP user-agent probes do not establish access from real crawler networks",
+    "Public JSON price and availability comparison is not Merchant Center ingestion verification"
+  ]
+}

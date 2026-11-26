@@ -27,6 +27,12 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 ## Setup and operation
 
 - Store `LGD_API_KEY` as an Actions secret. Reuse existing Shopify credentials.
+  The feed host is `api.lgdusallc.com`. On 2026-11-22 that domain was on
+  registrar client hold (Porkbun, last changed 2026-11-16) and did not
+  resolve, so the hourly sync failed at supplier fetch before any Shopify
+  write. The key was present. Restoring the run needs the registrant to
+  remove that hold, or a replacement base URL from the supplier. A failed
+  fetch still writes nothing and withdraws nothing.
 - Run the workflow in dry-run mode, then sample mode to create five drafts.
 - Verify five draft pages, ready photos, playable videos, grading reports,
   price, source isolation and no certificate collisions before expansion.
@@ -47,3 +53,49 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 Reports contain counts, handles and retail prices; no API key or supplier costs.
 Only the sanitized report is uploaded as an Actions artifact. No raw source
 records, private plan inputs, credentials, or actual-cost fixtures are committed.
+
+## Belgium Dia colored stones (second source)
+
+Merchant decision 2026-11-20: the fancy-color rows in the Belgium Dia lab feed
+(~500 pink, yellow, blue, green and brown stones in Nov 2026) are listed
+alongside LGD's, not instead of them. The white Belgium sync still holds them
+as `color_below_floor`; `src/lgd-color/belgium.ts` picks them up instead.
+
+- Same pipeline as LGD: `normalizeBelgiumRow` builds the LGD stone shape, then
+  `payloadFor`, `planFor` and `main` in `sync.mjs` price, write, media-check,
+  verify and withdraw it. Price is `coloredLabRetailFromCost` on the cost
+  `resolveStoneCost` gives the white lab sync, with the white lab $/ct floor.
+- Ownership: tags `colored-stone-feed` and `belgium-color-feed`, handle
+  `lg-color-bd-<stock>`. `ownsLgd` and `ownsBelgium` keep each source's
+  withdrawals to its own stones. The storefront treats both the same.
+- A stone whose IGI report is already listed (by LGD or any lab-grown product)
+  is skipped as `duplicate_certificate`.
+- Held, never guessed: modifier colors ("Yellowish Green"), unknown intensity,
+  non-IGI, clarity below SI2, no IGI report number, no HTTPS photo or MP4/WebM
+  video, memo / hold / sold / not-available status, or a cost below the lab $/ct floor.
+  Belgium Dia sends availability as a code (`G` guaranteed, `GA`, `Available`,
+  `STPS`); a blank field stays eligible. An unrecognized code is held and
+  fails the run. A complete feed whose colored rows are all recognized
+  unavailable logs the value counts, writes nothing, and exits 0.
+- A lab feed under 5,000 rows is refused (the pager has no total to check).
+- Workflow: `.github/workflows/belgium-color-sync.yml`, hourly at :07, the same
+  modes as LGD (dispatch defaults to a full dry run). Shares the
+  `lmny-colored-stone-sync` concurrency group with LGD. Set
+  `BELGIUM_COLOR_SYNC_LIVE=false` to pause scheduled writes. Report:
+  `out/belgium-color-report.json`.
+
+## Listing copy (both sources)
+
+`listingCopy` in `catalog.mjs` writes title, SEO title, SEO description and
+body from `docs/seo/listing-seo-geo.md` and the loose-diamond formula in
+`lmny-feeds/docs/seo-title-formulas.md`, the same formula as white loose stones:
+
+- Title: `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1, IGI Certified`
+- SEO title (<= 60): `2.00ct Oval Lab-Grown Diamond — Fancy Intense Pink VS1 | IGI`;
+  a long name drops clarity, then intensity, so the hue and `| IGI` always stay.
+- SEO description (<= 160): one identity sentence with grade and IGI report.
+- Body: one answer-first `<p>` of 40-60 words, facts only; specs live in the
+  `custom.*` metafields the theme turns into the spec grid and Product JSON-LD.
+
+Changed 2026-11-20 (was `2.00ct Oval Fancy Intense Pink Lab-Grown Diamond — VS1 | IGI`).
+Existing LGD listings take the new copy the next time the sync rewrites them.

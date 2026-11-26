@@ -26,6 +26,7 @@
       assign seo_page_title = page_title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
       assign seo_meta_description = page_description
       assign seo_social_title = page_title
+      assign wedding_style_title = false
       if request.page_type == 'index'
         assign seo_page_title = 'Gold & Lab-Grown Diamond Jewelry | Laura Milman New York'
         assign seo_social_title = seo_page_title
@@ -102,9 +103,29 @@
       endif
     -%}
 
+    {%- if request.page_type == 'collection' -%}
+      {%- capture wedding_seo_title -%}{%- render 'wedding-subnav', part: 'title' -%}{%- endcapture -%}
+      {%- capture wedding_seo_description -%}{%- render 'wedding-subnav', part: 'description' -%}{%- endcapture -%}
+      {%- liquid
+        assign wedding_seo_title = wedding_seo_title | strip
+        assign wedding_seo_description = wedding_seo_description | strip
+        if wedding_seo_title != blank
+          assign seo_page_title = wedding_seo_title
+          assign seo_social_title = wedding_seo_title
+          assign wedding_style_title = true
+        endif
+        if wedding_seo_description != blank
+          assign seo_meta_description = wedding_seo_description
+        endif
+        if seo_page_title contains shop.name or seo_page_title contains 'Laura Milman' or seo_page_title contains '|'
+          assign suppress_shop_suffix = true
+        endif
+      -%}
+    {%- endif -%}
+
     <title>
       {{ seo_page_title }}
-      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_tags and wedding_style_title != true %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
       {%- unless suppress_shop_suffix %} &ndash; {{ shop.name }}{% endunless -%}
     </title>

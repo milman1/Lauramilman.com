@@ -57,3 +57,22 @@ describe('welcome popup reopen tab', () => {
     expect(popup).toContain("set(sessionStorage, tabKey)");
   });
 });
+
+describe('welcome offer pause during a store-wide sale', () => {
+  const read = (f: string) => readFileSync(join(__dirname, '../../snippets', f), 'utf8');
+  const paused = read('welcome-offer-paused.liquid');
+  const popup = read('welcome-popup.liquid');
+  const line = read('welcome-offer-line.liquid');
+
+  it('pauses until the end of the LMNY20 sale, 11:59:59 PM New York time on 1 December 2026', () => {
+    expect(paused).toContain('assign paused_until = 1796187599');
+    expect(new Date(1796187599 * 1000).toISOString()).toBe('2026-12-02T04:59:59.000Z');
+  });
+
+  it('hides the popup, its tab and the product-page line while paused', () => {
+    expect(popup).toMatch(/render 'welcome-offer-paused'/);
+    expect(popup).toMatch(/unless [^%]*welcome_paused == 'true'/);
+    expect(line).toMatch(/render 'welcome-offer-paused'/);
+    expect(line).toMatch(/if welcome_paused == 'true' -%\}\{%- assign offer_ok = false/);
+  });
+});

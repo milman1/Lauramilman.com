@@ -20,6 +20,18 @@
   if display_vendor == 'Peaceful Diamonds' or display_vendor == "Laura's Gems" or display_vendor == 'Milman New York'
     assign display_vendor = 'Laura Milman New York'
   endif
+  assign show_private_viewing = false
+  if product.tags contains 'private-viewing'
+    assign show_private_viewing = true
+  elsif product.available
+    for product_collection in product.collections
+      assign collection_prefix = product_collection.handle | slice: 0, 13
+      if product_collection.handle == 'high-jewelry' or collection_prefix == 'high-jewelry-'
+        assign show_private_viewing = true
+        break
+      endif
+    endfor
+  endif
 -%}
 {%- capture is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- liquid
@@ -393,6 +405,13 @@
           </span>
         </div>
 
+        {%- if show_private_viewing -%}
+          {%- assign viewing_page = routes.root_url | append: '/pages/private-clients' | replace: '//', '/' -%}
+          <div class="pdp-private-viewing">
+            <a class="btn btn--wine" href="{{ viewing_page }}?interest={% if is_vintage == 'true' %}estate{% else %}jewelry{% endif %}&amp;piece={{ display_title | url_encode | escape }}#LmConsultContact">Request a Private Viewing</a>
+          </div>
+        {%- endif -%}
+
         <div class="pdp-installments">
           {{ form | payment_terms }}
         </div>
@@ -494,6 +513,9 @@
         </div>
 
         <!-- 7. Add to cart (sticky companion bar on mobile below) -->
+        {%- if is_vintage == 'true' and is_watch != 'true' -%}
+          {%- render 'vintage-buying-details', product: product, section_id: section.id -%}
+        {%- endif -%}
         <div class="atc-row" id="PdpAtcRow">
           <div class="quantity-selector">
             <button type="button" class="qty-btn" data-action="minus" aria-label="Decrease quantity">−</button>
@@ -685,6 +707,28 @@
   }
 
   /* Shop Pay installments */
+  .pdp-private-viewing {
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  .pdp-private-viewing .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .pdp-vintage-details {
+    padding: .75rem 0;
+    margin-bottom: .75rem;
+    border-top: 1px solid var(--rule-light, #DDD5C5);
+    font-size: .82rem;
+  }
+
+  .pdp-vintage-details h2 { margin: 0 0 .45rem; font: inherit; font-weight: 600; }
+  .pdp-vintage-details dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .75rem; margin: 0; }
+  .pdp-vintage-details dt { font-weight: 600; }
+  .pdp-vintage-details dd { margin: 0; }
+  .pdp-vintage-details a { display: inline-block; padding-top: .45rem; text-underline-offset: .2em; }
+
   .pdp-installments {
     margin: -0.5rem 0 1.25rem;
     font-family: var(--font-body, 'Montserrat', sans-serif);

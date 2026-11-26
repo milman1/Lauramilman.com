@@ -1,0 +1,108 @@
+# Belgium Dia colored loose lab-grown diamonds, listed alongside LGD's
+# (merchant decision 2026-11-20). src/lgd-color/belgium.ts feeds the same
+# colored-stone pipeline as LGD (catalog.mjs, sync.mjs): same pricing tiers,
+# titles, tags and media checks. These stones carry `belgium-color-feed` and
+# handles starting `lg-color-bd-`, so each source withdraws only its own.
+#
+# New stones are created as DRAFT. They go live only through the `activate`
+# mode with reviewed handles, exactly like LGD.
+#
+# Secrets: BELGIUMDIA_API_KEY, plus the Shopify ones the other syncs use.
+name: LMNY Belgium Dia colored loose-diamond sync
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Preview, create five drafts, sync, activate reviewed handles, or review/apply a withdrawal backlog'
+        type: choice
+        options: [dry-run, sample, sync, activate, review-withdrawals, sync-with-withdrawals]
+        default: dry-run
+      handles:
+        description: 'Exact comma-separated reviewed handles; activation only'
+        required: false
+        default: ''
+      max_withdrawals:
+        description: 'Most stones this run may move to draft (1-500); review-withdrawals and sync-with-withdrawals only'
+        required: false
+        default: ''
+  push:
+    paths:
+      - 'lmny-feeds/src/lgd-color/**'
+      - 'lmny-feeds/test/lgd-color/**'
+      - '.github/workflows/belgium-color-sync.yml'
+permissions:
+  contents: read
+concurrency:
+  # Shared with the LGD colored sync: both write the same lab-grown catalog.
+  group: lmny-colored-stone-sync
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci
+      - run: npx vitest run test/lgd-color
+      - run: node --experimental-strip-types --test checks/lgd-color.check.mjs
+  sync:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.BELGIUM_COLOR_SYNC_LIVE != 'false')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: lmny-feeds
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lmny-feeds/package-lock.json
+      - run: npm ci
+      - name: Sync Belgium Dia colored loose lab-grown diamonds
+        env:
+          BELGIUMDIA_API_KEY: ${{ secrets.BELGIUMDIA_API_KEY }}
+          BELGIUMDIA_API_URL: ${{ vars.BELGIUMDIA_API_URL }}
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          SHOPIFY_LOCATION_ID: ${{ vars.SHOPIFY_LOCATION_ID }}
+          # sync.mjs reads reviewed activation handles from this name for both sources.
+          LGD_ACTIVATION_HANDLES: ${{ inputs.handles }}
+          MODE: ${{ inputs.mode }}
+          MAX_WITHDRAWALS: ${{ inputs.max_withdrawals }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          run() { npx tsx src/lgd-color/belgium.ts "$@"; }
+          if [ "$EVENT" = "schedule" ]; then
+            run
+          else
+            case "$MODE" in
+              sample) run --limit=5 ;;
+              sync) run ;;
+              activate) run --activate ;;
+              review-withdrawals) run --dry-run --max-withdrawals="$MAX_WITHDRAWALS" ;;
+              sync-with-withdrawals) run --max-withdrawals="$MAX_WITHDRAWALS" ;;
+              *) run --dry-run ;;
+            esac
+          fi
+      - name: Upload sanitized report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: belgium-color-report-${{ github.run_id }}
+          path: lmny-feeds/out/belgium-color-report.json
+          retention-days: 7
+          if-no-files-found: warn

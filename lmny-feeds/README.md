@@ -629,6 +629,35 @@ Always live on the schedule (user chose no dry-run gate). Use
 
 ---
 
+## Vendor catalog sync (`src/vendors/`)
+
+Weekly (Monday 13:41 UTC, `.github/workflows/vendor-catalog-sync.yml`) for
+pieces imported from Alyce Jewels, Eric Originals and Namdar Diamonds. Each
+vendor runs Shopify, so the sync reads its public `/products.json` (no key)
+and matches our products by the vendor's import tag (`alyce-import`,
+`eric-originals-import`, `namdar-import`), plus five legacy Eric Originals
+SKUs imported before the tag existed. Within a product, a variant matches by
+`source-product-<id>` tag and SKU (`ALYCE-<vendor variant id>`, or the
+vendor's own SKU).
+
+- Prices follow the vendor, up or down (`VENDOR_CATALOG_SYNC` in
+  `config/pricing.ts`). Cost per item is not written.
+- A piece the vendor no longer lists, or has no available variant for, moves
+  to DRAFT and gets `vendor-sync-withdrawn`. Drafts are never reactivated;
+  the report lists withdrawn pieces that are available again.
+- Guards: a vendor price of 0 is never written (Namdar lists most stones as
+  "contact for pricing"); a move over 50% is held and listed; a vendor whose
+  drafts would exceed 20% of its active items (minimum 3) gets none that run;
+  a vendor whose catalog cannot be read completely is skipped with no writes.
+- Every write is read back. The run fails (red) on a skipped vendor, a write
+  error, or a tripped brake.
+- New imports from these vendors must carry the vendor's import tag (and, for
+  multi-variant pieces, SKU `ALYCE-<variant id>` or the vendor's SKU), or the
+  sync will not see them.
+
+`npm run sync:vendors:dry` prints the plan; the report is
+`out/vendor-sync-report.md`.
+
 ## Journal drafting job
 
 `scripts/journal-draft.ts` (`.github/workflows/journal-draft.yml`, Monday

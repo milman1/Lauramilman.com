@@ -3,10 +3,13 @@
   Rendered from layout/theme.liquid. The discount code is created in
   Shopify Admin (see SHOPIFY_SETUP.md). Kept as a snippet so it cannot
   fail as an invalid section type when included from the layout.
-  Not rendered on ring-builder templates: it would open mid-choice.
+  Not rendered on ring-builder templates: it would open mid-choice, nor while
+  the offer is paused for a store-wide sale (snippets/welcome-offer-paused.liquid).
 {% endcomment %}
 
-{%- unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder' -%}
+{%- comment -%} Paused during a store-wide sale: see snippets/welcome-offer-paused.liquid. {%- endcomment -%}
+{%- capture welcome_paused -%}{% render 'welcome-offer-paused' %}{%- endcapture -%}
+{%- unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder' or welcome_paused == 'true' -%}
 <div class="lm-welcome" id="LmWelcome" hidden>
   <div class="lm-welcome__backdrop" data-welcome-close></div>
   <div class="lm-welcome__card" role="dialog" aria-modal="true" aria-labelledby="LmWelcomeTitle">
@@ -243,7 +246,26 @@
       showTab(true);
       return;
     }
-    setTimeout(open, 8000);
+    var seenKey = 'lmny-welcome-seen';
+    try {
+      var seen = sessionStorage.getItem(seenKey);
+      sessionStorage.setItem(seenKey, '1');
+      if (!seen) return;
+    } catch (e) {}
+    function navOpen() {
+      return !!document.querySelector('.header--nav-open, .section-header.menu-open, #header .nav__item.open, #nav [aria-expanded="true"], details.menu-opening');
+    }
+    function whenNavClosed(done) {
+      if (!navOpen()) { done(); return; }
+      var watch = document.getElementById('header') || document.body;
+      var observer = new MutationObserver(function () {
+        if (navOpen()) return;
+        observer.disconnect();
+        setTimeout(done, 800);
+      });
+      observer.observe(watch, { attributes: true, subtree: true, attributeFilter: ['class', 'aria-expanded'] });
+    }
+    setTimeout(function () { whenNavClosed(open); }, 20000);
   })();
 </script>
 {%- endunless -%}

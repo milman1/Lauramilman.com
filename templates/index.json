@@ -1,7 +1,232 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
+    "holiday": {
+      "type": "holiday-carousel",
+      "blocks": {
+        "slide-jewelry": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Black Friday",
+            "heading": "Black Friday Sale",
+            "subtext": "20% off all jewelry, now through December 1. Use code LMNY20.",
+            "button_label": "Shop jewelry",
+            "button_link": "/collections/all"
+          }
+        },
+        "slide-rings": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-ring-desktop.webp",
+            "mobile_image_asset": "holiday-ring-mobile.webp",
+            "image_alt": "Diamond ring holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Rings",
+            "heading": "Rings",
+            "subtext": "20% off finished rings and settings with code LMNY20.",
+            "button_label": "Shop rings",
+            "button_link": "/collections/rings"
+          }
+        },
+        "slide-earrings": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-earrings-desktop.webp",
+            "mobile_image_asset": "holiday-earrings-mobile.webp",
+            "image_alt": "Diamond earrings holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Earrings",
+            "heading": "Earrings",
+            "subtext": "20% off diamond and gold earrings with code LMNY20.",
+            "button_label": "Shop earrings",
+            "button_link": "/collections/all-earrings"
+          }
+        },
+        "slide-bracelets": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "home-bracelets.webp",
+            "image_alt": "Stack of gold bracelets with colored stones",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Bracelets",
+            "heading": "Bracelets",
+            "subtext": "20% off gold and diamond bracelets with code LMNY20.",
+            "button_label": "Shop bracelets",
+            "button_link": "/collections/all-bracelets"
+          }
+        },
+        "slide-necklaces": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-necklace-desktop.webp",
+            "mobile_image_asset": "holiday-necklace-mobile.webp",
+            "image_alt": "Diamond necklace holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Necklaces",
+            "heading": "Necklaces",
+            "subtext": "20% off fine necklaces and pendants with code LMNY20.",
+            "button_label": "Shop necklaces",
+            "button_link": "/collections/necklaces"
+          }
+        },
+        "slide-vintage": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Vintage jewelry holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Vintage",
+            "heading": "20% off vintage jewelry",
+            "subtext": "Cartier, Van Cleef & Arpels, Tiffany & Co., David Webb and more. Use code LMNY20.",
+            "button_label": "Shop vintage",
+            "button_link": "/collections/vintage-jewelry"
+          }
+        },
+        "slide-blue": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-blue-desktop.webp",
+            "mobile_image_asset": "holiday-blue-mobile.webp",
+            "image_alt": "Blue diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Blue",
+            "heading": "Blue, for the season",
+            "subtext": "Blue loose diamonds. 20% off any setting with code LMNY20.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-red": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-red-desktop.webp",
+            "mobile_image_asset": "holiday-red-mobile.webp",
+            "image_alt": "Red diamond holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Red",
+            "heading": "Red, for the holidays",
+            "subtext": "Red loose diamonds. 20% off any setting with code LMNY20.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-green": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-green-desktop.webp",
+            "mobile_image_asset": "holiday-green-mobile.webp",
+            "image_alt": "Green diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Green",
+            "heading": "Green, beside the diamonds",
+            "subtext": "Green loose diamonds. 20% off any setting with code LMNY20.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-yellow": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-yellow-desktop.webp",
+            "mobile_image_asset": "holiday-yellow-mobile.webp",
+            "image_alt": "Yellow diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Yellow",
+            "heading": "A warm yellow light",
+            "subtext": "Yellow loose diamonds. 20% off any setting with code LMNY20.",
+            "button_label": "Shop yellow diamonds",
+            "button_link": "/collections/fancy-yellow-diamonds"
+          }
+        },
+        "slide-velvet": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Lab-grown",
+            "heading": "20% off lab-grown diamond jewelry",
+            "subtext": "Lab-grown diamond rings, earrings, necklaces and bracelets. Use code LMNY20, now through December 1.",
+            "button_label": "Shop diamond jewelry",
+            "button_link": "/collections/lab-grown-diamond-jewelry"
+          }
+        },
+        "slide-gifts": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Black Friday",
+            "heading": "Ends December 1",
+            "subtext": "Black Friday 20% off all jewelry with code LMNY20.",
+            "button_label": "Shop gifts",
+            "button_link": "/collections/everyday-jewelry"
+          }
+        }
+      },
+      "block_order": [
+        "slide-jewelry",
+        "slide-rings",
+        "slide-earrings",
+        "slide-bracelets",
+        "slide-necklaces",
+        "slide-vintage",
+        "slide-blue",
+        "slide-red",
+        "slide-green",
+        "slide-yellow",
+        "slide-velvet",
+        "slide-gifts"
+      ],
+      "settings": {
+        "autoplay": true,
+        "interval": 6,
+        "accessibility_label": "Holiday"
+      }
+    },
     "hero": {
       "type": "lmh-hero",
+      "disabled": true,
       "blocks": {
         "pill-1": {
           "type": "pill",
@@ -51,11 +276,13 @@
         "eyebrow": "Lab-grown diamonds & rings",
         "title": "Your diamond.",
         "title_emphasis": "Your story.",
-        "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in the Diamond District.",
+        "text": "For love, personal milestones, and the pleasure of choosing something for yourself. Designed in New York, crafted in Italy, by a house with 30+ years in Midtown, New York City.",
         "primary_text": "Explore Loose Diamonds",
         "primary_url": "/collections/lab-grown-diamonds",
         "secondary_text": "Shop complete engagement rings",
         "secondary_url": "/collections/engagement-rings",
+        "tertiary_text": "Build a Ring",
+        "tertiary_url": "/pages/ring-builder",
         "note": "Free insured shipping · Shop Pay Installments at checkout",
         "image_asset": "home-hero-ring.webp",
         "image_alt": "Woman in an ivory blazer wearing a diamond tennis necklace and solitaire ring"
@@ -160,6 +387,7 @@
           "type": "ring_style",
           "settings": {
             "title": "Three stone",
+            "style": "three-stone",
             "shape": "Oval",
             "artwork_x": 864
           }
@@ -176,6 +404,7 @@
         "three_stone"
       ],
       "settings": {
+        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png",
         "title": "Make it yours.",
         "subtitle": "Start with the stone or the ring.",
         "rings": [
@@ -184,8 +413,13 @@
           "round-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
           "oval-and-half-moon-three-stone-engagement-ring-setting-in-14k-or-18k-white-gold"
         ],
-        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png",
-        "color_image": "shopify://shop_images/lmny-gallery-color-lab-pink.png"
+        "additional_rings": [
+          "antique-marquise-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "pear-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "radiant-pave-hidden-halo-engagement-ring-setting-in-14k-or-18k-white-gold",
+          "elongated-cushion-prong-solitaire-engagement-ring-setting-in-14k-or-18k-white-gold"
+        ],
+        "ring_artwork": "shopify://shop_images/lmny-home-ring-preview-board.png"
       }
     },
     "meet-laura": {
@@ -218,10 +452,10 @@
             "title": "Rings",
             "link_text": "Shop complete rings",
             "url": "/collections/rings",
+            "image": "shopify://shop_images/home-rings-supplier-model.jpg",
             "image_asset": "",
             "image_alt": "Model in an ivory suit wearing stacked rings and delicate bracelets",
-            "position": "50% 50%",
-            "image": "shopify://shop_images/home-rings-supplier-model.jpg"
+            "position": "50% 50%"
           }
         },
         "tile-2": {
@@ -452,6 +686,7 @@
       "settings": {
         "style": "cream",
         "columns": "5",
+        "more_row": true,
         "ratio": "0.84",
         "eyebrow": "Everyday Jewelry",
         "title": "From your desk,",
@@ -459,7 +694,6 @@
         "text": "Gold chains, sculptural rings, and gemstone bracelets and necklaces. Find your everyday favorites.",
         "all_text": "Shop the full edit",
         "all_url": "/collections/everyday-jewelry",
-        "more_row": true,
         "button_1_text": "",
         "button_1_url": "",
         "button_2_text": "",
@@ -532,6 +766,7 @@
         "band-5",
         "band-6"
       ],
+      "disabled": true,
       "settings": {
         "eyebrow": "Gold",
         "title": "Chains and bands,",
@@ -541,8 +776,7 @@
         "collection_2": "",
         "link_text": "Shop all chains",
         "link_url": "/collections/chains"
-      },
-      "disabled": true
+      }
     },
     "lab-grown": {
       "type": "lmh-product-row",
@@ -800,13 +1034,13 @@
     },
     "estate-edit": {
       "type": "lmh-product-row",
-      "blocks": {},
-      "block_order": [],
       "settings": {
         "style": "cream",
         "columns": "4",
         "more_row": false,
         "scroll_row": false,
+        "mobile_grid": true,
+        "jewelry_only": true,
         "ratio": "1",
         "eyebrow": "VINTAGE & PRE-OWNED JEWELRY",
         "title": "A past.",
@@ -814,16 +1048,15 @@
         "text": "Discover pre-owned jewelry from Cartier, Van Cleef & Arpels, Tiffany & Co., David Webb and more.",
         "button_1_text": "Shop all vintage & pre-owned",
         "button_1_url": "/collections/estate-jewelry",
-        "collection_limit": 12,
         "collection": "estate-jewelry",
-        "mobile_grid": true,
-        "jewelry_only": true,
+        "collection_limit": 12,
         "mobile_button_text": "Shop all vintage & pre-owned",
         "mobile_button_url": "/collections/estate-jewelry"
       }
     }
   },
   "order": [
+    "holiday",
     "hero",
     "trust-strip",
     "ring-builder",

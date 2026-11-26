@@ -1,7 +1,24 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { FEED_TAG, PREFIX, fetchInventory, normalizeFeed, payloadFor, snapshotHash } from './catalog.mjs';
+import { FEED_TAG, fetchInventory, normalizeFeed, ownsLgd, payloadFor, snapshotHash } from './catalog.mjs';
 let stage = 'startup';
+export function currentStage() { return stage; }
+/**
+ * What to do when normalization produced no listable stones.
+ * `continue` when at least one stone is listable. `warn` is only a complete
+ * Belgium snapshot whose every colored row is a recognized unavailable
+ * status: exit without Shopify reads or writes. Anything else, including an
+ * unrecognized code or the LGD source, refuses so an empty snapshot cannot
+ * withdraw live stones.
+ */
+export function emptySnapshotAction(source, normalized) {
+  if (normalized.stones?.length) return 'continue';
+  const colored = normalized.colored ?? 0;
+  const unknown = normalized.holds?.unknown_availability ?? 0;
+  const unavailable = normalized.holds?.unavailable ?? 0;
+  if (source.emptyEligible === 'warn' && colored > 0 && unknown === 0 && unavailable === colored) return 'warn';
+  return 'refuse';
+}
 // Errors whose message carries only counts or fixed text, safe to print in CI logs.
 export class SafeError extends Error {}
 // Hourly runs may withdraw at most 150 stones, or 10% of live stones if that is
@@ -30,15 +47,15 @@ export function view(p) {
     readyImage:p.media.nodes.some(m=>m.mediaContentType==='IMAGE' && m.status==='READY'),
     variantId:v?.id, variantCount:p.variants.nodes.length, sku:v?.sku, price:v?.price};
 }
-export function planFor(stones, catalog, {limit=null, activate=false, locationId, maxWithdrawals=null, checkLimit=true}={}) {
-  const owned = catalog.filter(p=>p.tags.includes(FEED_TAG) && p.handle.startsWith(PREFIX));
+export function planFor(stones, catalog, {limit=null, activate=false, locationId, maxWithdrawals=null, checkLimit=true, owns=ownsLgd}={}) {
+  const owned = catalog.filter(owns);
   const byHandle = new Map(catalog.map(p=>[p.handle,p])), byCert = new Map();
   for (const p of catalog) if(p.certificate) { const key=p.certificate.toUpperCase().replace(/^LG/,''); const a=byCert.get(key)||[]; a.push(p); byCert.set(key,a); }
   const desired = new Set(), writes=[], skipped=[];
   for (const s of stones) {
     const existing=byHandle.get(s.handle), certOwners=byCert.get(s.certificate.replace(/^LG/,'').toUpperCase())||[];
     desired.add(s.handle);
-    if (existing && (!existing.tags.includes(FEED_TAG) || existing.status==='ARCHIVED' || existing.variantCount!==1)) { skipped.push({handle:s.handle,reason:'ownership_or_archived_or_variants'}); continue; }
+    if (existing && (!owns(existing) || existing.status==='ARCHIVED' || existing.variantCount!==1)) { skipped.push({handle:s.handle,reason:'ownership_or_archived_or_variants'}); continue; }
     if (certOwners.some(p=>p.handle!==s.handle)) { skipped.push({handle:s.handle,reason:'duplicate_certificate'}); continue; }
     if (activate && (!existing || !existing.readyImage)) { skipped.push({handle:s.handle,reason:'draft_media_not_ready'}); continue; }
     const status = activate || existing?.status==='ACTIVE' ? 'ACTIVE' : 'DRAFT';
@@ -110,7 +127,16 @@ export async function mediaReady(stone,fetcher=fetch) {
   }
   return true;
 }
-export async function main(argv=process.argv.slice(2)) {
+// The LGD source; src/lgd-color/belgium.ts supplies the Belgium Dia one.
+export const LGD_SOURCE = {
+  name: 'LGD',
+  fetchRows: () => fetchInventory(process.env.LGD_API_KEY),
+  normalize: normalizeFeed,
+  owns: ownsLgd,
+  reportPath: 'out/lgd-color-report.json',
+};
+export async function main(argv=process.argv.slice(2), source=LGD_SOURCE) {
+  const owns=source.owns;
   const dry=argv.includes('--dry-run'), activate=argv.includes('--activate');
   const limitArg=argv.find(a=>a.startsWith('--limit=')),limit=limitArg?Number(limitArg.split('=')[1]):null;
   if(limitArg && (!Number.isInteger(limit)||limit<1))throw new Error('Invalid limit');
@@ -119,11 +145,19 @@ export async function main(argv=process.argv.slice(2)) {
   if(maxArg && (!Number.isInteger(maxWithdrawals)||maxWithdrawals<1||maxWithdrawals>500))throw new SafeError('--max-withdrawals must be a whole number from 1 to 500');
   if(maxArg && (limitArg||activate))throw new SafeError('--max-withdrawals applies only to a full sync or full preview');
   stage='supplier_fetch';
-  const rows=await fetchInventory(process.env.LGD_API_KEY);
+  const rows=await source.fetchRows();
   stage='normalize';
-  const normalized=normalizeFeed(rows);
-  console.log(JSON.stringify({stage,fetched:rows.length,eligible:normalized.stones.length,excluded:normalized.holds}));
-  if(!normalized.stones.length)throw new Error('No eligible stones; availability writes are unsafe');
+  const normalized=source.normalize(rows);
+  console.log(JSON.stringify({stage,fetched:rows.length,...(normalized.colored==null?{}:{colored:normalized.colored}),eligible:normalized.stones.length,excluded:normalized.holds,...(normalized.availability?{availability:normalized.availability}:{})}));
+  const emptyAction=emptySnapshotAction(source,normalized);
+  if(emptyAction==='warn'){
+    const warning='No colored stones are available; availability writes skipped';
+    console.log(JSON.stringify({stage,warning,fetched:rows.length,colored:normalized.colored??0,eligible:0,excluded:normalized.holds,availability:normalized.availability??{}}));
+    await mkdir('out',{recursive:true});
+    await writeFile(source.reportPath,JSON.stringify({dryRun:dry,warning,fetched:rows.length,colored:normalized.colored??0,eligible:0,holds:normalized.holds,availability:normalized.availability??{},writes:[],withdrawals:[],skipped:[]},null,2));
+    return;
+  }
+  if(emptyAction==='refuse')throw new SafeError('No eligible stones; availability writes are unsafe');
   stage='shopify_auth';
   const gql=await client();
   stage='shopify_catalog';
@@ -136,7 +170,7 @@ export async function main(argv=process.argv.slice(2)) {
   const stones=activate?normalized.stones.filter(s=>activationHandles.has(s.handle)):normalized.stones;
   if(activate && (stones.length!==activationHandles.size || !stones.length))throw new Error('Activation scope is not fully eligible');
   stage='plan';
-  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,maxWithdrawals,checkLimit:!dry});
+  const plan=planFor(stones,catalog,{limit,activate,locationId:location.id,maxWithdrawals,checkLimit:!dry,owns});
   if(activate)plan.holds=[];
   // Check actual media before any new item or activation; do not expose dead photos/videos.
   stage='media_check';
@@ -149,8 +183,8 @@ export async function main(argv=process.argv.slice(2)) {
   plan.skipped.push(...Array.from(failedMedia,handle=>({handle,reason:'media_unavailable'})));
   if(!limit && !activate){
     const existingHolds=new Set(plan.holds.map(line=>line.handle));
-    for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&p.tags.includes(FEED_TAG)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
-    const activeOwned=catalog.filter(p=>p.tags.includes(FEED_TAG)&&p.handle.startsWith(PREFIX)&&p.status==='ACTIVE').length;
+    for(const p of catalog)if(failedMedia.has(p.handle)&&p.status==='ACTIVE'&&owns(p)&&!existingHolds.has(p.handle))plan.holds.push({action:'hold',handle:p.handle,input:{id:p.id,status:'DRAFT'}});
+    const activeOwned=catalog.filter(p=>owns(p)&&p.status==='ACTIVE').length;
     plan.withdrawalLimit=withdrawalLimit(activeOwned,maxWithdrawals);
     // A preview reports an over-limit withdrawal instead of stopping, so it can be reviewed.
     if(!dry)checkWithdrawals(plan.holds.length,activeOwned,maxWithdrawals);
@@ -158,7 +192,7 @@ export async function main(argv=process.argv.slice(2)) {
   console.log(JSON.stringify({stage:'media_checked',validWrites:plan.writes.length,excludedMedia:failedMedia.size}));
   const sanitized={dryRun:dry,fetched:rows.length,eligible:normalized.stones.length,holds:normalized.holds,planHash:snapshotHash(plan),writes:plan.writes.map(l=>({action:l.action,handle:l.handle,title:l.input.title,price:l.input.variants[0].price,status:l.input.status})),withdrawalLimit:plan.withdrawalLimit??null,withdrawals:plan.holds.map(l=>{const p=catalog.find(c=>c.handle===l.handle);return {handle:l.handle,title:p?.title??null,reason:failedMedia.has(l.handle)?'media_unavailable':'not_in_supplier_feed'};}),skipped:plan.skipped};
   await mkdir('out',{recursive:true});
-  await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
+  await writeFile(source.reportPath,JSON.stringify(sanitized,null,2));
   if(dry){console.log(JSON.stringify({dryRun:true,fetched:rows.length,eligible:normalized.stones.length,writes:plan.writes.length,withdrawals:plan.holds.length,withdrawalLimit:plan.withdrawalLimit??null,overLimit:plan.withdrawalLimit!=null&&plan.holds.length>plan.withdrawalLimit,skipped:plan.skipped.length}));return;}
   let publications=[];
   if(activate){publications=(await paginate(gql,OPS.publications,'publications')).filter(p=>p.name==='Online Store'||p.name==='Shop');if(!publications.some(p=>p.name==='Online Store'))throw new Error('Online Store publication unavailable');}
@@ -183,8 +217,8 @@ export async function main(argv=process.argv.slice(2)) {
     if(!p || p.status!==line.input.status || Number(p.price)!==Number(line.input.variants[0].price) || p.sku!==line.stone.stock || p.certificate!==line.stone.certificate || p.video!==line.stone.video || p.title!==line.input.title || p.templateSuffix!=='diamond' || p.hash!==snapshotHash(line.stone) || Number(p.variants.nodes[0].inventoryItem.unitCost?.amount)!==Number(line.input.variants[0].inventoryItem.cost) || p.variants.nodes[0].inventoryItem.tracked!==true || p.variants.nodes[0].inventoryQuantity!==0 || p.tags.includes('ebay') || p.tags.includes('lmny-feed'))throw new Error('Independent verification mismatch for '+line.handle);
   }
   for(const line of plan.holds)if(verified.find(p=>p.handle===line.handle)?.status!=='DRAFT')throw new Error('Withdrawal verification mismatch');
-  sanitized.verified=plan.writes.length;await writeFile('out/lgd-color-report.json',JSON.stringify(sanitized,null,2));
+  sanitized.verified=plan.writes.length;await writeFile(source.reportPath,JSON.stringify(sanitized,null,2));
   console.log(JSON.stringify({verified:plan.writes.length,withdrawn:plan.holds.length,newProductsRemainDraft:!activate}));
 }
-if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError?{reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(err=>{console.error(JSON.stringify({failedStage:stage,...(err instanceof SafeError || err?.safeToLog ? {reason:err.message}:{}),message:'Colored-diamond sync failed; no secrets or supplier costs are logged.'}));process.exitCode=1;});
 

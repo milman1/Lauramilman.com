@@ -62,3 +62,49 @@
 #lmny-ring-builder .review-purchase .row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
 #lmny-ring-builder .next-step{font-size:12px;line-height:1.35;margin:8px 0 0}
 @media(max-width:768px){#lmny-ring-builder .dock .dock-action{flex:0 1 48%;overflow:visible}#lmny-ring-builder .dock-action .primary{padding:10px 8px;white-space:normal}#lmny-ring-builder .dock-action .next-step{font-size:10px;margin:5px 0 0}#lmny-ring-builder .dock{align-items:center}#lmny-ring-builder:has(.dock:not([hidden])){padding-bottom:calc(165px + env(safe-area-inset-bottom,0px))}}
+
+#lmny-ring-builder .metal-price{display:block;font-size:13px;line-height:1.45}
+#lmny-ring-builder .fulfillment{max-width:62ch}
+#lmny-ring-builder{overflow-x:clip}
+@media(max-width:1099px){
+  #lmny-ring-builder .layout,
+  #lmny-ring-builder .layout:not(.solo){grid-template-columns:minmax(0,1fr)}
+  #lmny-ring-builder aside{position:static;max-height:none;order:2}
+  #lmny-ring-builder .products{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #lmny-ring-builder .lm-scale__stops{overflow-x:auto;padding-bottom:4px}
+}
+@media(max-width:480px){
+  #lmny-ring-builder .products{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Diamond photos contain-fit inside a square. object-fit:cover plus overflow:hidden was cropping the bottom of portrait stones. */
+#lmny-ring-builder .detail .media,
+#lmny-ring-builder .card-media,
+#lmny-ring-builder .review-images [data-review-media]{
+  aspect-ratio:1;
+  display:grid;
+  overflow:hidden;
+  background:var(--sand);
+}
+#lmny-ring-builder .detail .media>img,
+#lmny-ring-builder .product .card-media>img,
+#lmny-ring-builder .review-images [data-review-media] img{
+  width:100%;
+  height:100%;
+  max-height:100%;
+  aspect-ratio:auto;
+  object-fit:contain;
+  object-position:center;
+  display:block;
+}
+#lmny-ring-builder select.is-set{
+  border-color:var(--gold);
+  box-shadow:inset 4px 0 0 var(--gold);
+}
+#lmny-ring-builder select.is-empty{
+  border-color:#8c2d1e;
+}
+@media(max-width:480px){
+  #lmny-ring-builder .review-images{grid-template-columns:minmax(0,1fr)}
+  #lmny-ring-builder .fields{grid-template-columns:minmax(0,1fr)}
+}
