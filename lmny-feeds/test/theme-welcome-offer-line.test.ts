@@ -60,19 +60,22 @@ describe('welcome popup reopen tab', () => {
 
 describe('welcome offer pause during a store-wide sale', () => {
   const read = (f: string) => readFileSync(join(__dirname, '../../snippets', f), 'utf8');
-  const paused = read('welcome-offer-paused.liquid');
   const popup = read('welcome-popup.liquid');
   const line = read('welcome-offer-line.liquid');
 
   it('pauses until the end of the LMNY20 sale, 11:59:59 PM New York time on 1 December 2026', () => {
-    expect(paused).toContain('assign paused_until = 1796187599');
-    expect(new Date(1796187599 * 1000).toISOString()).toBe('2026-12-02T04:59:59.000Z');
+    expect(popup).toContain('var PAUSED_UNTIL = Date.UTC(2026, 11, 2, 4, 59, 59);');
+    expect(new Date(Date.UTC(2026, 11, 2, 4, 59, 59)).toISOString()).toBe('2026-12-02T04:59:59.000Z');
   });
 
-  it('hides the popup, its tab and the product-page line while paused', () => {
-    expect(popup).toMatch(/render 'welcome-offer-paused'/);
-    expect(popup).toMatch(/unless [^%]*welcome_paused == 'true'/);
-    expect(line).toMatch(/render 'welcome-offer-paused'/);
-    expect(line).toMatch(/if welcome_paused == 'true' -%\}\{%- assign offer_ok = false/);
+  it('decides in the browser, before the popup, its tab or the product-page line can show', () => {
+    const pause = popup.indexOf('if (Date.now() < PAUSED_UNTIL) return;');
+    expect(pause).toBeGreaterThan(-1);
+    for (const later of ['function open()', 'setTimeout(function () { whenNavClosed(open); }, 20000);', 'showTab(true);']) {
+      expect(popup.indexOf(later)).toBeGreaterThan(pause);
+    }
+    expect(popup.indexOf("el.hidden = false")).toBeGreaterThan(pause);
+    expect(line).toContain('<p class="lm-offer-line" data-welcome-line hidden>');
+    expect(popup).not.toContain('welcome-offer-paused');
   });
 });

@@ -3,13 +3,11 @@
   Rendered from layout/theme.liquid. The discount code is created in
   Shopify Admin (see SHOPIFY_SETUP.md). Kept as a snippet so it cannot
   fail as an invalid section type when included from the layout.
-  Not rendered on ring-builder templates: it would open mid-choice, nor while
-  the offer is paused for a store-wide sale (snippets/welcome-offer-paused.liquid).
+  Not rendered on ring-builder templates: it would open mid-choice.
+  Paused during a store-wide sale: see PAUSED_UNTIL in the script below.
 {% endcomment %}
 
-{%- comment -%} Paused during a store-wide sale: see snippets/welcome-offer-paused.liquid. {%- endcomment -%}
-{%- capture welcome_paused -%}{% render 'welcome-offer-paused' %}{%- endcapture -%}
-{%- unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder' or welcome_paused == 'true' -%}
+{%- unless customer.tags contains 'welcome10' or template.suffix contains 'ring-builder' -%}
 <div class="lm-welcome" id="LmWelcome" hidden>
   <div class="lm-welcome__backdrop" data-welcome-close></div>
   <div class="lm-welcome__card" role="dialog" aria-modal="true" aria-labelledby="LmWelcomeTitle">
@@ -196,6 +194,17 @@
   (function () {
     var root = document.getElementById('LmWelcome');
     if (!root) return;
+    // Store-wide sale pause. Until this moment the 10% offer stays out of
+    // sight: no popup, no reopen tab, and the product-page "sign up for 10%
+    // off" line (rendered hidden, data-welcome-line) is not revealed. Checked
+    // in the browser because Liquid's 'now' is cached with the page.
+    // Current pause: LMNY20 Black Friday, ends 11:59:59 PM New York time on
+    // 1 December 2026 (the code's end date in Shopify Admin -> Discounts).
+    // For a later sale, set this to that sale's end; a past date turns the
+    // pause off.
+    var PAUSED_UNTIL = Date.UTC(2026, 11, 2, 4, 59, 59);
+    if (Date.now() < PAUSED_UNTIL) return;
+    document.querySelectorAll('[data-welcome-line]').forEach(function (el) { el.hidden = false; });
     var key = 'lmny-welcome-dismissed';
     var joinedKey = 'lmny-welcome-joined';
     var tabKey = 'lmny-welcome-tab-hidden';
