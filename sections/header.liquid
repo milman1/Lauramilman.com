@@ -79,6 +79,8 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 }
 .lmhh__announce-dot { width: 4px; height: 4px; background: var(--lmhh-gold); transform: rotate(45deg); flex-shrink: 0; }
 .lmhh__announce-short { display: none; }
+.lmhh__announce-set { display: flex; align-items: center; gap: inherit; }
+.lmhh__announce-set[hidden] { display: none; }
 
 /* ---------- bar ---------- */
 .lmhh__bar {
@@ -503,13 +505,28 @@ body { padding-top: calc(var(--header-height) + var(--lmhh-announce)) !important
 <header class="header" id="header">
   {%- if section.settings.announce_text != blank -%}
     <div class="lmhh__announce" role="region" aria-label="Announcement">
-      <span>{{ section.settings.announce_text | escape }}</span>
-      {%- if section.settings.announce_link_text != blank -%}
+      {%- comment -%}
+        LMNY20 Black Friday line, shown until the sale ends (snippets/sale-window.liquid
+        swaps it for the normal line below by itself). The link applies the code, so
+        shoppers do not have to type it. Jewelry only: loose diamonds are not in the sale.
+      {%- endcomment -%}
+      <span class="lmhh__announce-set" data-sale-live>
+        <span class="lmhh__announce-long">Black Friday · 20% off all jewelry with code LMNY20 · Ends Dec 1</span><span class="lmhh__announce-short">20% off jewelry · Code LMNY20</span>
         <span class="lmhh__announce-dot" aria-hidden="true"></span>
-        <a href="{{ section.settings.announce_url | default: '/pages/private-clients' }}">
-          <span class="lmhh__announce-long">{{ section.settings.announce_link_text | escape }}</span><span class="lmhh__announce-short">{{ section.settings.announce_link_short | default: section.settings.announce_link_text | escape }}</span>
+        <a href="/discount/LMNY20?redirect=/collections/all">
+          <span class="lmhh__announce-long">Shop the sale</span><span class="lmhh__announce-short">Shop</span>
         </a>
-      {%- endif -%}
+      </span>
+      <span class="lmhh__announce-set" data-sale-over hidden>
+        <span>{{ section.settings.announce_text | escape }}</span>
+        {%- if section.settings.announce_link_text != blank -%}
+          <span class="lmhh__announce-dot" aria-hidden="true"></span>
+          <a href="{{ section.settings.announce_url | default: '/pages/private-clients' }}">
+            <span class="lmhh__announce-long">{{ section.settings.announce_link_text | escape }}</span><span class="lmhh__announce-short">{{ section.settings.announce_link_short | default: section.settings.announce_link_text | escape }}</span>
+          </a>
+        {%- endif -%}
+      </span>
+      {%- render 'sale-window' -%}
     </div>
   {%- endif -%}
 

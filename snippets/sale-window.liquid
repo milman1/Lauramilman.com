@@ -1,0 +1,25 @@
+{% doc %}
+  Ends the LMNY20 Black Friday messaging by itself. Elements marked
+  data-sale-live are shown during the sale and hidden afterwards; elements
+  marked data-sale-over (rendered hidden) appear afterwards.
+
+  The time is checked in the browser, not in Liquid: Liquid's 'now' is the time
+  the page was last rendered and can be cached, which is why the first version
+  of the welcome-offer pause did not work (#460).
+
+  END is 11:59:59 PM New York time on 1 December 2026 (2026-12-02T04:59:59Z),
+  the LMNY20 end date in Shopify Admin -> Discounts. For a later sale, change
+  END here and the PAUSED_UNTIL value in snippets/welcome-popup.liquid together
+  (a test checks they match).
+
+  Render it right after the elements it controls, so nothing flashes:
+  {% render 'sale-window' %}
+{% enddoc %}
+<script>
+  (function () {
+    var END = 1796187599000;
+    if (Date.now() < END) return;
+    document.querySelectorAll('[data-sale-live]').forEach(function (el) { el.hidden = true; });
+    document.querySelectorAll('[data-sale-over]').forEach(function (el) { el.hidden = false; });
+  })();
+</script>
