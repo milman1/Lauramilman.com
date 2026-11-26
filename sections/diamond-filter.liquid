@@ -122,6 +122,36 @@
         {%- render 'collection-guide', collection: collection -%}
       {%- endunless -%}
       {%- render 'diamond-origin-tabs', current: origin_tab -%}
+      {%- comment -%}
+        Shown when a sold diamond's page redirected here (?lmny_redirect=lg-... or
+        nd-..., from the feed sync's redirects or templates/404.liquid).
+      {%- endcomment -%}
+      <p class="lm-dfilter__sold-note" data-sold-note hidden>
+        That diamond has sold. Here are similar stones available now, or
+        <a href="/pages/private-clients">ask us to find one like it</a>.
+      </p>
+      <script>
+        (function () {
+          var note = document.currentScript.previousElementSibling;
+          try {
+            var h = new URLSearchParams(window.location.search).get('lmny_redirect') || '';
+            if (/^(lg|nd)-[a-z0-9-]{1,96}$/.test(h)) note.hidden = false;
+          } catch (e) {}
+        })();
+      </script>
+      <style>
+        .lm-dfilter__sold-note[hidden] { display: none; }
+        .lm-dfilter__sold-note {
+          margin: 1rem auto 0;
+          max-width: 40rem;
+          padding: 0.7rem 1rem;
+          border: 1px solid var(--gold, #C9A050);
+          font-family: var(--font-body, 'Montserrat', sans-serif);
+          font-size: 0.88rem;
+          text-align: center;
+        }
+        .lm-dfilter__sold-note a { color: inherit; text-decoration: underline; }
+      </style>
     </header>
 
     {% render 'diamond-api-filter-form', form_url: form_url, carat_floor: carat_floor, carat_ceil: carat_ceil, price_floor: price_floor, price_ceil: price_ceil, shape_order: shape_order, clarity_order: clarity_order, color_order: color_order, cut_order: cut_order, fold_shapes: true %}
