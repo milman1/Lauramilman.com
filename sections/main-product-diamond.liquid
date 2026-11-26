@@ -194,6 +194,18 @@
 
           </div>
         </div>
+        {%- comment -%}
+          Private viewing next to the buy buttons: many loose-stone buyers want
+          to see the stone first. Opens the Private Clients form with this stone
+          filled in (sections/private-client.liquid reads interest and piece).
+        {%- endcomment -%}
+        {%- if v.available -%}
+          {%- assign viewing_piece = product.title | append: ' ' | append: shop.url | append: product.url -%}
+          <p class="dpdp__viewing">
+            Prefer to see it first?
+            <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}">Book a private Midtown viewing</a>, or meet by video.
+          </p>
+        {%- endif -%}
         <a class="dpdp__view-cart" data-diamond-view-cart href="{{ routes.cart_url }}" hidden>View cart →</a>
         {%- if can_compare -%}
           <details class="dpdp__comparison" data-diamond-comparison data-root="{{ routes.root_url }}"

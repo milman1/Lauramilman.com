@@ -42,3 +42,5 @@
 .dpdp__comparison th[scope="row"] { min-width: 9rem; }
 .dpdp__comparison a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .dpdp__view-cart { display: inline-flex; align-items: center; min-height: 44px; margin-top: .5rem; color: inherit; text-underline-offset: 3px; }
+.dpdp__viewing { font-family: var(--font-body, 'Montserrat', sans-serif); font-size: 0.86rem; line-height: 1.6; margin: 0.9rem 0 0; color: inherit; }
+.dpdp__viewing a { color: inherit; text-decoration: underline; text-underline-offset: 3px; display: inline-block; min-height: 24px; }
