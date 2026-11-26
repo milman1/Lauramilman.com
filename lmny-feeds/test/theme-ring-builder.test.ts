@@ -78,7 +78,9 @@ describe('ring builder page chrome', () => {
     const js = themeFile('assets/ring-builder-flow.js');
     const en = JSON.parse(themeFile('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//, '')).ring_flow;
     expect(flow).toContain('<div class="ring-sent" data-ring-sent tabindex="-1" role="status" hidden></div>');
-    expect(flow).toContain('data-ring-email-sent>{{ \'ring_flow.email_sent_heading\' | t }}</h2>');
+    expect(flow).toContain('data-ring-email-sent hidden>{{ \'ring_flow.email_sent_heading\' | t }}</h2>');
+    expect(flow).toContain('data-inquiry-endpoint');
+    expect(flow).not.toContain("form 'contact', id: 'RingEmailForm'");
     expect(flow).toContain('data-ring-email-error');
     for (const key of ['email_sent_title', 'email_sent', 'keep_personalizing']) {
       expect(flow).toContain(`"${key}":{{ 'ring_flow.${key}' | t | json }}`);

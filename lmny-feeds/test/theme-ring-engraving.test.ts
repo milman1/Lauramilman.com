@@ -21,7 +21,10 @@ describe('ring engraving on the product page', () => {
     expect(form).not.toContain("{% render 'ring-engraving',");
     const after = mainProduct.slice(mainProduct.indexOf("{% render 'ring-diamond-pairing'"));
     expect(after.indexOf("{% render 'ring-engraving',")).toBeGreaterThan(0);
-    expect(after.indexOf("{% render 'ring-engraving',")).toBeLessThan(after.indexOf("{% render 'product-inquiry'"));
+    const endProductForm = mainProduct.indexOf('{%- endform -%}');
+    const inquiryAt = mainProduct.indexOf("{% render 'product-inquiry'");
+    expect(inquiryAt).toBeGreaterThan(endProductForm);
+    expect(inquiryAt).toBeLessThan(mainProduct.indexOf("{% render 'ring-diamond-pairing'"));
     expect(snippet).toContain('<input type="hidden" form="{{ form_id }}" name="properties[Engraving]"');
     expect(snippet).toContain("document.getElementById(root.getAttribute('data-form-id'))");
   });

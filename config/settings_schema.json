@@ -160,6 +160,13 @@
         "id": "whatsapp_number",
         "label": "WhatsApp number",
         "info": "Include the country code, for example +1 212 555 0123. Spaces, dashes and brackets are fine."
+      },
+      {
+        "type": "text",
+        "id": "inquiry_endpoint",
+        "label": "Inquiry endpoint",
+        "default": "https://lauramilman-com.milmanavi.workers.dev/inquiry",
+        "info": "Worker that saves the inquiry as a customer and sends the confirmation. Leave the default unless that URL changes."
       }
     ]
   }
