@@ -898,6 +898,8 @@
     "date": "Needed by (optional)",
     "date_hint": "A request, not a guaranteed delivery date.",
     "made_order": "Made to order",
+    "similar_shapes": "Explore this setting style in other shapes",
+    "compare_with_laura": "Compare with Laura in Midtown or by video",
     "production_note": "Laura confirms the final fit, personalization and timing before production.",
     "open_product": "Open full product page",
     "photo": "Photograph {{ number }}",

@@ -282,7 +282,7 @@
       const selections = ['setting', 'diamond'].map(k => `<span class="dock-selection" title="${esc(state[k]?.title || t('empty_selection'))}">${esc(t(k))}: ${esc(state[k]?.title || t('empty_selection'))}</span>`).join('');
       dock.innerHTML = `<div><span class="eyebrow">${esc(t(hasBands() ? 'order_subtotal' : both() ? 'subtotal' : 'selected_total'))}</span>${selections}<span class="total">${money(subtotal())}</span></div><div class="dock-action">${next}</div>`;
       const purchase = main.querySelector('[data-review-purchase]');
-      if (purchase) purchase.innerHTML = `<div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : 'subtotal'))}</span><strong class="total">${money(subtotal())}</strong></div>${reviewAction('review-add')}`;
+      if (purchase) purchase.innerHTML = `<div class="row"><span>${esc(t(hasBands() ? 'order_subtotal' : 'subtotal'))}</span><strong class="total">${money(subtotal())}</strong></div>${reviewAction('review-add')}<p class="quiet">${esc(t('production_note'))} <a class="link" href="${esc(consultationLink())}">${esc(t('compare_with_laura'))}</a></p>`;
       if (state.busy) lockControls();
     }
     function lockControls() {
@@ -564,6 +564,21 @@
         if (quick) choose(); else go('detail');
       } catch (error) { if (generation === state.generation) notice(error.message || t('load_failed'), true); }
     }
+    function relatedShapes(setting) {
+      const style = styleOf(setting);
+      if (state.diamond || !['solitaire', 'hidden-halo'].includes(style)) return '';
+      const alternatives = new Map();
+      for (const candidate of knownSettings.values()) {
+        if (candidate.shape !== setting.shape && styleOf(candidate) === style && !alternatives.has(candidate.shape)) {
+          alternatives.set(candidate.shape, candidate);
+        }
+      }
+      if (!alternatives.size) return '';
+      const links = Array.from(alternatives, ([shape, candidate]) =>
+        `<a class="link" href="${esc(candidate.url)}">${esc(shape)}</a>`
+      ).join(' · ');
+      return `<p class="quiet">${esc(t('similar_shapes'))} ${links}</p>`;
+    }
     function detail() {
       const p = state.detail;
       if (!p) return go('catalog');
@@ -572,7 +587,7 @@
       const s = p.spec || {};
       const facts = [['shape', p.shape], ...(!isSetting ? [['origin', t(p.origin === 'natural' ? 'natural' : 'lab')], ['color', s.color], ['clarity', s.clarity], ['cut', s.cut], ['polish', s.polish], ['symmetry', s.symmetry], ['fluorescence', s.fluorescence], ['measurements', s.measurements], ['table', s.table_pct != null ? s.table_pct + '%' : null], ['depth', s.depth_pct != null ? s.depth_pct + '%' : null], ['certificate', [s.lab, s.cert_number].filter(Boolean).join(' ')]] : [])].filter(([, value]) => value != null && value !== '');
       const videos = [...new Set([...(p.videos || []), ...(s.video_urls || [])].filter(safeURL))];
-      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${isSetting ? settingPriceHtml(p) : esc(money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
+      main.innerHTML = `${button('back_results', 'catalog', 'link')}<div class="detail"><div><div class="media" data-media>${image(photos[state.photo], p.title, '', true)}</div>${photos.length > 1 ? `<div class="media-thumbs">${photos.map((src, i) => `<button type="button" data-action="photo-${i}" aria-label="${esc(t('photo', { number: i + 1 }))}" aria-pressed="${i === state.photo}">${image(src)}</button>`).join('')}</div>` : ''}${videos.map((src, i) => `<button type="button" class="link" data-action="video-${i}">${esc(t('video'))}</button>`).join('')}${safeURL(s.cert_url) ? `<p><a class="link" href="${esc(safeURL(s.cert_url))}" target="_blank" rel="noopener">${esc(t('report'))}</a></p>` : ''}</div><div><div class="eyebrow">${esc(t(isSetting ? 'setting' : 'diamond'))}</div><h2>${esc(p.title)}</h2><p class="total">${isSetting ? settingPriceHtml(p) : esc(money(p.price))}</p><p class="quiet">${esc(t(isSetting ? 'setting_only' : 'diamond_only'))}</p>${button(isSetting ? 'select_setting' : 'select_diamond', 'select')}${isSetting ? relatedShapes(p) : ''}<p class="quiet">${esc(t(!isSetting && !state.setting && !settingCount(p.shape) ? 'no_setting_shape' : 'fits_check'))}</p><p class="detail-help"><a class="link" href="${esc(cfg.contact)}">${esc(t(isSetting ? 'ask_setting' : 'ask_stone'))}</a><a class="link" href="${esc(consultationLink())}">${esc(t('book_viewing'))}</a></p><div class="facts">${facts.map(([key, value]) => `<div class="row"><span class="fact-label">${esc(t(key))}</span><span>${esc(value)}</span></div>`).join('')}</div><a class="link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('open_product'))}</a></div></div>`;
       state.detailVideos = videos;
     }
     function bandSummary() {

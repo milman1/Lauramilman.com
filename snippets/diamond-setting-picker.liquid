@@ -23,10 +23,18 @@
           {%- assign setting_price = setting_prices | first -%}
           {%- assign setting_money = setting_price | money_without_trailing_zeros -%}
           {%- assign total_money = setting_price | plus: stone_price | money_without_trailing_zeros -%}
+          {%- assign illustrative_center = false -%}
+          {%- if ring.handle == 'round-four-prong-pave-engagement-ring-setting-in-white-gold-0-40-ct' -%}
+            {%- assign illustrative_center = true -%}
+          {%- endif -%}
           <li class="dsp__card">
             <a class="dsp__link" href="{{ routes.root_url }}pages/ring-builder?setting={{ ring.handle | url_encode }}&amp;diamond={{ product.handle | url_encode }}">
               <span class="dsp__media">
-                {%- if ring.featured_image -%}
+                {%- if illustrative_center -%}
+                  <img src="{{ 'round-pave-finished-preview.webp' | asset_url }}"
+                    alt="Illustration of the round pavé setting with a center diamond"
+                    width="600" height="600" loading="lazy">
+                {%- elsif ring.featured_image -%}
                   <img src="{{ ring.featured_image | image_url: width: 600 }}"
                     srcset="{{ ring.featured_image | image_url: width: 320 }} 320w, {{ ring.featured_image | image_url: width: 600 }} 600w"
                     sizes="(max-width: 600px) 44vw, (max-width: 900px) 42vw, 280px"
@@ -34,9 +42,14 @@
                     width="600" height="600" loading="lazy">
                 {%- endif -%}
               </span>
+              {%- if illustrative_center -%}
+                <small class="dsp__note dsp__caption">Illustrative center diamond</small>
+              {%- elsif ring.featured_image and ring.metafields.custom.featured_image_center_carat.value != blank -%}
+                <small>Shown with a {{ ring.metafields.custom.featured_image_center_carat.value | escape }} ct center</small>
+              {%- endif -%}
               <span class="dsp__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' | remove: ' Engagement Ring' | escape }}</span>
-              <span class="dsp__price">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.setting_from' | t: price: setting_money }}{% else %}{{ 'diamond_purchase.setting_price' | t: price: setting_money }}{% endif %}</span>
               <span class="dsp__total">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.total_from' | t: price: total_money }}{% else %}{{ 'diamond_purchase.total_price' | t: price: total_money }}{% endif %}</span>
+              <span class="dsp__price">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.setting_from' | t: price: setting_money }}{% else %}{{ 'diamond_purchase.setting_price' | t: price: setting_money }}{% endif %}</span>
               <span class="dsp__cta">{{ 'diamond_purchase.view_setting' | t }} →</span>
             </a>
           </li>
@@ -121,7 +134,7 @@
       font-size: 0.72rem;
       color: var(--text-muted, #8A8070);
     }
-    .dsp__total { font-weight: 600; color: var(--gold-dark, #A88340); }
+    .dsp__total { font-size: 0.95rem; font-weight: 600; color: var(--text-dark, #2C1810); }
     .dsp__note {
       margin: 0.6rem 0 0;
       font-family: var(--font-body, 'Montserrat', sans-serif);
@@ -135,6 +148,7 @@
       font-weight: 600;
       color: var(--gold-dark, #A88340);
     }
+    .dsp__caption { margin: 0; }
     .dsp__all { display: inline-block; margin-top: 0.5rem; letter-spacing: 0.04em; }
     .dsp__cta { margin-top: auto; padding-top: 0.5rem; font-size: 0.76rem; text-decoration: underline; color: var(--gold-dark, #A88340); }
     @media (max-width: 900px) { .dsp__row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
