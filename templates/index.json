@@ -23,7 +23,7 @@
             "show_snow": true,
             "eyebrow": "Black Friday",
             "heading": "Black Friday Sale",
-            "subtext": "Twenty percent off all jewelry, now through December 1. Use code LMNY20.",
+            "subtext": "20% off all jewelry, now through December 1. Use code LMNY20.",
             "button_label": "Shop jewelry",
             "button_link": "/collections/all"
           }
@@ -39,7 +39,7 @@
             "show_snow": true,
             "eyebrow": "Rings",
             "heading": "Rings",
-            "subtext": "Twenty percent off finished rings and settings with code LMNY20.",
+            "subtext": "20% off finished rings and settings with code LMNY20.",
             "button_label": "Shop rings",
             "button_link": "/collections/rings"
           }
@@ -55,7 +55,7 @@
             "show_snow": true,
             "eyebrow": "Earrings",
             "heading": "Earrings",
-            "subtext": "Twenty percent off diamond and gold earrings with code LMNY20.",
+            "subtext": "20% off diamond and gold earrings with code LMNY20.",
             "button_label": "Shop earrings",
             "button_link": "/collections/all-earrings"
           }
@@ -70,7 +70,7 @@
             "show_snow": true,
             "eyebrow": "Bracelets",
             "heading": "Bracelets",
-            "subtext": "Twenty percent off gold and diamond bracelets with code LMNY20.",
+            "subtext": "20% off gold and diamond bracelets with code LMNY20.",
             "button_label": "Shop bracelets",
             "button_link": "/collections/all-bracelets"
           }
@@ -86,7 +86,7 @@
             "show_snow": true,
             "eyebrow": "Necklaces",
             "heading": "Necklaces",
-            "subtext": "Twenty percent off fine necklaces and pendants with code LMNY20.",
+            "subtext": "20% off fine necklaces and pendants with code LMNY20.",
             "button_label": "Shop necklaces",
             "button_link": "/collections/necklaces"
           }
@@ -102,7 +102,7 @@
             "show_snow": true,
             "eyebrow": "Blue",
             "heading": "Blue, for the season",
-            "subtext": "Blue loose diamonds. Twenty percent off any setting with code LMNY20.",
+            "subtext": "Blue loose diamonds. 20% off any setting with code LMNY20.",
             "button_label": "Shop colored diamonds",
             "button_link": "/collections/colored-lab-grown-diamonds"
           }
@@ -118,7 +118,7 @@
             "show_snow": true,
             "eyebrow": "Red",
             "heading": "Red, for the holidays",
-            "subtext": "Red loose diamonds. Twenty percent off any setting with code LMNY20.",
+            "subtext": "Red loose diamonds. 20% off any setting with code LMNY20.",
             "button_label": "Shop colored diamonds",
             "button_link": "/collections/colored-lab-grown-diamonds"
           }
@@ -134,7 +134,7 @@
             "show_snow": true,
             "eyebrow": "Green",
             "heading": "Green, beside the diamonds",
-            "subtext": "Green loose diamonds. Twenty percent off any setting with code LMNY20.",
+            "subtext": "Green loose diamonds. 20% off any setting with code LMNY20.",
             "button_label": "Shop colored diamonds",
             "button_link": "/collections/colored-lab-grown-diamonds"
           }
@@ -150,7 +150,7 @@
             "show_snow": true,
             "eyebrow": "Yellow",
             "heading": "A warm yellow light",
-            "subtext": "Yellow loose diamonds. Twenty percent off any setting with code LMNY20.",
+            "subtext": "Yellow loose diamonds. 20% off any setting with code LMNY20.",
             "button_label": "Shop yellow diamonds",
             "button_link": "/collections/fancy-yellow-diamonds"
           }
@@ -164,9 +164,9 @@
             "image_focus": "center",
             "copy_side": "left",
             "show_snow": true,
-            "eyebrow": "The holidays",
-            "heading": "Lab-grown diamond jewelry",
-            "subtext": "Twenty percent off with code LMNY20, now through December 1.",
+            "eyebrow": "Lab-grown",
+            "heading": "20% off lab-grown diamond jewelry",
+            "subtext": "Lab-grown diamond rings, earrings, necklaces and bracelets. Use code LMNY20, now through December 1.",
             "button_label": "Shop diamond jewelry",
             "button_link": "/collections/lab-grown-diamond-jewelry"
           }
@@ -182,7 +182,7 @@
             "show_snow": true,
             "eyebrow": "Black Friday",
             "heading": "Ends December 1",
-            "subtext": "Black Friday twenty percent off all jewelry with code LMNY20.",
+            "subtext": "Black Friday 20% off all jewelry with code LMNY20.",
             "button_label": "Shop gifts",
             "button_link": "/collections/everyday-jewelry"
           }

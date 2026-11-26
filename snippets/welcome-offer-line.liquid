@@ -9,7 +9,8 @@
   Discounts) and is not a watch or a loose stone. Loose lab-grown and natural
   diamond pages do not render this snippet, and the two loose-diamond
   collections are left out of the list. Update ELIGIBLE below if the discount's collections change.
-  Hidden for customers who already signed up (tag welcome10).
+  Hidden for customers who already signed up (tag welcome10), and while the
+  offer is paused for a store-wide sale (snippets/welcome-offer-paused.liquid).
 
   @param {product} product - The product being shown
 
@@ -30,6 +31,8 @@
 {%- capture offer_is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
 {%- if offer_is_watch contains 'true' -%}{%- assign offer_ok = false -%}{%- endif -%}
 {%- if customer.tags contains 'welcome10' -%}{%- assign offer_ok = false -%}{%- endif -%}
+{%- capture welcome_paused -%}{% render 'welcome-offer-paused' %}{%- endcapture -%}
+{%- if welcome_paused == 'true' -%}{%- assign offer_ok = false -%}{%- endif -%}
 
 {%- if offer_ok -%}
   <p class="lm-offer-line">

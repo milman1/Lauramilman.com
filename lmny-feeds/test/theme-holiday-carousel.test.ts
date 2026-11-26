@@ -30,18 +30,19 @@ describe('homepage holiday carousel', () => {
     const slides = home.sections.holiday.blocks ?? {};
     const copy = Object.values(slides).map((block) => JSON.stringify(block.settings)).join('\n');
     expect(copy).toContain('Black Friday Sale');
-    expect(copy).toContain('Twenty percent off all jewelry, now through December 1. Use code LMNY20.');
-    expect(copy).toContain('Twenty percent off finished rings and settings with code LMNY20.');
-    expect(copy).toContain('Twenty percent off diamond and gold earrings with code LMNY20.');
-    expect(copy).toContain('Twenty percent off gold and diamond bracelets with code LMNY20.');
-    expect(copy).toContain('Twenty percent off fine necklaces and pendants with code LMNY20.');
-    expect(copy).toContain('Blue loose diamonds. Twenty percent off any setting with code LMNY20.');
-    expect(copy).toContain('Red loose diamonds. Twenty percent off any setting with code LMNY20.');
-    expect(copy).toContain('Green loose diamonds. Twenty percent off any setting with code LMNY20.');
-    expect(copy).toContain('Yellow loose diamonds. Twenty percent off any setting with code LMNY20.');
+    expect(copy).toContain('20% off all jewelry, now through December 1. Use code LMNY20.');
+    expect(copy).toContain('20% off finished rings and settings with code LMNY20.');
+    expect(copy).toContain('20% off diamond and gold earrings with code LMNY20.');
+    expect(copy).toContain('20% off gold and diamond bracelets with code LMNY20.');
+    expect(copy).toContain('20% off fine necklaces and pendants with code LMNY20.');
+    expect(copy).toContain('Blue loose diamonds. 20% off any setting with code LMNY20.');
+    expect(copy).toContain('Red loose diamonds. 20% off any setting with code LMNY20.');
+    expect(copy).toContain('Green loose diamonds. 20% off any setting with code LMNY20.');
+    expect(copy).toContain('Yellow loose diamonds. 20% off any setting with code LMNY20.');
     expect(copy).toContain('Ends December 1');
-    expect(copy).toContain('Black Friday twenty percent off all jewelry with code LMNY20.');
-    expect(copy).not.toMatch(/New York City|Christmas|December 22|%/);
+    expect(copy).toContain('Black Friday 20% off all jewelry with code LMNY20.');
+    // Merchant 2026-11-26: the discount is shown as the number "20%", not spelled out.
+    expect(copy).not.toMatch(/New York City|Christmas|December 22|percent/i);
     expect(copy).toContain('/collections/rings');
     expect(copy).toContain('/collections/all-earrings');
     expect(copy).toContain('/collections/all-bracelets');
@@ -88,10 +89,10 @@ describe('homepage holiday carousel', () => {
       expect(String(slide.image_alt)).not.toMatch(/velvet|watch/i);
     }
     const velvet = slides['slide-velvet'].settings ?? {};
-    expect(velvet.heading).toBe('Lab-grown diamond jewelry');
-    expect(velvet.subtext).toBe('Twenty percent off with code LMNY20, now through December 1.');
+    expect(velvet.heading).toBe('20% off lab-grown diamond jewelry');
+    expect(velvet.subtext).toBe('Lab-grown diamond rings, earrings, necklaces and bracelets. Use code LMNY20, now through December 1.');
     expect([velvet.eyebrow, velvet.heading, velvet.subtext, velvet.image_alt, velvet.button_label].join('\n')).not.toMatch(/velvet|on red/i);
-    expect(copy).not.toMatch(/%|Diamond District|Midtown|private appointment|showroom/i);
+    expect(copy).not.toMatch(/Diamond District|Midtown|private appointment|showroom/i);
   });
 
   it('is an editable, accessible carousel', () => {
