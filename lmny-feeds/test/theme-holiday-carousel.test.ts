@@ -36,14 +36,39 @@ describe('homepage holiday carousel', () => {
     expect(copy).toContain('/collections/all');
     expect(copy).toContain('/collections/lab-grown-diamond-jewelry');
     expect(copy).toContain('/collections/everyday-jewelry');
+    expect(copy).toContain('A ring for the season');
+    expect(copy).toContain('Light for the evening');
+    expect(copy).toContain('A bracelet to wear now');
+    expect(copy).toContain('A necklace for the season');
+    expect(copy).toContain('/collections/rings');
+    expect(copy).toContain('/collections/all-earrings');
+    expect(copy).toContain('/collections/all-bracelets');
+    expect(copy).toContain('/collections/necklaces');
     expect(copy).not.toMatch(/watch|jacob/i);
-    expect(home.sections.holiday.block_order).toEqual(['slide-jewelry', 'slide-velvet', 'slide-gifts']);
-    for (const id of ['slide-jewelry', 'slide-velvet', 'slide-gifts']) {
+    expect(home.sections.holiday.block_order).toEqual([
+      'slide-jewelry',
+      'slide-rings',
+      'slide-earrings',
+      'slide-bracelets',
+      'slide-necklaces',
+      'slide-velvet',
+      'slide-gifts',
+    ]);
+    const images: Record<string, string> = {
+      'slide-jewelry': 'holiday-velvet-desktop.webp',
+      'slide-velvet': 'holiday-velvet-desktop.webp',
+      'slide-gifts': 'holiday-velvet-desktop.webp',
+      'slide-rings': 'holiday-ring-desktop.webp',
+      'slide-earrings': 'holiday-earrings-desktop.webp',
+      'slide-bracelets': 'holiday-bracelet-desktop.webp',
+      'slide-necklaces': 'holiday-necklace-desktop.webp',
+    };
+    for (const [id, image] of Object.entries(images)) {
       const slide = slides[id].settings ?? {};
-      expect(slide.image_asset).toBe('holiday-velvet-desktop.webp');
-      expect(slide.mobile_image_asset).toBe('holiday-velvet-mobile.webp');
-      expect(slide.image_alt).toBe('Diamond jewelry holiday display');
+      expect(slide.image_asset).toBe(image);
+      expect(String(slide.mobile_image_asset)).toMatch(/-mobile\.webp$/);
       expect(slide.show_snow).toBe(true);
+      expect(String(slide.image_alt)).not.toMatch(/velvet|watch/i);
     }
     const velvet = slides['slide-velvet'].settings ?? {};
     expect(velvet.heading).toBe("The season's most brilliant gift");

@@ -28,6 +28,70 @@
             "button_link": "/collections/all"
           }
         },
+        "slide-rings": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-ring-desktop.webp",
+            "mobile_image_asset": "holiday-ring-mobile.webp",
+            "image_alt": "Diamond ring holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Rings",
+            "heading": "A ring for the season",
+            "subtext": "Finished rings, chosen in New York City.",
+            "button_label": "Shop rings",
+            "button_link": "/collections/rings"
+          }
+        },
+        "slide-earrings": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-earrings-desktop.webp",
+            "mobile_image_asset": "holiday-earrings-mobile.webp",
+            "image_alt": "Diamond earrings holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Earrings",
+            "heading": "Light for the evening",
+            "subtext": "Diamond earrings for the holidays.",
+            "button_label": "Shop earrings",
+            "button_link": "/collections/all-earrings"
+          }
+        },
+        "slide-bracelets": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-bracelet-desktop.webp",
+            "mobile_image_asset": "holiday-bracelet-mobile.webp",
+            "image_alt": "Diamond bracelet holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Bracelets",
+            "heading": "A bracelet to wear now",
+            "subtext": "Gold and diamond bracelets from New York City.",
+            "button_label": "Shop bracelets",
+            "button_link": "/collections/all-bracelets"
+          }
+        },
+        "slide-necklaces": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-necklace-desktop.webp",
+            "mobile_image_asset": "holiday-necklace-mobile.webp",
+            "image_alt": "Diamond necklace holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Necklaces",
+            "heading": "A necklace for the season",
+            "subtext": "Necklaces from New York City.",
+            "button_label": "Shop necklaces",
+            "button_link": "/collections/necklaces"
+          }
+        },
         "slide-velvet": {
           "type": "slide",
           "settings": {
@@ -63,6 +127,10 @@
       },
       "block_order": [
         "slide-jewelry",
+        "slide-rings",
+        "slide-earrings",
+        "slide-bracelets",
+        "slide-necklaces",
         "slide-velvet",
         "slide-gifts"
       ],
