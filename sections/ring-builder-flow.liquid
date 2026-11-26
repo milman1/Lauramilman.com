@@ -11,6 +11,8 @@
   <div class="intro">
     <h1>{{ 'ring_flow.title' | t }}</h1>
     <p class="quiet">{{ 'ring_flow.intro' | t }}</p>
+    <p class="quiet" data-sale-live><strong>Black Friday:</strong> 20% off the setting with code LMNY20, through December 1. Loose diamonds are not included.</p>
+    {%- render 'sale-window' -%}
     <nav aria-label="{{ 'ring_flow.title' | t | escape }}">
       <span data-stage="1" class="active">1 · {{ 'ring_flow.choose' | t }}</span>
       <span data-stage="2">2 · {{ 'ring_flow.pair' | t }}</span>

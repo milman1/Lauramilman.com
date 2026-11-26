@@ -1,0 +1,54 @@
+{% doc %}
+  One plain-text line on product pages during the LMNY20 Black Friday sale:
+  "20% off with code LMNY20 at checkout, through December 1."
+
+  Shown only where the code really applies: the product is in All Jewelry (the
+  collection LMNY20 covers), is not a watch, and is not a loose diamond (merchant
+  decision, 2026-11-26: loose diamonds are not part of the sale). Loose diamonds
+  also use their own product template (main-product-diamond), which does not
+  render this snippet; the checks below are a second guard.
+
+  The line hides itself after the sale (see snippets/sale-window.liquid).
+
+  @param {product} product - The product being shown
+
+  @example
+  {% render 'sale-offer-line', product: product %}
+{% enddoc %}
+
+{%- liquid
+  assign sale_ok = false
+  for c in product.collections
+    if c.handle == 'all'
+      assign sale_ok = true
+      break
+    endif
+  endfor
+  assign sale_type = product.type | downcase
+  assign sale_prefix = product.handle | slice: 0, 3
+  if sale_type == 'lab-grown diamond' or sale_type == 'lab grown diamond' or sale_type == 'natural diamond'
+    assign sale_ok = false
+  endif
+  if sale_prefix == 'lg-' or sale_prefix == 'nd-'
+    assign sale_ok = false
+  endif
+-%}
+{%- capture sale_is_watch -%}{% render 'product-is-watch', product: product %}{%- endcapture -%}
+{%- if sale_is_watch contains 'true' -%}{%- assign sale_ok = false -%}{%- endif -%}
+
+{%- if sale_ok -%}
+  <p class="lm-sale-line" data-sale-live>
+    <strong>Black Friday:</strong> 20% off with code LMNY20 at checkout, through December 1.
+  </p>
+  {%- render 'sale-window' -%}
+  <style>
+    .lm-sale-line[hidden] { display: none; }
+    .lm-sale-line {
+      margin: 0.6rem 0 0;
+      font-family: var(--font-body, 'Montserrat', sans-serif);
+      font-size: 0.82rem;
+      color: var(--text-dark, #2C1810);
+    }
+    .lm-sale-line strong { font-weight: 600; }
+  </style>
+{%- endif -%}
