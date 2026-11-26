@@ -1,0 +1,429 @@
+{%- comment -%}
+  Homepage holiday carousel. Leads the homepage in the banner slot.
+  Slides are theme-editor blocks: image, mobile image, heading, subtext,
+  and button. Theme asset filenames render before a merchant picks a
+  replacement image.
+
+  The diamond still on the second slide is generated. Snow is optional
+  per slide and does not cover the button.
+{%- endcomment -%}
+
+{{ 'holiday-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- if section.blocks.size > 0 -%}
+  <section
+    class="lm-holiday"
+    id="Holiday-{{ section.id }}"
+    data-holiday-carousel
+    data-autoplay="{% if section.settings.autoplay and section.blocks.size > 1 %}true{% else %}false{% endif %}"
+    data-interval="{{ section.settings.interval | times: 1000 }}"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="{{ section.settings.accessibility_label | escape }}"
+  >
+    <div class="lm-holiday__frame">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign desktop = ''
+          assign img_w = 1600
+          assign img_h = 900
+          if block.settings.image != blank
+            assign desktop = block.settings.image | image_url: width: 2000
+            assign img_w = block.settings.image.width
+            assign img_h = block.settings.image.height
+          elsif block.settings.image_asset != blank
+            assign desktop = block.settings.image_asset | asset_url
+            case block.settings.image_asset
+              when 'home-hero-ring.webp'
+                assign img_w = 1672
+                assign img_h = 940
+              when 'holiday-velvet-desktop.webp' or 'holiday-ring-desktop.webp' or 'holiday-earrings-desktop.webp' or 'holiday-bracelet-desktop.webp' or 'holiday-necklace-desktop.webp' or 'holiday-blue-desktop.webp' or 'holiday-red-desktop.webp' or 'holiday-green-desktop.webp' or 'holiday-yellow-desktop.webp'
+                assign img_w = 1280
+                assign img_h = 720
+              when 'home-bracelets.webp'
+                assign img_w = 738
+                assign img_h = 553
+              when 'home-rings-model.webp'
+                assign img_w = 1448
+                assign img_h = 1086
+            endcase
+          endif
+
+          assign mobile = ''
+          if block.settings.mobile_image != blank
+            assign mobile = block.settings.mobile_image | image_url: width: 1200
+          elsif block.settings.mobile_image_asset != blank
+            assign mobile = block.settings.mobile_image_asset | asset_url
+          endif
+
+          assign heading = block.settings.heading | default: 'Holiday'
+        -%}
+        <div
+          class="lm-holiday__slide{% if forloop.first %} is-active{% endif %}"
+          id="HolidaySlide-{{ section.id }}-{{ forloop.index }}"
+          data-holiday-slide
+          data-focus="{{ block.settings.image_focus }}"
+          data-copy="{{ block.settings.copy_side }}"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="{{ forloop.index }} of {{ section.blocks.size }}: {{ heading | escape }}"
+          aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+          {% unless forloop.first %}inert{% endunless %}
+          {{ block.shopify_attributes }}
+        >
+          <div class="lm-holiday__media">
+            {%- if desktop != blank -%}
+              {%- if forloop.first -%}
+                <picture>
+                  {%- if mobile != blank -%}
+                    <source media="(max-width: 749px)" srcset="{{ mobile }}">
+                  {%- endif -%}
+                  <img
+                    class="lm-holiday__img"
+                    src="{{ desktop }}"
+                    alt="{{ block.settings.image_alt | escape }}"
+                    width="{{ img_w }}"
+                    height="{{ img_h }}"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                    draggable="false"
+                    data-managed="picture"
+                  >
+                </picture>
+              {%- else -%}
+                <img
+                  class="lm-holiday__img"
+                  alt="{{ block.settings.image_alt | escape }}"
+                  width="{{ img_w }}"
+                  height="{{ img_h }}"
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  data-src="{{ desktop }}"
+                  {% if mobile != blank %}data-src-mobile="{{ mobile }}"{% endif %}
+                >
+              {%- endif -%}
+            {%- endif -%}
+            <div class="lm-holiday__scrim"></div>
+          </div>
+          {%- if block.settings.show_snow -%}
+            <div class="lm-holiday__snow" aria-hidden="true">
+              {%- for i in (1..14) -%}
+                <span class="lm-holiday__flake"></span>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          <div class="lm-holiday__copy">
+            {%- if block.settings.eyebrow != blank -%}
+              <p class="lm-holiday__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.heading != blank -%}
+              <h2 class="lm-holiday__heading">{{ block.settings.heading | escape }}</h2>
+            {%- endif -%}
+            {%- if block.settings.subtext != blank -%}
+              <p class="lm-holiday__sub">{{ block.settings.subtext | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.button_label != blank -%}
+              <a class="lm-holiday__btn" href="{{ block.settings.button_link | default: '/collections/all' }}">
+                {{ block.settings.button_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+
+      {%- if section.blocks.size > 1 -%}
+        <div class="lm-holiday__controls">
+          <button class="lm-holiday__arrow" type="button" data-holiday-prev aria-label="Previous slide">
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+              <path d="M11.5 3.5 6 9l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          </button>
+          <div class="lm-holiday__dots" role="group" aria-label="Choose a slide">
+            {%- for block in section.blocks -%}
+              <button
+                class="lm-holiday__dot{% if forloop.first %} is-active{% endif %}"
+                type="button"
+                data-holiday-dot
+                aria-label="Show slide {{ forloop.index }} of {{ section.blocks.size }}"
+                aria-controls="HolidaySlide-{{ section.id }}-{{ forloop.index }}"
+                {% if forloop.first %}aria-current="true"{% endif %}
+              ></button>
+            {%- endfor -%}
+          </div>
+          <button class="lm-holiday__pause" type="button" data-holiday-pause aria-pressed="false">
+            <svg class="lm-holiday__icon-pause" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M5 3.5v9M11 3.5v9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <svg class="lm-holiday__icon-play" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M5.5 3.5v9l7-4.5-7-4.5z" fill="currentColor"/>
+            </svg>
+            <span class="visually-hidden" data-holiday-pause-label>Pause slides</span>
+          </button>
+          <button class="lm-holiday__arrow" type="button" data-holiday-next aria-label="Next slide">
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+              <path d="M6.5 3.5 12 9l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+  <script src="{{ 'holiday-carousel.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Holiday carousel",
+  "tag": "section",
+  "class": "section-holiday-carousel",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-advance slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "interval",
+      "label": "Seconds between slides",
+      "min": 4,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 6
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Carousel label for screen readers",
+      "default": "Holiday"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        {
+          "type": "text",
+          "id": "image_asset",
+          "label": "Theme asset image",
+          "info": "Used when no image is picked. Filename in assets, such as home-hero-ring.webp."
+        },
+        { "type": "image_picker", "id": "mobile_image", "label": "Mobile image" },
+        {
+          "type": "text",
+          "id": "mobile_image_asset",
+          "label": "Theme asset mobile image",
+          "info": "Optional. Used on screens under 750 pixels when no mobile image is picked."
+        },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        {
+          "type": "select",
+          "id": "image_focus",
+          "label": "Image focus",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "copy_side",
+          "label": "Text side on desktop",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_snow",
+          "label": "Falling snow",
+          "info": "A light overlay of flakes. It pauses to a still dusting when the visitor prefers reduced motion.",
+          "default": false
+        },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "subtext", "label": "Subtext" },
+        { "type": "text", "id": "button_label", "label": "Button label" },
+        { "type": "url", "id": "button_link", "label": "Button link" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Holiday carousel",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "show_snow": true,
+            "eyebrow": "Black Friday",
+            "heading": "Twenty percent off jewelry",
+            "subtext": "All jewelry, November 27 through December 1.",
+            "button_label": "Shop jewelry",
+            "button_link": "/collections/all"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-ring-desktop.webp",
+            "mobile_image_asset": "holiday-ring-mobile.webp",
+            "image_alt": "Diamond ring holiday display",
+            "image_focus": "right",
+            "show_snow": true,
+            "eyebrow": "Rings",
+            "heading": "A ring for the season",
+            "subtext": "Finished rings, chosen in New York City.",
+            "button_label": "Shop rings",
+            "button_link": "/collections/rings"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-earrings-desktop.webp",
+            "mobile_image_asset": "holiday-earrings-mobile.webp",
+            "image_alt": "Diamond earrings holiday display",
+            "image_focus": "right",
+            "show_snow": true,
+            "eyebrow": "Earrings",
+            "heading": "Light for the evening",
+            "subtext": "Diamond earrings for the holidays.",
+            "button_label": "Shop earrings",
+            "button_link": "/collections/all-earrings"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "home-bracelets.webp",
+            "image_alt": "Stack of gold bracelets with colored stones",
+            "image_focus": "center",
+            "show_snow": true,
+            "eyebrow": "Bracelets",
+            "heading": "A bracelet to wear now",
+            "subtext": "Gold bracelets with colored stones, from New York City.",
+            "button_label": "Shop bracelets",
+            "button_link": "/collections/all-bracelets"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-necklace-desktop.webp",
+            "mobile_image_asset": "holiday-necklace-mobile.webp",
+            "image_alt": "Diamond necklace holiday display",
+            "image_focus": "right",
+            "show_snow": true,
+            "eyebrow": "Necklaces",
+            "heading": "A necklace for the season",
+            "subtext": "Necklaces from New York City.",
+            "button_label": "Shop necklaces",
+            "button_link": "/collections/necklaces"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-blue-desktop.webp",
+            "mobile_image_asset": "holiday-blue-mobile.webp",
+            "image_alt": "Blue diamond holiday display",
+            "show_snow": true,
+            "eyebrow": "Blue",
+            "heading": "Blue, for the season",
+            "subtext": "Blue stones and loose diamonds, chosen in New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-red-desktop.webp",
+            "mobile_image_asset": "holiday-red-mobile.webp",
+            "image_alt": "Red diamond holiday display",
+            "image_focus": "right",
+            "show_snow": true,
+            "eyebrow": "Red",
+            "heading": "Red, for the holidays",
+            "subtext": "Red stones and loose diamonds from New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-green-desktop.webp",
+            "mobile_image_asset": "holiday-green-mobile.webp",
+            "image_alt": "Green diamond holiday display",
+            "show_snow": true,
+            "eyebrow": "Green",
+            "heading": "Green, beside the diamonds",
+            "subtext": "Green stones and loose diamonds, chosen in New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-yellow-desktop.webp",
+            "mobile_image_asset": "holiday-yellow-mobile.webp",
+            "image_alt": "Yellow diamond holiday display",
+            "show_snow": true,
+            "eyebrow": "Yellow",
+            "heading": "A warm yellow light",
+            "subtext": "Yellow diamonds, chosen in New York City.",
+            "button_label": "Shop yellow diamonds",
+            "button_link": "/collections/fancy-yellow-diamonds"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "show_snow": true,
+            "eyebrow": "The holidays",
+            "heading": "The season's most brilliant gift",
+            "subtext": "Lab-grown diamond jewelry, chosen in New York City.",
+            "button_label": "Shop diamond jewelry",
+            "button_link": "/collections/lab-grown-diamond-jewelry"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-velvet-desktop.webp",
+            "mobile_image_asset": "holiday-velvet-mobile.webp",
+            "image_alt": "Diamond jewelry holiday display",
+            "show_snow": true,
+            "eyebrow": "Christmas delivery",
+            "heading": "Ship by December 22",
+            "subtext": "Order in time for Christmas delivery. Gifts from New York City.",
+            "button_label": "Shop gifts",
+            "button_link": "/collections/everyday-jewelry"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
