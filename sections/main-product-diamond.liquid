@@ -172,7 +172,7 @@
               <h2 class="dpdp__fallback-title">{{ 'diamond_purchase.build_ring' | t }}</h2>
               <p class="dpdp__purchase-note">{{ 'diamond_purchase.pair_note' | t }}</p>
               <a class="dpdp__atc dpdp__build" href="{{ builder_url }}">{{ 'diamond_purchase.choose_setting' | t }} →</a>
-              <p class="dpdp__purchase-note">{{ 'diamond_purchase.carried_forward' | t }}</p>
+              <p class="dpdp__purchase-note">Your diamond stays selected. Wedding bands are optional.</p>
             </div>
           {%- endif -%}
           <div id="DiamondBuy-{{ section.id }}" data-diamond-buy>
@@ -205,14 +205,7 @@
             and arrive in about 1-2 business days; setting a stone takes 1-2
             business days; building a ring takes about a week.
           {%- endcomment -%}
-          <p class="dpdp__delivery">
-            Free insured U.S. delivery in about 1–2 business days. Set in a ring: 1–2 business days to set it, or about a week when we build the ring for you.
-          </p>
-          {%- assign viewing_piece = product.title | append: ' ' | append: shop.url | append: product.url -%}
-          <p class="dpdp__viewing">
-            Prefer to see it first?
-            <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}">Book a private Midtown viewing</a>, or meet by video.
-          </p>
+          {%- render 'diamond-service-details', product: product, section: section -%}
         {%- endif -%}
         <a class="dpdp__view-cart" data-diamond-view-cart href="{{ routes.cart_url }}" hidden>View cart →</a>
         {%- if can_compare -%}

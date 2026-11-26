@@ -1,0 +1,26 @@
+{%- assign viewing_piece = product.title | append: ' ' | append: shop.url | append: product.url -%}
+<div class="dpdp-service">
+  <div class="dpdp-service__tiles">
+    <div class="dpdp-service__tile">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h12v11H2zM14 9h4l4 4v3h-8"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/></svg>
+      <span class="dpdp-service__value">1–2 days</span>
+      <span class="dpdp-service__label">Free delivery</span>
+    </div>
+    <div class="dpdp-service__tile">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6.5"/><path d="m12 2 3 4-3 3-3-3z"/></svg>
+      <span class="dpdp-service__value">+1–2 days</span>
+      <span class="dpdp-service__label">To set in a ring</span>
+    </div>
+    <a href="#MeetLaura-{{ section.id }}" class="dpdp-service__tile">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="dpdp-service__value">View with Laura</span>
+      <span class="dpdp-service__label">Midtown or video</span>
+    </a>
+  </div>
+  <p class="dpdp-service__note">Free insured U.S. delivery. Estimates are in business days. A ring built for you takes about a week.</p>
+  <div class="dpdp-service__meet" id="MeetLaura-{{ section.id }}">
+    <h3>Meet Laura</h3>
+    <p>See this diamond in Midtown or by video.</p>
+    <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}">Book a private viewing <span aria-hidden="true">→</span></a>
+  </div>
+</div>
