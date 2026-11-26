@@ -298,8 +298,9 @@
         "promise-4": {
           "type": "item",
           "settings": {
-            "text": "14-Day Returns",
-            "short": ""
+            "text": "14-day returns on eligible jewelry",
+            "short": "",
+            "link": "/pages/shipping-returns"
           }
         }
       },
