@@ -205,14 +205,31 @@
             and arrive in about 1-2 business days; setting a stone takes 1-2
             business days; building a ring takes about a week.
           {%- endcomment -%}
-          <p class="dpdp__delivery">
-            Free insured U.S. delivery in about 1–2 business days. Set in a ring: 1–2 business days to set it, or about a week when we build the ring for you.
-          </p>
           {%- assign viewing_piece = product.title | append: ' ' | append: shop.url | append: product.url -%}
-          <p class="dpdp__viewing">
-            Prefer to see it first?
-            <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}">Book a private Midtown viewing</a>, or meet by video.
-          </p>
+          {%- comment -%}
+            Three tiles in the style of the grade tiles above: delivery, setting,
+            private viewing. Full sentences are in each tile's accessible name.
+          {%- endcomment -%}
+          <ul class="dpdp__perks" role="list">
+            <li class="dpdp__perk dpdp__delivery" aria-label="Free insured U.S. delivery in about 1–2 business days">
+              <svg class="dpdp__perk-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17.5" cy="17.5" r="1.6"/></svg>
+              <span class="dpdp__perk-value">1–2 days</span>
+              <span class="dpdp__perk-label">Free delivery</span>
+            </li>
+            <li class="dpdp__perk dpdp__setting" aria-label="Set in a ring in 1–2 business days, or about a week when we build the ring for you">
+              <svg class="dpdp__perk-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="15" r="5.5"/><path d="M9.5 6.5 12 3l2.5 3.5L12 9.5z"/></svg>
+              <span class="dpdp__perk-value">+1–2 days</span>
+              <span class="dpdp__perk-label">To set in a ring</span>
+            </li>
+            <li class="dpdp__perk dpdp__viewing">
+              <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}" aria-label="Book a private Midtown viewing, in person or by video">
+                <svg class="dpdp__perk-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+                <span class="dpdp__perk-value">See it</span>
+                <span class="dpdp__perk-label">Midtown viewing →</span>
+              </a>
+            </li>
+          </ul>
+          <p class="dpdp__perks-note">U.S. delivery, insured. A ring built for you takes about a week.</p>
         {%- endif -%}
         <a class="dpdp__view-cart" data-diamond-view-cart href="{{ routes.cart_url }}" hidden>View cart →</a>
         {%- if can_compare -%}

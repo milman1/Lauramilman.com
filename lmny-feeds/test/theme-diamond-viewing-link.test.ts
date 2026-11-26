@@ -10,7 +10,7 @@ const form = themeFile('sections/private-client.liquid');
 
 describe('private viewing link on loose diamond pages', () => {
   it('sits between the buy buttons and the cart link, only while the stone is for sale', () => {
-    const at = page.indexOf('class="dpdp__viewing"');
+    const at = page.indexOf('class="dpdp__perk dpdp__viewing"');
     expect(at).toBeGreaterThan(page.indexOf("{%- endform -%}"));
     expect(at).toBeLessThan(page.indexOf('data-diamond-view-cart'));
     expect(page.slice(page.lastIndexOf('{%- if v.available -%}', at), at)).not.toContain('endif');
@@ -23,13 +23,14 @@ describe('private viewing link on loose diamond pages', () => {
     expect(form).toContain("var piece = params.get('piece')");
   });
 
-  it('states the merchant lead times once, above the viewing link', () => {
-    const delivery = page.indexOf('class="dpdp__delivery"');
-    expect(delivery).toBeGreaterThan(page.indexOf("{%- endform -%}"));
-    expect(delivery).toBeLessThan(page.indexOf('class="dpdp__viewing"'));
-    expect(page).toContain('Free insured U.S. delivery in about 1–2 business days. Set in a ring: 1–2 business days to set it, or about a week when we build the ring for you.');
-    const viewing = page.slice(page.indexOf('class="dpdp__viewing"'), page.indexOf('data-diamond-view-cart'));
-    expect(viewing).toContain('Book a private Midtown viewing');
-    expect(viewing).not.toMatch(/deliver|business day/i);
+  it('shows lead times and the viewing as three short tiles, full wording kept for screen readers', () => {
+    const tiles = page.slice(page.indexOf('<ul class="dpdp__perks"'), page.indexOf('dpdp__perks-note'));
+    expect(tiles.match(/<li class="dpdp__perk /g)).toHaveLength(3);
+    expect(tiles).toContain('aria-label="Free insured U.S. delivery in about 1–2 business days"');
+    expect(tiles).toContain('aria-label="Set in a ring in 1–2 business days, or about a week when we build the ring for you"');
+    expect(tiles).toContain('<span class="dpdp__perk-value">1–2 days</span>');
+    expect(tiles).toContain('<span class="dpdp__perk-label">Midtown viewing →</span>');
+    expect(tiles.indexOf('dpdp__delivery')).toBeLessThan(tiles.indexOf('dpdp__viewing'));
+    expect(page).toContain('<p class="dpdp__perks-note">U.S. delivery, insured. A ring built for you takes about a week.</p>');
   });
 });
