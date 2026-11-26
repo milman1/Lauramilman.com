@@ -1,3 +1,24 @@
+{%- comment -%}
+  Sold loose diamonds. The feed sync now archives a sold stone and adds a
+  redirect (lmny-feeds/src/archiveRedirects.ts), but stones it deleted before
+  that change (PR #386, 30 Oct 2026) have no redirect and land here, often from
+  AI-assistant and search links. A missing /products/lg-... (lab, including
+  lg-color-...) or /products/nd-... (natural) page goes straight to that kind's
+  diamond search, the same targets the feed sync uses. The lmny_redirect
+  parameter shows a "this diamond has sold" note there and is counted in GA4
+  (assets/lmny-ga4.js). Checked in the browser because this page is rendered
+  for any missing URL.
+{%- endcomment -%}
+<script>
+  (function () {
+    var m = window.location.pathname.match(/^\/products\/((lg|nd)-[a-z0-9-]{1,96})\/?$/i);
+    if (!m) return;
+    var handle = m[1].toLowerCase();
+    var target = handle.indexOf('nd-') === 0 ? '/collections/natural-diamonds' : '/collections/lab-grown-diamonds';
+    window.location.replace(target + '?lmny_redirect=' + encodeURIComponent(handle));
+  })();
+</script>
+
 <section class="page-404">
   <div class="page-404__inner">
     <span class="page-404__eyebrow">404</span>
