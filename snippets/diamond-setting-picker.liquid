@@ -34,9 +34,12 @@
                     width="600" height="600" loading="lazy">
                 {%- endif -%}
               </span>
+              {%- if ring.featured_image and ring.metafields.custom.featured_image_center_carat.value != blank -%}
+                <small>Shown with a {{ ring.metafields.custom.featured_image_center_carat.value | escape }} ct center</small>
+              {%- endif -%}
               <span class="dsp__name">{{ ring.title | remove: ' Engagement Ring Setting' | remove: ' Ring Setting' | remove: ' Engagement Ring' | escape }}</span>
-              <span class="dsp__price">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.setting_from' | t: price: setting_money }}{% else %}{{ 'diamond_purchase.setting_price' | t: price: setting_money }}{% endif %}</span>
               <span class="dsp__total">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.total_from' | t: price: total_money }}{% else %}{{ 'diamond_purchase.total_price' | t: price: total_money }}{% endif %}</span>
+              <span class="dsp__price">{% if setting_prices.size > 1 %}{{ 'diamond_purchase.setting_from' | t: price: setting_money }}{% else %}{{ 'diamond_purchase.setting_price' | t: price: setting_money }}{% endif %}</span>
               <span class="dsp__cta">{{ 'diamond_purchase.view_setting' | t }} →</span>
             </a>
           </li>
@@ -121,7 +124,7 @@
       font-size: 0.72rem;
       color: var(--text-muted, #8A8070);
     }
-    .dsp__total { font-weight: 600; color: var(--gold-dark, #A88340); }
+    .dsp__total { font-size: 0.95rem; font-weight: 600; color: var(--text-dark, #2C1810); }
     .dsp__note {
       margin: 0.6rem 0 0;
       font-family: var(--font-body, 'Montserrat', sans-serif);
