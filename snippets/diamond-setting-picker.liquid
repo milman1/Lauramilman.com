@@ -40,10 +40,33 @@
                     sizes="(max-width: 600px) 44vw, (max-width: 900px) 42vw, 280px"
                     alt="{{ ring.featured_image.alt | default: ring.title | escape }}"
                     width="600" height="600" loading="lazy">
+                {%- elsif ring.metafields.custom.setting_style.value contains 'Six-Prong' -%}
+                  {%- comment -%}
+                    No photo yet (six-prong platinum setting, 2026-11-26). A plain
+                    top-view drawing of a six-prong head, captioned as an
+                    illustration, instead of an empty box. Removed automatically
+                    once the product has a featured image.
+                  {%- endcomment -%}
+                  <svg class="dsp__drawing" viewBox="0 0 600 600" role="img" aria-label="Illustration of a six-prong round solitaire setting, seen from above">
+                    <rect x="40" y="282" width="520" height="36" rx="18" fill="none" stroke="currentColor" stroke-width="5"/>
+                    <circle cx="300" cy="300" r="118" fill="var(--warm-white, #FDFAF6)" stroke="currentColor" stroke-width="5"/>
+                    <circle cx="300" cy="300" r="58" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.55"/>
+                    <g fill="none" stroke="currentColor" stroke-width="2" opacity="0.45">
+                      <path d="M300 182 L300 242 M402 241 L350 271 M402 359 L350 329 M300 418 L300 358 M198 359 L250 329 M198 241 L250 271"/>
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="300" cy="180" r="15"/><circle cx="404" cy="240" r="15"/><circle cx="404" cy="360" r="15"/>
+                      <circle cx="300" cy="420" r="15"/><circle cx="196" cy="360" r="15"/><circle cx="196" cy="240" r="15"/>
+                    </g>
+                  </svg>
+                {%- else -%}
+                  <span class="dsp__placeholder">Photo coming soon</span>
                 {%- endif -%}
               </span>
               {%- if illustrative_center -%}
                 <small class="dsp__note dsp__caption">Illustrative center diamond</small>
+              {%- elsif ring.featured_image == blank and ring.metafields.custom.setting_style.value contains 'Six-Prong' -%}
+                <small class="dsp__note dsp__caption">Illustration · photo coming soon</small>
               {%- elsif ring.featured_image and ring.metafields.custom.featured_image_center_carat.value != blank -%}
                 <small>Shown with a {{ ring.metafields.custom.featured_image_center_carat.value | escape }} ct center</small>
               {%- endif -%}
@@ -121,6 +144,12 @@
     }
     .dsp__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
     .dsp__link:hover .dsp__media img { transform: scale(1.04); }
+    .dsp__drawing { display: block; width: 100%; height: 100%; color: #8E949B; }
+    .dsp__placeholder {
+      display: flex; align-items: center; justify-content: center; height: 100%;
+      font-family: var(--font-body, 'Montserrat', sans-serif); font-size: 0.74rem;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted, #8A8070);
+    }
     .dsp__link:hover .dsp__media { border-color: var(--gold, #C9A050); }
     .dsp__name {
       margin-top: 0.2rem;
