@@ -45,12 +45,23 @@ describe('homepage holiday carousel', () => {
     expect(copy).toContain('/collections/all-bracelets');
     expect(copy).toContain('/collections/necklaces');
     expect(copy).not.toMatch(/watch|jacob/i);
+    expect(copy).toContain('home-bracelets.webp');
+    expect(copy).toContain('Blue, for the season');
+    expect(copy).toContain('Red, for the holidays');
+    expect(copy).toContain('Green, beside the diamonds');
+    expect(copy).toContain('A warm yellow light');
+    expect(copy).toContain('/collections/colored-lab-grown-diamonds');
+    expect(copy).toContain('/collections/fancy-yellow-diamonds');
     expect(home.sections.holiday.block_order).toEqual([
       'slide-jewelry',
       'slide-rings',
       'slide-earrings',
       'slide-bracelets',
       'slide-necklaces',
+      'slide-blue',
+      'slide-red',
+      'slide-green',
+      'slide-yellow',
       'slide-velvet',
       'slide-gifts',
     ]);
@@ -60,13 +71,17 @@ describe('homepage holiday carousel', () => {
       'slide-gifts': 'holiday-velvet-desktop.webp',
       'slide-rings': 'holiday-ring-desktop.webp',
       'slide-earrings': 'holiday-earrings-desktop.webp',
-      'slide-bracelets': 'holiday-bracelet-desktop.webp',
+      'slide-bracelets': 'home-bracelets.webp',
       'slide-necklaces': 'holiday-necklace-desktop.webp',
+      'slide-blue': 'holiday-blue-desktop.webp',
+      'slide-red': 'holiday-red-desktop.webp',
+      'slide-green': 'holiday-green-desktop.webp',
+      'slide-yellow': 'holiday-yellow-desktop.webp',
     };
     for (const [id, image] of Object.entries(images)) {
       const slide = slides[id].settings ?? {};
       expect(slide.image_asset).toBe(image);
-      expect(String(slide.mobile_image_asset)).toMatch(/-mobile\.webp$/);
+      if (image !== 'home-bracelets.webp') expect(String(slide.mobile_image_asset)).toMatch(/-mobile\.webp$/);
       expect(slide.show_snow).toBe(true);
       expect(String(slide.image_alt)).not.toMatch(/velvet|watch/i);
     }

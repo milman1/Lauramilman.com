@@ -63,15 +63,14 @@
         "slide-bracelets": {
           "type": "slide",
           "settings": {
-            "image_asset": "holiday-bracelet-desktop.webp",
-            "mobile_image_asset": "holiday-bracelet-mobile.webp",
-            "image_alt": "Diamond bracelet holiday display",
-            "image_focus": "right",
+            "image_asset": "home-bracelets.webp",
+            "image_alt": "Stack of gold bracelets with colored stones",
+            "image_focus": "center",
             "copy_side": "left",
             "show_snow": true,
             "eyebrow": "Bracelets",
             "heading": "A bracelet to wear now",
-            "subtext": "Gold and diamond bracelets from New York City.",
+            "subtext": "Gold bracelets with colored stones, from New York City.",
             "button_label": "Shop bracelets",
             "button_link": "/collections/all-bracelets"
           }
@@ -90,6 +89,70 @@
             "subtext": "Necklaces from New York City.",
             "button_label": "Shop necklaces",
             "button_link": "/collections/necklaces"
+          }
+        },
+        "slide-blue": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-blue-desktop.webp",
+            "mobile_image_asset": "holiday-blue-mobile.webp",
+            "image_alt": "Blue diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Blue",
+            "heading": "Blue, for the season",
+            "subtext": "Blue stones and loose diamonds, chosen in New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-red": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-red-desktop.webp",
+            "mobile_image_asset": "holiday-red-mobile.webp",
+            "image_alt": "Red diamond holiday display",
+            "image_focus": "right",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Red",
+            "heading": "Red, for the holidays",
+            "subtext": "Red stones and loose diamonds from New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-green": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-green-desktop.webp",
+            "mobile_image_asset": "holiday-green-mobile.webp",
+            "image_alt": "Green diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Green",
+            "heading": "Green, beside the diamonds",
+            "subtext": "Green stones and loose diamonds, chosen in New York City.",
+            "button_label": "Shop colored diamonds",
+            "button_link": "/collections/colored-lab-grown-diamonds"
+          }
+        },
+        "slide-yellow": {
+          "type": "slide",
+          "settings": {
+            "image_asset": "holiday-yellow-desktop.webp",
+            "mobile_image_asset": "holiday-yellow-mobile.webp",
+            "image_alt": "Yellow diamond holiday display",
+            "image_focus": "center",
+            "copy_side": "left",
+            "show_snow": true,
+            "eyebrow": "Yellow",
+            "heading": "A warm yellow light",
+            "subtext": "Yellow diamonds, chosen in New York City.",
+            "button_label": "Shop yellow diamonds",
+            "button_link": "/collections/fancy-yellow-diamonds"
           }
         },
         "slide-velvet": {
@@ -131,6 +194,10 @@
         "slide-earrings",
         "slide-bracelets",
         "slide-necklaces",
+        "slide-blue",
+        "slide-red",
+        "slide-green",
+        "slide-yellow",
         "slide-velvet",
         "slide-gifts"
       ],
