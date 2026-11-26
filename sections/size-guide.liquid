@@ -1,9 +1,11 @@
 {%- comment -%}
-  Laura Milman New York — Ring Size Guide
-  US sizes with diameter/circumference table + measuring tips.
+  Laura Milman New York — Ring Size Chart
+  US sizes, international conversions, a printable sizer, and the
+  resizing policy already published on Shipping & Returns and the FAQ.
+  The US table is the same snippet as the product-page size dialog.
 {%- endcomment -%}
 
-<section class="lm-sizes" aria-label="Ring size guide">
+<section class="lm-sizes" aria-label="Ring size chart">
   <div class="lm-sizes__container">
 
     <header class="lm-sizes__header">
@@ -16,29 +18,148 @@
       {%- endif -%}
     </header>
 
-    <div class="lm-sizes__table-wrap">
-      {% render 'ring-size-chart', class: 'lm-sizes__table' %}
+    <nav class="lm-sizes__nav lm-sizes__no-print" aria-label="On this page">
+      <a href="#what-size">What a size is</a>
+      <a href="#measure">How to measure</a>
+      <a href="#us-chart">US sizes</a>
+      <a href="#convert">Other countries</a>
+      <a href="#print">Print a sizer</a>
+      <a href="#resizing">Resizing</a>
+      <a href="#questions">Questions</a>
+    </nav>
+
+    <div class="lm-sizes__block" id="what-size">
+      <h2 class="lm-sizes__heading">What a ring size is</h2>
+      <p class="lm-sizes__prose">A ring size is the inside measurement of the band. In the United States it is a number, usually from 3 to 13 in half steps. A ring that fits slides over the knuckle with slight resistance and rests at the base of the finger without pinching or spinning.</p>
+      <p class="lm-sizes__prose">Measure in millimeters, then find that number in the diameter or circumference column. Laura Milman rings are made in US sizes. The chart on a ring’s product page is this same US table.</p>
     </div>
 
-    <div class="lm-sizes__tips">
-      <h2 class="lm-sizes__tips-title">{{ section.settings.tips_title }}</h2>
+    <div class="lm-sizes__block" id="measure">
+      <h2 class="lm-sizes__heading">{{ section.settings.tips_title }}</h2>
+      {%- assign tip_n = 0 -%}
       {%- for block in section.blocks -%}
-        <div class="lm-sizes__tip" {{ block.shopify_attributes }}>
-          <span class="lm-sizes__tip-num">{{ forloop.index }}</span>
-          <p>{{ block.settings.text }}</p>
-        </div>
+        {%- if block.type == 'tip' and block.settings.text != blank -%}
+          {%- assign tip_n = tip_n | plus: 1 -%}
+          <div class="lm-sizes__tip" {{ block.shopify_attributes }}>
+            <span class="lm-sizes__tip-num">{{ tip_n }}</span>
+            <p>{{ block.settings.text }}</p>
+          </div>
+        {%- endif -%}
       {%- endfor -%}
     </div>
 
-    {%- if section.settings.cta_text != blank -%}
-      <div class="lm-sizes__footer">
-        <p>{{ section.settings.footer_text }}</p>
-        <a href="{{ section.settings.cta_url | default: '/pages/private-clients' }}" class="btn btn--outline">{{ section.settings.cta_text }}</a>
+    <div class="lm-sizes__block" id="us-chart">
+      <h2 class="lm-sizes__heading">US ring sizes</h2>
+      <p class="lm-sizes__prose">Inside diameter and inside circumference for US sizes 3 to 13. House rings are offered in these half sizes. If your measurement falls between two rows, choose the larger size.</p>
+      <div class="lm-sizes__table-wrap">
+        {% render 'ring-size-chart', class: 'lm-sizes__table', view: 'us' %}
       </div>
-    {%- endif -%}
+    </div>
+
+    <div class="lm-sizes__block" id="convert">
+      <h2 class="lm-sizes__heading">Sizes in other countries</h2>
+      <p class="lm-sizes__prose">Ring sizes are not one system worldwide. A US 6 is a UK L ½, a French 52, and a Japanese 12. France quotes the inside circumference in millimeters. The UK, Germany, Japan, and Italy columns are each country’s own size, not a millimeter measurement.</p>
+      <p class="lm-sizes__prose">UK also covers Australia, Ireland, New Zealand, and South Africa. Germany also covers Russia and Ukraine. Japan also covers China and India. Italy also covers Spain, the Netherlands, and Switzerland. A dash means that system has no standard size at that step. These are the usual trade equivalents, and a maker can differ by a fraction. If a size you were given is not in the table, ask us before you order.</p>
+      <p class="lm-sizes__swipe lm-sizes__no-print">Swipe sideways for UK, France, Germany, Japan, and Italy. The US size stays in place.</p>
+      <div class="lm-sizes__table-wrap lm-sizes__convert">
+        {% render 'ring-size-chart', class: 'lm-sizes__table lm-sizes__table--convert', view: 'convert' %}
+      </div>
+    </div>
+
+    <div class="lm-sizes__block" id="print">
+      <h2 class="lm-sizes__heading">Print a ring sizer</h2>
+      <p class="lm-sizes__prose">The circles are drawn at true size for paper. On a screen, use the tables. When you print, choose 100% scale, sometimes called Actual size, and leave Fit to page off.</p>
+      <p class="lm-sizes__prose">The bar is 50 millimeters. Measure it with a ruler after printing. If it is not 50 mm, print again before you trust a circle. Place a ring that fits over a disk. The disk should sit just inside the band, edge to edge. If the disk overlaps the metal, try the next size down. If you see paper between the disk and the band, try the next size up.</p>
+      <p class="lm-sizes__actions lm-sizes__no-print">
+        <button type="button" class="btn btn--outline" data-size-print>Print the chart</button>
+      </p>
+      {% render 'ring-size-chart', view: 'sizer' %}
+    </div>
+
+    <div class="lm-sizes__block" id="resizing">
+      <h2 class="lm-sizes__heading">Resizing</h2>
+      <p class="lm-sizes__prose">Most rings include one complimentary resizing. Eternity bands, and some estate pieces, cannot be resized without compromising the setting, and we say so on the piece before you buy. Unworn jewelry in its original condition may be returned or exchanged within 14 days of delivery. Engraved pieces and bespoke commissions are final sale. The full terms are on <a href="/pages/shipping-returns">Shipping &amp; Returns</a>.</p>
+    </div>
+
+    <div class="lm-sizes__block" id="questions">
+      <h2 class="lm-sizes__heading">{{ section.settings.faq_title | default: 'Questions' }}</h2>
+      <div class="lm-sizes__faqs">
+        {%- assign faq_open = true -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+            <div class="accordion-item"{% if faq_open %} data-open{% endif %} {{ block.shopify_attributes }}>
+              <button type="button" class="accordion-trigger" aria-expanded="{% if faq_open %}true{% else %}false{% endif %}">
+                {{ block.settings.question }}
+                <span class="accordion-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-content">{{ block.settings.answer }}</div>
+              </div>
+            </div>
+            {%- assign faq_open = false -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="lm-sizes__footer lm-sizes__no-print">
+      {%- if section.settings.footer_text != blank -%}
+        <p>{{ section.settings.footer_text }}</p>
+      {%- endif -%}
+      <div class="lm-sizes__actions">
+        <a href="/collections/engagement-rings" class="btn btn--gold">Shop engagement rings</a>
+        {%- if section.settings.cta_text != blank -%}
+          <a href="{{ section.settings.cta_url | default: '/pages/private-clients' }}" class="btn btn--outline">{{ section.settings.cta_text }}</a>
+        {%- endif -%}
+      </div>
+      <p class="lm-sizes__shops">
+        <a href="/collections/engagement-rings">Engagement rings</a>
+        <a href="/collections/wedding-bands">Wedding bands</a>
+        <a href="/collections/rings">All rings</a>
+      </p>
+    </div>
 
   </div>
 </section>
+
+{%- assign faq_has_pairs = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+    {%- assign faq_has_pairs = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if faq_has_pairs -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- assign faq_written = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+        {%- if faq_written -%},{%- endif -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.question | json }},
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": {{ block.settings.answer | strip_html | strip | json }}
+          }
+        }
+        {%- assign faq_written = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+{%- endif -%}
+
+<script>
+  document.querySelectorAll('[data-size-print]').forEach(function (btn) {
+    btn.addEventListener('click', function () { window.print(); });
+  });
+</script>
 
 <style>
   .lm-sizes {
@@ -47,13 +168,13 @@
   }
 
   .lm-sizes__container {
-    max-width: 720px;
+    max-width: 1080px;
     margin: 0 auto;
   }
 
   .lm-sizes__header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.75rem;
   }
 
   .lm-sizes__title {
@@ -70,14 +191,79 @@
     font-weight: 300;
     line-height: 1.8;
     color: var(--text-muted, #8A8070);
-    max-width: 560px;
+    max-width: 40rem;
     margin: 0 auto;
+  }
+
+  .lm-sizes__nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.65rem 1.15rem;
+    margin: 0 0 2.75rem;
+  }
+
+  .lm-sizes__nav a {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold, #C9A050);
+    padding-bottom: 0.15rem;
+  }
+
+  .lm-sizes__block {
+    scroll-margin-top: calc(var(--header-height, 112px) + 16px);
+  }
+
+  .lm-sizes__block + .lm-sizes__block {
+    margin-top: 3rem;
+  }
+
+  .lm-sizes__heading {
+    font-family: var(--font-heading, 'Cormorant Garamond', serif);
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+    margin: 0 0 1rem;
+  }
+
+  .lm-sizes__prose {
+    max-width: 40rem;
+    margin: 0 0 1rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-wine, #4A2018);
+  }
+
+  .lm-sizes__prose a {
+    color: var(--text-dark, #2C1810);
+    text-underline-offset: 3px;
   }
 
   .lm-sizes__table-wrap {
     overflow-x: auto;
     border: 1px solid var(--border-light, #E8E2D8);
     border-radius: var(--radius-md, 8px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #us-chart .lm-sizes__table-wrap {
+    max-width: 640px;
+  }
+
+  .lm-sizes__swipe {
+    display: none;
+    margin: 0 0 0.75rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted, #8A8070);
   }
 
   .lm-sizes__table {
@@ -90,18 +276,19 @@
   .lm-sizes__table th {
     background: var(--espresso, #1E1109);
     color: var(--gold-light, #E2C27A);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 0.75rem;
     text-align: left;
   }
 
   .lm-sizes__table td {
-    padding: 0.65rem 1rem;
+    padding: 0.6rem 0.75rem;
     color: var(--text-dark, #2C1810);
     border-bottom: 1px solid var(--border-light, #E8E2D8);
+    white-space: nowrap;
   }
 
   .lm-sizes__table tbody tr:nth-child(even) {
@@ -112,22 +299,31 @@
     border-bottom: none;
   }
 
-  .lm-sizes__tips {
-    margin-top: 3rem;
+  .lm-sizes__table--convert th:first-child,
+  .lm-sizes__table--convert td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
   }
 
-  .lm-sizes__tips-title {
-    font-family: var(--font-heading, 'Cormorant Garamond', serif);
-    font-size: 1.6rem;
-    font-weight: 500;
-    color: var(--text-dark, #2C1810);
-    margin: 0 0 1.5rem;
+  .lm-sizes__table--convert th:first-child {
+    background: var(--espresso, #1E1109);
+  }
+
+  .lm-sizes__table--convert td:first-child {
+    background: var(--warm-white, #FDFAF6);
+    font-weight: 600;
+  }
+
+  .lm-sizes__table--convert tbody tr:nth-child(even) td:first-child {
+    background: var(--cream, #FAF6F0);
   }
 
   .lm-sizes__tip {
     display: flex;
     align-items: flex-start;
     gap: 1rem;
+    max-width: 40rem;
     margin-bottom: 1.1rem;
   }
 
@@ -156,6 +352,66 @@
     margin: 0;
   }
 
+  .lm-sizer {
+    margin: 1.5rem 0 0;
+  }
+
+  .lm-sizer__rule-bar {
+    display: block;
+    width: 50mm;
+    height: 4mm;
+    box-sizing: border-box;
+    border-left: 0.35mm solid var(--espresso, #1E1109);
+    border-right: 0.35mm solid var(--espresso, #1E1109);
+    border-bottom: 0.35mm solid var(--espresso, #1E1109);
+  }
+
+  .lm-sizer__caption {
+    margin: 0.4rem 0 0;
+    max-width: 40rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-sizer__grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6mm 5mm;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lm-sizer__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5mm;
+    break-inside: avoid;
+  }
+
+  .lm-sizer__disk {
+    display: block;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: var(--espresso, #1E1109);
+  }
+
+  .lm-sizer__label {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dark, #2C1810);
+  }
+
+  .lm-sizes__faqs {
+    border-top: 1px solid var(--border-light, #E8E2D8);
+    max-width: 40rem;
+  }
+
   .lm-sizes__footer {
     text-align: center;
     margin-top: 3rem;
@@ -168,10 +424,60 @@
     margin-bottom: 1.25rem;
   }
 
+  .lm-sizes__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .lm-sizes__footer .lm-sizes__actions {
+    justify-content: center;
+  }
+
+  .lm-sizes__shops {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1.25rem;
+    margin: 1.25rem 0 0;
+  }
+
+  .lm-sizes__shops a {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dark, #2C1810);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold, #C9A050);
+  }
+
+  @media (max-width: 900px) {
+    .lm-sizes__swipe { display: block; }
+  }
+
   @media (max-width: 768px) {
     .lm-sizes {
       padding: 2rem 1.25rem 3.5rem;
     }
+  }
+
+  @page { size: letter landscape; margin: 12mm; }
+
+  @media print {
+    .header,
+    .footer,
+    .breadcrumbs,
+    #shopify-chat,
+    .lm-sizes__no-print { display: none !important; }
+    body { padding-top: 0 !important; background: #fff; }
+    .lm-sizes { padding: 0; background: #fff; }
+    .lm-sizes__container { max-width: none; }
+    .lm-sizes__table--convert { font-size: 9px; }
+    .lm-sizes__table--convert th,
+    .lm-sizes__table--convert td { padding: 2px 4px; }
+    .lm-sizer { break-before: page; }
   }
 </style>
 
@@ -191,25 +497,31 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Ring Size Guide"
+      "default": "Ring Size Chart"
     },
     {
       "type": "textarea",
       "id": "intro",
       "label": "Intro",
-      "default": "Find your size with confidence — and if you're between sizes or buying as a surprise, we'll help you get it right."
+      "default": "Match a measurement to a US size, convert a size from another country, or print a sizer and check it with a ruler."
     },
     {
       "type": "text",
       "id": "tips_title",
       "label": "Tips heading",
-      "default": "How to Measure at Home"
+      "default": "How to measure at home"
+    },
+    {
+      "type": "text",
+      "id": "faq_title",
+      "label": "Questions heading",
+      "default": "Questions"
     },
     {
       "type": "text",
       "id": "footer_text",
       "label": "Footer text",
-      "default": "Unsure between two sizes? Complimentary resizing is included on most rings."
+      "default": "Still between two sizes? Ask us before you order."
     },
     {
       "type": "text",
@@ -234,16 +546,31 @@
           "label": "Tip"
         }
       ]
+    },
+    {
+      "type": "qa",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Ring Size Guide",
       "blocks": [
-        { "type": "tip", "settings": { "text": "Wrap a thin strip of paper snugly around the base of your finger and mark where it overlaps. Measure the length in millimeters — that's your circumference." } },
-        { "type": "tip", "settings": { "text": "Measure at the end of the day, when your fingers are at their largest. Avoid measuring when your hands are cold." } },
-        { "type": "tip", "settings": { "text": "If a ring that fits is already in hand, measure its inside diameter and match it to the table above." } },
-        { "type": "tip", "settings": { "text": "Wider bands wear more snugly — for bands over 6mm, consider going up half a size." } }
+        { "type": "tip", "settings": { "text": "Wrap a thin strip of paper snugly around the base of the finger and mark where it overlaps. Measure that length in millimeters. That is your circumference." } },
+        { "type": "tip", "settings": { "text": "Measure at the end of the day, when your fingers are largest. Cold hands measure small." } },
+        { "type": "qa", "settings": { "question": "Can my ring be resized?", "answer": "<p>Most rings include one complimentary resizing. Eternity bands, and some estate pieces, cannot be resized, and we say so before you buy.</p>" } }
       ]
     }
   ]

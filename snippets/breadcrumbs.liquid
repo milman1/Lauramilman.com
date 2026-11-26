@@ -61,6 +61,8 @@
     assign crumb_current = page.title
     if page.handle == 'private-clients'
       assign crumb_current = 'Private viewing'
+    elsif page.handle == 'ring-size-guide'
+      assign crumb_current = 'Ring Size Chart'
     endif
   endif
 -%}
