@@ -2,9 +2,10 @@
 Renders Product and BreadcrumbList JSON-LD for a product detail page.
 
 Offers carry free insured US shipping and the return policy that matches the
-store's refund policy: jewelry 14 days unworn, watches exchange only. Loose
-diamonds get no return policy here, because specially sourced stones can be
-final sale. additionalProperty lists only facts stored in metafields, so
+store's refund policy: jewelry and loose diamonds 14 days unworn, watches
+exchange only. Loose diamonds are in stock (merchant, 2026-11-26) and also
+carry their delivery time: about 1-2 business days door to door. Specially
+sourced stones are final sale, but they are quoted privately and never listed. additionalProperty lists only facts stored in metafields, so
 nothing is parsed or inferred from the title.
 
 @param {product} product - Product represented by the current page.
@@ -66,6 +67,13 @@ nothing is parsed or inferred from the title.
     "@type": "OfferShippingDetails",
     "shippingRate": { "@type": "MonetaryAmount", "value": 0, "currency": {{ schema_currency | json }} },
     "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
+    {%- if schema_is_loose -%},
+    "deliveryTime": {
+      "@type": "ShippingDeliveryTime",
+      "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 0, "unitCode": "DAY" },
+      "transitTime": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 2, "unitCode": "DAY" }
+    }
+    {%- endif %}
   }
 {%- endcapture -%}
 
@@ -76,7 +84,7 @@ nothing is parsed or inferred from the title.
       "applicableCountry": "US",
       "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted"
     }
-  {%- elsif schema_is_loose == false -%}
+  {%- else -%}
     "hasMerchantReturnPolicy": {
       "@type": "MerchantReturnPolicy",
       "applicableCountry": "US",
