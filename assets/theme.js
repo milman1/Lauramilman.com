@@ -797,6 +797,49 @@ function formatMoney(cents) {
   window.setInterval(hidePieceCardIfChatClosed, 400);
 })();
 
+/* === Product page dialogs === */
+(function () {
+  document.addEventListener('click', function (event) {
+    if (!(event.target instanceof Element)) return;
+    var closeButton = event.target.closest('[data-pdp-dialog-close]');
+    if (closeButton) {
+      closeButton.closest('dialog').close();
+      return;
+    }
+
+    var trigger = event.target.closest('[data-pdp-dialog-trigger]');
+    if (!trigger || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var dialog = document.getElementById(trigger.getAttribute('aria-controls'));
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+
+    event.preventDefault();
+    if (dialog.open) return;
+    var frame = dialog.querySelector('[data-pdp-booking-frame]');
+    if (frame) {
+      var title = trigger.textContent.trim();
+      var bookingUrl = new URL(trigger.href);
+      bookingUrl.searchParams.set('embed_domain', window.location.hostname);
+      bookingUrl.searchParams.set('embed_type', 'Inline');
+      dialog.querySelector('[data-pdp-dialog-title]').textContent = title;
+      frame.title = title;
+      frame.src = bookingUrl.href;
+      dialog.addEventListener('close', function () {
+        if (!dialog.open) frame.removeAttribute('src');
+      }, { once: true });
+    }
+    trigger.focus({ preventScroll: true });
+    dialog.showModal();
+  });
+
+  if (window.location.hash === '#PdpAskForm') {
+    var form = document.getElementById('PdpAskForm');
+    var questionDialog = form && form.closest('dialog');
+    if (questionDialog && typeof questionDialog.showModal === 'function' && form.querySelector('[data-offer-result]')) {
+      questionDialog.showModal();
+    }
+  }
+})();
+
 /* === Newsletter Form === */
 (function () {
   document.querySelectorAll('[data-newsletter-form]').forEach(function (form) {

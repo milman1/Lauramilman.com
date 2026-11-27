@@ -11,12 +11,10 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps one chat button (Ask) on every product, and Make an offer for watches and pre-owned jewelry', () => {
-    expect(inquiry).toContain('data-chat-intent="ask"');
-    // "Direct message" opened the same chat as Ask; removed 2026-11-27 (merchant request).
-    expect(inquiry).not.toContain('data-chat-intent="message"');
-    expect(inquiry).toContain('Ask about this piece');
-    expect(inquiry.match(/class="[^"]*js-open-product-chat/g)).toHaveLength(1);
+  it('offers email on every product, and Make an offer for watches and pre-owned jewelry', () => {
+    expect(inquiry).toContain('product_appointments.email_about_piece');
+    expect(inquiry).toContain('mailto:hello@lauramilman.com');
+    expect(inquiry).not.toContain('js-open-product-chat');
     expect(inquiry).toContain("render 'product-is-watch', product: product");
     // Pre-owned, estate and vintage jewelry take offers too (merchant decision 2026-11-11).
     expect(inquiry).toContain("render 'product-is-vintage', product: product");
@@ -29,7 +27,7 @@ describe('product-page inquiry pills', () => {
     const offerStart = inquiry.indexOf('{%- if offer_ok -%}');
     const offerLabel = inquiry.indexOf('Make an offer', offerStart);
     const offerForm = inquiry.indexOf("form 'contact', id: 'PdpOfferForm'");
-    const offerEnd = inquiry.lastIndexOf('{%- endif -%}');
+    const offerEnd = inquiry.indexOf('<dialog');
     expect(offerStart).toBeGreaterThan(-1);
     expect(offerLabel).toBeGreaterThan(offerStart);
     expect(offerForm).toBeGreaterThan(offerLabel);
@@ -89,8 +87,8 @@ describe('product-page inquiry pills', () => {
   it('is rendered on jewelry and diamond product templates', () => {
     expect(mainProduct).toContain("{% render 'product-inquiry', product: product %}");
     expect(diamondProduct).toContain("{% render 'product-inquiry', product: product %}");
-    expect(inquiry).toContain('js-open-product-chat');
-    expect(inquiry).toContain("intent: btn.getAttribute('data-chat-intent') || 'ask'");
+    expect(inquiry).toContain('data-pdp-dialog-trigger');
+    expect(inquiry).toContain('<dialog class="pdp-dialog pdp-dialog--question"');
   });
 
   it('opens Shopify chat with this product named in the panel', () => {
@@ -117,29 +115,25 @@ describe('product-page inquiry pills', () => {
     expect(vintage).toContain("tags_l contains 'designer-jewelry'");
   });
 
-  it('gives loose lab-grown and natural diamonds an Ask about this stone form, never a reserve or an offer', () => {
-    expect(inquiry).toContain("assign ask_form_ok = false");
+  it('labels the email form for loose lab-grown and natural diamonds and includes their stock number', () => {
+    expect(inquiry).toContain("assign is_loose_diamond = false");
     const labBranch = inquiry.indexOf("if type_l == 'lab-grown diamond' or type_l == 'natural diamond'");
     expect(labBranch).toBeGreaterThan(-1);
-    expect(inquiry.slice(labBranch, labBranch + 140)).toContain('assign ask_form_ok = true');
-    expect(inquiry).toContain('Ask about this stone');
+    expect(inquiry.slice(labBranch, labBranch + 185)).toContain('assign is_loose_diamond = true');
+    expect(inquiry).toContain('product_appointments.email_about_stone');
     expect(inquiry).toContain("{%- form 'contact', id: 'PdpAskForm'");
-    expect(inquiry).toContain('name="contact[request_type]" value="Stone question"');
+    expect(inquiry).toContain('name="contact[request_type]" value="{% if is_loose_diamond %}Stone question{% else %}Product question{% endif %}"');
     for (const field of ['contact[product]', 'contact[product_url]', 'contact[stock_number]', 'contact[listed_price]', 'contact[name]', 'contact[email]', 'contact[body]']) {
       expect(inquiry).toContain(`name="${field}"`);
     }
     expect(inquiry).toContain('aria-controls="{{ ask_id }}"');
-    // On a lab stone the chat Ask pill is replaced, the offer stays off, and nothing promises a hold.
-    expect(inquiry).toContain('{%- if ask_form_ok -%}');
+    expect(inquiry).toContain('{%- if is_loose_diamond -%}');
     expect(inquiry).not.toMatch(/reserve/i);
     expect(inquiry).not.toMatch(/\bhold (this|the) stone/i);
     const askFormStart = inquiry.indexOf("form 'contact', id: 'PdpAskForm'");
     const offerFormStart = inquiry.indexOf("form 'contact', id: 'PdpOfferForm'");
     expect(offerFormStart).toBeLessThan(askFormStart);
-    // The offer panel stays inside its own offer_ok guard; the ask panel sits in a separate ask_form_ok guard.
-    const askGuard = inquiry.lastIndexOf('{%- if ask_form_ok -%}', askFormStart);
-    expect(askGuard).toBeGreaterThan(offerFormStart);
-    expect(inquiry.slice(offerFormStart, askGuard)).toContain('{%- endif -%}');
+    expect(inquiry.slice(offerFormStart, inquiry.indexOf('<dialog'))).toContain('{%- endif -%}');
   });
 });
 

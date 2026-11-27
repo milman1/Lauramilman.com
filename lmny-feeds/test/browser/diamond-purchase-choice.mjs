@@ -54,6 +54,7 @@ async function pageFor(options={},width=1440,javascript=true) {
  page.on('pageerror',e=>{throw e;});
  await page.route('**/*',route=>{
   const req=route.request(),url=new URL(req.url());
+  if (url.hostname === 'calendly.com') return route.fulfill({contentType:'text/html',body:'<h1>Calendly booking</h1>'});
   if(req.method()==='POST'){posts.push({path:url.pathname,body:req.postDataJSON()});return route.fulfill({status:options.failCart?422:200,contentType:'application/json',body:options.failCart?'{}':'{"id":123456,"quantity":1}'});}
   if(url.pathname==='/cart.js')return route.fulfill({contentType:'application/json',body:'{"items":[],"item_count":1}'});
   if(url.pathname.startsWith('/assets/'))return route.fulfill({contentType:url.pathname.endsWith('.css')?'text/css':'text/javascript',body:read(url.pathname.slice(1))});
@@ -108,6 +109,36 @@ for(const options of [{available:false},{matches:false}]) {
 {const {page:p,posts}=await pageFor();await p.locator('[data-diamond-choice] input[value="diamond"]').check();await p.locator('[data-buy-now]').click();await p.waitForURL('**/checkout');assert.equal(posts.length,1);assert.equal(posts[0].body.id,123456);await p.close();}
 {const {page:p}=await pageFor({},390,false);assert.equal(await p.locator('[data-diamond-choice]').isVisible(),false);assert.equal(await p.locator('[data-diamond-buy]').isVisible(),true);assert.equal(await p.locator('[data-diamond-build] a').isVisible(),true);await p.close();}
 console.log('PASS unavailable/no-matching-setting fallback, native Buy now checkout, no-JavaScript purchase paths.');
+{
+ const {page:p}=await pageFor({},390);
+ const bookingLinks = p.locator('.product-appointment-links a');
+ const booking = p.locator('.pdp-dialog--booking');
+ const frame = booking.locator('iframe');
+ assert.equal(await frame.getAttribute('src'), null);
+ for (const link of await bookingLinks.all()) {
+  const title = await link.textContent();
+  await link.click();
+  assert.equal(await booking.isVisible(), true);
+  assert.equal(await booking.getByRole('heading').textContent(), title);
+  const bookingUrl = new URL(await frame.getAttribute('src'));
+  assert.equal(bookingUrl.origin + bookingUrl.pathname, await link.getAttribute('href'));
+  assert.equal(bookingUrl.searchParams.get('embed_domain'), 'lmny.test');
+  await frame.contentFrame().getByRole('heading', { name: 'Calendly booking' }).waitFor();
+  assert.equal(p.url(), 'https://lmny.test/products/lg-test');
+  await booking.getByRole('button', { name: 'Close' }).click();
+  assert.equal(await booking.isVisible(), false);
+  assert.equal(await link.evaluate(element => element === document.activeElement), true);
+ }
+ await p.getByRole('link', { name: 'Ask about this stone' }).click();
+ const question = p.getByRole('dialog', { name: 'Ask about this stone' });
+ assert.equal(await question.isVisible(), true);
+ assert.equal(await question.locator('[name="contact[stock_number]"]').getAttribute('value'), 'TEST-DIAMOND');
+ assert.equal(await question.getByLabel('Your question').isVisible(), true);
+ await p.keyboard.press('Escape');
+ assert.equal(await question.isVisible(), false);
+ await p.close();
+}
+console.log('PASS popup booking, focus restoration, and the email-question form.');
 for (const allowed of [true,false]) {
  const {page:p}=await pageFor({tracking:true,allowed});
  assert.equal(await p.evaluate(()=>tracked.length),allowed?1:0);

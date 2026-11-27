@@ -1,26 +1,11 @@
-{%- comment -%}
-  Product-page concierge. "Ask about this piece" opens Shopify chat with
-  this product pinned beside it. (A second "Direct message" button opened
-  the same chat and was removed on 2026-11-27, merchant request.) Make an offer opens a
-  short form that posts through Shopify's contact form, so the offer
-  reaches the store's email with the piece attached. That form is for
-  watches and for pre-owned, estate and vintage jewelry (merchant decision
-  2026-11-11). Loose diamonds and house jewelry do not get it.
-  Loose lab-grown and natural diamonds get "Ask about this stone" instead
-  of the chat "Ask" pill: a short question form through the same contact
-  form, so the stone and the shopper's email reach the store's inbox. It
-  makes no promise to keep the stone for the shopper and does not take
-  offers.
-  Shopify chat is now an AI agent in a cross-origin iframe the theme
-  cannot type into, so offers never depend on it. Hold is intentionally
-  not rendered.
-{%- endcomment -%}
+{% doc %}
+  Renders the product email form and, for watches or vintage pieces, an offer form.
+  @param {product} product - The product the inquiry is about.
+{% enddoc %}
+
 {%- liquid
-  assign product_image = ''
-  if product.featured_image
-    assign product_image = product.featured_image | image_url: width: 240
-  endif
   assign display_title = product.title | replace: 'Jacob & Company', 'Jacob & Co.' | replace: 'Jacob and Company', 'Jacob & Co.'
+  assign escaped_title = display_title | escape
   assign offer_id = 'PdpOffer-' | append: product.id
   assign ask_id = 'PdpAsk-' | append: product.id
   assign type_l = product.type | downcase | strip
@@ -36,38 +21,24 @@
   if is_watch == 'true' or is_vintage == 'true'
     assign offer_ok = true
   endif
-  assign ask_form_ok = false
+  assign is_loose_diamond = false
+  assign ask_label = 'product_appointments.email_about_piece' | t
   if type_l == 'lab-grown diamond' or type_l == 'natural diamond'
-    assign ask_form_ok = true
+    assign is_loose_diamond = true
+    assign ask_label = 'product_appointments.email_about_stone' | t
   endif
 -%}
 
 <div class="pdp-inquire" id="PdpInquire">
   <p class="pdp-inquire__label">Questions about this piece?</p>
   <div class="pdp-inquire__actions">
-    {%- if ask_form_ok -%}
-      <button
-        type="button"
-        class="pdp-inquire__btn js-open-offer"
-        aria-expanded="false"
-        aria-controls="{{ ask_id }}"
-      >
-        Ask about this stone
-      </button>
-    {%- else -%}
-      <button
-        type="button"
-        class="pdp-inquire__btn js-open-product-chat"
-        data-chat-intent="ask"
-        data-product-id="{{ product.id }}"
-        data-product-handle="{{ product.handle }}"
-        data-product-title="{{ display_title | escape }}"
-        data-product-url="{{ shop.url }}{{ product.url }}"
-        data-product-image="{{ product_image | escape }}"
-      >
-        Ask about this piece
-      </button>
-    {%- endif -%}
+    <a
+      href="mailto:hello@lauramilman.com?subject={{ display_title | url_encode | replace: '+', '%20' }}"
+      class="pdp-inquire__btn pdp-inquire__btn--ghost"
+      data-pdp-dialog-trigger
+      aria-haspopup="dialog"
+      aria-controls="{{ ask_id }}"
+    >{{ ask_label }}</a>
     {%- if offer_ok -%}
       <button
         type="button"
@@ -145,8 +116,11 @@
   </div>
   {%- endif -%}
 
-  {%- if ask_form_ok -%}
-  <div class="pdp-offer" id="{{ ask_id }}" hidden>
+  <dialog class="pdp-dialog pdp-dialog--question" id="{{ ask_id }}" aria-labelledby="{{ ask_id }}-title">
+    <div class="pdp-dialog__header">
+      <h2 id="{{ ask_id }}-title">{{ ask_label }}</h2>
+      <button type="button" class="pdp-dialog__close" data-pdp-dialog-close aria-label="{{ 'accessibility.close' | t }}" autofocus>×</button>
+    </div>
     {%- form 'contact', id: 'PdpAskForm', class: 'pdp-offer__form' -%}
       {%- if form.posted_successfully? -%}
         <p class="pdp-offer__status" role="status" data-offer-result>
@@ -158,14 +132,14 @@
             Your question did not send. Please check your email address and try again.
           </p>
         {%- endif -%}
-        <p class="pdp-offer__intro">
-          Ask us anything about <strong>{{ display_title }}</strong>: the certificate, how it looks, setting it in a ring, or whether it is still available. We reply by email.
-        </p>
+        <p class="pdp-offer__intro">{{ 'product_appointments.question_intro_html' | t: product: escaped_title }}</p>
 
-        <input type="hidden" name="contact[request_type]" value="Stone question">
+        <input type="hidden" name="contact[request_type]" value="{% if is_loose_diamond %}Stone question{% else %}Product question{% endif %}">
         <input type="hidden" name="contact[product]" value="{{ display_title | escape }}">
         <input type="hidden" name="contact[product_url]" value="{{ shop.url }}{{ product.url }}">
-        <input type="hidden" name="contact[stock_number]" value="{{ product.metafields.lmny_feed.stock_ref | escape }}">
+        {%- if is_loose_diamond -%}
+          <input type="hidden" name="contact[stock_number]" value="{{ product.metafields.lmny_feed.stock_ref | escape }}">
+        {%- endif -%}
         <input type="hidden" name="contact[listed_price]" value="{{ product.selected_or_first_available_variant.price | money_without_trailing_zeros | strip_html | escape }}">
 
         <div class="pdp-offer__row">
@@ -189,8 +163,7 @@
         <button type="submit" class="pdp-inquire__btn pdp-offer__submit">Send question</button>
       {%- endif -%}
     {%- endform -%}
-  </div>
-  {%- endif -%}
+  </dialog>
 </div>
 
 <style>
@@ -317,32 +290,6 @@
 
 <script>
   (function () {
-    function payloadFrom(btn) {
-      return {
-        productTitle: btn.getAttribute('data-product-title') || '',
-        productUrl: btn.getAttribute('data-product-url') || window.location.href,
-        productId: btn.getAttribute('data-product-id') || '',
-        productHandle: btn.getAttribute('data-product-handle') || '',
-        productImage: btn.getAttribute('data-product-image') || '',
-        intent: btn.getAttribute('data-chat-intent') || 'ask'
-      };
-    }
-    function openChat(btn) {
-      var payload = payloadFrom(btn);
-      function go() {
-        if (window.lmChat && typeof window.lmChat.open === 'function') {
-          window.lmChat.open(payload);
-          return true;
-        }
-        return false;
-      }
-      if (go()) return;
-      var tries = 0;
-      var wait = setInterval(function () {
-        tries += 1;
-        if (go() || tries >= 40) clearInterval(wait);
-      }, 100);
-    }
     function setOfferOpen(toggle, panel, open) {
       panel.hidden = !open;
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -350,7 +297,7 @@
     document.querySelectorAll('.js-open-offer').forEach(function (toggle) {
       var panel = document.getElementById(toggle.getAttribute('aria-controls'));
       if (!panel) return;
-      if (panel.querySelector('[data-offer-result]')) {
+      if (window.location.hash !== '#PdpAskForm' && panel.querySelector('[data-offer-result]')) {
         setOfferOpen(toggle, panel, true);
         panel.scrollIntoView({ block: 'center' });
       }
@@ -375,13 +322,6 @@
           } catch (err) {}
         });
       }
-    });
-    document.querySelectorAll('.js-open-product-chat').forEach(function (btn) {
-      btn.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        openChat(btn);
-      });
     });
   })();
 </script>

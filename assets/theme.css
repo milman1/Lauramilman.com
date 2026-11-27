@@ -2809,3 +2809,83 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Product page dialogs */
+html:has(.pdp-dialog[open]) {
+  overflow: hidden;
+}
+
+.pdp-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(calc(100% - 1.5rem), 32rem);
+  max-height: calc(100dvh - 1.5rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--rule-light, #DDD5C5);
+  border-radius: 4px;
+  background: var(--cream, #FAF6F0);
+  color: var(--espresso, #1E1109);
+  overflow: auto;
+}
+
+.pdp-dialog::backdrop {
+  background: rgba(30, 17, 9, 0.55);
+}
+
+.pdp-dialog__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid var(--rule-light, #DDD5C5);
+  background: inherit;
+  z-index: 1;
+}
+
+.pdp-dialog__header h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  line-height: 1.2;
+}
+
+.pdp-dialog__close {
+  flex: 0 0 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.pdp-dialog__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.pdp-dialog--question .pdp-offer__form {
+  padding: 1rem;
+}
+
+.pdp-dialog--booking {
+  width: min(calc(100% - 1.5rem), 64rem);
+  height: min(calc(100dvh - 1.5rem), 49rem);
+}
+
+.pdp-dialog--booking[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.pdp-dialog__booking-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
