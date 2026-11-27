@@ -47,11 +47,7 @@
     });
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
-    const settingCount = shape => {
-      const names = String(shape || '').split(',').map(value => value.trim().toLowerCase());
-      return [...knownSettings.values()].filter(setting => setting.available && names.includes(setting.shape.toLowerCase())).length
-        + supplierDesigns.filter(design => names.includes(design.shape.toLowerCase())).length;
-    };
+    const settingCount = shape => supplierDesigns.filter(design => String(shape || '').split(',').some(s => s.trim().toLowerCase() === design.shape.toLowerCase())).length;
     const settingShape = shape => {
       const listed = String(shape || '').split(',').map(s => s.trim()).filter(Boolean);
       const own = shapes.find(s => listed.some(l => l.toLowerCase() === s.toLowerCase()) && settingCount(s));
@@ -170,7 +166,7 @@
       status.classList.toggle('error', error);
       status.setAttribute('role', error ? 'alert' : 'status');
     }
-    const urlFilters = ['origin', 'shape', 'style', 'metal', 'color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price', 'sort'];
+    const urlFilters = ['design', 'origin', 'shape', 'style', 'metal', 'color', 'clarity', 'cut', 'min_carat', 'max_carat', 'min_price', 'max_price', 'sort'];
     function persist() {
       const stored = { bands: state.bandSelections.map(b => ({ handle: b.product?.handle, options: b.options })), bandSlot: state.bandSlot, entry: state.entry, setting: state.setting?.handle, diamond: state.diamond?.handle, size: state.size, options: state.options, engraving: state.engraving, font: state.font, date: state.date, screen: state.screen, filters: state.filters, group: state.group, editGroup: state.editGroup };
       try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: Date.now() })); if (ready && both() && !state.savedEvent) { state.savedEvent = true; track('build_saved'); } } catch (_) {}
@@ -297,7 +293,7 @@
       const serverStart = main.dataset.initialStart === 'true' && main.querySelector('[data-action="start-diamond"]');
       main.dataset.initialStart = 'false';
       if (!serverStart) main.innerHTML = `<h2>${esc(t('where'))}</h2><div class="paths">${['diamond', 'setting'].map(k => {
-        const p = k === 'setting' ? cfg.settings[0] : null;
+        const p = k === 'setting' ? supplierDesigns[0] : null;
         const src = p?.image || root.dataset.diamondImage || '';
         return `<button type="button" class="path" data-action="start-${k}">${image(src, t(k), '', true)}<div><h2>${esc(t('start_' + k))}</h2><p class="quiet">${esc(t(k + '_intro'))}</p><span class="eyebrow">${esc(t('choose_' + k))} →</span></div></button>`;
       }).join('')}</div>`;
@@ -308,7 +304,7 @@
     function filters() {
       const lock = state.kind === 'diamond' ? state.setting : state.diamond;
       const shape = lock?.shape || state.filters.shape;
-      const shapeOptions = shapes.filter(s => settingCount(s) || s === shape).map(s => [s, s]);
+      const shapeOptions = shapes.filter(s => supplierDesigns.some(design => design.shape === s) || s === shape).map(s => [s, s]);
       if (!lock) shapeOptions.unshift(['', t('all_shapes')]);
       const metals = [...new Set(supplierDesigns.filter(design => (!shape || design.shape === shape) && (!state.filters.style || design.style === state.filters.style)).map(design => metalOf(design.metal)))];
       const metalField = metals.length > 1 ? selectField('metal', 'metal', [['', t('all_metals')], ...metals.map(m => [m, metalName(m)])], state.filters.metal) : '';
@@ -449,6 +445,7 @@
     const supplierDesigns = [
       {
         "title": "Oval Hidden Halo",
+        "reference": "oval-hidden-halo-3",
         "style": "hidden-halo",
         "video": "https://im.lgdus.co/Jwl/RG8540/RG8540.mp4",
         "price": 248596,
@@ -459,6 +456,7 @@
       },
       {
         "title": "Oval Three-Stone",
+        "reference": "oval-three-stone-3",
         "style": "three-stone",
         "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
         "price": 286790,
@@ -470,6 +468,7 @@
       },
       {
         "title": "Oval Solitaire",
+        "reference": "oval-solitaire-2",
         "style": "solitaire",
         "video": "https://im.lgdus.co/Jwl/RG7834/RG7834.mp4",
         "price": 199398,
@@ -484,7 +483,8 @@
         "shape": "Marquise",
         "center": 2.05,
         "metal": "14K Yellow Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6142_20_1.png?v=1790487325"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6142_20_1.png?v=1790487325",
+        "reference": "2-05-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq200pin"
       },
       {
         "title": "Marquise Solitaire",
@@ -492,7 +492,8 @@
         "shape": "Marquise",
         "center": 2.6,
         "metal": "14K Two-Tone Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6091_20_1.png?v=1790487327"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6091_20_1.png?v=1790487327",
+        "reference": "2-6-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-two-tone-rg14ttsomq250pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -500,7 +501,8 @@
         "shape": "Marquise",
         "center": 1.59,
         "metal": "14K Yellow Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7692_20_1.png?v=1790487329"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7692_20_1.png?v=1790487329",
+        "reference": "1-59-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq150pns"
       },
       {
         "title": "Oval Solitaire",
@@ -508,7 +510,8 @@
         "shape": "Oval",
         "center": 1.52,
         "metal": "14K Yellow Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7666_20_1.png?v=1790487331"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7666_20_1.png?v=1790487331",
+        "reference": "1-52-ct-oval-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoov150pns"
       },
       {
         "title": "Emerald Solitaire",
@@ -516,7 +519,8 @@
         "shape": "Emerald",
         "center": 1.41,
         "metal": "14K Yellow Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8674_20_1.png?v=1790487336"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8674_20_1.png?v=1790487336",
+        "reference": "1-41-ct-emerald-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoem125pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -524,7 +528,8 @@
         "shape": "Marquise",
         "center": 2.04,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8972_20_1.png?v=1790487338"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8972_20_1.png?v=1790487338",
+        "reference": "2-04-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq200pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -532,7 +537,8 @@
         "shape": "Marquise",
         "center": 2.53,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8974_20_1.png?v=1790487340"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8974_20_1.png?v=1790487340",
+        "reference": "2-53-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq250pns"
       },
       {
         "title": "Round Solitaire",
@@ -541,7 +547,8 @@
         "shape": "Round",
         "center": 1.25,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5465_20_1.png?v=1790662356"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5465_20_1.png?v=1790662356",
+        "reference": "lab-grown-round-diamond-solitaire-ring-1-25-ct-14k-white-gold"
       },
       {
         "title": "Emerald East-West",
@@ -550,7 +557,8 @@
         "shape": "Emerald",
         "center": 0.8,
         "metal": "14K Yellow Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6231_20_1.png?v=1790662357"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6231_20_1.png?v=1790662357",
+        "reference": "lab-grown-emerald-diamond-east-west-ring-0-80-ct-14k-yellow-gold"
       },
       {
         "title": "Antique Marquise Solitaire",
@@ -559,7 +567,8 @@
         "shape": "Marquise",
         "center": 1.02,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8942_20_1.png?v=1790662359"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8942_20_1.png?v=1790662359",
+        "reference": "lab-grown-antique-marquise-diamond-solitaire-ring-1-02-ct-14k-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -568,7 +577,8 @@
         "shape": "Step Marquise",
         "center": 1.02,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8987_20_1.png?v=1791208774"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8987_20_1.png?v=1791208774",
+        "reference": "step-marquise-lab-grown-diamond-ring-1-02-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -577,7 +587,8 @@
         "shape": "Step Marquise",
         "center": 1.64,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8988_20_1.png?v=1791209129"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8988_20_1.png?v=1791209129",
+        "reference": "step-marquise-lab-grown-diamond-ring-1-64-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -586,7 +597,8 @@
         "shape": "Step Marquise",
         "center": 2.51,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8992_20_1.png?v=1791209147"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8992_20_1.png?v=1791209147",
+        "reference": "step-marquise-lab-grown-diamond-ring-2-51-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -595,7 +607,8 @@
         "shape": "Step Marquise",
         "center": 2.16,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8935_20_1.png?v=1791209159"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8935_20_1.png?v=1791209159",
+        "reference": "step-marquise-lab-grown-diamond-ring-2-16-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -604,14 +617,15 @@
         "shape": "Step Marquise",
         "center": 3.58,
         "metal": "14K White Gold",
-        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8997_20_1.png?v=1791209726"
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8997_20_1.png?v=1791209726",
+        "reference": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold"
       }
     ];
 
     function supplierDesignCards(diamond) {
       const weight = Number(diamond?.spec?.carat || diamond?.carat || /^\s*(\d+(?:\.\d+)?)\s*ct\b/i.exec(diamond?.title || '')?.[1]);
       const bucket = Math.round(weight);
-      const matches = supplierDesigns.filter(design => (diamond ? design.shape === diamond.shape && Math.round(design.center) === bucket : (!state.filters.shape || design.shape === state.filters.shape)) && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
+      const matches = supplierDesigns.filter(design => (diamond ? design.shape === diamond.shape && Math.round(design.center) === bucket : (!state.filters.shape || design.shape === state.filters.shape)) && (!state.filters.design || design.reference === state.filters.design) && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
       const label = "Made-to-order ring designs";
       if (!matches.length) return '';
       return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">${diamond ? `Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.` : `Choose a design to see matching diamonds.`}</p><div class="products">${matches.map(design => {
@@ -622,7 +636,7 @@
           quote.searchParams.set('quote_diamond', [diamond.title || stoneTitle(diamond), diamond.handle].filter(Boolean).join(' · '));
         } else {
           const center = Math.round(design.center);
-          for (const [key, value] of Object.entries({ start: 'diamond', shape: design.shape, style: design.style, min_carat: center - 0.5, max_carat: center + 0.49 })) quote.searchParams.set(key, value);
+          for (const [key, value] of Object.entries({ start: 'diamond', shape: design.shape, style: design.style, design: design.reference, min_carat: center - 0.5, max_carat: center + 0.49 })) quote.searchParams.set(key, value);
         }
         const video = safeURL(design.video);
         const watch = video ? `<p><a class="link" href="${esc(video)}" target="_blank" rel="noopener">Watch design video</a></p>` : '';
@@ -635,16 +649,9 @@
       }).join('')}</div></section>`;
     }
     function settingResults() {
-      const shape = state.diamond?.shape || state.filters.shape;
-      state.rows = [...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style) && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
-      main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
-      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
-      const designs = supplierDesignCards(state.diamond);
-      if (designs) {
-        main.querySelector('[data-results]').insertAdjacentHTML('afterbegin', designs);
-        if (!state.rows.length) main.querySelector('[data-count]').textContent = '';
-      }
-      returnToCard();
+      state.rows = [];
+      main.querySelector('[data-count]').textContent = '';
+      main.querySelector('[data-results]').innerHTML = supplierDesignCards(state.diamond) || empty(true);
     }
     function returnToCard() {
       if (state.returnIndex == null) return;
@@ -1344,7 +1351,7 @@
         } catch (_) {}
       }
       let failed = hasSharedBuild && !shared;
-      if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
+      if (settingHandle && state.editGroup) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
       if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
       if (shared && both() && state.setting.shape !== state.diamond.shape) { state.diamond = null; failed = true; }
       const savedBands = Array.isArray(stored.bands) ? stored.bands.slice(0, 2) : stored.band ? [{ handle: stored.band, options: stored.bandOptions }] : [];
