@@ -491,3 +491,23 @@ export function coloredLabRetailFromCost(costUsd: number): number {
   return Math.round(costUsd * labRetailMultipleFromCost(costUsd));
 }
 
+
+/** Supplier reference pricing for made-to-order ring designs in the builder. */
+export const BUILDER_RING_DESIGNS = {
+  skylab: { retailMultipleOfWholesale: 2 },
+  alyce: { estimatedCostShareOfRegularRetail: 0.5, priceShareOfRegularRetail: 0.8 },
+} as const;
+
+export function builderRingDesignPricing(source: keyof typeof BUILDER_RING_DESIGNS, listedCents: number) {
+  if (!Number.isSafeInteger(listedCents) || listedCents <= 0) return null;
+  if (source === 'skylab') {
+    const retailCents = listedCents * BUILDER_RING_DESIGNS.skylab.retailMultipleOfWholesale;
+    return Number.isSafeInteger(retailCents) ? { retailCents, costCents: listedCents, estimatedCost: false } : null;
+  }
+  const { estimatedCostShareOfRegularRetail, priceShareOfRegularRetail } = BUILDER_RING_DESIGNS.alyce;
+  return {
+    retailCents: Math.round(listedCents * priceShareOfRegularRetail),
+    costCents: Math.round(listedCents * estimatedCostShareOfRegularRetail),
+    estimatedCost: true,
+  };
+}
