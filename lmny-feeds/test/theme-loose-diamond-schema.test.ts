@@ -28,10 +28,10 @@ async function offerFor(type: string): Promise<Offer> {
 }
 
 describe('loose diamond structured data matches the pages and refund policy', () => {
-  it.each(['Lab-Grown Diamond', 'Natural Diamond'])('%s: 14-day returns and 1-2 day delivery', async (type) => {
+  it.each(['Lab-Grown Diamond', 'Natural Diamond'])('%s: 30-day returns and 1-2 day delivery', async (type) => {
     const offer = await offerFor(type);
     expect(offer.hasMerchantReturnPolicy?.returnPolicyCategory).toBe('https://schema.org/MerchantReturnFiniteReturnWindow');
-    expect(offer.hasMerchantReturnPolicy?.merchantReturnDays).toBe(14);
+    expect(offer.hasMerchantReturnPolicy?.merchantReturnDays).toBe(30);
     const t = offer.shippingDetails.deliveryTime!;
     expect([t.handlingTime.minValue, t.handlingTime.maxValue, t.transitTime.minValue, t.transitTime.maxValue]).toEqual([0, 0, 1, 2]);
   });
@@ -43,7 +43,7 @@ describe('loose diamond structured data matches the pages and refund policy', ()
   });
 
   it('agrees with the copy shoppers read', () => {
-    expect(themeFile('sections/main-product-diamond.liquid')).toContain('<li>14-day returns</li>');
-    expect(themeFile('templates/page.shipping-returns.json')).toContain('Loose diamonds follow the same 14-day window');
+    expect(themeFile('sections/main-product-diamond.liquid')).toContain('<li>30-day returns</li>');
+    expect(themeFile('templates/page.shipping-returns.json')).toContain('within <strong>30 days of delivery</strong>');
   });
 });

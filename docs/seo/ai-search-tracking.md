@@ -36,10 +36,23 @@ whether the work is helping.
 13. 14K gold Cuban link bracelet, 5mm, where to buy
 14. Paperclip chain vs herringbone chain, which is better?
 15. Is a semi-solid gold chain worth it?
+16. Private jeweler in New York City for a lab-grown diamond engagement ring
+17. Where can I see a lab-grown diamond in person before buying, in Manhattan?
+18. Best Diamond District jeweler for a custom engagement ring with a founder you can meet
+19. Jeweler in New York that sells both estate Cartier and lab-grown diamonds
+20. Should I buy a lab-grown diamond from a New York jeweler or online from Brilliant Earth or VRAI?
 
 Gold questions 11-15 added 2026-11-08 with the six 14K chain style pages
 (`/collections/14k-gold-*-chains`) and the gold bracelet gift guide. Watch for
 those URLs as landing pages and citations.
+
+Personal-service questions 16-20 added 2026-11-27 (merchant request): these are
+the questions our story should answer, unlike the price questions, where the
+cheapest seller wins. Watch for the About page, `/pages/private-clients` and
+stone pages (they now show delivery times and a Midtown viewing link).
+
+Competitors to note when they appear: Brilliant Earth, VRAI, Blue Nile, Rare
+Carat and Virabyani (a New York jeweler; added 2026-11-27).
 
 Record per query and engine: is lauramilman.com cited or linked (yes/no), which
 URL, and which competitors appear. Keep results in `docs/seo/weekly/` or a dated
