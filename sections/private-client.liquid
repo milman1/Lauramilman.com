@@ -77,7 +77,13 @@
           </p>
         {%- endif -%}
 
-        <input type="hidden" name="contact[request_type]" value="Private viewing">
+        <input type="hidden" name="contact[request_type]" id="ConsultRequestType" value="Private viewing">
+        <input type="hidden" name="contact[setting]" id="ConsultQuoteDesign" disabled>
+        <input type="hidden" name="contact[diamond]" id="ConsultQuoteDiamond" disabled>
+        <div id="ConsultQuoteSizeField" class="lm-consult__field" hidden>
+          <label for="ConsultQuoteSize">Ring size (US)</label>
+          <input id="ConsultQuoteSize" name="contact[ring_size]" placeholder="For example, 6.5 or Not sure" maxlength="30" disabled>
+        </div>
         <input type="hidden" name="contact[ring_build]" id="ConsultRingBuild" disabled>
         <p id="ConsultBuildNotice" hidden>{{ 'conversion.build_attached' | t }}</p>
 
@@ -398,6 +404,22 @@
       if (interest === 'jewelry' || interest === 'fine-jewelry') interestSelect.value = 'Fine jewelry';
       if (interest === 'diamond') interestSelect.value = 'Diamond or gemstone sourcing';
     }
+    var quoteDesign = (params.get('quote_design') || '').trim().slice(0, 120);
+    var quoteDiamond = (params.get('quote_diamond') || '').trim().slice(0, 180);
+    if (interest === 'ring' && quoteDesign && quoteDiamond && message) {
+      document.getElementById('ConsultRequestType').value = 'Made-to-order ring quote';
+      [['ConsultQuoteDesign', quoteDesign], ['ConsultQuoteDiamond', quoteDiamond]].forEach(function (entry) {
+        var field = document.getElementById(entry[0]);
+        field.value = entry[1];
+        field.disabled = false;
+      });
+      document.getElementById('ConsultQuoteSizeField').hidden = false;
+      var quoteSize = document.getElementById('ConsultQuoteSize');
+      quoteSize.disabled = false;
+      quoteSize.required = true;
+      if (!message.value) message.value = 'I’d like a quote for ' + quoteDesign + ' with ' + quoteDiamond + '.';
+    }
+
     if (message && piece && !message.value) {
       message.value = 'I would like a private viewing of: ' + piece;
     }
