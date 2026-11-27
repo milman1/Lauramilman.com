@@ -47,7 +47,11 @@
     });
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
-    const settingCount = shape => supplierDesigns.filter(design => String(shape || '').split(',').some(s => s.trim().toLowerCase() === design.shape.toLowerCase())).length;
+    const settingCount = shape => {
+      const names = String(shape || '').split(',').map(value => value.trim().toLowerCase());
+      return [...knownSettings.values()].filter(setting => setting.available && names.includes(setting.shape.toLowerCase())).length
+        + supplierDesigns.filter(design => names.includes(design.shape.toLowerCase())).length;
+    };
     const settingShape = shape => {
       const listed = String(shape || '').split(',').map(s => s.trim()).filter(Boolean);
       const own = shapes.find(s => listed.some(l => l.toLowerCase() === s.toLowerCase()) && settingCount(s));
@@ -293,7 +297,7 @@
       const serverStart = main.dataset.initialStart === 'true' && main.querySelector('[data-action="start-diamond"]');
       main.dataset.initialStart = 'false';
       if (!serverStart) main.innerHTML = `<h2>${esc(t('where'))}</h2><div class="paths">${['diamond', 'setting'].map(k => {
-        const p = k === 'setting' ? supplierDesigns[0] : null;
+        const p = k === 'setting' ? cfg.settings[0] : null;
         const src = p?.image || root.dataset.diamondImage || '';
         return `<button type="button" class="path" data-action="start-${k}">${image(src, t(k), '', true)}<div><h2>${esc(t('start_' + k))}</h2><p class="quiet">${esc(t(k + '_intro'))}</p><span class="eyebrow">${esc(t('choose_' + k))} →</span></div></button>`;
       }).join('')}</div>`;
@@ -304,8 +308,8 @@
     function filters() {
       const lock = state.kind === 'diamond' ? state.setting : state.diamond;
       const shape = lock?.shape || state.filters.shape;
-      const shapeOptions = shapes.filter(s => supplierDesigns.some(design => design.shape === s) || s === shape).map(s => [s, s]);
-      if (state.filters.style && !lock) shapeOptions.unshift(['', t('all_shapes')]);
+      const shapeOptions = shapes.filter(s => settingCount(s) || s === shape).map(s => [s, s]);
+      if (!lock) shapeOptions.unshift(['', t('all_shapes')]);
       const metals = [...new Set(supplierDesigns.filter(design => (!shape || design.shape === shape) && (!state.filters.style || design.style === state.filters.style)).map(design => metalOf(design.metal)))];
       const metalField = metals.length > 1 ? selectField('metal', 'metal', [['', t('all_metals')], ...metals.map(m => [m, metalName(m)])], state.filters.metal) : '';
       if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${metalField}</div>${state.filters.style ? `<p class="quiet">${esc(t('style_filter', { style: state.filters.style }))}</p>` : ''}${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
@@ -473,20 +477,148 @@
         "center": 2,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7834_20_1.png?v=1791392616"
+      },
+      {
+        "title": "Marquise Solitaire",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 2.05,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6142_20_1.png?v=1790487325"
+      },
+      {
+        "title": "Marquise Solitaire",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 2.6,
+        "metal": "14K Two-Tone Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6091_20_1.png?v=1790487327"
+      },
+      {
+        "title": "Marquise Solitaire",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 1.59,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7692_20_1.png?v=1790487329"
+      },
+      {
+        "title": "Oval Solitaire",
+        "style": "solitaire",
+        "shape": "Oval",
+        "center": 1.52,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7666_20_1.png?v=1790487331"
+      },
+      {
+        "title": "Emerald Solitaire",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 1.41,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8674_20_1.png?v=1790487336"
+      },
+      {
+        "title": "Marquise Solitaire",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 2.04,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8972_20_1.png?v=1790487338"
+      },
+      {
+        "title": "Marquise Solitaire",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 2.53,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8974_20_1.png?v=1790487340"
+      },
+      {
+        "title": "Round Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/51018d7bb5884b7d9a338247501cd89d/51018d7bb5884b7d9a338247501cd89d.SD-480p-1.5Mbps-95854380.mp4",
+        "shape": "Round",
+        "center": 1.25,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5465_20_1.png?v=1790662356"
+      },
+      {
+        "title": "Emerald East-West",
+        "style": "east-west",
+        "video": "https://cdn.shopify.com/videos/c/vp/f9881f0c62554409bdfc560ad31db295/f9881f0c62554409bdfc560ad31db295.SD-480p-1.5Mbps-95854398.mp4",
+        "shape": "Emerald",
+        "center": 0.8,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6231_20_1.png?v=1790662357"
+      },
+      {
+        "title": "Antique Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/685f7eae7f7b41b2a60914ebb771730a/685f7eae7f7b41b2a60914ebb771730a.SD-480p-1.5Mbps-95854413.mp4",
+        "shape": "Marquise",
+        "center": 1.02,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8942_20_1.png?v=1790662359"
+      },
+      {
+        "title": "Step Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/175c277bc5434eb2b692a1a67b40dc6c/175c277bc5434eb2b692a1a67b40dc6c.SD-480p-1.5Mbps-96457194.mp4",
+        "shape": "Step Marquise",
+        "center": 1.02,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8987_20_1.png?v=1791208774"
+      },
+      {
+        "title": "Step Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/50011479b2534131829465418d659517/50011479b2534131829465418d659517.SD-480p-1.5Mbps-96457797.mp4",
+        "shape": "Step Marquise",
+        "center": 1.64,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8988_20_1.png?v=1791209129"
+      },
+      {
+        "title": "Step Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/580bdce81a124dc0b85fb83943c09015/580bdce81a124dc0b85fb83943c09015.SD-480p-1.5Mbps-96457872.mp4",
+        "shape": "Step Marquise",
+        "center": 2.51,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8992_20_1.png?v=1791209147"
+      },
+      {
+        "title": "Step Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/b11dfccd1c884ca085439e630a33bcf3/b11dfccd1c884ca085439e630a33bcf3.SD-480p-1.5Mbps-96457798.mp4",
+        "shape": "Step Marquise",
+        "center": 2.16,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8935_20_1.png?v=1791209159"
+      },
+      {
+        "title": "Step Marquise Solitaire",
+        "style": "solitaire",
+        "video": "https://cdn.shopify.com/videos/c/vp/ba76439e199d4a3b91990e5130d46c66/ba76439e199d4a3b91990e5130d46c66.SD-480p-1.5Mbps-96458410.mp4",
+        "shape": "Step Marquise",
+        "center": 3.58,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8997_20_1.png?v=1791209726"
       }
     ];
 
     function supplierDesignCards(diamond) {
       const weight = Number(diamond?.spec?.carat || diamond?.carat || /^\s*(\d+(?:\.\d+)?)\s*ct\b/i.exec(diamond?.title || '')?.[1]);
       const bucket = Math.round(weight);
-      const matches = supplierDesigns.filter(design => (!diamond || (design.shape === diamond.shape && Math.round(design.center) === bucket)) && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
+      const matches = supplierDesigns.filter(design => (diamond ? design.shape === diamond.shape && Math.round(design.center) === bucket : (!state.filters.shape || design.shape === state.filters.shape)) && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
       const label = "Made-to-order ring designs";
       if (!matches.length) return '';
       return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">${diamond ? `Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.` : `Choose a design to see matching diamonds.`}</p><div class="products">${matches.map(design => {
         const quote = new URL(diamond ? cfg.appointment : route('pages/ring-builder'), window.location.origin);
         if (diamond) {
           quote.searchParams.set('interest', 'ring');
-          quote.searchParams.set('quote_design', design.title + ' · ' + design.metal);
+          quote.searchParams.set('quote_design', design.title + ' · ' + design.metal + ' · ' + design.center.toFixed(2) + ' ct reference');
           quote.searchParams.set('quote_diamond', [diamond.title || stoneTitle(diamond), diamond.handle].filter(Boolean).join(' · '));
         } else {
           const center = Math.round(design.center);
@@ -496,16 +628,23 @@
         const watch = video ? `<p><a class="link" href="${esc(video)}" target="_blank" rel="noopener">Watch design video</a></p>` : '';
         const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
         const diamondPrice = Number(diamond?.price);
-        const separateTotal = cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
+        const separateTotal = Number.isFinite(design.price) && cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
           ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond ? "Request a quote" : "Choose a matching diamond"}</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${Number.isFinite(design.price) ? `${esc(money(design.price, 'USD'))} estimated setting` : 'Setting priced by quote'}</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond ? "Request a quote" : "Choose a matching diamond"}</a></article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
-      state.rows = [];
-      main.querySelector('[data-count]').textContent = '';
-      main.querySelector('[data-results]').innerHTML = supplierDesignCards(state.diamond) || empty(true);
+      const shape = state.diamond?.shape || state.filters.shape;
+      state.rows = [...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style) && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
+      main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
+      main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
+      const designs = supplierDesignCards(state.diamond);
+      if (designs) {
+        main.querySelector('[data-results]').insertAdjacentHTML('afterbegin', designs);
+        if (!state.rows.length) main.querySelector('[data-count]').textContent = '';
+      }
+      returnToCard();
     }
     function returnToCard() {
       if (state.returnIndex == null) return;
@@ -1007,7 +1146,7 @@
         const starting = state.screen === 'start' && action.startsWith('start-');
         state.kind = action.split('-')[1]; state.page = 1; state.returnIndex = null;
         if (starting) state.entry = state.kind;
-        if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : settingShape(state.filters.shape);
+        if (state.kind === 'setting') state.filters.shape = state.diamond ? state.diamond.shape : '';
         if (state.kind === 'diamond' && state.setting) state.filters.shape = state.setting.shape;
         go('catalog');
         if (starting) track('builder_path_selected', { product_kind: state.kind });
@@ -1177,7 +1316,7 @@
         root.dataset.diamondImage = main.querySelector('[data-action="start-diamond"] img')?.src || '';
         if (begin === 'diamond' || begin === 'setting') {
           state.kind = begin; state.entry = begin; state.page = 1;
-          if (begin === 'setting') state.filters.shape = params.get('style') && !params.get('shape') ? '' : settingShape(state.filters.shape);
+          if (begin === 'setting' && !requestedShape) state.filters.shape = '';
           go('catalog');
         }
         ready = true;
@@ -1205,7 +1344,7 @@
         } catch (_) {}
       }
       let failed = hasSharedBuild && !shared;
-      if (settingHandle && state.editGroup) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
+      if (settingHandle) { try { const p = await product(settingHandle); if (editLine) state.options = p.variants.find(v => Number(v.id) === Number(editLine.variant_id || editLine.id))?.options?.slice() || []; setSetting(p, sameSelection || !!editLine); if (shared && (state.size !== shared.size || JSON.stringify(state.options) !== JSON.stringify(shared.options))) failed = true; } catch (_) { failed = true; state.setting = null; } }
       if (diamondHandle) { try { state.diamond = await diamond(diamondHandle); } catch (_) { failed = true; state.diamond = null; } }
       if (shared && both() && state.setting.shape !== state.diamond.shape) { state.diamond = null; failed = true; }
       const savedBands = Array.isArray(stored.bands) ? stored.bands.slice(0, 2) : stored.band ? [{ handle: stored.band, options: stored.bandOptions }] : [];
