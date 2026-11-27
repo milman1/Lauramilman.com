@@ -662,7 +662,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8453_20_1.png?v=1795803941",
         "video": "https://im.lgdus.co/Jwl/RG8453/RG8453.mp4",
-        "price": 166040
+        "price": 166040,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-1-73-ct-14k-white-gold-rg8453"
       },
       {
         "title": "Radiant Hidden Halo",
@@ -673,7 +674,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1522_20_1.png?v=1795803998",
         "video": "https://lgdus.co/RG1522/RG1522.mp4",
-        "price": 180284
+        "price": 180284,
+        "finishedHandle": "radiant-lab-grown-diamond-hidden-halo-ring-1-01-ct-14k-white-gold-rg1522"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -684,7 +686,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWEMSS_20_1_b0a8438b-88e5-4ced-9ade-c683446e1886.png?v=1795804000",
         "video": "https://im.lgdus.co/Jwl/RGWEMSS/RGWEMSS.mp4",
-        "price": 211470
+        "price": 211470,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-1-64-ct-14k-white-gold-rg1657"
       },
       {
         "title": "Emerald Split Shank",
@@ -695,7 +698,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1.jpg?v=1795803983",
         "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
-        "price": 191354
+        "price": 191354,
+        "finishedHandle": "emerald-lab-grown-diamond-split-shank-ring-1-ct-14k-white-gold-rg1556"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -706,7 +710,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8435_20_1.png?v=1795803999",
         "video": "https://im.lgdus.co/Jwl/RG8435/RG8435.mp4",
-        "price": 257480
+        "price": 257480,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-4-09-ct-14k-white-gold-rg8435"
       },
       {
         "title": "Round Three-Stone",
@@ -717,7 +722,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTHM_20_1.png?v=1795803943",
         "video": "https://im.lgdus.co/Jwl/RGBRPLTHM/RGBRPLTHM.mp4",
-        "price": 249400
+        "price": 249400,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-1-55-ct-platinum-rg1387"
       },
       {
         "title": "Marquise Split Shank",
@@ -728,7 +734,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGYSSMQ_1.jpg?v=1795804000",
         "video": "https://lgdus.co/RGYSSMQ/RGYSSMQ.mp4",
-        "price": 580020
+        "price": 580020,
+        "finishedHandle": "marquise-lab-grown-diamond-split-shank-ring-3-15-ct-14k-yellow-gold-rg1243"
       },
       {
         "title": "Emerald Split Shank",
@@ -739,7 +746,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_3f3522fd-0a25-4621-bbfe-f8c315dd2516.jpg?v=1795804001",
         "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
-        "price": 235272
+        "price": 235272,
+        "finishedHandle": "emerald-lab-grown-diamond-split-shank-ring-1-51-ct-14k-white-gold-rg874"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -750,7 +758,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3405_20_1.png?v=1795804003",
         "video": "https://im.lgdus.co/Jwl/RG3405/RG3405.mp4",
-        "price": 258700
+        "price": 258700,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-2-11-ct-14k-white-gold-rg3405"
       },
       {
         "title": "Oval Three-Stone",
@@ -761,7 +770,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_1c5481aa-e783-4387-8fe2-ac34004a656b.png?v=1795804004",
         "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
-        "price": 261184
+        "price": 261184,
+        "finishedHandle": "oval-lab-grown-diamond-three-stone-ring-1-56-ct-platinum-rg986"
       },
       {
         "title": "Radiant Split Shank",
@@ -772,7 +782,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSRAD_20_1.png?v=1795804004",
         "video": "https://lgdus.co/RGWSSRAD/RGWSSRAD.mp4",
-        "price": 257960
+        "price": 257960,
+        "finishedHandle": "radiant-lab-grown-diamond-split-shank-ring-1-67-ct-14k-white-gold-rg1496"
       },
       {
         "title": "Oval Three-Stone",
@@ -783,7 +794,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_136801ba-38c3-4bd4-a855-49ee790be7aa.png?v=1795804005",
         "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
-        "price": 304656
+        "price": 304656,
+        "finishedHandle": "oval-lab-grown-diamond-three-stone-ring-2-03-ct-14k-white-gold-rg928"
       },
       {
         "title": "Radiant Split Shank",
@@ -794,7 +806,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG2352_20_1.png?v=1795804006",
         "video": "https://im.lgdus.co/Jwl/RG2352/RG2352.mp4",
-        "price": 261680
+        "price": 261680,
+        "finishedHandle": "radiant-lab-grown-diamond-split-shank-ring-3-28-ct-14k-white-gold-rg2352"
       },
       {
         "title": "Oval Three-Stone",
@@ -805,7 +818,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/NLR_200407_20_1.png?v=1795804006",
         "video": "https://im.lgdus.co/Jwl/NLR%200407/NLR%200407.mp4",
-        "price": 288154
+        "price": 288154,
+        "finishedHandle": "oval-lab-grown-diamond-three-stone-ring-2-08-ct-14k-white-gold-rg2096"
       },
       {
         "title": "Emerald Three-Stone",
@@ -816,7 +830,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG2118_20_1.png?v=1795804007",
         "video": "https://im.lgdus.co/Jwl/RG2118/RG2118.mp4",
-        "price": 230194
+        "price": 230194,
+        "finishedHandle": "emerald-lab-grown-diamond-three-stone-ring-2-06-ct-14k-white-gold-rg2118"
       },
       {
         "title": "Emerald Three-Stone",
@@ -827,7 +842,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2.png?v=1795804009",
         "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
-        "price": 247928
+        "price": 247928,
+        "finishedHandle": "emerald-lab-grown-diamond-three-stone-ring-1-01-ct-platinum-rg1696"
       },
       {
         "title": "Emerald Three-Stone",
@@ -838,7 +854,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2_ccdeb6d7-1d01-4c9d-897d-0955cfac8369.png?v=1795804023",
         "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
-        "price": 240344
+        "price": 240344,
+        "finishedHandle": "emerald-lab-grown-diamond-three-stone-ring-1-14-ct-platinum-rg1692"
       },
       {
         "title": "Oval Three-Stone",
@@ -849,7 +866,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_402a078f-e10a-4afe-9ae1-7ba6920ba8b8.png?v=1795804023",
         "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
-        "price": 245898
+        "price": 245898,
+        "finishedHandle": "oval-lab-grown-diamond-three-stone-ring-1-04-ct-platinum-rg1674"
       },
       {
         "title": "Emerald Split Shank",
@@ -860,7 +878,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_6e420430-51a5-4fa5-a145-02dd1852a9cd.jpg?v=1795804023",
         "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
-        "price": 242016
+        "price": 242016,
+        "finishedHandle": "emerald-lab-grown-diamond-split-shank-ring-1-65-ct-14k-white-gold-rg1478"
       },
       {
         "title": "Emerald Split Shank",
@@ -871,7 +890,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_c557fef9-8288-49a3-a814-b815d52c4c45.jpg?v=1795804024",
         "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
-        "price": 348248
+        "price": 348248,
+        "finishedHandle": "emerald-lab-grown-diamond-split-shank-ring-2-02-ct-platinum-rg1453"
       },
       {
         "title": "Round Three-Stone",
@@ -882,7 +902,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_7556bcf5-d488-4bfc-a2cd-3a131258ac02.png?v=1795804025",
         "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
-        "price": 238036
+        "price": 238036,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-2-02-ct-platinum-rg1388"
       },
       {
         "title": "Round Three-Stone",
@@ -893,7 +914,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTHM_20_2_19c2dc6d-a5f3-4ea1-a544-ce992a9fccaa.png?v=1795804025",
         "video": "https://im.lgdus.co/Jwl/RGBRPLTHM/RGBRPLTHM.mp4",
-        "price": 206302
+        "price": 206302,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-1-14-ct-platinum-rg1378"
       },
       {
         "title": "Round Three-Stone",
@@ -904,7 +926,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTBR_20_1.png?v=1795804026",
         "video": "https://im.lgdus.co/Jwl/RGBRPLTBR/RGBRPLTBR.mp4",
-        "price": 216752
+        "price": 216752,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-0-72-ct-platinum-rg1330"
       },
       {
         "title": "Round Three-Stone",
@@ -915,7 +938,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_1a0e86cd-5c99-43df-be0d-2b1a806c1ca0.png?v=1795804027",
         "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
-        "price": 268994
+        "price": 268994,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-2-11-ct-platinum-rg1339"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -926,7 +950,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWEMSS_20_1_ab85eb21-afdb-49fb-8865-aaf34015df18.png?v=1795804029",
         "video": "https://im.lgdus.co/Jwl/RGWEMSS/RGWEMSS.mp4",
-        "price": 131354
+        "price": 131354,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-1-01-ct-14k-white-gold-rg1219"
       },
       {
         "title": "Round Three-Stone",
@@ -937,7 +962,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_673f401a-ca28-4745-ac6d-8cc84a5b0dfe.png?v=1795804028",
         "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
-        "price": 154134
+        "price": 154134,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-1-51-ct-14k-white-gold-rg1115"
       },
       {
         "title": "Round Split Shank",
@@ -948,7 +974,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1877_20_1.png?v=1795804029",
         "video": "https://im.lgdus.co/Jwl/RG1877/RG1877.mp4",
-        "price": 1064246
+        "price": 1064246,
+        "finishedHandle": "round-lab-grown-diamond-split-shank-ring-4-2-ct-14k-white-gold-rg1041"
       },
       {
         "title": "Round Split Shank",
@@ -959,7 +986,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1874_20_1.png?v=1795804029",
         "video": "https://im.lgdus.co/Jwl/RG1874/RG1874.mp4",
-        "price": 287580
+        "price": 287580,
+        "finishedHandle": "round-lab-grown-diamond-split-shank-ring-2-07-ct-14k-white-gold-rg964"
       },
       {
         "title": "Oval Three-Stone",
@@ -970,7 +998,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_7af0f7f8-c615-4955-8421-4db36dd16d4e.png?v=1795804031",
         "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
-        "price": 159414
+        "price": 159414,
+        "finishedHandle": "oval-lab-grown-diamond-three-stone-ring-1-ct-14k-white-gold-rg909"
       },
       {
         "title": "Emerald Three-Stone",
@@ -981,7 +1010,8 @@
         "metal": "Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2_7726f7b0-bbdc-4659-bb38-5e508426e579.png?v=1795804031",
         "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
-        "price": 312016
+        "price": 312016,
+        "finishedHandle": "emerald-lab-grown-diamond-three-stone-ring-1-62-ct-platinum-rg1635"
       },
       {
         "title": "Round Hidden Halo",
@@ -992,7 +1022,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3929_20_1.png?v=1795804032",
         "video": "https://im.lgdus.co/Jwl/RG3929/RG3929.mp4",
-        "price": 188036
+        "price": 188036,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-ct-14k-yellow-gold-rg3929"
       },
       {
         "title": "Round Hidden Halo",
@@ -1003,7 +1034,8 @@
         "metal": "18K Yellow Gold - Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3931_20_1.png?v=1795804037",
         "video": "https://im.lgdus.co/Jwl/RG3931/RG3931.mp4",
-        "price": 218376
+        "price": 218376,
+        "finishedHandle": "round-lab-grown-diamond-ring-2-54-ct-18k-yellow-gold-platinum-rg3931"
       },
       {
         "title": "Round Hidden Halo",
@@ -1014,7 +1046,8 @@
         "metal": "18K Yellow Gold - Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3927_20_1.png?v=1795804038",
         "video": "https://im.lgdus.co/Jwl/RG3927/RG3927.mp4",
-        "price": 218036
+        "price": 218036,
+        "finishedHandle": "round-lab-grown-diamond-ring-2-ct-18k-yellow-gold-platinum-rg3927"
       },
       {
         "title": "Round Hidden Halo",
@@ -1025,7 +1058,8 @@
         "metal": "18K Yellow Gold - Platinum",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3955_20_1.png?v=1795804039",
         "video": "https://im.lgdus.co/Jwl/RG3955/RG3955.mp4",
-        "price": 297324
+        "price": 297324,
+        "finishedHandle": "round-lab-grown-diamond-ring-3-36-ct-18k-yellow-gold-platinum-rg3955"
       },
       {
         "title": "Emerald Solitaire",
@@ -1036,7 +1070,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8884_20_1.png?v=1795804039",
         "video": "https://im.lgdus.co/Jwl/RG8884/RG8884.mp4",
-        "price": 189734
+        "price": 189734,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-2-21-ct-14k-white-gold-rg8884"
       },
       {
         "title": "Round Solitaire",
@@ -1047,7 +1082,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8913_20_1.png?v=1795804039",
         "video": "https://im.lgdus.co/Jwl/RG8913/RG8913.mp4",
-        "price": 168376
+        "price": 168376,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-2-6-ct-14k-white-gold-rg8913"
       },
       {
         "title": "Radiant Hidden Halo",
@@ -1058,7 +1094,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8545_20_1.png?v=1795804040",
         "video": "https://im.lgdus.co/Jwl/RG8545/RG8545.mp4",
-        "price": 236224
+        "price": 236224,
+        "finishedHandle": "radiant-lab-grown-diamond-hidden-halo-ring-3-22-ct-14k-white-gold-rg8545"
       },
       {
         "title": "Princess Solitaire",
@@ -1069,7 +1106,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5360_20_1.png?v=1795804040",
         "video": "https://im.lgdus.co/Jwl/RG5360/RG5360.mp4",
-        "price": 196668
+        "price": 196668,
+        "finishedHandle": "princess-lab-grown-diamond-solitaire-ring-2-5-ct-14k-white-gold-rg5360"
       },
       {
         "title": "Round Solitaire",
@@ -1080,7 +1118,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5663_20_1.png?v=1795804041",
         "video": "https://im.lgdus.co/Jwl/RG5663/RG5663.mp4",
-        "price": 210860
+        "price": 210860,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-2-04-ct-14k-white-gold-rg5663"
       },
       {
         "title": "Radiant Diamond-Shank Solitaire",
@@ -1091,7 +1130,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6645_20_1.png?v=1795803942",
         "video": "https://im.lgdus.co/Jwl/RG6645/RG6645.mp4",
-        "price": 306680
+        "price": 306680,
+        "finishedHandle": "radiant-lab-grown-diamond-ring-5-18-ct-14k-white-gold-rg6645"
       },
       {
         "title": "Oval Hidden Halo",
@@ -1102,7 +1142,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6587_20_1.png?v=1795804043",
         "video": "https://im.lgdus.co/Jwl/RG6587/RG6587.mp4",
-        "price": 410228
+        "price": 410228,
+        "finishedHandle": "oval-lab-grown-diamond-hidden-halo-ring-5-11-ct-14k-yellow-gold-rg6587"
       },
       {
         "title": "Emerald Halo",
@@ -1113,7 +1154,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6836_20_1.png?v=1795804043",
         "video": "https://im.lgdus.co/Jwl/RG6836/RG6836.mp4",
-        "price": 283526
+        "price": 283526,
+        "finishedHandle": "emerald-lab-grown-diamond-halo-ring-2-05-ct-14k-white-gold-rg6836"
       },
       {
         "title": "Pear Solitaire",
@@ -1124,7 +1166,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6913_20_1.png?v=1795804043",
         "video": "https://im.lgdus.co/Jwl/RG6913/RG6913.mp4",
-        "price": 224954
+        "price": 224954,
+        "finishedHandle": "pear-lab-grown-diamond-solitaire-ring-2-02-ct-14k-white-gold-rg6913"
       },
       {
         "title": "Princess Solitaire",
@@ -1135,7 +1178,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7720_20_1.png?v=1795804044",
         "video": "https://im.lgdus.co/Jwl/RG7720/RG7720.mp4",
-        "price": 267828
+        "price": 267828,
+        "finishedHandle": "princess-lab-grown-diamond-solitaire-ring-3-11-ct-14k-white-gold-rg7720"
       },
       {
         "title": "Princess Solitaire",
@@ -1146,7 +1190,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6986_20_1.png?v=1795804045",
         "video": "https://im.lgdus.co/Jwl/RG6986/RG6986.mp4",
-        "price": 197378
+        "price": 197378,
+        "finishedHandle": "princess-lab-grown-diamond-solitaire-ring-2-04-ct-14k-white-gold-rg6986"
       },
       {
         "title": "Princess Solitaire",
@@ -1157,7 +1202,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6548_20_1.png?v=1795804052",
         "video": "https://im.lgdus.co/Jwl/RG6548/RG6548.mp4",
-        "price": 216668
+        "price": 216668,
+        "finishedHandle": "princess-lab-grown-diamond-solitaire-ring-2-54-ct-14k-white-gold-rg6548"
       },
       {
         "title": "Marquise Modified Split Shank",
@@ -1168,7 +1214,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6722_20_1.png?v=1795804052",
         "video": "https://im.lgdus.co/Jwl/RG6722/RG6722.mp4",
-        "price": 365774
+        "price": 365774,
+        "finishedHandle": "marquise-modified-lab-grown-diamond-ring-4-56-ct-14k-yellow-gold-rg6722"
       },
       {
         "title": "Oval Hidden Halo",
@@ -1179,7 +1226,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6715_20_1.png?v=1795804053",
         "video": "https://im.lgdus.co/Jwl/RG6715/RG6715.mp4",
-        "price": 245304
+        "price": 245304,
+        "finishedHandle": "oval-lab-grown-diamond-hidden-halo-ring-3-04-ct-14k-white-gold-rg6715"
       },
       {
         "title": "Round Three-Stone",
@@ -1190,7 +1238,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7819_20_1.png?v=1795804054",
         "video": "https://im.lgdus.co/Jwl/RG7819/RG7819.mp4",
-        "price": 459178
+        "price": 459178,
+        "finishedHandle": "round-lab-grown-diamond-three-stone-ring-2-1-ct-14k-yellow-gold-rg7819"
       },
       {
         "title": "Oval Solitaire",
@@ -1201,7 +1250,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7190_20_1.png?v=1795804055",
         "video": "https://im.lgdus.co/Jwl/RG7190/RG7190.mp4",
-        "price": 294752
+        "price": 294752,
+        "finishedHandle": "oval-lab-grown-diamond-solitaire-ring-4-21-ct-14k-white-gold-rg7190"
       },
       {
         "title": "Round Diamond-Shank Solitaire",
@@ -1212,7 +1262,8 @@
         "metal": "14K Rose Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7550_20_1.png?v=1795804055",
         "video": "https://im.lgdus.co/Jwl/RG7550/RG7550.mp4",
-        "price": 248382
+        "price": 248382,
+        "finishedHandle": "round-lab-grown-diamond-ring-3-75-ct-14k-rose-gold-rg7550"
       },
       {
         "title": "Round Solitaire",
@@ -1223,7 +1274,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7551_20_1.png?v=1795804056",
         "video": "https://im.lgdus.co/Jwl/RG7551/RG7551.mp4",
-        "price": 131232
+        "price": 131232,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-1-53-ct-14k-yellow-gold-rg7551"
       },
       {
         "title": "Radiant Solitaire",
@@ -1234,7 +1286,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8524_20_1.png?v=1795804057",
         "video": "https://im.lgdus.co/Jwl/RG8524/RG8524.mp4",
-        "price": 183150
+        "price": 183150,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-2-08-ct-14k-white-gold-rg8524"
       },
       {
         "title": "Radiant Solitaire",
@@ -1245,7 +1298,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7652_20_1.png?v=1795804058",
         "video": "https://im.lgdus.co/Jwl/RG7652/RG7652.mp4",
-        "price": 221000
+        "price": 221000,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-2-05-ct-14k-yellow-gold-rg7652"
       },
       {
         "title": "Princess Solitaire",
@@ -1256,7 +1310,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7715_20_1.png?v=1795804059",
         "video": "https://im.lgdus.co/Jwl/RG7715/RG7715.mp4",
-        "price": 213668
+        "price": 213668,
+        "finishedHandle": "princess-lab-grown-diamond-solitaire-ring-2-04-ct-14k-white-gold-rg7715"
       },
       {
         "title": "Oval Solitaire",
@@ -1267,7 +1322,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7665_20_1_de9b80a5-b343-4202-aaa9-a408a4467631.png?v=1795804060",
         "video": "https://im.lgdus.co/Jwl/RG7665/RG7665.mp4",
-        "price": 205800
+        "price": 205800,
+        "finishedHandle": "oval-lab-grown-diamond-solitaire-ring-1-53-ct-14k-white-gold-rg7665"
       },
       {
         "title": "Cushion Brilliant Solitaire",
@@ -1278,7 +1334,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7681_20_1.png?v=1795804060",
         "video": "https://im.lgdus.co/Jwl/RG7681/RG7681.mp4",
-        "price": 200518
+        "price": 200518,
+        "finishedHandle": "cushion-brilliant-lab-grown-diamond-ring-1-52-ct-14k-yellow-gold-rg7681"
       },
       {
         "title": "Radiant Solitaire",
@@ -1289,7 +1346,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7643_20_1_bb67f4d8-a169-4e58-aa6e-681ab85b211a.png?v=1795804061",
         "video": "https://im.lgdus.co/Jwl/RG7643/RG7643.mp4",
-        "price": 198276
+        "price": 198276,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-1-55-ct-14k-white-gold-rg7643"
       },
       {
         "title": "Radiant Solitaire",
@@ -1300,7 +1358,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7646_20_1_436889b0-3bd8-4547-a551-3ce110a107f6.png?v=1795804062",
         "video": "https://im.lgdus.co/Jwl/RG7646/RG7646.mp4",
-        "price": 203792
+        "price": 203792,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-1-56-ct-14k-yellow-gold-rg7646"
       },
       {
         "title": "Emerald Solitaire",
@@ -1311,7 +1370,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7630_20_1_dea5c4e1-1727-4597-b47c-5006622ee3ee.png?v=1795804070",
         "video": "https://im.lgdus.co/Jwl/RG7630/RG7630.mp4",
-        "price": 201728
+        "price": 201728,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-1-5-ct-14k-white-gold-rg7630"
       },
       {
         "title": "Round Solitaire",
@@ -1322,7 +1382,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8910_20_1.png?v=1795804072",
         "video": "https://im.lgdus.co/Jwl/RG8910/RG8910.mp4",
-        "price": 155214
+        "price": 155214,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-1-71-ct-14k-white-gold-rg8910"
       },
       {
         "title": "Oval Solitaire",
@@ -1333,7 +1394,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7672_20_1.png?v=1795804073",
         "video": "https://im.lgdus.co/Jwl/RG7672/RG7672.mp4",
-        "price": 246322
+        "price": 246322,
+        "finishedHandle": "oval-lab-grown-diamond-solitaire-ring-2-12-ct-14k-yellow-gold-rg7672"
       },
       {
         "title": "Marquise Solitaire",
@@ -1344,7 +1406,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7689_20_1.png?v=1795804074",
         "video": "https://im.lgdus.co/Jwl/RG7689/RG7689.mp4",
-        "price": 204066
+        "price": 204066,
+        "finishedHandle": "marquise-lab-grown-diamond-solitaire-ring-1-56-ct-14k-white-gold-rg7689"
       },
       {
         "title": "Oval Solitaire",
@@ -1355,7 +1418,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7837_20_1_4f0e7521-671b-48e9-a07f-2bae3c27319b.png?v=1795804074",
         "video": "https://im.lgdus.co/Jwl/RG7837/RG7837.mp4",
-        "price": 280176
+        "price": 280176,
+        "finishedHandle": "oval-lab-grown-diamond-solitaire-ring-3-52-ct-14k-white-gold-rg7837"
       },
       {
         "title": "Emerald Solitaire",
@@ -1366,7 +1430,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7632_20_1_af6b7c40-75c3-4be5-87f9-59a8a9643edb.png?v=1795804075",
         "video": "https://im.lgdus.co/Jwl/RG7632/RG7632.mp4",
-        "price": 201728
+        "price": 201728,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-1-53-ct-14k-yellow-gold-rg7632"
       },
       {
         "title": "Round Diamond-Shank Solitaire",
@@ -1377,7 +1442,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7844_20_1.png?v=1795804076",
         "video": "https://im.lgdus.co/Jwl/RG7844/RG7844.mp4",
-        "price": 242518
+        "price": 242518,
+        "finishedHandle": "round-lab-grown-diamond-ring-2-5-ct-14k-white-gold-rg7844"
       },
       {
         "title": "Round Diamond-Shank Solitaire",
@@ -1388,7 +1454,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7842_20_1.png?v=1795804077",
         "video": "https://im.lgdus.co/Jwl/RG7842/RG7842.mp4",
-        "price": 190026
+        "price": 190026,
+        "finishedHandle": "round-lab-grown-diamond-ring-1-51-ct-14k-yellow-gold-rg7842"
       },
       {
         "title": "Round Solitaire",
@@ -1399,7 +1466,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8365_20_1_26c8accb-f194-42ca-86a1-d91739ca9a63.png?v=1795804078",
         "video": "https://im.lgdus.co/Jwl/RG8365/RG8365.mp4",
-        "price": 171232
+        "price": 171232,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-1-53-ct-14k-yellow-gold-rg8365"
       },
       {
         "title": "Radiant Solitaire",
@@ -1410,7 +1478,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8412_20_1.png?v=1795804079",
         "video": "https://im.lgdus.co/Jwl/RG8412/RG8412.mp4",
-        "price": 256256
+        "price": 256256,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-4-2-ct-14k-white-gold-rg8412"
       },
       {
         "title": "Radiant Solitaire",
@@ -1421,7 +1490,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8501_20_1.png?v=1795804080",
         "video": "https://im.lgdus.co/Jwl/RG8501/RG8501.mp4",
-        "price": 298570
+        "price": 298570,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-4-87-ct-14k-white-gold-rg8501"
       },
       {
         "title": "Emerald Solitaire",
@@ -1432,7 +1502,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8885_20_1.png?v=1795804080",
         "video": "https://im.lgdus.co/Jwl/RG8885/RG8885.mp4",
-        "price": 194334
+        "price": 194334,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-2-57-ct-14k-white-gold-rg8885"
       },
       {
         "title": "Radiant Solitaire",
@@ -1443,7 +1514,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8530_20_1.png?v=1795804086",
         "video": "https://im.lgdus.co/Jwl/RG8530/RG8530.mp4",
-        "price": 234386
+        "price": 234386,
+        "finishedHandle": "radiant-lab-grown-diamond-solitaire-ring-3-53-ct-14k-white-gold-rg8530"
       },
       {
         "title": "Emerald Solitaire",
@@ -1454,7 +1526,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8889_20_1_c4683966-b354-4705-b67f-c22f0d75d836.png?v=1795804087",
         "video": "https://im.lgdus.co/Jwl/RG8889/RG8889.mp4",
-        "price": 259106
+        "price": 259106,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-3-51-ct-14k-white-gold-rg8889"
       },
       {
         "title": "Radiant Hidden Halo",
@@ -1465,7 +1538,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8447_20_1.png?v=1795804088",
         "video": "https://im.lgdus.co/Jwl/RG8447/RG8447.mp4",
-        "price": 258622
+        "price": 258622,
+        "finishedHandle": "radiant-lab-grown-diamond-hidden-halo-ring-4-05-ct-14k-white-gold-rg8447"
       },
       {
         "title": "Round Hidden Halo",
@@ -1476,7 +1550,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8450_20_1.png?v=1795804089",
         "video": "https://im.lgdus.co/Jwl/RG8450/RG8450.mp4",
-        "price": 141784
+        "price": 141784,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-1-13-ct-14k-white-gold-rg8450"
       },
       {
         "title": "Round Hidden Halo",
@@ -1487,7 +1562,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8455_20_1.png?v=1795804089",
         "video": "https://im.lgdus.co/Jwl/RG8455/RG8455.mp4",
-        "price": 213056
+        "price": 213056,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-28-ct-14k-white-gold-rg8455"
       },
       {
         "title": "Oval Hidden Halo",
@@ -1498,7 +1574,8 @@
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9067_20_1.png?v=1795804090",
         "video": "https://im.lgdus.co/Jwl/RG9067/RG9067.mp4",
-        "price": 218300
+        "price": 218300,
+        "finishedHandle": "oval-lab-grown-diamond-hidden-halo-ring-2-12-ct-14k-yellow-gold-rg9067"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -1509,7 +1586,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8437_20_1.png?v=1795804090",
         "video": "https://im.lgdus.co/Jwl/RG8437/RG8437.mp4",
-        "price": 298558
+        "price": 298558,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-4-55-ct-14k-white-gold-rg8437"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -1520,7 +1598,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8431_20_1.png?v=1795804091",
         "video": "https://im.lgdus.co/Jwl/RG8431/RG8431.mp4",
-        "price": 253580
+        "price": 253580,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-3-18-ct-14k-white-gold-rg8431"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1531,7 +1610,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8465_20_1.png?v=1795804092",
         "video": "https://im.lgdus.co/Jwl/RG8465/RG8465.mp4",
-        "price": 183688
+        "price": 183688,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-2-ct-14k-white-gold-rg8465"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1542,7 +1622,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8470_20_1.png?v=1795804092",
         "video": "https://im.lgdus.co/Jwl/RG8470/RG8470.mp4",
-        "price": 235886
+        "price": 235886,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-3-02-ct-14k-white-gold-rg8470"
       },
       {
         "title": "Emerald Hidden Halo",
@@ -1553,7 +1634,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8428_20_1.png?v=1795804093",
         "video": "https://im.lgdus.co/Jwl/RG8428/RG8428.mp4",
-        "price": 230142
+        "price": 230142,
+        "finishedHandle": "emerald-lab-grown-diamond-hidden-halo-ring-2-7-ct-14k-white-gold-rg8428"
       },
       {
         "title": "Round Solitaire",
@@ -1564,7 +1646,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8912_20_1.png?v=1795804094",
         "video": "https://im.lgdus.co/Jwl/RG8912/RG8912.mp4",
-        "price": 177408
+        "price": 177408,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-2-24-ct-14k-white-gold-rg8912"
       },
       {
         "title": "Emerald Solitaire",
@@ -1575,7 +1658,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8894_20_1.png?v=1795804095",
         "video": "https://im.lgdus.co/Jwl/RG8894/RG8894.mp4",
-        "price": 298558
+        "price": 298558,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-4-53-ct-14k-white-gold-rg8894"
       },
       {
         "title": "Round Solitaire",
@@ -1586,7 +1670,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8915_20_1_25eb3748-09e3-44c9-8233-c51c93b7423f.png?v=1795804095",
         "video": "https://im.lgdus.co/Jwl/RG8915/RG8915.mp4",
-        "price": 242602
+        "price": 242602,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-3-61-ct-14k-white-gold-rg8915"
       },
       {
         "title": "Antique Marquise Diamond-Shank Solitaire",
@@ -1597,7 +1682,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8948_20_1.png?v=1795804103",
         "video": "https://im.lgdus.co/Jwl/RG8948/RG8948.mp4",
-        "price": 203178
+        "price": 203178,
+        "finishedHandle": "antique-marquise-lab-grown-diamond-ring-2-74-ct-14k-white-gold-rg8948"
       },
       {
         "title": "Round Solitaire",
@@ -1608,7 +1694,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8926_20_1.png?v=1795804105",
         "video": "https://im.lgdus.co/Jwl/RG8926/RG8926.mp4",
-        "price": 132398
+        "price": 132398,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-1-3-ct-14k-white-gold-rg8926"
       },
       {
         "title": "Antique Marquise Solitaire",
@@ -1619,7 +1706,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8986_20_1.png?v=1795804105",
         "video": "https://im.lgdus.co/Jwl/RG8986/RG8986.mp4",
-        "price": 157636
+        "price": 157636,
+        "finishedHandle": "antique-marquise-lab-grown-diamond-ring-2-37-ct-14k-white-gold-rg8986"
       },
       {
         "title": "Round Hidden Halo",
@@ -1630,7 +1718,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8898_20_1.png?v=1795804106",
         "video": "https://im.lgdus.co/Jwl/RG8898/RG8898.mp4",
-        "price": 146724
+        "price": 146724,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-02-ct-14k-white-gold-rg8898"
       },
       {
         "title": "Round Solitaire",
@@ -1641,7 +1730,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8932_20_1.png?v=1795804107",
         "video": "https://im.lgdus.co/Jwl/RG8932/RG8932.mp4",
-        "price": 225964
+        "price": 225964,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-4-06-ct-14k-white-gold-rg8932"
       },
       {
         "title": "Round Hidden Halo",
@@ -1652,7 +1742,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8897_20_1.png?v=1795804107",
         "video": "https://im.lgdus.co/Jwl/RG8897/RG8897.mp4",
-        "price": 149400
+        "price": 149400,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-1-56-ct-14k-white-gold-rg8897"
       },
       {
         "title": "Round Hidden Halo",
@@ -1663,7 +1754,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8901_20_1.png?v=1795804108",
         "video": "https://im.lgdus.co/Jwl/RG8901/RG8901.mp4",
-        "price": 175488
+        "price": 175488,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-56-ct-14k-white-gold-rg8901"
       },
       {
         "title": "Round Hidden Halo",
@@ -1674,7 +1766,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8919_20_1.png?v=1795804109",
         "video": "https://im.lgdus.co/Jwl/RG8919/RG8919.mp4",
-        "price": 149898
+        "price": 149898,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-1-27-ct-14k-white-gold-rg8919"
       },
       {
         "title": "Antique Marquise Solitaire",
@@ -1685,7 +1778,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8944_20_1.png?v=1795804110",
         "video": "https://im.lgdus.co/Jwl/RG8944/RG8944.mp4",
-        "price": 173842
+        "price": 173842,
+        "finishedHandle": "antique-marquise-lab-grown-diamond-ring-1-75-ct-14k-white-gold-rg8944"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1696,7 +1790,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8956_20_1.png?v=1795804111",
         "video": "https://im.lgdus.co/Jwl/RG8956/RG8956.mp4",
-        "price": 172138
+        "price": 172138,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-2-05-ct-14k-white-gold-rg8956"
       },
       {
         "title": "Emerald Solitaire",
@@ -1707,7 +1802,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8888_20_1.png?v=1795804112",
         "video": "https://im.lgdus.co/Jwl/RG8888/RG8888.mp4",
-        "price": 245924
+        "price": 245924,
+        "finishedHandle": "emerald-lab-grown-diamond-solitaire-ring-3-06-ct-14k-white-gold-rg8888"
       },
       {
         "title": "Radiant Hidden Halo",
@@ -1718,7 +1814,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8548_20_1.png?v=1795804112",
         "video": "https://im.lgdus.co/Jwl/RG8548/RG8548.mp4",
-        "price": 255934
+        "price": 255934,
+        "finishedHandle": "radiant-lab-grown-diamond-hidden-halo-ring-3-74-ct-14k-white-gold-rg8548"
       },
       {
         "title": "Round Hidden Halo",
@@ -1729,7 +1826,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8923_20_1.png?v=1795804118",
         "video": "https://im.lgdus.co/Jwl/RG8923/RG8923.mp4",
-        "price": 193248
+        "price": 193248,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-4-ct-14k-white-gold-rg8923"
       },
       {
         "title": "Round Solitaire",
@@ -1740,7 +1838,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8930_20_1.png?v=1795804118",
         "video": "https://im.lgdus.co/Jwl/RG8930/RG8930.mp4",
-        "price": 191960
+        "price": 191960,
+        "finishedHandle": "round-lab-grown-diamond-solitaire-ring-3-21-ct-14k-white-gold-rg8930"
       },
       {
         "title": "Round Diamond-Shank Solitaire",
@@ -1751,7 +1850,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8922_20_1.png?v=1795804119",
         "video": "https://im.lgdus.co/Jwl/RG8922/RG8922.mp4",
-        "price": 196740
+        "price": 196740,
+        "finishedHandle": "round-lab-grown-diamond-ring-2-38-ct-14k-white-gold-rg8922"
       },
       {
         "title": "Round Hidden Halo",
@@ -1762,7 +1862,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8921_20_1.png?v=1795804121",
         "video": "https://im.lgdus.co/Jwl/RG8921/RG8921.mp4",
-        "price": 159732
+        "price": 159732,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-1-78-ct-14k-white-gold-rg8921"
       },
       {
         "title": "Round Hidden Halo",
@@ -1773,7 +1874,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8903_20_1.png?v=1795804123",
         "video": "https://im.lgdus.co/Jwl/RG8903/RG8903.mp4",
-        "price": 199884
+        "price": 199884,
+        "finishedHandle": "round-lab-grown-diamond-hidden-halo-ring-2-97-ct-14k-white-gold-rg8903"
       },
       {
         "title": "Round Diamond-Shank Solitaire",
@@ -1784,7 +1886,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8920_20_1.png?v=1795804123",
         "video": "https://im.lgdus.co/Jwl/RG8920/RG8920.mp4",
-        "price": 156122
+        "price": 156122,
+        "finishedHandle": "round-lab-grown-diamond-ring-1-27-ct-14k-white-gold-rg8920"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1795,7 +1898,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9017_20_1.png?v=1795804124",
         "video": "https://im.lgdus.co/Jwl/RG9017/RG9017.mp4",
-        "price": 185092
+        "price": 185092,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-2-06-ct-14k-white-gold-rg9017"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1806,7 +1910,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9022_20_1.png?v=1795804125",
         "video": "https://im.lgdus.co/Jwl/RG9022/RG9022.mp4",
-        "price": 211180
+        "price": 211180,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-3-13-ct-14k-white-gold-rg9022"
       },
       {
         "title": "Marquise Diamond-Shank Solitaire",
@@ -1817,7 +1922,8 @@
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8955_20_1.png?v=1795804125",
         "video": "https://im.lgdus.co/Jwl/RG8955/RG8955.mp4",
-        "price": 165660
+        "price": 165660,
+        "finishedHandle": "marquise-lab-grown-diamond-ring-1-53-ct-14k-white-gold-rg8955"
       }
     ];
 
