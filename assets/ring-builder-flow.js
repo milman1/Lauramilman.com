@@ -441,7 +441,7 @@
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
     }
-    // Private pilot. These are historical retail estimates, independent of the live catalog.
+    // Private pilot. Quote-only estimates use the merchant's custom build budget.
     const supplierDesignPreview = new URLSearchParams(window.location.search).get('supplier-preview') === '1';
     const supplierDesigns = [
       {
@@ -449,7 +449,6 @@
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
-        "price": 310000,
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8540_20_1.png?v=1791392613"
       },
       {
@@ -457,7 +456,6 @@
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
-        "price": 350000,
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1.png?v=1791392607",
         "genericPhoto": true
       },
@@ -466,10 +464,11 @@
         "shape": "Oval",
         "center": 2,
         "metal": "14K Yellow Gold",
-        "price": 240000,
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7834_20_1.png?v=1791392616"
       }
     ];
+
+    const estimatedSettingPrice = 200000;
 
     function supplierDesignCards(diamond) {
       const weight = Number(diamond.carat);
@@ -484,9 +483,9 @@
         const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
         const diamondPrice = Number(diamond.price);
         const separateTotal = cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
-          ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
+          ? `<p class="quiet">With your diamond ${esc(money(estimatedSettingPrice + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(estimatedSettingPrice, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
