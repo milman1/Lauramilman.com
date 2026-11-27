@@ -441,11 +441,62 @@
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
     }
+    // Private pilot. These are historical retail estimates, independent of the live catalog.
+    const supplierDesignPreview = new URLSearchParams(window.location.search).get('supplier-preview') === '1';
+    const supplierDesigns = [
+      {
+        "title": "Oval Hidden Halo",
+        "shape": "Oval",
+        "center": 3,
+        "metal": "14K White Gold",
+        "price": 310000,
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8540_20_1.png?v=1791392613"
+      },
+      {
+        "title": "Oval Three-Stone",
+        "shape": "Oval",
+        "center": 3,
+        "metal": "14K White Gold",
+        "price": 350000,
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1.png?v=1791392607",
+        "genericPhoto": true
+      },
+      {
+        "title": "Oval Solitaire",
+        "shape": "Oval",
+        "center": 2,
+        "metal": "14K Yellow Gold",
+        "price": 240000,
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7834_20_1.png?v=1791392616"
+      }
+    ];
+
+    function supplierDesignCards(diamond) {
+      const weight = Number(diamond.carat);
+      const bucket = Math.round(weight);
+      const matches = supplierDesigns.filter(design => design.shape === diamond.shape && Math.round(design.center) === bucket);
+      const label = "Made-to-order ring designs";
+      if (!matches.length) return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">No catalog designs match this diamond’s shape and size in the preview.</p></section>`;
+      return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct. Preview pricing in USD.</p><div class="products">${matches.map(design => {
+        const quote = new URL(cfg.contact || '/pages/contact', window.location.origin);
+        quote.searchParams.set('design', design.title);
+        quote.searchParams.set('diamond', diamond.handle || diamond.title || stoneTitle(diamond));
+        const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
+        const diamondPrice = Number(diamond.price);
+        const separateTotal = cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
+          ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
+          : '';
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
+      }).join('')}</div></section>`;
+    }
     function settingResults() {
       const shape = state.diamond?.shape || state.filters.shape;
       state.rows = [...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style) && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
       main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
       main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
+      if (supplierDesignPreview && state.diamond) {
+        main.querySelector('[data-results]').insertAdjacentHTML('afterbegin', supplierDesignCards(state.diamond));
+      }
       returnToCard();
     }
     function returnToCard() {
