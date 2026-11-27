@@ -242,7 +242,16 @@ export const WATCH = {
  * `LOOSE_LAB_GROWN`.
  * Not sourced from the Belgium Dia diamond API.
  *
- *   retail = cost × 2 (rounded to cents)
+ *   engagement-style rings: retail = round(cost × 2.75) to the dollar
+ *   everything else:        retail = cost × 2 (rounded to cents)
+ *
+ * Merchant decision 2026-11-27: the rule matches the live catalog. Every
+ * costed engagement-style ring (solitaire SO, hidden halo HH, three-stone 3,
+ * side-stone shank SDS: e.g. RG14YSOOV150PNS, RG14WHHRD150P, RG14W3OV150HMPNS,
+ * RG14YSDSEM75RDBEW) sits at cost × 2.75 rounded to the dollar; bracelets,
+ * necklaces, earrings, eternity bands and fashion rings (BC, NK, ER, EB,
+ * RG..SP..) sit at cost × 2. The ring is recognised from the supplier SKU,
+ * with or without the LMNY-MTO- made-to-order prefix.
  *
  * Cost is the merchant's wholesale / invoice cost on the piece (Shopify
  * Cost per item when recorded). Do not apply stone, watch, Back Vault, or
@@ -252,15 +261,25 @@ export const LAB_GROWN_JEWELRY = {
   vendors: ['Peaceful Diamonds'] as const,
   /** Common Peaceful Diamonds SKU prefixes observed on the store. */
   skuPrefixes: ['BC14', 'NK14'] as const,
-  /** retail = cost × this. */
+  /** retail = cost × this, for everything except engagement-style rings. */
   costMultiple: 2,
+  /** retail = round(cost × this) for engagement-style rings. */
+  engagementRingCostMultiple: 2.75,
+  /** Supplier SKU of an engagement-style ring: metal code then SO, HH, 3 or SDS. */
+  engagementRingSku: /^(?:LMNY-MTO-)?RG(?:10|14|18)(?:TT|W|Y|R)(?:SO|HH|3|SDS)/,
 } as const;
 
+/** True when a lab-grown jewelry SKU is an engagement-style ring (cost × 2.75). */
+export function isLabGrownEngagementRingSku(sku: string | null | undefined): boolean {
+  return LAB_GROWN_JEWELRY.engagementRingSku.test((sku ?? '').trim().toUpperCase());
+}
+
 /** Retail for lab-grown jewelry from recorded wholesale cost. */
-export function labGrownJewelryRetailFromCost(costUsd: number): number {
+export function labGrownJewelryRetailFromCost(costUsd: number, sku?: string | null): number {
   if (!Number.isFinite(costUsd) || costUsd <= 0) {
     throw new Error(`Lab-grown jewelry pricing: invalid cost ${costUsd}`);
   }
+  if (isLabGrownEngagementRingSku(sku)) return Math.round(costUsd * LAB_GROWN_JEWELRY.engagementRingCostMultiple);
   return Math.round(costUsd * LAB_GROWN_JEWELRY.costMultiple * 100) / 100;
 }
 
@@ -399,18 +418,24 @@ export const VENDOR_CATALOG_SYNC: {
  * merchant's Royal Chain trade account. Only trending items are imported,
  * never a whole category.
  *
- *   retail = roundUpTo5(cost × 3)
+ *   retail = roundUpTo10(cost × 2)
+ *
+ * Merchant decision 2026-11-27, effective 2 December 2026 (after the LMNY20
+ * sale): × 3 → × 2, because the chains sat well above Brilliant Earth and
+ * Blue Nile for the same width and length and none sold in six months. The
+ * live chains were priced to the nearest $10 above, so rounding is $10
+ * (the earlier code said $5). Reprice list: docs/pricing/2026-12-02-chain-reprice.csv.
  *
  * This multiple applies to no other source. Watches, loose stones, and
  * Back Vault pieces have their own rules above; Laura Milman fine
  * jewelry and hand-imported estate pieces are merchant-set and have no
- * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×2). A new
+ * automated rule. Lab-grown jewelry uses `LAB_GROWN_JEWELRY` (×2, engagement-style rings ×2.75). A new
  * supplier gets its own constant here, never this one.
  */
 export const SUPPLIER_INTAKE = {
   supplier: 'Royal Chain',
-  costMultiple: 3,
-  roundUpToUsd: 5,
+  costMultiple: 2,
+  roundUpToUsd: 10,
 } as const;
 
 export function supplierRetailFromCost(costUsd: number): number {

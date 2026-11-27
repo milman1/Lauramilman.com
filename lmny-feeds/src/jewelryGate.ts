@@ -168,7 +168,7 @@ export function validateActivation(snapshot: Snapshot, review: Review, now = Dat
       const cost = Number(v.inventoryItem.unitCost?.amount);
       if (!(cost > 0 && Number.isFinite(cost)) || v.inventoryItem.unitCost?.currencyCode !== 'USD') issues.push(`Verified USD cost required: ${v.id}`);
       else {
-        const expected = review.kind === 'setting' ? settingOnlyRetailFromCost(cost) : review.kind === 'royal-chain' ? supplierRetailFromCost(cost) : labGrownJewelryRetailFromCost(cost);
+        const expected = review.kind === 'setting' ? settingOnlyRetailFromCost(cost) : review.kind === 'royal-chain' ? supplierRetailFromCost(cost) : labGrownJewelryRetailFromCost(cost, v.sku);
         if (Math.round(retail * 100) !== Math.round(expected * 100)) issues.push(`Price does not match source rule: ${v.id}`);
       }
     }
