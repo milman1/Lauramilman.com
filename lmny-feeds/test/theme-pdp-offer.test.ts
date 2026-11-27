@@ -11,11 +11,12 @@ describe('product-page inquiry pills', () => {
   const mainProduct = themeFile('sections/main-product.liquid');
   const diamondProduct = themeFile('sections/main-product-diamond.liquid');
 
-  it('keeps Ask and Direct message on every product, and Make an offer for watches and pre-owned jewelry', () => {
+  it('keeps one chat button (Ask) on every product, and Make an offer for watches and pre-owned jewelry', () => {
     expect(inquiry).toContain('data-chat-intent="ask"');
-    expect(inquiry).toContain('data-chat-intent="message"');
+    // "Direct message" opened the same chat as Ask; removed 2026-11-27 (merchant request).
+    expect(inquiry).not.toContain('data-chat-intent="message"');
     expect(inquiry).toContain('Ask about this piece');
-    expect(inquiry).toContain('Direct message');
+    expect(inquiry.match(/class="[^"]*js-open-product-chat/g)).toHaveLength(1);
     expect(inquiry).toContain("render 'product-is-watch', product: product");
     // Pre-owned, estate and vintage jewelry take offers too (merchant decision 2026-11-11).
     expect(inquiry).toContain("render 'product-is-vintage', product: product");

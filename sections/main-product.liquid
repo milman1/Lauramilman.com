@@ -146,9 +146,19 @@
   capture is_vintage
     render 'product-is-vintage', product: product
   endcapture
+  # A product sold in several carat weights or metals shows them as options;
+  # a fixed Specifications row would contradict the selected option
+  # (2026-11-27: "Carat Weight 2.00" with 1.53 ct selected), so it is left out.
+  assign option_names = product.options | join: '|' | downcase
   assign spec_rows = ''
   for def in spec_defs
     assign def_parts = def | split: ':'
+    if def_parts[0] == 'carat_weight' and option_names contains 'carat'
+      continue
+    endif
+    if def_parts[0] == 'metal' and option_names contains 'metal'
+      continue
+    endif
     assign mf = product.metafields.custom[def_parts[0]]
     assign v = ''
     if mf != blank
@@ -848,6 +858,13 @@
     overflow: visible;
   }
 
+  #PdpDescription video,
+  #PdpDescription iframe,
+  #PdpDescription img {
+    max-width: 100%;
+    height: auto;
+  }
+
   .pdp-desc .accordion-content,
   .pdp-desc .accordion-content p,
   .pdp-desc .accordion-content li,
@@ -1047,6 +1064,18 @@
       });
     }
 
+    // Imports list one video per option ("Videos" heading, a caption per
+    // clip). The gallery shows one; the rest would stretch the description
+    // past the screen on phones (2026-11-27), so they are removed.
+    function dropDescriptionVideos(desc) {
+      Array.prototype.slice.call(desc.querySelectorAll('video, iframe')).forEach(function (el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      });
+      Array.prototype.slice.call(desc.querySelectorAll('h2, h3, h4')).forEach(function (h) {
+        if (/^videos?$/i.test((h.textContent || '').trim()) && h.parentNode) h.parentNode.removeChild(h);
+      });
+    }
+
     function hideEmptyDescription(desc) {
       var leftover = (desc.textContent || '')
         .replace(/360°\s*View/gi, '')
@@ -1074,7 +1103,7 @@
         '.pdp-media[data-media-type="video"], .pdp-media[data-media-type="external_video"]'
       );
       if (!gallery || galleryHasVideo) {
-        if (videoEl.parentNode) videoEl.parentNode.removeChild(videoEl);
+        dropDescriptionVideos(desc);
         removeEmptyVideoWrappers(desc);
         hideEmptyDescription(desc);
         return;
@@ -1110,6 +1139,7 @@
       videoEl.autoplay = true;
       slide.appendChild(videoEl);
       main.insertBefore(slide, main.firstChild);
+      dropDescriptionVideos(desc);
       removeEmptyVideoWrappers(desc);
       hideEmptyDescription(desc);
 

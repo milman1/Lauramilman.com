@@ -1,6 +1,7 @@
 {%- comment -%}
-  Product-page concierge. Ask and Direct message open Shopify chat with
-  this product pinned beside it on every product. Make an offer opens a
+  Product-page concierge. "Ask about this piece" opens Shopify chat with
+  this product pinned beside it. (A second "Direct message" button opened
+  the same chat and was removed on 2026-11-27, merchant request.) Make an offer opens a
   short form that posts through Shopify's contact form, so the offer
   reaches the store's email with the piece attached. That form is for
   watches and for pre-owned, estate and vintage jewelry (merchant decision
@@ -77,20 +78,6 @@
         Make an offer
       </button>
     {%- endif -%}
-    {%- unless ask_form_ok -%}
-      <button
-        type="button"
-        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-        data-chat-intent="message"
-        data-product-id="{{ product.id }}"
-        data-product-handle="{{ product.handle }}"
-        data-product-title="{{ display_title | escape }}"
-        data-product-url="{{ shop.url }}{{ product.url }}"
-        data-product-image="{{ product_image | escape }}"
-      >
-        Direct message
-      </button>
-    {%- endunless -%}
     {%- if wa_url != blank -%}
       <a
         class="pdp-inquire__btn pdp-inquire__btn--ghost"
