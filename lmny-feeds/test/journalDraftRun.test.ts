@@ -80,15 +80,20 @@ vi.mock('../src/shopify.js', async (importOriginal) => {
 });
 
 let anthropicConstructed = 0;
+/** Options each client was built with, and each stream call's request options. */
+const clientOptions: unknown[] = [];
+const streamOptions: Array<Record<string, unknown> | undefined> = [];
 
 vi.mock('@anthropic-ai/sdk', () => {
   class StubAnthropic {
-    constructor() {
+    constructor(opts?: unknown) {
       anthropicConstructed += 1;
+      clientOptions.push(opts);
     }
     messages = {
-      stream: (_params: { model: string }) => {
+      stream: (_params: { model: string }, opts?: Record<string, unknown>) => {
         order.push('anthropic:stream');
+        streamOptions.push(opts);
         return { finalMessage: () => state.hookStream() };
       },
     };
@@ -113,6 +118,8 @@ beforeEach(() => {
   writes.clear();
   order.length = 0;
   anthropicConstructed = 0;
+  clientOptions.length = 0;
+  streamOptions.length = 0;
   state.blogError = null;
   state.scopes = ['read_products', 'write_products'];
   state.hookStream = async () => {
@@ -259,5 +266,14 @@ describe('hook-source note in the report', () => {
     const md = report();
     expect(md).toContain('Server tool use limit exceeded');
     expect(md).toContain('org-level limit on the web_search server tool, not a network failure');
+  });
+
+  it('bounds every web-search request so the hook step cannot run past the workflow limit (2026-11-23)', async () => {
+    await run([]);
+    expect(clientOptions[0]).toEqual({ maxRetries: 1, timeout: 6 * 60_000 });
+    const first = streamOptions[0]!;
+    expect(first.maxRetries).toBe(1);
+    expect(first.timeout as number).toBeLessThanOrEqual(4 * 60_000);
+    expect(first.signal).toBeInstanceOf(AbortSignal);
   });
 });

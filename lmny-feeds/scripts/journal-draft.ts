@@ -1255,6 +1255,32 @@ Return ONLY a JSON array, no prose around it, of ten objects:
 export const MAX_PAUSE_TURN_CONTINUATIONS = 3;
 
 /**
+ * Time limits for the hook step (the 2026-11-23 run was cancelled at the
+ * workflow's 30-minute limit while web search was still going: the SDK's
+ * default is a 10-minute timeout per request with two retries, and up to three
+ * pause_turn continuations). Web search now gets 10 minutes in total, each
+ * request at most 4 minutes with one retry; when the time is used up the run
+ * falls back to the public RSS feeds, so a draft is still written.
+ */
+export const HOOK_SEARCH_BUDGET_MS = 10 * 60_000;
+export const HOOK_REQUEST_TIMEOUT_MS = 4 * 60_000;
+/** Below this much budget left, another search request is not started. */
+export const HOOK_MIN_REQUEST_MS = 30_000;
+/** Every Claude call: one retry, and a request never waits longer than this. */
+export const ANTHROPIC_CLIENT_OPTIONS = { maxRetries: 1, timeout: 6 * 60_000 } as const;
+
+/** Per-request options for a web-search call, or null when the budget is spent. */
+export function hookRequestOptions(
+  deadlineMs: number,
+  nowMs: number,
+  signal?: AbortSignal,
+): { timeout: number; maxRetries: number; signal?: AbortSignal } | null {
+  const left = deadlineMs - nowMs;
+  if (left < HOOK_MIN_REQUEST_MS) return null;
+  return { timeout: Math.min(HOOK_REQUEST_TIMEOUT_MS, left), maxRetries: 1, ...(signal ? { signal } : {}) };
+}
+
+/**
  * Messages for a `pause_turn` continuation: exactly the original user turn plus
  * the paused assistant turn. Each continuation *replaces* the assistant entry
  * rather than appending, so roles always alternate — two assistant entries in a
@@ -1276,6 +1302,12 @@ async function gatherHooks(
   let searchNote: string | null = null;
   let message: Anthropic.Message | null = null;
   let messages: Anthropic.MessageParam[] = [{ role: 'user', content: HOOK_INSTRUCTIONS }];
+  const deadline = Date.now() + HOOK_SEARCH_BUDGET_MS;
+  // A retry inside the SDK would restart the per-request timeout, so the whole
+  // budget is also enforced with an abort signal.
+  const budget = new AbortController();
+  const budgetTimer = setTimeout(() => budget.abort(), HOOK_SEARCH_BUDGET_MS);
+  budgetTimer.unref?.();
 
   try {
     // A long web_search turn can come back as `pause_turn`: the model is not
@@ -1283,13 +1315,22 @@ async function gatherHooks(
     // and let it carry on, a bounded number of times. The array is rebuilt to
     // [user, assistant] every round so the roles keep alternating.
     for (let attempt = 0; ; attempt++) {
+      const options = hookRequestOptions(deadline, Date.now(), budget.signal);
+      if (!options) {
+        searchNote = `web_search ran out of its ${HOOK_SEARCH_BUDGET_MS / 60_000}-minute budget`;
+        message = null;
+        break;
+      }
       const next = await anthropic.messages
-        .stream({
-          model: HOOK_MODEL,
-          max_tokens: 16000,
-          tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 12 }],
-          messages,
-        })
+        .stream(
+          {
+            model: HOOK_MODEL,
+            max_tokens: 16000,
+            tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 12 }],
+            messages,
+          },
+          options,
+        )
         .finalMessage();
       message = next;
       if (next.stop_reason !== 'pause_turn') break;
@@ -1307,10 +1348,14 @@ async function gatherHooks(
     // call and the RSS fallback correctly took over. Called out by name here
     // so a reader of the report does not have to guess which kind of outage
     // this was from a generic "call failed" line.
-    searchNote = /server tool use limit exceeded/i.test(errMessage)
+    searchNote = budget.signal.aborted
+      ? `web_search ran out of its ${HOOK_SEARCH_BUDGET_MS / 60_000}-minute budget (${errMessage})`
+      : /server tool use limit exceeded/i.test(errMessage)
       ? `web_search unavailable: Server tool use limit exceeded — an org-level limit on the web_search server tool, not a network failure (${errMessage})`
       : `web_search call failed: ${errMessage}`;
     message = null;
+  } finally {
+    clearTimeout(budgetTimer);
   }
 
   if (message !== null) {
@@ -1372,7 +1417,7 @@ async function gatherHooks(
               .join('\n')}`,
           },
         ],
-      })
+      }, { timeout: HOOK_REQUEST_TIMEOUT_MS, maxRetries: 1 })
       .finalMessage();
     fallbackHooks = normalizeHooks(extractJson(textOf(fallback)));
   } catch (err) {
@@ -1679,7 +1724,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
   // 2. Hooks — the first Anthropic spend of the run, only after every
   //    Shopify read above has succeeded.
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
-  const anthropic = new Anthropic();
+  const anthropic = new Anthropic(ANTHROPIC_CLIENT_OPTIONS);
   const { hooks, source: hookSource, note: hookNote } = await gatherHooks(anthropic);
   await writeFile(`${OUT_DIR}/journal-hooks.md`, renderHooksMarkdown(hooks, hookSource, startedAt.toISOString()));
   console.log(`Hooks: ${hooks.length} shortlisted via ${hookSource}`);
