@@ -74,7 +74,7 @@ for(const width of [1440,390,320]) {
  assert.equal(await p.locator('[data-diamond-buy]').isVisible(),false);
  assert.equal(await p.locator('[data-diamond-build]').isVisible(),true);
  const bookingLinks = p.locator('.product-appointment-links a');
- assert.deepEqual(await bookingLinks.evaluateAll(links => links.map(link => link.href)), [
+ assert.deepEqual(await bookingLinks.evaluateAll(links => links.map(link => link.origin + link.pathname)), [
   'https://calendly.com/hello-lauramilman/30min',
   'https://calendly.com/hello-lauramilman/virtual-meeting'
  ]);
@@ -121,7 +121,11 @@ console.log('PASS unavailable/no-matching-setting fallback, native Buy now check
   assert.equal(await booking.isVisible(), true);
   assert.equal(await booking.getByRole('heading').textContent(), title);
   const bookingUrl = new URL(await frame.getAttribute('src'));
-  assert.equal(bookingUrl.origin + bookingUrl.pathname, await link.getAttribute('href'));
+  const directUrl = new URL(await link.getAttribute('href'));
+  assert.equal(bookingUrl.origin + bookingUrl.pathname, directUrl.origin + directUrl.pathname);
+  const productNote = product.title + '\nhttps://lmny.test' + product.url;
+  assert.equal(directUrl.searchParams.get('a1'), productNote);
+  assert.equal(bookingUrl.searchParams.get('a1'), productNote);
   assert.equal(bookingUrl.searchParams.get('embed_domain'), 'lmny.test');
   await frame.contentFrame().getByRole('heading', { name: 'Calendly booking' }).waitFor();
   assert.equal(p.url(), 'https://lmny.test/products/lg-test');
