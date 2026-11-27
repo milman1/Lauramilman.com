@@ -27,12 +27,16 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 ## Setup and operation
 
 - Store `LGD_API_KEY` as an Actions secret. Reuse existing Shopify credentials.
-  The feed host is `api.lgdusallc.com`. On 2026-11-22 that domain was on
-  registrar client hold (Porkbun, last changed 2026-11-16) and did not
-  resolve, so the hourly sync failed at supplier fetch before any Shopify
-  write. The key was present. Restoring the run needs the registrant to
-  remove that hold, or a replacement base URL from the supplier. A failed
-  fetch still writes nothing and withdraws nothing.
+  The feed endpoint is `https://api.lgdusallc.com/api/v1/inventory/diamond`.
+  The same key and endpoint serve two classes: `type=certified_color`
+  (fancy-color lab diamonds, the original feed) and `type=certified`
+  (white lab diamonds, grades D through L). On 2026-11-24 `api.lgdusallc.com`
+  and `lgdusallc.com` still did not resolve. The domain was on registrar
+  client hold on 2026-11-22 (Porkbun, last changed 2026-11-16). The key was
+  present. A failed fetch still writes nothing and withdraws nothing.
+  When the supplier provides a replacement URL, set the Actions variable
+  `LGD_API_BASE` to that exact https endpoint with no query string. Leave
+  it empty to keep the default above. Do not put the key in the variable.
 - Run the workflow in dry-run mode, then sample mode to create five drafts.
 - Verify five draft pages, ready photos, playable videos, grading reports,
   price, source isolation and no certificate collisions before expansion.
@@ -53,6 +57,41 @@ quantity zero with CONTINUE, consistent with the existing loose-stone policy.
 Reports contain counts, handles and retail prices; no API key or supplier costs.
 Only the sanitized report is uploaded as an Actions artifact. No raw source
 records, private plan inputs, credentials, or actual-cost fixtures are committed.
+
+## White stones from the same supplier
+
+`type=certified` is fetched after a complete colored snapshot. Rows are
+normalized separately and created as drafts:
+
+- Handle `lab-white-` and tag `white-stone-feed`. The supplier is not
+  named. They are not `lg-` handles and they are not tagged `lmny-feed`
+  or `colored-stone-feed`, so the Belgium sync and the colored withdrawal
+  pass do not take them.
+- Title formula matches white loose stones:
+  `1.20ct Oval Lab-Grown Diamond — F VS1, IGI Certified`.
+- Price is `coloredLabRetailFromCost` (the white loose lab-grown tiers).
+  The loose-lab cost-per-carat floor applies. Wholesale cost stays in
+  Cost per item.
+- Lab is IGI or GIA. A photograph is required. Video is used when the
+  row has an HTTPS MP4 or WebM link, and a missing video does not drop
+  the stone.
+- Grades past L, unknown shapes, memo or held status, and cost mismatches
+  are counted and skipped.
+- If the account does not offer `type=certified` (HTTP 404 or an unknown-type
+  body), colored stones still sync and any white products are left as they are.
+- A complete white snapshot with nothing listable can draft existing white
+  products on a full sync. It cannot do that unless the colored snapshot
+  also has listable stones. An empty colored snapshot still refuses every
+  write.
+- New white stones stay draft until a reviewed activation list names their
+  handles. The same `LGD_ACTIVATION_HANDLES` input is used.
+- The sync hash stays in the existing `colored_feed.content_hash` metafield
+  so verification does not need a new metafield definition. That value is
+  not storefront copy.
+
+Pages already fetched in the run are not requested again. A snapshot from
+an earlier run is not kept for the next one: if the host is down, the job
+stops before it reads or writes Shopify.
 
 ## Belgium Dia colored stones (second source)
 

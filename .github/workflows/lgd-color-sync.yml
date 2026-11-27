@@ -53,6 +53,7 @@ jobs:
       - name: Sync certified colored loose lab-grown diamonds
         env:
           LGD_API_KEY: ${{ secrets.LGD_API_KEY }}
+          LGD_API_BASE: ${{ vars.LGD_API_BASE }}
           SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
           SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
           SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
