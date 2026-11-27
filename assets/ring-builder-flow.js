@@ -441,11 +441,12 @@
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
     }
-    // Private pilot. Quote-only estimates use the merchant's custom build budget.
+    // Private pilot. Quote-only prices are calculated from wholesale ring costs less comparable centers.
     const supplierDesignPreview = new URLSearchParams(window.location.search).get('supplier-preview') === '1';
     const supplierDesigns = [
       {
         "title": "Oval Hidden Halo",
+        "price": 242956,
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
@@ -453,6 +454,7 @@
       },
       {
         "title": "Oval Three-Stone",
+        "price": 264464,
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
@@ -461,14 +463,13 @@
       },
       {
         "title": "Oval Solitaire",
+        "price": 199820,
         "shape": "Oval",
         "center": 2,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7834_20_1.png?v=1791392616"
       }
     ];
-
-    const estimatedSettingPrice = 200000;
 
     function supplierDesignCards(diamond) {
       const weight = Number(diamond.carat);
@@ -483,9 +484,9 @@
         const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
         const diamondPrice = Number(diamond.price);
         const separateTotal = cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
-          ? `<p class="quiet">With your diamond ${esc(money(estimatedSettingPrice + diamondPrice, 'USD'))}</p>`
+          ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(estimatedSettingPrice, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
