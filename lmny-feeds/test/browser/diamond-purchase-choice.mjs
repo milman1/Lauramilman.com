@@ -7,6 +7,17 @@ const read = p => fs.readFileSync(root+p,'utf8');
 const copy = JSON.parse(read('locales/en.default.json').replace(/^\s*\/\*[\s\S]*?\*\//,''));
 const liquid = new Liquid({root:root+'snippets',extname:'.liquid'});
 for (const tag of ['doc','schema']) liquid.registerTag(tag,{parse(token,tokens){while(tokens.length && tokens.shift().name!=='end'+tag){}},render(){return '';}});
+liquid.registerTag('stylesheet', {
+ parse(token, tokens) {
+  this.css = [];
+  while (tokens.length) {
+   const next = tokens.shift();
+   if (next.name === 'endstylesheet') break;
+   this.css.push(next.getText());
+  }
+ },
+ render() { return '<style>' + this.css.join('') + '</style>'; }
+});
 liquid.registerTag('form', {
  parse(token,tokens) {
   this.product = token.args.startsWith("'product'"); this.templates=[];
@@ -61,6 +72,12 @@ for(const width of [1440,390,320]) {
  assert.equal(await p.locator('[data-diamond-choice]').isVisible(),true);
  assert.equal(await p.locator('[data-diamond-buy]').isVisible(),false);
  assert.equal(await p.locator('[data-diamond-build]').isVisible(),true);
+ const bookingLinks = p.locator('.product-appointment-links a');
+ assert.deepEqual(await bookingLinks.evaluateAll(links => links.map(link => link.href)), [
+  'https://calendly.com/hello-lauramilman/30min',
+  'https://calendly.com/hello-lauramilman/virtual-meeting'
+ ]);
+ for (const link of await bookingLinks.all()) assert.equal(await link.isVisible(), true);
  assert.equal(await p.locator('.dsp__card').count(),3);
  const first=p.locator('.dsp__card').first();assert.match(await first.innerText(),/Setting from \$1,200/);assert.match(await first.innerText(),/With this diamond from \$1,417/);
  for(const link of await p.locator('.dsp__link, .dsp__all, [data-diamond-build] a').evaluateAll(links=>links.map(a=>a.href))) {const u=new URL(link);assert.equal(u.pathname,'/pages/ring-builder');assert.equal(u.searchParams.get('diamond'),'lg-test');}
@@ -85,6 +102,7 @@ for(const width of [1440,390,320]) {
 console.log('PASS desktop/390px/320px choice, keyboard, compact stats, current available prices, matching active settings, diamond handoff, native cart payload and sticky action state.');
 for(const options of [{available:false},{matches:false}]) {
  const {page:p}=await pageFor(options,390);assert.equal(await p.locator('[data-diamond-choice]').count(),0);assert.equal(await p.locator('[data-diamond-build]').count(),0);assert.equal(await p.locator('[data-diamond-buy]').isVisible(),true);
+ assert.equal(await p.locator('.product-appointment-links').count(), options.available === false ? 0 : 1);
  assert.equal(await p.locator('[data-diamond-buy] .atc-btn').first().isDisabled(),options.available===false);await p.close();
 }
 {const {page:p,posts}=await pageFor();await p.locator('[data-diamond-choice] input[value="diamond"]').check();await p.locator('[data-buy-now]').click();await p.waitForURL('**/checkout');assert.equal(posts.length,1);assert.equal(posts[0].body.id,123456);await p.close();}

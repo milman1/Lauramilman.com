@@ -8,6 +8,11 @@
  * ------------------------------------------------------------
  */
 {
+  "product_appointments": {
+    "in_person": "Book an In-Person Viewing",
+    "virtual": "Book a Virtual Meeting",
+    "request_diamond_viewing": "Send a viewing request about this diamond"
+  },
   "general": {
     "password_page": {
       "login_form_heading": "Enter store using password:",

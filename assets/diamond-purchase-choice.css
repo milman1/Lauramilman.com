@@ -56,6 +56,6 @@ a.dpdp-service__tile { border-color: #ae8339; }
 .dpdp-service__meet { background: #f5f0e8; padding: 1rem 1.15rem; scroll-margin-top: 8rem; }
 .dpdp-service__meet h3 { font: italic 1.6rem/1.2 var(--font-heading, Georgia, serif); margin: 0; }
 .dpdp-service__meet p { margin: .3rem 0; }
-.dpdp-service__meet a { display: inline-block; padding-block: .35rem; color: #49172b; text-decoration: underline; text-underline-offset: .2em; }
+.dpdp-service__meet > a { display: inline-block; padding-block: .35rem; color: #49172b; text-decoration: underline; text-underline-offset: .2em; }
 .dpdp-service a:focus-visible { outline: 2px solid #49172b; outline-offset: 2px; }
 
