@@ -77,18 +77,20 @@
         Make an offer
       </button>
     {%- endif -%}
-    <button
-      type="button"
-      class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
-      data-chat-intent="message"
-      data-product-id="{{ product.id }}"
-      data-product-handle="{{ product.handle }}"
-      data-product-title="{{ display_title | escape }}"
-      data-product-url="{{ shop.url }}{{ product.url }}"
-      data-product-image="{{ product_image | escape }}"
-    >
-      Direct message
-    </button>
+    {%- unless ask_form_ok -%}
+      <button
+        type="button"
+        class="pdp-inquire__btn pdp-inquire__btn--ghost js-open-product-chat"
+        data-chat-intent="message"
+        data-product-id="{{ product.id }}"
+        data-product-handle="{{ product.handle }}"
+        data-product-title="{{ display_title | escape }}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+        data-product-image="{{ product_image | escape }}"
+      >
+        Direct message
+      </button>
+    {%- endunless -%}
     {%- if wa_url != blank -%}
       <a
         class="pdp-inquire__btn pdp-inquire__btn--ghost"
