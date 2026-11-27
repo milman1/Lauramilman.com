@@ -308,7 +308,10 @@
       if (!lock) shapeOptions.unshift(['', t('all_shapes')]);
       const metals = [...new Set(supplierDesigns.filter(design => (!shape || design.shape === shape) && (!state.filters.style || design.style === state.filters.style)).map(design => metalOf(design.metal)).filter(Boolean))];
       const metalField = metals.length > 1 ? selectField('metal', 'metal', [['', t('all_metals')], ...metals.map(m => [m, metalName(m)])], state.filters.metal) : '';
-      if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${metalField}</div>${state.filters.style ? `<p class="quiet">${esc(t('style_filter', { style: state.filters.style }))}</p>` : ''}${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
+      const styles = [...new Set(supplierDesigns.filter(design => !shape || design.shape === shape).map(design => design.style))].sort();
+      const styleLabel = style => style.split('-').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
+      const styleField = selectField('Style', 'style', [['', 'All styles'], ...styles.map(style => [style, styleLabel(style)])], state.filters.style);
+      if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${styleField}${metalField}</div>${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
       return root.querySelector('[data-diamond-filter-template]').innerHTML + (lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : '');
     }
     function paintDiamondFilters() {
@@ -649,16 +652,1187 @@
         "reference": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold",
         "price": 223816,
         "finishedHandle": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold"
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8453",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 1.73,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8453_20_1.png?v=1795803941",
+        "video": "https://im.lgdus.co/Jwl/RG8453/RG8453.mp4",
+        "price": 166040
+      },
+      {
+        "title": "Radiant Hidden Halo",
+        "reference": "design-rg1522",
+        "style": "hidden-halo",
+        "shape": "Radiant",
+        "center": 1.01,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1522_20_1.png?v=1795803998",
+        "video": "https://lgdus.co/RG1522/RG1522.mp4",
+        "price": 180284
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg1657",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 1.64,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWEMSS_20_1_b0a8438b-88e5-4ced-9ade-c683446e1886.png?v=1795804000",
+        "video": "https://im.lgdus.co/Jwl/RGWEMSS/RGWEMSS.mp4",
+        "price": 211470
+      },
+      {
+        "title": "Emerald Split Shank",
+        "reference": "design-rg1556",
+        "style": "split-shank",
+        "shape": "Emerald",
+        "center": 1,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1.jpg?v=1795803983",
+        "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
+        "price": 191354
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg8435",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 4.09,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8435_20_1.png?v=1795803999",
+        "video": "https://im.lgdus.co/Jwl/RG8435/RG8435.mp4",
+        "price": 257480
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1387",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 1.55,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTHM_20_1.png?v=1795803943",
+        "video": "https://im.lgdus.co/Jwl/RGBRPLTHM/RGBRPLTHM.mp4",
+        "price": 249400
+      },
+      {
+        "title": "Marquise Split Shank",
+        "reference": "design-rg1243",
+        "style": "split-shank",
+        "shape": "Marquise",
+        "center": 3.15,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGYSSMQ_1.jpg?v=1795804000",
+        "video": "https://lgdus.co/RGYSSMQ/RGYSSMQ.mp4",
+        "price": 580020
+      },
+      {
+        "title": "Emerald Split Shank",
+        "reference": "design-rg874",
+        "style": "split-shank",
+        "shape": "Emerald",
+        "center": 1.51,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_3f3522fd-0a25-4621-bbfe-f8c315dd2516.jpg?v=1795804001",
+        "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
+        "price": 235272
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg3405",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 2.11,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3405_20_1.png?v=1795804003",
+        "video": "https://im.lgdus.co/Jwl/RG3405/RG3405.mp4",
+        "price": 258700
+      },
+      {
+        "title": "Oval Three-Stone",
+        "reference": "design-rg986",
+        "style": "three-stone",
+        "shape": "Oval",
+        "center": 1.56,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_1c5481aa-e783-4387-8fe2-ac34004a656b.png?v=1795804004",
+        "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
+        "price": 261184
+      },
+      {
+        "title": "Radiant Split Shank",
+        "reference": "design-rg1496",
+        "style": "split-shank",
+        "shape": "Radiant",
+        "center": 1.67,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSRAD_20_1.png?v=1795804004",
+        "video": "https://lgdus.co/RGWSSRAD/RGWSSRAD.mp4",
+        "price": 257960
+      },
+      {
+        "title": "Oval Three-Stone",
+        "reference": "design-rg928",
+        "style": "three-stone",
+        "shape": "Oval",
+        "center": 2.03,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_136801ba-38c3-4bd4-a855-49ee790be7aa.png?v=1795804005",
+        "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
+        "price": 304656
+      },
+      {
+        "title": "Radiant Split Shank",
+        "reference": "design-rg2352",
+        "style": "split-shank",
+        "shape": "Radiant",
+        "center": 3.28,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG2352_20_1.png?v=1795804006",
+        "video": "https://im.lgdus.co/Jwl/RG2352/RG2352.mp4",
+        "price": 261680
+      },
+      {
+        "title": "Oval Three-Stone",
+        "reference": "design-rg2096",
+        "style": "three-stone",
+        "shape": "Oval",
+        "center": 2.08,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/NLR_200407_20_1.png?v=1795804006",
+        "video": "https://im.lgdus.co/Jwl/NLR%200407/NLR%200407.mp4",
+        "price": 288154
+      },
+      {
+        "title": "Emerald Three-Stone",
+        "reference": "design-rg2118",
+        "style": "three-stone",
+        "shape": "Emerald",
+        "center": 2.06,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG2118_20_1.png?v=1795804007",
+        "video": "https://im.lgdus.co/Jwl/RG2118/RG2118.mp4",
+        "price": 230194
+      },
+      {
+        "title": "Emerald Three-Stone",
+        "reference": "design-rg1696",
+        "style": "three-stone",
+        "shape": "Emerald",
+        "center": 1.01,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2.png?v=1795804009",
+        "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
+        "price": 247928
+      },
+      {
+        "title": "Emerald Three-Stone",
+        "reference": "design-rg1692",
+        "style": "three-stone",
+        "shape": "Emerald",
+        "center": 1.14,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2_ccdeb6d7-1d01-4c9d-897d-0955cfac8369.png?v=1795804023",
+        "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
+        "price": 240344
+      },
+      {
+        "title": "Oval Three-Stone",
+        "reference": "design-rg1674",
+        "style": "three-stone",
+        "shape": "Oval",
+        "center": 1.04,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_402a078f-e10a-4afe-9ae1-7ba6920ba8b8.png?v=1795804023",
+        "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
+        "price": 245898
+      },
+      {
+        "title": "Emerald Split Shank",
+        "reference": "design-rg1478",
+        "style": "split-shank",
+        "shape": "Emerald",
+        "center": 1.65,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_6e420430-51a5-4fa5-a145-02dd1852a9cd.jpg?v=1795804023",
+        "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
+        "price": 242016
+      },
+      {
+        "title": "Emerald Split Shank",
+        "reference": "design-rg1453",
+        "style": "split-shank",
+        "shape": "Emerald",
+        "center": 2.02,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWSSEM_20_1_c557fef9-8288-49a3-a814-b815d52c4c45.jpg?v=1795804024",
+        "video": "https://lgdus.co/RGWSSEM/RGWSSEM.mp4",
+        "price": 348248
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1388",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 2.02,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_7556bcf5-d488-4bfc-a2cd-3a131258ac02.png?v=1795804025",
+        "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
+        "price": 238036
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1378",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 1.14,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTHM_20_2_19c2dc6d-a5f3-4ea1-a544-ce992a9fccaa.png?v=1795804025",
+        "video": "https://im.lgdus.co/Jwl/RGBRPLTHM/RGBRPLTHM.mp4",
+        "price": 206302
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1330",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 0.72,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGBRPLTBR_20_1.png?v=1795804026",
+        "video": "https://im.lgdus.co/Jwl/RGBRPLTBR/RGBRPLTBR.mp4",
+        "price": 216752
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1339",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 2.11,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_1a0e86cd-5c99-43df-be0d-2b1a806c1ca0.png?v=1795804027",
+        "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
+        "price": 268994
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg1219",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 1.01,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWEMSS_20_1_ab85eb21-afdb-49fb-8865-aaf34015df18.png?v=1795804029",
+        "video": "https://im.lgdus.co/Jwl/RGWEMSS/RGWEMSS.mp4",
+        "price": 131354
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg1115",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 1.51,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGWGBRHM_20_1_673f401a-ca28-4745-ac6d-8cc84a5b0dfe.png?v=1795804028",
+        "video": "https://im.lgdus.co/Jwl/RGWGBRHM/RGWGBRHM.mp4",
+        "price": 154134
+      },
+      {
+        "title": "Round Split Shank",
+        "reference": "design-rg1041",
+        "style": "split-shank",
+        "shape": "Round",
+        "center": 4.2,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1877_20_1.png?v=1795804029",
+        "video": "https://im.lgdus.co/Jwl/RG1877/RG1877.mp4",
+        "price": 1064246
+      },
+      {
+        "title": "Round Split Shank",
+        "reference": "design-rg964",
+        "style": "split-shank",
+        "shape": "Round",
+        "center": 2.07,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG1874_20_1.png?v=1795804029",
+        "video": "https://im.lgdus.co/Jwl/RG1874/RG1874.mp4",
+        "price": 287580
+      },
+      {
+        "title": "Oval Three-Stone",
+        "reference": "design-rg909",
+        "style": "three-stone",
+        "shape": "Oval",
+        "center": 1,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3OVHM_20_1_7af0f7f8-c615-4955-8421-4db36dd16d4e.png?v=1795804031",
+        "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
+        "price": 159414
+      },
+      {
+        "title": "Emerald Three-Stone",
+        "reference": "design-rg1635",
+        "style": "three-stone",
+        "shape": "Emerald",
+        "center": 1.62,
+        "metal": "Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RGW3EMTRA_20_2_7726f7b0-bbdc-4659-bb38-5e508426e579.png?v=1795804031",
+        "video": "https://lgdus.co/RGW3EMTRA/RGW3EMTRA%20(1).mp4",
+        "price": 312016
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg3929",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3929_20_1.png?v=1795804032",
+        "video": "https://im.lgdus.co/Jwl/RG3929/RG3929.mp4",
+        "price": 188036
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg3931",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.54,
+        "metal": "18K Yellow Gold - Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3931_20_1.png?v=1795804037",
+        "video": "https://im.lgdus.co/Jwl/RG3931/RG3931.mp4",
+        "price": 218376
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg3927",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2,
+        "metal": "18K Yellow Gold - Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3927_20_1.png?v=1795804038",
+        "video": "https://im.lgdus.co/Jwl/RG3927/RG3927.mp4",
+        "price": 218036
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg3955",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 3.36,
+        "metal": "18K Yellow Gold - Platinum",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG3955_20_1.png?v=1795804039",
+        "video": "https://im.lgdus.co/Jwl/RG3955/RG3955.mp4",
+        "price": 297324
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg8884",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 2.21,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8884_20_1.png?v=1795804039",
+        "video": "https://im.lgdus.co/Jwl/RG8884/RG8884.mp4",
+        "price": 189734
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8913",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 2.6,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8913_20_1.png?v=1795804039",
+        "video": "https://im.lgdus.co/Jwl/RG8913/RG8913.mp4",
+        "price": 168376
+      },
+      {
+        "title": "Radiant Hidden Halo",
+        "reference": "design-rg8545",
+        "style": "hidden-halo",
+        "shape": "Radiant",
+        "center": 3.22,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8545_20_1.png?v=1795804040",
+        "video": "https://im.lgdus.co/Jwl/RG8545/RG8545.mp4",
+        "price": 236224
+      },
+      {
+        "title": "Princess Solitaire",
+        "reference": "design-rg5360",
+        "style": "solitaire",
+        "shape": "Princess",
+        "center": 2.5,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5360_20_1.png?v=1795804040",
+        "video": "https://im.lgdus.co/Jwl/RG5360/RG5360.mp4",
+        "price": 196668
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg5663",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 2.04,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5663_20_1.png?v=1795804041",
+        "video": "https://im.lgdus.co/Jwl/RG5663/RG5663.mp4",
+        "price": 210860
+      },
+      {
+        "title": "Radiant Diamond-Shank Solitaire",
+        "reference": "design-rg6645",
+        "style": "diamond-shank",
+        "shape": "Radiant",
+        "center": 5.18,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6645_20_1.png?v=1795803942",
+        "video": "https://im.lgdus.co/Jwl/RG6645/RG6645.mp4",
+        "price": 306680
+      },
+      {
+        "title": "Oval Hidden Halo",
+        "reference": "design-rg6587",
+        "style": "hidden-halo",
+        "shape": "Oval",
+        "center": 5.11,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6587_20_1.png?v=1795804043",
+        "video": "https://im.lgdus.co/Jwl/RG6587/RG6587.mp4",
+        "price": 410228
+      },
+      {
+        "title": "Emerald Halo",
+        "reference": "design-rg6836",
+        "style": "halo",
+        "shape": "Emerald",
+        "center": 2.05,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6836_20_1.png?v=1795804043",
+        "video": "https://im.lgdus.co/Jwl/RG6836/RG6836.mp4",
+        "price": 283526
+      },
+      {
+        "title": "Pear Solitaire",
+        "reference": "design-rg6913",
+        "style": "solitaire",
+        "shape": "Pear",
+        "center": 2.02,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6913_20_1.png?v=1795804043",
+        "video": "https://im.lgdus.co/Jwl/RG6913/RG6913.mp4",
+        "price": 224954
+      },
+      {
+        "title": "Princess Solitaire",
+        "reference": "design-rg7720",
+        "style": "solitaire",
+        "shape": "Princess",
+        "center": 3.11,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7720_20_1.png?v=1795804044",
+        "video": "https://im.lgdus.co/Jwl/RG7720/RG7720.mp4",
+        "price": 267828
+      },
+      {
+        "title": "Princess Solitaire",
+        "reference": "design-rg6986",
+        "style": "solitaire",
+        "shape": "Princess",
+        "center": 2.04,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6986_20_1.png?v=1795804045",
+        "video": "https://im.lgdus.co/Jwl/RG6986/RG6986.mp4",
+        "price": 197378
+      },
+      {
+        "title": "Princess Solitaire",
+        "reference": "design-rg6548",
+        "style": "solitaire",
+        "shape": "Princess",
+        "center": 2.54,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6548_20_1.png?v=1795804052",
+        "video": "https://im.lgdus.co/Jwl/RG6548/RG6548.mp4",
+        "price": 216668
+      },
+      {
+        "title": "Marquise Modified Split Shank",
+        "reference": "design-rg6722",
+        "style": "split-shank",
+        "shape": "Marquise Modified",
+        "center": 4.56,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6722_20_1.png?v=1795804052",
+        "video": "https://im.lgdus.co/Jwl/RG6722/RG6722.mp4",
+        "price": 365774
+      },
+      {
+        "title": "Oval Hidden Halo",
+        "reference": "design-rg6715",
+        "style": "hidden-halo",
+        "shape": "Oval",
+        "center": 3.04,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6715_20_1.png?v=1795804053",
+        "video": "https://im.lgdus.co/Jwl/RG6715/RG6715.mp4",
+        "price": 245304
+      },
+      {
+        "title": "Round Three-Stone",
+        "reference": "design-rg7819",
+        "style": "three-stone",
+        "shape": "Round",
+        "center": 2.1,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7819_20_1.png?v=1795804054",
+        "video": "https://im.lgdus.co/Jwl/RG7819/RG7819.mp4",
+        "price": 459178
+      },
+      {
+        "title": "Oval Solitaire",
+        "reference": "design-rg7190",
+        "style": "solitaire",
+        "shape": "Oval",
+        "center": 4.21,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7190_20_1.png?v=1795804055",
+        "video": "https://im.lgdus.co/Jwl/RG7190/RG7190.mp4",
+        "price": 294752
+      },
+      {
+        "title": "Round Diamond-Shank Solitaire",
+        "reference": "design-rg7550",
+        "style": "diamond-shank",
+        "shape": "Round",
+        "center": 3.75,
+        "metal": "14K Rose Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7550_20_1.png?v=1795804055",
+        "video": "https://im.lgdus.co/Jwl/RG7550/RG7550.mp4",
+        "price": 248382
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg7551",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 1.53,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7551_20_1.png?v=1795804056",
+        "video": "https://im.lgdus.co/Jwl/RG7551/RG7551.mp4",
+        "price": 131232
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg8524",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 2.08,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8524_20_1.png?v=1795804057",
+        "video": "https://im.lgdus.co/Jwl/RG8524/RG8524.mp4",
+        "price": 183150
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg7652",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 2.05,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7652_20_1.png?v=1795804058",
+        "video": "https://im.lgdus.co/Jwl/RG7652/RG7652.mp4",
+        "price": 221000
+      },
+      {
+        "title": "Princess Solitaire",
+        "reference": "design-rg7715",
+        "style": "solitaire",
+        "shape": "Princess",
+        "center": 2.04,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7715_20_1.png?v=1795804059",
+        "video": "https://im.lgdus.co/Jwl/RG7715/RG7715.mp4",
+        "price": 213668
+      },
+      {
+        "title": "Oval Solitaire",
+        "reference": "design-rg7665",
+        "style": "solitaire",
+        "shape": "Oval",
+        "center": 1.53,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7665_20_1_de9b80a5-b343-4202-aaa9-a408a4467631.png?v=1795804060",
+        "video": "https://im.lgdus.co/Jwl/RG7665/RG7665.mp4",
+        "price": 205800
+      },
+      {
+        "title": "Cushion Brilliant Solitaire",
+        "reference": "design-rg7681",
+        "style": "solitaire",
+        "shape": "Cushion Brilliant",
+        "center": 1.52,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7681_20_1.png?v=1795804060",
+        "video": "https://im.lgdus.co/Jwl/RG7681/RG7681.mp4",
+        "price": 200518
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg7643",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 1.55,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7643_20_1_bb67f4d8-a169-4e58-aa6e-681ab85b211a.png?v=1795804061",
+        "video": "https://im.lgdus.co/Jwl/RG7643/RG7643.mp4",
+        "price": 198276
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg7646",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 1.56,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7646_20_1_436889b0-3bd8-4547-a551-3ce110a107f6.png?v=1795804062",
+        "video": "https://im.lgdus.co/Jwl/RG7646/RG7646.mp4",
+        "price": 203792
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg7630",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 1.5,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7630_20_1_dea5c4e1-1727-4597-b47c-5006622ee3ee.png?v=1795804070",
+        "video": "https://im.lgdus.co/Jwl/RG7630/RG7630.mp4",
+        "price": 201728
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8910",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 1.71,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8910_20_1.png?v=1795804072",
+        "video": "https://im.lgdus.co/Jwl/RG8910/RG8910.mp4",
+        "price": 155214
+      },
+      {
+        "title": "Oval Solitaire",
+        "reference": "design-rg7672",
+        "style": "solitaire",
+        "shape": "Oval",
+        "center": 2.12,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7672_20_1.png?v=1795804073",
+        "video": "https://im.lgdus.co/Jwl/RG7672/RG7672.mp4",
+        "price": 246322
+      },
+      {
+        "title": "Marquise Solitaire",
+        "reference": "design-rg7689",
+        "style": "solitaire",
+        "shape": "Marquise",
+        "center": 1.56,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7689_20_1.png?v=1795804074",
+        "video": "https://im.lgdus.co/Jwl/RG7689/RG7689.mp4",
+        "price": 204066
+      },
+      {
+        "title": "Oval Solitaire",
+        "reference": "design-rg7837",
+        "style": "solitaire",
+        "shape": "Oval",
+        "center": 3.52,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7837_20_1_4f0e7521-671b-48e9-a07f-2bae3c27319b.png?v=1795804074",
+        "video": "https://im.lgdus.co/Jwl/RG7837/RG7837.mp4",
+        "price": 280176
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg7632",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 1.53,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7632_20_1_af6b7c40-75c3-4be5-87f9-59a8a9643edb.png?v=1795804075",
+        "video": "https://im.lgdus.co/Jwl/RG7632/RG7632.mp4",
+        "price": 201728
+      },
+      {
+        "title": "Round Diamond-Shank Solitaire",
+        "reference": "design-rg7844",
+        "style": "diamond-shank",
+        "shape": "Round",
+        "center": 2.5,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7844_20_1.png?v=1795804076",
+        "video": "https://im.lgdus.co/Jwl/RG7844/RG7844.mp4",
+        "price": 242518
+      },
+      {
+        "title": "Round Diamond-Shank Solitaire",
+        "reference": "design-rg7842",
+        "style": "diamond-shank",
+        "shape": "Round",
+        "center": 1.51,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7842_20_1.png?v=1795804077",
+        "video": "https://im.lgdus.co/Jwl/RG7842/RG7842.mp4",
+        "price": 190026
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8365",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 1.53,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8365_20_1_26c8accb-f194-42ca-86a1-d91739ca9a63.png?v=1795804078",
+        "video": "https://im.lgdus.co/Jwl/RG8365/RG8365.mp4",
+        "price": 171232
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg8412",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 4.2,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8412_20_1.png?v=1795804079",
+        "video": "https://im.lgdus.co/Jwl/RG8412/RG8412.mp4",
+        "price": 256256
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg8501",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 4.87,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8501_20_1.png?v=1795804080",
+        "video": "https://im.lgdus.co/Jwl/RG8501/RG8501.mp4",
+        "price": 298570
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg8885",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 2.57,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8885_20_1.png?v=1795804080",
+        "video": "https://im.lgdus.co/Jwl/RG8885/RG8885.mp4",
+        "price": 194334
+      },
+      {
+        "title": "Radiant Solitaire",
+        "reference": "design-rg8530",
+        "style": "solitaire",
+        "shape": "Radiant",
+        "center": 3.53,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8530_20_1.png?v=1795804086",
+        "video": "https://im.lgdus.co/Jwl/RG8530/RG8530.mp4",
+        "price": 234386
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg8889",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 3.51,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8889_20_1_c4683966-b354-4705-b67f-c22f0d75d836.png?v=1795804087",
+        "video": "https://im.lgdus.co/Jwl/RG8889/RG8889.mp4",
+        "price": 259106
+      },
+      {
+        "title": "Radiant Hidden Halo",
+        "reference": "design-rg8447",
+        "style": "hidden-halo",
+        "shape": "Radiant",
+        "center": 4.05,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8447_20_1.png?v=1795804088",
+        "video": "https://im.lgdus.co/Jwl/RG8447/RG8447.mp4",
+        "price": 258622
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8450",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 1.13,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8450_20_1.png?v=1795804089",
+        "video": "https://im.lgdus.co/Jwl/RG8450/RG8450.mp4",
+        "price": 141784
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8455",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.28,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8455_20_1.png?v=1795804089",
+        "video": "https://im.lgdus.co/Jwl/RG8455/RG8455.mp4",
+        "price": 213056
+      },
+      {
+        "title": "Oval Hidden Halo",
+        "reference": "design-rg9067",
+        "style": "hidden-halo",
+        "shape": "Oval",
+        "center": 2.12,
+        "metal": "14K Yellow Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9067_20_1.png?v=1795804090",
+        "video": "https://im.lgdus.co/Jwl/RG9067/RG9067.mp4",
+        "price": 218300
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg8437",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 4.55,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8437_20_1.png?v=1795804090",
+        "video": "https://im.lgdus.co/Jwl/RG8437/RG8437.mp4",
+        "price": 298558
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg8431",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 3.18,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8431_20_1.png?v=1795804091",
+        "video": "https://im.lgdus.co/Jwl/RG8431/RG8431.mp4",
+        "price": 253580
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg8465",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 2,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8465_20_1.png?v=1795804092",
+        "video": "https://im.lgdus.co/Jwl/RG8465/RG8465.mp4",
+        "price": 183688
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg8470",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 3.02,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8470_20_1.png?v=1795804092",
+        "video": "https://im.lgdus.co/Jwl/RG8470/RG8470.mp4",
+        "price": 235886
+      },
+      {
+        "title": "Emerald Hidden Halo",
+        "reference": "design-rg8428",
+        "style": "hidden-halo",
+        "shape": "Emerald",
+        "center": 2.7,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8428_20_1.png?v=1795804093",
+        "video": "https://im.lgdus.co/Jwl/RG8428/RG8428.mp4",
+        "price": 230142
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8912",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 2.24,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8912_20_1.png?v=1795804094",
+        "video": "https://im.lgdus.co/Jwl/RG8912/RG8912.mp4",
+        "price": 177408
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg8894",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 4.53,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8894_20_1.png?v=1795804095",
+        "video": "https://im.lgdus.co/Jwl/RG8894/RG8894.mp4",
+        "price": 298558
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8915",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 3.61,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8915_20_1_25eb3748-09e3-44c9-8233-c51c93b7423f.png?v=1795804095",
+        "video": "https://im.lgdus.co/Jwl/RG8915/RG8915.mp4",
+        "price": 242602
+      },
+      {
+        "title": "Antique Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg8948",
+        "style": "diamond-shank",
+        "shape": "Antique Marquise",
+        "center": 2.74,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8948_20_1.png?v=1795804103",
+        "video": "https://im.lgdus.co/Jwl/RG8948/RG8948.mp4",
+        "price": 203178
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8926",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 1.3,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8926_20_1.png?v=1795804105",
+        "video": "https://im.lgdus.co/Jwl/RG8926/RG8926.mp4",
+        "price": 132398
+      },
+      {
+        "title": "Antique Marquise Solitaire",
+        "reference": "design-rg8986",
+        "style": "solitaire",
+        "shape": "Antique Marquise",
+        "center": 2.37,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8986_20_1.png?v=1795804105",
+        "video": "https://im.lgdus.co/Jwl/RG8986/RG8986.mp4",
+        "price": 157636
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8898",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.02,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8898_20_1.png?v=1795804106",
+        "video": "https://im.lgdus.co/Jwl/RG8898/RG8898.mp4",
+        "price": 146724
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8932",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 4.06,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8932_20_1.png?v=1795804107",
+        "video": "https://im.lgdus.co/Jwl/RG8932/RG8932.mp4",
+        "price": 225964
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8897",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 1.56,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8897_20_1.png?v=1795804107",
+        "video": "https://im.lgdus.co/Jwl/RG8897/RG8897.mp4",
+        "price": 149400
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8901",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.56,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8901_20_1.png?v=1795804108",
+        "video": "https://im.lgdus.co/Jwl/RG8901/RG8901.mp4",
+        "price": 175488
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8919",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 1.27,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8919_20_1.png?v=1795804109",
+        "video": "https://im.lgdus.co/Jwl/RG8919/RG8919.mp4",
+        "price": 149898
+      },
+      {
+        "title": "Antique Marquise Solitaire",
+        "reference": "design-rg8944",
+        "style": "solitaire",
+        "shape": "Antique Marquise",
+        "center": 1.75,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8944_20_1.png?v=1795804110",
+        "video": "https://im.lgdus.co/Jwl/RG8944/RG8944.mp4",
+        "price": 173842
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg8956",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 2.05,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8956_20_1.png?v=1795804111",
+        "video": "https://im.lgdus.co/Jwl/RG8956/RG8956.mp4",
+        "price": 172138
+      },
+      {
+        "title": "Emerald Solitaire",
+        "reference": "design-rg8888",
+        "style": "solitaire",
+        "shape": "Emerald",
+        "center": 3.06,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8888_20_1.png?v=1795804112",
+        "video": "https://im.lgdus.co/Jwl/RG8888/RG8888.mp4",
+        "price": 245924
+      },
+      {
+        "title": "Radiant Hidden Halo",
+        "reference": "design-rg8548",
+        "style": "hidden-halo",
+        "shape": "Radiant",
+        "center": 3.74,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8548_20_1.png?v=1795804112",
+        "video": "https://im.lgdus.co/Jwl/RG8548/RG8548.mp4",
+        "price": 255934
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8923",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.4,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8923_20_1.png?v=1795804118",
+        "video": "https://im.lgdus.co/Jwl/RG8923/RG8923.mp4",
+        "price": 193248
+      },
+      {
+        "title": "Round Solitaire",
+        "reference": "design-rg8930",
+        "style": "solitaire",
+        "shape": "Round",
+        "center": 3.21,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8930_20_1.png?v=1795804118",
+        "video": "https://im.lgdus.co/Jwl/RG8930/RG8930.mp4",
+        "price": 191960
+      },
+      {
+        "title": "Round Diamond-Shank Solitaire",
+        "reference": "design-rg8922",
+        "style": "diamond-shank",
+        "shape": "Round",
+        "center": 2.38,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8922_20_1.png?v=1795804119",
+        "video": "https://im.lgdus.co/Jwl/RG8922/RG8922.mp4",
+        "price": 196740
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8921",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 1.78,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8921_20_1.png?v=1795804121",
+        "video": "https://im.lgdus.co/Jwl/RG8921/RG8921.mp4",
+        "price": 159732
+      },
+      {
+        "title": "Round Hidden Halo",
+        "reference": "design-rg8903",
+        "style": "hidden-halo",
+        "shape": "Round",
+        "center": 2.97,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8903_20_1.png?v=1795804123",
+        "video": "https://im.lgdus.co/Jwl/RG8903/RG8903.mp4",
+        "price": 199884
+      },
+      {
+        "title": "Round Diamond-Shank Solitaire",
+        "reference": "design-rg8920",
+        "style": "diamond-shank",
+        "shape": "Round",
+        "center": 1.27,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8920_20_1.png?v=1795804123",
+        "video": "https://im.lgdus.co/Jwl/RG8920/RG8920.mp4",
+        "price": 156122
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg9017",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 2.06,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9017_20_1.png?v=1795804124",
+        "video": "https://im.lgdus.co/Jwl/RG9017/RG9017.mp4",
+        "price": 185092
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg9022",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 3.13,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG9022_20_1.png?v=1795804125",
+        "video": "https://im.lgdus.co/Jwl/RG9022/RG9022.mp4",
+        "price": 211180
+      },
+      {
+        "title": "Marquise Diamond-Shank Solitaire",
+        "reference": "design-rg8955",
+        "style": "diamond-shank",
+        "shape": "Marquise",
+        "center": 1.53,
+        "metal": "14K White Gold",
+        "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8955_20_1.png?v=1795804125",
+        "video": "https://im.lgdus.co/Jwl/RG8955/RG8955.mp4",
+        "price": 165660
       }
     ];
 
+    const designsPerPage = 12;
     function supplierDesignCards(diamond) {
       const weight = Number(diamond?.spec?.carat || diamond?.carat || /^\s*(\d+(?:\.\d+)?)\s*ct\b/i.exec(diamond?.title || '')?.[1]);
       const bucket = Math.round(weight);
       const matches = supplierDesigns.filter(design => (diamond ? design.shape === diamond.shape && Math.round(design.center) === bucket : (!state.filters.shape || design.shape === state.filters.shape)) && (!state.filters.design || design.reference === state.filters.design) && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
       const label = "Made-to-order ring designs";
+      state.totalPages = Math.max(1, Math.ceil(matches.length / designsPerPage));
+      state.page = Math.max(1, Math.min(state.page, state.totalPages));
       if (!matches.length) return '';
-      return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">${diamond ? `Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.` : `Choose a design to see matching diamonds.`}</p><div class="products">${matches.map(design => {
+      const pageStart = (state.page - 1) * designsPerPage;
+      const pageMatches = matches.slice(pageStart, pageStart + designsPerPage);
+      return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">${diamond ? `Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.` : `Choose a design to see matching diamonds.`}</p><div class="products">${pageMatches.map(design => {
         const sourcingQuote = !diamond && !shapes.includes(design.shape);
         const quote = new URL(diamond || sourcingQuote ? cfg.appointment : route('pages/ring-builder'), window.location.origin);
         if (diamond || sourcingQuote) {
@@ -685,6 +1859,8 @@
       state.rows = [];
       main.querySelector('[data-count]').textContent = '';
       main.querySelector('[data-results]').innerHTML = supplierDesignCards(state.diamond) || empty(true);
+      const pager = main.querySelector('[data-pager]');
+      pager.innerHTML = state.totalPages > 1 ? `${button('previous', 'previous', 'secondary', state.page === 1 ? 'disabled' : '')} <span>${state.page} / ${state.totalPages}</span> ${button('next', 'next', 'secondary', state.page === state.totalPages ? 'disabled' : '')}` : '';
     }
     function returnToCard() {
       if (state.returnIndex == null) return;
@@ -1243,7 +2419,7 @@
       }
       else if (action === 'reset') resetSearch();
       else if (action === 'retry') search();
-      else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); search(); persist(); }
+      else if (action === 'next' || action === 'previous') { state.page += action === 'next' ? 1 : -1; reveal(main.querySelector('.toolbar')); if (state.kind === 'setting') settingResults(); else search(); persist(); }
       else if (action === 'dock-summary') reveal(aside);
       else if (action === 'share') share();
       else if (action === 'review-video') {
@@ -1301,7 +2477,13 @@
         state.filters[el.dataset.filter] = el.value;
         if (state.kind === 'setting') {
           state.page = 1;
-          if (el.dataset.filter === 'shape') { state.filters.metal = ''; catalogShell(); main.querySelector('[data-filter="shape"]').focus(); }
+          if (el.dataset.filter === 'shape' || el.dataset.filter === 'style') {
+            state.filters.metal = '';
+            if (el.dataset.filter === 'shape') state.filters.style = '';
+            state.filters.design = '';
+            catalogShell();
+            main.querySelector('[data-filter="' + el.dataset.filter + '"]')?.focus();
+          }
           settingResults(); persist();
         }
       } else if (el.hasAttribute('data-sort')) { state.filters.sort = el.value; state.page = 1; search(); persist(); }
