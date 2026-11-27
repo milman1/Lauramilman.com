@@ -86,15 +86,15 @@
       <div class="dpdp__media">
         <div class="dpdp__tabs" role="tablist">
           {%- if m.video_url -%}
-            <button type="button" class="dpdp__tab" role="tab" aria-selected="false" data-pane="video">360° Video</button>
+            <button type="button" class="dpdp__tab is-active" role="tab" aria-selected="true" data-pane="video" data-video-default>360° Video</button>
           {%- endif -%}
-          <button type="button" class="dpdp__tab is-active" role="tab" aria-selected="true" data-pane="image">Image</button>
+          <button type="button" class="dpdp__tab{% unless m.video_url %} is-active{% endunless %}" role="tab" aria-selected="{% if m.video_url %}false{% else %}true{% endif %}" data-pane="image">Image</button>
           {%- if m.cert_url -%}
             <a class="dpdp__tab" href="{{ m.cert_url }}" data-cert-popout target="_blank" rel="noopener">Certificate</a>
           {%- endif -%}
         </div>
 
-        <div class="dpdp__stage" data-pane-body="image">
+        <div class="dpdp__stage" data-pane-body="image"{% if m.video_url %} hidden{% endif %}>
           {%- if product.featured_media -%}
             <img
               src="{{ product.featured_media | image_url: width: 1200 }}"
@@ -111,14 +111,17 @@
           {%- comment -%}
             The feed's video links are plain .mp4 files, so this is a <video>,
             not an iframe — framing an mp4 rendered the supplier's directory
-            page instead of the stone. Loaded on demand: most visitors never
-            open the tab, and these files are large.
+            page instead of the stone. When a stone has a video, the page
+            opens on it (merchant request 2026-11-27): the script below opens
+            the video tab on load, which sets the src and starts it muted.
+            The photo is one tab away.
 
             The supplier's links aren't always live. onerror hides the whole
             tab rather than leaving a broken player sitting there.
           {%- endcomment -%}
-          <div class="dpdp__stage" data-pane-body="video" hidden>
+          <div class="dpdp__stage" data-pane-body="video">
             <video data-src="{{ m.video_url }}" controls playsinline muted loop preload="none"
+                   {% if product.featured_media %}poster="{{ product.featured_media | image_url: width: 1200 }}"{% endif %}
                    aria-label="360° view of {{ product.title | escape }}"></video>
           </div>
         {%- endif -%}
@@ -805,12 +808,21 @@
       });
     });
 
-    /* Thumbnails swap the main image. */
+    /* A stone with a video opens on it. Going through the tab's own click
+       handler loads the file, starts it muted, and falls back to the photo
+       if the supplier link is dead. */
+    var videoDefault = root.querySelector('.dpdp__tab[data-video-default]');
+    if (videoDefault) videoDefault.click();
+
+    /* Thumbnails swap the main image, and bring the photo forward if the
+       video is showing. */
     var thumbs = root.querySelectorAll('.dpdp__thumb');
     var stage = root.querySelector('[data-pane-body="image"] img');
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
         if (!stage) return;
+        var imageTab = root.querySelector('.dpdp__tab[data-pane="image"]');
+        if (imageTab && !imageTab.classList.contains('is-active')) imageTab.click();
         stage.removeAttribute('srcset');
         stage.src = thumb.dataset.full;
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
