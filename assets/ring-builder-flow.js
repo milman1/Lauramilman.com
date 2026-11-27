@@ -47,7 +47,7 @@
     });
     const knownSettings = new Map(cfg.settings.filter(p => p.setting && shapes.includes(p.shape)).map(p => [p.handle, p]));
     const knownBands = new Set((cfg.bands || []).map(p => p.handle));
-    const settingCount = shape => [...knownSettings.values()].filter(p => p.available && String(shape || '').split(',').some(s => s.trim().toLowerCase() === p.shape.toLowerCase())).length;
+    const settingCount = shape => supplierDesigns.filter(design => String(shape || '').split(',').some(s => s.trim().toLowerCase() === design.shape.toLowerCase())).length;
     const settingShape = shape => {
       const listed = String(shape || '').split(',').map(s => s.trim()).filter(Boolean);
       const own = shapes.find(s => listed.some(l => l.toLowerCase() === s.toLowerCase()) && settingCount(s));
