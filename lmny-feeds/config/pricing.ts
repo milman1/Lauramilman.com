@@ -494,15 +494,17 @@ export function coloredLabRetailFromCost(costUsd: number): number {
 
 /** Supplier reference pricing for made-to-order ring designs in the builder. */
 export const BUILDER_RING_DESIGNS = {
-  skylab: { retailMultipleOfWholesale: 2 },
+  skylab: { retailMultipleOfNetWholesale: 2 },
   alyce: { estimatedCostShareOfRegularRetail: 0.5, priceShareOfRegularRetail: 0.8 },
 } as const;
 
-export function builderRingDesignPricing(source: keyof typeof BUILDER_RING_DESIGNS, listedCents: number) {
+export function builderRingDesignPricing(source: keyof typeof BUILDER_RING_DESIGNS, listedCents: number, centerCostCents?: number) {
   if (!Number.isSafeInteger(listedCents) || listedCents <= 0) return null;
   if (source === 'skylab') {
-    const retailCents = listedCents * BUILDER_RING_DESIGNS.skylab.retailMultipleOfWholesale;
-    return Number.isSafeInteger(retailCents) ? { retailCents, costCents: listedCents, estimatedCost: false } : null;
+    if (centerCostCents === undefined || !Number.isSafeInteger(centerCostCents) || centerCostCents <= 0 || centerCostCents >= listedCents) return null;
+    const costCents = listedCents - centerCostCents;
+    const retailCents = costCents * BUILDER_RING_DESIGNS.skylab.retailMultipleOfNetWholesale;
+    return Number.isSafeInteger(retailCents) ? { retailCents, costCents, estimatedCost: true } : null;
   }
   const { estimatedCostShareOfRegularRetail, priceShareOfRegularRetail } = BUILDER_RING_DESIGNS.alyce;
   return {
