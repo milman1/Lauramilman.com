@@ -72,7 +72,8 @@ describe('storefront warranty and return policy', () => {
       expect(text, path).not.toMatch(/7-Day Jewelry Returns/);
       expect(text, path).not.toMatch(/7-day jewelry returns/);
       expect(text, path).not.toMatch(/7-day returns/);
-      expect(text, path).not.toMatch(/30-day return/i);
+      // 30-day returns are for loose diamonds only (merchant decision 2026-11-27); jewelry stays 14 days.
+      expect(text, path).not.toMatch(/30-day return(?!s on loose diamonds)/i);
     }
   });
 });
