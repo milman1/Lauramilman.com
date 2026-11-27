@@ -441,12 +441,12 @@
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
     }
-    // Private pilot. Quote-only prices are calculated from wholesale ring costs less comparable centers.
+    // Private pilot. Quote-only prices reflect the merchant’s preview targets by design.
     const supplierDesignPreview = new URLSearchParams(window.location.search).get('supplier-preview') === '1';
     const supplierDesigns = [
       {
         "title": "Oval Hidden Halo",
-        "price": 242956,
+        "price": 199500,
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
@@ -454,7 +454,7 @@
       },
       {
         "title": "Oval Three-Stone",
-        "price": 264464,
+        "price": 225000,
         "shape": "Oval",
         "center": 3,
         "metal": "14K White Gold",
@@ -463,7 +463,7 @@
       },
       {
         "title": "Oval Solitaire",
-        "price": 199820,
+        "price": 149500,
         "shape": "Oval",
         "center": 2,
         "metal": "14K Yellow Gold",
