@@ -306,7 +306,7 @@
       const shape = lock?.shape || state.filters.shape;
       const shapeOptions = shapes.filter(s => supplierDesigns.some(design => design.shape === s) || s === shape).map(s => [s, s]);
       if (!lock) shapeOptions.unshift(['', t('all_shapes')]);
-      const metals = [...new Set(supplierDesigns.filter(design => (!shape || design.shape === shape) && (!state.filters.style || design.style === state.filters.style)).map(design => metalOf(design.metal)))];
+      const metals = [...new Set(supplierDesigns.filter(design => (!shape || design.shape === shape) && (!state.filters.style || design.style === state.filters.style)).map(design => metalOf(design.metal)).filter(Boolean))];
       const metalField = metals.length > 1 ? selectField('metal', 'metal', [['', t('all_metals')], ...metals.map(m => [m, metalName(m)])], state.filters.metal) : '';
       if (state.kind === 'setting') return `<div class="filters">${selectField('shape', 'shape', shapeOptions, shape, !!lock)}${metalField}</div>${state.filters.style ? `<p class="quiet">${esc(t('style_filter', { style: state.filters.style }))}</p>` : ''}${lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_diamond', 'clear-diamond', 'link')}</p>` : ''}`;
       return root.querySelector('[data-diamond-filter-template]').innerHTML + (lock ? `<p class="quiet">${esc(t('shape_locked', { shape }))} ${button('clear_setting', 'clear-setting', 'link')}</p>` : '');
@@ -629,11 +629,13 @@
       const label = "Made-to-order ring designs";
       if (!matches.length) return '';
       return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">${diamond ? `Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.` : `Choose a design to see matching diamonds.`}</p><div class="products">${matches.map(design => {
-        const quote = new URL(diamond ? cfg.appointment : route('pages/ring-builder'), window.location.origin);
-        if (diamond) {
+        const sourcingQuote = !diamond && !shapes.includes(design.shape);
+        const quote = new URL(diamond || sourcingQuote ? cfg.appointment : route('pages/ring-builder'), window.location.origin);
+        if (diamond || sourcingQuote) {
           quote.searchParams.set('interest', 'ring');
           quote.searchParams.set('quote_design', design.title + ' · ' + design.metal + ' · ' + design.center.toFixed(2) + ' ct reference');
-          quote.searchParams.set('quote_diamond', [diamond.title || stoneTitle(diamond), diamond.handle].filter(Boolean).join(' · '));
+          const stone = diamond ? [diamond.title || stoneTitle(diamond), diamond.handle].filter(Boolean).join(' · ') : 'Help sourcing a matching ' + design.shape.toLowerCase() + ' diamond';
+          quote.searchParams.set('quote_diamond', stone);
         } else {
           const center = Math.round(design.center);
           for (const [key, value] of Object.entries({ start: 'diamond', shape: design.shape, style: design.style, design: design.reference, min_carat: center - 0.5, max_carat: center + 0.49 })) quote.searchParams.set(key, value);
@@ -645,7 +647,7 @@
         const separateTotal = Number.isFinite(design.price) && cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
           ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${Number.isFinite(design.price) ? `${esc(money(design.price, 'USD'))} estimated setting` : 'Setting priced by quote'}</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond ? "Request a quote" : "Choose a matching diamond"}</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${Number.isFinite(design.price) ? `${esc(money(design.price, 'USD'))} estimated setting` : 'Setting priced by quote'}</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond || sourcingQuote ? "Request a quote" : "Choose a matching diamond"}</a></article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
