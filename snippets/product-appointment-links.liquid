@@ -1,12 +1,19 @@
 {% doc %}
   Displays the in-person and virtual booking links on product pages.
   @param {string} section_id - The containing section ID.
+  @param {product} product - The product the shopper is viewing.
+  @param {string} [product_title] - The title displayed on the page.
 {% enddoc %}
 
 {%- assign booking_dialog_id = 'PdpBooking-' | append: section_id -%}
+{%- capture booking_note -%}
+{{ product_title | default: product.title }}
+{{ shop.url }}{{ product.url }}
+{%- endcapture -%}
+{%- assign encoded_booking_note = booking_note | url_encode -%}
 <div class="product-appointment-links">
-  <a href="https://calendly.com/hello-lauramilman/30min" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.in_person' | t }}</a>
-  <a href="https://calendly.com/hello-lauramilman/virtual-meeting" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.virtual' | t }}</a>
+  <a href="https://calendly.com/hello-lauramilman/30min?a1={{ encoded_booking_note }}" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.in_person' | t }}</a>
+  <a href="https://calendly.com/hello-lauramilman/virtual-meeting?a1={{ encoded_booking_note }}" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.virtual' | t }}</a>
 </div>
 
 <dialog class="pdp-dialog pdp-dialog--booking" id="{{ booking_dialog_id }}" aria-labelledby="{{ booking_dialog_id }}-title">

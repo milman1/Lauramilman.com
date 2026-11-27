@@ -551,7 +551,7 @@
 
       {%- endform -%}
 
-      {%- render 'product-appointment-links', section_id: section.id -%}
+      {%- render 'product-appointment-links', section_id: section.id, product: product, product_title: display_title -%}
 
       {% render 'ring-diamond-pairing',
         product: product,
