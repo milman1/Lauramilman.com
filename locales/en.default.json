@@ -9,9 +9,13 @@
  */
 {
   "product_appointments": {
+    "book_appointment": "Book an appointment",
     "in_person": "Book an In-Person Viewing",
     "virtual": "Book a Virtual Meeting",
-    "request_diamond_viewing": "Send a viewing request about this diamond"
+    "request_diamond_viewing": "Send a viewing request about this diamond",
+    "email_about_piece": "Email us about this piece",
+    "email_about_stone": "Ask about this stone",
+    "question_intro_html": "Send us a question about <strong>{{ product }}</strong>. We’ll reply by email."
   },
   "general": {
     "password_page": {

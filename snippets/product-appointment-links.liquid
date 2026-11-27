@@ -1,11 +1,21 @@
 {% doc %}
   Displays the in-person and virtual booking links on product pages.
+  @param {string} section_id - The containing section ID.
 {% enddoc %}
 
+{%- assign booking_dialog_id = 'PdpBooking-' | append: section_id -%}
 <div class="product-appointment-links">
-  <a href="https://calendly.com/hello-lauramilman/30min">{{ 'product_appointments.in_person' | t }}</a>
-  <a href="https://calendly.com/hello-lauramilman/virtual-meeting">{{ 'product_appointments.virtual' | t }}</a>
+  <a href="https://calendly.com/hello-lauramilman/30min" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.in_person' | t }}</a>
+  <a href="https://calendly.com/hello-lauramilman/virtual-meeting" data-pdp-dialog-trigger aria-haspopup="dialog" aria-controls="{{ booking_dialog_id }}">{{ 'product_appointments.virtual' | t }}</a>
 </div>
+
+<dialog class="pdp-dialog pdp-dialog--booking" id="{{ booking_dialog_id }}" aria-labelledby="{{ booking_dialog_id }}-title">
+  <div class="pdp-dialog__header">
+    <h2 id="{{ booking_dialog_id }}-title" data-pdp-dialog-title>{{ 'product_appointments.book_appointment' | t }}</h2>
+    <button type="button" class="pdp-dialog__close" data-pdp-dialog-close aria-label="{{ 'accessibility.close' | t }}" autofocus>×</button>
+  </div>
+  <iframe class="pdp-dialog__booking-frame" data-pdp-booking-frame title="{{ 'product_appointments.book_appointment' | t }}"></iframe>
+</dialog>
 
 {% stylesheet %}
   .product-appointment-links {

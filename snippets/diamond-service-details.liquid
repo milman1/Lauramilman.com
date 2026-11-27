@@ -21,7 +21,7 @@
   <div class="dpdp-service__meet" id="MeetLaura-{{ section.id }}">
     <h3>Meet Laura</h3>
     <p>See this diamond in Midtown or by video.</p>
-    {%- render 'product-appointment-links' -%}
+    {%- render 'product-appointment-links', section_id: section.id -%}
     <a href="/pages/private-clients?interest=diamond&amp;piece={{ viewing_piece | url_encode }}">{{ 'product_appointments.request_diamond_viewing' | t }} <span aria-hidden="true">→</span></a>
   </div>
 </div>
