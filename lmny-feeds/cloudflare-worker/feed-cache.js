@@ -35,6 +35,7 @@
 import { collectFeed } from './complete-feed.js';
 
 import { ENGRAVING_ROUTE, handleEngraving } from './engraving-render.js';
+import { SYNC_DISPATCH_CRON, dispatchSync } from './sync-dispatch.js';
 
 const UPSTREAM = 'https://belgiumdia.com';
 const FEEDS = ['natural', 'lab', 'watch'];
@@ -132,6 +133,10 @@ async function refreshFeed(kind, env, key) {
 
 export default {
   async scheduled(controller, env, ctx) {
+    if (controller.cron === SYNC_DISPATCH_CRON) {
+      ctx.waitUntil(dispatchSync(env));
+      return;
+    }
     const minute = new Date(controller.scheduledTime).getUTCMinutes();
     const kind = CRON_SLOTS[minute] ?? FEEDS[minute % FEEDS.length];
     ctx.waitUntil(

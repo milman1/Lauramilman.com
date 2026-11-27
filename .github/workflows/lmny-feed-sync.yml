@@ -7,6 +7,8 @@
 #   - pull_request runs are ALWAYS --dry-run (safe CI signal on the sync PR)
 #   - workflow_dispatch: dry_run input defaults to true; untick it for a live run
 #   - scheduled runs are dry-run until the repo variable LMNY_SYNC_LIVE=true
+#   - workflow_dispatch with scheduled=true (the Cloudflare Worker's :17 cron)
+#     follows the same LMNY_SYNC_LIVE rule as the schedule
 #
 # Secrets (Settings → Secrets and variables → Actions → Secrets):
 #   SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN, BELGIUMDIA_API_KEY
@@ -29,6 +31,13 @@ on:
         description: 'Dry run (no writes to Shopify)'
         type: boolean
         default: true
+      scheduled:
+        # Set only by the Cloudflare Worker's :17 cron (lmny-feeds/cloudflare-worker/sync-dispatch.js),
+        # because GitHub's schedule above drops most hourly runs. Treated like
+        # the schedule: live only while LMNY_SYNC_LIVE=true; dry_run is ignored.
+        description: 'Hourly start from the Cloudflare timer (leave unticked when running by hand)'
+        type: boolean
+        default: false
   pull_request:
     paths:
       - 'lmny-feeds/**'
@@ -62,11 +71,11 @@ jobs:
       # edit must not stop the hourly catalogue sync. Pull requests still
       # run the full suite, including those snapshots.
       - name: Test sync logic
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' || inputs.scheduled
         run: npx vitest run --exclude 'test/theme-*.test.ts'
 
       - name: Test
-        if: github.event_name != 'schedule'
+        if: github.event_name != 'schedule' && !inputs.scheduled
         run: npm test
 
       - name: Run sync
@@ -90,8 +99,13 @@ jobs:
           SYNC_FEEDS: ${{ vars.SYNC_FEEDS }}
           EVENT: ${{ github.event_name }}
           DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          SCHEDULED_INPUT: ${{ inputs.scheduled }}
           LIVE_VAR: ${{ vars.LMNY_SYNC_LIVE }}
         run: |
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$SCHEDULED_INPUT" = "true" ]; then
+            echo "Started by the hourly Cloudflare timer; following LMNY_SYNC_LIVE"
+            EVENT=schedule
+          fi
           if { [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "false" ]; } \
              || { [ "$EVENT" = "schedule" ] && [ "$LIVE_VAR" = "true" ]; }; then
             echo "Mode: LIVE"

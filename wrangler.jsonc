@@ -22,6 +22,8 @@
   "triggers": {
     // :07 natural, :27 lab, :47 watch — 20 minutes apart; the key's
     // upstream limit is 1 request per 15 minutes.
-    "crons": ["7,27,47 * * * *"]
+    // :17 starts the hourly Shopify feed sync on GitHub (sync-dispatch.js);
+    // it makes no supplier request. Needs the GITHUB_DISPATCH_TOKEN secret.
+    "crons": ["7,27,47 * * * *", "17 * * * *"]
   }
 }

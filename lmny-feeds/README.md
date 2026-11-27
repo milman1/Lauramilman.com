@@ -705,6 +705,13 @@ artifact. Needs `ANTHROPIC_API_KEY` alongside the usual Shopify secrets.
   *is* the dry-run report).
 - **workflow_dispatch** → `dry_run` input, default `true`; untick for live.
 - **schedule** (hourly at :17) → live when `LMNY_SYNC_LIVE=true`.
+- **Cloudflare timer** → the feed-cache Worker's `17 * * * *` cron
+  (`cloudflare-worker/sync-dispatch.js`) starts a `workflow_dispatch` with
+  `scheduled=true`, which follows the same `LMNY_SYNC_LIVE` rule. GitHub's
+  schedule dropped about 7 in 8 hourly runs in November 2026 (40 runs in
+  13 days); the GitHub schedule stays as a backup. Needs the Worker secret
+  `GITHUB_DISPATCH_TOKEN` (fine-grained, this repo only, Actions: read and
+  write); without it the cron logs a skip.
 
 Every run writes `out/report.json` (audit trail artifact) and renders
 `out/report.md` into the Actions run summary.
