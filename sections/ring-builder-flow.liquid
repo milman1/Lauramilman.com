@@ -5,7 +5,6 @@
   <link rel="preconnect" href="{{ diamond_api_origin }}" crossorigin>
 {%- endif -%}
 {%- assign settings_collection = section.settings.settings_collection -%}
-{%- assign first_setting = settings_collection.products.first -%}
 {%- assign first_diamond = section.settings.diamond_product -%}
 <div id="lmny-ring-builder">
   <div class="intro">
@@ -30,7 +29,7 @@
           <div><h2>{{ 'ring_flow.start_diamond' | t }}</h2><p class="quiet">{{ 'ring_flow.diamond_intro' | t }}</p><span class="eyebrow">{{ 'ring_flow.choose_diamond' | t }} →</span></div>
         </button>
         <button type="button" class="path" data-action="start-setting">
-          {% if first_setting.featured_image %}{{ first_setting.featured_image | image_url: width: 800 | image_tag: width: 800, height: 800, loading: 'eager' }}{% endif %}
+          <img src="https://cdn.shopify.com/s/files/1/1727/2565/files/RG8540_20_1.png?v=1791392613" alt="" width="800" height="800" loading="eager">
           <div><h2>{{ 'ring_flow.start_setting' | t }}</h2><p class="quiet">{{ 'ring_flow.setting_intro' | t }}</p><span class="eyebrow">{{ 'ring_flow.choose_setting' | t }} →</span></div>
         </button>
       </div>
