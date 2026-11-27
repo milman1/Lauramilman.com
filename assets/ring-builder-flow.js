@@ -484,7 +484,9 @@
         "center": 2.05,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6142_20_1.png?v=1790487325",
-        "reference": "2-05-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq200pin"
+        "reference": "2-05-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq200pin",
+        "price": 189160,
+        "finishedHandle": "2-05-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq200pin"
       },
       {
         "title": "Marquise Solitaire",
@@ -493,7 +495,9 @@
         "center": 2.6,
         "metal": "14K Two-Tone Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6091_20_1.png?v=1790487327",
-        "reference": "2-6-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-two-tone-rg14ttsomq250pns"
+        "reference": "2-6-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-two-tone-rg14ttsomq250pns",
+        "price": 207480,
+        "finishedHandle": "2-6-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-two-tone-rg14ttsomq250pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -502,7 +506,9 @@
         "center": 1.59,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7692_20_1.png?v=1790487329",
-        "reference": "1-59-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq150pns"
+        "reference": "1-59-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq150pns",
+        "price": 205656,
+        "finishedHandle": "1-59-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysomq150pns"
       },
       {
         "title": "Oval Solitaire",
@@ -511,7 +517,9 @@
         "center": 1.52,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG7666_20_1.png?v=1790487331",
-        "reference": "1-52-ct-oval-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoov150pns"
+        "reference": "1-52-ct-oval-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoov150pns",
+        "price": 212640,
+        "finishedHandle": "1-52-ct-oval-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoov150pns"
       },
       {
         "title": "Emerald Solitaire",
@@ -520,7 +528,9 @@
         "center": 1.41,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8674_20_1.png?v=1790487336",
-        "reference": "1-41-ct-emerald-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoem125pns"
+        "reference": "1-41-ct-emerald-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoem125pns",
+        "price": 153120,
+        "finishedHandle": "1-41-ct-emerald-lab-grown-diamond-solitaire-ring-in-14k-yellow-gold-rg14ysoem125pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -529,7 +539,9 @@
         "center": 2.04,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8972_20_1.png?v=1790487338",
-        "reference": "2-04-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq200pns"
+        "reference": "2-04-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq200pns",
+        "price": 172672,
+        "finishedHandle": "2-04-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq200pns"
       },
       {
         "title": "Marquise Solitaire",
@@ -538,7 +550,9 @@
         "center": 2.53,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8974_20_1.png?v=1790487340",
-        "reference": "2-53-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq250pns"
+        "reference": "2-53-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq250pns",
+        "price": 191424,
+        "finishedHandle": "2-53-ct-marquise-lab-grown-diamond-solitaire-ring-in-14k-white-gold-rg14wsomq250pns"
       },
       {
         "title": "Round Solitaire",
@@ -548,7 +562,9 @@
         "center": 1.25,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG5465_20_1.png?v=1790662356",
-        "reference": "lab-grown-round-diamond-solitaire-ring-1-25-ct-14k-white-gold"
+        "reference": "lab-grown-round-diamond-solitaire-ring-1-25-ct-14k-white-gold",
+        "price": 146936,
+        "finishedHandle": "lab-grown-round-diamond-solitaire-ring-1-25-ct-14k-white-gold"
       },
       {
         "title": "Emerald East-West",
@@ -558,7 +574,9 @@
         "center": 0.8,
         "metal": "14K Yellow Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG6231_20_1.png?v=1790662357",
-        "reference": "lab-grown-emerald-diamond-east-west-ring-0-80-ct-14k-yellow-gold"
+        "reference": "lab-grown-emerald-diamond-east-west-ring-0-80-ct-14k-yellow-gold",
+        "price": 123680,
+        "finishedHandle": "lab-grown-emerald-diamond-east-west-ring-0-80-ct-14k-yellow-gold"
       },
       {
         "title": "Antique Marquise Solitaire",
@@ -568,7 +586,9 @@
         "center": 1.02,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8942_20_1.png?v=1790662359",
-        "reference": "lab-grown-antique-marquise-diamond-solitaire-ring-1-02-ct-14k-white-gold"
+        "reference": "lab-grown-antique-marquise-diamond-solitaire-ring-1-02-ct-14k-white-gold",
+        "price": 147102,
+        "finishedHandle": "lab-grown-antique-marquise-diamond-solitaire-ring-1-02-ct-14k-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -578,7 +598,9 @@
         "center": 1.02,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8987_20_1.png?v=1791208774",
-        "reference": "step-marquise-lab-grown-diamond-ring-1-02-ct-white-gold"
+        "reference": "step-marquise-lab-grown-diamond-ring-1-02-ct-white-gold",
+        "price": 148386,
+        "finishedHandle": "step-marquise-lab-grown-diamond-ring-1-02-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -588,7 +610,9 @@
         "center": 1.64,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8988_20_1.png?v=1791209129",
-        "reference": "step-marquise-lab-grown-diamond-ring-1-64-ct-white-gold"
+        "reference": "step-marquise-lab-grown-diamond-ring-1-64-ct-white-gold",
+        "price": 165680,
+        "finishedHandle": "step-marquise-lab-grown-diamond-ring-1-64-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -598,7 +622,9 @@
         "center": 2.51,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8992_20_1.png?v=1791209147",
-        "reference": "step-marquise-lab-grown-diamond-ring-2-51-ct-white-gold"
+        "reference": "step-marquise-lab-grown-diamond-ring-2-51-ct-white-gold",
+        "price": 169760,
+        "finishedHandle": "step-marquise-lab-grown-diamond-ring-2-51-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -608,7 +634,9 @@
         "center": 2.16,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8935_20_1.png?v=1791209159",
-        "reference": "step-marquise-lab-grown-diamond-ring-2-16-ct-white-gold"
+        "reference": "step-marquise-lab-grown-diamond-ring-2-16-ct-white-gold",
+        "price": 184192,
+        "finishedHandle": "step-marquise-lab-grown-diamond-ring-2-16-ct-white-gold"
       },
       {
         "title": "Step Marquise Solitaire",
@@ -618,7 +646,9 @@
         "center": 3.58,
         "metal": "14K White Gold",
         "image": "https://cdn.shopify.com/s/files/1/1727/2565/files/RG8997_20_1.png?v=1791209726",
-        "reference": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold"
+        "reference": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold",
+        "price": 223816,
+        "finishedHandle": "step-marquise-lab-grown-diamond-ring-3-58-ct-white-gold"
       }
     ];
 
@@ -642,12 +672,13 @@
         }
         const video = safeURL(design.video);
         const watch = video ? `<p><a class="link" href="${esc(video)}" target="_blank" rel="noopener">Watch design video</a></p>` : '';
+        const finishedRing = !diamond && design.finishedHandle ? `<p><a class="link" href="${esc(route('products/' + design.finishedHandle))}">View finished ring</a></p>` : '';
         const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
         const diamondPrice = Number(diamond?.price);
         const separateTotal = Number.isFinite(design.price) && cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
           ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${Number.isFinite(design.price) ? `${esc(money(design.price, 'USD'))} estimated setting` : 'Setting priced by quote'}</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond || sourcingQuote ? "Request a quote" : "Choose a matching diamond"}</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${Number.isFinite(design.price) ? `${esc(money(design.price, 'USD'))} estimated setting` : 'Setting priced by quote'}</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">${diamond || sourcingQuote ? "Request a quote" : "Choose a matching diamond"}</a>${finishedRing}</article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
