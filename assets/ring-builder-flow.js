@@ -477,7 +477,7 @@
     ];
 
     function supplierDesignCards(diamond) {
-      const weight = Number(diamond.carat);
+      const weight = Number(diamond.spec?.carat || diamond.carat || /^\s*(\d+(?:\.\d+)?)\s*ct\b/i.exec(diamond.title || '')?.[1]);
       const bucket = Math.round(weight);
       const matches = supplierDesigns.filter(design => design.shape === diamond.shape && Math.round(design.center) === bucket && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
       const label = "Made-to-order ring designs";
