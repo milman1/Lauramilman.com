@@ -441,11 +441,12 @@
     function empty(settings = false) {
       return `<div class="empty"><h3>${esc(t('no_matches'))}</h3><p class="quiet">${esc(t(settings ? 'no_settings' : 'widen'))}</p>${settings ? `<a class="secondary" href="${esc(cfg.contact)}">${esc(t('custom_setting'))}</a>` : button('reset', 'reset', 'secondary')}</div>`;
     }
-    // Private pilot. Quote-only prices use twice the estimated setting cost, after deducting a comparable center diamond.
-    const supplierDesignPreview = new URLSearchParams(window.location.search).get('supplier-preview') === '1';
+    // Made-to-order supplier designs. Quote-only prices use twice the estimated setting cost, after deducting a comparable center diamond.
     const supplierDesigns = [
       {
         "title": "Oval Hidden Halo",
+        "style": "hidden-halo",
+        "video": "https://im.lgdus.co/Jwl/RG8540/RG8540.mp4",
         "price": 248596,
         "shape": "Oval",
         "center": 3,
@@ -454,6 +455,8 @@
       },
       {
         "title": "Oval Three-Stone",
+        "style": "three-stone",
+        "video": "https://lgdus.co/RGW3OVHM/RGW3OVHM%20(1).mp4",
         "price": 286790,
         "shape": "Oval",
         "center": 3,
@@ -463,6 +466,8 @@
       },
       {
         "title": "Oval Solitaire",
+        "style": "solitaire",
+        "video": "https://im.lgdus.co/Jwl/RG7834/RG7834.mp4",
         "price": 199398,
         "shape": "Oval",
         "center": 2,
@@ -474,19 +479,22 @@
     function supplierDesignCards(diamond) {
       const weight = Number(diamond.carat);
       const bucket = Math.round(weight);
-      const matches = supplierDesigns.filter(design => design.shape === diamond.shape && Math.round(design.center) === bucket);
+      const matches = supplierDesigns.filter(design => design.shape === diamond.shape && Math.round(design.center) === bucket && (!state.filters.style || design.style === state.filters.style) && (!state.filters.metal || metalOf(design.metal) === state.filters.metal));
       const label = "Made-to-order ring designs";
-      if (!matches.length) return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">No catalog designs match this diamond’s shape and size in the preview.</p></section>`;
-      return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct. Preview pricing in USD.</p><div class="products">${matches.map(design => {
-        const quote = new URL(cfg.contact || '/pages/contact', window.location.origin);
-        quote.searchParams.set('design', design.title);
-        quote.searchParams.set('diamond', diamond.handle || diamond.title || stoneTitle(diamond));
+      if (!matches.length) return '';
+      return `<section aria-label="${label}"><h3>${label}</h3><p class="quiet">Designs for ${esc(diamond.shape.toLowerCase())} diamonds around ${bucket} ct.</p><div class="products">${matches.map(design => {
+        const quote = new URL(cfg.appointment, window.location.origin);
+        quote.searchParams.set('interest', 'ring');
+        quote.searchParams.set('quote_design', design.title + ' · ' + design.metal);
+        quote.searchParams.set('quote_diamond', [diamond.title || stoneTitle(diamond), diamond.handle].filter(Boolean).join(' · '));
+        const video = safeURL(design.video);
+        const watch = video ? `<p><a class="link" href="${esc(video)}" target="_blank" rel="noopener">Watch design video</a></p>` : '';
         const note = design.genericPhoto ? 'Style reference photo' : `Shown with a ${design.center.toFixed(2)} ct center`;
         const diamondPrice = Number(diamond.price);
         const separateTotal = cfg.currency === 'USD' && Number.isFinite(diamondPrice) && diamondPrice > 0
           ? `<p class="quiet">With your diamond ${esc(money(design.price + diamondPrice, 'USD'))}</p>`
           : '';
-        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
+        return `<article class="product">${image(design.image, design.title)}<h3>${esc(design.title)}</h3><p class="quiet">${esc(design.metal)} · ${esc(note)}</p><div class="price">${esc(money(design.price, 'USD'))} estimated setting</div>${separateTotal}${watch}<a class="secondary" href="${esc(quote.href)}">Request a quote</a></article>`;
       }).join('')}</div></section>`;
     }
     function settingResults() {
@@ -494,8 +502,10 @@
       state.rows = [...knownSettings.values()].filter(p => p.available && (!shape || p.shape === shape) && (!state.filters.style || styleOf(p) === state.filters.style) && (!state.filters.metal || settingMetals(p).includes(state.filters.metal)));
       main.querySelector('[data-count]').textContent = counted('settings_results', state.rows.length);
       main.querySelector('[data-results]').innerHTML = state.rows.length ? `<div class="products">${state.rows.map((p, i) => `<article class="product">${image(p.image, settingHeading(p))}<h3>${esc(settingHeading(p))}</h3><div class="quiet">${esc(settingSubtitle(p))}</div><div class="price">${settingPriceHtml(p)}</div>${cardActions(i)}</article>`).join('')}</div>` : empty(true);
-      if (supplierDesignPreview && state.diamond) {
-        main.querySelector('[data-results]').insertAdjacentHTML('afterbegin', supplierDesignCards(state.diamond));
+      const designs = state.diamond ? supplierDesignCards(state.diamond) : '';
+      if (designs) {
+        main.querySelector('[data-results]').insertAdjacentHTML('afterbegin', designs);
+        if (!state.rows.length) main.querySelector('[data-count]').textContent = '';
       }
       returnToCard();
     }
